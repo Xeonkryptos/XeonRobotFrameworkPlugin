@@ -16,6 +16,6 @@ public class PostStartupActivity implements Disposable, DumbAware {
     @Override
     public void runActivity(@NotNull Project project) {
         MyLogger.logger.debug("runActivity: " + project.getName());
-        RobotListenerMgr.getInstance().a(project);
+        RobotListenerMgr.getInstance().initializeListeners(project);
     }
 }

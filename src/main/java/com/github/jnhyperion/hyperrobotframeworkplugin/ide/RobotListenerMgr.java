@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import com.jetbrains.python.PythonPluginDisposable;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -43,7 +44,7 @@ public class RobotListenerMgr {
         return INSTANCE;
     }
 
-    public final void a(Project project) {
+    public final void initializeListeners(Project project) {
         project.getMessageBus().connect().subscribe(VirtualFileManager.VFS_CHANGES, new BulkFileListener() {
             @Override
             public void after(@NotNull List<? extends @NotNull VFileEvent> events) {
@@ -78,7 +79,7 @@ public class RobotListenerMgr {
                     isPythonFileChanged.set(true);
                 }
             }
-        }, () -> {});
+        }, PythonPluginDisposable.getInstance(project));
         project.getMessageBus().connect().subscribe(FileEditorManagerListener.FILE_EDITOR_MANAGER, new FileEditorManagerListener() {
             @Override
             public void selectionChanged(@NotNull FileEditorManagerEvent event) {
