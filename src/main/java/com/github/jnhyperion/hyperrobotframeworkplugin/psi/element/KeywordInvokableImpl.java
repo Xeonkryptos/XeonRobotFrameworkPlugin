@@ -26,6 +26,7 @@ public class KeywordInvokableImpl extends RobotPsiElementBase implements Keyword
       }
    }
 
+   @Override
    public PsiReference getReference() {
       return new RobotKeywordReference(this);
    }

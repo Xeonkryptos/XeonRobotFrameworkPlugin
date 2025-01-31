@@ -31,6 +31,7 @@ public class RobotKeywordReference extends PsiReferenceBase<KeywordInvokable> {
     }
 
     @Nullable
+    @Override
     public PsiElement resolve() {
         KeywordInvokable keywordInvokable = this.getElement();
         return ResolverUtils.findKeywordElement(keywordInvokable.getPresentableText(), keywordInvokable.getContainingFile());
