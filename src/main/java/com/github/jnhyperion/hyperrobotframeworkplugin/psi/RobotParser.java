@@ -12,7 +12,6 @@ public class RobotParser implements PsiParser {
     @NotNull
     @Override
     public ASTNode parse(@NotNull IElementType type, @NotNull PsiBuilder builder) {
-        builder.setDebugMode(true);
         PsiBuilder.Marker marker = builder.mark();
         while (!builder.eof()) {
             IElementType tokenType = builder.getTokenType();
