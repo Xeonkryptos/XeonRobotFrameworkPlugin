@@ -53,8 +53,9 @@ public class RobotParser implements PsiParser {
                         parseKeywordStatement(builder, RobotTokenTypes.KEYWORD_STATEMENT, false);
                     } else if (RobotTokenTypes.IMPORT == type) {
                         parseWithArguments(builder, RobotTokenTypes.IMPORT);
+                    } else {
+                        builder.advanceLexer();
                     }
-                    builder.advanceLexer();
                 }
             }
             done(headingMarker, RobotTokenTypes.HEADING);
@@ -324,10 +325,10 @@ public class RobotParser implements PsiParser {
         arg.done(type);
     }
 
-    private static void parseSimple(@NotNull PsiBuilder paramPsiBuilder, @NotNull IElementType paramIElementType) {
-        PsiBuilder.Marker marker = paramPsiBuilder.mark();
-        paramPsiBuilder.advanceLexer();
-        marker.done(paramIElementType);
+    private static void parseSimple(@NotNull PsiBuilder builder, @NotNull IElementType type) {
+        PsiBuilder.Marker marker = builder.mark();
+        builder.advanceLexer();
+        marker.done(type);
     }
 
     private static void done(@Nullable PsiBuilder.Marker marker, @NotNull RobotElementType type) {
