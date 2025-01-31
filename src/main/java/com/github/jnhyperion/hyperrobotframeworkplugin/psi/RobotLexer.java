@@ -44,7 +44,6 @@ public class RobotLexer extends LexerBase {
         if (initialState == NONE) {
             this.level.clear();
         }
-
         this.isTestTemplate = false;
         this.isBracketTemplate = false;
         this.advance();
@@ -59,284 +58,285 @@ public class RobotLexer extends LexerBase {
             int state = getState();
             int parentState = this.level.size() > 1 ? this.level.get(this.level.size() - 2) : NONE;
 
-            if (this.isComment(this.position)) {
-                if (this.isNewLine(this.position)) {
-                    this.currentToken = RobotTokenTypes.WHITESPACE;
-                    this.position++;
-                } else if (this.isSuperSpace(this.position)) {
-                    skipWhitespace();
-                    this.currentToken = RobotTokenTypes.WHITESPACE;
+            if (isComment(this.position)) {
+                handleComment();
+            } else if (isNewLine(this.position)) {
+                handleNewLine(state);
+            } else if (isHeading(this.position)) {
+                handleHeading();
+            } else {
+                handleState(state, parentState);
+            }
+        }
+    }
+
+    private void handleComment() {
+        if (isNewLine(this.position)) {
+            this.currentToken = RobotTokenTypes.WHITESPACE;
+            this.position++;
+        } else if (isSuperSpace(this.position)) {
+            skipWhitespace();
+            this.currentToken = RobotTokenTypes.WHITESPACE;
+        } else {
+            this.currentToken = RobotTokenTypes.COMMENT;
+            goToEndOfLine();
+        }
+    }
+
+    private void handleNewLine(int state) {
+        if (state != KEYWORD && state != IMPORT && state != SYNTAX && state != VARIABLE_DEFINITION && state != SETTING && state != IF_CLAUSE) {
+            if (state == KEYWORD_DEFINITION) {
+                int nextPosition = this.position + SETTINGS_HEADING;
+                if (!isWhitespace(nextPosition) && !isNewLine(nextPosition) && !isComment(nextPosition)) {
+                    this.level.pop();
+                    advance();
+                    return;
+                }
+            }
+        } else if (!isEllipsis(this.position)) {
+            this.level.pop();
+            advance();
+            return;
+        }
+        this.currentToken = RobotTokenTypes.WHITESPACE;
+        this.position++;
+    }
+
+    private void handleHeading() {
+        goToEndOfLine();
+        String line = getTokenText();
+        this.currentToken = RobotTokenTypes.HEADING;
+
+        if (isSettings(line)) {
+            this.level.clear();
+            this.level.push(SETTINGS_HEADING);
+        } else if (isTestCases(line)) {
+            this.level.clear();
+            this.level.push(TEST_CASES_HEADING);
+        } else if (isKeywords(line)) {
+            this.level.clear();
+            this.level.push(KEYWORDS_HEADING);
+        } else if (isVariables(line)) {
+            this.level.clear();
+            this.level.push(VARIABLES_HEADING);
+        } else {
+            this.currentToken = RobotTokenTypes.ERROR;
+        }
+    }
+
+    private void handleState(int state, int parentState) {
+        if (state == NONE) {
+            goToEndOfLine();
+            this.currentToken = RobotTokenTypes.ERROR;
+        } else if (state == SETTINGS_HEADING) {
+            handleSettingsHeading();
+        } else if (state == VARIABLES_HEADING) {
+            handleVariablesHeading();
+        } else if (state != TEST_CASES_HEADING && state != KEYWORDS_HEADING) {
+            handleOtherStates(state, parentState);
+        } else {
+            handleKeywordDefinition();
+        }
+    }
+
+    private void handleSettingsHeading() {
+        if (isSuperSpace(this.position)) {
+            skipWhitespace();
+        }
+        goToNextNewLineOrSuperSpace();
+        String word = getTokenText();
+        if (RobotKeywordProvider.isSyntaxOfType(RobotTokenTypes.IMPORT, word)) {
+            this.level.push(IMPORT);
+            this.currentToken = RobotTokenTypes.IMPORT;
+        } else if (!RobotKeywordProvider.isGlobalSetting(word)) {
+            goToEndOfLine();
+            this.currentToken = RobotTokenTypes.ERROR;
+        } else {
+            this.currentToken = RobotTokenTypes.SETTING;
+            if (RobotKeywordProvider.isSyntaxFollowedByKeyword(word)) {
+                if (RobotKeywordProvider.isTestTemplate(word)) {
+                    this.isTestTemplate = true;
+                }
+                this.level.push(SYNTAX);
+            } else if (RobotKeywordProvider.isSyntaxFollowedByVariableDefinition(word)) {
+                this.level.push(SETTING);
+            } else if (RobotKeywordProvider.isSyntaxFollowedByString(word)) {
+                this.level.push(IMPORT);
+            } else {
+                goToEndOfLine();
+                this.currentToken = RobotTokenTypes.ERROR;
+            }
+        }
+    }
+
+    private void handleVariablesHeading() {
+        if (isSuperSpace(this.position)) {
+            skipWhitespace();
+        }
+        goToVariableEnd();
+        this.level.push(VARIABLE_DEFINITION);
+        this.currentToken = RobotTokenTypes.VARIABLE_DEFINITION;
+    }
+
+    private void handleOtherStates(int state, int parentState) {
+        if (state == KEYWORD_DEFINITION) {
+            handleKeywordDefinition();
+        } else if (state == SYNTAX) {
+            handleSyntax();
+        } else if (state == GHERKIN) {
+            handleGherkin();
+        } else {
+            handleRemainingStates(state, parentState);
+        }
+    }
+
+    private void handleKeywordDefinition() {
+        if (isSuperSpace(this.position)) {
+            skipWhitespace();
+            this.currentToken = RobotTokenTypes.WHITESPACE;
+        } else if (isVariable(this.position)) {
+            goToVariableEnd();
+            if (isSuperSpaceOrNewline(this.position) || isVariableDefinition(this.position)) {
+                if ((this.isTestTemplate || this.isBracketTemplate) && getState() == TEST_CASES_HEADING) {
+                    this.currentToken = RobotTokenTypes.VARIABLE;
+                    this.level.push(KEYWORD);
                 } else {
-                    this.currentToken = RobotTokenTypes.COMMENT;
-                    goToEndOfLine();
+                    this.currentToken = RobotTokenTypes.VARIABLE_DEFINITION;
+                    this.level.push(VARIABLE_DEFINITION);
                 }
             } else {
-                if (isNewLine(this.position)) {
-                    if (KEYWORD != state && IMPORT != state && SYNTAX != state && VARIABLE_DEFINITION != state && SETTING != state && IF_CLAUSE != state) {
-                        if (KEYWORD_DEFINITION == state) {
-                            int nextPosition = this.position + SETTINGS_HEADING;
-                            if (!this.isWhitespace(nextPosition) && !isNewLine(nextPosition) && !isComment(nextPosition)) {
-                                this.level.pop();
-                                advance();
-                                return;
-                            }
+                this.currentToken = RobotTokenTypes.VARIABLE;
+                this.level.push(KEYWORD);
+                if (!isSuperSpaceOrNewline(this.position)) {
+                    this.level.push(KEYWORD);
+                }
+            }
+        } else {
+            skipWhitespace();
+            String word = getTokenText();
+            if (RobotKeywordProvider.isSyntaxOfType(RobotTokenTypes.GHERKIN, word)) {
+                this.currentToken = RobotTokenTypes.GHERKIN;
+                this.level.push(GHERKIN);
+            } else {
+                goToNextNewLineOrSuperSpaceOrVariable();
+                word = getTokenText();
+                if (RobotKeywordProvider.isSyntaxOfType(RobotTokenTypes.BRACKET_SETTING, word)) {
+                    this.currentToken = RobotTokenTypes.BRACKET_SETTING;
+                    if (RobotKeywordProvider.isSyntaxFollowedByKeyword(word)) {
+                        if ("[Template]".equals(word)) {
+                            this.isBracketTemplate = true;
                         }
-                    } else if (!this.isEllipsis(this.position)) {
-                        this.level.pop();
-                        advance();
-                        return;
-                    }
-
-                    this.currentToken = RobotTokenTypes.WHITESPACE;
-                    this.position++;
-                    return;
-                } else if (isHeading(this.position)) {
-                    goToEndOfLine();
-                    String line = getTokenText();
-                    this.currentToken = RobotTokenTypes.HEADING;
-
-                    if (isSettings(line)) {
-                        this.level.clear();
-                        this.level.push(SETTINGS_HEADING);
-                    } else if (isTestCases(line)) {
-                        this.level.clear();
-                        this.level.push(TEST_CASES_HEADING);
-                    } else if (isKeywords(line)) {
-                        this.level.clear();
-                        this.level.push(KEYWORDS_HEADING);
-                    } else if (isVariables(line)) {
-                        this.level.clear();
-                        this.level.push(VARIABLES_HEADING);
+                        this.level.push(SYNTAX);
+                    } else if (RobotKeywordProvider.isSyntaxFollowedByVariableDefinition(word)) {
+                        this.level.push(SETTING);
+                    } else if (RobotKeywordProvider.isSyntaxFollowedByString(word)) {
+                        this.level.push(IMPORT);
                     } else {
+                        goToEndOfLine();
                         this.currentToken = RobotTokenTypes.ERROR;
                     }
-                    return;
-                }
-
-                // the rest is based on state
-                if (state == NONE) {
-                    // this is the instance where no '*** setting ***' has been detected yet.
-                    goToEndOfLine();
-                    this.currentToken = RobotTokenTypes.ERROR;
+                } else if (RobotKeywordProvider.isSyntaxOfType(RobotTokenTypes.SYNTAX_MARKER, word)) {
+                    this.currentToken = RobotTokenTypes.SYNTAX_MARKER;
+                    this.level.push(IF_CLAUSE);
                 } else {
-                    if (SETTINGS_HEADING == state) {
-                        if (isSuperSpace(this.position)) {
-                            skipWhitespace();
-                        }
-
-                        goToNextNewLineOrSuperSpace();
-                        String word = getTokenText();
-                        if (RobotKeywordProvider.isSyntaxOfType(RobotTokenTypes.IMPORT, word)) {
-                            this.level.push(IMPORT);
-                            this.currentToken = RobotTokenTypes.IMPORT;
-                        } else {
-                            if (!RobotKeywordProvider.isGlobalSetting(word)) {
-                                this.goToEndOfLine();
-                                this.currentToken = RobotTokenTypes.ERROR;
-                            } else {
-                                this.currentToken = RobotTokenTypes.SETTING;
-                                if (RobotKeywordProvider.isSyntaxFollowedByKeyword(word)) {
-                                    if (RobotKeywordProvider.isTestTemplate(word)) {
-                                        this.isTestTemplate = true;
-                                    }
-
-                                    this.level.push(SYNTAX);
-                                } else if (RobotKeywordProvider.isSyntaxFollowedByVariableDefinition(word)) {
-                                    this.level.push(SETTING);
-                                } else if (RobotKeywordProvider.isSyntaxFollowedByString(word)) {
-                                    this.level.push(IMPORT);
-                                } else {
-                                    this.goToEndOfLine();
-                                    this.currentToken = RobotTokenTypes.ERROR;
-                                }
-                            }
+                    if (!this.isTestTemplate && !this.isBracketTemplate || getState() != TEST_CASES_HEADING) {
+                        this.currentToken = RobotTokenTypes.KEYWORD;
+                        this.level.push(KEYWORD);
+                        if (!isSuperSpaceOrNewline(this.position)) {
+                            this.level.push(KEYWORD);
                         }
                     } else {
-                        if (VARIABLES_HEADING == state) {
-                            if (isSuperSpace(this.position)) {
-                                skipWhitespace();
-                            }
-
-                            goToVariableEnd();
-                            this.level.push(VARIABLE_DEFINITION);
-                            this.currentToken = RobotTokenTypes.VARIABLE_DEFINITION;
-                        } else if (TEST_CASES_HEADING != state && KEYWORDS_HEADING != state) {
-                            if (KEYWORD_DEFINITION != state) {
-                                if (KEYWORD != state && IMPORT != state && VARIABLE_DEFINITION != state && SETTING != state && IF_CLAUSE != state) {
-                                    if (SYNTAX == state) {
-                                        if (isSuperSpace(this.position)) {
-                                            skipWhitespace();
-                                            this.currentToken = RobotTokenTypes.WHITESPACE;
-                                        } else {
-                                            goToNextNewLineOrSuperSpace();
-                                            this.level.push(KEYWORD);
-                                            this.currentToken = RobotTokenTypes.KEYWORD;
-                                        }
-                                    } else if (GHERKIN == state) {
-                                        this.level.pop();
-                                        this.currentToken = RobotTokenTypes.WHITESPACE;
-                                        this.position++;
-                                    } else {
-                                        throw new RuntimeException("Unknown State: " + state);
-                                    }
-                                } else if (isSuperSpace(this.position)) {
-                                    skipWhitespace();
-                                    this.currentToken = RobotTokenTypes.WHITESPACE;
-                                    if (KEYWORD == state && KEYWORD == parentState) {
-                                        this.level.pop();
-                                    }
-                                } else {
-                                    if (this.isEllipsis(this.position)) {
-                                        if (isOnlyWhitespaceToPreviousLine(position - 1)) {
-                                            // if the only thing before the ... is white space then it is the reserved word
-                                            goToNextNewLineOrSuperSpace();
-                                            this.currentToken = RobotTokenTypes.WHITESPACE;
-                                        } else {
-                                            goToNextNewLineOrSuperSpace();
-                                            this.currentToken = RobotTokenTypes.ARGUMENT;
-                                        }
-                                    } else if (VARIABLE_DEFINITION == state && isVariableEnd(this.position - 1)) {
-                                        goToNextNewLineOrSuperSpace();
-                                        this.currentToken = RobotTokenTypes.WHITESPACE;
-                                    } else if (VARIABLE_DEFINITION == state && KEYWORD_DEFINITION == parentState) {
-                                        // this is a variable assignment inside a keyword definition: "${var} =  some keyword  arg1  arg2"
-                                        // next token may be another variable or a keyword
-                                        if (this.isVariable(this.position)) {
-                                            this.goToVariableEnd();
-                                            this.currentToken = RobotTokenTypes.VARIABLE_DEFINITION;
-                                            return;
-                                        } else {
-                                            this.goToNextNewLineOrSuperSpace();
-                                            if (this.getTokenText().equals("IF")) {
-                                                this.currentToken = RobotTokenTypes.SYNTAX_MARKER;
-                                                this.level.push(IF_CLAUSE);
-                                                return;
-                                            }
-                                        }
-
-                                        this.currentToken = RobotTokenTypes.KEYWORD;
-                                        this.level.push(KEYWORD);
-                                    } else if (isVariable(this.position)) {
-                                        this.goToVariableEnd();
-                                        if (SETTING == state && isSuperSpacePrevious()) {
-                                            this.currentToken = RobotTokenTypes.VARIABLE_DEFINITION;
-                                        } else if (!isWithinForLoop() && !isVarOrAsTokenPresent(this.position)) {
-                                            this.currentToken = RobotTokenTypes.VARIABLE;
-                                        } else {
-                                            this.currentToken = RobotTokenTypes.VARIABLE_DEFINITION;
-                                            this.level.push(VARIABLE_DEFINITION);
-                                        }
-                                    } else if (KEYWORD == state && KEYWORD == parentState) {
-                                        this.goToNextNewLineOrSuperSpaceOrVariable();
-                                        this.currentToken = RobotTokenTypes.KEYWORD;
-                                    } else {
-                                        this.goToNextNewLineOrSuperSpaceOrVariable();
-                                        String word = this.getTokenText();
-                                        if (this.startOffset == NONE || this.charAtEquals(this.startOffset - SETTINGS_HEADING, '\n')) {
-                                            this.currentToken = RobotTokenTypes.KEYWORD_DEFINITION;
-                                            this.isBracketTemplate = false;
-                                        } else if (RobotKeywordProvider.isSyntaxOfType(RobotTokenTypes.SYNTAX_MARKER, word)) {
-                                            this.currentToken = RobotTokenTypes.SYNTAX_MARKER;
-                                            this.level.push(IF_CLAUSE);
-                                        } else {
-                                            if (parentState != IMPORT || state != IF_CLAUSE) {
-                                                this.currentToken = RobotTokenTypes.ARGUMENT;
-                                            } else {
-                                                this.currentToken = RobotTokenTypes.VARIABLE_DEFINITION;
-                                            }
-                                        }
-                                    }
-                                }
-                            } else {
-                                if (this.isSuperSpace(this.position)) {
-                                    this.skipWhitespace();
-                                    this.currentToken = RobotTokenTypes.WHITESPACE;
-                                } else if (this.isVariable(this.position)) {
-                                    this.goToVariableEnd();
-                                    if (this.isSuperSpaceOrNewline(this.position) || isVariableDefinition(this.position)) {
-                                        if ((this.isTestTemplate || this.isBracketTemplate) && parentState == TEST_CASES_HEADING) {
-                                            this.currentToken = RobotTokenTypes.VARIABLE;
-                                            this.level.push(KEYWORD);
-                                        } else {
-                                            this.currentToken = RobotTokenTypes.VARIABLE_DEFINITION;
-                                            this.level.push(VARIABLE_DEFINITION);
-                                        }
-                                    } else {
-                                        this.currentToken = RobotTokenTypes.VARIABLE;
-                                        this.level.push(KEYWORD);
-                                        if (!this.isSuperSpaceOrNewline(this.position)) {
-                                            this.level.push(KEYWORD);
-                                        }
-                                    }
-                                } else {
-                                    skipWhitespace();
-
-                                    String word = getTokenText();
-                                    if (RobotKeywordProvider.isSyntaxOfType(RobotTokenTypes.GHERKIN, word)) {
-                                        this.currentToken = RobotTokenTypes.GHERKIN;
-                                        this.level.push(11);
-                                    } else {
-                                        this.goToNextNewLineOrSuperSpaceOrVariable();
-                                        word = getTokenText();
-                                        if (RobotKeywordProvider.isSyntaxOfType(RobotTokenTypes.BRACKET_SETTING, word)) {
-                                            this.currentToken = RobotTokenTypes.BRACKET_SETTING;
-                                            if (RobotKeywordProvider.isSyntaxFollowedByKeyword(word)) {
-                                                if ("[Template]".equals(word)) {
-                                                    this.isBracketTemplate = true;
-                                                }
-
-                                                this.level.push(SYNTAX);
-                                            } else if (RobotKeywordProvider.isSyntaxFollowedByVariableDefinition(word)) {
-                                                this.level.push(SETTING);
-                                            } else if (RobotKeywordProvider.isSyntaxFollowedByString(word)) {
-                                                this.level.push(IMPORT);
-                                            } else {
-                                                goToEndOfLine();
-                                                this.currentToken = RobotTokenTypes.ERROR;
-                                            }
-                                        } else if (RobotKeywordProvider.isSyntaxOfType(RobotTokenTypes.SYNTAX_MARKER, word)) {
-                                            this.currentToken = RobotTokenTypes.SYNTAX_MARKER;
-                                            this.level.push(IF_CLAUSE);
-                                        } else {
-                                            if (!this.isTestTemplate && !this.isBracketTemplate || parentState != TEST_CASES_HEADING) {
-                                                this.currentToken = RobotTokenTypes.KEYWORD;
-                                                this.level.push(KEYWORD);
-                                                if (!this.isSuperSpaceOrNewline(this.position)) {
-                                                    this.level.push(KEYWORD);
-                                                }
-                                            } else {
-                                                this.currentToken = RobotTokenTypes.ARGUMENT;
-                                                this.level.push(KEYWORD);
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        } else {
-                            if (this.isSuperSpace(this.position)) {
-                                this.skipWhitespace();
-                            }
-                            if (this.isVariable(this.position)) {
-                                this.goToVariableEnd();
-                                this.currentToken = RobotTokenTypes.VARIABLE_DEFINITION;
-                            } else {
-                                this.goToNextNewLineOrSuperSpaceOrVariable();
-                                this.currentToken = RobotTokenTypes.KEYWORD_DEFINITION;
-                                this.isBracketTemplate = false;
-                            }
-                            if (this.isSuperSpaceOrNewline(this.position)) {
-                                this.level.push(KEYWORD_DEFINITION);
-                            }
-                        }
+                        this.currentToken = RobotTokenTypes.ARGUMENT;
+                        this.level.push(KEYWORD);
                     }
                 }
             }
         }
     }
 
+    private void handleSyntax() {
+        if (isSuperSpace(this.position)) {
+            skipWhitespace();
+            this.currentToken = RobotTokenTypes.WHITESPACE;
+        } else {
+            goToNextNewLineOrSuperSpace();
+            this.level.push(KEYWORD);
+            this.currentToken = RobotTokenTypes.KEYWORD;
+        }
+    }
+
+    private void handleGherkin() {
+        this.level.pop();
+        this.currentToken = RobotTokenTypes.WHITESPACE;
+        this.position++;
+    }
+
+    private void handleRemainingStates(int state, int parentState) {
+        if (isSuperSpace(this.position)) {
+            skipWhitespace();
+            this.currentToken = RobotTokenTypes.WHITESPACE;
+            if (state == KEYWORD && parentState == KEYWORD) {
+                this.level.pop();
+            }
+        } else if (isEllipsis(this.position)) {
+            if (isOnlyWhitespaceToPreviousLine(position - 1)) {
+                goToNextNewLineOrSuperSpace();
+                this.currentToken = RobotTokenTypes.WHITESPACE;
+            } else {
+                goToNextNewLineOrSuperSpace();
+                this.currentToken = RobotTokenTypes.ARGUMENT;
+            }
+        } else if (state == VARIABLE_DEFINITION && isVariableEnd(this.position - 1)) {
+            goToNextNewLineOrSuperSpace();
+            this.currentToken = RobotTokenTypes.WHITESPACE;
+        } else if (state == VARIABLE_DEFINITION && getState() == KEYWORD_DEFINITION) {
+            handleVariableDefinitionInKeyword();
+        } else if (isVariable(this.position)) {
+            goToVariableEnd();
+            if (state == SETTING && isSuperSpacePrevious()) {
+                this.currentToken = RobotTokenTypes.VARIABLE_DEFINITION;
+            } else if (!isWithinForLoop() && !isVarOrAsTokenPresent(this.position)) {
+                this.currentToken = RobotTokenTypes.VARIABLE;
+            } else {
+                this.currentToken = RobotTokenTypes.VARIABLE_DEFINITION;
+                this.level.push(VARIABLE_DEFINITION);
+            }
+        } else if (state == KEYWORD && parentState == KEYWORD) {
+            goToNextNewLineOrSuperSpaceOrVariable();
+            this.currentToken = RobotTokenTypes.KEYWORD;
+        } else {
+            goToNextNewLineOrSuperSpaceOrVariable();
+            String word = getTokenText();
+            if (this.startOffset == NONE || charAtEquals(this.startOffset - SETTINGS_HEADING, '\n')) {
+                this.currentToken = RobotTokenTypes.KEYWORD_DEFINITION;
+                this.isBracketTemplate = false;
+            } else if (RobotKeywordProvider.isSyntaxOfType(RobotTokenTypes.SYNTAX_MARKER, word)) {
+                this.currentToken = RobotTokenTypes.SYNTAX_MARKER;
+                this.level.push(IF_CLAUSE);
+            } else {
+                if (parentState != IMPORT || state != IF_CLAUSE) {
+                    this.currentToken = RobotTokenTypes.ARGUMENT;
+                } else {
+                    this.currentToken = RobotTokenTypes.VARIABLE_DEFINITION;
+                }
+            }
+        }
+    }
+
+    private void handleVariableDefinitionInKeyword() {
+        goToNextNewLineOrSuperSpace();
+        if (getTokenText().equals("IF")) {
+            this.currentToken = RobotTokenTypes.SYNTAX_MARKER;
+            this.level.push(IF_CLAUSE);
+        } else {
+            this.currentToken = RobotTokenTypes.KEYWORD;
+            this.level.push(KEYWORD);
+        }
+    }
+
     private boolean isWithinForLoop() {
         int startOffset = this.startOffset;
-        List<TokenWord> tokenWords = this.extractTokenWords();
+        List<TokenWord> tokenWords = extractTokenWords();
         if (!tokenWords.isEmpty() && tokenWords.get(NONE).word.equals("FOR")) {
             TokenWord forToken = tokenWords.get(NONE);
             TokenWord inToken = null;
@@ -354,7 +354,7 @@ public class RobotLexer extends LexerBase {
     }
 
     private boolean isVarOrAsTokenPresent(int startOffset) {
-        List<TokenWord> tokenWords = this.extractTokenWords();
+        List<TokenWord> tokenWords = extractTokenWords();
         int tokenCount = tokenWords.size();
         for (int i = 0; i < tokenCount; i++) {
             TokenWord token = tokenWords.get(i);
@@ -366,82 +366,63 @@ public class RobotLexer extends LexerBase {
     }
 
     private boolean isVariable(int position) {
-        if (this.isVariableStart(position)) {
+        if (isVariableStart(position)) {
             position += 2;
-
             for (int i = 1; i > NONE && position < this.endOffset && position >= NONE; position++) {
-                if (this.charAtEquals(position, '}')) {
+                if (charAtEquals(position, '}')) {
                     if (--i == NONE) {
                         return true;
                     }
                 }
-
-                if (this.isVariableStart(position)) {
+                if (isVariableStart(position)) {
                     i++;
                     position += 2;
                 }
-
-                if (this.isSuperSpaceOrNewline(position)) {
+                if (isSuperSpaceOrNewline(position)) {
                     return false;
                 }
             }
         }
-
         return false;
     }
 
     private boolean isComment(int position) {
-        while (position < this.endOffset && (this.isWhitespace(position) || this.isNewLine(position))) {
+        while (position < this.endOffset && (isWhitespace(position) || isNewLine(position))) {
             position++;
         }
-
-        return this.charAtEquals(position, '#');
+        return charAtEquals(position, '#');
     }
 
     private boolean isVariableStart(int position) {
-        return (this.charAtEquals(position, '$') || this.charAtEquals(position, '@') || this.charAtEquals(position, '&') || this.charAtEquals(position, '%'))
-               && this.charAtEquals(position + 1, '{');
+        return (charAtEquals(position, '$') || charAtEquals(position, '@') || charAtEquals(position, '&') || charAtEquals(position, '%')) && charAtEquals(
+                position + 1,
+                '{');
     }
 
     private List<TokenWord> extractTokenWords() {
         List<TokenWord> tokenWords = new ArrayList<>();
         int start = this.startOffset;
-
-        // Move start to the beginning of the line
-        while (start > 0 && !this.charAtEquals(start - 1, '\n')) {
+        while (start > 0 && !charAtEquals(start - 1, '\n')) {
             start--;
         }
-
         int end = start;
-
-        // Move end to the end of the line
-        while (end < this.endOffset && !this.charAtEquals(end, '\n')) {
+        while (end < this.endOffset && !charAtEquals(end, '\n')) {
             end++;
         }
-
-        // Extract words from the line
         while (start < end) {
-            // Skip whitespace
             while (start < end && Character.isWhitespace(this.buffer.charAt(start))) {
                 start++;
             }
-
             int wordEnd = start;
-
-            // Find the end of the word
-            while (wordEnd < end && !this.isSuperSpaceOrNewline(wordEnd)) {
+            while (wordEnd < end && !isSuperSpaceOrNewline(wordEnd)) {
                 wordEnd++;
             }
-
-            // Add the word to the list if it's not empty
             String word = this.buffer.subSequence(start, wordEnd).toString();
             if (!word.isEmpty()) {
                 tokenWords.add(new TokenWord(word, start, wordEnd));
             }
-
             start = wordEnd + 1;
         }
-
         return tokenWords;
     }
 
@@ -497,7 +478,7 @@ public class RobotLexer extends LexerBase {
     }
 
     private boolean isSuperSpaceOrNewline(int position) {
-        return this.isSuperSpace(position) || isNewLine(position);
+        return isSuperSpace(position) || isNewLine(position);
     }
 
     private boolean isVariableDefinition(int position) {
