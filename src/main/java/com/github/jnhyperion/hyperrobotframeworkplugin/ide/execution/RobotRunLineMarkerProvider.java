@@ -22,33 +22,34 @@ public class RobotRunLineMarkerProvider extends RunLineMarkerContributor {
         if (element instanceof LeafPsiElement) {
             IElementType type = ((LeafPsiElement) element).getElementType();
             if (RobotTokenTypes.HEADING.equals(type)) {
-                Heading heading = (Heading) element;
-                element = element.getParent();
-                if (element instanceof Heading && !heading.getTestCases().isEmpty()) {
+                Heading heading = getHeading(element);
+                if (heading != null && !heading.getTestCases().isEmpty()) {
                     AnAction[] actions = ExecutorAction.getActions();
                     return new Info(TestState.Green2,
                                     actions,
                                     elem -> StringUtil.join(ContainerUtil.mapNotNull(actions, action -> getText(action, elem)), "\n"));
                 }
             } else {
-                Heading heading;
-                element = element.getParent();
-                if (RobotTokenTypes.KEYWORD_DEFINITION.equals(type) && element != null) {
-                    element = element.getParent();
-                    if (element != null) {
-                        element = element.getParent();
-                        if (element instanceof Heading) {
-                            heading = (Heading) element;
-                            if (heading.containsTasks() || heading.containsTestCases()) {
-                                AnAction[] actions = ExecutorAction.getActions();
-                                return new Info(TestState.Run,
-                                                actions,
-                                                elem -> StringUtil.join(ContainerUtil.mapNotNull(actions, action -> getText(action, elem)), "\n"));
-                            }
-                        }
+                if (RobotTokenTypes.KEYWORD_DEFINITION.equals(type)) {
+                    Heading heading = getHeading(element);
+                    if (heading != null && (heading.containsTasks() || heading.containsTestCases())) {
+                        AnAction[] actions = ExecutorAction.getActions();
+                        return new Info(TestState.Run,
+                                        actions,
+                                        elem -> StringUtil.join(ContainerUtil.mapNotNull(actions, action -> getText(action, elem)), "\n"));
                     }
                 }
             }
+        }
+        return null;
+    }
+
+    private Heading getHeading(PsiElement element) {
+        if (element instanceof Heading) {
+            return (Heading) element;
+        }
+        if (element != null) {
+            return getHeading(element.getParent());
         }
         return null;
     }
