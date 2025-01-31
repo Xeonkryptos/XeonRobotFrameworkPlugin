@@ -1,0 +1,148 @@
+package com.github.jnhyperion.hyperrobotframeworkplugin.psi.ref;
+
+import com.github.jnhyperion.hyperrobotframeworkplugin.psi.dto.ImportType;
+import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.DefinedKeyword;
+import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.DefinedVariable;
+import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.KeywordFile;
+import com.intellij.openapi.project.Project;
+import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.psi.PsiFile;
+import com.jetbrains.python.psi.PyClass;
+
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Map;
+
+import org.jetbrains.annotations.NotNull;
+
+public class RobotPythonClass extends RobotPythonWrapper implements KeywordFile {
+
+    private final String library;
+    private final PyClass pythonClass;
+    private final ImportType importType;
+    private final String uniqueIdentifier;
+    private final Project project;
+    private final boolean isDifferentNamespace;
+
+    public RobotPythonClass(@NotNull String library, @NotNull PyClass pythonClass, @NotNull ImportType importType, @NotNull Project project, boolean var5) {
+        this.library = library;
+        this.pythonClass = pythonClass;
+        this.importType = importType;
+        this.uniqueIdentifier = this.pythonClass.getName() + "#" + this.library + "#" + this.pythonClass.hashCode();
+        this.project = project;
+        this.isDifferentNamespace = var5;
+    }
+
+    @NotNull
+    @Override
+    public final synchronized Collection<DefinedKeyword> getDefinedKeywords() {
+        Collection<DefinedKeyword> keywords;
+        try {
+            Map<String, Collection<DefinedKeyword>> cachedKeywords = ProjectFileCache.getCachedKeywords(this.project);
+            keywords = cachedKeywords.get(this.uniqueIdentifier);
+            if (keywords == null) {
+                HashSet<DefinedKeyword> newKeywords = new HashSet<>();
+                if (this.importType.equals(ImportType.LIBRARY)) {
+                    try {
+                        addDefinedKeywords(this.pythonClass, this.library, newKeywords);
+                    } catch (Throwable e) {
+                        newKeywords.clear();
+                    }
+                }
+                if (!newKeywords.isEmpty()) {
+                    cachedKeywords.put(this.uniqueIdentifier, newKeywords);
+                }
+                return newKeywords;
+            }
+        } catch (Throwable e) {
+            return new HashSet<>();
+        }
+        return keywords;
+    }
+
+    @NotNull
+    @Override
+    public final synchronized Collection<DefinedVariable> getDefinedVariables() {
+        Collection<DefinedVariable> variables;
+        try {
+            Map<String, Collection<DefinedVariable>> cachedVariables = ProjectFileCache.getCachedVariables(this.project);
+            variables = cachedVariables.get(this.uniqueIdentifier);
+            if (variables == null) {
+                HashSet<DefinedVariable> newVariables = new HashSet<>();
+                if (this.importType.equals(ImportType.VARIABLES)) {
+                    try {
+                        addDefinedVariables(this.pythonClass, newVariables);
+                    } catch (Throwable e) {
+                        newVariables.clear();
+                    }
+                }
+                if (!newVariables.isEmpty()) {
+                    cachedVariables.put(this.uniqueIdentifier, newVariables);
+                }
+                return newVariables;
+            }
+        } catch (Throwable e) {
+            return new HashSet<>();
+        }
+        return variables;
+    }
+
+    @NotNull
+    @Override
+    public final ImportType getImportType() {
+        return this.importType;
+    }
+
+    @NotNull
+    @Override
+    public final Collection<KeywordFile> getImportedFiles(boolean includeTransitive) {
+        return Collections.emptyList();
+    }
+
+    @NotNull
+    @Override
+    public final Collection<VirtualFile> getVirtualFiles(boolean includeTransitive) {
+        return Collections.emptyList();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
+        RobotPythonClass that = (RobotPythonClass) o;
+        return this.library.equals(that.library) && this.pythonClass.equals(that.pythonClass);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = this.library.hashCode();
+        result = 31 * result + this.pythonClass.hashCode();
+        return result;
+    }
+
+    @Override
+    public String toString() {
+        return this.library;
+    }
+
+    @Override
+    public VirtualFile getVirtualFile() {
+        return this.getPsiFile().getVirtualFile();
+    }
+
+    @Override
+    public final PsiFile getPsiFile() {
+        return this.pythonClass.getContainingFile();
+    }
+
+    @Override
+    public final boolean isDifferentNamespace() {
+        return this.isDifferentNamespace;
+    }
+}
