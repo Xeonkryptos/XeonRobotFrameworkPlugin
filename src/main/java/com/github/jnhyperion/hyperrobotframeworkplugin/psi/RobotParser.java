@@ -35,26 +35,25 @@ public class RobotParser implements PsiParser {
                     done(headingMarker, RobotTokenTypes.HEADING);
                     headingMarker = builder.mark();
                     builder.advanceLexer();
-                    continue;
-                }
-                type = builder.getTokenType();
-                if (RobotTokenTypes.HEADING != type) {
-                    if (RobotTokenTypes.SETTING == type) {
-                        parseSetting(builder);
-                        continue;
-                    } else if (RobotTokenTypes.VARIABLE_DEFINITION == type && isNextToken(builder, RobotTokenTypes.WHITESPACE)) {
-                        parseWithArguments(builder, RobotTokenTypes.VARIABLE_DEFINITION);
-                    } else if (RobotTokenTypes.BRACKET_SETTING == type) {
-                        parseWithArguments(builder, RobotTokenTypes.BRACKET_SETTING);
-                    } else if (RobotTokenTypes.KEYWORD_DEFINITION == type || (RobotTokenTypes.VARIABLE_DEFINITION == type && isNextToken(builder,
-                                                                                                                                         RobotTokenTypes.KEYWORD_DEFINITION))) {
-                        parseKeywordDefinition(builder);
-                    } else if (RobotTokenTypes.KEYWORD == type) {
-                        parseKeywordStatement(builder, RobotTokenTypes.KEYWORD_STATEMENT, false);
-                    } else if (RobotTokenTypes.IMPORT == type) {
-                        parseWithArguments(builder, RobotTokenTypes.IMPORT);
-                    } else {
-                        builder.advanceLexer();
+                } else {
+                    type = builder.getTokenType();
+                    if (RobotTokenTypes.HEADING != type) {
+                        if (RobotTokenTypes.SETTING == type) {
+                            parseSetting(builder);
+                        } else if (RobotTokenTypes.VARIABLE_DEFINITION == type && isNextToken(builder, RobotTokenTypes.WHITESPACE)) {
+                            parseWithArguments(builder, RobotTokenTypes.VARIABLE_DEFINITION);
+                        } else if (RobotTokenTypes.BRACKET_SETTING == type) {
+                            parseWithArguments(builder, RobotTokenTypes.BRACKET_SETTING);
+                        } else if (RobotTokenTypes.KEYWORD_DEFINITION == type || (RobotTokenTypes.VARIABLE_DEFINITION == type && isNextToken(builder,
+                                                                                                                                             RobotTokenTypes.KEYWORD_DEFINITION))) {
+                            parseKeywordDefinition(builder);
+                        } else if (RobotTokenTypes.KEYWORD == type) {
+                            parseKeywordStatement(builder, RobotTokenTypes.KEYWORD_STATEMENT, false);
+                        } else if (RobotTokenTypes.IMPORT == type) {
+                            parseWithArguments(builder, RobotTokenTypes.IMPORT);
+                        } else {
+                            builder.advanceLexer();
+                        }
                     }
                 }
             }
@@ -162,31 +161,32 @@ public class RobotParser implements PsiParser {
             }
 
             if (tokenType == RobotTokenTypes.KEYWORD || (tokenType == RobotTokenTypes.VARIABLE && isNextToken(builder, RobotTokenTypes.KEYWORD))) {
-                if (!keywordFound) {
-                    keywordFound = true;
-                    parseKeyword(builder);
-                    continue;
+                if (keywordFound) {
+                    break;
                 }
-                break;
+                keywordFound = true;
+                parseKeyword(builder);
+                continue;
             }
 
             if ((tokenType == RobotTokenTypes.ARGUMENT || tokenType == RobotTokenTypes.VARIABLE) && builder.rawLookup(1) != RobotTokenTypes.KEYWORD) {
                 parseWith(builder, RobotTokenTypes.ARGUMENT);
             } else if (tokenType == RobotTokenTypes.VARIABLE_DEFINITION) {
-                if (!keywordFound) {
-                    keywordFound = true;
-                    boolean isKeywordDefinition = builder.rawLookup(-1) == RobotTokenTypes.KEYWORD_DEFINITION || isNextToken(builder, RobotTokenTypes.KEYWORD_DEFINITION);
-                    PsiBuilder.Marker variableMarker = builder.mark();
-                    builder.advanceLexer();
-                    done(variableMarker, RobotTokenTypes.VARIABLE_DEFINITION_ID);
-                    inline = isKeywordDefinition;
-
-                    if (!isKeywordDefinition && builder.getTokenType() == RobotTokenTypes.KEYWORD) {
-                        parseKeywordStatement(builder, RobotTokenTypes.KEYWORD_STATEMENT, true);
-                    }
-                    continue;
+                if (keywordFound) {
+                    break;
                 }
-                break;
+
+                keywordFound = true;
+                boolean isKeywordDefinition =
+                        builder.rawLookup(-1) == RobotTokenTypes.KEYWORD_DEFINITION || isNextToken(builder, RobotTokenTypes.KEYWORD_DEFINITION);
+                PsiBuilder.Marker variableMarker = builder.mark();
+                builder.advanceLexer();
+                done(variableMarker, RobotTokenTypes.VARIABLE_DEFINITION_ID);
+                inline = isKeywordDefinition;
+
+                if (!isKeywordDefinition && builder.getTokenType() == RobotTokenTypes.KEYWORD) {
+                    parseKeywordStatement(builder, RobotTokenTypes.KEYWORD_STATEMENT, true);
+                }
             } else if (tokenType == RobotTokenTypes.SYNTAX_MARKER && !keywordFound) {
                 keywordFound = true;
                 parseWith(builder, RobotTokenTypes.SYNTAX_MARKER);

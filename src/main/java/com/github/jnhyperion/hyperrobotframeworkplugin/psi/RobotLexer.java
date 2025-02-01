@@ -238,6 +238,9 @@ public class RobotLexer extends LexerBase {
                 } else if (RobotKeywordProvider.isSyntaxOfType(RobotTokenTypes.SYNTAX_MARKER, word)) {
                     this.currentToken = RobotTokenTypes.SYNTAX_MARKER;
                     this.level.push(IF_CLAUSE);
+                } else if (getState() == TEST_CASES_HEADING) {
+                    this.currentToken = RobotTokenTypes.KEYWORD_DEFINITION;
+                    this.level.push(KEYWORD_DEFINITION);
                 } else {
                     if (!this.isTestTemplate && !this.isBracketTemplate || getState() != TEST_CASES_HEADING) {
                         this.currentToken = RobotTokenTypes.KEYWORD;
@@ -307,7 +310,7 @@ public class RobotLexer extends LexerBase {
         } else {
             goToNextNewLineOrSuperSpaceOrVariable();
             String word = getTokenText();
-            if (this.startOffset == NONE || charAtEquals(this.startOffset - SETTINGS_HEADING, '\n')) {
+            if (this.startOffset == NONE || charAtEquals(this.startOffset - 1, '\n')) {
                 this.currentToken = RobotTokenTypes.KEYWORD_DEFINITION;
                 this.isBracketTemplate = false;
             } else if (RobotKeywordProvider.isSyntaxOfType(RobotTokenTypes.SYNTAX_MARKER, word)) {
