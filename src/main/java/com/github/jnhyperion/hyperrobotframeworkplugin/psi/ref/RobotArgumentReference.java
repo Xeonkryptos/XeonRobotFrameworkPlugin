@@ -48,6 +48,11 @@ public class RobotArgumentReference extends PsiReferenceBase<Argument> implement
                 }
             } else if (parent instanceof KeywordStatement) {
                 result = ResolverUtils.findKeywordElement(argument.getPresentableText(), argument.getContainingFile());
+                if (argument.getPresentableText().contains("=")) {
+                    int index = argument.getPresentableText().indexOf('=');
+                    String parameterName = argument.getPresentableText().substring(0, index).trim();
+                    result = ResolverUtils.findKeywordParameterElement(parameterName, (KeywordStatement) parent);
+                }
             }
         }
 

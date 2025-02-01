@@ -4,6 +4,7 @@ import com.github.jnhyperion.hyperrobotframeworkplugin.ide.config.*;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.dto.*;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.*;
 import com.intellij.psi.*;
+import com.jetbrains.python.psi.*;
 import org.jetbrains.annotations.*;
 
 import java.util.*;
@@ -182,5 +183,24 @@ public class ResolverUtils {
         } catch (Throwable ignored) {
         }
         return Collections.emptyList();
+    }
+
+    public static PsiElement findKeywordParameterElement(String parameterName, KeywordStatement keywordStatement) {
+        KeywordInvokable invokable = keywordStatement.getInvokable();
+        if (invokable != null) {
+            PsiReference reference = invokable.getReference();
+            if (reference != null) {
+                PsiElement referencedElement = reference.resolve();
+                if (referencedElement instanceof PyFunction) {
+                    PyFunction pyFunction = (PyFunction) referencedElement;
+                    for (PyParameter parameter : pyFunction.getParameterList().getParameters()) {
+                        if (parameterName.equals(parameter.getName())) {
+                            return parameter;
+                        }
+                    }
+                }
+            }
+        }
+        return null;
     }
 }
