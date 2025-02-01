@@ -1,231 +1,179 @@
 package com.github.jnhyperion.hyperrobotframeworkplugin.ide;
 
-import com.github.jnhyperion.hyperrobotframeworkplugin.ide.config.RobotOptionsProvider;
-import com.github.jnhyperion.hyperrobotframeworkplugin.ide.icons.RobotIcons;
-import com.github.jnhyperion.hyperrobotframeworkplugin.psi.RecommendationWord;
-import com.github.jnhyperion.hyperrobotframeworkplugin.psi.RobotElementType;
-import com.github.jnhyperion.hyperrobotframeworkplugin.psi.RobotKeywordProvider;
-import com.github.jnhyperion.hyperrobotframeworkplugin.psi.RobotResourceFileType;
-import com.github.jnhyperion.hyperrobotframeworkplugin.psi.RobotTokenTypes;
-import com.github.jnhyperion.hyperrobotframeworkplugin.psi.dto.ImportType;
-import com.github.jnhyperion.hyperrobotframeworkplugin.psi.dto.KeywordDto;
-import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.Argument;
-import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.DefinedKeyword;
-import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.DefinedVariable;
-import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.Heading;
-import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.Import;
-import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.KeywordDefinitionImpl;
-import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.KeywordFile;
-import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.KeywordInvokable;
-import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.RobotFile;
-import com.github.jnhyperion.hyperrobotframeworkplugin.psi.ref.RobotFileManager;
-import com.intellij.codeInsight.TailType;
-import com.intellij.codeInsight.completion.CompletionContributor;
-import com.intellij.codeInsight.completion.CompletionParameters;
-import com.intellij.codeInsight.completion.CompletionProvider;
-import com.intellij.codeInsight.completion.CompletionResultSet;
-import com.intellij.codeInsight.completion.CompletionType;
-import com.intellij.codeInsight.lookup.LookupElement;
-import com.intellij.codeInsight.lookup.LookupElementBuilder;
-import com.intellij.codeInsight.lookup.TailTypeDecorator;
-import com.intellij.icons.AllIcons;
+import com.github.jnhyperion.hyperrobotframeworkplugin.ide.config.*;
+import com.github.jnhyperion.hyperrobotframeworkplugin.ide.icons.*;
+import com.github.jnhyperion.hyperrobotframeworkplugin.psi.*;
+import com.github.jnhyperion.hyperrobotframeworkplugin.psi.dto.*;
+import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.*;
+import com.github.jnhyperion.hyperrobotframeworkplugin.psi.ref.*;
+import com.intellij.codeInsight.*;
+import com.intellij.codeInsight.completion.*;
+import com.intellij.codeInsight.lookup.*;
+import com.intellij.icons.*;
 import com.intellij.icons.AllIcons.Nodes;
-import com.intellij.openapi.editor.Document;
-import com.intellij.openapi.util.TextRange;
-import com.intellij.openapi.util.io.FileUtil;
-import com.intellij.patterns.PlatformPatterns;
-import com.intellij.psi.PsiComment;
-import com.intellij.psi.PsiElement;
-import com.intellij.psi.PsiFile;
-import com.intellij.util.ProcessingContext;
-import com.jetbrains.python.psi.PyParameter;
-import org.apache.commons.lang.SystemUtils;
-import org.apache.commons.lang.WordUtils;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import com.intellij.openapi.editor.*;
+import com.intellij.openapi.util.*;
+import com.intellij.openapi.util.io.*;
+import com.intellij.patterns.*;
+import com.intellij.psi.*;
+import com.intellij.psi.util.*;
+import com.intellij.util.*;
+import com.jetbrains.python.psi.*;
+import org.apache.commons.lang.*;
+import org.jetbrains.annotations.*;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.io.*;
+import java.util.*;
+import java.util.stream.*;
 
 public class RobotCompletionContributor extends CompletionContributor {
 
     public RobotCompletionContributor() {
-        extend(CompletionType.BASIC,
-               PlatformPatterns.psiElement().inFile(PlatformPatterns.psiElement(RobotFile.class)),
-               new CompletionProvider<CompletionParameters>() {
-                   @Override
-                   protected void addCompletions(@NotNull CompletionParameters parameters,
-                                                 @NotNull ProcessingContext context,
-                                                 @NotNull CompletionResultSet result) {
-                       if (!(parameters.getOriginalPosition() instanceof PsiComment)) {
-                           if (RobotCompletionContributor.isValidCompletion(parameters)
-                               && !RobotCompletionContributor.isArgument(parameters.getOriginalPosition()) && !RobotCompletionContributor.isKeywordInvokable(
-                                   parameters.getOriginalPosition())) {
-                               boolean var5 = parameters.getOriginalFile().getFileType() instanceof RobotResourceFileType;
+        extend(CompletionType.BASIC, PlatformPatterns.psiElement().inFile(PlatformPatterns.psiElement(RobotFile.class)), new CompletionProvider<>() {
+            @Override
+            protected void addCompletions(@NotNull CompletionParameters parameters, @NotNull ProcessingContext context, @NotNull CompletionResultSet result) {
+                if (!(parameters.getOriginalPosition() instanceof PsiComment)) {
+                    if (RobotCompletionContributor.isValidCompletion(parameters) &&
+                        !RobotCompletionContributor.isArgument(parameters.getOriginalPosition()) &&
+                        !RobotCompletionContributor.isKeywordInvokable(parameters.getOriginalPosition())) {
+                        boolean isResource = parameters.getOriginalFile().getFileType() instanceof RobotResourceFileType;
 
-                               for (LookupElement var4 : addSyntaxLookup(RobotTokenTypes.HEADING)) {
-                                   if (!var5 || !"*** Test Cases ***".equals(var4.getLookupString()) && !"*** Tasks ***".equals(var4.getLookupString())) {
-                                       result.addElement(var4);
-                                   }
-                               }
-                           }
-                       }
-                   }
-               });
-        extend(CompletionType.BASIC,
-               PlatformPatterns.psiElement().inFile(PlatformPatterns.psiElement(RobotFile.class)),
-               new CompletionProvider<CompletionParameters>() {
-                   @Override
-                   protected void addCompletions(@NotNull CompletionParameters parameters,
-                                                 @NotNull ProcessingContext context,
-                                                 @NotNull CompletionResultSet result) {
-                       if (!(parameters.getOriginalPosition() instanceof PsiComment)) {
-                           PsiElement heading = getHeading(parameters.getOriginalPosition());
-                           if (!isValidCompletion(parameters) && (containsTestCases(heading) || containsKeywordDefinitions(heading))
-                               && !isArgument(parameters.getOriginalPosition())) {
-                               RobotCompletionContributor.addSyntaxLookup(RobotTokenTypes.BRACKET_SETTING, result);
-                           }
-                       }
-                   }
-               });
-        extend(CompletionType.BASIC,
-               PlatformPatterns.psiElement().inFile(PlatformPatterns.psiElement(RobotFile.class)),
-               new CompletionProvider<CompletionParameters>() {
-                   @Override
-                   protected void addCompletions(@NotNull CompletionParameters parameters,
-                                                 @NotNull ProcessingContext context,
-                                                 @NotNull CompletionResultSet result) {
-                       if (!(parameters.getOriginalPosition() instanceof PsiComment)) {
-                           PsiElement originalPosition = parameters.getOriginalPosition();
-                           PsiElement heading = getHeading(originalPosition);
-                           if (containsSettings(heading) && !isArgument(originalPosition) && !isKeywordInvokable(originalPosition)) {
-                               addSyntaxLookup(RobotTokenTypes.SETTING, result);
-                               addSyntaxLookup(RobotTokenTypes.IMPORT, result);
-                           }
-                       }
-                   }
-               });
-        extend(CompletionType.BASIC,
-               PlatformPatterns.psiElement().inFile(PlatformPatterns.psiElement(RobotFile.class)),
-               new CompletionProvider<CompletionParameters>() {
-                   @Override
-                   protected void addCompletions(@NotNull CompletionParameters parameters,
-                                                 @NotNull ProcessingContext context,
-                                                 @NotNull CompletionResultSet result) {
-                       if (!(parameters.getOriginalPosition() instanceof PsiComment)) {
-                           PsiElement originalPosition = parameters.getOriginalPosition();
-                           if (originalPosition != null) {
-                               PsiElement parent = originalPosition.getParent();
-                               if (parent instanceof Argument) {
-                                   PsiElement grandParent = parent.getParent();
-                                   if (grandParent instanceof Import) {
-                                       Import importElement = (Import) grandParent;
-                                       if (importElement.isLibrary()) {
-                                           addBuiltinLibraryCompletions(result, parameters.getOriginalFile());
-                                           if (importElement.getChildren().length > 1) {
-                                               for (LookupElement lookupElement : addSyntaxLookup(RobotTokenTypes.SYNTAX_MARKER)) {
-                                                   if ("AS".equals(lookupElement.getLookupString())) {
-                                                       result.addElement(lookupElement);
-                                                   }
-                                               }
-                                           }
-                                       }
+                        for (LookupElement element : addSyntaxLookup(RobotTokenTypes.HEADING)) {
+                            if (!isResource || !"*** Test Cases ***".equals(element.getLookupString()) && !"*** Tasks ***".equals(element.getLookupString())) {
+                                result.addElement(element);
+                            }
+                        }
+                    }
+                }
+            }
+        });
+        extend(CompletionType.BASIC, PlatformPatterns.psiElement().inFile(PlatformPatterns.psiElement(RobotFile.class)), new CompletionProvider<>() {
+            @Override
+            protected void addCompletions(@NotNull CompletionParameters parameters, @NotNull ProcessingContext context, @NotNull CompletionResultSet result) {
+                if (!(parameters.getOriginalPosition() instanceof PsiComment)) {
+                    PsiElement heading = getHeading(parameters.getOriginalPosition());
+                    if (!isValidCompletion(parameters) &&
+                        (containsTestCases(heading) || containsKeywordDefinitions(heading)) &&
+                        !isArgument(parameters.getOriginalPosition())) {
+                        RobotCompletionContributor.addSyntaxLookup(RobotTokenTypes.BRACKET_SETTING, result);
+                    }
+                }
+            }
+        });
+        extend(CompletionType.BASIC, PlatformPatterns.psiElement().inFile(PlatformPatterns.psiElement(RobotFile.class)), new CompletionProvider<>() {
+            @Override
+            protected void addCompletions(@NotNull CompletionParameters parameters, @NotNull ProcessingContext context, @NotNull CompletionResultSet result) {
+                if (!(parameters.getOriginalPosition() instanceof PsiComment)) {
+                    PsiElement originalPosition = parameters.getOriginalPosition();
+                    PsiElement heading = getHeading(originalPosition);
+                    if (containsSettings(heading) && !isArgument(originalPosition) && !isKeywordInvokable(originalPosition)) {
+                        addSyntaxLookup(RobotTokenTypes.SETTING, result);
+                        addSyntaxLookup(RobotTokenTypes.IMPORT, result);
+                    }
+                }
+            }
+        });
+        extend(CompletionType.BASIC, PlatformPatterns.psiElement().inFile(PlatformPatterns.psiElement(RobotFile.class)), new CompletionProvider<>() {
+            @Override
+            protected void addCompletions(@NotNull CompletionParameters parameters, @NotNull ProcessingContext context, @NotNull CompletionResultSet result) {
+                if (!(parameters.getOriginalPosition() instanceof PsiComment)) {
+                    PsiElement originalPosition = parameters.getOriginalPosition();
+                    if (originalPosition != null) {
+                        PsiElement parent = originalPosition.getParent();
+                        if (parent instanceof Argument) {
+                            PsiElement grandParent = parent.getParent();
+                            if (grandParent instanceof Import) {
+                                Import importElement = (Import) grandParent;
+                                if (importElement.isLibrary()) {
+                                    addBuiltinLibraryCompletions(result, parameters.getOriginalFile());
+                                    if (importElement.getChildren().length > 1) {
+                                        for (LookupElement lookupElement : addSyntaxLookup(RobotTokenTypes.SYNTAX_MARKER)) {
+                                            if ("AS".equals(lookupElement.getLookupString())) {
+                                                result.addElement(lookupElement);
+                                            }
+                                        }
+                                    }
+                                }
 
-                                       if (importElement.isResource()) {
-                                           addResourceFilePaths(result, parameters.getOriginalFile());
-                                       }
-                                   }
-                               }
-                           }
-                       }
-                   }
-               });
-        extend(CompletionType.BASIC,
-               PlatformPatterns.psiElement().inFile(PlatformPatterns.psiElement(RobotFile.class)),
-               new CompletionProvider<CompletionParameters>() {
-                   @Override
-                   protected void addCompletions(@NotNull CompletionParameters parameters,
-                                                 @NotNull ProcessingContext context,
-                                                 @NotNull CompletionResultSet result) {
-                       if (!(parameters.getOriginalPosition() instanceof PsiComment)) {
-                           PsiElement heading = getHeading(parameters.getOriginalPosition());
-                           if (!isValidCompletion(parameters) && containsTestCases(heading) && !isArgument(parameters.getOriginalPosition())) {
-                               addSyntaxLookup(RobotTokenTypes.GHERKIN, result);
-                           }
-                       }
-                   }
-               });
-        extend(CompletionType.BASIC,
-               PlatformPatterns.psiElement().inFile(PlatformPatterns.psiElement(RobotFile.class)),
-               new CompletionProvider<CompletionParameters>() {
-                   @Override
-                   protected void addCompletions(@NotNull CompletionParameters parameters,
-                                                 @NotNull ProcessingContext context,
-                                                 @NotNull CompletionResultSet result) {
-                       if (!(parameters.getOriginalPosition() instanceof PsiComment)) {
-                           PsiElement heading = getHeading(parameters.getOriginalPosition());
-                           if (!isValidCompletion(parameters) && (containsTestCases(heading) || containsKeywordDefinitions(heading))) {
-                               List<LookupElement> lookupElements = addSyntaxLookup(RobotTokenTypes.SYNTAX_MARKER);
-                               List<LookupElement> nonSpecialElements = new ArrayList<>();
-                               List<LookupElement> specialElements = new ArrayList<>();
+                                if (importElement.isResource()) {
+                                    addResourceFilePaths(result, parameters.getOriginalFile());
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        });
+        extend(CompletionType.BASIC, PlatformPatterns.psiElement().inFile(PlatformPatterns.psiElement(RobotFile.class)), new CompletionProvider<>() {
+            @Override
+            protected void addCompletions(@NotNull CompletionParameters parameters, @NotNull ProcessingContext context, @NotNull CompletionResultSet result) {
+                if (!(parameters.getOriginalPosition() instanceof PsiComment)) {
+                    PsiElement heading = getHeading(parameters.getOriginalPosition());
+                    if (!isValidCompletion(parameters) && containsTestCases(heading) && !isArgument(parameters.getOriginalPosition())) {
+                        addSyntaxLookup(RobotTokenTypes.GHERKIN, result);
+                    }
+                }
+            }
+        });
+        extend(CompletionType.BASIC, PlatformPatterns.psiElement().inFile(PlatformPatterns.psiElement(RobotFile.class)), new CompletionProvider<>() {
+            @Override
+            protected void addCompletions(@NotNull CompletionParameters parameters, @NotNull ProcessingContext context, @NotNull CompletionResultSet result) {
+                if (!(parameters.getOriginalPosition() instanceof PsiComment)) {
+                    PsiElement heading = getHeading(parameters.getOriginalPosition());
+                    if (!isValidCompletion(parameters) && (containsTestCases(heading) || containsKeywordDefinitions(heading))) {
+                        List<LookupElement> lookupElements = addSyntaxLookup(RobotTokenTypes.SYNTAX_MARKER);
+                        List<LookupElement> nonSpecialElements = new ArrayList<>();
+                        List<LookupElement> specialElements = new ArrayList<>();
 
-                               for (LookupElement element : lookupElements) {
-                                   if (!element.getLookupString().equals("AS") && !element.getLookupString().startsWith("IN")) {
-                                       nonSpecialElements.add(element);
-                                   } else {
-                                       specialElements.add(element);
-                                   }
-                               }
+                        for (LookupElement element : lookupElements) {
+                            if (!element.getLookupString().equals("AS") && !element.getLookupString().startsWith("IN")) {
+                                nonSpecialElements.add(element);
+                            } else {
+                                specialElements.add(element);
+                            }
+                        }
 
-                               if (!isArgument(parameters.getOriginalPosition())) {
-                                   result.addAllElements(nonSpecialElements);
-                                   return;
-                               }
+                        if (!isArgument(parameters.getOriginalPosition())) {
+                            result.addAllElements(nonSpecialElements);
+                            return;
+                        }
 
-                               result.addAllElements(specialElements);
-                           }
-                       }
-                   }
-               });
-        extend(CompletionType.BASIC,
-               PlatformPatterns.psiElement().inFile(PlatformPatterns.psiElement(RobotFile.class)),
-               new CompletionProvider<CompletionParameters>() {
-                   @Override
-                   protected void addCompletions(@NotNull CompletionParameters parameters,
-                                                 @NotNull ProcessingContext context,
-                                                 @NotNull CompletionResultSet result) {
-                       if (!(parameters.getOriginalPosition() instanceof PsiComment)) {
-                           PsiElement heading = getHeading(parameters.getOriginalPosition());
-                           if (!isValidCompletion(parameters) && (containsTestCases(heading) || containsKeywordDefinitions(heading)
-                                                                  || containsTasks(heading))) {
-                               addDefinedKeywordsFromFile(result, parameters.getOriginalFile());
-                           }
+                        result.addAllElements(specialElements);
+                    }
+                }
+            }
+        });
+        extend(CompletionType.BASIC, PlatformPatterns.psiElement().inFile(PlatformPatterns.psiElement(RobotFile.class)), new CompletionProvider<>() {
+            @Override
+            protected void addCompletions(@NotNull CompletionParameters parameters, @NotNull ProcessingContext context, @NotNull CompletionResultSet result) {
+                if (!(parameters.getOriginalPosition() instanceof PsiComment)) {
+                    PsiElement heading = getHeading(parameters.getOriginalPosition());
+                    if (!isValidCompletion(parameters) && (containsTestCases(heading) || containsKeywordDefinitions(heading) || containsTasks(heading))) {
+                        addDefinedKeywordsFromFile(result, parameters.getOriginalFile());
+                    }
 
-                           if (containsSettings(heading) && isKeywordInvokable(parameters.getOriginalPosition())) {
-                               addDefinedKeywordsFromFile(result, parameters.getOriginalFile());
-                           }
-                       }
-                   }
-               });
-        extend(CompletionType.BASIC,
-               PlatformPatterns.psiElement().inFile(PlatformPatterns.psiElement(RobotFile.class)),
-               new CompletionProvider<CompletionParameters>() {
-                   @Override
-                   protected void addCompletions(@NotNull CompletionParameters parameters,
-                                                 @NotNull ProcessingContext context,
-                                                 @NotNull CompletionResultSet result) {
-                       if (!(parameters.getOriginalPosition() instanceof PsiComment)) {
-                           if (isArgument(parameters.getOriginalPosition())) {
-                               addDefinedVariablesFromImportedFiles(result, parameters.getOriginalFile(), parameters.getOriginalPosition());
-                               addDefinedVariablesFromKeyword(result, parameters.getOriginalPosition());
-                           }
-                       }
-                   }
-               });
+                    if (containsSettings(heading) && isKeywordInvokable(parameters.getOriginalPosition())) {
+                        addDefinedKeywordsFromFile(result, parameters.getOriginalFile());
+                    }
+                    if (isInKeywordStatement(parameters.getPosition())) {
+                        KeywordStatement keyword = PsiTreeUtil.getParentOfType(parameters.getPosition(), KeywordStatement.class);
+                        assert keyword != null;
+                        addKeywordParameters(keyword, result, parameters.getPosition());
+                    }
+                }
+            }
+        });
+        extend(CompletionType.BASIC, PlatformPatterns.psiElement().inFile(PlatformPatterns.psiElement(RobotFile.class)), new CompletionProvider<>() {
+            @Override
+            protected void addCompletions(@NotNull CompletionParameters parameters, @NotNull ProcessingContext context, @NotNull CompletionResultSet result) {
+                if (!(parameters.getOriginalPosition() instanceof PsiComment)) {
+                    if (isArgument(parameters.getOriginalPosition())) {
+                        addDefinedVariablesFromImportedFiles(result, parameters.getOriginalFile(), parameters.getOriginalPosition());
+                        addDefinedVariablesFromKeyword(result, parameters.getOriginalPosition());
+                    }
+                }
+            }
+        });
     }
 
     private static boolean isArgument(PsiElement current) {
@@ -240,6 +188,14 @@ public class RobotCompletionContributor extends CompletionContributor {
             return false;
         }
         return current.getParent() instanceof KeywordInvokable;
+    }
+
+    private static boolean isInKeywordStatement(PsiElement current) {
+        if (current == null) {
+            return false;
+        }
+
+        return PsiTreeUtil.getParentOfType(current, KeywordStatement.class) != null;
     }
 
     private static boolean isValidCompletion(@NotNull CompletionParameters parameters) {
@@ -381,11 +337,11 @@ public class RobotCompletionContributor extends CompletionContributor {
     }
 
     private static void addDefinedVariablesFromKeyword(@NotNull CompletionResultSet resultSet, @Nullable PsiElement element) {
-        KeywordDefinitionImpl keywordDefinition = null;
+        KeywordDefinition keywordDefinition = null;
         if (element != null) {
             for (PsiElement parent = element.getParent(); parent != null; parent = parent.getParent()) {
-                if (parent instanceof KeywordDefinitionImpl) {
-                    keywordDefinition = (KeywordDefinitionImpl) parent;
+                if (parent instanceof KeywordDefinition) {
+                    keywordDefinition = (KeywordDefinition) parent;
                     break;
                 }
             }
@@ -408,6 +364,13 @@ public class RobotCompletionContributor extends CompletionContributor {
     private static void addDefinedVariables(@NotNull Collection<DefinedVariable> variables,
                                             @NotNull CompletionResultSet resultSet,
                                             @Nullable PsiElement element) {
+        addDefinedVariables(variables, resultSet, element, TailType.NONE);
+    }
+
+    private static void addDefinedVariables(@NotNull Collection<DefinedVariable> variables,
+                                            @NotNull CompletionResultSet resultSet,
+                                            @Nullable PsiElement element,
+                                            @NotNull TailType tailType) {
         for (DefinedVariable variable : variables) {
             if (variable.isInScope(element)) {
                 String lookup = variable.getLookup();
@@ -415,11 +378,21 @@ public class RobotCompletionContributor extends CompletionContributor {
                     String[] lookupStrings = { lookup, WordUtils.capitalize(lookup), lookup.toLowerCase() };
                     LookupElementBuilder builder = LookupElementBuilder.create(lookup).withLookupStrings(Arrays.asList(lookupStrings)).withIcon(Nodes.Variable);
                     TailTypeDecorator<LookupElementBuilder> decoratedBuilder = TailTypeDecorator.withTail(addReferenceType(variable.reference(), builder),
-                                                                                                          TailType.NONE);
+                                                                                                          tailType);
                     resultSet.addElement(decoratedBuilder);
                 }
             }
         }
+    }
+
+    private static void addKeywordParameters(@NotNull KeywordStatement keywordStatement, @NotNull CompletionResultSet resultSet, @NotNull PsiElement position) {
+        Collection<DefinedVariable> availableParameters = keywordStatement.getAvailableParameters();
+        Set<String> arguments = keywordStatement.getArguments().stream().map(RobotStatement::getPresentableText).map(text -> {
+            int index = text.indexOf('=');
+            return index > -1 ? text.substring(0, index) : null;
+        }).filter(Objects::nonNull).collect(Collectors.toSet());
+        availableParameters.removeIf(variable -> arguments.contains(variable.getLookup()));
+        addDefinedVariables(availableParameters, resultSet, position, TailType.createSimpleTailType('='));
     }
 
     public static LookupElementBuilder addReferenceType(PsiElement element, LookupElementBuilder builder) {
@@ -463,7 +436,8 @@ public class RobotCompletionContributor extends CompletionContributor {
                                                                      .withCaseSensitivity(true)
                                                                      .withIcon(Nodes.Function);
             LookupElementBuilder decoratedElement = addReferenceType(keyword.reference(), lookupElement);
-            if ((displayName = getKeywordArguments(keyword)) != null) {
+            displayName = getKeywordArguments(keyword);
+            if (displayName != null) {
                 decoratedElement = decoratedElement.withTailText(displayName);
             }
 
@@ -498,7 +472,7 @@ public class RobotCompletionContributor extends CompletionContributor {
         for (Object argument : arguments) {
             if (argument instanceof PyParameter) {
                 String name = ((PyParameter) argument).getName();
-                if (!"self".equals(name)) {
+                if (!((PyParameter) argument).isSelf()) {
                     argumentNames.add(name);
                 }
             } else if (argument instanceof DefinedVariable) {

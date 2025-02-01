@@ -30,23 +30,20 @@ public class ResolverUtils {
             return null;
         }
 
-        try {
-            RobotFile robotFile = (RobotFile) psiFile;
-            for (DefinedKeyword definedKeyword : robotFile.getDefinedKeywords()) {
+        RobotFile robotFile = (RobotFile) psiFile;
+        for (DefinedKeyword definedKeyword : robotFile.getDefinedKeywords()) {
+            if (definedKeyword.matches(keyword)) {
+                return definedKeyword.reference();
+            }
+        }
+
+        boolean includeTransitive = RobotOptionsProvider.getInstance(psiFile.getProject()).allowTransitiveImports();
+        for (KeywordFile keywordFile : robotFile.getImportedFiles(includeTransitive)) {
+            for (DefinedKeyword definedKeyword : keywordFile.getDefinedKeywords()) {
                 if (definedKeyword.matches(keyword)) {
                     return definedKeyword.reference();
                 }
             }
-
-            boolean includeTransitive = RobotOptionsProvider.getInstance(psiFile.getProject()).allowTransitiveImports();
-            for (KeywordFile keywordFile : robotFile.getImportedFiles(includeTransitive)) {
-                for (DefinedKeyword definedKeyword : keywordFile.getDefinedKeywords()) {
-                    if (definedKeyword.matches(keyword)) {
-                        return definedKeyword.reference();
-                    }
-                }
-            }
-        } catch (Throwable ignored) {
         }
 
         return null;

@@ -44,6 +44,11 @@ public enum ReservedVariableScope {
             // only in teardown for suites
             return isArgument(element) && isInSuiteTeardown(element);
         }
+    }, KeywordStatement {
+        @Override
+        public boolean isInScope(@NotNull PsiElement element) {
+            return isArgument(element) && isInKeywordStatement(element);
+        }
     };
 
     private static boolean isArgument(@NotNull PsiElement position) {
@@ -135,6 +140,17 @@ public enum ReservedVariableScope {
             if (sibling instanceof BracketSetting) {
                 return ((BracketSetting) sibling).isTeardown();
             }
+        }
+        return false;
+    }
+
+    private static boolean isInKeywordStatement(@NotNull PsiElement position) {
+        if (isInSettings(position)) {
+            KeywordStatement keyword = getKeyword(position);
+            return keyword != null;
+        } else if (isInTestCase(position)) {
+            KeywordStatement keyword = getKeyword(position);
+            return keyword != null;
         }
         return false;
     }

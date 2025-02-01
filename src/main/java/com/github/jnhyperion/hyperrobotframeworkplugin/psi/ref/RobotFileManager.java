@@ -4,6 +4,7 @@ import com.github.jnhyperion.hyperrobotframeworkplugin.psi.dto.VariableDto;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.DefinedVariable;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.util.ReservedVariable;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.vfs.*;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.search.FilenameIndex;
@@ -29,47 +30,54 @@ public class RobotFileManager {
     private RobotFileManager() {
     }
 
-    public static synchronized void clearProjectCache(Project var0) {
-        ProjectFileCache.getCachedElements(var0).clear();
-        ProjectFileCache.getCachedFiles(var0).clear();
-        ProjectFileCache.getGlobalVariables(var0).clear();
-        ProjectFileCache.getCachedVariables(var0).clear();
-        ProjectFileCache.getCachedKeywords(var0).clear();
+    public static synchronized void clearProjectCache(Project project) {
+        ProjectFileCache.getCachedElements(project).clear();
+        ProjectFileCache.getCachedFiles(project).clear();
+        ProjectFileCache.getGlobalVariables(project).clear();
+        ProjectFileCache.getCachedVariables(project).clear();
+        ProjectFileCache.getCachedKeywords(project).clear();
     }
 
     @Nullable
-    private static synchronized PsiElement getCachedElement(@NotNull Project var0, @NotNull String var1) {
-        PsiElement var2;
-        if ((var2 = ProjectFileCache.getCachedElements(var0).get(var1)) != null) {
-            if (var0.isDisposed()) {
-                ProjectFileCache.getCachedElements(var0).clear();
+    private static synchronized PsiElement getCachedElement(@NotNull Project project, @NotNull String key) {
+        PsiElement element;
+        if ((element = ProjectFileCache.getCachedElements(project).get(key)) != null) {
+            if (project.isDisposed()) {
+                ProjectFileCache.getCachedElements(project).clear();
                 return null;
             }
 
-            if (!var2.isValid()) {
-                ProjectFileCache.getCachedElements(var0).remove(var1);
+            if (!element.isValid()) {
+                ProjectFileCache.getCachedElements(project).remove(key);
                 return null;
             }
         }
 
-        return var2;
+        return element;
     }
 
     @Nullable
     public static PsiElement findElement(@Nullable String elementName, @NotNull Project project, @NotNull PsiElement contextElement) {
         if (elementName == null) {
             return null;
-        } else {
-            String cacheKey = contextElement.getContainingFile().getVirtualFile().getParent().getPath() + "#" + elementName;
+        }
+        String cacheKey = null;
+        VirtualFile virtualFile = contextElement.getContainingFile().getVirtualFile();
+        if (virtualFile != null) {
+            cacheKey = virtualFile.getParent().getPath() + "#" + elementName;
             PsiElement cachedElement = getCachedElement(project, cacheKey);
             if (cachedElement != null) {
                 return cachedElement;
-            } else {
-                PsiFile psiFile = findPsiFile(elementName, project, contextElement);
-                cacheElement(project, cacheKey, psiFile);
-                return psiFile;
             }
         }
+        PsiFile psiFile = findPsiFile(elementName, project, contextElement);
+        if (psiFile != null && cacheKey == null) {
+            cacheKey = psiFile.getVirtualFile().getParent().getPath() + "#" + elementName;
+        }
+        if (cacheKey != null) {
+            cacheElement(project, cacheKey, psiFile);
+        }
+        return psiFile;
     }
 
     private static synchronized void cacheElement(@NotNull Project project, @NotNull String cacheKey, @Nullable PsiElement element) {

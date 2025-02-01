@@ -12,22 +12,22 @@ public class ImportImpl extends RobotPsiElementBase implements Import {
 
     @Override
     public final boolean isResource() {
-        return this.getPresentableText().equals("Resource");
+        return "Resource".equals(this.getPresentableText());
     }
 
     @Override
     public final boolean isVariables() {
-        return this.getPresentableText().equals("Variables");
+        return "Variables".equals(this.getPresentableText());
     }
 
     @Override
-    public final String d() {
+    public final String getImportText() {
         PsiElement[] children = getChildren();
-        return this.isResource() && children.length > 0 ? this.getPresentableText() + "    " + children[0].getText() : this.getText();
+        return isResource() && children.length > 0 ? getPresentableText() + "    " + children[0].getText() : getText();
     }
 
     @Override
     public final boolean isLibrary() {
-        return this.getPresentableText().equals("Library");
+        return "Library".equals(this.getPresentableText());
     }
 }

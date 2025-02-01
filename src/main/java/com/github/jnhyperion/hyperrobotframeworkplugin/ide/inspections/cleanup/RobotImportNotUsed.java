@@ -10,6 +10,8 @@ import com.intellij.psi.PsiReference;
 import com.intellij.psi.util.PsiTreeUtil;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
+
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NotNull;
 
@@ -33,14 +35,14 @@ public class RobotImportNotUsed extends SimpleRobotInspection {
                && (elementReference = element.getReference()) != null && (resolvedElement = elementReference.resolve()) instanceof RobotFile) {
 
                Collection<Import> importElements = PsiTreeUtil.findChildrenOfType(element.getContainingFile(), Import.class);
-               ArrayList<String> importIdentifiers = new ArrayList<>();
+               List<String> importIdentifiers = new ArrayList<>();
 
                for (Import importElement : importElements) {
-                   importIdentifiers.add(importElement.d());
+                   importIdentifiers.add(importElement.getImportText());
                }
 
-               int firstOccurrenceIndex = importIdentifiers.indexOf(((Import) parentElement).d());
-               int lastOccurrenceIndex = importIdentifiers.lastIndexOf(((Import) parentElement).d());
+               int firstOccurrenceIndex = importIdentifiers.indexOf(((Import) parentElement).getImportText());
+               int lastOccurrenceIndex = importIdentifiers.lastIndexOf(((Import) parentElement).getImportText());
 
                if (firstOccurrenceIndex != lastOccurrenceIndex && new ArrayList<>(importElements).indexOf(parentElement) != firstOccurrenceIndex) {
                    return false;

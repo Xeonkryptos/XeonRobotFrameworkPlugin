@@ -332,7 +332,7 @@ public class HeadingImpl extends RobotPsiElementBase implements Heading {
             try {
                 files = new LinkedHashSet<>();
                 addBuiltInImports(files);
-                if (this.isSettings()) {
+                if (isSettings()) {
                     for (Import importElement : PsiTreeUtil.findChildrenOfType(this, Import.class)) {
                         Argument argument = PsiTreeUtil.findChildOfType(importElement, Argument.class);
                         if (argument != null) {

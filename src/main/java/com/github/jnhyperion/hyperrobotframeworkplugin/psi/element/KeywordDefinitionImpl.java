@@ -8,6 +8,7 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiNameIdentifierOwner;
+import com.intellij.psi.PsiReference;
 import com.intellij.psi.util.PsiTreeUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -59,11 +60,11 @@ public class KeywordDefinitionImpl extends RobotPsiElementBase implements Define
     @Override
     public final Collection<DefinedVariable> getDeclaredVariables() {
         Set<DefinedVariable> results = new LinkedHashSet<>();
-        results.addAll(this.getDefinedArguments());
-        results.addAll(this.getInlineVariables());
+        results.addAll(getDefinedArguments());
+        results.addAll(getInlineVariables());
         Collection<DefinedVariable> localTestCaseVariables = this.testCaseVariables;
         if (this.testCaseVariables == null) {
-            localTestCaseVariables = this.getTestCaseVariables();
+            localTestCaseVariables = getTestCaseVariables();
             this.testCaseVariables = localTestCaseVariables;
         }
         results.addAll(localTestCaseVariables);
@@ -72,7 +73,7 @@ public class KeywordDefinitionImpl extends RobotPsiElementBase implements Define
 
     @Override
     public final boolean hasInlineVariables() {
-        return !this.getInlineVariables().isEmpty();
+        return !getInlineVariables().isEmpty();
     }
 
     @NotNull
@@ -104,7 +105,7 @@ public class KeywordDefinitionImpl extends RobotPsiElementBase implements Define
     public final Collection<DefinedVariable> getDefinedArguments() {
         Collection<DefinedVariable> results = this.definedArguments;
         if (this.definedArguments == null) {
-            results = this.collectDefinedArguments();
+            results = collectDefinedArguments();
             this.definedArguments = results;
         }
         return results;
@@ -140,6 +141,7 @@ public class KeywordDefinitionImpl extends RobotPsiElementBase implements Define
         return results;
     }
 
+    @Override
     public void subtreeChanged() {
         super.subtreeChanged();
         this.definedArguments = null;

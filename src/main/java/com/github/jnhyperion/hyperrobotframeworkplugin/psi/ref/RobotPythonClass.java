@@ -9,10 +9,7 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiFile;
 import com.jetbrains.python.psi.PyClass;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Map;
+import java.util.*;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -69,11 +66,11 @@ public class RobotPythonClass extends RobotPythonWrapper implements KeywordFile 
             Map<String, Collection<DefinedVariable>> cachedVariables = ProjectFileCache.getCachedVariables(this.project);
             variables = cachedVariables.get(this.uniqueIdentifier);
             if (variables == null) {
-                HashSet<DefinedVariable> newVariables = new HashSet<>();
+                Set<DefinedVariable> newVariables = new HashSet<>();
                 if (this.importType.equals(ImportType.VARIABLES)) {
                     try {
                         addDefinedVariables(this.pythonClass, newVariables);
-                    } catch (Throwable e) {
+                    } catch (Throwable t) {
                         newVariables.clear();
                     }
                 }
@@ -82,7 +79,7 @@ public class RobotPythonClass extends RobotPythonWrapper implements KeywordFile 
                 }
                 return newVariables;
             }
-        } catch (Throwable e) {
+        } catch (Throwable t) {
             return new HashSet<>();
         }
         return variables;

@@ -23,7 +23,6 @@ public class KeywordDto implements DefinedKeyword {
    }
 
    public KeywordDto(@NotNull PsiElement reference, @NotNull String namespace, @NotNull String name, boolean args, List<PyParameter> parameters) {
-      super();
       this.reference = reference;
       this.name = PatternUtil.functionToKeyword(name).trim();
       this.namePattern = Pattern.compile(PatternBuilder.parseNamespace(namespace, PatternUtil.keywordToFunction(this.name)), Pattern.CASE_INSENSITIVE);

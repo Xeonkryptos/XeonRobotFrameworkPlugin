@@ -33,15 +33,15 @@ public class RobotKeywordReference extends PsiReferenceBase<KeywordInvokable> {
     @Nullable
     @Override
     public PsiElement resolve() {
-        KeywordInvokable keywordInvokable = this.getElement();
+        KeywordInvokable keywordInvokable = getElement();
         return ResolverUtils.findKeywordElement(keywordInvokable.getPresentableText(), keywordInvokable.getContainingFile());
     }
 
     @NotNull
     @Override
     public Object @NotNull [] getVariants() {
-        String keywordPrefix = this.getElement().getPresentableText().split("\\.")[0];
-        PsiFile containingFile = this.getElement().getContainingFile();
+        String keywordPrefix = getElement().getPresentableText().split("\\.")[0];
+        PsiFile containingFile = getElement().getContainingFile();
 
         if (containingFile instanceof RobotFile) {
             boolean capitalizeKeywords = RobotOptionsProvider.getInstance(containingFile.getProject()).capitalizeKeywords();

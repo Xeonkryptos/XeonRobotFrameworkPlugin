@@ -1,5 +1,6 @@
 package com.github.jnhyperion.hyperrobotframeworkplugin.psi.element;
 
+import java.util.Collection;
 import java.util.List;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -11,6 +12,9 @@ public interface KeywordStatement extends RobotStatement {
 
    @NotNull
    List<Argument> getArguments();
+
+   @NotNull
+   Collection<DefinedVariable> getAvailableParameters();
 
    @Nullable
    DefinedVariable getGlobalVariable();

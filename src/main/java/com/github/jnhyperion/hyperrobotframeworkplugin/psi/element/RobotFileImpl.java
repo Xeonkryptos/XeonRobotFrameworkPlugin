@@ -23,9 +23,10 @@ import java.util.stream.Collectors;
 
 public class RobotFileImpl extends PsiFileBase implements KeywordFile, RobotFile {
 
+    private final FileType fileType;
+
     private Collection<Heading> headings;
     private Collection<DefinedVariable> robotInitVariables;
-    private final FileType fileType;
 
     public RobotFileImpl(FileViewProvider fileViewProvider) {
         super(fileViewProvider, RobotLanguage.INSTANCE);
@@ -49,9 +50,10 @@ public class RobotFileImpl extends PsiFileBase implements KeywordFile, RobotFile
     @Override
     public final Collection<DefinedVariable> getDefinedVariables() {
         Set<DefinedVariable> results = new LinkedHashSet<>();
-        for (Heading heading : this.collectHeadings()) {
+        for (Heading heading : collectHeadings()) {
             results.addAll(heading.getDefinedVariables());
         }
+//        results.addAll(collectRobotInitVariables());
         return results;
     }
 
@@ -70,7 +72,7 @@ public class RobotFileImpl extends PsiFileBase implements KeywordFile, RobotFile
                         results.addAll(((RobotFile) psiFile).getDefinedVariables());
                     }
                 }
-            } catch (Throwable var6) {
+            } catch (Throwable t) {
                 return new LinkedHashSet<>();
             }
             this.robotInitVariables = results;
@@ -128,10 +130,10 @@ public class RobotFileImpl extends PsiFileBase implements KeywordFile, RobotFile
     @Override
     public final Collection<KeywordFile> getImportedFiles(boolean includeTransitive) {
         Set<KeywordFile> results = new LinkedHashSet<>();
-        Collection<Heading> headings = this.collectHeadings();
+        Collection<Heading> headings = collectHeadings();
         for (Heading heading : headings) {
             for (KeywordFile keywordFile : heading.collectImportFiles()) {
-                this.collectTransitiveKeywordFiles(results, keywordFile, includeTransitive);
+                collectTransitiveKeywordFiles(results, keywordFile, includeTransitive);
             }
         }
         return results;
@@ -160,7 +162,7 @@ public class RobotFileImpl extends PsiFileBase implements KeywordFile, RobotFile
     private void collectTransitiveKeywordFiles(Collection<KeywordFile> results, KeywordFile keywordFile, boolean includeTransitive) {
         if (results.add(keywordFile) && includeTransitive) {
             for (KeywordFile child : keywordFile.getImportedFiles(false)) {
-                this.collectTransitiveKeywordFiles(results, child, true);
+                collectTransitiveKeywordFiles(results, child, true);
             }
         }
     }

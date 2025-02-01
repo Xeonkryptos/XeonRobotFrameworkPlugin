@@ -8,5 +8,5 @@ public interface Import extends RobotStatement {
 
    boolean isVariables();
 
-   String d();
+   String getImportText();
 }
