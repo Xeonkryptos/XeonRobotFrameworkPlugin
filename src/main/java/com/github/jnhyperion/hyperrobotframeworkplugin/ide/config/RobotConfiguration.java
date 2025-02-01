@@ -28,52 +28,57 @@ public class RobotConfiguration implements NoScroll, SearchableConfigurable {
     private final JCheckBox smartAutoEncloseVariable;
 
     public RobotConfiguration() {
-        JPanel var2 = new JPanel();
-        this.panel = var2;
-        var2.setLayout(new GridLayoutManager(2, 2, JBUI.emptyInsets(), -1, -1, false, false));
-        JPanel var3;
-        (var3 = new JPanel()).setLayout(new GridLayoutManager(7, 1, JBUI.emptyInsets(), -1, -1, false, false));
-        var2.add(var3, new GridConstraints(0, 0, 1, 2, 0, 3, 3, 3, null, null, null));
-        JCheckBox var4 = new JCheckBox();
-        this.allowTransitiveImports = var4;
-        var4.setText("Allow Transitive Imports (performance concern)");
-        var3.add(var4, new GridConstraints(0, 0, 1, 1, 8, 0, 3, 3, null, null, null));
-        var4 = new JCheckBox();
-        this.allowGlobalVariables = var4;
-        var4.setText("Allow Global Variables (performance concern)");
-        var3.add(var4, new GridConstraints(1, 0, 1, 1, 8, 0, 3, 3, null, null, null));
-        var4 = new JCheckBox();
-        this.enableDebug = var4;
-        var4.setText("Enable Debug Trace");
-        var3.add(var4, new GridConstraints(2, 0, 1, 1, 8, 0, 3, 3, null, null, null));
-        var4 = new JCheckBox();
-        this.capitalizeKeywords = var4;
-        var4.setText("Capitalize Keywords");
-        var3.add(var4, new GridConstraints(3, 0, 1, 1, 8, 0, 3, 0, null, null, null));
-        var4 = new JCheckBox();
-        this.inlineVariableSearch = var4;
-        var4.setText("Inline Variable Keyword Search (performance concern)");
-        var3.add(var4, new GridConstraints(4, 0, 1, 1, 8, 0, 3, 0, null, null, null));
-        var4 = new JCheckBox();
-        this.reformatOnSave = var4;
-        var4.setText("Always Insert 4 whitespace When Typing \"Tab\"");
-        var3.add(var4, new GridConstraints(5, 0, 1, 1, 8, 0, 3, 0, null, null, null));
-        var4 = new JCheckBox();
-        this.smartAutoEncloseVariable = var4;
-        var4.setText("Smart Auto Enclose Variable");
-        var3.add(var4, new GridConstraints(6, 0, 1, 1, 8, 0, 3, 0, null, null, null));
-        Spacer var1 = new Spacer();
-        var2.add(var1, new GridConstraints(1, 1, 1, 1, 0, 2, 1, 6, null, null, null));
+        JPanel mainPanel = new JPanel();
+        this.panel = mainPanel;
+        mainPanel.setLayout(new GridLayoutManager(2, 2, JBUI.emptyInsets(), -1, -1, false, false));
+
+        JPanel checkBoxPanel = new JPanel();
+        checkBoxPanel.setLayout(new GridLayoutManager(7, 1, JBUI.emptyInsets(), -1, -1, false, false));
+        mainPanel.add(checkBoxPanel, new GridConstraints(0, 0, 1, 2, 0, 3, 3, 3, null, null, null));
+
+        JCheckBox transitiveImportsCheckBox = new JCheckBox();
+        this.allowTransitiveImports = transitiveImportsCheckBox;
+        transitiveImportsCheckBox.setText("Allow Transitive Imports (performance concern)");
+        checkBoxPanel.add(transitiveImportsCheckBox, new GridConstraints(0, 0, 1, 1, 8, 0, 3, 3, null, null, null));
+
+        JCheckBox globalVariablesCheckBox = new JCheckBox();
+        this.allowGlobalVariables = globalVariablesCheckBox;
+        globalVariablesCheckBox.setText("Allow Global Variables (performance concern)");
+        checkBoxPanel.add(globalVariablesCheckBox, new GridConstraints(1, 0, 1, 1, 8, 0, 3, 3, null, null, null));
+
+        JCheckBox debugCheckBox = new JCheckBox();
+        this.enableDebug = debugCheckBox;
+        debugCheckBox.setText("Enable Debug Trace");
+        checkBoxPanel.add(debugCheckBox, new GridConstraints(2, 0, 1, 1, 8, 0, 3, 3, null, null, null));
+
+        JCheckBox capitalizeKeywordsCheckBox = new JCheckBox();
+        this.capitalizeKeywords = capitalizeKeywordsCheckBox;
+        capitalizeKeywordsCheckBox.setText("Capitalize Keywords");
+        checkBoxPanel.add(capitalizeKeywordsCheckBox, new GridConstraints(3, 0, 1, 1, 8, 0, 3, 0, null, null, null));
+
+        JCheckBox inlineVariableSearchCheckBox = new JCheckBox();
+        this.inlineVariableSearch = inlineVariableSearchCheckBox;
+        inlineVariableSearchCheckBox.setText("Inline Variable Keyword Search (performance concern)");
+        checkBoxPanel.add(inlineVariableSearchCheckBox, new GridConstraints(4, 0, 1, 1, 8, 0, 3, 0, null, null, null));
+
+        JCheckBox reformatOnSaveCheckBox = new JCheckBox();
+        this.reformatOnSave = reformatOnSaveCheckBox;
+        reformatOnSaveCheckBox.setText("Always Insert 4 whitespace When Typing \"Tab\"");
+        checkBoxPanel.add(reformatOnSaveCheckBox, new GridConstraints(5, 0, 1, 1, 8, 0, 3, 0, null, null, null));
+
+        JCheckBox smartAutoEncloseVariableCheckBox = new JCheckBox();
+        this.smartAutoEncloseVariable = smartAutoEncloseVariableCheckBox;
+        smartAutoEncloseVariableCheckBox.setText("Smart Auto Enclose Variable");
+        checkBoxPanel.add(smartAutoEncloseVariableCheckBox, new GridConstraints(6, 0, 1, 1, 8, 0, 3, 0, null, null, null));
+
+        Spacer spacer = new Spacer();
+        mainPanel.add(spacer, new GridConstraints(1, 1, 1, 1, 0, 2, 1, 6, null, null, null));
     }
 
     @Nullable
     private static RobotOptionsProvider getOptionProvider() {
         Project[] projects = ProjectManager.getInstance().getOpenProjects();
-        if (projects.length > 0) {
-            return RobotOptionsProvider.getInstance(projects[0]);
-        } else {
-            return null;
-        }
+        return projects.length > 0 ? RobotOptionsProvider.getInstance(projects[0]) : null;
     }
 
     @NotNull

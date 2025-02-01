@@ -7,7 +7,7 @@
     <depends>com.intellij.modules.platform</depends>
 
     <extensions defaultExtensionNs="com.intellij">
-        <projectConfigurable groupId="language" instance="com.github.jnhyperion.hyperrobotframeworkplugin.ide.config.RobotConfiguration"/>
+        <projectConfigurable groupId="language" instance="com.github.jnhyperion.hyperrobotframeworkplugin.ide.config.RobotConfiguration" displayName="Robot Options"/>
         <projectService serviceImplementation="com.github.jnhyperion.hyperrobotframeworkplugin.ide.config.RobotOptionsProvider"/>
         <fileType name="Robot Feature" implementationClass="com.github.jnhyperion.hyperrobotframeworkplugin.psi.RobotFeatureFileType" fieldName="INSTANCE"
                   language="Robot" extensions="robot"/>
