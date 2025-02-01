@@ -17,9 +17,56 @@ import com.intellij.psi.impl.source.tree.LeafPsiElement;
 import com.intellij.psi.tree.IElementType;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.File;
+import java.nio.file.Path;
 
 public class RobotRunConfigurationProducer extends LazyRunConfigurationProducer<RobotRunConfiguration> {
+
+    @NotNull
+    @Override
+    public ConfigurationFactory getConfigurationFactory() {
+        return RobotRunConfigurationType.getRobotRunConfigurationType().getConfigurationFactory();
+    }
+
+    @Override
+    public boolean isPreferredConfiguration(ConfigurationFromContext context1, @NotNull ConfigurationFromContext context2) {
+        return context2.isProducedBy(RobotRunConfigurationProducer.class);
+    }
+
+    @Override
+    protected boolean setupConfigurationFromContext(@NotNull RobotRunConfiguration runConfig,
+                                                    @NotNull ConfigurationContext context,
+                                                    @NotNull Ref<PsiElement> sourceElement) {
+        if (isValidRobotExecutableScript(context)) {
+            String workingDirectorySafe = runConfig.getWorkingDirectorySafe();
+            String runParam = getRunParameters(context, workingDirectorySafe);
+            runConfig.setUseModuleSdk(false);
+            runConfig.setModuleMode(true);
+            runConfig.setScriptName("robot.run");
+            runConfig.setWorkingDirectory(context.getProject().getBasePath());
+            runConfig.setScriptParameters(runParam);
+            Sdk sdk = ProjectRootManager.getInstance(context.getProject()).getProjectSdk();
+            if (sdk != null) {
+                runConfig.setSdkHome(sdk.getHomePath());
+            }
+            runConfig.setName(getRunDisplayName(context));
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public boolean isConfigurationFromContext(@NotNull RobotRunConfiguration runConfig, @NotNull ConfigurationContext context) {
+        if (isValidRobotExecutableScript(context)) {
+            String workingDirectorySafe = runConfig.getWorkingDirectorySafe();
+            String runParam = getRunParameters(context, workingDirectorySafe);
+            boolean ret = runParam.trim().equals(runConfig.getScriptParameters().trim());
+            if (ret) {
+                runConfig.setName(getRunDisplayName(context));
+            }
+            return ret;
+        }
+        return false;
+    }
 
     private static boolean containsTasksOnly(ConfigurationContext context) {
         PsiElement element = context.getPsiLocation();
@@ -41,41 +88,36 @@ public class RobotRunConfigurationProducer extends LazyRunConfigurationProducer<
     private static String getRunParameters(ConfigurationContext context, String basePath) {
         String testCaseName = getTestCaseName(context);
         String projectBasePath = context.getProject().getBasePath();
-        if (projectBasePath == null) {
-            throw new AssertionError("Project base path is null");
-        }
+        assert projectBasePath != null;
 
         Location<?> location = context.getLocation();
-        if (location == null) {
-            throw new AssertionError("Location is null");
-        }
+        assert location != null;
 
         VirtualFile virtualFile = location.getVirtualFile();
-        if (virtualFile == null) {
-            throw new AssertionError("Virtual file is null");
-        }
+        assert virtualFile != null;
 
         testCaseName = testCaseName.replace("\"", "\\\"");
-        if (basePath.startsWith(projectBasePath) && virtualFile.getPath().startsWith(basePath)) {
-            basePath = relativizePath(basePath, virtualFile.getPath()).replace("\"", "\\\"");
-            basePath = !testCaseName.isEmpty() ? "--test \"" + basePath + "." + testCaseName + "\" ." : "--suite \"" + basePath + "\" .";
+        String runParameters;
+        if (!testCaseName.isEmpty()) {
+            runParameters = "--test \"" + testCaseName + "\"";
         } else {
-            basePath = (!testCaseName.isEmpty() ? "--test \"" + testCaseName + "\"" : "--test *") + " \"" + virtualFile.getPath().replace("\"", "\\\"") + "\"";
+            runParameters = "--test *";
         }
+        String filePath = virtualFile.getPath();
+        basePath = relativizePath(basePath, filePath);
+        runParameters += " \"" + basePath.replace("\"", "\\\"") + "\"";
 
         if (containsTasksOnly(context)) {
-            basePath = "--rpa " + basePath;
+            runParameters = "--rpa " + runParameters;
         }
-        return basePath;
+        return runParameters;
     }
 
     @NotNull
     private static String relativizePath(String basePath, String targetPath) {
-        String relativePath;
-        targetPath = (relativePath = new File(basePath).toURI().relativize(new File(targetPath).toURI()).getPath().replace("/", ".")).substring(0,
-                                                                                                                                                relativePath.lastIndexOf(
-                                                                                                                                                        '.'));
-        return new File(basePath).getName() + "." + targetPath;
+        Path targetFile = Path.of(targetPath);
+        Path relativePath = Path.of(basePath).relativize(targetFile);
+        return relativePath.toString();
     }
 
     @NotNull
@@ -126,53 +168,6 @@ public class RobotRunConfigurationProducer extends LazyRunConfigurationProducer<
             }
         }
         return ((KeywordDefinitionImpl) element).getKeywordName();
-    }
-
-    @NotNull
-    @Override
-    public ConfigurationFactory getConfigurationFactory() {
-        return RobotRunConfigurationType.getRobotRunConfigurationType().getConfigurationFactory();
-    }
-
-    @Override
-    public boolean isPreferredConfiguration(ConfigurationFromContext context1, @NotNull ConfigurationFromContext context2) {
-        return context2.isProducedBy(RobotRunConfigurationProducer.class);
-    }
-
-    @Override
-    protected boolean setupConfigurationFromContext(@NotNull RobotRunConfiguration runConfig,
-                                                    @NotNull ConfigurationContext context,
-                                                    @NotNull Ref<PsiElement> sourceElement) {
-        if (isValidRobotExecutableScript(context)) {
-            String workingDirectorySafe = runConfig.getWorkingDirectorySafe();
-            String runParam = getRunParameters(context, workingDirectorySafe);
-            runConfig.setUseModuleSdk(false);
-            runConfig.setModuleMode(true);
-            runConfig.setScriptName("robot.run");
-            runConfig.setWorkingDirectory(context.getProject().getBasePath());
-            runConfig.setScriptParameters(runParam);
-            Sdk sdk = ProjectRootManager.getInstance(context.getProject()).getProjectSdk();
-            if (sdk != null) {
-                runConfig.setSdkHome(sdk.getHomePath());
-            }
-            runConfig.setName(getRunDisplayName(context));
-            return true;
-        }
-        return false;
-    }
-
-    @Override
-    public boolean isConfigurationFromContext(@NotNull RobotRunConfiguration runConfig, @NotNull ConfigurationContext context) {
-        if (isValidRobotExecutableScript(context)) {
-            String workingDirectorySafe = runConfig.getWorkingDirectorySafe();
-            String runParam = getRunParameters(context, workingDirectorySafe);
-            boolean ret = runParam.trim().equals(runConfig.getScriptParameters().trim());
-            if (ret) {
-                runConfig.setName(getRunDisplayName(context));
-            }
-            return ret;
-        }
-        return false;
     }
 
     @NotNull

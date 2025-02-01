@@ -13,11 +13,13 @@ public class RobotConfigurationFactory extends ConfigurationFactory {
    }
 
    @NotNull
+   @Override
    public String getId() {
       return "RobotRunConfiguration";
    }
 
    @NotNull
+   @Override
    public RunConfiguration createTemplateConfiguration(@NotNull Project project) {
       return new RobotRunConfiguration(project, this);
    }
