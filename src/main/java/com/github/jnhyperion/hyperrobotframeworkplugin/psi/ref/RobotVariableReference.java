@@ -29,15 +29,8 @@ public class RobotVariableReference extends PsiReferenceBase<Variable> {
 
         if (resolvedElement != null) {
             return resolvedElement;
-        } else {
-            PsiFile containingFile = variable.getContainingFile();
-            return ResolverUtils.findVariableElement(variableName, containingFile);
         }
-    }
-
-    @NotNull
-    @Override
-    public Object @NotNull [] getVariants() {
-        return EMPTY_ARRAY;
+        PsiFile containingFile = variable.getContainingFile();
+        return ResolverUtils.findVariableElement(variableName, containingFile);
     }
 }

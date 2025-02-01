@@ -112,8 +112,8 @@ public class HeadingImpl extends RobotPsiElementBase implements Heading {
         Collection<DefinedVariable> results = this.declaredVariables;
         if (results == null) {
             try {
-                results = new LinkedHashSet<>(RobotFileManager.getGlobalVariables(this.getProject()));
-                if (this.containsVariables()) {
+                results = new LinkedHashSet<>(RobotFileManager.getGlobalVariables(getProject()));
+                if (containsVariables()) {
                     for (PsiElement child : getChildren()) {
                         if (child instanceof DefinedVariable) {
                             if (child instanceof VariableDefinitionImpl) {

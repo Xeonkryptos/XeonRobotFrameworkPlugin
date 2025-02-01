@@ -125,9 +125,12 @@ public class RobotParser implements PsiParser {
             type = builder.getTokenType();
             if (RobotTokenTypes.ARGUMENT == type || RobotTokenTypes.VARIABLE == type) {
                 parseWith(builder, RobotTokenTypes.ARGUMENT);
-            } else if (RobotTokenTypes.VARIABLE_DEFINITION == type && (builder.rawLookup(-1) != RobotTokenTypes.WHITESPACE
-                                                                       || builder.rawLookup(-2) != RobotTokenTypes.WHITESPACE
-                                                                       || builder.rawLookup(-3) == RobotTokenTypes.WHITESPACE)) {
+            } else if (RobotTokenTypes.VARIABLE_DEFINITION == type && RobotTokenTypes.VARIABLE_DEFINITION != markType) {
+                if (builder.rawLookup(-1) != RobotTokenTypes.WHITESPACE ||
+                    builder.rawLookup(-2) != RobotTokenTypes.WHITESPACE ||
+                    builder.rawLookup(-3) == RobotTokenTypes.WHITESPACE) {
+                    break;
+                }
                 int currentOffset = builder.getCurrentOffset();
                 String originalText = builder.getOriginalText().toString();
                 String[] lines = originalText.split(System.lineSeparator());

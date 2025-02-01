@@ -1,24 +1,12 @@
 package com.github.jnhyperion.hyperrobotframeworkplugin.psi.ref;
 
-import com.github.jnhyperion.hyperrobotframeworkplugin.ide.config.RobotOptionsProvider;
-import com.github.jnhyperion.hyperrobotframeworkplugin.psi.dto.ImportType;
-import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.DefinedKeyword;
-import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.DefinedVariable;
-import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.KeywordDefinition;
-import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.KeywordFile;
-import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.KeywordInvokable;
-import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.KeywordStatement;
-import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.RobotFile;
-import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.RobotFileImpl;
-import com.intellij.psi.PsiElement;
-import com.intellij.psi.PsiFile;
-import com.intellij.psi.PsiReference;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import com.github.jnhyperion.hyperrobotframeworkplugin.ide.config.*;
+import com.github.jnhyperion.hyperrobotframeworkplugin.psi.dto.*;
+import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.*;
+import com.intellij.psi.*;
+import org.jetbrains.annotations.*;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 public class ResolverUtils {
     private ResolverUtils() {
@@ -75,11 +63,9 @@ public class ResolverUtils {
                 }
             }
 
-            if (robotFile instanceof RobotFileImpl) {
-                for (DefinedVariable definedVariable : robotFile.getDefinedVariables()) {
-                    if (definedVariable.matches(variableName)) {
-                        return definedVariable.reference();
-                    }
+            for (DefinedVariable definedVariable : robotFile.getDefinedVariables()) {
+                if (definedVariable.matches(variableName)) {
+                    return definedVariable.reference();
                 }
             }
         } catch (Throwable ignored) {
