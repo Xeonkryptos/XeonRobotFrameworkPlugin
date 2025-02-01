@@ -258,7 +258,7 @@ public class RobotParser implements PsiParser {
     }
 
     private static void parseSetting(@NotNull PsiBuilder builder) {
-        PsiBuilder.Marker importMarker = builder.mark();
+        PsiBuilder.Marker settingsMarker = builder.mark();
         PsiBuilder.Marker id = null;
         if (builder.getTokenType() == RobotTokenTypes.VARIABLE_DEFINITION) {
             id = builder.mark();
@@ -279,7 +279,7 @@ public class RobotParser implements PsiParser {
                 break;
             }
         }
-        importMarker.done(RobotTokenTypes.IMPORT);
+        settingsMarker.done(RobotTokenTypes.SETTING);
     }
 
     private static void parseVariableDefinitionWithDefaults(@NotNull PsiBuilder builder) {
