@@ -2,6 +2,7 @@ package com.github.jnhyperion.hyperrobotframeworkplugin.psi;
 
 import com.github.jnhyperion.hyperrobotframeworkplugin.ide.RobotTailTypes;
 import com.intellij.codeInsight.TailType;
+import com.intellij.codeInsight.TailTypes;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -127,11 +128,11 @@ public class RobotKeywordProvider {
         KEYWORD_TABLE.addSyntax(RobotTokenTypes.GHERKIN, "And");
         KEYWORD_TABLE.addSyntax(RobotTokenTypes.GHERKIN, "BUT");
 
-        addRecommendation(RobotTokenTypes.GHERKIN, "Given", "Given", TailType.SPACE);
-        addRecommendation(RobotTokenTypes.GHERKIN, "When", "When", TailType.SPACE);
-        addRecommendation(RobotTokenTypes.GHERKIN, "Then", "Then", TailType.SPACE);
-        addRecommendation(RobotTokenTypes.GHERKIN, "And", "And", TailType.SPACE);
-        addRecommendation(RobotTokenTypes.GHERKIN, "BUT", "BUT", TailType.SPACE);
+        addRecommendation(RobotTokenTypes.GHERKIN, "Given", "Given", TailTypes.spaceType());
+        addRecommendation(RobotTokenTypes.GHERKIN, "When", "When", TailTypes.spaceType());
+        addRecommendation(RobotTokenTypes.GHERKIN, "Then", "Then", TailTypes.spaceType());
+        addRecommendation(RobotTokenTypes.GHERKIN, "And", "And", TailTypes.spaceType());
+        addRecommendation(RobotTokenTypes.GHERKIN, "BUT", "BUT", TailTypes.spaceType());
 
         KEYWORD_TABLE.addSyntax(RobotTokenTypes.SYNTAX_MARKER, "IF");
         KEYWORD_TABLE.addSyntax(RobotTokenTypes.SYNTAX_MARKER, "END");
@@ -152,17 +153,17 @@ public class RobotKeywordProvider {
         KEYWORD_TABLE.addSyntax(RobotTokenTypes.SYNTAX_MARKER, "VAR");
 
         addRecommendation(RobotTokenTypes.SYNTAX_MARKER, "IF", "IF", RobotTailTypes.TAB);
-        addRecommendation(RobotTokenTypes.SYNTAX_MARKER, "END", "END", TailType.NONE);
-        addRecommendation(RobotTokenTypes.SYNTAX_MARKER, "ELSE", "ELSE", TailType.NONE);
+        addRecommendation(RobotTokenTypes.SYNTAX_MARKER, "END", "END", TailTypes.noneType());
+        addRecommendation(RobotTokenTypes.SYNTAX_MARKER, "ELSE", "ELSE", TailTypes.noneType());
         addRecommendation(RobotTokenTypes.SYNTAX_MARKER, "ELSE IF", "ELSE IF", RobotTailTypes.TAB);
         addRecommendation(RobotTokenTypes.SYNTAX_MARKER, "WHILE", "WHILE", RobotTailTypes.TAB);
-        addRecommendation(RobotTokenTypes.SYNTAX_MARKER, "CONTINUE", "CONTINUE", TailType.NONE);
-        addRecommendation(RobotTokenTypes.SYNTAX_MARKER, "BREAK", "BREAK", TailType.NONE);
+        addRecommendation(RobotTokenTypes.SYNTAX_MARKER, "CONTINUE", "CONTINUE", TailTypes.noneType());
+        addRecommendation(RobotTokenTypes.SYNTAX_MARKER, "BREAK", "BREAK", TailTypes.noneType());
         addRecommendation(RobotTokenTypes.SYNTAX_MARKER, "FOR", "FOR", RobotTailTypes.TAB);
-        addRecommendation(RobotTokenTypes.SYNTAX_MARKER, "TRY", "TRY", TailType.NONE);
+        addRecommendation(RobotTokenTypes.SYNTAX_MARKER, "TRY", "TRY", TailTypes.noneType());
         addRecommendation(RobotTokenTypes.SYNTAX_MARKER, "EXCEPT", "EXCEPT", RobotTailTypes.TAB);
-        addRecommendation(RobotTokenTypes.SYNTAX_MARKER, "FINALLY", "FINALLY", TailType.NONE);
-        addRecommendation(RobotTokenTypes.SYNTAX_MARKER, "RETURN", "RETURN", TailType.NONE);
+        addRecommendation(RobotTokenTypes.SYNTAX_MARKER, "FINALLY", "FINALLY", TailTypes.noneType());
+        addRecommendation(RobotTokenTypes.SYNTAX_MARKER, "RETURN", "RETURN", TailTypes.noneType());
         addRecommendation(RobotTokenTypes.SYNTAX_MARKER, "IN", "IN", RobotTailTypes.TAB);
         addRecommendation(RobotTokenTypes.SYNTAX_MARKER, "IN RANGE", "IN RANGE", RobotTailTypes.TAB);
         addRecommendation(RobotTokenTypes.SYNTAX_MARKER, "IN ENUMERATE", "IN ENUMERATE", RobotTailTypes.TAB);

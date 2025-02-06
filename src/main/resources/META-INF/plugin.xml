@@ -5,6 +5,7 @@
 
     <depends>com.intellij.modules.python</depends>
     <depends>com.intellij.modules.platform</depends>
+    <depends>com.intellij.modules.xdebugger</depends>
 
     <extensions defaultExtensionNs="com.intellij">
         <projectConfigurable groupId="language" instance="com.github.jnhyperion.hyperrobotframeworkplugin.ide.config.RobotConfiguration" displayName="Robot Options"/>
@@ -85,6 +86,13 @@
         <editorActionHandler action="EditorTab" implementationClass="com.github.jnhyperion.hyperrobotframeworkplugin.ide.RobotTabActionHandler"/>
         <configurationType implementation="com.github.jnhyperion.hyperrobotframeworkplugin.ide.execution.RobotRunConfigurationType"/>
         <spellchecker.support language="Robot" implementationClass="com.github.jnhyperion.hyperrobotframeworkplugin.ide.RobotSpellcheckingStrategy"/>
+
+        <xdebugger.breakpointType implementation="com.github.jnhyperion.hyperrobotframeworkplugin.ide.debugger.RobotLineBreakpoint"/>
+<!--        <programRunner implementation="com.github.jnhyperion.hyperrobotframeworkplugin.ide.execution.RobotProgramRunner"/>-->
+        <!--<programRunner implementation="com.github.jnhyperion.hyperrobotframeworkplugin.ide.debugger.RobotDebugRunner"/>-->
+    </extensions>
+    <extensions defaultExtensionNs="Pythonid">
+        <breakpointHandler implementation="com.github.jnhyperion.hyperrobotframeworkplugin.ide.debugger.RobotBreakpointHandlerFactory"/>
     </extensions>
     <actions>
         <action id="HyperRobotFrameworkPlugin.CreateNew" class="com.github.jnhyperion.hyperrobotframeworkplugin.ide.RobotCreateAction">

@@ -25,7 +25,6 @@ import java.util.List;
 
 public class RobotFoldingBuilder implements FoldingBuilder, DumbAware {
 
-    @NotNull
     @Override
     public FoldingDescriptor @NotNull [] buildFoldRegions(@NotNull ASTNode node, @NotNull Document document) {
         List<FoldingDescriptor> descriptors = new ArrayList<>();

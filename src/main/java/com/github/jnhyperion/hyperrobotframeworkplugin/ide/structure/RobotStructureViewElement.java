@@ -77,7 +77,6 @@ public class RobotStructureViewElement implements StructureViewTreeElement {
       return getDisplayName().hashCode();
    }
 
-   @NotNull
    @Override
    public TreeElement @NotNull [] getChildren() {
       List<StructureViewTreeElement> elements = new ArrayList<>();

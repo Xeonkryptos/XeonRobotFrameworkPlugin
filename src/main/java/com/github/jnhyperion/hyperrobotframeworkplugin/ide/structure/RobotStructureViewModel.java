@@ -50,7 +50,6 @@ public class RobotStructureViewModel extends StructureViewModelBase implements E
       return false;
    }
 
-   @NotNull
    @Override
    public Filter @NotNull [] getFilters() {
       return FILTERS;

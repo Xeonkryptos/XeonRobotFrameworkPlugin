@@ -47,7 +47,7 @@ public class RobotListenerMgr {
     public final void initializeListeners(Project project) {
         project.getMessageBus().connect().subscribe(VirtualFileManager.VFS_CHANGES, new BulkFileListener() {
             @Override
-            public void after(@NotNull List<? extends @NotNull VFileEvent> events) {
+            public void after(@NotNull List<? extends VFileEvent> events) {
                 for (VFileEvent event : events) {
                     if (!(event instanceof VFileContentChangeEvent)) {
                         VirtualFile file = event.getFile();

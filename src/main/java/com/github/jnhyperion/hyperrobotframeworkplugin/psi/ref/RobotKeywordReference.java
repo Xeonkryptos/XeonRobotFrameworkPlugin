@@ -8,14 +8,14 @@ import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.DefinedKeywor
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.KeywordFile;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.KeywordInvokable;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.RobotFile;
-import com.intellij.codeInsight.TailType;
+import com.intellij.codeInsight.TailTypes;
 import com.intellij.codeInsight.lookup.LookupElementBuilder;
 import com.intellij.codeInsight.lookup.TailTypeDecorator;
 import com.intellij.icons.AllIcons.Nodes;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiReferenceBase;
-import org.apache.commons.lang.WordUtils;
+import org.apache.commons.text.WordUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -37,7 +37,6 @@ public class RobotKeywordReference extends PsiReferenceBase<KeywordInvokable> {
         return ResolverUtils.findKeywordElement(keywordInvokable.getPresentableText(), keywordInvokable.getContainingFile());
     }
 
-    @NotNull
     @Override
     public Object @NotNull [] getVariants() {
         String keywordPrefix = getElement().getPresentableText().split("\\.")[0];
@@ -76,7 +75,7 @@ public class RobotKeywordReference extends PsiReferenceBase<KeywordInvokable> {
                             TailTypeDecorator<LookupElementBuilder> tailTypeDecorator = TailTypeDecorator.withTail(lookupElement,
                                                                                                                    definedKeyword.hasArguments() ?
                                                                                                                    RobotTailTypes.TAB :
-                                                                                                                   TailType.NONE);
+                                                                                                                   TailTypes.noneType());
                             tailTypeDecorators.add(tailTypeDecorator);
                         }
 

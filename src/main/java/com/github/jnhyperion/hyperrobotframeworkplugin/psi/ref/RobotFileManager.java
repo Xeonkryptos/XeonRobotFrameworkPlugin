@@ -7,6 +7,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.*;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
+import com.intellij.psi.PsiManager;
 import com.intellij.psi.search.FilenameIndex;
 import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.psi.search.ProjectScope;
@@ -14,7 +15,7 @@ import com.intellij.psi.util.QualifiedName;
 import com.jetbrains.python.psi.PyFile;
 import com.jetbrains.python.psi.search.PySearchUtilBase;
 import com.jetbrains.python.psi.stubs.PyModuleNameIndex;
-import org.apache.commons.lang.SystemUtils;
+import org.apache.commons.lang3.SystemUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -138,7 +139,7 @@ public class RobotFileManager {
                                        @NotNull PsiElement element) {
         try {
             File file = new File(filePath);
-            PsiFile[] foundFiles = FilenameIndex.getFilesByName(project, file.getName(), searchScope);
+            Collection<VirtualFile> foundFiles = FilenameIndex.getVirtualFilesByName(file.getName(), searchScope);
             if (!file.isAbsolute()) {
                 String parentPath = element.getContainingFile().getVirtualFile().getParent().getPath();
                 file = new File(parentPath, filePath).getCanonicalFile();
@@ -147,9 +148,10 @@ public class RobotFileManager {
             if (SystemUtils.IS_OS_WINDOWS) {
                 canonicalPath = canonicalPath.replace("\\", "/");
             }
-            for (PsiFile psiFile : foundFiles) {
-                if (psiFile.getVirtualFile().getPath().equals(canonicalPath)) {
-                    return psiFile;
+            PsiManager psiManager = PsiManager.getInstance(project);
+            for (VirtualFile virtualFile : foundFiles) {
+                if (virtualFile.getPath().equals(canonicalPath)) {
+                    return psiManager.findFile(virtualFile);
                 }
             }
         } catch (Throwable ignored) {
@@ -163,11 +165,13 @@ public class RobotFileManager {
 
         try {
             File file = new File(filePath);
-            PsiFile[] foundFiles = FilenameIndex.getFilesByName(project, file.getName(), GlobalSearchScope.allScope(project));
+            Collection<VirtualFile> foundFiles = FilenameIndex.getVirtualFilesByName(file.getName(), GlobalSearchScope.allScope(project));
             if (!file.isAbsolute()) {
-                for (PsiFile foundFile : foundFiles) {
-                    if (foundFile.getVirtualFile().getPath().endsWith(filePath)) {
-                        psiFiles.add(foundFile);
+                PsiManager psiManager = PsiManager.getInstance(project);
+                for (VirtualFile foundFile : foundFiles) {
+                    if (foundFile.getPath().endsWith(filePath)) {
+                        PsiFile psiFile = psiManager.findFile(foundFile);
+                        psiFiles.add(psiFile);
                     }
                 }
             }

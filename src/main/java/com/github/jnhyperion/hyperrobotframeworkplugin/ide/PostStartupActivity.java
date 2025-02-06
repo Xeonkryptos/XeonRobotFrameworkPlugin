@@ -3,10 +3,13 @@ package com.github.jnhyperion.hyperrobotframeworkplugin.ide;
 import com.github.jnhyperion.hyperrobotframeworkplugin.MyLogger;
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.startup.StartupActivity.DumbAware;
+import com.intellij.openapi.startup.ProjectActivity;
+import kotlin.Unit;
+import kotlin.coroutines.Continuation;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-public class PostStartupActivity implements Disposable, DumbAware {
+public class PostStartupActivity implements Disposable, ProjectActivity {
 
     @Override
     public void dispose() {
@@ -14,8 +17,9 @@ public class PostStartupActivity implements Disposable, DumbAware {
     }
 
     @Override
-    public void runActivity(@NotNull Project project) {
+    public @Nullable Object execute(@NotNull Project project, @NotNull Continuation<? super Unit> continuation) {
         MyLogger.logger.debug("runActivity: " + project.getName());
         RobotListenerMgr.getInstance().initializeListeners(project);
+        return null;
     }
 }

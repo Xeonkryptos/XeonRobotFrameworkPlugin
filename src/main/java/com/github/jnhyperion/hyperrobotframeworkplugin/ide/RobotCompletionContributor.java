@@ -1,30 +1,63 @@
 package com.github.jnhyperion.hyperrobotframeworkplugin.ide;
 
-import com.github.jnhyperion.hyperrobotframeworkplugin.ide.config.*;
-import com.github.jnhyperion.hyperrobotframeworkplugin.ide.icons.*;
-import com.github.jnhyperion.hyperrobotframeworkplugin.psi.*;
-import com.github.jnhyperion.hyperrobotframeworkplugin.psi.dto.*;
-import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.*;
-import com.github.jnhyperion.hyperrobotframeworkplugin.psi.ref.*;
-import com.intellij.codeInsight.*;
-import com.intellij.codeInsight.completion.*;
-import com.intellij.codeInsight.lookup.*;
-import com.intellij.icons.*;
+import com.github.jnhyperion.hyperrobotframeworkplugin.ide.config.RobotOptionsProvider;
+import com.github.jnhyperion.hyperrobotframeworkplugin.ide.icons.RobotIcons;
+import com.github.jnhyperion.hyperrobotframeworkplugin.psi.RecommendationWord;
+import com.github.jnhyperion.hyperrobotframeworkplugin.psi.RobotElementType;
+import com.github.jnhyperion.hyperrobotframeworkplugin.psi.RobotKeywordProvider;
+import com.github.jnhyperion.hyperrobotframeworkplugin.psi.RobotResourceFileType;
+import com.github.jnhyperion.hyperrobotframeworkplugin.psi.RobotTokenTypes;
+import com.github.jnhyperion.hyperrobotframeworkplugin.psi.dto.ImportType;
+import com.github.jnhyperion.hyperrobotframeworkplugin.psi.dto.KeywordDto;
+import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.Argument;
+import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.DefinedKeyword;
+import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.DefinedVariable;
+import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.Heading;
+import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.Import;
+import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.KeywordDefinition;
+import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.KeywordDefinitionImpl;
+import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.KeywordFile;
+import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.KeywordInvokable;
+import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.KeywordStatement;
+import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.RobotFile;
+import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.RobotStatement;
+import com.github.jnhyperion.hyperrobotframeworkplugin.psi.ref.RobotFileManager;
+import com.intellij.codeInsight.TailType;
+import com.intellij.codeInsight.TailTypes;
+import com.intellij.codeInsight.completion.CompletionContributor;
+import com.intellij.codeInsight.completion.CompletionParameters;
+import com.intellij.codeInsight.completion.CompletionProvider;
+import com.intellij.codeInsight.completion.CompletionResultSet;
+import com.intellij.codeInsight.completion.CompletionType;
+import com.intellij.codeInsight.lookup.LookupElement;
+import com.intellij.codeInsight.lookup.LookupElementBuilder;
+import com.intellij.codeInsight.lookup.TailTypeDecorator;
+import com.intellij.icons.AllIcons;
 import com.intellij.icons.AllIcons.Nodes;
-import com.intellij.openapi.editor.*;
-import com.intellij.openapi.util.*;
-import com.intellij.openapi.util.io.*;
-import com.intellij.patterns.*;
-import com.intellij.psi.*;
-import com.intellij.psi.util.*;
-import com.intellij.util.*;
-import com.jetbrains.python.psi.*;
-import org.apache.commons.lang.*;
-import org.jetbrains.annotations.*;
+import com.intellij.openapi.editor.Document;
+import com.intellij.openapi.util.TextRange;
+import com.intellij.openapi.util.io.FileUtil;
+import com.intellij.patterns.PlatformPatterns;
+import com.intellij.psi.PsiComment;
+import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiFile;
+import com.intellij.psi.util.PsiTreeUtil;
+import com.intellij.util.ProcessingContext;
+import com.jetbrains.python.psi.PyParameter;
+import org.apache.commons.lang3.SystemUtils;
+import org.apache.commons.text.WordUtils;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-import java.io.*;
-import java.util.*;
-import java.util.stream.*;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public class RobotCompletionContributor extends CompletionContributor {
 
@@ -82,8 +115,7 @@ public class RobotCompletionContributor extends CompletionContributor {
                         PsiElement parent = originalPosition.getParent();
                         if (parent instanceof Argument) {
                             PsiElement grandParent = parent.getParent();
-                            if (grandParent instanceof Import) {
-                                Import importElement = (Import) grandParent;
+                            if (grandParent instanceof Import importElement) {
                                 if (importElement.isLibrary()) {
                                     addBuiltinLibraryCompletions(result, parameters.getOriginalFile());
                                     if (importElement.getChildren().length > 1) {
@@ -256,16 +288,14 @@ public class RobotCompletionContributor extends CompletionContributor {
                                                                           .withCaseSensitivity(true)
                                                                           .withIcon(AllIcons.Nodes.Package)
                                                                           .withTypeText("robot.libraries.Builtin");
-                resultSet.addElement(TailTypeDecorator.withTail(elementBuilder, TailType.NONE));
+                resultSet.addElement(TailTypeDecorator.withTail(elementBuilder, TailTypes.noneType()));
             }
         } catch (Throwable ignored) {
         }
     }
 
     private static void addResourceFilePaths(CompletionResultSet resultSet, PsiFile file) {
-        if (file instanceof RobotFile) {
-            RobotFile robotFile = (RobotFile) file;
-
+        if (file instanceof RobotFile robotFile) {
             try {
                 String basePath = robotFile.getProject().getBasePath();
                 if (basePath != null) {
@@ -284,7 +314,7 @@ public class RobotCompletionContributor extends CompletionContributor {
                                                                                           .withLookupStrings(Arrays.asList(lookupStrings))
                                                                                           .withCaseSensitivity(true)
                                                                                           .withIcon(RobotIcons.RESOURCE);
-                                resultSet.addElement(TailTypeDecorator.withTail(elementBuilder, TailType.NONE));
+                                resultSet.addElement(TailTypeDecorator.withTail(elementBuilder, TailTypes.noneType()));
                             }
                         }
                     }
@@ -310,8 +340,7 @@ public class RobotCompletionContributor extends CompletionContributor {
     }
 
     private static void addDefinedKeywordsFromFile(CompletionResultSet resultSet, PsiFile file) {
-        if (file instanceof RobotFile) {
-            RobotFile robotFile = (RobotFile) file;
+        if (file instanceof RobotFile robotFile) {
             boolean capitalizeKeywords = RobotOptionsProvider.getInstance(robotFile.getProject()).capitalizeKeywords();
             addDefinedKeywords(robotFile.getDefinedKeywords(), resultSet, capitalizeKeywords);
             boolean allowTransitiveImports = RobotOptionsProvider.getInstance(file.getProject()).allowTransitiveImports();
@@ -324,8 +353,7 @@ public class RobotCompletionContributor extends CompletionContributor {
     }
 
     private static void addDefinedVariablesFromImportedFiles(@NotNull CompletionResultSet resultSet, @NotNull PsiFile file, @Nullable PsiElement element) {
-        if (file instanceof RobotFile) {
-            RobotFile robotFile = (RobotFile) file;
+        if (file instanceof RobotFile robotFile) {
             addDefinedVariables(robotFile.getDefinedVariables(), resultSet, element);
             boolean allowTransitiveImports = RobotOptionsProvider.getInstance(file.getProject()).allowTransitiveImports();
             for (KeywordFile importedFile : robotFile.getImportedFiles(allowTransitiveImports)) {
@@ -354,7 +382,7 @@ public class RobotCompletionContributor extends CompletionContributor {
                     String[] lookupStrings = { lookup, WordUtils.capitalize(lookup), lookup.toLowerCase() };
                     LookupElementBuilder builder = LookupElementBuilder.create(lookup).withLookupStrings(Arrays.asList(lookupStrings)).withIcon(Nodes.Variable);
                     TailTypeDecorator<LookupElementBuilder> decoratedBuilder = TailTypeDecorator.withTail(addReferenceType(variable.reference(), builder),
-                                                                                                          TailType.NONE);
+                                                                                                          TailTypes.noneType());
                     resultSet.addElement(decoratedBuilder);
                 }
             }
@@ -364,7 +392,7 @@ public class RobotCompletionContributor extends CompletionContributor {
     private static void addDefinedVariables(@NotNull Collection<DefinedVariable> variables,
                                             @NotNull CompletionResultSet resultSet,
                                             @Nullable PsiElement element) {
-        addDefinedVariables(variables, resultSet, element, TailType.NONE);
+        addDefinedVariables(variables, resultSet, element, TailTypes.noneType());
     }
 
     private static void addDefinedVariables(@NotNull Collection<DefinedVariable> variables,
@@ -442,7 +470,9 @@ public class RobotCompletionContributor extends CompletionContributor {
             }
 
             TailTypeDecorator<LookupElementBuilder> tailTypeDecorator = TailTypeDecorator.withTail(decoratedElement,
-                                                                                                   keyword.hasArguments() ? RobotTailTypes.TAB : TailType.NONE);
+                                                                                                   keyword.hasArguments() ?
+                                                                                                   RobotTailTypes.TAB :
+                                                                                                   TailTypes.noneType());
             resultSet.addElement(tailTypeDecorator);
         }
     }

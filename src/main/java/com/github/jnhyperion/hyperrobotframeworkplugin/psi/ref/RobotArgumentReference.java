@@ -59,13 +59,6 @@ public class RobotArgumentReference extends PsiReferenceBase<Argument> implement
         return result;
     }
 
-    @NotNull
-    @Override
-    public Object @NotNull [] getVariants() {
-        return EMPTY_ARRAY;
-    }
-
-    @NotNull
     @Override
     public ResolveResult @NotNull [] multiResolve(boolean incompleteCode) {
         LinkedHashSet<ResolveResult> results = new LinkedHashSet<>();
