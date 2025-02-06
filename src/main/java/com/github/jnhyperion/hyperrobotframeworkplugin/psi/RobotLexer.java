@@ -110,7 +110,7 @@ public class RobotLexer extends LexerBase {
         if (isSettings(line)) {
             this.level.clear();
             this.level.push(SETTINGS_HEADING);
-        } else if (isTestCases(line)) {
+        } else if (isTestCases(line) || isTasks(line)) {
             this.level.clear();
             this.level.push(TEST_CASES_HEADING);
         } else if (isKeywords(line)) {
@@ -443,6 +443,10 @@ public class RobotLexer extends LexerBase {
 
     private static boolean isVariables(String line) {
         return "*** Variables ***".equals(line) || "*** Variable ***".equals(line);
+    }
+
+    private static boolean isTasks(String line) {
+        return "*** Tasks ***".equals(line) || "*** Task ***".equals(line);
     }
 
     private boolean isHeading(int position) {
