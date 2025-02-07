@@ -135,7 +135,7 @@ public class RobotLexer extends LexerBase {
         } else if (state != TEST_CASES_HEADING && state != KEYWORDS_HEADING) {
             handleOtherStates(state, parentState);
         } else {
-            handleKeywordDefinition();
+            handleKeywordDefinition(state, parentState);
         }
     }
 
@@ -180,7 +180,7 @@ public class RobotLexer extends LexerBase {
 
     private void handleOtherStates(int state, int parentState) {
         if (state == KEYWORD_DEFINITION) {
-            handleKeywordDefinition();
+            handleKeywordDefinition(state, parentState);
         } else if (state == SYNTAX) {
             handleSyntax();
         } else if (state == GHERKIN) {
@@ -190,14 +190,14 @@ public class RobotLexer extends LexerBase {
         }
     }
 
-    private void handleKeywordDefinition() {
+    private void handleKeywordDefinition(int state, int parentState) {
         if (isSuperSpace(this.position)) {
             skipWhitespace();
             this.currentToken = RobotTokenTypes.WHITESPACE;
         } else if (isVariable(this.position)) {
             goToVariableEnd();
             if (isSuperSpaceOrNewline(this.position) || isVariableDefinition(this.position)) {
-                if ((this.isTestTemplate || this.isBracketTemplate) && getState() == TEST_CASES_HEADING) {
+                if ((this.isTestTemplate || this.isBracketTemplate) && state == TEST_CASES_HEADING) {
                     this.currentToken = RobotTokenTypes.VARIABLE;
                     this.level.push(KEYWORD);
                 } else {
@@ -238,11 +238,11 @@ public class RobotLexer extends LexerBase {
                 } else if (RobotKeywordProvider.isSyntaxOfType(RobotTokenTypes.SYNTAX_MARKER, word)) {
                     this.currentToken = RobotTokenTypes.SYNTAX_MARKER;
                     this.level.push(IF_CLAUSE);
-                } else if (getState() == TEST_CASES_HEADING) {
+                } else if (state == TEST_CASES_HEADING) {
                     this.currentToken = RobotTokenTypes.KEYWORD_DEFINITION;
                     this.level.push(KEYWORD_DEFINITION);
                 } else {
-                    if (!this.isTestTemplate && !this.isBracketTemplate || getState() != TEST_CASES_HEADING) {
+                    if (!this.isTestTemplate && !this.isBracketTemplate || parentState != TEST_CASES_HEADING && state != KEYWORD_DEFINITION) {
                         this.currentToken = RobotTokenTypes.KEYWORD;
                         this.level.push(KEYWORD);
                         if (!isSuperSpaceOrNewline(this.position)) {
@@ -434,7 +434,7 @@ public class RobotLexer extends LexerBase {
     }
 
     private static boolean isTestCases(String line) {
-        return "*** Test Cases ***".equals(line) || "*** Test Case ***".equals(line);
+        return line.contains("*** Test Cases ***") || line.contains("*** Test Case ***");
     }
 
     private static boolean isKeywords(String line) {

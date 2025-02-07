@@ -191,9 +191,9 @@ public class ResolverUtils {
             PsiReference reference = invokable.getReference();
             if (reference != null) {
                 PsiElement referencedElement = reference.resolve();
-                if (referencedElement instanceof PyFunction) {
-                    PyFunction pyFunction = (PyFunction) referencedElement;
+                if (referencedElement instanceof PyFunction pyFunction) {
                     for (PyParameter parameter : pyFunction.getParameterList().getParameters()) {
+                        System.out.println("Searching parameter: " + parameterName + ", found parameter: " + parameter.getName() + ", equals: " + parameterName.equals(parameter.getName()));
                         if (parameterName.equals(parameter.getName())) {
                             return parameter;
                         }

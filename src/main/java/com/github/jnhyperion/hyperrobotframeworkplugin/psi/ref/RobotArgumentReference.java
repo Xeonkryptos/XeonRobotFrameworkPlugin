@@ -29,8 +29,7 @@ public class RobotArgumentReference extends PsiReferenceBase<Argument> implement
         Argument argument = getElement();
         PsiElement parent = argument.getParent();
         if (argument.getContainingFile().isValid()) {
-            if (parent instanceof Import) {
-                Import importElement = (Import) parent;
+            if (parent instanceof Import importElement) {
                 PsiElement[] children = parent.getChildren();
                 if (children.length > 0 && children[0] == argument) {
                     if (importElement.isResource()) {
@@ -52,6 +51,7 @@ public class RobotArgumentReference extends PsiReferenceBase<Argument> implement
                     int index = argument.getPresentableText().indexOf('=');
                     String parameterName = argument.getPresentableText().substring(0, index).trim();
                     result = ResolverUtils.findKeywordParameterElement(parameterName, (KeywordStatement) parent);
+                    System.out.println("result: " + result);
                 }
             }
         }

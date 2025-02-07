@@ -22,32 +22,32 @@ public class RobotFindUsagesProvider implements FindUsagesProvider {
    }
 
    @Override
-   public boolean canFindUsagesFor(@NotNull PsiElement var1) {
-      return !(var1 instanceof Argument) || !(var1.getParent() instanceof Import) ? var1 instanceof PsiNamedElement : var1 == var1.getParent().getFirstChild();
+   public boolean canFindUsagesFor(@NotNull PsiElement element) {
+      return !(element instanceof Argument) || !(element.getParent() instanceof Import) ? element instanceof PsiNamedElement : element == element.getParent().getFirstChild();
    }
 
    @Nullable
    @Override
-   public String getHelpId(@NotNull PsiElement var1) {
+   public String getHelpId(@NotNull PsiElement element) {
       return null;
    }
 
    @NotNull
    @Override
-   public String getType(@NotNull PsiElement var1) {
+   public String getType(@NotNull PsiElement element) {
        return RobotBundle.getMessage("usage.declaration");
    }
 
    @NotNull
    @Override
-   public String getDescriptiveName(@NotNull PsiElement var1) {
-      if (var1 instanceof KeywordDefinition) {
+   public String getDescriptiveName(@NotNull PsiElement element) {
+      if (element instanceof KeywordDefinition) {
           return RobotBundle.getMessage("usage.descriptive.keyword");
-      } else if (var1 instanceof VariableDefinition) {
+      } else if (element instanceof VariableDefinition) {
           return RobotBundle.getMessage("usage.descriptive.variable");
-      } else if (var1 instanceof RobotFile) {
+      } else if (element instanceof RobotFile) {
           return RobotBundle.getMessage("usage.descriptive.import");
-      } else if (var1 instanceof Argument) {
+      } else if (element instanceof Argument) {
           return RobotBundle.getMessage("usage.descriptive.argument");
       } else {
          return "";
@@ -56,7 +56,7 @@ public class RobotFindUsagesProvider implements FindUsagesProvider {
 
    @NotNull
    @Override
-   public String getNodeText(@NotNull PsiElement var1, boolean var2) {
+   public String getNodeText(@NotNull PsiElement element, boolean var2) {
       return "";
    }
 }
