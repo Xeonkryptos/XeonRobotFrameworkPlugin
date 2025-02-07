@@ -51,7 +51,6 @@ public class RobotArgumentReference extends PsiReferenceBase<Argument> implement
                     int index = argument.getPresentableText().indexOf('=');
                     String parameterName = argument.getPresentableText().substring(0, index).trim();
                     result = ResolverUtils.findKeywordParameterElement(parameterName, (KeywordStatement) parent);
-                    System.out.println("result: " + result);
                 }
             }
         }
@@ -69,9 +68,7 @@ public class RobotArgumentReference extends PsiReferenceBase<Argument> implement
             PsiElement parent = argument.getParent();
             String presentableText = argument.getPresentableText();
 
-            if (parent instanceof Import) {
-                Import importElement = (Import) parent;
-
+            if (parent instanceof Import importElement) {
                 if (importElement.isResource()) {
                     for (PsiFile file : RobotFileManager.findPsiFiles(presentableText, project)) {
                         results.add(new PsiElementResolveResult(file));

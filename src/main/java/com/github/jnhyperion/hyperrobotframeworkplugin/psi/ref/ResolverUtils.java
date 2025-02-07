@@ -15,11 +15,10 @@ public class ResolverUtils {
 
     @Nullable
     public static PsiElement findKeywordElement(@Nullable String keyword, @Nullable PsiFile psiFile) {
-        if (keyword == null || !(psiFile instanceof RobotFile)) {
+        if (keyword == null || !(psiFile instanceof RobotFile robotFile)) {
             return null;
         }
 
-        RobotFile robotFile = (RobotFile) psiFile;
         for (DefinedKeyword definedKeyword : robotFile.getDefinedKeywords()) {
             if (definedKeyword.matches(keyword)) {
                 return definedKeyword.reference();
@@ -83,8 +82,7 @@ public class ResolverUtils {
         try {
             PsiElement currentElement = element;
             while ((currentElement = currentElement.getParent()) != null) {
-                if (currentElement instanceof KeywordDefinition) {
-                    KeywordDefinition keywordDefinition = (KeywordDefinition) currentElement;
+                if (currentElement instanceof KeywordDefinition keywordDefinition) {
                     PsiElement[] children = keywordDefinition.getChildren();
                     boolean foundElement = false;
                     for (int i = children.length - 1; i >= 0; i--) {
@@ -193,7 +191,6 @@ public class ResolverUtils {
                 PsiElement referencedElement = reference.resolve();
                 if (referencedElement instanceof PyFunction pyFunction) {
                     for (PyParameter parameter : pyFunction.getParameterList().getParameters()) {
-                        System.out.println("Searching parameter: " + parameterName + ", found parameter: " + parameter.getName() + ", equals: " + parameterName.equals(parameter.getName()));
                         if (parameterName.equals(parameter.getName())) {
                             return parameter;
                         }
