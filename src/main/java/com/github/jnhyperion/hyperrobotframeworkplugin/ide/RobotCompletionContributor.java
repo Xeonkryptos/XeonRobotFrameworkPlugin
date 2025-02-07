@@ -66,9 +66,8 @@ public class RobotCompletionContributor extends CompletionContributor {
             @Override
             protected void addCompletions(@NotNull CompletionParameters parameters, @NotNull ProcessingContext context, @NotNull CompletionResultSet result) {
                 if (!(parameters.getOriginalPosition() instanceof PsiComment)) {
-                    if (RobotCompletionContributor.isValidCompletion(parameters) &&
-                        !RobotCompletionContributor.isArgument(parameters.getOriginalPosition()) &&
-                        !RobotCompletionContributor.isKeywordInvokable(parameters.getOriginalPosition())) {
+                    if (RobotCompletionContributor.isValidCompletion(parameters) && !RobotCompletionContributor.isArgument(parameters.getOriginalPosition())
+                        && !RobotCompletionContributor.isKeywordInvokable(parameters.getOriginalPosition())) {
                         boolean isResource = parameters.getOriginalFile().getFileType() instanceof RobotResourceFileType;
 
                         for (LookupElement element : addSyntaxLookup(RobotTokenTypes.HEADING)) {
@@ -85,9 +84,8 @@ public class RobotCompletionContributor extends CompletionContributor {
             protected void addCompletions(@NotNull CompletionParameters parameters, @NotNull ProcessingContext context, @NotNull CompletionResultSet result) {
                 if (!(parameters.getOriginalPosition() instanceof PsiComment) && !isInKeywordStatement(parameters.getPosition())) {
                     PsiElement heading = getHeading(parameters.getOriginalPosition());
-                    if (!isValidCompletion(parameters) &&
-                        (containsTestCases(heading) || containsKeywordDefinitions(heading)) &&
-                        !isArgument(parameters.getOriginalPosition())) {
+                    if (!isValidCompletion(parameters) && (containsTestCases(heading) || containsKeywordDefinitions(heading))
+                        && !isArgument(parameters.getOriginalPosition())) {
                         RobotCompletionContributor.addSyntaxLookup(RobotTokenTypes.BRACKET_SETTING, result);
                     }
                 }
@@ -99,7 +97,7 @@ public class RobotCompletionContributor extends CompletionContributor {
                 if (!(parameters.getOriginalPosition() instanceof PsiComment)) {
                     PsiElement originalPosition = parameters.getOriginalPosition();
                     PsiElement heading = getHeading(originalPosition);
-                    if (containsSettings(heading) && !isArgument(originalPosition) && !isKeywordInvokable(originalPosition)) {
+                    if (containsSettings(heading) && !isArgument(originalPosition)) {
                         addSyntaxLookup(RobotTokenTypes.SETTING, result);
                         addSyntaxLookup(RobotTokenTypes.IMPORT, result);
                     }
@@ -109,7 +107,7 @@ public class RobotCompletionContributor extends CompletionContributor {
         extend(CompletionType.BASIC, PlatformPatterns.psiElement().inFile(PlatformPatterns.psiElement(RobotFile.class)), new CompletionProvider<>() {
             @Override
             protected void addCompletions(@NotNull CompletionParameters parameters, @NotNull ProcessingContext context, @NotNull CompletionResultSet result) {
-                if (!(parameters.getOriginalPosition() instanceof PsiComment)) {
+                if (!(parameters.getOriginalPosition() instanceof PsiComment) && !isInKeywordStatement(parameters.getPosition())) {
                     PsiElement originalPosition = parameters.getOriginalPosition();
                     if (originalPosition != null) {
                         PsiElement parent = originalPosition.getParent();
@@ -223,10 +221,9 @@ public class RobotCompletionContributor extends CompletionContributor {
     }
 
     private static boolean isInKeywordStatement(PsiElement current) {
-        if (current == null) {
+        if (!isArgument(current)) {
             return false;
         }
-
         return PsiTreeUtil.getParentOfType(current, KeywordStatement.class) != null;
     }
 

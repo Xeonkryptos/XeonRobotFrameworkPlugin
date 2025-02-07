@@ -66,14 +66,12 @@ public class KeywordStatementImpl extends RobotPsiElementBase implements Keyword
     @NotNull
     @Override
     public Collection<DefinedVariable> getAvailableParameters() {
-        Set<DefinedVariable> results = new LinkedHashSet<>();
         Collection<DefinedVariable> localDefinedParameters = this.availableKeywordParameters;
-        //        if (this.availableKeywordParameters == null) {
-        localDefinedParameters = collectKeywordParameters();
-        this.availableKeywordParameters = localDefinedParameters;
-        //        }
-        results.addAll(localDefinedParameters);
-        return results;
+        if (this.availableKeywordParameters == null) {
+            localDefinedParameters = collectKeywordParameters();
+            this.availableKeywordParameters = localDefinedParameters;
+        }
+        return localDefinedParameters;
     }
 
     @Nullable
@@ -109,8 +107,7 @@ public class KeywordStatementImpl extends RobotPsiElementBase implements Keyword
                                                           .map(PsiReference::resolve);
         if (resolvedReferenceOpt.isPresent()) {
             PsiElement psiElement = resolvedReferenceOpt.get();
-            if (psiElement instanceof PyFunction) {
-                PyFunction pyFunction = (PyFunction) psiElement;
+            if (psiElement instanceof PyFunction pyFunction) {
                 PyParameter[] parameters = pyFunction.getParameterList().getParameters();
                 for (PyParameter parameter : parameters) {
                     PyNamedParameter parameterName = parameter.getAsNamed();

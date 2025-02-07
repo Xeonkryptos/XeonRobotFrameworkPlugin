@@ -86,7 +86,7 @@ public class RobotLexer extends LexerBase {
     private void handleNewLine(int state) {
         if (state != KEYWORD && state != IMPORT && state != SYNTAX && state != VARIABLE_DEFINITION && state != SETTING && state != IF_CLAUSE) {
             if (state == KEYWORD_DEFINITION) {
-                int nextPosition = this.position + SETTINGS_HEADING;
+                int nextPosition = this.position + 1;
                 if (!isWhitespace(nextPosition) && !isNewLine(nextPosition) && !isComment(nextPosition)) {
                     this.level.pop();
                     advance();
