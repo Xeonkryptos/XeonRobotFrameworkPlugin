@@ -238,7 +238,7 @@ public class RobotLexer extends LexerBase {
                 } else if (RobotKeywordProvider.isSyntaxOfType(RobotTokenTypes.SYNTAX_MARKER, word)) {
                     this.currentToken = RobotTokenTypes.SYNTAX_MARKER;
                     this.level.push(IF_CLAUSE);
-                } else if (state == TEST_CASES_HEADING) {
+                } else if (state == TEST_CASES_HEADING || state == KEYWORDS_HEADING) {
                     this.currentToken = RobotTokenTypes.KEYWORD_DEFINITION;
                     this.level.push(KEYWORD_DEFINITION);
                 } else {
@@ -458,9 +458,9 @@ public class RobotLexer extends LexerBase {
             position++;
         }
         return charAtEquals(position, '.') &&
-               charAtEquals(position + SETTINGS_HEADING, '.') &&
-               charAtEquals(position + TEST_CASES_HEADING, '.') &&
-               isSuperSpaceOrNewline(position + KEYWORDS_HEADING);
+               charAtEquals(position + 1, '.') &&
+               charAtEquals(position + 2, '.') &&
+               isSuperSpaceOrNewline(position + 3);
     }
 
     private boolean isSuperSpacePrevious() {
@@ -475,7 +475,7 @@ public class RobotLexer extends LexerBase {
     }
 
     private boolean isSuperSpace(int position) {
-        return isSpace(position) && isSpace(position + SETTINGS_HEADING) || isSpace(position) && isTab(position + SETTINGS_HEADING) || isTab(position);
+        return isSpace(position) && isSpace(position + 1) || isSpace(position) && isTab(position + 1) || isTab(position);
     }
 
     private boolean isTab(int position) {

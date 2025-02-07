@@ -70,8 +70,8 @@ public class HeadingImpl extends RobotPsiElementBase implements Heading {
 
     @Override
     public final boolean containsKeywordDefinitions() {
-        String var1;
-        return (var1 = this.getPresentableText()).startsWith("*** Keyword") || var1.startsWith("*** User Keyword");
+        String text = this.getPresentableText();
+        return text.startsWith("*** Keyword") || text.startsWith("*** User Keyword");
     }
 
     @Override
@@ -80,8 +80,7 @@ public class HeadingImpl extends RobotPsiElementBase implements Heading {
         try {
             if (isSettings()) {
                 PsiFile file = getContainingFile();
-                if (file instanceof RobotFile) {
-                    RobotFile robotFile = (RobotFile) file;
+                if (file instanceof RobotFile robotFile) {
                     robotFile.reset();
                     robotFile.importsChanged();
                 }
@@ -128,8 +127,7 @@ public class HeadingImpl extends RobotPsiElementBase implements Heading {
                     PsiElement[] children = getChildren();
                     for (int i = 0; i < children.length; i++) {
                         PsiElement child = children[i];
-                        if (child instanceof Setting) {
-                            Setting setting = (Setting) child;
+                        if (child instanceof Setting setting) {
                             if (setting.getText().equalsIgnoreCase("Suite Setup")
                                 || setting.getText().equalsIgnoreCase("Test Setup") && i + 1 < children.length && children[i + 1] instanceof KeywordStatement) {
                                 List<DefinedVariable> resolvedVariablesInKeywords = ResolverUtils.walkKeyword((KeywordStatement) children[i + 1]);
@@ -314,7 +312,8 @@ public class HeadingImpl extends RobotPsiElementBase implements Heading {
         Collection<RobotStatement> statement = this.metadataStatements;
         if (this.metadataStatements == null) {
             try {
-                statement = PsiTreeUtil.findChildrenOfType(this, Import.class);
+                statement = new LinkedHashSet<>();
+                statement.addAll(PsiTreeUtil.findChildrenOfType(this, Import.class));
                 statement.addAll(PsiTreeUtil.findChildrenOfType(this, Setting.class));
             } catch (Throwable var2) {
                 return Collections.emptySet();
