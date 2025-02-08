@@ -320,6 +320,7 @@ public class RobotParser implements PsiParser {
     private static void parseWith(@NotNull PsiBuilder builder, @NotNull IElementType type) {
         PsiBuilder.Marker arg = builder.mark();
         IElementType current = builder.getTokenType();
+        PsiBuilder.Marker parameterId = null;
         while (!builder.eof() &&
                (type == current ||
                 type == RobotTokenTypes.PARAMETER && current == RobotTokenTypes.ARGUMENT ||
@@ -331,7 +332,14 @@ public class RobotParser implements PsiParser {
                 RobotTokenTypes.VARIABLE_DEFINITION == current) {
                 parseSimple(builder, current);
             } else {
+                if (current == RobotTokenTypes.PARAMETER) {
+                    parameterId = builder.mark();
+                }
                 builder.advanceLexer();
+                if (parameterId != null) {
+                    parameterId.done(RobotTokenTypes.PARAMETER_ID);
+                    parameterId = null;
+                }
             }
             if (end) {
                 break;

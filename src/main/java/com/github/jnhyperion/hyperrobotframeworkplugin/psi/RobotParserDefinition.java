@@ -9,6 +9,7 @@ import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.KeywordDefini
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.KeywordInvokableImpl;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.KeywordPartImpl;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.KeywordStatementImpl;
+import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.ParameterIdImpl;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.ParameterImpl;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.RobotFileImpl;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.SettingImpl;
@@ -84,6 +85,8 @@ public class RobotParserDefinition implements ParserDefinition {
          return new HeadingImpl(node);
       } else if (node.getElementType() == RobotTokenTypes.PARAMETER) {
          return new ParameterImpl(node);
+      } else if (node.getElementType() == RobotTokenTypes.PARAMETER_ID) {
+         return new ParameterIdImpl(node);
       } else if (node.getElementType() == RobotTokenTypes.ARGUMENT) {
          return new ArgumentImpl(node);
       } else if (node.getElementType() == RobotTokenTypes.VARIABLE) {

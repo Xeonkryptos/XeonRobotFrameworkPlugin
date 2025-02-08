@@ -15,6 +15,7 @@ public interface RobotTokenTypes {
    RobotElementType KEYWORD_DEFINITION_ID = new RobotElementType("KEYWORD_DEFINITION_ID");
    RobotElementType KEYWORD = new RobotElementType("KEYWORD");
    RobotElementType PARAMETER = new RobotElementType("PARAMETER");
+   RobotElementType PARAMETER_ID = new RobotElementType("PARAMETER_ID");
    RobotElementType ARGUMENT = new RobotElementType("ARGUMENT");
    RobotElementType VARIABLE_DEFINITION = new RobotElementType("VARIABLE_DEFINITION");
    RobotElementType VARIABLE_DEFINITION_ID = new RobotElementType("VARIABLE_DEFINITION_ID");
