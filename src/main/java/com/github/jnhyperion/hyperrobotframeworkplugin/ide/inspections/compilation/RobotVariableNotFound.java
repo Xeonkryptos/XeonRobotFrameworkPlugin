@@ -7,6 +7,7 @@ import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.KeywordStatem
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.Variable;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiReference;
+import com.intellij.psi.util.PsiTreeUtil;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NotNull;
 
@@ -49,13 +50,8 @@ public class RobotVariableNotFound extends SimpleRobotInspection {
             }
         }
 
-        PsiElement parentElement = element.getParent();
-        if (parentElement instanceof Argument) {
-            parentElement = parentElement.getParent();
-        }
-
-        if (parentElement instanceof KeywordStatement) {
-            KeywordStatement keywordStatement = (KeywordStatement) parentElement;
+        KeywordStatement keywordStatement = PsiTreeUtil.getParentOfType(element, KeywordStatement.class);
+        if (keywordStatement != null) {
             List<Argument> arguments = keywordStatement.getArguments();
             return keywordStatement.getGlobalVariable() != null && arguments.size() > 1 && element == arguments.get(0);
         }

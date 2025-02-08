@@ -6,6 +6,7 @@ import com.github.jnhyperion.hyperrobotframeworkplugin.psi.util.ReservedVariable
 import com.intellij.lang.ASTNode;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiReference;
+import com.intellij.psi.util.PsiTreeUtil;
 import com.jetbrains.python.psi.PyFunction;
 import com.jetbrains.python.psi.PyNamedParameter;
 import com.jetbrains.python.psi.PyParameter;
@@ -13,7 +14,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -22,6 +22,7 @@ import java.util.Set;
 
 public class KeywordStatementImpl extends RobotPsiElementBase implements KeywordStatement {
 
+    private List<Parameter> parameters;
     private List<Argument> arguments;
     private DefinedVariable variable;
     private KeywordInvokable invokable;
@@ -47,17 +48,22 @@ public class KeywordStatementImpl extends RobotPsiElementBase implements Keyword
         return result;
     }
 
+    @Override
+    public @NotNull List<Parameter> getParameters() {
+        List<Parameter> results = this.parameters;
+        if (this.parameters == null) {
+            results = new ArrayList<>(PsiTreeUtil.getChildrenOfTypeAsList(this, Parameter.class));
+            this.parameters = results;
+        }
+        return results;
+    }
+
     @NotNull
     @Override
     public final List<Argument> getArguments() {
         List<Argument> results = this.arguments;
         if (this.arguments == null) {
-            results = new ArrayList<>();
-            for (PsiElement element : getChildren()) {
-                if (element instanceof Argument) {
-                    results.add((Argument) element);
-                }
-            }
+            results = new ArrayList<>(PsiTreeUtil.getChildrenOfTypeAsList(this, Argument.class));
             this.arguments = results;
         }
         return results;
@@ -99,12 +105,9 @@ public class KeywordStatementImpl extends RobotPsiElementBase implements Keyword
     @NotNull
     private Collection<DefinedVariable> collectKeywordParameters() {
         Set<DefinedVariable> results = new LinkedHashSet<>();
-        Optional<PsiElement> resolvedReferenceOpt = Arrays.stream(getChildren())
-                                                          .filter(child -> child instanceof KeywordInvokable)
-                                                          .findFirst()
-                                                          .map(child -> (KeywordInvokable) child)
-                                                          .map(KeywordInvokable::getReference)
-                                                          .map(PsiReference::resolve);
+        Optional<PsiElement> resolvedReferenceOpt = Optional.ofNullable(PsiTreeUtil.findChildOfType(this, KeywordInvokable.class))
+                                                            .map(KeywordInvokable::getReference)
+                                                            .map(PsiReference::resolve);
         if (resolvedReferenceOpt.isPresent()) {
             PsiElement psiElement = resolvedReferenceOpt.get();
             if (psiElement instanceof PyFunction pyFunction) {
@@ -125,6 +128,7 @@ public class KeywordStatementImpl extends RobotPsiElementBase implements Keyword
     @Override
     public void subtreeChanged() {
         super.subtreeChanged();
+        this.parameters = null;
         this.arguments = null;
         this.invokable = null;
         this.variable = null;

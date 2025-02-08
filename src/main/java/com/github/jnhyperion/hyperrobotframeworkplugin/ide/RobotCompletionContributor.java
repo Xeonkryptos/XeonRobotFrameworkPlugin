@@ -19,6 +19,7 @@ import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.KeywordDefini
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.KeywordFile;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.KeywordInvokable;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.KeywordStatement;
+import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.ParameterId;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.RobotFile;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.RobotStatement;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.ref.RobotFileManager;
@@ -55,7 +56,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -66,8 +66,9 @@ public class RobotCompletionContributor extends CompletionContributor {
             @Override
             protected void addCompletions(@NotNull CompletionParameters parameters, @NotNull ProcessingContext context, @NotNull CompletionResultSet result) {
                 if (!(parameters.getOriginalPosition() instanceof PsiComment)) {
-                    if (RobotCompletionContributor.isValidCompletion(parameters) && !RobotCompletionContributor.isArgument(parameters.getOriginalPosition())
-                        && !RobotCompletionContributor.isKeywordInvokable(parameters.getOriginalPosition())) {
+                    if (RobotCompletionContributor.isValidCompletion(parameters) &&
+                        !RobotCompletionContributor.isArgument(parameters.getOriginalPosition()) &&
+                        !RobotCompletionContributor.isKeywordInvokable(parameters.getOriginalPosition())) {
                         boolean isResource = parameters.getOriginalFile().getFileType() instanceof RobotResourceFileType;
 
                         for (LookupElement element : addSyntaxLookup(RobotTokenTypes.HEADING)) {
@@ -84,8 +85,9 @@ public class RobotCompletionContributor extends CompletionContributor {
             protected void addCompletions(@NotNull CompletionParameters parameters, @NotNull ProcessingContext context, @NotNull CompletionResultSet result) {
                 if (!(parameters.getOriginalPosition() instanceof PsiComment) && !isInKeywordStatement(parameters.getPosition())) {
                     PsiElement heading = getHeading(parameters.getOriginalPosition());
-                    if (!isValidCompletion(parameters) && (containsTestCases(heading) || containsKeywordDefinitions(heading))
-                        && !isArgument(parameters.getOriginalPosition())) {
+                    if (!isValidCompletion(parameters) &&
+                        (containsTestCases(heading) || containsKeywordDefinitions(heading)) &&
+                        !isArgument(parameters.getOriginalPosition())) {
                         RobotCompletionContributor.addSyntaxLookup(RobotTokenTypes.BRACKET_SETTING, result);
                     }
                 }
@@ -412,10 +414,11 @@ public class RobotCompletionContributor extends CompletionContributor {
 
     private static void addKeywordParameters(@NotNull KeywordStatement keywordStatement, @NotNull CompletionResultSet resultSet, @NotNull PsiElement position) {
         Collection<DefinedVariable> availableParameters = keywordStatement.getAvailableParameters();
-        Set<String> arguments = keywordStatement.getArguments().stream().map(RobotStatement::getPresentableText).map(text -> {
-            int index = text.indexOf('=');
-            return index > -1 ? text.substring(0, index) : null;
-        }).filter(Objects::nonNull).collect(Collectors.toSet());
+        Set<String> arguments = keywordStatement.getParameters()
+                                                .stream()
+                                                .flatMap(parameter -> PsiTreeUtil.getChildrenOfTypeAsList(parameter, ParameterId.class).stream())
+                                                .map(RobotStatement::getPresentableText)
+                                                .collect(Collectors.toSet());
         availableParameters.removeIf(variable -> arguments.contains(variable.getLookup()));
         addDefinedVariables(availableParameters, resultSet, position, TailType.createSimpleTailType('='));
     }
