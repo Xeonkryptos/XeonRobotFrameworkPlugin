@@ -123,7 +123,7 @@ public class HeadingImpl extends RobotPsiElementBase implements Heading {
                             results.add((DefinedVariable) child);
                         }
                     }
-                } else if (this.isSettings()) {
+                } else if (isSettings()) {
                     PsiElement[] children = getChildren();
                     for (int i = 0; i < children.length; i++) {
                         PsiElement child = children[i];
@@ -136,7 +136,7 @@ public class HeadingImpl extends RobotPsiElementBase implements Heading {
                         }
                     }
                 }
-            } catch (Throwable var6) {
+            } catch (Throwable t) {
                 return Collections.emptySet();
             }
             this.declaredVariables = results;

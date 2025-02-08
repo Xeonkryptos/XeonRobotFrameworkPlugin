@@ -1,13 +1,26 @@
 package com.github.jnhyperion.hyperrobotframeworkplugin.psi.ref;
 
-import com.github.jnhyperion.hyperrobotframeworkplugin.ide.config.*;
-import com.github.jnhyperion.hyperrobotframeworkplugin.psi.dto.*;
-import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.*;
-import com.intellij.psi.*;
-import com.jetbrains.python.psi.*;
-import org.jetbrains.annotations.*;
+import com.github.jnhyperion.hyperrobotframeworkplugin.ide.config.RobotOptionsProvider;
+import com.github.jnhyperion.hyperrobotframeworkplugin.psi.dto.ImportType;
+import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.DefinedKeyword;
+import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.DefinedVariable;
+import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.KeywordDefinition;
+import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.KeywordFile;
+import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.KeywordInvokable;
+import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.KeywordStatement;
+import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.RobotFile;
+import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiFile;
+import com.intellij.psi.PsiReference;
+import com.intellij.psi.util.PsiTreeUtil;
+import com.jetbrains.python.psi.PyFunction;
+import com.jetbrains.python.psi.PyParameter;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 public class ResolverUtils {
     private ResolverUtils() {
@@ -39,38 +52,25 @@ public class ResolverUtils {
 
     @Nullable
     public static PsiElement findVariableElement(@Nullable String variableName, @Nullable PsiFile psiFile) {
-        if (variableName == null || !(psiFile instanceof RobotFile)) {
+        if (variableName == null || !(psiFile instanceof RobotFile robotFile)) {
             return null;
         }
-
-        try {
-            RobotFile robotFile = (RobotFile) psiFile;
-
-            for (DefinedVariable definedVariable : robotFile.getDefinedVariables()) {
-                if (definedVariable.matches(variableName)) {
-                    return definedVariable.reference();
-                }
+        for (DefinedVariable definedVariable : robotFile.getDefinedVariables()) {
+            if (definedVariable.matches(variableName)) {
+                return definedVariable.reference();
             }
+        }
 
-            boolean includeTransitive = RobotOptionsProvider.getInstance(psiFile.getProject()).allowTransitiveImports();
-            for (KeywordFile keywordFile : robotFile.getImportedFiles(includeTransitive)) {
-                if (keywordFile.getImportType() != ImportType.LIBRARY) {
-                    for (DefinedVariable definedVariable : keywordFile.getDefinedVariables()) {
-                        if (definedVariable.matches(variableName)) {
-                            return definedVariable.reference();
-                        }
+        boolean includeTransitive = RobotOptionsProvider.getInstance(psiFile.getProject()).allowTransitiveImports();
+        for (KeywordFile keywordFile : robotFile.getImportedFiles(includeTransitive)) {
+            if (keywordFile.getImportType() != ImportType.LIBRARY) {
+                for (DefinedVariable definedVariable : keywordFile.getDefinedVariables()) {
+                    if (definedVariable.matches(variableName)) {
+                        return definedVariable.reference();
                     }
                 }
             }
-
-            for (DefinedVariable definedVariable : robotFile.getDefinedVariables()) {
-                if (definedVariable.matches(variableName)) {
-                    return definedVariable.reference();
-                }
-            }
-        } catch (Throwable ignored) {
         }
-
         return null;
     }
 
@@ -79,36 +79,30 @@ public class ResolverUtils {
         if (variableName == null || element == null) {
             return null;
         }
-        try {
-            PsiElement currentElement = element;
-            while ((currentElement = currentElement.getParent()) != null) {
-                if (currentElement instanceof KeywordDefinition keywordDefinition) {
-                    PsiElement[] children = keywordDefinition.getChildren();
-                    boolean foundElement = false;
-                    for (int i = children.length - 1; i >= 0; i--) {
-                        PsiElement child = children[i];
-                        if (child == element) {
-                            foundElement = true;
-                        } else if (foundElement) {
-                            if (child instanceof DefinedVariable && ((DefinedVariable) child).matches(variableName)) {
-                                return child;
-                            } else if (child instanceof KeywordStatement) {
-                                PsiElement result = searchInKeywordStatements ? findVariableInStatement((KeywordStatement) child, variableName) : null;
-                                if (result != null) {
-                                    return result;
-                                }
-                            }
+        KeywordDefinition keywordDefinition = PsiTreeUtil.getParentOfType(element, KeywordDefinition.class);
+        if (keywordDefinition != null) {
+            PsiElement[] children = keywordDefinition.getChildren();
+            boolean foundElement = false;
+            for (int i = children.length - 1; i >= 0; i--) {
+                PsiElement child = children[i];
+                if (child == element) {
+                    foundElement = true;
+                } else if (foundElement) {
+                    if (child instanceof DefinedVariable && ((DefinedVariable) child).matches(variableName)) {
+                        return child;
+                    } else if (child instanceof KeywordStatement) {
+                        PsiElement result = searchInKeywordStatements ? findVariableInStatement((KeywordStatement) child, variableName) : null;
+                        if (result != null) {
+                            return result;
                         }
                     }
-                    for (DefinedVariable definedVariable : keywordDefinition.getDeclaredVariables()) {
-                        if (definedVariable.matches(variableName)) {
-                            return definedVariable.reference();
-                        }
-                    }
-                    break;
                 }
             }
-        } catch (Throwable ignored) {
+            for (DefinedVariable definedVariable : keywordDefinition.getDeclaredVariables()) {
+                if (definedVariable.matches(variableName)) {
+                    return definedVariable.reference();
+                }
+            }
         }
         return null;
     }

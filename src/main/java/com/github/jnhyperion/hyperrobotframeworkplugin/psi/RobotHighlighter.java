@@ -5,15 +5,15 @@ import com.intellij.openapi.editor.DefaultLanguageHighlighterColors;
 import com.intellij.openapi.editor.colors.TextAttributesKey;
 import com.intellij.openapi.fileTypes.SyntaxHighlighterBase;
 import com.intellij.psi.tree.IElementType;
-import gnu.trove.THashMap;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.HashMap;
 import java.util.Map;
 
 public class RobotHighlighter extends SyntaxHighlighterBase {
 
-    private static final Map<IElementType, TextAttributesKey> keys1 = new THashMap<>();
-    private static final Map<IElementType, TextAttributesKey> keys2 = new THashMap<>();
+    private static final Map<IElementType, TextAttributesKey> keys1 = new HashMap<>();
+    private static final Map<IElementType, TextAttributesKey> keys2 = new HashMap<>();
 
     public static final TextAttributesKey HEADING = TextAttributesKey.createTextAttributesKey(RobotTokenTypes.HEADING.toString(),
                                                                                               DefaultLanguageHighlighterColors.STRING);
@@ -27,6 +27,8 @@ public class RobotHighlighter extends SyntaxHighlighterBase {
                                                                                                          DefaultLanguageHighlighterColors.KEYWORD);
     public static final TextAttributesKey KEYWORD = TextAttributesKey.createTextAttributesKey(RobotTokenTypes.KEYWORD.toString(),
                                                                                               DefaultLanguageHighlighterColors.FUNCTION_DECLARATION);
+    public static final TextAttributesKey PARAMETER = TextAttributesKey.createTextAttributesKey(RobotTokenTypes.PARAMETER.toString(),
+                                                                                                DefaultLanguageHighlighterColors.PARAMETER);
     public static final TextAttributesKey ARGUMENT = TextAttributesKey.createTextAttributesKey(RobotTokenTypes.ARGUMENT.toString(),
                                                                                                DefaultLanguageHighlighterColors.STATIC_FIELD);
     public static final TextAttributesKey VARIABLE_DEFINITION = TextAttributesKey.createTextAttributesKey(RobotTokenTypes.VARIABLE_DEFINITION.toString(),
@@ -51,6 +53,7 @@ public class RobotHighlighter extends SyntaxHighlighterBase {
     static {
         keys1.put(RobotTokenTypes.HEADING, HEADING);
         keys1.put(RobotTokenTypes.COMMENT, COMMENT);
+        keys1.put(RobotTokenTypes.PARAMETER, PARAMETER);
         keys1.put(RobotTokenTypes.ARGUMENT, ARGUMENT);
         keys1.put(RobotTokenTypes.ERROR, ERROR);
         keys1.put(RobotTokenTypes.GHERKIN, GHERKIN);
@@ -66,7 +69,7 @@ public class RobotHighlighter extends SyntaxHighlighterBase {
 
     @NotNull
     @Override
-    public TextAttributesKey[] getTokenHighlights(IElementType tokenType) {
+    public TextAttributesKey @NotNull [] getTokenHighlights(IElementType tokenType) {
         return pack(keys1.get(tokenType), keys2.get(tokenType));
     }
 }

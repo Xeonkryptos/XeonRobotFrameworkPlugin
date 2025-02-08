@@ -127,13 +127,9 @@ public class KeywordDefinitionImpl extends RobotPsiElementBase implements Define
     @NotNull
     private Collection<DefinedVariable> getTestCaseVariables() {
         Set<DefinedVariable> results = new LinkedHashSet<>();
-        for (PsiElement child : getChildren()) {
-            if (child instanceof VariableDefinition) {
-                for (PsiElement element : child.getChildren()) {
-                    if (element instanceof VariableDefinitionId id) {
-                        results.add(new VariableDto(child, id.getText(), ReservedVariableScope.TestCase));
-                    }
-                }
+        for (VariableDefinition variableDefinition : PsiTreeUtil.getChildrenOfTypeAsList(this, VariableDefinition.class)) {
+            for (VariableDefinitionId variableDefinitionId : PsiTreeUtil.getChildrenOfTypeAsList(variableDefinition, VariableDefinitionId.class)) {
+                results.add(new VariableDto(variableDefinition, variableDefinitionId.getText(), ReservedVariableScope.TestCase));
             }
         }
         return results;

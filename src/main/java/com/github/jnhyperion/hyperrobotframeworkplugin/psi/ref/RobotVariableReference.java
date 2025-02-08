@@ -17,7 +17,7 @@ public class RobotVariableReference extends PsiReferenceBase<Variable> {
     @Nullable
     @Override
     public PsiElement resolve() {
-        Variable variable = this.getElement();
+        Variable variable = getElement();
         String variableName = variable.getPresentableText();
         PsiElement parentElement = variable.getParent();
 

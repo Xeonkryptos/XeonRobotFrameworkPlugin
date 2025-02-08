@@ -56,4 +56,9 @@ public abstract class RobotPsiElementBase extends ASTWrapperPsiElement implement
    public PsiElement setName(@NotNull String newName) {
       return this;
    }
+
+   @Override
+   public String toString() {
+      return super.toString() + "(" + getPresentableText() + ")";
+   }
 }

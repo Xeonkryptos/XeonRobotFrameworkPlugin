@@ -242,6 +242,9 @@ public class RobotLexer extends LexerBase {
                 } else if (state == TEST_CASES_HEADING || state == KEYWORDS_HEADING) {
                     this.currentToken = RobotTokenTypes.KEYWORD_DEFINITION;
                     this.level.push(KEYWORD_DEFINITION);
+                } else if (state == KEYWORD_DEFINITION && isAssignment(this.position)) {
+                    this.position++;
+                    this.currentToken = RobotTokenTypes.WHITESPACE;
                 } else {
                     if (!this.isTestTemplate && !this.isBracketTemplate || parentState != TEST_CASES_HEADING && state != KEYWORD_DEFINITION) {
                         this.currentToken = RobotTokenTypes.KEYWORD;
@@ -250,7 +253,11 @@ public class RobotLexer extends LexerBase {
                             this.level.push(KEYWORD);
                         }
                     } else {
-                        this.currentToken = RobotTokenTypes.ARGUMENT;
+                        if (isAssignment(this.position + 1)) {
+                            this.currentToken = RobotTokenTypes.PARAMETER;
+                        } else {
+                            this.currentToken = RobotTokenTypes.ARGUMENT;
+                        }
                         this.level.push(KEYWORD);
                     }
                 }
@@ -309,9 +316,15 @@ public class RobotLexer extends LexerBase {
             goToNextNewLineOrSuperSpaceOrVariable();
             this.currentToken = RobotTokenTypes.KEYWORD;
         } else {
-            goToNextNewLineOrSuperSpaceOrVariable();
+            goToNextNewLineOrSuperSpaceOrVariableOrArgument();
+            if (charAtEquals(this.position, '=') && charAtEquals(this.position + 1, '=')) {
+                goToNextNewLineOrSuperSpaceOrVariable();
+            }
             String word = getTokenText();
-            if (this.startOffset == 0 || charAtEquals(this.startOffset - 1, '\n')) {
+            if (word.isEmpty() && isAssignment(this.position)) {
+                this.position++;
+                this.currentToken = RobotTokenTypes.WHITESPACE;
+            } else if (this.startOffset == 0 || charAtEquals(this.startOffset - 1, '\n')) {
                 this.currentToken = RobotTokenTypes.KEYWORD_DEFINITION;
                 this.isBracketTemplate = false;
             } else if (RobotKeywordProvider.isSyntaxOfType(RobotTokenTypes.SYNTAX_MARKER, word)) {
@@ -321,7 +334,11 @@ public class RobotLexer extends LexerBase {
                 this.level.push(KEYWORD);
                 this.currentToken = RobotTokenTypes.KEYWORD;
             } else if (parentState != IMPORT || state != IF_CLAUSE) {
-                this.currentToken = RobotTokenTypes.ARGUMENT;
+                if (isAssignment(this.position)) {
+                    this.currentToken = RobotTokenTypes.PARAMETER;
+                } else {
+                    this.currentToken = RobotTokenTypes.ARGUMENT;
+                }
             } else {
                 this.currentToken = RobotTokenTypes.VARIABLE_DEFINITION;
             }
@@ -330,7 +347,7 @@ public class RobotLexer extends LexerBase {
 
     private void handleVariableDefinitionInKeyword() {
         goToNextNewLineOrSuperSpace();
-        if (getTokenText().equals("IF")) {
+        if ("IF".equals(getTokenText())) {
             this.currentToken = RobotTokenTypes.SYNTAX_MARKER;
             this.level.push(IF_CLAUSE);
         } else {
@@ -342,8 +359,8 @@ public class RobotLexer extends LexerBase {
     private boolean isWithinForLoop() {
         int startOffset = this.startOffset;
         List<TokenWord> tokenWords = extractTokenWords();
-        if (!tokenWords.isEmpty() && tokenWords.get(NONE).word.equals("FOR")) {
-            TokenWord forToken = tokenWords.get(NONE);
+        if (!tokenWords.isEmpty() && "FOR".equals(tokenWords.get(0).word)) {
+            TokenWord forToken = tokenWords.get(0);
             TokenWord inToken = null;
             for (TokenWord token : tokenWords) {
                 if (token.word.startsWith("IN")) {
@@ -373,9 +390,9 @@ public class RobotLexer extends LexerBase {
     private boolean isVariable(int position) {
         if (isVariableStart(position)) {
             position += 2;
-            for (int i = 1; i > NONE && position < this.endOffset && position >= NONE; position++) {
+            for (int i = 1; i > 0 && position < this.endOffset && position >= 0; position++) {
                 if (charAtEquals(position, '}')) {
-                    if (--i == NONE) {
+                    if (--i == 0) {
                         return true;
                     }
                 }
@@ -431,23 +448,23 @@ public class RobotLexer extends LexerBase {
     }
 
     private static boolean isSettings(String line) {
-        return "*** Settings ***".equals(line) || "*** Setting ***".equals(line);
+        return "*** Settings ***".equalsIgnoreCase(line) || "*** Setting ***".equalsIgnoreCase(line);
     }
 
     private static boolean isTestCases(String line) {
-        return line.contains("*** Test Cases ***") || line.contains("*** Test Case ***");
+        return line.toLowerCase().contains("*** test cases ***") || line.toLowerCase().contains("*** test case ***");
     }
 
     private static boolean isKeywords(String line) {
-        return "*** Keywords ***".equals(line) || "*** Keyword ***".equals(line);
+        return "*** Keywords ***".equalsIgnoreCase(line) || "*** Keyword ***".equalsIgnoreCase(line);
     }
 
     private static boolean isVariables(String line) {
-        return "*** Variables ***".equals(line) || "*** Variable ***".equals(line);
+        return "*** Variables ***".equalsIgnoreCase(line) || "*** Variable ***".equalsIgnoreCase(line);
     }
 
     private static boolean isTasks(String line) {
-        return "*** Tasks ***".equals(line) || "*** Task ***".equals(line);
+        return "*** Tasks ***".equalsIgnoreCase(line) || "*** Task ***".equalsIgnoreCase(line);
     }
 
     private boolean isHeading(int position) {
@@ -458,10 +475,7 @@ public class RobotLexer extends LexerBase {
         while (this.position < this.endOffset && (isWhitespace(position) || isNewLine(position))) {
             position++;
         }
-        return charAtEquals(position, '.') &&
-               charAtEquals(position + 1, '.') &&
-               charAtEquals(position + 2, '.') &&
-               isSuperSpaceOrNewline(position + 3);
+        return charAtEquals(position, '.') && charAtEquals(position + 1, '.') && charAtEquals(position + 2, '.') && isSuperSpaceOrNewline(position + 3);
     }
 
     private boolean isSuperSpacePrevious() {
@@ -540,13 +554,19 @@ public class RobotLexer extends LexerBase {
     }
 
     private void goToNextNewLineOrSuperSpace() {
-        while (this.position < this.endOffset && !this.isSuperSpaceOrNewline(this.position)) {
+        while (this.position < this.endOffset && !isSuperSpaceOrNewline(this.position)) {
             this.position++;
         }
     }
 
     private void goToNextNewLineOrSuperSpaceOrVariable() {
-        while (this.position < this.endOffset && !this.isSuperSpaceOrNewline(this.position) && !this.isVariable(this.position)) {
+        while (this.position < this.endOffset && !isSuperSpaceOrNewline(this.position) && !isVariable(this.position)) {
+            this.position++;
+        }
+    }
+
+    private void goToNextNewLineOrSuperSpaceOrVariableOrArgument() {
+        while (this.position < this.endOffset && !isSuperSpaceOrNewline(this.position) && !isVariable(this.position) && !isAssignment(this.position)) {
             this.position++;
         }
     }
@@ -590,6 +610,10 @@ public class RobotLexer extends LexerBase {
 
     private boolean isNewLine(int position) {
         return charAtEquals(position, '\n');
+    }
+
+    private boolean isAssignment(int position) {
+        return charAtEquals(position, '=') && !charAtEquals(position + 1, '=');
     }
 
     private boolean charAtEquals(int position, char c) {
