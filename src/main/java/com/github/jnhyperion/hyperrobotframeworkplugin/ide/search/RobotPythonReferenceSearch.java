@@ -31,17 +31,14 @@ public class RobotPythonReferenceSearch extends QueryExecutorBase<PsiReference, 
     @Override
     public void processQuery(@NotNull SearchParameters queryParameters, @NotNull Processor<? super PsiReference> consumer) {
         PsiElement elementToSearch = queryParameters.getElementToSearch();
-        if (elementToSearch instanceof KeywordDefinition) {
-            KeywordDefinition keywordDefinition = (KeywordDefinition) elementToSearch;
+        if (elementToSearch instanceof KeywordDefinition keywordDefinition) {
             Project project = keywordDefinition.getProject();
             SearchScope searchScope = queryParameters.getEffectiveSearchScope();
-            if (searchScope instanceof GlobalSearchScope) {
-                GlobalSearchScope globalSearchScope = (GlobalSearchScope) searchScope;
+            if (searchScope instanceof GlobalSearchScope globalSearchScope) {
                 Collection<VirtualFile> virtualFiles = FileTypeIndex.getFiles(RobotFeatureFileType.getInstance(), globalSearchScope);
                 processKeywordReferences(keywordDefinition, consumer, project, virtualFiles);
             }
-        } else if (elementToSearch instanceof RobotStatement) {
-            RobotStatement statement = (RobotStatement) elementToSearch;
+        } else if (elementToSearch instanceof RobotStatement statement) {
             SearchScope searchScope = queryParameters.getEffectiveSearchScope();
             searchWord(statement, queryParameters, searchScope);
         }

@@ -8,7 +8,6 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiNameIdentifierOwner;
-import com.intellij.psi.PsiReference;
 import com.intellij.psi.util.PsiTreeUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -131,8 +130,7 @@ public class KeywordDefinitionImpl extends RobotPsiElementBase implements Define
         for (PsiElement child : getChildren()) {
             if (child instanceof VariableDefinition) {
                 for (PsiElement element : child.getChildren()) {
-                    if (element instanceof VariableDefinitionId) {
-                        VariableDefinitionId id = (VariableDefinitionId) element;
+                    if (element instanceof VariableDefinitionId id) {
                         results.add(new VariableDto(child, id.getText(), ReservedVariableScope.TestCase));
                     }
                 }

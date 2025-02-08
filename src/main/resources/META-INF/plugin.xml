@@ -8,7 +8,8 @@
     <depends>com.intellij.modules.xdebugger</depends>
 
     <extensions defaultExtensionNs="com.intellij">
-        <projectConfigurable groupId="language" instance="com.github.jnhyperion.hyperrobotframeworkplugin.ide.config.RobotConfiguration" displayName="Robot Options"/>
+        <projectConfigurable groupId="language" instance="com.github.jnhyperion.hyperrobotframeworkplugin.ide.config.RobotConfiguration"
+                             displayName="Robot Options"/>
         <projectService serviceImplementation="com.github.jnhyperion.hyperrobotframeworkplugin.ide.config.RobotOptionsProvider"/>
         <fileType name="Robot Feature" implementationClass="com.github.jnhyperion.hyperrobotframeworkplugin.psi.RobotFeatureFileType" fieldName="INSTANCE"
                   language="Robot" extensions="robot"/>
@@ -88,7 +89,7 @@
         <spellchecker.support language="Robot" implementationClass="com.github.jnhyperion.hyperrobotframeworkplugin.ide.RobotSpellcheckingStrategy"/>
 
         <xdebugger.breakpointType implementation="com.github.jnhyperion.hyperrobotframeworkplugin.ide.debugger.RobotLineBreakpoint"/>
-<!--        <programRunner implementation="com.github.jnhyperion.hyperrobotframeworkplugin.ide.execution.RobotProgramRunner"/>-->
+        <!--        <programRunner implementation="com.github.jnhyperion.hyperrobotframeworkplugin.ide.execution.RobotProgramRunner"/>-->
         <!--<programRunner implementation="com.github.jnhyperion.hyperrobotframeworkplugin.ide.debugger.RobotDebugRunner"/>-->
     </extensions>
     <extensions defaultExtensionNs="Pythonid">

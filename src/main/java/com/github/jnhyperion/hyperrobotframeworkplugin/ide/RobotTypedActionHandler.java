@@ -14,16 +14,13 @@ public class RobotTypedActionHandler extends TypedHandlerDelegate {
     @NotNull
     @Override
     public Result beforeCharTyped(char c, @NotNull Project project, @NotNull Editor editor, @NotNull PsiFile file, @NotNull FileType fileType) {
-        try {
-            if (file instanceof RobotFile && (c == '$' || c == '@' || c == '&') && RobotOptionsProvider.getInstance(project).smartAutoEncloseVariable()) {
-                int offset = editor.getCaretModel().getOffset();
-                String documentText = editor.getDocument().getText();
-                String newText = documentText.substring(0, offset) + c + "{}" + documentText.substring(offset);
-                editor.getDocument().setText(newText);
-                editor.getCaretModel().moveToOffset(offset + 2);
-                return Result.STOP;
-            }
-        } catch (Throwable ignored) {
+        if (file instanceof RobotFile && (c == '$' || c == '@' || c == '&') && RobotOptionsProvider.getInstance(project).smartAutoEncloseVariable()) {
+            int offset = editor.getCaretModel().getOffset();
+            String documentText = editor.getDocument().getText();
+            String newText = documentText.substring(0, offset) + c + "{}" + documentText.substring(offset);
+            editor.getDocument().setText(newText);
+            editor.getCaretModel().moveToOffset(offset + 2);
+            return Result.STOP;
         }
         return Result.CONTINUE;
     }

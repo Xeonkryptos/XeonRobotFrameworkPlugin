@@ -114,6 +114,7 @@ public class RobotLexer extends LexerBase {
             this.level.clear();
             this.level.push(TEST_CASES_HEADING);
         } else if (isKeywords(line)) {
+            this.isTestTemplate = false;
             this.level.clear();
             this.level.push(KEYWORDS_HEADING);
         } else if (isVariables(line)) {
