@@ -5,6 +5,7 @@ import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.BracketSettin
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.Heading;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.KeywordStatement;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.Setting;
+import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.Variable;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.ref.PythonResolver;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiElement;
@@ -24,25 +25,25 @@ public enum ReservedVariableScope {
         @Override
         public final boolean isInScope(@NotNull PsiElement element) {
             // only in test cases
-            return isArgument(element) && isInTestCase(element) || TestTeardown.isInScope(element);
+            return (isArgument(element) || isVariable(element)) && isInTestCase(element) || TestTeardown.isInScope(element);
         }
     }, KeywordTeardown {
         @Override
         public final boolean isInScope(@NotNull PsiElement element) {
             // only in teardown for keywords
-            return isArgument(element) && isInKeywordTeardown(element);
+            return (isArgument(element) || isVariable(element)) && isInKeywordTeardown(element);
         }
     }, TestTeardown {
         @Override
         public boolean isInScope(@NotNull PsiElement element) {
             // only in teardown for test cases
-            return isArgument(element) && isInTestTeardown(element);
+            return (isArgument(element) || isVariable(element)) && isInTestTeardown(element);
         }
     }, SuiteTeardown {
         @Override
         public boolean isInScope(@NotNull PsiElement element) {
             // only in teardown for suites
-            return isArgument(element) && isInSuiteTeardown(element);
+            return (isArgument(element) || isVariable(element)) && isInSuiteTeardown(element);
         }
     }, KeywordStatement {
         @Override
@@ -53,6 +54,10 @@ public enum ReservedVariableScope {
 
     private static boolean isArgument(@NotNull PsiElement position) {
         return position instanceof Argument || PsiTreeUtil.getParentOfType(position, Argument.class) != null;
+    }
+
+    private static boolean isVariable(@NotNull PsiElement position) {
+        return position instanceof Variable || PsiTreeUtil.getParentOfType(position, Variable.class) != null;
     }
 
     /**
