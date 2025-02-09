@@ -4,5 +4,7 @@ import com.intellij.psi.PsiNamedElement;
 
 public interface VariableDefinition extends RobotStatement, PsiNamedElement {
 
+   String getVariableName();
+
    boolean isNested();
 }

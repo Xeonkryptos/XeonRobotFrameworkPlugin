@@ -1,8 +1,8 @@
 package com.github.jnhyperion.hyperrobotframeworkplugin.psi.element;
 
+import com.github.jnhyperion.hyperrobotframeworkplugin.psi.dto.ParameterDto;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.dto.VariableDto;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.util.PatternUtil;
-import com.github.jnhyperion.hyperrobotframeworkplugin.psi.util.ReservedVariableScope;
 import com.intellij.lang.ASTNode;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiReference;
@@ -26,7 +26,7 @@ public class KeywordStatementImpl extends RobotPsiElementBase implements Keyword
     private List<Argument> arguments;
     private DefinedVariable variable;
     private KeywordInvokable invokable;
-    private Collection<DefinedVariable> availableKeywordParameters;
+    private Collection<DefinedParameter> availableKeywordParameters;
 
     public KeywordStatementImpl(@NotNull ASTNode node) {
         super(node);
@@ -71,8 +71,8 @@ public class KeywordStatementImpl extends RobotPsiElementBase implements Keyword
 
     @NotNull
     @Override
-    public Collection<DefinedVariable> getAvailableParameters() {
-        Collection<DefinedVariable> localDefinedParameters = this.availableKeywordParameters;
+    public Collection<DefinedParameter> getAvailableParameters() {
+        Collection<DefinedParameter> localDefinedParameters = this.availableKeywordParameters;
         if (this.availableKeywordParameters == null) {
             localDefinedParameters = collectKeywordParameters();
             this.availableKeywordParameters = localDefinedParameters;
@@ -103,8 +103,8 @@ public class KeywordStatementImpl extends RobotPsiElementBase implements Keyword
     }
 
     @NotNull
-    private Collection<DefinedVariable> collectKeywordParameters() {
-        Set<DefinedVariable> results = new LinkedHashSet<>();
+    private Collection<DefinedParameter> collectKeywordParameters() {
+        Set<DefinedParameter> results = new LinkedHashSet<>();
         Optional<PsiElement> resolvedReferenceOpt = Optional.ofNullable(PsiTreeUtil.findChildOfType(this, KeywordInvokable.class))
                                                             .map(KeywordInvokable::getReference)
                                                             .map(PsiReference::resolve);
@@ -114,10 +114,9 @@ public class KeywordStatementImpl extends RobotPsiElementBase implements Keyword
                 PyParameter[] parameters = pyFunction.getParameterList().getParameters();
                 for (PyParameter parameter : parameters) {
                     PyNamedParameter parameterName = parameter.getAsNamed();
-                    if (parameterName != null) {
-                        if (!parameterName.isSelf()) {
-                            results.add(new VariableDto(parameter, parameterName.getRepr(false), ReservedVariableScope.KeywordStatement));
-                        }
+                    if (parameterName != null && !parameterName.isSelf() && !parameterName.isPositionalContainer() && !parameterName.isKeywordContainer()) {
+                        String defaultValueText = parameter.getDefaultValueText();
+                        results.add(new ParameterDto(parameter, parameterName.getRepr(false), defaultValueText));
                     }
                 }
             }

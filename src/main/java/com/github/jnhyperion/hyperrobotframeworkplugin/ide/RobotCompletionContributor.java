@@ -11,6 +11,7 @@ import com.github.jnhyperion.hyperrobotframeworkplugin.psi.dto.ImportType;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.dto.KeywordDto;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.Argument;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.DefinedKeyword;
+import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.DefinedParameter;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.DefinedVariable;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.Heading;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.Import;
@@ -18,6 +19,7 @@ import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.KeywordDefini
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.KeywordDefinitionImpl;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.KeywordFile;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.KeywordStatement;
+import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.LookupElementMarker;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.Parameter;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.ParameterId;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.RobotFile;
@@ -39,6 +41,7 @@ import com.intellij.icons.AllIcons.Nodes;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.util.TextRange;
 import com.intellij.openapi.util.io.FileUtil;
+import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.patterns.PlatformPatterns;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
@@ -50,6 +53,7 @@ import org.apache.commons.text.WordUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import javax.swing.Icon;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -252,7 +256,7 @@ public class RobotCompletionContributor extends CompletionContributor {
                                                  @NotNull CompletionResultSet result) {
                        KeywordStatement keyword = PsiTreeUtil.getParentOfType(parameters.getPosition(), KeywordStatement.class);
                        if (keyword != null) {
-                           addKeywordParameters(keyword, result, parameters.getPosition());
+                           addKeywordParameters(keyword, result);
                        }
                    }
                });
@@ -420,14 +424,7 @@ public class RobotCompletionContributor extends CompletionContributor {
 
         if (keywordDefinition != null) {
             for (DefinedVariable variable : keywordDefinition.getDeclaredVariables()) {
-                String lookup = variable.getLookup();
-                if (lookup != null) {
-                    String[] lookupStrings = { lookup, WordUtils.capitalize(lookup), lookup.toLowerCase() };
-                    LookupElementBuilder builder = LookupElementBuilder.create(lookup).withLookupStrings(Arrays.asList(lookupStrings)).withIcon(Nodes.Variable);
-                    TailTypeDecorator<LookupElementBuilder> decoratedBuilder = TailTypeDecorator.withTail(addReferenceType(variable.reference(), builder),
-                                                                                                          TailTypes.noneType());
-                    resultSet.addElement(decoratedBuilder);
-                }
+                addLookupElement(variable, Nodes.Variable, TailTypes.noneType(), resultSet);
             }
         }
     }
@@ -444,32 +441,30 @@ public class RobotCompletionContributor extends CompletionContributor {
                                             @NotNull TailType tailType) {
         for (DefinedVariable variable : variables) {
             if (variable.isInScope(element)) {
-                String lookup = variable.getLookup();
-                if (lookup != null) {
-                    String[] lookupStrings = { lookup, WordUtils.capitalize(lookup), lookup.toLowerCase() };
-                    LookupElementBuilder builder = LookupElementBuilder.create(lookup).withLookupStrings(Arrays.asList(lookupStrings)).withIcon(Nodes.Variable);
-                    TailTypeDecorator<LookupElementBuilder> decoratedBuilder = TailTypeDecorator.withTail(addReferenceType(variable.reference(), builder),
-                                                                                                          tailType);
-                    resultSet.addElement(decoratedBuilder);
-                }
+                addLookupElement(variable, Nodes.Variable, tailType, resultSet);
             }
         }
     }
 
-    private static void addKeywordParameters(@NotNull KeywordStatement keywordStatement, @NotNull CompletionResultSet resultSet, @NotNull PsiElement position) {
-        Collection<DefinedVariable> availableParameters = keywordStatement.getAvailableParameters();
+    private static void addKeywordParameters(@NotNull KeywordStatement keywordStatement, @NotNull CompletionResultSet resultSet) {
+        Collection<DefinedParameter> availableParameters = keywordStatement.getAvailableParameters();
         Set<String> arguments = keywordStatement.getParameters()
                                                 .stream()
                                                 .flatMap(parameter -> PsiTreeUtil.getChildrenOfTypeAsList(parameter, ParameterId.class).stream())
                                                 .map(RobotStatement::getPresentableText)
                                                 .collect(Collectors.toSet());
         availableParameters.removeIf(variable -> arguments.contains(variable.getLookup()));
-        addDefinedVariables(availableParameters, resultSet, position, TailType.createSimpleTailType('='));
+
+        TailType assignmentTailType = TailType.createSimpleTailType('=');
+        for (DefinedParameter parameter : availableParameters) {
+            addLookupElement(parameter, Nodes.Parameter, assignmentTailType, resultSet);
+        }
     }
 
     public static LookupElementBuilder addReferenceType(PsiElement element, LookupElementBuilder builder) {
-        try {
-            String fileName = element.getContainingFile().getVirtualFile().getName();
+        VirtualFile virtualFile = element.getContainingFile().getVirtualFile();
+        if (virtualFile != null) {
+            String fileName = virtualFile.getName();
             if (fileName.endsWith(".resource")) {
                 builder = builder.withTypeText(getBaseName(fileName), RobotIcons.RESOURCE, true);
             } else if (fileName.endsWith(".robot")) {
@@ -482,11 +477,21 @@ public class RobotCompletionContributor extends CompletionContributor {
             } else {
                 builder = builder.withTypeText(getBaseName(fileName), true);
             }
-        } catch (Throwable ignored) {
-            // Log or handle the exception if necessary
         }
-
         return builder;
+    }
+
+    private static void addLookupElement(LookupElementMarker variable,
+                                         @Nullable Icon icon,
+                                         @NotNull TailType tailType,
+                                         @NotNull CompletionResultSet resultSet) {
+        String lookup = variable.getLookup();
+        if (lookup != null) {
+            String[] lookupStrings = { lookup, WordUtils.capitalize(lookup), lookup.toLowerCase() };
+            LookupElementBuilder builder = LookupElementBuilder.create(lookup).withLookupStrings(Arrays.asList(lookupStrings)).withIcon(icon);
+            TailTypeDecorator<LookupElementBuilder> lookupElement = TailTypeDecorator.withTail(addReferenceType(variable.reference(), builder), tailType);
+            resultSet.addElement(lookupElement);
+        }
     }
 
     private static String getBaseName(String fileName) {
@@ -532,8 +537,8 @@ public class RobotCompletionContributor extends CompletionContributor {
                 return formatArguments(((KeywordDto) keyword).getParameters());
             }
 
-            if (keyword instanceof KeywordDefinitionImpl) {
-                return formatArguments(((KeywordDefinitionImpl) keyword).getDefinedArguments());
+            if (keyword instanceof KeywordDefinitionImpl keywordDefinition) {
+                return formatArguments(keywordDefinition.getDefinedArguments());
             }
         } catch (Exception ignored) {
         }

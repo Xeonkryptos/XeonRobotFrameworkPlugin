@@ -3,7 +3,7 @@ package com.github.jnhyperion.hyperrobotframeworkplugin.psi.element;
 import com.intellij.psi.PsiElement;
 import org.jetbrains.annotations.Nullable;
 
-public interface DefinedVariable {
+public interface DefinedVariable extends LookupElementMarker {
 
    boolean matches(@Nullable String text);
 

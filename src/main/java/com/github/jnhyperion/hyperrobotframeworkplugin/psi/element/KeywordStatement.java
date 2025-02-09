@@ -17,7 +17,7 @@ public interface KeywordStatement extends RobotStatement {
    List<Argument> getArguments();
 
    @NotNull
-   Collection<DefinedVariable> getAvailableParameters();
+   Collection<DefinedParameter> getAvailableParameters();
 
    @Nullable
    DefinedVariable getGlobalVariable();
