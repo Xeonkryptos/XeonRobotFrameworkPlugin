@@ -79,7 +79,7 @@ public class RobotPythonFile extends RobotPythonWrapper implements KeywordFile {
                         }
 
                         for (PyClass pyClass : this.pythonFile.getTopLevelClasses()) {
-                            if (!pyClass.getName().startsWith("_")) {
+                            if (pyClass.getName() != null && !pyClass.getName().startsWith("_")) {
                                 String className = pyClass.getQualifiedName();
                                 if (className == null) {
                                     className = "";

@@ -1,6 +1,6 @@
 package com.github.jnhyperion.hyperrobotframeworkplugin.psi.ref;
 
-import com.github.jnhyperion.hyperrobotframeworkplugin.ide.RobotCompletionContributor;
+import com.github.jnhyperion.hyperrobotframeworkplugin.ide.completion.RobotCompletionContributor;
 import com.github.jnhyperion.hyperrobotframeworkplugin.ide.RobotTailTypes;
 import com.github.jnhyperion.hyperrobotframeworkplugin.ide.config.RobotOptionsProvider;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.dto.ImportType;

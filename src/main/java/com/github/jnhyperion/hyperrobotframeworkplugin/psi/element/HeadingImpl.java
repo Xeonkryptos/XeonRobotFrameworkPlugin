@@ -2,13 +2,11 @@ package com.github.jnhyperion.hyperrobotframeworkplugin.psi.element;
 
 import com.github.jnhyperion.hyperrobotframeworkplugin.ide.icons.RobotIcons;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.dto.ImportType;
-import com.github.jnhyperion.hyperrobotframeworkplugin.psi.dto.VariableDto;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.ref.PythonResolver;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.ref.ResolverUtils;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.ref.RobotFileManager;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.ref.RobotPythonClass;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.ref.RobotPythonFile;
-import com.github.jnhyperion.hyperrobotframeworkplugin.psi.util.ReservedVariableScope;
 import com.intellij.lang.ASTNode;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
@@ -114,12 +112,8 @@ public class HeadingImpl extends RobotPsiElementBase implements Heading {
                 results = new LinkedHashSet<>(RobotFileManager.getGlobalVariables(getProject()));
                 if (containsVariables()) {
                     for (PsiElement child : getChildren()) {
-                        if (child instanceof DefinedVariable) {
-                            if (child instanceof VariableDefinition variable) {
-                                results.add(new VariableDto(child, variable.getVariableName(), ReservedVariableScope.Global));
-                            } else {
-                                results.add((DefinedVariable) child);
-                            }
+                        if (child instanceof DefinedVariable definedVariable) {
+                            results.add(definedVariable);
                         }
                     }
                 } else if (isSettings()) {
@@ -127,8 +121,8 @@ public class HeadingImpl extends RobotPsiElementBase implements Heading {
                     for (int i = 0; i < children.length; i++) {
                         PsiElement child = children[i];
                         if (child instanceof Setting setting) {
-                            if (setting.getText().equalsIgnoreCase("Suite Setup")
-                                || setting.getText().equalsIgnoreCase("Test Setup") && i + 1 < children.length && children[i + 1] instanceof KeywordStatement) {
+                            if (setting.getText().equalsIgnoreCase("Suite Setup") ||
+                                setting.getText().equalsIgnoreCase("Test Setup") && i + 1 < children.length && children[i + 1] instanceof KeywordStatement) {
                                 List<DefinedVariable> resolvedVariablesInKeywords = ResolverUtils.walkKeyword((KeywordStatement) children[i + 1]);
                                 results.addAll(resolvedVariablesInKeywords);
                             }
@@ -394,7 +388,6 @@ public class HeadingImpl extends RobotPsiElementBase implements Heading {
      *
      * @param imp     the import statement to get the namespace of.
      * @param library the first argument; aka the default namespace
-     *
      * @return the namespace of the import.
      */
     private static String getNamespace(Import imp, Argument library) {
@@ -409,8 +402,9 @@ public class HeadingImpl extends RobotPsiElementBase implements Heading {
             RobotStatement secondStatement = args.get(args.size() - 2);
             if (secondStatement instanceof Argument && WITH_NAME.equals(secondStatement.getPresentableText())) {
                 results = firstStatement.getPresentableText();
-            } else if (secondStatement instanceof KeywordInvokable && AS.equals(secondStatement.getPresentableText())
-                       && firstStatement instanceof VariableDefinition) {
+            } else if (secondStatement instanceof KeywordInvokable &&
+                       AS.equals(secondStatement.getPresentableText()) &&
+                       firstStatement instanceof VariableDefinition) {
                 results = firstStatement.getPresentableText();
             }
         }

@@ -14,7 +14,6 @@ import org.jetbrains.annotations.Nullable;
 
 import javax.swing.Icon;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -112,16 +111,11 @@ public class KeywordDefinitionImpl extends RobotPsiElementBase implements Define
 
     @NotNull
     private Collection<DefinedVariable> collectDefinedArguments() {
-        return Arrays.stream(getChildren())
-                     .filter(child -> child instanceof BracketSetting)
-                     .map(child -> (BracketSetting) child)
-                     .filter(BracketSetting::isArguments)
-                     .flatMap(bracketSetting -> Arrays.stream(bracketSetting.getChildren()))
-                     .filter(argument -> argument instanceof Argument)
-                     .flatMap(argument -> Arrays.stream(argument.getChildren()))
-                     .filter(argumentChild -> argumentChild instanceof DefinedVariable)
-                     .map(argumentChild -> (DefinedVariable) argumentChild)
-                     .collect(Collectors.toSet());
+        return PsiTreeUtil.getChildrenOfTypeAsList(this, BracketSetting.class)
+                          .stream()
+                          .filter(BracketSetting::isArguments)
+                          .flatMap(bracketSetting -> PsiTreeUtil.getChildrenOfTypeAsList(bracketSetting, VariableDefinition.class).stream())
+                          .collect(Collectors.toSet());
     }
 
     @NotNull

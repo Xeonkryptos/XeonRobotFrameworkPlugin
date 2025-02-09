@@ -17,7 +17,7 @@
                   language="Robot" extensions="resource"/>
         <colorSettingsPage implementation="com.github.jnhyperion.hyperrobotframeworkplugin.ide.config.RobotColorsPage"/>
         <!-- IDE Hooks -->
-        <completion.contributor language="Robot" implementationClass="com.github.jnhyperion.hyperrobotframeworkplugin.ide.RobotCompletionContributor"/>
+        <completion.contributor language="Robot" implementationClass="com.github.jnhyperion.hyperrobotframeworkplugin.ide.completion.RobotCompletionContributor"/>
         <lang.findUsagesProvider language="Robot" implementationClass="com.github.jnhyperion.hyperrobotframeworkplugin.ide.usage.RobotFindUsagesProvider"/>
         <fileStructureGroupRuleProvider implementation="com.github.jnhyperion.hyperrobotframeworkplugin.ide.usage.RobotKeywordGroupingRuleProvider"/>
         <referencesSearch implementation="com.github.jnhyperion.hyperrobotframeworkplugin.ide.search.RobotPythonReferenceSearch"/>
@@ -93,6 +93,8 @@
         <xdebugger.breakpointType implementation="com.github.jnhyperion.hyperrobotframeworkplugin.ide.debugger.RobotLineBreakpoint"/>
         <!--        <programRunner implementation="com.github.jnhyperion.hyperrobotframeworkplugin.ide.execution.RobotProgramRunner"/>-->
         <!--<programRunner implementation="com.github.jnhyperion.hyperrobotframeworkplugin.ide.debugger.RobotDebugRunner"/>-->
+
+        <weigher key="completion" implementationClass="com.github.jnhyperion.hyperrobotframeworkplugin.ide.completion.RobotContextLevelWeigher" id="context" order="first"/>
     </extensions>
     <extensions defaultExtensionNs="Pythonid">
         <breakpointHandler implementation="com.github.jnhyperion.hyperrobotframeworkplugin.ide.debugger.RobotBreakpointHandlerFactory"/>

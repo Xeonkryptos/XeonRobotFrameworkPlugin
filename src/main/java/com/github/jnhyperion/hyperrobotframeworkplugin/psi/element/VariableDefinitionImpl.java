@@ -13,7 +13,7 @@ import org.jetbrains.annotations.Nullable;
 import javax.swing.Icon;
 import java.util.regex.Pattern;
 
-public class VariableDefinitionImpl extends RobotPsiElementBase implements DefinedVariable, VariableDefinition, PsiNameIdentifierOwner {
+public class VariableDefinitionImpl extends RobotPsiElementBase implements VariableDefinition, PsiNameIdentifierOwner {
 
     private Pattern pattern;
 
@@ -60,7 +60,7 @@ public class VariableDefinitionImpl extends RobotPsiElementBase implements Defin
     @Nullable
     @Override
     public final String getLookup() {
-        return this.getText();
+        return getVariableName();
     }
 
     @Override

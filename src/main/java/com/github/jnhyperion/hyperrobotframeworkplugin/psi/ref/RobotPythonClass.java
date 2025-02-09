@@ -8,10 +8,13 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiFile;
 import com.jetbrains.python.psi.PyClass;
-
-import java.util.*;
-
 import org.jetbrains.annotations.NotNull;
+
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 public class RobotPythonClass extends RobotPythonWrapper implements KeywordFile {
 
@@ -22,13 +25,17 @@ public class RobotPythonClass extends RobotPythonWrapper implements KeywordFile 
     private final Project project;
     private final boolean isDifferentNamespace;
 
-    public RobotPythonClass(@NotNull String library, @NotNull PyClass pythonClass, @NotNull ImportType importType, @NotNull Project project, boolean var5) {
+    public RobotPythonClass(@NotNull String library,
+                            @NotNull PyClass pythonClass,
+                            @NotNull ImportType importType,
+                            @NotNull Project project,
+                            boolean isDifferentNamespace) {
         this.library = library;
         this.pythonClass = pythonClass;
         this.importType = importType;
         this.uniqueIdentifier = this.pythonClass.getName() + "#" + this.library + "#" + this.pythonClass.hashCode();
         this.project = project;
-        this.isDifferentNamespace = var5;
+        this.isDifferentNamespace = isDifferentNamespace;
     }
 
     @NotNull

@@ -1,5 +1,6 @@
-package com.github.jnhyperion.hyperrobotframeworkplugin.ide;
+package com.github.jnhyperion.hyperrobotframeworkplugin.ide.completion;
 
+import com.github.jnhyperion.hyperrobotframeworkplugin.ide.RobotTailTypes;
 import com.github.jnhyperion.hyperrobotframeworkplugin.ide.config.RobotOptionsProvider;
 import com.github.jnhyperion.hyperrobotframeworkplugin.ide.icons.RobotIcons;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.RecommendationWord;
@@ -24,7 +25,6 @@ import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.Parameter;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.ParameterId;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.RobotFile;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.RobotStatement;
-import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.Variable;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.ref.RobotFileManager;
 import com.intellij.codeInsight.TailType;
 import com.intellij.codeInsight.TailTypes;
@@ -33,16 +33,20 @@ import com.intellij.codeInsight.completion.CompletionParameters;
 import com.intellij.codeInsight.completion.CompletionProvider;
 import com.intellij.codeInsight.completion.CompletionResultSet;
 import com.intellij.codeInsight.completion.CompletionType;
+import com.intellij.codeInsight.completion.InsertionContext;
 import com.intellij.codeInsight.lookup.LookupElement;
 import com.intellij.codeInsight.lookup.LookupElementBuilder;
 import com.intellij.codeInsight.lookup.TailTypeDecorator;
 import com.intellij.icons.AllIcons;
 import com.intellij.icons.AllIcons.Nodes;
 import com.intellij.openapi.editor.Document;
+import com.intellij.openapi.editor.Editor;
+import com.intellij.openapi.util.Key;
 import com.intellij.openapi.util.TextRange;
 import com.intellij.openapi.util.io.FileUtil;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.patterns.PlatformPatterns;
+import com.intellij.patterns.PsiElementPattern;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.util.PsiTreeUtil;
@@ -60,6 +64,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -69,8 +74,7 @@ public class RobotCompletionContributor extends CompletionContributor {
         extend(CompletionType.BASIC,
                PlatformPatterns.psiElement()
                                .andNot(PlatformPatterns.psiComment())
-                               .andNot(PlatformPatterns.psiElement(RobotTokenTypes.ARGUMENT)
-                                                       .withAncestor(5, PlatformPatterns.psiElement(RobotTokenTypes.KEYWORD_STATEMENT)))
+                               .andNot(withArgumentInKeywordStatement())
                                .andNot(PlatformPatterns.psiElement(RobotTokenTypes.SYNTAX_MARKER))
                                .inFile(PlatformPatterns.psiElement(RobotFile.class)),
                new CompletionProvider<>() {
@@ -82,8 +86,8 @@ public class RobotCompletionContributor extends CompletionContributor {
                            boolean isResource = parameters.getOriginalFile().getFileType() instanceof RobotResourceFileType;
 
                            for (LookupElement element : addSyntaxLookup(RobotTokenTypes.HEADING)) {
-                               if (!isResource ||
-                                   !"*** Test Cases ***".equals(element.getLookupString()) && !"*** Tasks ***".equals(element.getLookupString())) {
+                               String lookupString = element.getLookupString();
+                               if (!isResource || !"*** Test Cases ***".equals(lookupString) && !"*** Tasks ***".equals(lookupString)) {
                                    result.addElement(element);
                                }
                            }
@@ -130,7 +134,8 @@ public class RobotCompletionContributor extends CompletionContributor {
         extend(CompletionType.BASIC,
                PlatformPatterns.psiElement()
                                .andNot(PlatformPatterns.psiComment())
-                               .and(PlatformPatterns.psiElement(RobotTokenTypes.ARGUMENT).withAncestor(4, PlatformPatterns.psiElement(RobotTokenTypes.IMPORT)))
+                               .and(PlatformPatterns.psiElement(RobotTokenTypes.ARGUMENT)
+                                                    .withSuperParent(2, PlatformPatterns.psiElement(RobotTokenTypes.IMPORT)))
                                .inFile(PlatformPatterns.psiElement(RobotFile.class)),
                new CompletionProvider<>() {
                    @Override
@@ -174,8 +179,7 @@ public class RobotCompletionContributor extends CompletionContributor {
         extend(CompletionType.BASIC,
                PlatformPatterns.psiElement()
                                .andNot(PlatformPatterns.psiComment())
-                               .andNot(PlatformPatterns.psiElement(RobotTokenTypes.ARGUMENT)
-                                                       .withAncestor(5, PlatformPatterns.psiElement(RobotTokenTypes.KEYWORD_STATEMENT)))
+                               .andNot(withArgumentInKeywordStatement())
                                .inFile(PlatformPatterns.psiElement(RobotFile.class)),
                new CompletionProvider<>() {
                    @Override
@@ -191,7 +195,8 @@ public class RobotCompletionContributor extends CompletionContributor {
                            List<LookupElement> specialElements = new ArrayList<>();
 
                            for (LookupElement element : lookupElements) {
-                               if (!element.getLookupString().equals("AS") && !element.getLookupString().startsWith("IN")) {
+                               String lookupString = element.getLookupString();
+                               if (!"AS".equals(lookupString) && !lookupString.startsWith("IN")) {
                                    nonSpecialElements.add(element);
                                } else {
                                    specialElements.add(element);
@@ -209,8 +214,7 @@ public class RobotCompletionContributor extends CompletionContributor {
         extend(CompletionType.BASIC,
                PlatformPatterns.psiElement()
                                .andNot(PlatformPatterns.psiComment())
-                               .andNot(PlatformPatterns.psiElement(RobotTokenTypes.ARGUMENT)
-                                                       .withAncestor(5, PlatformPatterns.psiElement(RobotTokenTypes.KEYWORD_STATEMENT)))
+                               .andNot(withArgumentInKeywordStatement())
                                .inFile(PlatformPatterns.psiElement(RobotFile.class)),
                new CompletionProvider<>() {
                    @Override
@@ -222,67 +226,60 @@ public class RobotCompletionContributor extends CompletionContributor {
                            heading != null &&
                            (heading.containsTestCases() || heading.containsKeywordDefinitions() || heading.containsTasks())) {
                            addDefinedKeywordsFromFile(result, parameters.getOriginalFile());
-                       }
-                   }
-               });
-        extend(CompletionType.BASIC,
-               PlatformPatterns.psiElement()
-                               .andNot(PlatformPatterns.psiComment())
-                               .andOr(PlatformPatterns.psiElement(RobotTokenTypes.KEYWORD), PlatformPatterns.psiElement(RobotTokenTypes.SYNTAX_MARKER))
-                               .andNot(PlatformPatterns.psiElement(RobotTokenTypes.ARGUMENT)
-                                                       .withAncestor(5, PlatformPatterns.psiElement(RobotTokenTypes.KEYWORD_STATEMENT)))
-                               .inFile(PlatformPatterns.psiElement(RobotFile.class)),
-               new CompletionProvider<>() {
-                   @Override
-                   protected void addCompletions(@NotNull CompletionParameters parameters,
-                                                 @NotNull ProcessingContext context,
-                                                 @NotNull CompletionResultSet result) {
-                       Heading heading = getHeading(parameters.getPosition());
-                       if (heading != null && heading.isSettings()) {
+                       } else if (heading != null && heading.isSettings()) {
                            addDefinedKeywordsFromFile(result, parameters.getOriginalFile());
                        }
                    }
                });
-        extend(CompletionType.BASIC,
-               PlatformPatterns.psiElement()
-                               .andNot(PlatformPatterns.psiComment())
-                               .and(PlatformPatterns.psiElement(RobotTokenTypes.ARGUMENT)
-                                                    .withAncestor(5, PlatformPatterns.psiElement(RobotTokenTypes.KEYWORD_STATEMENT)))
-                               .inFile(PlatformPatterns.psiElement(RobotFile.class)),
-               new CompletionProvider<>() {
-                   @Override
-                   protected void addCompletions(@NotNull CompletionParameters parameters,
-                                                 @NotNull ProcessingContext context,
-                                                 @NotNull CompletionResultSet result) {
-                       KeywordStatement keyword = PsiTreeUtil.getParentOfType(parameters.getPosition(), KeywordStatement.class);
-                       if (keyword != null) {
-                           addKeywordParameters(keyword, result);
-                       }
-                   }
-               });
+        // Provide parameter completions in context of keyword statements
+        extend(CompletionType.BASIC, PlatformPatterns.psiElement()
+                                                     .andNot(PlatformPatterns.psiComment())
+                                                     .and(withArgumentInKeywordStatement())
+                                                     // Don't provide parameters in parameter context. There is no nesting of function parameters
+                                                     .andNot(PlatformPatterns.psiElement()
+                                                                             .withSuperParent(2, PlatformPatterns.psiElement(RobotTokenTypes.PARAMETER)))
+                                                     .inFile(PlatformPatterns.psiElement(RobotFile.class)), new CompletionProvider<>() {
+            @Override
+            protected void addCompletions(@NotNull CompletionParameters parameters, @NotNull ProcessingContext context, @NotNull CompletionResultSet result) {
+                KeywordStatement keyword = PsiTreeUtil.getParentOfType(parameters.getPosition(), KeywordStatement.class);
+                if (keyword != null) {
+                    addKeywordParameters(keyword, result);
+                }
+            }
+        });
         // Provide completions in context of variables
         extend(CompletionType.BASIC,
-               PlatformPatterns.psiElement()
-                               .andOr(PlatformPatterns.psiElement(RobotTokenTypes.ARGUMENT), PlatformPatterns.psiElement(RobotTokenTypes.VARIABLE))
-                               .andNot(PlatformPatterns.psiComment())
-                               .inFile(PlatformPatterns.psiElement(RobotFile.class)),
+               PlatformPatterns.psiElement(RobotTokenTypes.VARIABLE).inFile(PlatformPatterns.psiElement(RobotFile.class)),
                new CompletionProvider<>() {
                    @Override
                    protected void addCompletions(@NotNull CompletionParameters parameters,
                                                  @NotNull ProcessingContext context,
                                                  @NotNull CompletionResultSet result) {
                        PsiElement psiElement = parameters.getPosition();
-                       if (isVariable(psiElement)) {
-                           Parameter parameter = PsiTreeUtil.getParentOfType(psiElement, Parameter.class);
-                           if (parameter != null) {
-                               // In parameter context, the prefix usually contains the parameter name, too. For finding and filtering variable names, we need to
-                               // remove the parameter name from the prefix.
-                               String parameterName = parameter.getParameterName();
-                               String prefix = result.getPrefixMatcher().getPrefix();
-                               String newPrefix = prefix.substring(parameterName.length() + 1);
-                               result = result.withPrefixMatcher(newPrefix);
-                           }
+                       Parameter parameter = PsiTreeUtil.getParentOfType(psiElement, Parameter.class);
+                       if (parameter != null) {
+                           // In parameter context, the prefix usually contains the parameter name, too. For finding and filtering variable names, we need to
+                           // remove the parameter name from the prefix.
+                           String parameterName = parameter.getParameterName();
+                           String prefix = result.getPrefixMatcher().getPrefix();
+                           String newPrefix = prefix.substring(parameterName.length() + 1);
+                           result = result.withPrefixMatcher(newPrefix);
                        }
+
+                       addDefinedVariablesFromImportedFiles(result, parameters.getOriginalFile(), psiElement);
+                       addDefinedVariablesFromKeyword(result, psiElement);
+                   }
+               });
+        // Provide completions in context of arguments
+        extend(CompletionType.BASIC,
+               PlatformPatterns.psiElement(RobotTokenTypes.ARGUMENT).inFile(PlatformPatterns.psiElement(RobotFile.class)),
+               new CompletionProvider<>() {
+                   @Override
+                   protected void addCompletions(@NotNull CompletionParameters parameters,
+                                                 @NotNull ProcessingContext context,
+                                                 @NotNull CompletionResultSet result) {
+                       PsiElement psiElement = parameters.getPosition();
+                       result = result.withPrefixMatcher("");
 
                        addDefinedVariablesFromImportedFiles(result, parameters.getOriginalFile(), psiElement);
                        addDefinedVariablesFromKeyword(result, psiElement);
@@ -290,18 +287,15 @@ public class RobotCompletionContributor extends CompletionContributor {
                });
     }
 
+    private static PsiElementPattern.Capture<PsiElement> withArgumentInKeywordStatement() {
+        return PlatformPatterns.psiElement(RobotTokenTypes.ARGUMENT).withAncestor(3, PlatformPatterns.psiElement(RobotTokenTypes.KEYWORD_STATEMENT));
+    }
+
     private static boolean isArgument(PsiElement current) {
         if (current == null) {
             return false;
         }
         return current.getParent() instanceof Argument;
-    }
-
-    private static boolean isVariable(PsiElement current) {
-        if (current == null) {
-            return false;
-        }
-        return current.getParent() instanceof Variable;
     }
 
     private static boolean isIndexPositionAWhitespaceCharacter(@NotNull CompletionParameters parameters) {
@@ -389,11 +383,17 @@ public class RobotCompletionContributor extends CompletionContributor {
     private static void addDefinedKeywordsFromFile(CompletionResultSet resultSet, PsiFile file) {
         if (file instanceof RobotFile robotFile) {
             boolean capitalizeKeywords = RobotOptionsProvider.getInstance(robotFile.getProject()).capitalizeKeywords();
-            addDefinedKeywords(robotFile.getDefinedKeywords(), resultSet, capitalizeKeywords);
+            addDefinedKeywords(robotFile.getDefinedKeywords(), resultSet, capitalizeKeywords).forEach(lookupElement -> {
+                lookupElement.putUserData(CompletionKeys.ROBOT_LOOKUP_CONTEXT, RobotLookupContext.KEYWORDS);
+                lookupElement.putUserData(CompletionKeys.ROBOT_LOOKUP_ELEMENT_TYPE, RobotLookupElementType.KEYWORD);
+            });
             boolean allowTransitiveImports = RobotOptionsProvider.getInstance(file.getProject()).allowTransitiveImports();
             for (KeywordFile importedFile : robotFile.getImportedFiles(allowTransitiveImports)) {
                 if (importedFile.getImportType() != ImportType.VARIABLES) {
-                    addDefinedKeywords(importedFile.getDefinedKeywords(), resultSet, capitalizeKeywords);
+                    addDefinedKeywords(importedFile.getDefinedKeywords(), resultSet, capitalizeKeywords).forEach(lookupElement -> {
+                        lookupElement.putUserData(CompletionKeys.ROBOT_LOOKUP_CONTEXT, RobotLookupContext.KEYWORDS);
+                        lookupElement.putUserData(CompletionKeys.ROBOT_LOOKUP_ELEMENT_TYPE, RobotLookupElementType.KEYWORD);
+                    });
                 }
             }
         }
@@ -401,49 +401,50 @@ public class RobotCompletionContributor extends CompletionContributor {
 
     private static void addDefinedVariablesFromImportedFiles(@NotNull CompletionResultSet resultSet, @NotNull PsiFile file, @Nullable PsiElement element) {
         if (file instanceof RobotFile robotFile) {
-            addDefinedVariables(robotFile.getDefinedVariables(), resultSet, element);
+            addDefinedVariables(robotFile.getDefinedVariables(), resultSet, element).forEach(lookupElement -> {
+                lookupElement.putUserData(CompletionKeys.ROBOT_LOOKUP_CONTEXT, RobotLookupContext.WITHIN_KEYWORD_STATEMENT);
+                lookupElement.putUserData(CompletionKeys.ROBOT_LOOKUP_ELEMENT_TYPE, RobotLookupElementType.VARIABLE);
+            });
             boolean allowTransitiveImports = RobotOptionsProvider.getInstance(file.getProject()).allowTransitiveImports();
             for (KeywordFile importedFile : robotFile.getImportedFiles(allowTransitiveImports)) {
                 if (importedFile.getImportType() == ImportType.VARIABLES || importedFile.getImportType() == ImportType.RESOURCE) {
-                    addDefinedVariables(importedFile.getDefinedVariables(), resultSet, element);
+                    addDefinedVariables(importedFile.getDefinedVariables(), resultSet, element).forEach(lookupElement -> {
+                        lookupElement.putUserData(CompletionKeys.ROBOT_LOOKUP_CONTEXT, RobotLookupContext.WITHIN_KEYWORD_STATEMENT);
+                        lookupElement.putUserData(CompletionKeys.ROBOT_LOOKUP_ELEMENT_TYPE, RobotLookupElementType.VARIABLE);
+                    });
                 }
             }
         }
     }
 
-    private static void addDefinedVariablesFromKeyword(@NotNull CompletionResultSet resultSet, @Nullable PsiElement element) {
-        KeywordDefinition keywordDefinition = null;
-        if (element != null) {
-            for (PsiElement parent = element.getParent(); parent != null; parent = parent.getParent()) {
-                if (parent instanceof KeywordDefinition) {
-                    keywordDefinition = (KeywordDefinition) parent;
-                    break;
-                }
-            }
-        }
-
+    private static void addDefinedVariablesFromKeyword(@NotNull CompletionResultSet resultSet, @NotNull PsiElement element) {
+        KeywordDefinition keywordDefinition = PsiTreeUtil.getParentOfType(element, KeywordDefinition.class);
         if (keywordDefinition != null) {
             for (DefinedVariable variable : keywordDefinition.getDeclaredVariables()) {
-                addLookupElement(variable, Nodes.Variable, TailTypes.noneType(), resultSet);
+                addLookupElement(variable, Nodes.Variable, false, TailTypes.noneType(), resultSet).ifPresent(lookupElement -> {
+                    lookupElement.putUserData(CompletionKeys.ROBOT_LOOKUP_CONTEXT, RobotLookupContext.WITHIN_KEYWORD_STATEMENT);
+                    lookupElement.putUserData(CompletionKeys.ROBOT_LOOKUP_ELEMENT_TYPE, RobotLookupElementType.VARIABLE);
+                });
             }
         }
     }
 
-    private static void addDefinedVariables(@NotNull Collection<DefinedVariable> variables,
-                                            @NotNull CompletionResultSet resultSet,
-                                            @Nullable PsiElement element) {
-        addDefinedVariables(variables, resultSet, element, TailTypes.noneType());
+    private static Collection<LookupElement> addDefinedVariables(@NotNull Collection<DefinedVariable> variables,
+                                                                 @NotNull CompletionResultSet resultSet,
+                                                                 @Nullable PsiElement element) {
+        return addDefinedVariables(variables, resultSet, element, TailTypes.noneType());
     }
 
-    private static void addDefinedVariables(@NotNull Collection<DefinedVariable> variables,
-                                            @NotNull CompletionResultSet resultSet,
-                                            @Nullable PsiElement element,
-                                            @NotNull TailType tailType) {
-        for (DefinedVariable variable : variables) {
-            if (variable.isInScope(element)) {
-                addLookupElement(variable, Nodes.Variable, tailType, resultSet);
-            }
-        }
+    private static Collection<LookupElement> addDefinedVariables(@NotNull Collection<DefinedVariable> variables,
+                                                                 @NotNull CompletionResultSet resultSet,
+                                                                 @Nullable PsiElement element,
+                                                                 @NotNull TailType tailType) {
+        return variables.stream()
+                        .filter(variable -> variable.isInScope(element))
+                        .map(variable -> addLookupElement(variable, Nodes.Variable, false, tailType, resultSet))
+                        .filter(Optional::isPresent)
+                        .map(Optional::get)
+                        .toList();
     }
 
     private static void addKeywordParameters(@NotNull KeywordStatement keywordStatement, @NotNull CompletionResultSet resultSet) {
@@ -457,8 +458,67 @@ public class RobotCompletionContributor extends CompletionContributor {
 
         TailType assignmentTailType = TailType.createSimpleTailType('=');
         for (DefinedParameter parameter : availableParameters) {
-            addLookupElement(parameter, Nodes.Parameter, assignmentTailType, resultSet);
+            addLookupElement(parameter, Nodes.Parameter, true, assignmentTailType, resultSet).ifPresent(lookupElement -> {
+                lookupElement.putUserData(CompletionKeys.ROBOT_LOOKUP_CONTEXT, RobotLookupContext.WITHIN_KEYWORD_STATEMENT);
+                lookupElement.putUserData(CompletionKeys.ROBOT_LOOKUP_ELEMENT_TYPE, RobotLookupElementType.PARAMETER);
+            });
         }
+    }
+
+    private static Optional<LookupElement> addLookupElement(LookupElementMarker lookupElementMarker,
+                                                            @Nullable Icon icon,
+                                                            boolean bold,
+                                                            @NotNull TailType tailType,
+                                                            @NotNull CompletionResultSet resultSet) {
+        String lookup = lookupElementMarker.getLookup();
+        if (lookup != null) {
+            List<String> lookupStrings = List.of(lookup, WordUtils.capitalize(lookup), lookup.toLowerCase());
+            LookupElementBuilder builder = LookupElementBuilder.create(lookup)
+                                                               .withLookupStrings(lookupStrings)
+                                                               .withIcon(icon)
+                                                               .withPsiElement(lookupElementMarker.reference())
+                                                               .withInsertHandler((context, item) -> {
+                                                                   if (item.getUserData(CompletionKeys.ROBOT_LOOKUP_ELEMENT_TYPE) ==
+                                                                       RobotLookupElementType.VARIABLE) {
+                                                                       String lookupString = item.getLookupString();
+
+                                                                       Editor editor = context.getEditor();
+                                                                       Document document = context.getDocument();
+                                                                       int startOffset = context.getStartOffset();
+                                                                       int selectionEndOffset = context.getSelectionEndOffset();
+                                                                       String text = document.getText(new TextRange(selectionEndOffset,
+                                                                                                                    selectionEndOffset + 1));
+                                                                       if (text.endsWith("}")) {
+                                                                           selectionEndOffset += 1;
+                                                                       }
+                                                                       int newEndOffset = startOffset + lookupString.length();
+                                                                       document.replaceString(startOffset, selectionEndOffset, lookupString);
+                                                                       editor.getCaretModel().moveToOffset(newEndOffset);
+                                                                       context.setTailOffset(newEndOffset);
+                                                                   }
+                                                               });
+            if (bold) {
+                builder = builder.bold();
+            }
+            builder = addReferenceType(lookupElementMarker.reference(), builder);
+            TailTypeDecorator<LookupElementBuilder> lookupElement = new TailTypeDecorator<>(builder) {
+
+                @NotNull
+                @Override
+                protected TailType computeTailType(InsertionContext context) {
+                    return tailType;
+                }
+
+                @Override
+                public <T> void putUserData(@NotNull Key<T> key, @Nullable T value) {
+                    getDelegate().putUserData(key, value);
+                    super.putUserData(key, value);
+                }
+            };
+            resultSet.addElement(lookupElement);
+            return Optional.of(lookupElement);
+        }
+        return Optional.empty();
     }
 
     public static LookupElementBuilder addReferenceType(PsiElement element, LookupElementBuilder builder) {
@@ -481,19 +541,6 @@ public class RobotCompletionContributor extends CompletionContributor {
         return builder;
     }
 
-    private static void addLookupElement(LookupElementMarker variable,
-                                         @Nullable Icon icon,
-                                         @NotNull TailType tailType,
-                                         @NotNull CompletionResultSet resultSet) {
-        String lookup = variable.getLookup();
-        if (lookup != null) {
-            String[] lookupStrings = { lookup, WordUtils.capitalize(lookup), lookup.toLowerCase() };
-            LookupElementBuilder builder = LookupElementBuilder.create(lookup).withLookupStrings(Arrays.asList(lookupStrings)).withIcon(icon);
-            TailTypeDecorator<LookupElementBuilder> lookupElement = TailTypeDecorator.withTail(addReferenceType(variable.reference(), builder), tailType);
-            resultSet.addElement(lookupElement);
-        }
-    }
-
     private static String getBaseName(String fileName) {
         if (fileName == null) {
             return null;
@@ -502,7 +549,8 @@ public class RobotCompletionContributor extends CompletionContributor {
         return (lastIndex == -1) ? fileName : fileName.substring(0, lastIndex);
     }
 
-    private static void addDefinedKeywords(Collection<DefinedKeyword> keywords, CompletionResultSet resultSet, boolean capitalize) {
+    private static Collection<LookupElement> addDefinedKeywords(Collection<DefinedKeyword> keywords, CompletionResultSet resultSet, boolean capitalize) {
+        List<LookupElement> lookupElements = new ArrayList<>();
         for (DefinedKeyword keyword : keywords) {
             String keywordName = keyword.getKeywordName();
             String displayName = capitalize ? WordUtils.capitalize(keywordName) : keywordName;
@@ -523,7 +571,9 @@ public class RobotCompletionContributor extends CompletionContributor {
                                                                                                    RobotTailTypes.TAB :
                                                                                                    TailTypes.noneType());
             resultSet.addElement(tailTypeDecorator);
+            lookupElements.add(tailTypeDecorator);
         }
+        return lookupElements;
     }
 
     @Nullable
