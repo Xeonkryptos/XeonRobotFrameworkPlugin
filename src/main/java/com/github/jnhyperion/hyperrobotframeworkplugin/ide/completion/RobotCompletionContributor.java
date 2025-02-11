@@ -247,9 +247,11 @@ public class RobotCompletionContributor extends CompletionContributor {
                 }
             }
         });
-        // Provide completions in context of variables
+        // Provide completions in context of variables or arguments
         extend(CompletionType.BASIC,
-               PlatformPatterns.psiElement(RobotTokenTypes.VARIABLE).inFile(PlatformPatterns.psiElement(RobotFile.class)),
+               PlatformPatterns.psiElement()
+                               .andOr(PlatformPatterns.psiElement(RobotTokenTypes.VARIABLE), PlatformPatterns.psiElement(RobotTokenTypes.ARGUMENT))
+                               .inFile(PlatformPatterns.psiElement(RobotFile.class)),
                new CompletionProvider<>() {
                    @Override
                    protected void addCompletions(@NotNull CompletionParameters parameters,
@@ -265,21 +267,6 @@ public class RobotCompletionContributor extends CompletionContributor {
                            String newPrefix = prefix.substring(parameterName.length() + 1);
                            result = result.withPrefixMatcher(newPrefix);
                        }
-
-                       addDefinedVariablesFromImportedFiles(result, parameters.getOriginalFile(), psiElement);
-                       addDefinedVariablesFromKeyword(result, psiElement);
-                   }
-               });
-        // Provide completions in context of arguments
-        extend(CompletionType.BASIC,
-               PlatformPatterns.psiElement(RobotTokenTypes.ARGUMENT).inFile(PlatformPatterns.psiElement(RobotFile.class)),
-               new CompletionProvider<>() {
-                   @Override
-                   protected void addCompletions(@NotNull CompletionParameters parameters,
-                                                 @NotNull ProcessingContext context,
-                                                 @NotNull CompletionResultSet result) {
-                       PsiElement psiElement = parameters.getPosition();
-                       result = result.withPrefixMatcher("");
 
                        addDefinedVariablesFromImportedFiles(result, parameters.getOriginalFile(), psiElement);
                        addDefinedVariablesFromKeyword(result, psiElement);

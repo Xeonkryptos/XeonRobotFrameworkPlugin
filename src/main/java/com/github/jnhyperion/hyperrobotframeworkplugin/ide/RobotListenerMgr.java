@@ -15,7 +15,7 @@ import com.intellij.openapi.fileEditor.FileEditorManagerListener;
 import com.intellij.openapi.project.DumbService;
 import com.intellij.openapi.project.DumbService.DumbModeListener;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.roots.ProjectFileIndex.SERVICE;
+import com.intellij.openapi.roots.ProjectFileIndex;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.vfs.VirtualFileManager;
 import com.intellij.openapi.vfs.newvfs.BulkFileListener;
@@ -24,14 +24,13 @@ import com.intellij.openapi.vfs.newvfs.events.VFileEvent;
 import com.intellij.openapi.vfs.newvfs.impl.VirtualDirectoryImpl;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiManager;
+import com.jetbrains.python.PythonPluginDisposable;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
-
-import com.jetbrains.python.PythonPluginDisposable;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 public class RobotListenerMgr {
     private static final AtomicBoolean isPythonFileChanged = new AtomicBoolean(false);
@@ -98,7 +97,7 @@ public class RobotListenerMgr {
             try {
                 ReadAction.nonBlocking(() -> {
                     List<VirtualFile> robotFiles = new ArrayList<>();
-                    SERVICE.getInstance(project).iterateContent(file -> {
+                    ProjectFileIndex.getInstance(project).iterateContent(file -> {
                         if (!file.isDirectory() && isRobotFile(file)) {
                             robotFiles.add(file);
                         }
@@ -107,8 +106,7 @@ public class RobotListenerMgr {
 
                     for (VirtualFile file : robotFiles) {
                         PsiFile psiFile = PsiManager.getInstance(project).findFile(file);
-                        if (psiFile instanceof RobotFileImpl) {
-                            RobotFileImpl robotFile = (RobotFileImpl) psiFile;
+                        if (psiFile instanceof RobotFileImpl robotFile) {
                             robotFile.reset();
                             robotFile.importsChanged();
                         }
