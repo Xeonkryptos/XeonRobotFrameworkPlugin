@@ -91,7 +91,6 @@
         <spellchecker.support language="Robot" implementationClass="com.github.jnhyperion.hyperrobotframeworkplugin.ide.RobotSpellcheckingStrategy"/>
 
         <xdebugger.breakpointType implementation="com.github.jnhyperion.hyperrobotframeworkplugin.ide.debugger.RobotLineBreakpoint"/>
-        <!--        <programRunner implementation="com.github.jnhyperion.hyperrobotframeworkplugin.ide.execution.RobotProgramRunner"/>-->
         <!--<programRunner implementation="com.github.jnhyperion.hyperrobotframeworkplugin.ide.debugger.RobotDebugRunner"/>-->
 
         <weigher key="completion" implementationClass="com.github.jnhyperion.hyperrobotframeworkplugin.ide.completion.RobotContextLevelWeigher" id="context" order="first"/>

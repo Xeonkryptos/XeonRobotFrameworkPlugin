@@ -4,12 +4,15 @@ import com.github.jnhyperion.hyperrobotframeworkplugin.psi.RobotFeatureFileType;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.RobotLanguage;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.RobotResourceFileType;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.RobotTokenTypes;
+import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.KeywordStatement;
+import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.VariableDefinition;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.fileEditor.FileDocumentManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Ref;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiElement;
+import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.xdebugger.XDebuggerUtil;
 import com.intellij.xdebugger.breakpoints.SuspendPolicy;
 import com.intellij.xdebugger.breakpoints.XLineBreakpointTypeBase;
@@ -56,16 +59,13 @@ public class RobotLineBreakpoint extends XLineBreakpointTypeBase {
     protected void lineHasStoppablePsi(@NotNull Project project,
                                        int line,
                                        Document document,
-                                       //Class<? extends PsiElement>[] unstoppablePsiElements,
                                        Ref<? super Boolean> stoppable) {
-        XDebuggerUtil.getInstance().iterateLine(project, document, line, (psiElement) -> {
-            /*if (PsiTreeUtil.getNonStrictParentOfType(psiElement) != null) {
-                return true;
-            } else */if (psiElement.getNode() != null &&
+        XDebuggerUtil.getInstance().iterateLine(project, document, line, psiElement -> {
+            if (psiElement.getNode() != null &&
                        Set.of(RobotTokenTypes.WHITESPACE, RobotTokenTypes.ERROR).contains(psiElement.getNode().getElementType())) {
                 return true;
             } else {
-                if (this.isPsiElementStoppable(psiElement)) {
+                if (isPsiElementStoppable(psiElement)) {
                     stoppable.set(true);
                 }
                 return false;
@@ -77,7 +77,14 @@ public class RobotLineBreakpoint extends XLineBreakpointTypeBase {
     }
 
     protected boolean isPsiElementStoppable(PsiElement psiElement) {
-        return psiElement.getLanguage() == RobotLanguage.INSTANCE;
+        if (psiElement.getLanguage() == RobotLanguage.INSTANCE) {
+            PsiElement nextSibling = psiElement.getNextSibling();
+            if (nextSibling instanceof KeywordStatement) {
+                return true;
+            }
+            return nextSibling instanceof VariableDefinition && PsiTreeUtil.getChildOfType(nextSibling, KeywordStatement.class) != null;
+        }
+        return false;
     }
 
     @Override
