@@ -4,7 +4,8 @@ import com.github.jnhyperion.hyperrobotframeworkplugin.psi.RobotFeatureFileType;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.RobotLanguage;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.RobotResourceFileType;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.RobotTokenTypes;
-import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.KeywordStatement;
+import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.KeywordDefinitionId;
+import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.KeywordInvokable;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.VariableDefinition;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.fileEditor.FileDocumentManager;
@@ -12,6 +13,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Ref;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiWhiteSpace;
 import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.xdebugger.XDebuggerUtil;
 import com.intellij.xdebugger.breakpoints.SuspendPolicy;
@@ -78,11 +80,17 @@ public class RobotLineBreakpoint extends XLineBreakpointTypeBase {
 
     protected boolean isPsiElementStoppable(PsiElement psiElement) {
         if (psiElement.getLanguage() == RobotLanguage.INSTANCE) {
-            PsiElement nextSibling = psiElement.getNextSibling();
-            if (nextSibling instanceof KeywordStatement) {
+            if (!(psiElement instanceof PsiWhiteSpace) && PsiTreeUtil.getChildOfType(psiElement.getParent(), KeywordInvokable.class) != null) {
                 return true;
             }
-            return nextSibling instanceof VariableDefinition && PsiTreeUtil.getChildOfType(nextSibling, KeywordStatement.class) != null;
+            PsiElement nextSibling = psiElement.getNextSibling();
+            if (PsiTreeUtil.getChildOfType(nextSibling, KeywordInvokable.class) != null) {
+                return true;
+            }
+            if (nextSibling instanceof VariableDefinition && PsiTreeUtil.findChildOfType(nextSibling, KeywordInvokable.class) != null) {
+                return true;
+            }
+            return !(psiElement instanceof PsiWhiteSpace) && psiElement.getParent() instanceof KeywordDefinitionId;
         }
         return false;
     }
