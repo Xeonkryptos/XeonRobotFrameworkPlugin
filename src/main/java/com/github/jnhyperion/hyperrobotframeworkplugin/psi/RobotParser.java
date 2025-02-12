@@ -285,6 +285,8 @@ public class RobotParser implements PsiParser {
                 parseWith(builder, RobotTokenTypes.SYNTAX_MARKER);
             } else if (RobotTokenTypes.VARIABLE_DEFINITION == type) {
                 parseWith(builder, RobotTokenTypes.VARIABLE_DEFINITION);
+            } else if (RobotTokenTypes.KEYWORD == type) {
+                parseKeyword(builder);
             } else {
                 break;
             }
