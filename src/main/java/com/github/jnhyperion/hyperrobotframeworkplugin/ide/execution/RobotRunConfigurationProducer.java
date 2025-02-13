@@ -123,17 +123,13 @@ public class RobotRunConfigurationProducer extends LazyRunConfigurationProducer<
     @NotNull
     private static String getTestCaseOrFileName(ConfigurationContext context) {
         Location<?> location = context.getLocation();
-        if (location == null) {
-            throw new AssertionError();
-        } else {
-            VirtualFile virtualFile = location.getVirtualFile();
-            if (virtualFile == null) {
-                throw new AssertionError();
-            } else {
-                String testCaseName = getTestCaseName(context);
-                return !testCaseName.isEmpty() ? testCaseName : virtualFile.getName();
-            }
-        }
+        assert location != null;
+
+        VirtualFile virtualFile = location.getVirtualFile();
+        assert virtualFile != null;
+
+        String testCaseName = getTestCaseName(context);
+        return !testCaseName.isEmpty() ? testCaseName : virtualFile.getName();
     }
 
     private static boolean isValidRobotExecutableScript(@NotNull ConfigurationContext context) {
@@ -142,8 +138,8 @@ public class RobotRunConfigurationProducer extends LazyRunConfigurationProducer<
         PsiElement element;
         if (location != null) {
             element = location.getPsiElement();
-            if (element instanceof LeafPsiElement) {
-                IElementType type = ((LeafPsiElement) element).getElementType();
+            if (element instanceof LeafPsiElement leafPsiElement) {
+                IElementType type = leafPsiElement.getElementType();
                 return RobotTokenTypes.KEYWORD_DEFINITION.equals(type) || RobotTokenTypes.HEADING.equals(type);
             }
         }
