@@ -4,6 +4,7 @@ import com.intellij.execution.ExecutionException;
 import com.intellij.execution.ExecutionResult;
 import com.intellij.execution.Executor;
 import com.intellij.execution.configurations.ConfigurationFactory;
+import com.intellij.execution.configurations.ParametersList;
 import com.intellij.execution.configurations.ParamsGroup;
 import com.intellij.execution.configurations.RunProfileState;
 import com.intellij.execution.runners.ExecutionEnvironment;
@@ -43,15 +44,26 @@ public class RobotRunConfiguration extends PythonRunConfiguration {
             public @Nullable ExecutionResult execute(Executor executor, PythonProcessStarter processStarter, CommandLinePatcher... patchers) throws
                                                                                                                                              ExecutionException {
                 return super.execute(executor, processStarter, ArrayUtil.append(patchers, commandLine -> {
-                    ParamsGroup paramsGroup = commandLine.getParametersList().getParamsGroup(PythonCommandLineState.GROUP_DEBUGGER);
+                    ParametersList parametersList = commandLine.getParametersList();
+                    String modeCommand = "--module";
+                    ParamsGroup paramsGroup = parametersList.getParamsGroup(PythonCommandLineState.GROUP_MODULE);
+                    if (paramsGroup == null) {
+                        paramsGroup = parametersList.getParamsGroup(PythonCommandLineState.GROUP_SCRIPT);
+                        modeCommand = "--script";
+                    }
                     if (paramsGroup != null) {
-                        paramsGroup.addParameter("--r-listen 9999");
+                        int parameterIndex = 0;
+                        paramsGroup.getParametersList().addAt(parameterIndex, modeCommand);
+                        parameterIndex++;
+                        paramsGroup.getParametersList().addAt(parameterIndex, "--listen");
+                        parameterIndex++;
+                        paramsGroup.getParametersList().addAt(parameterIndex, "9999");
                     }
                 }));
             }
 
             @Override
-            @SuppressWarnings("UnstableApiUsage")
+            @SuppressWarnings("UnstableApiUsage") // Might be unstable at the moment, but is an important extension point
             public @Nullable ExecutionResult execute(@NotNull Executor executor, @NotNull PythonScriptTargetedCommandLineBuilder converter) throws
                                                                                                                                             ExecutionException {
                 return super.execute(executor, new MyPythonScriptTargetedCommandLineBuilder(converter));
@@ -61,7 +73,7 @@ public class RobotRunConfiguration extends PythonRunConfiguration {
         return state;
     }
 
-    @SuppressWarnings("UnstableApiUsage")
+    @SuppressWarnings("UnstableApiUsage") // Might be unstable at the moment, but is an important extension point
     private record MyPythonScriptTargetedCommandLineBuilder(PythonScriptTargetedCommandLineBuilder parentBuilder)
             implements PythonScriptTargetedCommandLineBuilder {
 
