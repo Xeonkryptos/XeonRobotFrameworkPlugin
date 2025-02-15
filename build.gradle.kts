@@ -34,6 +34,8 @@ repositories {
 dependencies {
     detektPlugins("io.gitlab.arturbosch.detekt:detekt-formatting:1.15.0")
 
+    implementation("org.eclipse.lsp4j:org.eclipse.lsp4j.debug:0.24.0")
+
     intellijPlatform {
         val platformVersion = properties("platformVersion")
 

@@ -17,9 +17,10 @@ import com.intellij.psi.PsiWhiteSpace;
 import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.xdebugger.XDebuggerUtil;
 import com.intellij.xdebugger.breakpoints.SuspendPolicy;
-import com.intellij.xdebugger.breakpoints.XLineBreakpointTypeBase;
+import com.intellij.xdebugger.breakpoints.XLineBreakpointType;
 import com.jetbrains.python.debugger.PyDebugSupportUtils;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Set;
 
@@ -38,12 +39,15 @@ import java.util.Set;
  * to actually handle a registered breakpoint and send it to the debugger
  * backend.
  */
-public class RobotLineBreakpoint extends XLineBreakpointTypeBase {
+public class RobotLineBreakpointType extends XLineBreakpointType<RobotLineBreakpointProperties> {
 
-    public static final String ID = "robot-line";
+    protected RobotLineBreakpointType() {
+        super("robot-line", "Robot Line Breakpoint");
+    }
 
-    protected RobotLineBreakpoint() {
-        super(ID, "Robot Line Breakpoint", new RobotDebuggerEditorsProvider());
+    @Override
+    public @Nullable RobotLineBreakpointProperties createBreakpointProperties(@NotNull VirtualFile file, int line) {
+        return new RobotLineBreakpointProperties();
     }
 
     @Override
