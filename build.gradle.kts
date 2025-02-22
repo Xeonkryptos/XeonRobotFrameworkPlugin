@@ -1,6 +1,5 @@
 import io.gitlab.arturbosch.detekt.Detekt
 import org.jetbrains.changelog.markdownToHTML
-import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.tasks.PrepareSandboxTask
 
 fun properties(key: String) = project.findProperty(key).toString()
@@ -98,29 +97,9 @@ intellijPlatform {
 //    }
 
     pluginVerification {
-
         ides {
-            val platformVersion = properties("platformVersion")
-
-            ide(IntelliJPlatformType.PyCharmCommunity, platformVersion)
             recommended()
-
-            select {
-                types = listOf(IntelliJPlatformType.PyCharmCommunity)
-                sinceBuild = properties("pluginSinceBuild")
-                untilBuild = properties("pluginUntilBuild")
-            }
         }
-    }
-}
-
-val prepareSandboxConfig: PrepareSandboxTask.() -> Unit = {
-    from(".") {
-        include("bundled/**/*")
-        exclude("**/bin")
-        exclude("**/__pycache__")
-        exclude("**/*.iml")
-        into("$name/data")
     }
 }
 
@@ -135,5 +114,11 @@ tasks {
         jvmTarget = "17"
     }
 
-    prepareSandbox(prepareSandboxConfig)
+    withType<PrepareSandboxTask> {
+        from(layout.projectDirectory) {
+            include("bundled/**/*")
+            exclude("**/*.iml")
+            into(pluginName.map { "$it/data" })
+        }
+    }
 }

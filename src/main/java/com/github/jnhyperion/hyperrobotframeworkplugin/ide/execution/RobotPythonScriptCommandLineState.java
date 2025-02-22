@@ -8,6 +8,7 @@ import com.intellij.execution.configurations.ParamsGroup;
 import com.intellij.execution.runners.ExecutionEnvironment;
 import com.intellij.execution.target.TargetEnvironment;
 import com.intellij.execution.target.value.TargetEnvironmentFunctions;
+import com.intellij.openapi.application.PathManager;
 import com.intellij.openapi.util.Key;
 import com.intellij.util.ArrayUtil;
 import com.intellij.util.net.NetUtils;
@@ -26,12 +27,17 @@ import org.jetbrains.annotations.Nullable;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.function.Function;
 
 public class RobotPythonScriptCommandLineState extends PythonScriptCommandLineState {
 
     public static final Key<Integer> ROBOT_DEBUG_PORT = Key.create("ROBOT_DEBUG_PORT");
+
+    private static final Path DATA_DIR = PathManager.getPluginsDir().resolve("Hyper RobotFramework Support").resolve("data");
+    private static final Path BUNDLED_DIR = DATA_DIR.resolve("bundled");
+    private static final Path DEBUG_DIR = BUNDLED_DIR.resolve("debugging");
 
     private final RobotRunConfiguration robotRunConfiguration;
 
@@ -83,7 +89,9 @@ public class RobotPythonScriptCommandLineState extends PythonScriptCommandLineSt
             configuration.putUserData(ROBOT_DEBUG_PORT, robotDebugPort);
 
             PythonScriptExecution delegateExecution = createCopiedPythonScriptExecution(pythonExecution);
-            delegateExecution.setPythonScriptPath(TargetEnvironmentFunctions.constant("robot-debug-script.py"));
+            // TODO: Rename script to the real script name when it is defined
+            String robotDebugScriptLocation = DEBUG_DIR.resolve("robot-debug-script.py").toAbsolutePath().toString();
+            delegateExecution.setPythonScriptPath(TargetEnvironmentFunctions.constant(robotDebugScriptLocation));
 
             PythonExecution.Visitor visitor = new PythonExecution.Visitor() {
                 @Override
