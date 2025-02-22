@@ -5,6 +5,7 @@ import com.intellij.execution.ExecutionResult;
 import com.intellij.execution.Executor;
 import com.intellij.execution.configurations.ParametersList;
 import com.intellij.execution.configurations.ParamsGroup;
+import com.intellij.execution.executors.DefaultRunExecutor;
 import com.intellij.execution.runners.ExecutionEnvironment;
 import com.intellij.execution.target.TargetEnvironment;
 import com.intellij.execution.target.value.TargetEnvironmentFunctions;
@@ -16,7 +17,6 @@ import com.jetbrains.python.PyBundle;
 import com.jetbrains.python.run.CommandLinePatcher;
 import com.jetbrains.python.run.PythonCommandLineState;
 import com.jetbrains.python.run.PythonExecution;
-import com.jetbrains.python.run.PythonModuleExecution;
 import com.jetbrains.python.run.PythonScriptCommandLineState;
 import com.jetbrains.python.run.PythonScriptExecution;
 import com.jetbrains.python.run.PythonScriptTargetedCommandLineBuilder;
@@ -37,7 +37,8 @@ public class RobotPythonScriptCommandLineState extends PythonScriptCommandLineSt
 
     private static final Path DATA_DIR = PathManager.getPluginsDir().resolve("Hyper RobotFramework Support").resolve("data");
     private static final Path BUNDLED_DIR = DATA_DIR.resolve("bundled");
-    private static final Path DEBUG_DIR = BUNDLED_DIR.resolve("debugging");
+    private static final Path TOOL_DIR = BUNDLED_DIR.resolve("tool");
+    private static final Path ROBOTCODE_DIR = TOOL_DIR.resolve("robotcode");
 
     private final RobotRunConfiguration robotRunConfiguration;
 
@@ -47,24 +48,22 @@ public class RobotPythonScriptCommandLineState extends PythonScriptCommandLineSt
         this.robotRunConfiguration = robotRunConfiguration;
     }
 
+    @Nullable
     @Override
-    public @Nullable ExecutionResult execute(Executor executor, PythonProcessStarter processStarter, CommandLinePatcher... patchers) throws ExecutionException {
+    public ExecutionResult execute(Executor executor, PythonProcessStarter processStarter, CommandLinePatcher... patchers) throws ExecutionException {
+        if (DefaultRunExecutor.EXECUTOR_ID.equals(executor.getId())) {
+            return super.execute(executor, processStarter, patchers);
+        }
         return super.execute(executor, processStarter, ArrayUtil.append(patchers, commandLine -> {
             ParametersList parametersList = commandLine.getParametersList();
-            String modeCommand = "--module";
             ParamsGroup paramsGroup = parametersList.getParamsGroup(PythonCommandLineState.GROUP_MODULE);
-            if (paramsGroup == null) {
-                paramsGroup = parametersList.getParamsGroup(PythonCommandLineState.GROUP_SCRIPT);
-                modeCommand = "--script";
-            }
             if (paramsGroup != null) {
                 int robotDebugPort = findAvailableSocketPort();
                 robotRunConfiguration.putUserData(ROBOT_DEBUG_PORT, robotDebugPort);
 
+                // TODO Python script path needs to be modified
                 int parameterIndex = 0;
-                paramsGroup.getParametersList().addAt(parameterIndex, modeCommand);
-                parameterIndex++;
-                paramsGroup.getParametersList().addAt(parameterIndex, "--listen");
+                paramsGroup.getParametersList().addAt(parameterIndex, "--tcp");
                 parameterIndex++;
                 paramsGroup.getParametersList().addAt(parameterIndex, String.valueOf(robotDebugPort));
             }
@@ -75,6 +74,9 @@ public class RobotPythonScriptCommandLineState extends PythonScriptCommandLineSt
     @Override
     @SuppressWarnings("UnstableApiUsage") // Might be unstable at the moment, but is an important extension point
     public ExecutionResult execute(@NotNull Executor executor, @NotNull PythonScriptTargetedCommandLineBuilder converter) throws ExecutionException {
+        if (DefaultRunExecutor.EXECUTOR_ID.equals(executor.getId())) {
+            return super.execute(executor, converter);
+        }
         return super.execute(executor, new MyPythonScriptTargetedCommandLineBuilder(converter, robotRunConfiguration));
     }
 
@@ -82,41 +84,19 @@ public class RobotPythonScriptCommandLineState extends PythonScriptCommandLineSt
     private record MyPythonScriptTargetedCommandLineBuilder(@NotNull PythonScriptTargetedCommandLineBuilder parentBuilder, RobotRunConfiguration configuration)
             implements PythonScriptTargetedCommandLineBuilder {
 
+        @NotNull
         @Override
-        public @NotNull PythonExecution build(@NotNull HelpersAwareTargetEnvironmentRequest helpersAwareTargetEnvironmentRequest,
-                                              @NotNull PythonExecution pythonExecution) {
+        public PythonExecution build(@NotNull HelpersAwareTargetEnvironmentRequest helpersAwareTargetEnvironmentRequest,
+                                     @NotNull PythonExecution pythonExecution) {
             int robotDebugPort = findAvailableSocketPort();
             configuration.putUserData(ROBOT_DEBUG_PORT, robotDebugPort);
 
             PythonScriptExecution delegateExecution = createCopiedPythonScriptExecution(pythonExecution);
-            // TODO: Rename script to the real script name when it is defined
-            String robotDebugScriptLocation = DEBUG_DIR.resolve("robot-debug-script.py").toAbsolutePath().toString();
-            delegateExecution.setPythonScriptPath(TargetEnvironmentFunctions.constant(robotDebugScriptLocation));
-
-            PythonExecution.Visitor visitor = new PythonExecution.Visitor() {
-                @Override
-                public void visit(@NotNull PythonModuleExecution pythonModuleExecution) {
-                    String moduleName = pythonModuleExecution.getModuleName();
-                    if (moduleName == null) {
-                        throw new IllegalArgumentException("Python module name must be set");
-                    }
-                    delegateExecution.getParameters()
-                                     .addAll(0, List.of(TargetEnvironmentFunctions.constant("--module"), TargetEnvironmentFunctions.constant(moduleName)));
-                }
-
-                @Override
-                public void visit(@NotNull PythonScriptExecution pythonScriptExecution) {
-                    Function<TargetEnvironment, String> pythonScriptPath = pythonScriptExecution.getPythonScriptPath();
-                    if (pythonScriptPath == null) {
-                        throw new IllegalArgumentException("Python script path must be set");
-                    }
-                    delegateExecution.getParameters().addAll(0, List.of(TargetEnvironmentFunctions.constant("--script"), pythonScriptPath));
-                }
-            };
-            pythonExecution.accept(visitor);
+            delegateExecution.setPythonScriptPath(TargetEnvironmentFunctions.constant(ROBOTCODE_DIR.toString()));
             delegateExecution.getParameters()
                              .addAll(0,
-                                     List.of(TargetEnvironmentFunctions.constant("--listen"),
+                                     List.of(TargetEnvironmentFunctions.constant("debug"),
+                                             TargetEnvironmentFunctions.constant("--tcp"),
                                              TargetEnvironmentFunctions.constant(String.valueOf(robotDebugPort))));
 
             return parentBuilder.build(helpersAwareTargetEnvironmentRequest, delegateExecution);

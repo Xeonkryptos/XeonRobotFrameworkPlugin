@@ -2,7 +2,9 @@ package com.github.jnhyperion.hyperrobotframeworkplugin.ide.debugger.dap;
 
 import com.intellij.execution.process.ProcessEvent;
 import com.intellij.execution.process.ProcessListener;
+import com.intellij.openapi.progress.ProcessCanceledException;
 import com.jetbrains.rd.util.reactive.Signal;
+import kotlinx.coroutines.TimeoutCancellationException;
 import org.eclipse.lsp4j.debug.Capabilities;
 import org.eclipse.lsp4j.debug.ConfigurationDoneArguments;
 import org.eclipse.lsp4j.debug.InitializeRequestArguments;
@@ -17,6 +19,9 @@ import java.net.Socket;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+
+import static com.intellij.openapi.progress.util.ProgressIndicatorUtils.withTimeout;
 
 public class RobotDebugAdapterProtocolCommunicator implements ProcessListener {
 
@@ -39,7 +44,10 @@ public class RobotDebugAdapterProtocolCommunicator implements ProcessListener {
     @Override
     public void startNotified(@NotNull ProcessEvent event) {
         try {
-            socket = new Socket("localhost", robotDebugPort);
+            socket = tryConnectToServerWithTimeout("localhost", robotDebugPort, 10_000L, 100L);
+            if (socket == null) {
+                throw new RuntimeException("Failed to connect to debug server");
+            }
             Launcher<IDebugProtocolServer> clientLauncher = DSPLauncher.createClientLauncher(robotDebugClient,
                                                                                              socket.getInputStream(),
                                                                                              socket.getOutputStream());
@@ -77,6 +85,11 @@ public class RobotDebugAdapterProtocolCommunicator implements ProcessListener {
     }
 
     @Override
+    public void processWillTerminate(@NotNull ProcessEvent event, boolean willBeDestroyed) {
+        processTerminated(event);
+    }
+
+    @Override
     public void processTerminated(@NotNull ProcessEvent event) {
         if (socket != null) {
             try {
@@ -100,5 +113,28 @@ public class RobotDebugAdapterProtocolCommunicator implements ProcessListener {
 
     public boolean isInitialized() {
         return initialized;
+    }
+
+    private Socket tryConnectToServerWithTimeout(String host, int port, long timeoutMillis, long retryIntervalMillis) {
+        try {
+            return withTimeout(timeoutMillis, () -> {
+                Socket socket = null;
+                while (socket == null || !socket.isConnected()) {
+                    socket = null;
+                    try {
+                        socket = new Socket(host, port);
+                    } catch (Exception ignored) {
+                    }
+                    try {
+                        TimeUnit.MILLISECONDS.sleep(retryIntervalMillis);
+                    } catch (InterruptedException e) {
+                        throw new ProcessCanceledException(e);
+                    }
+                }
+                return socket;
+            });
+        } catch (TimeoutCancellationException ignored) {
+        }
+        return null;
     }
 }

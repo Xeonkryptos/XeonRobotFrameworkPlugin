@@ -2,7 +2,6 @@ package com.github.jnhyperion.hyperrobotframeworkplugin.ide.debugger;
 
 import com.github.jnhyperion.hyperrobotframeworkplugin.ide.debugger.dap.RobotDebugAdapterProtocolCommunicator;
 import com.intellij.execution.ExecutionResult;
-import com.intellij.execution.process.ProcessHandler;
 import com.intellij.execution.ui.ExecutionConsole;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.util.ArrayUtil;
@@ -355,11 +354,6 @@ public class RobotDebugProcess extends XDebugProcess {
     @Override
     public ExecutionConsole createConsole() {
         return executionResult.getExecutionConsole();
-    }
-
-    @Override
-    public ProcessHandler doGetProcessHandler() {
-        return executionResult.getProcessHandler();
     }
 
     @NotNull

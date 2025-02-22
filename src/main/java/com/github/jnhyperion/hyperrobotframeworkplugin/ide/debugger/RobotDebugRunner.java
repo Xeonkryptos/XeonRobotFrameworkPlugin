@@ -8,6 +8,7 @@ import com.intellij.execution.ExecutionResult;
 import com.intellij.execution.configurations.RunProfile;
 import com.intellij.execution.configurations.RunProfileState;
 import com.intellij.execution.executors.DefaultDebugExecutor;
+import com.intellij.execution.process.ProcessHandler;
 import com.intellij.execution.runners.ExecutionEnvironment;
 import com.intellij.execution.ui.RunContentDescriptor;
 import com.intellij.openapi.project.Project;
@@ -51,20 +52,27 @@ public class RobotDebugRunner extends PyDebugRunner {
             Project project = environment.getProject();
             try {
                 XDebuggerManager debuggerManager = XDebuggerManager.getInstance(project);
-                debuggerManager.startSession(environment, new XDebugProcessStarter() {
+                Integer robotDebugPort = ((RobotPythonScriptCommandLineState) state).getRobotDebugPort();
+                RobotDebugAdapterProtocolCommunicator robotDebugAdapterProtocolCommunicator = new RobotDebugAdapterProtocolCommunicator(robotDebugPort);
+                RunContentDescriptor runContentDescriptor = debuggerManager.startSession(environment, new XDebugProcessStarter() {
                     @NotNull
                     @Override
                     public XDebugProcess start(@NotNull final XDebugSession session) {
-                        Integer robotDebugPort = ((RobotPythonScriptCommandLineState) state).getRobotDebugPort();
-                        RobotDebugAdapterProtocolCommunicator robotDebugAdapterProtocolCommunicator = new RobotDebugAdapterProtocolCommunicator(robotDebugPort);
-                        executionResult.getProcessHandler().addProcessListener(robotDebugAdapterProtocolCommunicator);
                         return new RobotDebugProcess(session, executionResult, robotDebugAdapterProtocolCommunicator);
                     }
-                });
+                }).getRunContentDescriptor();
+
+                executionResult.getProcessHandler().addProcessListener(robotDebugAdapterProtocolCommunicator);
+                ProcessHandler processHandler = runContentDescriptor.getProcessHandler();
+                if (processHandler == null) {
+                    throw new RuntimeException("Process handler is null");
+                }
+                processHandler.addProcessListener(robotDebugAdapterProtocolCommunicator);
+
+                return runContentDescriptor;
             } catch (ExecutionException e) {
                 throw new RuntimeException(e);
             }
-            return result;
         });
     }
 
