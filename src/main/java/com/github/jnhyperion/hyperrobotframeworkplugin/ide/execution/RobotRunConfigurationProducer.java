@@ -37,8 +37,8 @@ public class RobotRunConfigurationProducer extends LazyRunConfigurationProducer<
                                                     @NotNull ConfigurationContext context,
                                                     @NotNull Ref<PsiElement> sourceElement) {
         if (isValidRobotExecutableScript(context)) {
-            String workingDirectorySafe = runConfig.getWorkingDirectorySafe();
-            String runParam = getRunParameters(context, workingDirectorySafe);
+            String workingDirectory = getWorkingDirectoryToUse(runConfig);
+            String runParam = getRunParameters(context, workingDirectory);
             runConfig.setUseModuleSdk(false);
             runConfig.setModuleMode(true);
             runConfig.setScriptName("robot.run");
@@ -57,8 +57,8 @@ public class RobotRunConfigurationProducer extends LazyRunConfigurationProducer<
     @Override
     public boolean isConfigurationFromContext(@NotNull RobotRunConfiguration runConfig, @NotNull ConfigurationContext context) {
         if (isValidRobotExecutableScript(context)) {
-            String workingDirectorySafe = runConfig.getWorkingDirectorySafe();
-            String runParam = getRunParameters(context, workingDirectorySafe);
+            String workingDirectory = getWorkingDirectoryToUse(runConfig);
+            String runParam = getRunParameters(context, workingDirectory);
             boolean ret = runParam.trim().equals(runConfig.getScriptParameters().trim());
             if (ret) {
                 runConfig.setName(getRunDisplayName(context));
@@ -66,6 +66,14 @@ public class RobotRunConfigurationProducer extends LazyRunConfigurationProducer<
             return ret;
         }
         return false;
+    }
+
+    private String getWorkingDirectoryToUse(@NotNull RobotRunConfiguration runConfig) {
+        String workingDirectory = runConfig.getWorkingDirectory();
+        if (workingDirectory == null) {
+            workingDirectory = runConfig.getWorkingDirectorySafe();
+        }
+        return workingDirectory;
     }
 
     private static boolean containsTasksOnly(ConfigurationContext context) {

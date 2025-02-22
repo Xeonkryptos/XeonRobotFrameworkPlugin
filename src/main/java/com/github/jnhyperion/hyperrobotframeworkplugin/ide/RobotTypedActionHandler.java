@@ -17,9 +17,12 @@ public class RobotTypedActionHandler extends TypedHandlerDelegate {
         if (file instanceof RobotFile && (c == '$' || c == '@' || c == '&') && RobotOptionsProvider.getInstance(project).smartAutoEncloseVariable()) {
             int offset = editor.getCaretModel().getOffset();
             String documentText = editor.getDocument().getText();
-            String newText = documentText.substring(0, offset) + c + "{}" + documentText.substring(offset);
-            editor.getDocument().setText(newText);
-            editor.getCaretModel().moveToOffset(offset + 2);
+            String textAfterInsertion = documentText.substring(offset);
+            if (textAfterInsertion.charAt(0) != '{') {
+                String newText = documentText.substring(0, offset) + c + "{}" + textAfterInsertion;
+                editor.getDocument().setText(newText);
+                editor.getCaretModel().moveToOffset(offset + 2);
+            }
             return Result.STOP;
         }
         return Result.CONTINUE;
