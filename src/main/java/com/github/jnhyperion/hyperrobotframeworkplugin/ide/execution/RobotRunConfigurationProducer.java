@@ -70,7 +70,7 @@ public class RobotRunConfigurationProducer extends LazyRunConfigurationProducer<
 
     private String getWorkingDirectoryToUse(@NotNull RobotRunConfiguration runConfig) {
         String workingDirectory = runConfig.getWorkingDirectory();
-        if (workingDirectory == null) {
+        if (workingDirectory == null || workingDirectory.isEmpty()) {
             workingDirectory = runConfig.getWorkingDirectorySafe();
         }
         return workingDirectory;

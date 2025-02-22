@@ -90,15 +90,15 @@
         <configurationType implementation="com.github.jnhyperion.hyperrobotframeworkplugin.ide.execution.RobotRunConfigurationType"/>
         <spellchecker.support language="Robot" implementationClass="com.github.jnhyperion.hyperrobotframeworkplugin.ide.RobotSpellcheckingStrategy"/>
 
-        <xdebugger.breakpointType implementation="com.github.jnhyperion.hyperrobotframeworkplugin.ide.debugger.RobotLineBreakpoint"/>
+        <!--<xdebugger.breakpointType implementation="com.github.jnhyperion.hyperrobotframeworkplugin.ide.debugger.RobotLineBreakpoint"/>-->
         <!--        <programRunner implementation="com.github.jnhyperion.hyperrobotframeworkplugin.ide.execution.RobotProgramRunner"/>-->
         <!--<programRunner implementation="com.github.jnhyperion.hyperrobotframeworkplugin.ide.debugger.RobotDebugRunner"/>-->
 
         <weigher key="completion" implementationClass="com.github.jnhyperion.hyperrobotframeworkplugin.ide.completion.RobotContextLevelWeigher" id="context" order="first"/>
     </extensions>
-    <extensions defaultExtensionNs="Pythonid">
+    <!--<extensions defaultExtensionNs="Pythonid">
         <breakpointHandler implementation="com.github.jnhyperion.hyperrobotframeworkplugin.ide.debugger.RobotBreakpointHandlerFactory"/>
-    </extensions>
+    </extensions>-->
     <actions>
         <action id="HyperRobotFrameworkPlugin.CreateNew" class="com.github.jnhyperion.hyperrobotframeworkplugin.ide.RobotCreateAction">
             <add-to-group group-id="NewGroup"/>
