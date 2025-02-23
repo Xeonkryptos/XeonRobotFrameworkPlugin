@@ -3,6 +3,7 @@ package com.github.jnhyperion.hyperrobotframeworkplugin.ide.debugger;
 import com.github.jnhyperion.hyperrobotframeworkplugin.ide.debugger.dap.RobotDebugAdapterProtocolCommunicator;
 import com.intellij.execution.ExecutionResult;
 import com.intellij.execution.ui.ExecutionConsole;
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.util.ArrayUtil;
 import com.intellij.xdebugger.XDebugProcess;
@@ -35,11 +36,14 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class RobotDebugProcess extends XDebugProcess {
@@ -51,7 +55,7 @@ public class RobotDebugProcess extends XDebugProcess {
 
     private final List<ExceptionBreakpointInfo> exceptionBreakpoints = new ArrayList<>();
 
-    private final List<BreakPointInfo> breakpoints = new ArrayList<>();
+    private final List<BreakPointInfo> breakpoints = new CopyOnWriteArrayList<>();
     private final Map<VirtualFile, Map<Integer, BreakPointInfo>> breakpointMap = new LinkedHashMap<>();
     private final ReentrantLock breakpointsMapMutex = new ReentrantLock();
 
@@ -69,56 +73,72 @@ public class RobotDebugProcess extends XDebugProcess {
         session.setPauseActionSupported(true);
 
         robotDAPCommunicator.getAfterInitialize().advise(Lifetime.Companion.getEternal(), ignore -> {
-            sendBreakpointRequest();
+            ApplicationManager.getApplication().executeOnPooledThread(() -> sendBreakpointRequest());
             return null;
         });
         robotDAPCommunicator.getDebugClient().getOnStopped().advise(Lifetime.Companion.getEternal(), args -> {
-            handleOnStopped(args);
+            ApplicationManager.getApplication().executeOnPooledThread(() -> handleOnStopped(args));
+            return null;
+        });
+        robotDAPCommunicator.getDebugClient().getOnRobotMessage().advise(Lifetime.Companion.getEternal(), message -> {
+            System.out.println("Robot message: " + message);
+            return null;
+        });
+        robotDAPCommunicator.getDebugClient().getOnRobotLog().advise(Lifetime.Companion.getEternal(), log -> {
+            System.out.println("Robot log: " + log);
             return null;
         });
     }
 
-    private RobotSuspendContext createRobotCodeSuspendContext(int threadId) throws ExecutionException, InterruptedException {
+    private RobotSuspendContext createRobotCodeSuspendContext(int threadId) throws ExecutionException, InterruptedException, TimeoutException {
         IDebugProtocolServer debugServer = robotDAPCommunicator.getDebugServer();
         StackTraceArguments stackTraceArguments = new StackTraceArguments();
         stackTraceArguments.setThreadId(threadId);
-        StackTraceResponse stackTraceResponse = debugServer.stackTrace(stackTraceArguments).get();
+        System.out.println("Requesting stack trace");
+        StackTraceResponse stackTraceResponse = debugServer.stackTrace(stackTraceArguments).get(5L, TimeUnit.SECONDS);
+        System.out.println("Got stack trace");
         return new RobotSuspendContext(stackTraceResponse, threadId, debugServer, getSession());
     }
 
     private void handleOnStopped(StoppedEventArguments args) {
         try {
+            final RobotSuspendContext robotCodeSuspendContext = createRobotCodeSuspendContext(args.getThreadId());
             switch (args.getReason()) {
                 case "breakpoint" -> {
                     BreakPointInfo bp = breakpoints.stream()
-                                                   .filter(breakPointInfo -> breakPointInfo.id != null &&
-                                                                             ArrayUtil.contains(breakPointInfo.id, args.getHitBreakpointIds()))
+                                                   .filter(breakPointInfo -> breakPointInfo.id != null)
+                                                   .filter(breakPointInfo -> ArrayUtil.contains(breakPointInfo.id, args.getHitBreakpointIds()))
                                                    .findFirst()
                                                    .orElse(null);
 
                     if (bp instanceof LineBreakpointInfo lineBreakpointInfo) {
-                        if (!getSession().breakpointReached(lineBreakpointInfo.breakpoint, null, createRobotCodeSuspendContext(args.getThreadId()))) {
+                        if (!getSession().breakpointReached(lineBreakpointInfo.breakpoint, null, robotCodeSuspendContext)) {
                             ContinueArguments continueArguments = new ContinueArguments();
                             continueArguments.setThreadId(args.getThreadId());
                             robotDAPCommunicator.getDebugServer().continue_(continueArguments).get();
                         }
                     } else {
-                        getSession().positionReached(createRobotCodeSuspendContext(args.getThreadId()));
+                        getSession().positionReached(robotCodeSuspendContext);
                     }
                 }
-
                 case "exception" -> {
-                    if (!getSession().breakpointReached(exceptionBreakpoints.get(0).breakpoint, null, createRobotCodeSuspendContext(args.getThreadId()))) {
+                    breakpointsMapMutex.lock();
+                    ExceptionBreakpointInfo exceptionBreakpointInfo;
+                    try {
+                        exceptionBreakpointInfo = exceptionBreakpoints.get(0);
+                    } finally {
+                        breakpointsMapMutex.unlock();
+                    }
+                    if (!getSession().breakpointReached(exceptionBreakpointInfo.breakpoint, null, robotCodeSuspendContext)) {
                         ContinueArguments continueArguments = new ContinueArguments();
                         continueArguments.setThreadId(args.getThreadId());
                         robotDAPCommunicator.getDebugServer().continue_(continueArguments).get();
                     }
                 }
-
-                default -> getSession().positionReached(createRobotCodeSuspendContext(args.getThreadId()));
+                default -> getSession().positionReached(robotCodeSuspendContext);
             }
             removeCurrentOneTimeBreakpoint();
-        } catch (ExecutionException | InterruptedException e) {
+        } catch (ExecutionException | InterruptedException | TimeoutException e) {
             throw new RuntimeException(e);
         }
     }
@@ -146,11 +166,12 @@ public class RobotDebugProcess extends XDebugProcess {
         try {
             XSourcePosition sourcePosition = breakpoint.getSourcePosition();
             if (sourcePosition != null) {
-                if (!breakpointMap.containsKey(sourcePosition.getFile())) {
-                    breakpointMap.put(sourcePosition.getFile(), new LinkedHashMap<>());
-                }
-                Map<Integer, BreakPointInfo> bpMap = breakpointMap.get(sourcePosition.getFile());
-                bpMap.put(breakpoint.getLine(), new LineBreakpointInfo(null, breakpoint));
+                LineBreakpointInfo lineBreakpointInfo = new LineBreakpointInfo(null, breakpoint);
+                breakpoints.add(lineBreakpointInfo);
+
+                Map<Integer, BreakPointInfo> bpMap = breakpointMap.computeIfAbsent(sourcePosition.getFile(), file -> new LinkedHashMap<>());
+                bpMap.put(breakpoint.getLine(), lineBreakpointInfo);
+
                 sendBreakpointRequest(sourcePosition.getFile());
             }
         } finally {
@@ -164,6 +185,8 @@ public class RobotDebugProcess extends XDebugProcess {
             XSourcePosition sourcePosition = breakpoint.getSourcePosition();
             if (sourcePosition != null) {
                 if (breakpointMap.containsKey(sourcePosition.getFile())) {
+                    breakpoints.removeIf(bpInfo -> bpInfo instanceof LineBreakpointInfo lineBreakpointInfo && lineBreakpointInfo.breakpoint.equals(breakpoint));
+
                     Map<Integer, BreakPointInfo> bpMap = breakpointMap.get(sourcePosition.getFile());
                     bpMap.remove(breakpoint.getLine());
                     sendBreakpointRequest(sourcePosition.getFile());
@@ -189,7 +212,7 @@ public class RobotDebugProcess extends XDebugProcess {
             return;
         }
 
-        Set<Map.Entry<Integer, BreakPointInfo>> breakpoints = breakpointMap.get(file).entrySet();
+        Collection<BreakPointInfo> breakpoints = breakpointMap.get(file).values();
         if (breakpoints.isEmpty()) {
             return;
         }
@@ -198,8 +221,7 @@ public class RobotDebugProcess extends XDebugProcess {
         source.setPath(file.toNioPath().toString());
         arguments.setSource(source);
 
-        SourceBreakpoint[] dapBreakpoints = breakpoints.stream().map(entry -> {
-            BreakPointInfo bp = entry.getValue();
+        SourceBreakpoint[] dapBreakpoints = breakpoints.stream().map(bp -> {
             SourceBreakpoint sourceBreakpoint = new SourceBreakpoint();
             sourceBreakpoint.setLine(bp.line + 1);
             if (bp instanceof LineBreakpointInfo lineBreakpointInfo) {
@@ -221,19 +243,17 @@ public class RobotDebugProcess extends XDebugProcess {
 
             breakpoints.forEach(breakpoint -> {
                 Breakpoint responseBreakpoint = Arrays.stream(response.getBreakpoints())
-                                                      .filter(x -> x.getLine() - 1 == breakpoint.getValue().line)
+                                                      .filter(x -> x.getLine() - 1 == breakpoint.line)
                                                       .findFirst()
                                                       .orElse(null);
                 if (responseBreakpoint != null) {
-                    breakpoint.getValue().id = responseBreakpoint.getId();
+                    breakpoint.id = responseBreakpoint.getId();
 
-                    LineBreakpointInfo lineBreakpointInfo = (LineBreakpointInfo) breakpoint.getValue();
-                    if (lineBreakpointInfo != null) {
-                        if (responseBreakpoint.isVerified()) {
-                            getSession().setBreakpointVerified(lineBreakpointInfo.breakpoint);
-                        } else {
-                            getSession().setBreakpointInvalid(lineBreakpointInfo.breakpoint, "Invalid breakpoint");
-                        }
+                    LineBreakpointInfo lineBreakpointInfo = (LineBreakpointInfo) breakpoint;
+                    if (responseBreakpoint.isVerified()) {
+                        getSession().setBreakpointVerified(lineBreakpointInfo.breakpoint);
+                    } else {
+                        getSession().setBreakpointInvalid(lineBreakpointInfo.breakpoint, "Invalid breakpoint");
                     }
                 }
             });
@@ -304,7 +324,7 @@ public class RobotDebugProcess extends XDebugProcess {
         }
 
         _oneTimeBreakpointInfo = new OneTimeBreakpointInfo(null, position);
-        bpMap.put(position.getLine(), new OneTimeBreakpointInfo(null, position));
+        bpMap.put(position.getLine(), _oneTimeBreakpointInfo);
 
         sendBreakpointRequest(position.getFile());
         resume(context);
@@ -364,7 +384,7 @@ public class RobotDebugProcess extends XDebugProcess {
 
     private static class BreakPointInfo {
 
-        protected Integer id;
+        protected volatile Integer id;
         protected final int line;
         protected final VirtualFile file;
 

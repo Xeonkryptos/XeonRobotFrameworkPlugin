@@ -44,7 +44,7 @@ public class RobotDebugAdapterProtocolCommunicator implements ProcessListener {
     @Override
     public void startNotified(@NotNull ProcessEvent event) {
         try {
-            socket = tryConnectToServerWithTimeout("localhost", robotDebugPort, 10_000L, 100L);
+            socket = tryConnectToServerWithTimeout(robotDebugPort);
             if (socket == null) {
                 throw new RuntimeException("Failed to connect to debug server");
             }
@@ -76,7 +76,7 @@ public class RobotDebugAdapterProtocolCommunicator implements ProcessListener {
                 robotDebugServer.configurationDone(new ConfigurationDoneArguments()).get();
             }
 
-            robotDebugServer.attach(Map.of());
+            robotDebugServer.attach(Map.of()).get();
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         } catch (ExecutionException | InterruptedException e) {
@@ -94,6 +94,7 @@ public class RobotDebugAdapterProtocolCommunicator implements ProcessListener {
         if (socket != null) {
             try {
                 socket.close();
+                socket = null;
             } catch (IOException ignore) {
             }
         }
@@ -115,18 +116,18 @@ public class RobotDebugAdapterProtocolCommunicator implements ProcessListener {
         return initialized;
     }
 
-    private Socket tryConnectToServerWithTimeout(String host, int port, long timeoutMillis, long retryIntervalMillis) {
+    private Socket tryConnectToServerWithTimeout(int port) {
         try {
-            return withTimeout(timeoutMillis, () -> {
+            return withTimeout(10000L, () -> {
                 Socket socket = null;
                 while (socket == null || !socket.isConnected()) {
                     socket = null;
                     try {
-                        socket = new Socket(host, port);
+                        socket = new Socket("localhost", port);
                     } catch (Exception ignored) {
                     }
                     try {
-                        TimeUnit.MILLISECONDS.sleep(retryIntervalMillis);
+                        TimeUnit.MILLISECONDS.sleep(100L);
                     } catch (InterruptedException e) {
                         throw new ProcessCanceledException(e);
                     }

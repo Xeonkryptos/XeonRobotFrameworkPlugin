@@ -26,6 +26,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.ServerSocket;
 import java.nio.charset.Charset;
 import java.nio.file.Path;
 import java.util.List;
@@ -39,6 +40,8 @@ public class RobotPythonScriptCommandLineState extends PythonScriptCommandLineSt
     private static final Path BUNDLED_DIR = DATA_DIR.resolve("bundled");
     private static final Path TOOL_DIR = BUNDLED_DIR.resolve("tool");
     private static final Path ROBOTCODE_DIR = TOOL_DIR.resolve("robotcode");
+
+    private static final int DEBUGGER_DEFAULT_PORT = 6612;
 
     private final RobotRunConfiguration robotRunConfiguration;
 
@@ -93,11 +96,11 @@ public class RobotPythonScriptCommandLineState extends PythonScriptCommandLineSt
 
             PythonScriptExecution delegateExecution = createCopiedPythonScriptExecution(pythonExecution);
             delegateExecution.setPythonScriptPath(TargetEnvironmentFunctions.constant(ROBOTCODE_DIR.toString()));
-            delegateExecution.getParameters()
-                             .addAll(0,
-                                     List.of(TargetEnvironmentFunctions.constant("debug"),
-                                             TargetEnvironmentFunctions.constant("--tcp"),
-                                             TargetEnvironmentFunctions.constant(String.valueOf(robotDebugPort))));
+            List<Function<TargetEnvironment, String>> parameters = delegateExecution.getParameters();
+            parameters.addAll(0,
+                              List.of(TargetEnvironmentFunctions.constant("debug"),
+                                      TargetEnvironmentFunctions.constant("--tcp"),
+                                      TargetEnvironmentFunctions.constant(String.valueOf(robotDebugPort))));
 
             return parentBuilder.build(helpersAwareTargetEnvironmentRequest, delegateExecution);
         }
@@ -122,6 +125,18 @@ public class RobotPythonScriptCommandLineState extends PythonScriptCommandLineSt
     }
 
     private static int findAvailableSocketPort() {
+        try (ServerSocket serverSocket = new ServerSocket(DEBUGGER_DEFAULT_PORT)) {
+            // workaround for linux : calling close() immediately after opening socket
+            // may result that socket is not closed
+            //noinspection SynchronizationOnLocalVariableOrMethodParameter
+            synchronized (serverSocket) {
+                try {
+                    //noinspection WaitNotInLoop
+                    serverSocket.wait(1);
+                } catch (InterruptedException ignored) {}
+            }
+            return serverSocket.getLocalPort();
+        } catch (Exception ignored) {}
         try {
             return NetUtils.findAvailableSocketPort();
         } catch (IOException e) {
