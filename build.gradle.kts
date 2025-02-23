@@ -118,6 +118,8 @@ tasks {
         from(layout.projectDirectory) {
             include("bundled/**/*")
             exclude("**/*.iml")
+            exclude("**/bin")
+            exclude("**/__pycache__")
             into(pluginName.map { "$it/data" })
         }
     }

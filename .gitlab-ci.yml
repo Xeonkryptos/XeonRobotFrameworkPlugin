@@ -11,6 +11,12 @@
     - "**/build"
     - "**/.gradle"
 
+.robotcode-cache: &robotcode-cache
+  key: "$CI_PROJECT_NAME-robotcode-cache-key"
+  paths:
+    - robotcode/*
+  policy: pull
+
 default:
   image: gradle:8.12.1-jdk21
   cache:
@@ -38,9 +44,7 @@ download-robotcode:
     - rm -rf robotcode/robot && rm -rf robotcode/robotframework*
     - ls -la robotcode
   cache:
-    - key: "$CI_PROJECT_NAME-robotcode-cache-key"
-      paths:
-        - robotcode/*
+    - <<: *robotcode-cache
       policy: pull-push
 
 compile-code:
@@ -61,11 +65,6 @@ build-plugin:
     paths:
       - build/distributions/*.zip
   cache:
-    - key: "$CI_PROJECT_NAME-robotcode-cache-key"
-      paths:
-        - robotcode/*
-      policy: pull
+    - <<: *robotcode-cache
     - <<: *gradle-dependency-cache
-      policy: pull
     - <<: *gradle-build-cache
-      policy: pull
