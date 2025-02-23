@@ -12,7 +12,7 @@
     - "**/.gradle"
 
 default:
-  image: gradle:8.12.1-jdk21-alpine
+  image: gradle:8.12.1-jdk21
   cache:
     - *gradle-dependency-cache
     - *gradle-build-cache
