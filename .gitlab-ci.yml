@@ -33,8 +33,9 @@ download-robotcode:
   script:
     - mkdir /robotcode
     - pip install --upgrade -t /robotocode robotcode[debugger]
+    - ls -la
     - rm -rf /robotcode/robot && rm -rf /robotcode/robotframework*
-    - ls -l /robotcode
+    - ls -la /robotcode
   cache:
     - key: "$CI_PROJECT_NAME-robotcode-cache-key"
       paths:
