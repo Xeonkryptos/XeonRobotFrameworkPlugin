@@ -62,6 +62,8 @@ build-plugin:
       - build/distributions/*.zip
   cache:
     - key: "$CI_PROJECT_NAME-robotcode-cache-key"
+      paths:
+        - robotcode/*
       policy: pull
     - <<: *gradle-dependency-cache
       policy: pull
