@@ -31,7 +31,8 @@ download-robotcode:
   stage: preparation
   image: python:3.11
   script:
-    - mkdir robotcode
+    - mkdir -p robotcode
+    - ls -la robotcode
     - pip install --upgrade -t robotcode robotcode[debugger]
     - ls -la robotcode
     - rm -rf robotcode/robot && rm -rf robotcode/robotframework*
