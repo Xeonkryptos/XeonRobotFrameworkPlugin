@@ -18,7 +18,6 @@ default:
     - *gradle-build-cache
 
 variables:
-  DOCKER_TLS_CERTDIR: "/certs"
   GRADLE_USER_HOME: "$CI_PROJECT_DIR/.gradle"
   GRADLE_OPTS: "-Dorg.gradle.daemon=false"
 
@@ -35,14 +34,11 @@ download-robotcode:
     - mkdir /robotcode
     - pip install --upgrade -t /robotocode robotcode[debugger]
     - rm -rf /robotcode/robot && rm -rf /robotcode/robotframework*
-  artifacts:
-    paths:
-      - /robotcode
-    expire_in: 1 week
+    - ls -l /robotcode
   cache:
     - key: "$CI_PROJECT_NAME-robotcode-cache-key"
       paths:
-        - /robotcode
+        - /robotcode/*
       policy: pull-push
 
 compile-code:
@@ -60,3 +56,12 @@ build-plugin:
   artifacts:
     paths:
       - build/distributions/*.zip
+  cache:
+    - key: "$CI_PROJECT_NAME-robotcode-cache-key"
+      paths:
+        - bundled/libs
+      policy: pull
+    - <<: *gradle-dependency-cache
+      policy: pull
+    - <<: *gradle-build-cache
+      policy: pull
