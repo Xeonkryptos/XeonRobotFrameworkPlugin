@@ -1,0 +1,62 @@
+.gradle-dependency-cache: &gradle-dependency-cache
+  key: "$CI_PROJECT_NAME-gradle-cache-key"
+  paths:
+    - .gradle/caches
+  policy: pull
+
+.gradle-build-cache: &gradle-build-cache
+  key: "$CI_PROJECT_NAME-$CI_COMMIT_REF_NAME"
+  policy: pull
+  paths:
+    - "**/build"
+    - "**/.gradle"
+
+default:
+  image: gradle:8.12.1-jdk21-alpine
+  cache:
+    - *gradle-dependency-cache
+    - *gradle-build-cache
+
+variables:
+  DOCKER_TLS_CERTDIR: "/certs"
+  GRADLE_USER_HOME: "$CI_PROJECT_DIR/.gradle"
+  GRADLE_OPTS: "-Dorg.gradle.daemon=false"
+
+stages:
+  - build
+  - test
+  - publish
+  - deploy
+
+download-robotcode:
+  stage: build
+  image: python:3.11
+  script:
+    - mkdir /robotcode
+    - pip install --upgrade -t /robotocode robotcode[debugger]
+    - rm -rf /robotcode/robot && rm -rf /robotcode/robotframework*
+  artifacts:
+    paths:
+      - /robotcode
+    expire_in: 1 week
+  cache:
+    - key: "$CI_PROJECT_NAME-robotcode-cache-key"
+      paths:
+        - /robotcode
+      policy: pull-push
+
+compile-code:
+  stage: build
+  script: gradle --build-cache jarSearchableOptions
+  cache:
+    - <<: *gradle-dependency-cache
+      policy: pull-push
+    - <<: *gradle-build-cache
+      policy: pull-push
+
+build-plugin:
+  stage: publish
+  script: gradle --build-cache buildPlugin
+  artifacts:
+    paths:
+      - build/distributions/*.zip
