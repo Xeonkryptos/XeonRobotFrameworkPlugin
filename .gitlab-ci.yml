@@ -31,15 +31,15 @@ download-robotcode:
   stage: preparation
   image: python:3.11
   script:
-    - mkdir /robotcode
-    - pip install --upgrade -t /robotcode robotcode[debugger]
-    - ls -la /robotcode
-    - rm -rf /robotcode/robot && rm -rf /robotcode/robotframework*
-    - ls -la /robotcode
+    - mkdir robotcode
+    - pip install --upgrade -t robotcode robotcode[debugger]
+    - ls -la robotcode
+    - rm -rf robotcode/robot && rm -rf robotcode/robotframework*
+    - ls -la robotcode
   cache:
     - key: "$CI_PROJECT_NAME-robotcode-cache-key"
       paths:
-        - /robotcode/*
+        - robotcode/*
       policy: pull-push
 
 compile-code:
