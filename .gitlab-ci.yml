@@ -54,14 +54,14 @@ compile-code:
 
 build-plugin:
   stage: build
-  script: gradle --build-cache buildPlugin
+  script:
+    - mv robotcode bundled/libs
+    - gradle --build-cache buildPlugin
   artifacts:
     paths:
       - build/distributions/*.zip
   cache:
     - key: "$CI_PROJECT_NAME-robotcode-cache-key"
-      paths:
-        - bundled/libs
       policy: pull
     - <<: *gradle-dependency-cache
       policy: pull
