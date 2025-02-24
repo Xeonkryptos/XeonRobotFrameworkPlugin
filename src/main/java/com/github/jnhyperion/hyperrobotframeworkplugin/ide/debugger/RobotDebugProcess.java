@@ -80,29 +80,25 @@ public class RobotDebugProcess extends XDebugProcess {
             ApplicationManager.getApplication().executeOnPooledThread(() -> handleOnStopped(args));
             return null;
         });
-        robotDAPCommunicator.getDebugClient().getOnRobotMessage().advise(Lifetime.Companion.getEternal(), message -> {
-            System.out.println("Robot message: " + message);
-            return null;
-        });
-        robotDAPCommunicator.getDebugClient().getOnRobotLog().advise(Lifetime.Companion.getEternal(), log -> {
-            System.out.println("Robot log: " + log);
-            return null;
-        });
     }
 
     private RobotSuspendContext createRobotCodeSuspendContext(int threadId) throws ExecutionException, InterruptedException, TimeoutException {
         IDebugProtocolServer debugServer = robotDAPCommunicator.getDebugServer();
         StackTraceArguments stackTraceArguments = new StackTraceArguments();
         stackTraceArguments.setThreadId(threadId);
-        System.out.println("Requesting stack trace");
         StackTraceResponse stackTraceResponse = debugServer.stackTrace(stackTraceArguments).get(5L, TimeUnit.SECONDS);
-        System.out.println("Got stack trace");
         return new RobotSuspendContext(stackTraceResponse, threadId, debugServer, getSession());
     }
 
     private void handleOnStopped(StoppedEventArguments args) {
         try {
             final RobotSuspendContext robotCodeSuspendContext = createRobotCodeSuspendContext(args.getThreadId());
+            if (getSession().areBreakpointsMuted()) {
+                ContinueArguments continueArguments = new ContinueArguments();
+                continueArguments.setThreadId(args.getThreadId());
+                robotDAPCommunicator.getDebugServer().continue_(continueArguments).get();
+                return;
+            }
             switch (args.getReason()) {
                 case "breakpoint" -> {
                     BreakPointInfo bp = breakpoints.stream()
@@ -123,13 +119,15 @@ public class RobotDebugProcess extends XDebugProcess {
                 }
                 case "exception" -> {
                     breakpointsMapMutex.lock();
-                    ExceptionBreakpointInfo exceptionBreakpointInfo;
+                    ExceptionBreakpointInfo exceptionBreakpointInfo = null;
                     try {
-                        exceptionBreakpointInfo = exceptionBreakpoints.get(0);
+                        if (!exceptionBreakpoints.isEmpty()) {
+                            exceptionBreakpointInfo = exceptionBreakpoints.get(0);
+                        }
                     } finally {
                         breakpointsMapMutex.unlock();
                     }
-                    if (!getSession().breakpointReached(exceptionBreakpointInfo.breakpoint, null, robotCodeSuspendContext)) {
+                    if (exceptionBreakpointInfo == null || !getSession().breakpointReached(exceptionBreakpointInfo.breakpoint, null, robotCodeSuspendContext)) {
                         ContinueArguments continueArguments = new ContinueArguments();
                         continueArguments.setThreadId(args.getThreadId());
                         robotDAPCommunicator.getDebugServer().continue_(continueArguments).get();

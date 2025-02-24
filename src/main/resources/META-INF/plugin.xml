@@ -17,7 +17,8 @@
                   language="Robot" extensions="resource"/>
         <colorSettingsPage implementation="com.github.jnhyperion.hyperrobotframeworkplugin.ide.config.RobotColorsPage"/>
         <!-- IDE Hooks -->
-        <completion.contributor language="Robot" implementationClass="com.github.jnhyperion.hyperrobotframeworkplugin.ide.completion.RobotCompletionContributor"/>
+        <completion.contributor language="Robot"
+                                implementationClass="com.github.jnhyperion.hyperrobotframeworkplugin.ide.completion.RobotCompletionContributor"/>
         <lang.findUsagesProvider language="Robot" implementationClass="com.github.jnhyperion.hyperrobotframeworkplugin.ide.usage.RobotFindUsagesProvider"/>
         <fileStructureGroupRuleProvider implementation="com.github.jnhyperion.hyperrobotframeworkplugin.ide.usage.RobotKeywordGroupingRuleProvider"/>
         <referencesSearch implementation="com.github.jnhyperion.hyperrobotframeworkplugin.ide.search.RobotPythonReferenceSearch"/>
@@ -92,9 +93,12 @@
 
         <xdebugger.breakpointType implementation="com.github.jnhyperion.hyperrobotframeworkplugin.ide.debugger.RobotLineBreakpointType"/>
         <xdebugger.breakpointType implementation="com.github.jnhyperion.hyperrobotframeworkplugin.ide.debugger.RobotExceptionBreakpointType"/>
-        <programRunner implementation="com.github.jnhyperion.hyperrobotframeworkplugin.ide.debugger.RobotDebugRunner" order="first"/>
+        <programRunner implementation="com.github.jnhyperion.hyperrobotframeworkplugin.ide.execution.RobotRunner" id="robotRunner" order="first"/>
+        <programRunner implementation="com.github.jnhyperion.hyperrobotframeworkplugin.ide.debugger.RobotDebugRunner" id="robotDebugRunner"
+                       order="after robotRunner"/>
 
-        <weigher key="completion" implementationClass="com.github.jnhyperion.hyperrobotframeworkplugin.ide.completion.RobotContextLevelWeigher" id="context" order="first"/>
+        <weigher key="completion" implementationClass="com.github.jnhyperion.hyperrobotframeworkplugin.ide.completion.RobotContextLevelWeigher" id="context"
+                 order="first"/>
     </extensions>
     <actions>
         <action id="HyperRobotFrameworkPlugin.CreateNew" class="com.github.jnhyperion.hyperrobotframeworkplugin.ide.RobotCreateAction">

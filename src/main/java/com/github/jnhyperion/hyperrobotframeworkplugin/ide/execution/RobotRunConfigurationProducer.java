@@ -125,8 +125,12 @@ public class RobotRunConfigurationProducer extends LazyRunConfigurationProducer<
     @NotNull
     private static String relativizePath(String basePath, String targetPath) {
         Path targetFile = Path.of(targetPath);
-        Path relativePath = Path.of(basePath).relativize(targetFile);
-        return relativePath.toString();
+        try {
+            Path relativePath = Path.of(basePath).relativize(targetFile);
+            return relativePath.toString();
+        } catch (IllegalArgumentException e) {
+            return targetPath;
+        }
     }
 
     @NotNull

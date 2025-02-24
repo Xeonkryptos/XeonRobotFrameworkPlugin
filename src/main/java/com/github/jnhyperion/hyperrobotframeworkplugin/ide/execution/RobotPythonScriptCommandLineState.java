@@ -5,7 +5,7 @@ import com.intellij.execution.ExecutionResult;
 import com.intellij.execution.Executor;
 import com.intellij.execution.configurations.ParametersList;
 import com.intellij.execution.configurations.ParamsGroup;
-import com.intellij.execution.executors.DefaultRunExecutor;
+import com.intellij.execution.executors.DefaultDebugExecutor;
 import com.intellij.execution.runners.ExecutionEnvironment;
 import com.intellij.execution.target.TargetEnvironment;
 import com.intellij.execution.target.value.TargetEnvironmentFunctions;
@@ -29,6 +29,7 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.nio.charset.Charset;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 
@@ -54,9 +55,6 @@ public class RobotPythonScriptCommandLineState extends PythonScriptCommandLineSt
     @Nullable
     @Override
     public ExecutionResult execute(Executor executor, PythonProcessStarter processStarter, CommandLinePatcher... patchers) throws ExecutionException {
-        if (DefaultRunExecutor.EXECUTOR_ID.equals(executor.getId())) {
-            return super.execute(executor, processStarter, patchers);
-        }
         return super.execute(executor, processStarter, ArrayUtil.append(patchers, commandLine -> {
             ParametersList parametersList = commandLine.getParametersList();
             ParamsGroup paramsGroup = parametersList.getParamsGroup(PythonCommandLineState.GROUP_MODULE);
@@ -77,30 +75,35 @@ public class RobotPythonScriptCommandLineState extends PythonScriptCommandLineSt
     @Override
     @SuppressWarnings("UnstableApiUsage") // Might be unstable at the moment, but is an important extension point
     public ExecutionResult execute(@NotNull Executor executor, @NotNull PythonScriptTargetedCommandLineBuilder converter) throws ExecutionException {
-        if (DefaultRunExecutor.EXECUTOR_ID.equals(executor.getId())) {
-            return super.execute(executor, converter);
-        }
-        return super.execute(executor, new MyPythonScriptTargetedCommandLineBuilder(converter, robotRunConfiguration));
+        boolean debugModeEnabled = DefaultDebugExecutor.EXECUTOR_ID.equals(executor.getId());
+        return super.execute(executor, new MyPythonScriptTargetedCommandLineBuilder(converter, robotRunConfiguration, debugModeEnabled));
     }
 
     @SuppressWarnings("UnstableApiUsage") // Might be unstable at the moment, but is an important extension point
-    private record MyPythonScriptTargetedCommandLineBuilder(@NotNull PythonScriptTargetedCommandLineBuilder parentBuilder, RobotRunConfiguration configuration)
-            implements PythonScriptTargetedCommandLineBuilder {
+    private record MyPythonScriptTargetedCommandLineBuilder(@NotNull PythonScriptTargetedCommandLineBuilder parentBuilder,
+                                                            RobotRunConfiguration configuration,
+                                                            boolean debugModeEnabled) implements PythonScriptTargetedCommandLineBuilder {
 
         @NotNull
         @Override
         public PythonExecution build(@NotNull HelpersAwareTargetEnvironmentRequest helpersAwareTargetEnvironmentRequest,
                                      @NotNull PythonExecution pythonExecution) {
-            int robotDebugPort = findAvailableSocketPort();
-            configuration.putUserData(ROBOT_DEBUG_PORT, robotDebugPort);
+            List<Function<TargetEnvironment, String>> additionalParameters = new ArrayList<>();
+            additionalParameters.add(TargetEnvironmentFunctions.constant("debug"));
+            if (debugModeEnabled) {
+                int robotDebugPort = findAvailableSocketPort();
+                configuration.putUserData(ROBOT_DEBUG_PORT, robotDebugPort);
+
+                additionalParameters.add(TargetEnvironmentFunctions.constant("--tcp"));
+                additionalParameters.add(TargetEnvironmentFunctions.constant(String.valueOf(robotDebugPort)));
+            } else {
+                additionalParameters.add(TargetEnvironmentFunctions.constant("--no-debug"));
+            }
 
             PythonScriptExecution delegateExecution = createCopiedPythonScriptExecution(pythonExecution);
             delegateExecution.setPythonScriptPath(TargetEnvironmentFunctions.constant(ROBOTCODE_DIR.toString()));
             List<Function<TargetEnvironment, String>> parameters = delegateExecution.getParameters();
-            parameters.addAll(0,
-                              List.of(TargetEnvironmentFunctions.constant("debug"),
-                                      TargetEnvironmentFunctions.constant("--tcp"),
-                                      TargetEnvironmentFunctions.constant(String.valueOf(robotDebugPort))));
+            parameters.addAll(0, additionalParameters);
 
             return parentBuilder.build(helpersAwareTargetEnvironmentRequest, delegateExecution);
         }

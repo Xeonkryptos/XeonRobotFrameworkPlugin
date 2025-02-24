@@ -1,6 +1,13 @@
 <!-- Keep a Changelog guide -> https://keepachangelog.com -->
 
 # HyperRobotFrameworkPlugin Changelog
+## [0.1.20]
+### Fixed
+- Fixed IndexOutOfBoundsException when exception occurs in Robot file but default breakpoint is removed
+- Fixed error running a robot testcase with robotcode module in run configuration
+- When breakpoints are muted tell the debugger to continue
+- IllegalArgumentException on creating run configuration: When base path doesn't match file path for relativization
+
 ## [0.1.19]
 ### Added
 - Added support for debugging of Robot files
