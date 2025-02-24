@@ -1,6 +1,6 @@
 import io.gitlab.arturbosch.detekt.Detekt
 import org.jetbrains.changelog.markdownToHTML
-import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
+import org.jetbrains.intellij.platform.gradle.tasks.PrepareSandboxTask
 
 fun properties(key: String) = project.findProperty(key).toString()
 
@@ -32,6 +32,8 @@ repositories {
 
 dependencies {
     detektPlugins("io.gitlab.arturbosch.detekt:detekt-formatting:1.15.0")
+
+    implementation("org.eclipse.lsp4j:org.eclipse.lsp4j.debug:0.24.0")
 
     intellijPlatform {
         val platformVersion = properties("platformVersion")
@@ -95,18 +97,8 @@ intellijPlatform {
 //    }
 
     pluginVerification {
-
         ides {
-            val platformVersion = properties("platformVersion")
-
-            ide(IntelliJPlatformType.PyCharmCommunity, platformVersion)
             recommended()
-
-//            select {
-//                types = listOf(IntelliJPlatformType.PyCharmCommunity)
-//                sinceBuild = properties("pluginSinceBuild")
-//                untilBuild = properties("pluginUntilBuild")
-//            }
         }
     }
 }
@@ -120,5 +112,15 @@ tasks {
 
     withType<Detekt> {
         jvmTarget = "17"
+    }
+
+    withType<PrepareSandboxTask> {
+        from(layout.projectDirectory) {
+            include("bundled/**/*")
+            exclude("**/*.iml")
+            exclude("**/bin")
+            exclude("**/__pycache__")
+            into(pluginName.map { "$it/data" })
+        }
     }
 }

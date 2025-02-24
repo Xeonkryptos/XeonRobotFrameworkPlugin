@@ -1,22 +1,26 @@
 package com.github.jnhyperion.hyperrobotframeworkplugin.ide.execution;
 
+import com.intellij.execution.Executor;
 import com.intellij.execution.configurations.ConfigurationFactory;
-import com.intellij.execution.configurations.ModuleBasedConfigurationOptions;
+import com.intellij.execution.configurations.RunProfileState;
+import com.intellij.execution.runners.ExecutionEnvironment;
 import com.intellij.openapi.project.Project;
 import com.jetbrains.python.run.PythonRunConfiguration;
+import com.jetbrains.python.run.PythonScriptCommandLineState;
 import org.jetbrains.annotations.NotNull;
 
 public class RobotRunConfiguration extends PythonRunConfiguration {
 
-   public RobotRunConfiguration(Project project, ConfigurationFactory configurationFactory) {
-      super(project, configurationFactory);
+    public RobotRunConfiguration(Project project, ConfigurationFactory configurationFactory) {
+        super(project, configurationFactory);
 
-      this.setEmulateTerminal(true);
-   }
+        setEmulateTerminal(true);
+    }
 
-   @NotNull
-   @Override
-   public ModuleBasedConfigurationOptions getOptions() {
-      return super.getOptions();
-   }
+    @Override
+    public RunProfileState getState(@NotNull Executor executor, @NotNull ExecutionEnvironment env) {
+        PythonScriptCommandLineState state = new RobotPythonScriptCommandLineState(this, env);
+        state.setMultiprocessDebug(true);
+        return state;
+    }
 }

@@ -1,1 +1,1 @@
-rootProject.name = "HyperRobotFrameworkPlugin"
+rootProject.name = "Hyper RobotFramework Support"

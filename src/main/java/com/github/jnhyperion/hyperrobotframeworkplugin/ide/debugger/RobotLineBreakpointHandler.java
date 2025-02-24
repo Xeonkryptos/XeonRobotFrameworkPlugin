@@ -1,12 +1,26 @@
 package com.github.jnhyperion.hyperrobotframeworkplugin.ide.debugger;
 
-import com.jetbrains.python.debugger.AbstractLineBreakpointHandler;
-import com.jetbrains.python.debugger.PyDebugProcess;
+import com.intellij.xdebugger.breakpoints.XBreakpointHandler;
+import com.intellij.xdebugger.breakpoints.XLineBreakpoint;
 import org.jetbrains.annotations.NotNull;
 
-public class RobotLineBreakpointHandler extends AbstractLineBreakpointHandler {
+public class RobotLineBreakpointHandler extends XBreakpointHandler<XLineBreakpoint<RobotLineBreakpointProperties>> {
 
-    public RobotLineBreakpointHandler(@NotNull PyDebugProcess debugProcess) {
-        super(RobotLineBreakpoint.class, debugProcess);
+    private final RobotDebugProcess debugProcess;
+
+    public RobotLineBreakpointHandler(@NotNull RobotDebugProcess debugProcess) {
+        super(RobotLineBreakpointType.class);
+
+        this.debugProcess = debugProcess;
+    }
+
+    @Override
+    public void registerBreakpoint(@NotNull XLineBreakpoint<RobotLineBreakpointProperties> breakpoint) {
+        debugProcess.registerBreakpoint(breakpoint);
+    }
+
+    @Override
+    public void unregisterBreakpoint(@NotNull XLineBreakpoint<RobotLineBreakpointProperties> breakpoint, boolean temporary) {
+        debugProcess.unregisterBreakpoint(breakpoint);
     }
 }

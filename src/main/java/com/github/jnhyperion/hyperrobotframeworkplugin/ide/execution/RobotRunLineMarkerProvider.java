@@ -27,7 +27,7 @@ public class RobotRunLineMarkerProvider extends RunLineMarkerContributor {
                     AnAction[] actions = ExecutorAction.getActions();
                     return new Info(TestState.Green2,
                                     actions,
-                                    elem -> StringUtil.join(ContainerUtil.mapNotNull(actions, action -> getText(action, elem)), "\n"));
+                                    elem -> StringUtil.join(ContainerUtil.mapNotNull(actions, action -> getText(action, createActionEvent(elem))), "\n"));
                 }
             } else {
                 if (RobotTokenTypes.KEYWORD_DEFINITION.equals(type)) {
@@ -36,7 +36,7 @@ public class RobotRunLineMarkerProvider extends RunLineMarkerContributor {
                         AnAction[] actions = ExecutorAction.getActions();
                         return new Info(TestState.Run,
                                         actions,
-                                        elem -> StringUtil.join(ContainerUtil.mapNotNull(actions, action -> getText(action, elem)), "\n"));
+                                        elem -> StringUtil.join(ContainerUtil.mapNotNull(actions, action -> getText(action, createActionEvent(elem))), "\n"));
                     }
                 }
             }
