@@ -93,9 +93,7 @@
 
         <xdebugger.breakpointType implementation="com.github.jnhyperion.hyperrobotframeworkplugin.ide.debugger.RobotLineBreakpointType"/>
         <xdebugger.breakpointType implementation="com.github.jnhyperion.hyperrobotframeworkplugin.ide.debugger.RobotExceptionBreakpointType"/>
-        <programRunner implementation="com.github.jnhyperion.hyperrobotframeworkplugin.ide.execution.RobotRunner" id="robotRunner" order="first"/>
-        <programRunner implementation="com.github.jnhyperion.hyperrobotframeworkplugin.ide.debugger.RobotDebugRunner" id="robotDebugRunner"
-                       order="after robotRunner"/>
+        <programRunner implementation="com.github.jnhyperion.hyperrobotframeworkplugin.ide.debugger.RobotDebugRunner" order="first"/>
 
         <weigher key="completion" implementationClass="com.github.jnhyperion.hyperrobotframeworkplugin.ide.completion.RobotContextLevelWeigher" id="context"
                  order="first"/>
