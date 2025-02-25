@@ -89,15 +89,15 @@ public class RobotPythonScriptCommandLineState extends PythonScriptCommandLineSt
         public PythonExecution build(@NotNull HelpersAwareTargetEnvironmentRequest helpersAwareTargetEnvironmentRequest,
                                      @NotNull PythonExecution pythonExecution) {
             List<Function<TargetEnvironment, String>> additionalParameters = new ArrayList<>();
-            additionalParameters.add(TargetEnvironmentFunctions.constant("debug"));
             if (debugModeEnabled) {
                 int robotDebugPort = findAvailableSocketPort();
                 configuration.putUserData(ROBOT_DEBUG_PORT, robotDebugPort);
 
+                additionalParameters.add(TargetEnvironmentFunctions.constant("debug"));
                 additionalParameters.add(TargetEnvironmentFunctions.constant("--tcp"));
                 additionalParameters.add(TargetEnvironmentFunctions.constant(String.valueOf(robotDebugPort)));
             } else {
-                additionalParameters.add(TargetEnvironmentFunctions.constant("--no-debug"));
+                additionalParameters.add(TargetEnvironmentFunctions.constant("robot"));
             }
 
             PythonScriptExecution delegateExecution = createCopiedPythonScriptExecution(pythonExecution);

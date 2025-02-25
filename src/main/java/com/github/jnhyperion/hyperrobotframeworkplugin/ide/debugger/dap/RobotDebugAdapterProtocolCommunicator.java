@@ -3,7 +3,6 @@ package com.github.jnhyperion.hyperrobotframeworkplugin.ide.debugger.dap;
 import com.intellij.execution.process.ProcessEvent;
 import com.intellij.execution.process.ProcessListener;
 import com.intellij.openapi.progress.ProcessCanceledException;
-import com.jetbrains.rd.util.lifetime.Lifetime;
 import com.jetbrains.rd.util.reactive.Signal;
 import kotlinx.coroutines.TimeoutCancellationException;
 import org.eclipse.lsp4j.debug.Capabilities;
@@ -78,11 +77,6 @@ public class RobotDebugAdapterProtocolCommunicator implements ProcessListener {
             }
 
             robotDebugServer.attach(Map.of()).get();
-
-            robotDebugClient.getOnRobotExited().advise(Lifetime.Companion.getEternal(), args -> {
-                processTerminated(new ProcessEvent(event.getProcessHandler(), args.exitCode()));
-                return null;
-            });
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         } catch (ExecutionException | InterruptedException e) {

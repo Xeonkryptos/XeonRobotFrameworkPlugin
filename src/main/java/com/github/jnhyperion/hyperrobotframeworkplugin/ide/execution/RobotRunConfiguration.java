@@ -6,7 +6,6 @@ import com.intellij.execution.configurations.RunProfileState;
 import com.intellij.execution.runners.ExecutionEnvironment;
 import com.intellij.openapi.project.Project;
 import com.jetbrains.python.run.PythonRunConfiguration;
-import com.jetbrains.python.run.PythonScriptCommandLineState;
 import org.jetbrains.annotations.NotNull;
 
 public class RobotRunConfiguration extends PythonRunConfiguration {
@@ -19,8 +18,6 @@ public class RobotRunConfiguration extends PythonRunConfiguration {
 
     @Override
     public RunProfileState getState(@NotNull Executor executor, @NotNull ExecutionEnvironment env) {
-        PythonScriptCommandLineState state = new RobotPythonScriptCommandLineState(this, env);
-        state.setMultiprocessDebug(true);
-        return state;
+        return new RobotPythonScriptCommandLineState(this, env);
     }
 }
