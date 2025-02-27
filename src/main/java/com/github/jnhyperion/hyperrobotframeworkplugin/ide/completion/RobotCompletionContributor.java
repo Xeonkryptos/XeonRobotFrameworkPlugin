@@ -106,9 +106,8 @@ public class RobotCompletionContributor extends CompletionContributor {
                                                  @NotNull ProcessingContext context,
                                                  @NotNull CompletionResultSet result) {
                        Heading heading = getHeading(parameters.getOriginalPosition());
-                       if (isIndexPositionAWhitespaceCharacter(parameters) &&
-                           heading != null &&
-                           (heading.containsTestCases() || heading.containsKeywordDefinitions())) {
+                       if (isIndexPositionAWhitespaceCharacter(parameters) && heading != null && (heading.containsTestCases()
+                                                                                                  || heading.containsKeywordDefinitions())) {
                            RobotCompletionContributor.addSyntaxLookup(RobotTokenTypes.BRACKET_SETTING, result);
                        }
                    }
@@ -187,9 +186,8 @@ public class RobotCompletionContributor extends CompletionContributor {
                                                  @NotNull ProcessingContext context,
                                                  @NotNull CompletionResultSet result) {
                        Heading heading = getHeading(parameters.getOriginalPosition());
-                       if (isIndexPositionAWhitespaceCharacter(parameters) &&
-                           heading != null &&
-                           (heading.containsTestCases() || heading.containsKeywordDefinitions())) {
+                       if (isIndexPositionAWhitespaceCharacter(parameters) && heading != null && (heading.containsTestCases()
+                                                                                                  || heading.containsKeywordDefinitions())) {
                            List<LookupElement> lookupElements = addSyntaxLookup(RobotTokenTypes.SYNTAX_MARKER);
                            List<LookupElement> nonSpecialElements = new ArrayList<>();
                            List<LookupElement> specialElements = new ArrayList<>();
@@ -222,9 +220,9 @@ public class RobotCompletionContributor extends CompletionContributor {
                                                  @NotNull ProcessingContext context,
                                                  @NotNull CompletionResultSet result) {
                        Heading heading = getHeading(parameters.getPosition());
-                       if (isIndexPositionAWhitespaceCharacter(parameters) &&
-                           heading != null &&
-                           (heading.containsTestCases() || heading.containsKeywordDefinitions() || heading.containsTasks())) {
+                       if (isIndexPositionAWhitespaceCharacter(parameters) && heading != null && (heading.containsTestCases()
+                                                                                                  || heading.containsKeywordDefinitions()
+                                                                                                  || heading.containsTasks())) {
                            addDefinedKeywordsFromFile(result, parameters.getOriginalFile());
                        } else if (heading != null && heading.isSettings()) {
                            addDefinedKeywordsFromFile(result, parameters.getOriginalFile());
@@ -262,9 +260,13 @@ public class RobotCompletionContributor extends CompletionContributor {
                        if (parameter != null) {
                            // In parameter context, the prefix usually contains the parameter name, too. For finding and filtering variable names, we need to
                            // remove the parameter name from the prefix.
-                           String parameterName = parameter.getParameterName();
                            String prefix = result.getPrefixMatcher().getPrefix();
-                           String newPrefix = prefix.substring(parameterName.length() + 1);
+                           String newPrefix;
+                           if (prefix.startsWith("=")) {
+                               newPrefix = prefix.substring(1);
+                           } else {
+                               newPrefix = prefix;
+                           }
                            result = result.withPrefixMatcher(newPrefix);
                        }
 
@@ -465,8 +467,8 @@ public class RobotCompletionContributor extends CompletionContributor {
                                                                .withIcon(icon)
                                                                .withPsiElement(lookupElementMarker.reference())
                                                                .withInsertHandler((context, item) -> {
-                                                                   if (item.getUserData(CompletionKeys.ROBOT_LOOKUP_ELEMENT_TYPE) ==
-                                                                       RobotLookupElementType.VARIABLE) {
+                                                                   if (item.getUserData(CompletionKeys.ROBOT_LOOKUP_ELEMENT_TYPE)
+                                                                       == RobotLookupElementType.VARIABLE) {
                                                                        String lookupString = item.getLookupString();
 
                                                                        Editor editor = context.getEditor();

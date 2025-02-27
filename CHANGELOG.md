@@ -1,6 +1,10 @@
 <!-- Keep a Changelog guide -> https://keepachangelog.com -->
 
 # HyperRobotFrameworkPlugin Changelog
+## [0.1.21]
+### Fixed
+- StringIndexOutOfBoundsException when requesting code completion for an argument of a keyword parameter
+
 ## [0.1.20]
 ### Fixed
 - Fixed IndexOutOfBoundsException when exception occurs in Robot file but default breakpoint is removed
