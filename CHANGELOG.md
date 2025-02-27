@@ -6,6 +6,9 @@
 - StringIndexOutOfBoundsException when requesting code completion for an argument of a keyword parameter
 - Don't create another run configuration for the same testcase when one exists already but created by another run mode
 
+### Changed
+- Use module SDK when creating a new Robot run configuration
+
 ## [0.1.20]
 ### Fixed
 - Fixed IndexOutOfBoundsException when exception occurs in Robot file but default breakpoint is removed

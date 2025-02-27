@@ -2,7 +2,7 @@ package com.github.jnhyperion.hyperrobotframeworkplugin.ide.execution;
 
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.RobotTokenTypes;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.Heading;
-import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.KeywordDefinitionImpl;
+import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.KeywordDefinition;
 import com.intellij.execution.Location;
 import com.intellij.execution.actions.ConfigurationContext;
 import com.intellij.execution.actions.ConfigurationFromContext;
@@ -39,9 +39,8 @@ public class RobotRunConfigurationProducer extends LazyRunConfigurationProducer<
         if (isValidRobotExecutableScript(context)) {
             String workingDirectory = getWorkingDirectoryToUse(runConfig);
             String runParam = getRunParameters(context, workingDirectory);
-            runConfig.setUseModuleSdk(false);
+            runConfig.setUseModuleSdk(true);
             runConfig.setModuleMode(true);
-//            runConfig.setScriptName("robot.run");
             runConfig.setScriptName("robotcode");
             runConfig.setWorkingDirectory(context.getProject().getBasePath());
             runConfig.setScriptParameters(runParam);
@@ -170,13 +169,13 @@ public class RobotRunConfigurationProducer extends LazyRunConfigurationProducer<
 
     @NotNull
     private static String getKeywordNameFromAnyElement(PsiElement element) {
-        while (!(element instanceof KeywordDefinitionImpl)) {
+        while (!(element instanceof KeywordDefinition)) {
             element = element.getParent();
             if (element == null) {
                 return "";
             }
         }
-        return ((KeywordDefinitionImpl) element).getKeywordName();
+        return ((KeywordDefinition) element).getKeywordName();
     }
 
     @NotNull
