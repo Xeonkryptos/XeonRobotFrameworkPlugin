@@ -4,9 +4,7 @@ import com.github.jnhyperion.hyperrobotframeworkplugin.ide.icons.RobotIcons;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.dto.VariableDto;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.util.ReservedVariableScope;
 import com.intellij.lang.ASTNode;
-import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiElement;
-import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiNameIdentifierOwner;
 import com.intellij.psi.util.PsiTreeUtil;
 import org.jetbrains.annotations.NotNull;
@@ -18,20 +16,13 @@ import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-public class KeywordDefinitionImpl extends RobotPsiElementBase implements DefinedKeyword, KeywordDefinition, PsiNameIdentifierOwner {
+public class KeywordDefinitionImpl extends RobotPsiElementBase implements KeywordDefinition, PsiNameIdentifierOwner {
 
-    private static final Pattern PATTERN = Pattern.compile("(.*?)(\\$\\{.*?})(.*)");
-    private static final String ANY = ".*?";
-    private static final String DOT = ".";
-
-    private Pattern pattern;
     private List<KeywordInvokable> invokedKeywords;
     private Collection<DefinedVariable> inlineVariables;
-    private Collection<DefinedVariable> definedArguments;
+    private Collection<DefinedVariable> definedVariables;
     private Collection<DefinedVariable> testCaseVariables;
 
     public KeywordDefinitionImpl(@NotNull ASTNode node) {
@@ -58,7 +49,7 @@ public class KeywordDefinitionImpl extends RobotPsiElementBase implements Define
     @Override
     public final Collection<DefinedVariable> getDeclaredVariables() {
         Set<DefinedVariable> results = new LinkedHashSet<>();
-        results.addAll(getDefinedArguments());
+        results.addAll(getDefinedVariables());
         results.addAll(getInlineVariables());
         Collection<DefinedVariable> localTestCaseVariables = this.testCaseVariables;
         if (this.testCaseVariables == null) {
@@ -67,11 +58,6 @@ public class KeywordDefinitionImpl extends RobotPsiElementBase implements Define
         }
         results.addAll(localTestCaseVariables);
         return results;
-    }
-
-    @Override
-    public final boolean hasInlineVariables() {
-        return !getInlineVariables().isEmpty();
     }
 
     @NotNull
@@ -100,17 +86,17 @@ public class KeywordDefinitionImpl extends RobotPsiElementBase implements Define
     }
 
     @NotNull
-    public final Collection<DefinedVariable> getDefinedArguments() {
-        Collection<DefinedVariable> results = this.definedArguments;
-        if (this.definedArguments == null) {
-            results = collectDefinedArguments();
-            this.definedArguments = results;
+    public final Collection<DefinedVariable> getDefinedVariables() {
+        Collection<DefinedVariable> results = this.definedVariables;
+        if (this.definedVariables == null) {
+            results = collectDefinedVariables();
+            this.definedVariables = results;
         }
         return results;
     }
 
     @NotNull
-    private Collection<DefinedVariable> collectDefinedArguments() {
+    private Collection<DefinedVariable> collectDefinedVariables() {
         return PsiTreeUtil.getChildrenOfTypeAsList(this, BracketSetting.class)
                           .stream()
                           .filter(BracketSetting::isArguments)
@@ -132,75 +118,10 @@ public class KeywordDefinitionImpl extends RobotPsiElementBase implements Define
     @Override
     public void subtreeChanged() {
         super.subtreeChanged();
-        this.definedArguments = null;
+        this.definedVariables = null;
         this.inlineVariables = null;
         this.testCaseVariables = null;
-        this.pattern = null;
         this.invokedKeywords = null;
-    }
-
-    @Override
-    public final boolean matches(String text) {
-        if (text == null) {
-            return false;
-        } else {
-            try {
-                String myText = this.getPresentableText();
-                Pattern namePattern = this.pattern;
-                if (namePattern == null) {
-                    PsiFile psiFile = getContainingFile();
-                    String myNamespace = getNamespace(psiFile);
-                    namePattern = Pattern.compile(buildPattern(myNamespace, myText.trim()), Pattern.CASE_INSENSITIVE);
-                    this.pattern = namePattern;
-                }
-
-                return namePattern.matcher(text.trim()).matches();
-            } catch (Throwable var5) {
-                return false;
-            }
-        }
-    }
-
-    private String getNamespace(@NotNull PsiFile file) {
-        VirtualFile virtualFile = file.getVirtualFile();
-        if (virtualFile == null) {
-            return null;
-        }
-        String name = virtualFile.getName();
-        // remove the extension
-        int index = name.lastIndexOf(DOT);
-        if (index > 0) {
-            name = name.substring(0, index);
-        }
-        return name;
-    }
-
-    @Override
-    public final PsiElement reference() {
-        return this;
-    }
-
-    private String buildPattern(String namespace, String text) {
-        Matcher matcher = PATTERN.matcher(text);
-        String result = "";
-        if (matcher.matches()) {
-            text = matcher.group(1);
-            String end = this.buildPattern(null, matcher.group(3));
-            if (!text.isEmpty()) {
-                result = Pattern.quote(text);
-            }
-
-            result = result + ANY;
-            if (!end.isEmpty()) {
-                result = result + end;
-            }
-        } else {
-            result = !text.isEmpty() ? Pattern.quote(text) : text;
-        }
-        if (namespace != null && !namespace.isEmpty()) {
-            result = "(" + Pattern.quote(namespace + DOT) + ")?" + result;
-        }
-        return result;
     }
 
     @Override
@@ -208,17 +129,14 @@ public class KeywordDefinitionImpl extends RobotPsiElementBase implements Define
         return this.getPresentableText();
     }
 
-    @Override
-    public final boolean hasArguments() {
-        return !this.getDefinedArguments().isEmpty();
-    }
-
     @Nullable
+    @Override
     public PsiElement getNameIdentifier() {
         return PsiTreeUtil.findChildOfType(this, KeywordDefinitionId.class);
     }
 
     @NotNull
+    @Override
     public Icon getIcon(int flags) {
         Heading heading = PsiTreeUtil.getParentOfType(this, Heading.class);
         if (heading != null && heading.containsTestCases()) {

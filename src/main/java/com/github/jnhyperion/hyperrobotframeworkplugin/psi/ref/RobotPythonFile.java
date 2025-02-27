@@ -66,7 +66,6 @@ public class RobotPythonFile extends RobotPythonWrapper implements KeywordFile {
                                 keywordSet.add(new KeywordDto(function,
                                                               this.namespace,
                                                               functionName,
-                                                              hasNonSelfParameter(function.getParameterList().getParameters()),
                                                               Arrays.asList(function.getParameterList().getParameters())));
                             }
                         }

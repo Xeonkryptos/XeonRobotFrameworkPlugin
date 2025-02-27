@@ -12,34 +12,20 @@ import com.jetbrains.python.psi.PyDecorator;
 import com.jetbrains.python.psi.PyDecoratorList;
 import com.jetbrains.python.psi.PyExpression;
 import com.jetbrains.python.psi.PyFunction;
-import com.jetbrains.python.psi.PyParameter;
 import com.jetbrains.python.psi.PyTargetExpression;
 import com.jetbrains.python.psi.types.TypeEvalContext;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map.Entry;
 
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-
 public abstract class RobotPythonWrapper {
 
-    protected static boolean hasNonSelfParameter(@Nullable PyParameter[] parameters) {
-        if (parameters != null) {
-            for (PyParameter parameter : parameters) {
-                String paramName = parameter.getName();
-                if (paramName != null && !"self".equalsIgnoreCase(paramName)) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
     protected static String getValidName(@Nullable String name) {
-        return name != null && !isReservedName(name) ? name : null;
+        return name != null && isNotReservedName(name) ? name : null;
     }
 
     protected static void addDefinedVariables(@NotNull PyClass pyClass, @NotNull Collection<DefinedVariable> definedVariables) {
@@ -49,7 +35,7 @@ public abstract class RobotPythonWrapper {
 
         for (PyTargetExpression attribute : attributes) {
             String attributeName = attribute.getName();
-            if (attributeName != null && !isReservedName(attributeName)) {
+            if (attributeName != null && isNotReservedName(attributeName)) {
                 definedVariables.add(new VariableDto(attribute, ReservedVariable.wrapToScalar(attributeName), ReservedVariableScope.Global));
             }
         }
@@ -57,7 +43,7 @@ public abstract class RobotPythonWrapper {
         for (Entry<String, Property> entry : pyClass.getProperties().entrySet()) {
             String propertyName = entry.getKey();
             PyFunction propertyFunction = pyClass.findMethodByName(propertyName, false, context);
-            if (propertyName != null && !isReservedName(propertyName) && propertyFunction != null) {
+            if (propertyName != null && isNotReservedName(propertyName) && propertyFunction != null) {
                 definedVariables.add(new VariableDto(propertyFunction, ReservedVariable.wrapToScalar(propertyName), ReservedVariableScope.Global));
             }
         }
@@ -70,8 +56,8 @@ public abstract class RobotPythonWrapper {
         }
     }
 
-    private static boolean isReservedName(@NotNull String name) {
-        return name.startsWith("_") || name.startsWith("ROBOT_LIBRARY_");
+    private static boolean isNotReservedName(@NotNull String name) {
+        return !name.startsWith("_") && !name.startsWith("ROBOT_LIBRARY_");
     }
 
     @Nullable
@@ -108,11 +94,7 @@ public abstract class RobotPythonWrapper {
                 if (keywordName != null) {
                     methodName = keywordName;
                 }
-                keywords.add(new KeywordDto(method,
-                                            namespace,
-                                            methodName,
-                                            hasNonSelfParameter(method.getParameterList().getParameters()),
-                                            Arrays.asList(method.getParameterList().getParameters())));
+                keywords.add(new KeywordDto(method, namespace, methodName, Arrays.asList(method.getParameterList().getParameters())));
             }
             return true;
         }, true, null);

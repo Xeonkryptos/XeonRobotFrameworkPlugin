@@ -5,6 +5,10 @@ import java.util.Collection;
 import org.jetbrains.annotations.NotNull;
 
 public interface KeywordInvokable extends RobotStatement, PsiNamedElement {
+
+   @NotNull
+   Collection<Parameter> getParameters();
+
    @NotNull
    Collection<Argument> getArguments();
 }

@@ -13,5 +13,5 @@ public interface KeywordDefinition extends RobotStatement, PsiNamedElement {
    @NotNull
    Collection<DefinedVariable> getDeclaredVariables();
 
-   boolean hasInlineVariables();
+   String getKeywordName();
 }

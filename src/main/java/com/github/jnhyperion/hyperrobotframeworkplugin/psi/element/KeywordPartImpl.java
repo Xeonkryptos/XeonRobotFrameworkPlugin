@@ -14,6 +14,11 @@ public class KeywordPartImpl extends RobotPsiElementBase implements KeywordInvok
       super(node);
    }
 
+   @Override
+   public @NotNull Collection<Parameter> getParameters() {
+      return Collections.emptySet();
+   }
+
    @NotNull
    @Override
    public final Collection<Argument> getArguments() {

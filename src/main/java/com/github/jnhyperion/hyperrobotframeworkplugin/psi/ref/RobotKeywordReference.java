@@ -73,7 +73,7 @@ public class RobotKeywordReference extends PsiReferenceBase<KeywordInvokable> {
                             }
 
                             TailTypeDecorator<LookupElementBuilder> tailTypeDecorator = TailTypeDecorator.withTail(lookupElement,
-                                                                                                                   definedKeyword.hasArguments() ?
+                                                                                                                   definedKeyword.hasParameters() ?
                                                                                                                    RobotTailTypes.TAB :
                                                                                                                    TailTypes.noneType());
                             tailTypeDecorators.add(tailTypeDecorator);

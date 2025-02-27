@@ -223,9 +223,10 @@ public class RobotCompletionContributor extends CompletionContributor {
                        if (isIndexPositionAWhitespaceCharacter(parameters) && heading != null && (heading.containsTestCases()
                                                                                                   || heading.containsKeywordDefinitions()
                                                                                                   || heading.containsTasks())) {
-                           addDefinedKeywordsFromFile(result, parameters.getOriginalFile());
+                           boolean startingWithSlash = isStartingWithSlash(parameters);
+                           addDefinedKeywordsFromFile(result, parameters.getOriginalFile(), startingWithSlash);
                        } else if (heading != null && heading.isSettings()) {
-                           addDefinedKeywordsFromFile(result, parameters.getOriginalFile());
+                           addDefinedKeywordsFromFile(result, parameters.getOriginalFile(), false);
                        }
                    }
                });
@@ -300,6 +301,20 @@ public class RobotCompletionContributor extends CompletionContributor {
         return Character.isWhitespace(firstCharacterInLine);
     }
 
+    private static boolean isStartingWithSlash(@NotNull CompletionParameters parameters) {
+        int offset = parameters.getOffset();
+
+        Document document = parameters.getEditor().getDocument();
+        int lineNumber = document.getLineNumber(offset);
+        int lineStartOffset = document.getLineStartOffset(lineNumber);
+        String textBeforeOffset = document.getText(new TextRange(lineStartOffset, offset));
+        if (textBeforeOffset.isEmpty()) {
+            return false;
+        }
+        int firstCharacterInLine = textBeforeOffset.trim().codePointAt(0);
+        return "/".equals(Character.toString(firstCharacterInLine));
+    }
+
     private static Heading getHeading(PsiElement current) {
         if (current == null) {
             return null;
@@ -369,17 +384,20 @@ public class RobotCompletionContributor extends CompletionContributor {
         return filePaths;
     }
 
-    private static void addDefinedKeywordsFromFile(CompletionResultSet resultSet, PsiFile file) {
+    private static void addDefinedKeywordsFromFile(CompletionResultSet resultSet, PsiFile file, boolean addKeywordParametersOnInsert) {
         if (file instanceof RobotFile robotFile) {
             boolean capitalizeKeywords = RobotOptionsProvider.getInstance(robotFile.getProject()).capitalizeKeywords();
-            addDefinedKeywords(robotFile.getDefinedKeywords(), resultSet, capitalizeKeywords).forEach(lookupElement -> {
+            addDefinedKeywords(robotFile.getDefinedKeywords(), resultSet, capitalizeKeywords, addKeywordParametersOnInsert).forEach(lookupElement -> {
                 lookupElement.putUserData(CompletionKeys.ROBOT_LOOKUP_CONTEXT, RobotLookupContext.KEYWORDS);
                 lookupElement.putUserData(CompletionKeys.ROBOT_LOOKUP_ELEMENT_TYPE, RobotLookupElementType.KEYWORD);
             });
             boolean allowTransitiveImports = RobotOptionsProvider.getInstance(file.getProject()).allowTransitiveImports();
             for (KeywordFile importedFile : robotFile.getImportedFiles(allowTransitiveImports)) {
                 if (importedFile.getImportType() != ImportType.VARIABLES) {
-                    addDefinedKeywords(importedFile.getDefinedKeywords(), resultSet, capitalizeKeywords).forEach(lookupElement -> {
+                    addDefinedKeywords(importedFile.getDefinedKeywords(),
+                                       resultSet,
+                                       capitalizeKeywords,
+                                       addKeywordParametersOnInsert).forEach(lookupElement -> {
                         lookupElement.putUserData(CompletionKeys.ROBOT_LOOKUP_CONTEXT, RobotLookupContext.KEYWORDS);
                         lookupElement.putUserData(CompletionKeys.ROBOT_LOOKUP_ELEMENT_TYPE, RobotLookupElementType.KEYWORD);
                     });
@@ -538,12 +556,16 @@ public class RobotCompletionContributor extends CompletionContributor {
         return (lastIndex == -1) ? fileName : fileName.substring(0, lastIndex);
     }
 
-    private static Collection<LookupElement> addDefinedKeywords(Collection<DefinedKeyword> keywords, CompletionResultSet resultSet, boolean capitalize) {
+    private static Collection<LookupElement> addDefinedKeywords(Collection<DefinedKeyword> keywords,
+                                                                CompletionResultSet resultSet,
+                                                                boolean capitalize,
+                                                                boolean addKeywordParametersOnInsert) {
         List<LookupElement> lookupElements = new ArrayList<>();
         for (DefinedKeyword keyword : keywords) {
             String keywordName = keyword.getKeywordName();
             String displayName = capitalize ? WordUtils.capitalize(keywordName) : keywordName;
             String[] lookupStrings = new String[] { keywordName, WordUtils.capitalize(keywordName), keywordName.toLowerCase() };
+            lookupStrings = Arrays.stream(lookupStrings).map(lookup -> "/" + lookup).toArray(String[]::new);
             LookupElementBuilder lookupElement = LookupElementBuilder.create(displayName)
                                                                      .withLookupStrings(Arrays.asList(lookupStrings))
                                                                      .withPresentableText(displayName)
@@ -555,10 +577,39 @@ public class RobotCompletionContributor extends CompletionContributor {
                 decoratedElement = decoratedElement.withTailText(displayName);
             }
 
-            TailTypeDecorator<LookupElementBuilder> tailTypeDecorator = TailTypeDecorator.withTail(decoratedElement,
-                                                                                                   keyword.hasArguments() ?
-                                                                                                   RobotTailTypes.TAB :
-                                                                                                   TailTypes.noneType());
+            TailTypeDecorator<LookupElementBuilder> tailTypeDecorator;
+            if (keyword.hasParameters()) {
+                if (addKeywordParametersOnInsert) {
+                    tailTypeDecorator = TailTypeDecorator.withTail(decoratedElement, new TailType() {
+                        @Override
+                        public int processTail(Editor editor, int tailOffset) {
+                            Document document = editor.getDocument();
+
+                            int lineNumber = document.getLineNumber(tailOffset);
+                            int lineStartOffset = document.getLineStartOffset(lineNumber);
+                            int keywordStartOffset = tailOffset - keywordName.length();
+                            String spaceBeforeOffset = document.getText(new TextRange(lineStartOffset, keywordStartOffset));
+
+                            int currentOffset = tailOffset;
+                            int addedOffset = 0;
+                            for (DefinedParameter parameter : keyword.getParameters()) {
+                                String parameterInsertString = "\n" + spaceBeforeOffset + "...    " + parameter.getLookup() + "=";
+                                if (parameter.hasDefaultValue()) {
+                                    parameterInsertString += parameter.getDefaultValue();
+                                }
+                                document.insertString(currentOffset, parameterInsertString);
+                                currentOffset += parameterInsertString.length();
+                                addedOffset += parameterInsertString.length();
+                            }
+                            return moveCaret(editor, tailOffset, addedOffset);
+                        }
+                    });
+                } else {
+                    tailTypeDecorator = TailTypeDecorator.withTail(decoratedElement, RobotTailTypes.TAB);
+                }
+            } else {
+                tailTypeDecorator = TailTypeDecorator.withTail(decoratedElement, TailTypes.noneType());
+            }
             resultSet.addElement(tailTypeDecorator);
             lookupElements.add(tailTypeDecorator);
         }
@@ -567,17 +618,17 @@ public class RobotCompletionContributor extends CompletionContributor {
 
     @Nullable
     public static String getKeywordArguments(DefinedKeyword keyword) {
-        if (keyword == null || !keyword.hasArguments()) {
+        if (keyword == null || !keyword.hasParameters()) {
             return null;
         }
 
         try {
             if (keyword instanceof KeywordDto) {
-                return formatArguments(((KeywordDto) keyword).getParameters());
+                return formatArguments(keyword.getParameters());
             }
 
             if (keyword instanceof KeywordDefinitionImpl keywordDefinition) {
-                return formatArguments(keywordDefinition.getDefinedArguments());
+                return formatArguments(keywordDefinition.getDefinedVariables());
             }
         } catch (Exception ignored) {
         }

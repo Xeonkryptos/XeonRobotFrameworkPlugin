@@ -2,6 +2,10 @@
 
 # HyperRobotFrameworkPlugin Changelog
 ## [0.1.21]
+### Added
+- When starting a keyword statement with / the code completion provides the complete list of available keywords and will add any defined parameter of this
+  keyword with default values if available
+
 ### Fixed
 - StringIndexOutOfBoundsException when requesting code completion for an argument of a keyword parameter
 - Don't create another run configuration for the same testcase when one exists already but created by another run mode
