@@ -17,6 +17,7 @@
 - Don't create another run configuration for the same testcase when one exists already but created by another run mode
 - Show available parameters in code completion for keywords when a previous parameter is defined but missing a value and a new parameter definition is possible
   because of an ellipsis or super space
+- Jumping to parameter definitions in python files from keywords now works correctly with CTRL+Left Mouse Click
 
 ### Changed
 

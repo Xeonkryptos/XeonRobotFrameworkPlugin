@@ -36,8 +36,8 @@
                                  implementationClass="com.github.jnhyperion.hyperrobotframeworkplugin.psi.manip.ArgumentManipulator"/>
         <lang.elementManipulator forClass="com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.Variable"
                                  implementationClass="com.github.jnhyperion.hyperrobotframeworkplugin.psi.manip.VariableManipulator"/>
-        <lang.elementManipulator forClass="com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.Parameter"
-                                 implementationClass="com.github.jnhyperion.hyperrobotframeworkplugin.psi.manip.ParameterManipulator"/>
+        <lang.elementManipulator forClass="com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.ParameterId"
+                                 implementationClass="com.github.jnhyperion.hyperrobotframeworkplugin.psi.manip.ParameterIdManipulator"/>
         <!-- Inspections -->
         <!-- Inspections: Compilation -->
         <localInspection language="Robot" shortName="RobotKeywordNotFound" bundle="messages.RobotBundle" key="INSP.NAME.keyword.undefined" groupPath="Robot"

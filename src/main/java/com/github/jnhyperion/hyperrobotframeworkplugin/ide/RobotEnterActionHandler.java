@@ -24,32 +24,30 @@ public class RobotEnterActionHandler extends EnterHandlerDelegateAdapter {
 
     @Override
     public Result postProcessEnter(@NotNull PsiFile psiFile, @NotNull Editor editor, @NotNull DataContext context) {
-        try {
-            if (psiFile instanceof RobotFile) {
-                int caretOffset = editor.getCaretModel().getOffset();
-                Document document = editor.getDocument();
-                int lineNumberOffset = document.getLineNumber(caretOffset) - 1;
-                int lineStartOffset = document.getLineStartOffset(lineNumberOffset);
-                int lineEndOffset = document.getLineEndOffset(lineNumberOffset);
-                List<PsiElement> results = new ArrayList<>();
+        if (psiFile instanceof RobotFile) {
+            int caretOffset = editor.getCaretModel().getOffset();
+            Document document = editor.getDocument();
+            int lineNumberOffset = document.getLineNumber(caretOffset) - 1;
+            int lineStartOffset = document.getLineStartOffset(lineNumberOffset);
+            int lineEndOffset = document.getLineEndOffset(lineNumberOffset);
+            List<PsiElement> results = new ArrayList<>();
 
-                for (int i = lineStartOffset; i <= lineEndOffset; i++) {
-                    PsiElement element = psiFile.findElementAt(i);
-                    if (!(element instanceof PsiWhiteSpace) && !results.contains(element)) {
-                        results.add(element);
-                    }
+            for (int i = lineStartOffset; i <= lineEndOffset; i++) {
+                PsiElement element = psiFile.findElementAt(i);
+                if (!(element instanceof PsiWhiteSpace) && !results.contains(element)) {
+                    results.add(element);
                 }
+            }
 
+            if (!results.isEmpty()) {
                 PsiElement element = results.get(0);
                 IElementType type = element.getNode().getElementType();
-                if (!results.isEmpty() && (type == RobotTokenTypes.KEYWORD_DEFINITION || type == RobotTokenTypes.SYNTAX_MARKER && INTERACTION_WORDS.contains(
-                        element.getText()))) {
+                if (!results.isEmpty() &&
+                    (type == RobotTokenTypes.KEYWORD_DEFINITION || type == RobotTokenTypes.SYNTAX_MARKER && INTERACTION_WORDS.contains(element.getText()))) {
                     document.insertString(caretOffset, "    ");
                 }
             }
-        } catch (Throwable ignored) {
         }
-
         return Result.Continue;
     }
 }

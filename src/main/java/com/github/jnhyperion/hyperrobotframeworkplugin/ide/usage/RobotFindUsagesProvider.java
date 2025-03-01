@@ -4,6 +4,7 @@ import com.github.jnhyperion.hyperrobotframeworkplugin.RobotBundle;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.Argument;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.Import;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.KeywordDefinition;
+import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.Parameter;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.RobotFile;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.VariableDefinition;
 import com.intellij.lang.cacheBuilder.WordsScanner;
@@ -23,6 +24,9 @@ public class RobotFindUsagesProvider implements FindUsagesProvider {
 
    @Override
    public boolean canFindUsagesFor(@NotNull PsiElement element) {
+      if (element instanceof Parameter) {
+         return false;
+      }
       return !(element instanceof Argument) || !(element.getParent() instanceof Import) ? element instanceof PsiNamedElement : element == element.getParent().getFirstChild();
    }
 
@@ -47,6 +51,8 @@ public class RobotFindUsagesProvider implements FindUsagesProvider {
           return RobotBundle.getMessage("usage.descriptive.variable");
       } else if (element instanceof RobotFile) {
           return RobotBundle.getMessage("usage.descriptive.import");
+      } else if (element instanceof Parameter) {
+          return RobotBundle.getMessage("usage.descriptive.parameter");
       } else if (element instanceof Argument) {
           return RobotBundle.getMessage("usage.descriptive.argument");
       } else {
