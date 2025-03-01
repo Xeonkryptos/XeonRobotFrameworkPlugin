@@ -106,8 +106,9 @@ public class RobotCompletionContributor extends CompletionContributor {
                                                  @NotNull ProcessingContext context,
                                                  @NotNull CompletionResultSet result) {
                        Heading heading = getHeading(parameters.getOriginalPosition());
-                       if (isIndexPositionAWhitespaceCharacter(parameters) && heading != null && (heading.containsTestCases()
-                                                                                                  || heading.containsKeywordDefinitions())) {
+                       if (isIndexPositionAWhitespaceCharacter(parameters) &&
+                           heading != null &&
+                           (heading.containsTestCases() || heading.containsKeywordDefinitions())) {
                            RobotCompletionContributor.addSyntaxLookup(RobotTokenTypes.BRACKET_SETTING, result);
                        }
                    }
@@ -186,8 +187,9 @@ public class RobotCompletionContributor extends CompletionContributor {
                                                  @NotNull ProcessingContext context,
                                                  @NotNull CompletionResultSet result) {
                        Heading heading = getHeading(parameters.getOriginalPosition());
-                       if (isIndexPositionAWhitespaceCharacter(parameters) && heading != null && (heading.containsTestCases()
-                                                                                                  || heading.containsKeywordDefinitions())) {
+                       if (isIndexPositionAWhitespaceCharacter(parameters) &&
+                           heading != null &&
+                           (heading.containsTestCases() || heading.containsKeywordDefinitions())) {
                            List<LookupElement> lookupElements = addSyntaxLookup(RobotTokenTypes.SYNTAX_MARKER);
                            List<LookupElement> nonSpecialElements = new ArrayList<>();
                            List<LookupElement> specialElements = new ArrayList<>();
@@ -220,9 +222,9 @@ public class RobotCompletionContributor extends CompletionContributor {
                                                  @NotNull ProcessingContext context,
                                                  @NotNull CompletionResultSet result) {
                        Heading heading = getHeading(parameters.getPosition());
-                       if (isIndexPositionAWhitespaceCharacter(parameters) && heading != null && (heading.containsTestCases()
-                                                                                                  || heading.containsKeywordDefinitions()
-                                                                                                  || heading.containsTasks())) {
+                       if (isIndexPositionAWhitespaceCharacter(parameters) &&
+                           heading != null &&
+                           (heading.containsTestCases() || heading.containsKeywordDefinitions() || heading.containsTasks())) {
                            boolean startingWithSlash = isStartingWithSlash(parameters);
                            addDefinedKeywordsFromFile(result, parameters.getOriginalFile(), startingWithSlash);
                        } else if (heading != null && heading.isSettings()) {
@@ -231,21 +233,30 @@ public class RobotCompletionContributor extends CompletionContributor {
                    }
                });
         // Provide parameter completions in context of keyword statements
-        extend(CompletionType.BASIC, PlatformPatterns.psiElement()
-                                                     .andNot(PlatformPatterns.psiComment())
-                                                     .and(withArgumentInKeywordStatement())
-                                                     // Don't provide parameters in parameter context. There is no nesting of function parameters
-                                                     .andNot(PlatformPatterns.psiElement()
-                                                                             .withSuperParent(2, PlatformPatterns.psiElement(RobotTokenTypes.PARAMETER)))
-                                                     .inFile(PlatformPatterns.psiElement(RobotFile.class)), new CompletionProvider<>() {
-            @Override
-            protected void addCompletions(@NotNull CompletionParameters parameters, @NotNull ProcessingContext context, @NotNull CompletionResultSet result) {
-                KeywordStatement keyword = PsiTreeUtil.getParentOfType(parameters.getPosition(), KeywordStatement.class);
-                if (keyword != null) {
-                    addKeywordParameters(keyword, result);
-                }
-            }
-        });
+        extend(CompletionType.BASIC,
+               PlatformPatterns.psiElement()
+                               .andNot(PlatformPatterns.psiComment())
+                               .and(withArgumentInKeywordStatement())
+                               .inFile(PlatformPatterns.psiElement(RobotFile.class)),
+               new CompletionProvider<>() {
+                   @Override
+                   protected void addCompletions(@NotNull CompletionParameters parameters,
+                                                 @NotNull ProcessingContext context,
+                                                 @NotNull CompletionResultSet result) {
+                       KeywordStatement keyword = PsiTreeUtil.getParentOfType(parameters.getPosition(), KeywordStatement.class);
+                       if (keyword != null) {
+                           PsiElement psiParent = parameters.getPosition().getParent();
+                           PsiElement superParent = psiParent.getParent();
+                           if (superParent instanceof Parameter) {
+                               if ("=".equals(psiParent.getPrevSibling().getText())) {
+                                   return;
+                               }
+                               result = result.withPrefixMatcher("");
+                           }
+                           addKeywordParameters(keyword, result);
+                       }
+                   }
+               });
         // Provide completions in context of variables or arguments
         extend(CompletionType.BASIC,
                PlatformPatterns.psiElement()
@@ -488,8 +499,8 @@ public class RobotCompletionContributor extends CompletionContributor {
                                                                .withIcon(icon)
                                                                .withPsiElement(lookupElementMarker.reference())
                                                                .withInsertHandler((context, item) -> {
-                                                                   if (item.getUserData(CompletionKeys.ROBOT_LOOKUP_ELEMENT_TYPE)
-                                                                       == RobotLookupElementType.VARIABLE) {
+                                                                   if (item.getUserData(CompletionKeys.ROBOT_LOOKUP_ELEMENT_TYPE) ==
+                                                                       RobotLookupElementType.VARIABLE) {
                                                                        String lookupString = item.getLookupString();
 
                                                                        Editor editor = context.getEditor();
