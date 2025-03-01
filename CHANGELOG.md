@@ -18,6 +18,7 @@
 - Show available parameters in code completion for keywords when a previous parameter is defined but missing a value and a new parameter definition is possible
   because of an ellipsis or super space
 - Jumping to parameter definitions in python files from keywords now works correctly with CTRL+Left Mouse Click
+- When a process started in debug mode ends, it isn't shown as running in the run tool window anymore
 
 ### Changed
 

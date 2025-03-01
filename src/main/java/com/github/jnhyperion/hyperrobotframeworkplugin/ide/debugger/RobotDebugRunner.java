@@ -9,7 +9,7 @@ import com.intellij.execution.configurations.RunProfile;
 import com.intellij.execution.configurations.RunProfileState;
 import com.intellij.execution.executors.DefaultDebugExecutor;
 import com.intellij.execution.executors.DefaultRunExecutor;
-import com.intellij.execution.process.ProcessHandler;
+import com.intellij.execution.process.ProcessEvent;
 import com.intellij.execution.runners.ExecutionEnvironment;
 import com.intellij.execution.ui.RunContentDescriptor;
 import com.intellij.openapi.project.Project;
@@ -64,11 +64,9 @@ public class RobotDebugRunner extends PyDebugRunner {
                 }).getRunContentDescriptor();
 
                 executionResult.getProcessHandler().addProcessListener(robotDebugAdapterProtocolCommunicator);
-                ProcessHandler processHandler = runContentDescriptor.getProcessHandler();
-                if (processHandler == null) {
-                    throw new RuntimeException("Process handler is null");
-                }
-                processHandler.addProcessListener(robotDebugAdapterProtocolCommunicator);
+                // Usually, startNotified would be called by the ProcessHandler itself and in reality, it is called by it. Sadly, when we're reaching this point,
+                // the process is already running and the method called. Therefore, we have to emulate the call ourselves to connect to our debug server
+                robotDebugAdapterProtocolCommunicator.startNotified(new ProcessEvent(executionResult.getProcessHandler()));
 
                 return runContentDescriptor;
             } catch (ExecutionException e) {

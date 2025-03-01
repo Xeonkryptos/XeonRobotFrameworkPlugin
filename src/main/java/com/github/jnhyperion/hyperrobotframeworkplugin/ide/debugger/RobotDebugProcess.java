@@ -2,6 +2,7 @@ package com.github.jnhyperion.hyperrobotframeworkplugin.ide.debugger;
 
 import com.github.jnhyperion.hyperrobotframeworkplugin.ide.debugger.dap.RobotDebugAdapterProtocolCommunicator;
 import com.intellij.execution.ExecutionResult;
+import com.intellij.execution.process.ProcessHandler;
 import com.intellij.execution.ui.ExecutionConsole;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.vfs.VirtualFile;
@@ -366,6 +367,12 @@ public class RobotDebugProcess extends XDebugProcess {
     @Override
     public XBreakpointHandler<?> @NotNull [] getBreakpointHandlers() {
         return new XBreakpointHandler[] { breakpointHandler, exceptionBreakpointHandler };
+    }
+
+    @Nullable
+    @Override
+    protected ProcessHandler doGetProcessHandler() {
+        return executionResult.getProcessHandler();
     }
 
     @NotNull
