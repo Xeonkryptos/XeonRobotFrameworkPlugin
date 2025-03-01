@@ -3,7 +3,7 @@ package com.github.jnhyperion.hyperrobotframeworkplugin.ide.inspections.compilat
 import com.github.jnhyperion.hyperrobotframeworkplugin.RobotBundle;
 import com.github.jnhyperion.hyperrobotframeworkplugin.ide.inspections.SimpleRobotInspection;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.RobotTokenTypes;
-import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.KeywordInvokableImpl;
+import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.KeywordInvokable;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiReference;
 import org.jetbrains.annotations.Nls;
@@ -18,18 +18,15 @@ public class RobotKeywordNotFound extends SimpleRobotInspection {
 
     @Override
     public final boolean skip(PsiElement element) {
-        try {
-            if (element instanceof KeywordInvokableImpl) {
-                PsiReference reference = element.getReference();
-                boolean isResolved = reference != null && reference.resolve() != null;
+        if (element instanceof KeywordInvokable) {
+            PsiReference reference = element.getReference();
+            boolean isResolved = reference != null && reference.resolve() != null;
 
-                if (!isResolved && element.getNode().getElementType() == RobotTokenTypes.SYNTAX_MARKER) {
-                    return true;
-                }
-
-                return isResolved;
+            if (!isResolved && element.getNode().getElementType() == RobotTokenTypes.SYNTAX_MARKER) {
+                return true;
             }
-        } catch (Throwable ignored) {
+
+            return isResolved;
         }
         return true;
     }

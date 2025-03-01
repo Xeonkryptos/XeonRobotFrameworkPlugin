@@ -49,6 +49,13 @@
         <localInspection language="Robot" shortName="RobotImportNotFound" bundle="messages.RobotBundle" key="INSP.NAME.import.undefined" groupPath="Robot"
                          groupKey="INSP.GROUP.compilation" enabledByDefault="true" level="WARNING"
                          implementationClass="com.github.jnhyperion.hyperrobotframeworkplugin.ide.inspections.compilation.RobotImportNotFound"/>
+        <localInspection language="Robot" shortName="RobotKeywordParameterNotFound" bundle="messages.RobotBundle" key="INSP.Name.keyword.parameter.undefined"
+                         groupPath="Robot" groupKey="INSP.GROUP.compilation" enabledByDefault="true" level="WARNING"
+                         implementationClass="com.github.jnhyperion.hyperrobotframeworkplugin.ide.inspections.compilation.RobotKeywordParameterNotFound"/>
+        <localInspection language="Robot" shortName="RobotKeywordParameterMissingValue" bundle="messages.RobotBundle"
+                         key="INSP.Name.keyword.parameter.value.undefined" groupPath="Robot" groupKey="INSP.GROUP.compilation" enabledByDefault="true"
+                         level="WEAK WARNING"
+                         implementationClass="com.github.jnhyperion.hyperrobotframeworkplugin.ide.inspections.compilation.RobotKeywordParameterMissingValue"/>
         <!-- TODO: inspection: error?: resource import is not a robot file -->
         <!-- TODO: inspection: warn: import python file vs class -->
         <!-- Inspections: Cleanup -->
@@ -64,13 +71,11 @@
                          level="WARNING"
                          implementationClass="com.github.jnhyperion.hyperrobotframeworkplugin.ide.inspections.readability.RobotKeywordDefinitionStartingWithGherkin"/>
         <!-- TODO: inspection: warn: use of I in keyword; decreased readability -->
-        <!-- TODO: inspection: warn: keyword starting with upper case; decreased readability -->
         <!-- TODO: inspection: warn: scenario step does not start with gherkin; decreased readability -->
         <!-- TODO: inspection: warn: scenario step is not a keyword (ie variable); decreased readability -->
         <!-- TODO: inspection: warn: scenario step contains arguments; decreased readability -->
         <!-- Inspections: Complexity -->
         <!-- TODO: inspection: warn: keyword definitions that contain gherkin; trying to do too much -->
-        <!-- TODO: inspection: warn: scenarios longer than X lines; trying to do too much -->
         <localInspection language="Robot" shortName="RobotNestedVariable" bundle="messages.RobotBundle" key="INSP.NAME.variable.nested" groupPath="Robot"
                          groupKey="INSP.GROUP.complexity" enabledByDefault="true" level="WARNING"
                          implementationClass="com.github.jnhyperion.hyperrobotframeworkplugin.ide.inspections.complexity.RobotNestedVariable"/>

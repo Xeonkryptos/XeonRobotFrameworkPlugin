@@ -8,6 +8,8 @@
 
 - When starting a keyword statement with / the code completion provides the complete list of available keywords and will add any defined parameter of this
   keyword with default values if available
+- Added inspection to check for unknown keyword parameters
+- Added inspection to check for keyword parameters without a value
 
 ### Fixed
 
