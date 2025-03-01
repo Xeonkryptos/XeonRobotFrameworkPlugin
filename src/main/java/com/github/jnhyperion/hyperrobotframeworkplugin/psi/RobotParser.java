@@ -248,8 +248,13 @@ public class RobotParser implements PsiParser {
     }
 
     private static boolean isNextToken(@NotNull PsiBuilder builder, IElementType type) {
+        return isNextToken(builder, 1, type);
+    }
+
+    private static boolean isNextToken(@NotNull PsiBuilder builder, int nextTokenCount, IElementType type) {
+        nextTokenCount = Math.max(1, nextTokenCount);
         boolean allowEof = type == RobotTokenTypes.WHITESPACE;
-        IElementType next = builder.rawLookup(1);
+        IElementType next = builder.rawLookup(nextTokenCount);
         return next == type || allowEof && next == null;
     }
 
@@ -328,7 +333,8 @@ public class RobotParser implements PsiParser {
                 type == RobotTokenTypes.PARAMETER && current == RobotTokenTypes.ARGUMENT ||
                 RobotTokenTypes.VARIABLE == current ||
                 RobotTokenTypes.VARIABLE_DEFINITION == current)) {
-            boolean end = current != RobotTokenTypes.PARAMETER && isNextToken(builder, RobotTokenTypes.WHITESPACE);
+            boolean end = (current != RobotTokenTypes.PARAMETER || isNextToken(builder, 2, RobotTokenTypes.WHITESPACE)) &&
+                          isNextToken(builder, RobotTokenTypes.WHITESPACE);
             if (type == RobotTokenTypes.PARAMETER && current == RobotTokenTypes.ARGUMENT ||
                 RobotTokenTypes.VARIABLE == current ||
                 RobotTokenTypes.VARIABLE_DEFINITION == current) {
