@@ -12,6 +12,7 @@
 
 ### Changed
 - Use module SDK when creating a new Robot run configuration
+- Handling of smart enclosing of variables when typing $, @, & optimized - changed handling to IntelliJ's default behavior
 
 ## [0.1.20]
 ### Fixed

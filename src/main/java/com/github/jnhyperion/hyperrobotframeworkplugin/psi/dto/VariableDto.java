@@ -27,12 +27,11 @@ public class VariableDto implements DefinedVariable {
             return false;
         } else {
             Pattern pattern = this.pattern;
-            if (this.pattern == null) {
+            if (this.pattern == null && this.name.length() > 3) {
                 pattern = Pattern.compile(PatternUtil.getVariablePattern(this.name), Pattern.CASE_INSENSITIVE);
                 this.pattern = pattern;
             }
-
-            return pattern.matcher(text).matches();
+            return pattern != null && pattern.matcher(text).matches();
         }
     }
 
