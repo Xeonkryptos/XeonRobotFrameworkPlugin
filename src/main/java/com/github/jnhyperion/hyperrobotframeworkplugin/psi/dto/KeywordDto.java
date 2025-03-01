@@ -7,6 +7,7 @@ import com.github.jnhyperion.hyperrobotframeworkplugin.psi.util.PatternUtil;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.util.ReservedVariable;
 import com.intellij.psi.PsiElement;
 import com.jetbrains.python.psi.PyBoolLiteralExpression;
+import com.jetbrains.python.psi.PyNoneLiteralExpression;
 import com.jetbrains.python.psi.PyParameter;
 import com.jetbrains.python.psi.PyReferenceExpression;
 import com.jetbrains.python.psi.PyStringLiteralExpression;
@@ -77,8 +78,10 @@ public class KeywordDto implements DefinedKeyword {
             defaultValue = expression.getStringValue();
         } else if (parameter.getDefaultValue() instanceof PyBoolLiteralExpression expression) {
             defaultValue = expression.getValue() ? ReservedVariable.TRUE.getVariable() : ReservedVariable.FALSE.getVariable();
-        } else if (parameter.getDefaultValue() instanceof PyReferenceExpression expression) {
-            defaultValue = "${%s}".formatted(expression.getText());
+        } else if (parameter.getDefaultValue() instanceof PyReferenceExpression) {
+            defaultValue = "${%s}".formatted(parameter.getText());
+        } else if (parameter.getDefaultValue() instanceof PyNoneLiteralExpression) {
+            defaultValue = ReservedVariable.NONE.getVariable();
         } else {
            defaultValue = parameter.getDefaultValueText();
         }

@@ -1,6 +1,5 @@
 package com.github.jnhyperion.hyperrobotframeworkplugin.ide.completion;
 
-import com.github.jnhyperion.hyperrobotframeworkplugin.ide.RobotTailTypes;
 import com.github.jnhyperion.hyperrobotframeworkplugin.ide.config.RobotOptionsProvider;
 import com.github.jnhyperion.hyperrobotframeworkplugin.ide.icons.RobotIcons;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.RecommendationWord;
@@ -619,7 +618,7 @@ public class RobotCompletionContributor extends CompletionContributor {
                         }
                     });
                 } else {
-                    tailTypeDecorator = TailTypeDecorator.withTail(decoratedElement, RobotTailTypes.TAB);
+                    tailTypeDecorator = TailTypeDecorator.withTail(decoratedElement, TailTypes.noneType());
                 }
             } else {
                 tailTypeDecorator = TailTypeDecorator.withTail(decoratedElement, TailTypes.noneType());
