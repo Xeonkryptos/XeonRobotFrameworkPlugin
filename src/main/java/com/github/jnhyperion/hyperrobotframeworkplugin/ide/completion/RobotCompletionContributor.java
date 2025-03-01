@@ -265,6 +265,9 @@ public class RobotCompletionContributor extends CompletionContributor {
                            String newPrefix;
                            if (prefix.startsWith("=")) {
                                newPrefix = prefix.substring(1);
+                           } else if (prefix.startsWith(parameter.getParameterName() + "=")) {
+                               int parameterDefinitionLength = (parameter.getParameterName() + "=").length();
+                               newPrefix = prefix.substring(parameterDefinitionLength);
                            } else {
                                newPrefix = prefix;
                            }
