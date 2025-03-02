@@ -11,12 +11,14 @@ import com.intellij.execution.target.TargetEnvironment;
 import com.intellij.execution.target.value.TargetEnvironmentFunctions;
 import com.intellij.openapi.application.PathManager;
 import com.intellij.openapi.util.Key;
+import com.intellij.openapi.util.Ref;
 import com.intellij.util.ArrayUtil;
 import com.intellij.util.net.NetUtils;
 import com.jetbrains.python.PyBundle;
 import com.jetbrains.python.run.CommandLinePatcher;
 import com.jetbrains.python.run.PythonCommandLineState;
 import com.jetbrains.python.run.PythonExecution;
+import com.jetbrains.python.run.PythonModuleExecution;
 import com.jetbrains.python.run.PythonScriptCommandLineState;
 import com.jetbrains.python.run.PythonScriptExecution;
 import com.jetbrains.python.run.PythonScriptTargetedCommandLineBuilder;
@@ -55,41 +57,73 @@ public class RobotPythonScriptCommandLineState extends PythonScriptCommandLineSt
     @Nullable
     @Override
     public ExecutionResult execute(Executor executor, PythonProcessStarter processStarter, CommandLinePatcher... patchers) throws ExecutionException {
+        final RobotExecutionMode executionMode = computeRobotExecutionMode(executor);
         return super.execute(executor, processStarter, ArrayUtil.append(patchers, commandLine -> {
             ParametersList parametersList = commandLine.getParametersList();
-            ParamsGroup paramsGroup = parametersList.getParamsGroup(PythonCommandLineState.GROUP_MODULE);
-            if (paramsGroup != null) {
-                int robotDebugPort = findAvailableSocketPort();
-                robotRunConfiguration.putUserData(ROBOT_DEBUG_PORT, robotDebugPort);
-
-                // TODO Python script path needs to be modified
-                int parameterIndex = 0;
-                paramsGroup.getParametersList().addAt(parameterIndex, "--tcp");
-                parameterIndex++;
-                paramsGroup.getParametersList().addAt(parameterIndex, String.valueOf(robotDebugPort));
+            ParamsGroup moduleGroup = parametersList.getParamsGroup(PythonCommandLineState.GROUP_MODULE);
+            if (moduleGroup != null && moduleGroup.getParameters().contains("robotcode")) {
+                modifyCommandLine(moduleGroup, 1, executionMode);
+            } else {
+                ParamsGroup scriptGroup = parametersList.getParamsGroup(PythonCommandLineState.GROUP_SCRIPT);
+                if (scriptGroup != null && scriptGroup.getParameters().contains("robotcode")) {
+                    modifyCommandLine(scriptGroup, 0, executionMode);
+                }
             }
         }));
+    }
+
+    private void modifyCommandLine(ParamsGroup paramsGroup, int scriptIndex, RobotExecutionMode robotExecutionMode) {
+        paramsGroup.getParametersList().set(scriptIndex, ROBOTCODE_DIR + "/robotcode");
+        if (robotExecutionMode == RobotExecutionMode.DEBUG) {
+            int robotDebugPort = findAvailableSocketPort();
+            robotRunConfiguration.putUserData(ROBOT_DEBUG_PORT, robotDebugPort);
+
+            paramsGroup.getParametersList().addAll("debug", "--tcp", String.valueOf(robotDebugPort));
+        } else {
+            paramsGroup.getParametersList().add("robot");
+            if (robotExecutionMode == RobotExecutionMode.DRY_RUN) {
+                paramsGroup.getParametersList().add("--dryrun");
+            }
+        }
     }
 
     @Nullable
     @Override
     @SuppressWarnings("UnstableApiUsage") // Might be unstable at the moment, but is an important extension point
     public ExecutionResult execute(@NotNull Executor executor, @NotNull PythonScriptTargetedCommandLineBuilder converter) throws ExecutionException {
-        boolean debugModeEnabled = DefaultDebugExecutor.EXECUTOR_ID.equals(executor.getId());
-        return super.execute(executor, new MyPythonScriptTargetedCommandLineBuilder(converter, robotRunConfiguration, debugModeEnabled));
+        final RobotExecutionMode executionMode = computeRobotExecutionMode(executor);
+        return super.execute(executor, new MyPythonScriptTargetedCommandLineBuilder(converter, robotRunConfiguration, executionMode));
     }
 
     @SuppressWarnings("UnstableApiUsage") // Might be unstable at the moment, but is an important extension point
     private record MyPythonScriptTargetedCommandLineBuilder(@NotNull PythonScriptTargetedCommandLineBuilder parentBuilder,
                                                             RobotRunConfiguration configuration,
-                                                            boolean debugModeEnabled) implements PythonScriptTargetedCommandLineBuilder {
+                                                            RobotExecutionMode executionMode) implements PythonScriptTargetedCommandLineBuilder {
 
         @NotNull
         @Override
         public PythonExecution build(@NotNull HelpersAwareTargetEnvironmentRequest helpersAwareTargetEnvironmentRequest,
                                      @NotNull PythonExecution pythonExecution) {
+            Ref<Boolean> robotCodeModuleRef = new Ref<>(false);
+            pythonExecution.accept(new PythonExecution.Visitor() {
+                @Override
+                public void visit(@NotNull PythonScriptExecution pythonScriptExecution) {
+                    robotCodeModuleRef.set(false);
+                }
+
+                @Override
+                public void visit(@NotNull PythonModuleExecution pythonModuleExecution) {
+                    boolean robotcodeModule = "robotcode".equals(pythonModuleExecution.getModuleName());
+                    robotCodeModuleRef.set(robotcodeModule);
+                }
+            });
+
+            if (!robotCodeModuleRef.get()) {
+                return parentBuilder.build(helpersAwareTargetEnvironmentRequest, pythonExecution);
+            }
+
             List<Function<TargetEnvironment, String>> additionalParameters = new ArrayList<>();
-            if (debugModeEnabled) {
+            if (executionMode == RobotExecutionMode.DEBUG) {
                 int robotDebugPort = findAvailableSocketPort();
                 configuration.putUserData(ROBOT_DEBUG_PORT, robotDebugPort);
 
@@ -98,6 +132,9 @@ public class RobotPythonScriptCommandLineState extends PythonScriptCommandLineSt
                 additionalParameters.add(TargetEnvironmentFunctions.constant(String.valueOf(robotDebugPort)));
             } else {
                 additionalParameters.add(TargetEnvironmentFunctions.constant("robot"));
+                if (executionMode == RobotExecutionMode.DRY_RUN) {
+                    additionalParameters.add(TargetEnvironmentFunctions.constant("--dryrun"));
+                }
             }
 
             PythonScriptExecution delegateExecution = createCopiedPythonScriptExecution(pythonExecution);
@@ -127,6 +164,14 @@ public class RobotPythonScriptCommandLineState extends PythonScriptCommandLineSt
         }
     }
 
+    private static RobotExecutionMode computeRobotExecutionMode(Executor executor) {
+        return switch (executor.getId()) {
+            case DefaultDebugExecutor.EXECUTOR_ID -> RobotExecutionMode.DEBUG;
+            case RobotDryRunExecutor.EXECUTOR_ID -> RobotExecutionMode.DRY_RUN;
+            default -> RobotExecutionMode.RUN;
+        };
+    }
+
     private static int findAvailableSocketPort() {
         try (ServerSocket serverSocket = new ServerSocket(DEBUGGER_DEFAULT_PORT)) {
             // workaround for linux : calling close() immediately after opening socket
@@ -149,5 +194,10 @@ public class RobotPythonScriptCommandLineState extends PythonScriptCommandLineSt
 
     public Integer getRobotDebugPort() {
         return robotRunConfiguration.getUserData(ROBOT_DEBUG_PORT);
+    }
+
+    private enum RobotExecutionMode {
+
+        RUN, DEBUG, DRY_RUN
     }
 }

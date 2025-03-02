@@ -10,6 +10,7 @@
   keyword with default values if available
 - Added inspection to check for unknown keyword parameters
 - Added inspection to check for keyword parameters without a value
+- Added a new executor to execute a robot testcase with dry-run option
 
 ### Fixed
 
