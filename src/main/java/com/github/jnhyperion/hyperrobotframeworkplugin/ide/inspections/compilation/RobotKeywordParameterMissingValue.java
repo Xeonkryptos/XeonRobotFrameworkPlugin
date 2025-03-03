@@ -2,8 +2,8 @@ package com.github.jnhyperion.hyperrobotframeworkplugin.ide.inspections.compilat
 
 import com.github.jnhyperion.hyperrobotframeworkplugin.RobotBundle;
 import com.github.jnhyperion.hyperrobotframeworkplugin.ide.inspections.SimpleRobotInspection;
-import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.Argument;
-import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.Parameter;
+import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.PositionalArgument;
+import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.NamedArgument;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.RobotStatement;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.Variable;
 import com.intellij.psi.PsiElement;
@@ -21,8 +21,8 @@ public class RobotKeywordParameterMissingValue extends SimpleRobotInspection {
 
     @Override
     public boolean skip(PsiElement element) {
-        if (element instanceof Parameter parameter) {
-            RobotStatement argument = PsiTreeUtil.findChildOfAnyType(parameter, Argument.class, Variable.class);
+        if (element instanceof NamedArgument namedArgument) {
+            RobotStatement argument = PsiTreeUtil.findChildOfAnyType(namedArgument, PositionalArgument.class, Variable.class);
             return argument != null;
         }
         return true;

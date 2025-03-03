@@ -1,6 +1,6 @@
 package com.github.jnhyperion.hyperrobotframeworkplugin.psi.util;
 
-import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.Argument;
+import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.PositionalArgument;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.BracketSetting;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.Heading;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.KeywordStatement;
@@ -53,7 +53,7 @@ public enum ReservedVariableScope {
     };
 
     private static boolean isArgument(@NotNull PsiElement position) {
-        return position instanceof Argument || PsiTreeUtil.getParentOfType(position, Argument.class) != null;
+        return position instanceof PositionalArgument || PsiTreeUtil.getParentOfType(position, PositionalArgument.class) != null;
     }
 
     private static boolean isVariable(@NotNull PsiElement position) {

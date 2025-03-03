@@ -29,11 +29,12 @@
         <lang.parserDefinition language="Robot" implementationClass="com.github.jnhyperion.hyperrobotframeworkplugin.psi.RobotParserDefinition"/>
         <lang.psiStructureViewFactory language="Robot"
                                       implementationClass="com.github.jnhyperion.hyperrobotframeworkplugin.ide.structure.RobotStructureViewFactory"/>
+        <codeInsight.parameterInfo language="Robot" implementationClass="com.github.jnhyperion.hyperrobotframeworkplugin.ide.parameterinfo.RobotParameterInfoHandler" />
         <!-- Manipulators -->
         <lang.elementManipulator forClass="com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.KeywordInvokable"
                                  implementationClass="com.github.jnhyperion.hyperrobotframeworkplugin.psi.manip.KeywordInvokableManipulator"/>
-        <lang.elementManipulator forClass="com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.Argument"
-                                 implementationClass="com.github.jnhyperion.hyperrobotframeworkplugin.psi.manip.ArgumentManipulator"/>
+        <lang.elementManipulator forClass="com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.PositionalArgument"
+                                 implementationClass="com.github.jnhyperion.hyperrobotframeworkplugin.psi.manip.PositionalArgumentManipulator"/>
         <lang.elementManipulator forClass="com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.Variable"
                                  implementationClass="com.github.jnhyperion.hyperrobotframeworkplugin.psi.manip.VariableManipulator"/>
         <lang.elementManipulator forClass="com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.ParameterId"

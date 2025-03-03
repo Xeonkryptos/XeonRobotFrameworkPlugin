@@ -22,8 +22,9 @@ import java.util.Set;
 
 public class KeywordStatementImpl extends RobotPsiElementBase implements KeywordStatement {
 
-    private List<Parameter> parameters;
     private List<Argument> arguments;
+    private List<NamedArgument> namedArguments;
+    private List<PositionalArgument> positionalArguments;
     private DefinedVariable variable;
     private KeywordInvokable invokable;
     private Collection<DefinedParameter> availableKeywordParameters;
@@ -48,23 +49,34 @@ public class KeywordStatementImpl extends RobotPsiElementBase implements Keyword
         return result;
     }
 
+    @NotNull
     @Override
-    public @NotNull List<Parameter> getParameters() {
-        List<Parameter> results = this.parameters;
-        if (this.parameters == null) {
-            results = new ArrayList<>(PsiTreeUtil.getChildrenOfTypeAsList(this, Parameter.class));
-            this.parameters = results;
+    public List<Argument> getArguments() {
+        List<Argument> arguments = this.arguments;
+        if (arguments == null) {
+            arguments = PsiTreeUtil.getChildrenOfTypeAsList(this, Argument.class);
+            this.arguments = arguments;
+        }
+        return arguments;
+    }
+
+    @Override
+    public @NotNull List<NamedArgument> getNamedArguments() {
+        List<NamedArgument> results = this.namedArguments;
+        if (this.namedArguments == null) {
+            results = new ArrayList<>(PsiTreeUtil.getChildrenOfTypeAsList(this, NamedArgument.class));
+            this.namedArguments = results;
         }
         return results;
     }
 
     @NotNull
     @Override
-    public final List<Argument> getArguments() {
-        List<Argument> results = this.arguments;
-        if (this.arguments == null) {
-            results = new ArrayList<>(PsiTreeUtil.getChildrenOfTypeAsList(this, Argument.class));
-            this.arguments = results;
+    public final List<PositionalArgument> getPositionalArguments() {
+        List<PositionalArgument> results = this.positionalArguments;
+        if (this.positionalArguments == null) {
+            results = new ArrayList<>(PsiTreeUtil.getChildrenOfTypeAsList(this, PositionalArgument.class));
+            this.positionalArguments = results;
         }
         return results;
     }
@@ -89,9 +101,9 @@ public class KeywordStatementImpl extends RobotPsiElementBase implements Keyword
             if (invokable != null) {
                 String text = invokable.getPresentableText();
                 if (PatternUtil.isVariableSettingKeyword(text)) {
-                    List<Argument> arguments = getArguments();
-                    if (!arguments.isEmpty()) {
-                        Argument variable = arguments.get(0);
+                    List<PositionalArgument> positionalArguments = getPositionalArguments();
+                    if (!positionalArguments.isEmpty()) {
+                        PositionalArgument variable = positionalArguments.get(0);
                         // already formatted ${X}
                         result = new VariableDto(variable, variable.getPresentableText(), null);
                     }
@@ -127,7 +139,8 @@ public class KeywordStatementImpl extends RobotPsiElementBase implements Keyword
     @Override
     public void subtreeChanged() {
         super.subtreeChanged();
-        this.parameters = null;
+        this.namedArguments = null;
+        this.positionalArguments = null;
         this.arguments = null;
         this.invokable = null;
         this.variable = null;

@@ -5,9 +5,9 @@ import com.intellij.lang.ASTNode;
 import com.intellij.psi.PsiReference;
 import org.jetbrains.annotations.NotNull;
 
-public class ArgumentImpl extends RobotPsiElementBase implements Argument {
+public class PositionalArgumentImpl extends RobotPsiElementBase implements PositionalArgument {
 
-   public ArgumentImpl(@NotNull ASTNode node) {
+   public PositionalArgumentImpl(@NotNull ASTNode node) {
          super(node);
    }
 

@@ -1,7 +1,7 @@
 package com.github.jnhyperion.hyperrobotframeworkplugin.ide.usage;
 
 import com.github.jnhyperion.hyperrobotframeworkplugin.RobotBundle;
-import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.Argument;
+import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.PositionalArgument;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.Import;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.KeywordDefinition;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.RobotFile;
@@ -23,7 +23,7 @@ public class RobotFindUsagesProvider implements FindUsagesProvider {
 
    @Override
    public boolean canFindUsagesFor(@NotNull PsiElement element) {
-      return !(element instanceof Argument) || !(element.getParent() instanceof Import) ? element instanceof PsiNamedElement : element == element.getParent().getFirstChild();
+      return !(element instanceof PositionalArgument) || !(element.getParent() instanceof Import) ? element instanceof PsiNamedElement : element == element.getParent().getFirstChild();
    }
 
    @Nullable
@@ -47,7 +47,7 @@ public class RobotFindUsagesProvider implements FindUsagesProvider {
           return RobotBundle.getMessage("usage.descriptive.variable");
       } else if (element instanceof RobotFile) {
           return RobotBundle.getMessage("usage.descriptive.import");
-      } else if (element instanceof Argument) {
+      } else if (element instanceof PositionalArgument) {
           return RobotBundle.getMessage("usage.descriptive.argument");
       } else {
          return "";

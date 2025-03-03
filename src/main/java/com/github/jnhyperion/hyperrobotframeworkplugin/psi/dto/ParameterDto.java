@@ -29,7 +29,7 @@ public class ParameterDto implements DefinedParameter {
         return defaultValue;
     }
 
-    @Nullable
+    @NotNull
     @Override
     public final PsiElement reference() {
         return this.reference;

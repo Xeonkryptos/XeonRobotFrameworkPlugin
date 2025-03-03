@@ -9,7 +9,7 @@ import com.github.jnhyperion.hyperrobotframeworkplugin.psi.RobotResourceFileType
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.RobotTokenTypes;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.dto.ImportType;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.dto.KeywordDto;
-import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.Argument;
+import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.PositionalArgument;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.DefinedKeyword;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.DefinedParameter;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.DefinedVariable;
@@ -20,7 +20,7 @@ import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.KeywordDefini
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.KeywordFile;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.KeywordStatement;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.LookupElementMarker;
-import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.Parameter;
+import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.NamedArgument;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.ParameterId;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.RobotFile;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.RobotStatement;
@@ -246,7 +246,7 @@ public class RobotCompletionContributor extends CompletionContributor {
                        if (keyword != null) {
                            PsiElement psiParent = parameters.getPosition().getParent();
                            PsiElement superParent = psiParent.getParent();
-                           if (superParent instanceof Parameter) {
+                           if (superParent instanceof NamedArgument) {
                                if ("=".equals(psiParent.getPrevSibling().getText())) {
                                    return;
                                }
@@ -267,16 +267,16 @@ public class RobotCompletionContributor extends CompletionContributor {
                                                  @NotNull ProcessingContext context,
                                                  @NotNull CompletionResultSet result) {
                        PsiElement psiElement = parameters.getPosition();
-                       Parameter parameter = PsiTreeUtil.getParentOfType(psiElement, Parameter.class);
-                       if (parameter != null) {
-                           // In parameter context, the prefix usually contains the parameter name, too. For finding and filtering variable names, we need to
-                           // remove the parameter name from the prefix.
+                       NamedArgument namedArgument = PsiTreeUtil.getParentOfType(psiElement, NamedArgument.class);
+                       if (namedArgument != null) {
+                           // In namedArgument context, the prefix usually contains the namedArgument name, too. For finding and filtering variable names, we need to
+                           // remove the namedArgument name from the prefix.
                            String prefix = result.getPrefixMatcher().getPrefix();
                            String newPrefix;
                            if (prefix.startsWith("=")) {
                                newPrefix = prefix.substring(1);
-                           } else if (prefix.startsWith(parameter.getParameterName() + "=")) {
-                               int parameterDefinitionLength = (parameter.getParameterName() + "=").length();
+                           } else if (prefix.startsWith(namedArgument.getParameterName() + "=")) {
+                               int parameterDefinitionLength = (namedArgument.getParameterName() + "=").length();
                                newPrefix = prefix.substring(parameterDefinitionLength);
                            } else {
                                newPrefix = prefix;
@@ -298,7 +298,7 @@ public class RobotCompletionContributor extends CompletionContributor {
         if (current == null) {
             return false;
         }
-        return current.getParent() instanceof Argument;
+        return current.getParent() instanceof PositionalArgument;
     }
 
     private static boolean isIndexPositionAWhitespaceCharacter(@NotNull CompletionParameters parameters) {
@@ -469,7 +469,7 @@ public class RobotCompletionContributor extends CompletionContributor {
 
     private static void addKeywordParameters(@NotNull KeywordStatement keywordStatement, @NotNull CompletionResultSet resultSet) {
         Collection<DefinedParameter> availableParameters = keywordStatement.getAvailableParameters();
-        Set<String> arguments = keywordStatement.getParameters()
+        Set<String> arguments = keywordStatement.getNamedArguments()
                                                 .stream()
                                                 .flatMap(parameter -> PsiTreeUtil.getChildrenOfTypeAsList(parameter, ParameterId.class).stream())
                                                 .map(RobotStatement::getPresentableText)

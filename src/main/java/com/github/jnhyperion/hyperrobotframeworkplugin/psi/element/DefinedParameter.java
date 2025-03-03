@@ -1,6 +1,7 @@
 package com.github.jnhyperion.hyperrobotframeworkplugin.psi.element;
 
 import com.intellij.psi.PsiElement;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public interface DefinedParameter extends LookupElementMarker {
@@ -15,6 +16,6 @@ public interface DefinedParameter extends LookupElementMarker {
    @Nullable
    String getDefaultValue();
 
-   @Nullable
+   @NotNull
    PsiElement reference();
 }

@@ -17,10 +17,10 @@ public class KeywordInvokableImpl extends RobotPsiElementBase implements Keyword
 
    @NotNull
    @Override
-   public Collection<Parameter> getParameters() {
+   public Collection<NamedArgument> getNamedArguments() {
       PsiElement parent = this.getParent();
       if (parent instanceof KeywordStatement) {
-         return ((KeywordStatement) parent).getParameters();
+         return ((KeywordStatement) parent).getNamedArguments();
       } else {
          return Collections.emptySet();
       }
@@ -28,10 +28,10 @@ public class KeywordInvokableImpl extends RobotPsiElementBase implements Keyword
 
    @NotNull
    @Override
-   public final Collection<Argument> getArguments() {
+   public final Collection<PositionalArgument> getPositionalArguments() {
       PsiElement parent = this.getParent();
       if (parent instanceof KeywordStatement) {
-          return ((KeywordStatement) parent).getArguments();
+          return ((KeywordStatement) parent).getPositionalArguments();
       } else {
           return Collections.emptySet();
       }

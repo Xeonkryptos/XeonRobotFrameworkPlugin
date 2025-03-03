@@ -134,7 +134,7 @@ public class RobotRunConfigurationProducer extends LazyRunConfigurationProducer<
 
     @NotNull
     private static String getTestCaseOrFileName(ConfigurationContext context) {
-        Location<?> location = context.getLocation();
+        Location<PsiElement> location = context.getLocation();
         assert location != null;
 
         VirtualFile virtualFile = location.getVirtualFile();
@@ -145,11 +145,9 @@ public class RobotRunConfigurationProducer extends LazyRunConfigurationProducer<
     }
 
     private static boolean isValidRobotExecutableScript(@NotNull ConfigurationContext context) {
-        @SuppressWarnings("rawtypes")
-        Location location = context.getLocation();
-        PsiElement element;
+        Location<PsiElement> location = context.getLocation();
         if (location != null) {
-            element = location.getPsiElement();
+            PsiElement element = location.getPsiElement();
             if (element instanceof LeafPsiElement leafPsiElement) {
                 IElementType type = leafPsiElement.getElementType();
                 return RobotTokenTypes.KEYWORD_DEFINITION.equals(type) || RobotTokenTypes.HEADING.equals(type);

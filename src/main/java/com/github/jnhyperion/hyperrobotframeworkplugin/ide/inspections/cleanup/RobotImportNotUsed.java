@@ -2,7 +2,7 @@ package com.github.jnhyperion.hyperrobotframeworkplugin.ide.inspections.cleanup;
 
 import com.github.jnhyperion.hyperrobotframeworkplugin.RobotBundle;
 import com.github.jnhyperion.hyperrobotframeworkplugin.ide.inspections.SimpleRobotInspection;
-import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.Argument;
+import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.PositionalArgument;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.Import;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.RobotFile;
 import com.intellij.psi.PsiElement;
@@ -31,7 +31,7 @@ public class RobotImportNotUsed extends SimpleRobotInspection {
            PsiReference elementReference;
            PsiElement resolvedElement;
 
-           if (element instanceof Argument && (parentElement = element.getParent()) instanceof Import && ((Import) parentElement).isResource()
+           if (element instanceof PositionalArgument && (parentElement = element.getParent()) instanceof Import && ((Import) parentElement).isResource()
                && (elementReference = element.getReference()) != null && (resolvedElement = elementReference.resolve()) instanceof RobotFile) {
 
                Collection<Import> importElements = PsiTreeUtil.findChildrenOfType(element.getContainingFile(), Import.class);

@@ -231,8 +231,8 @@ public class HeadingImpl extends RobotPsiElementBase implements Heading {
     }
 
     private static void addReferencedArguments(@NotNull Collection<PsiFile> results, @NotNull KeywordInvokable keyword) {
-        for (Argument argument : keyword.getArguments()) {
-            PsiReference reference = argument.getReference();
+        for (PositionalArgument positionalArgument : keyword.getPositionalArguments()) {
+            PsiReference reference = positionalArgument.getReference();
             if (reference != null) {
                 PsiElement resolvedReference = reference.resolve();
                 if (resolvedReference != null) {
@@ -326,19 +326,19 @@ public class HeadingImpl extends RobotPsiElementBase implements Heading {
                 addBuiltInImports(files);
                 if (isSettings()) {
                     for (Import importElement : PsiTreeUtil.findChildrenOfType(this, Import.class)) {
-                        Argument argument = PsiTreeUtil.findChildOfType(importElement, Argument.class);
-                        if (argument != null) {
+                        PositionalArgument positionalArgument = PsiTreeUtil.findChildOfType(importElement, PositionalArgument.class);
+                        if (positionalArgument != null) {
                             if (importElement.isResource()) {
-                                PsiElement resolution = resolveImport(argument);
+                                PsiElement resolution = resolveImport(positionalArgument);
                                 if (resolution instanceof KeywordFile) {
                                     files.add((KeywordFile) resolution);
                                 }
                             } else if (importElement.isLibrary() || importElement.isVariables()) {
-                                PsiElement resolved = resolveImport(argument);
+                                PsiElement resolved = resolveImport(positionalArgument);
                                 PyClass resolution = PythonResolver.castClass(resolved);
                                 if (resolution != null) {
-                                    String namespace = getNamespace(importElement, argument);
-                                    boolean isDifferentNamespace = !argument.getPresentableText().equals(namespace);
+                                    String namespace = getNamespace(importElement, positionalArgument);
+                                    boolean isDifferentNamespace = !positionalArgument.getPresentableText().equals(namespace);
                                     files.add(new RobotPythonClass(namespace,
                                                                    resolution,
                                                                    ImportType.getType(importElement.getPresentableText()),
@@ -347,8 +347,8 @@ public class HeadingImpl extends RobotPsiElementBase implements Heading {
                                 }
                                 PyFile file = PythonResolver.castFile(resolved);
                                 if (file != null) {
-                                    String namespace = getNamespace(importElement, argument);
-                                    boolean isDifferentNamespace = !argument.getPresentableText().equals(namespace);
+                                    String namespace = getNamespace(importElement, positionalArgument);
+                                    boolean isDifferentNamespace = !positionalArgument.getPresentableText().equals(namespace);
                                     files.add(new RobotPythonFile(namespace,
                                                                   file,
                                                                   ImportType.getType(importElement.getPresentableText()),
@@ -390,7 +390,7 @@ public class HeadingImpl extends RobotPsiElementBase implements Heading {
      * @param library the first argument; aka the default namespace
      * @return the namespace of the import.
      */
-    private static String getNamespace(Import imp, Argument library) {
+    private static String getNamespace(Import imp, PositionalArgument library) {
         List<RobotStatement> args = PsiTreeUtil.getChildrenOfAnyType(imp, RobotStatement.class);
         String results = library.getPresentableText();
         if (!args.isEmpty()) {
@@ -400,7 +400,7 @@ public class HeadingImpl extends RobotPsiElementBase implements Heading {
         if (args.size() >= 3) {
             RobotStatement firstStatement = args.get(args.size() - 1);
             RobotStatement secondStatement = args.get(args.size() - 2);
-            if (secondStatement instanceof Argument && WITH_NAME.equals(secondStatement.getPresentableText())) {
+            if (secondStatement instanceof PositionalArgument && WITH_NAME.equals(secondStatement.getPresentableText())) {
                 results = firstStatement.getPresentableText();
             } else if (secondStatement instanceof KeywordInvokable &&
                        AS.equals(secondStatement.getPresentableText()) &&
@@ -413,8 +413,8 @@ public class HeadingImpl extends RobotPsiElementBase implements Heading {
     }
 
     @Nullable
-    private static PsiElement resolveImport(@NotNull Argument argument) {
-        PsiReference reference = argument.getReference();
+    private static PsiElement resolveImport(@NotNull PositionalArgument positionalArgument) {
+        PsiReference reference = positionalArgument.getReference();
         if (reference != null) {
             return reference.resolve();
         }

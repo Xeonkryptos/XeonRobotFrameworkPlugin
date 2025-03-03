@@ -11,10 +11,13 @@ public interface KeywordStatement extends RobotStatement {
    KeywordInvokable getInvokable();
 
    @NotNull
-   List<Parameter> getParameters();
+   List<Argument> getArguments();
 
    @NotNull
-   List<Argument> getArguments();
+   List<NamedArgument> getNamedArguments();
+
+   @NotNull
+   List<PositionalArgument> getPositionalArguments();
 
    @NotNull
    Collection<DefinedParameter> getAvailableParameters();

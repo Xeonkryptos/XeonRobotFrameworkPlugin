@@ -1,6 +1,6 @@
 package com.github.jnhyperion.hyperrobotframeworkplugin.psi.ref;
 
-import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.Argument;
+import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.PositionalArgument;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.Import;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiElement;
@@ -14,10 +14,10 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.LinkedHashSet;
 
-public class RobotArgumentReference extends PsiReferenceBase<Argument> implements PsiPolyVariantReference {
+public class RobotArgumentReference extends PsiReferenceBase<PositionalArgument> implements PsiPolyVariantReference {
 
-    public RobotArgumentReference(@NotNull Argument argument) {
-        super(argument, false);
+    public RobotArgumentReference(@NotNull PositionalArgument positionalArgument) {
+        super(positionalArgument, false);
     }
 
     @Nullable
@@ -25,16 +25,17 @@ public class RobotArgumentReference extends PsiReferenceBase<Argument> implement
     public PsiElement resolve() {
         PsiElement result = null;
 
-        Argument argument = getElement();
-        PsiElement parent = argument.getParent();
-        if (argument.getContainingFile().isValid()) {
+        PositionalArgument positionalArgument = getElement();
+        PsiElement parent = positionalArgument.getParent();
+        if (positionalArgument.getContainingFile().isValid()) {
             if (parent instanceof Import importElement) {
                 PsiElement[] children = parent.getChildren();
-                if (children.length > 0 && children[0] == argument) {
+                if (children.length > 0 && children[0] == positionalArgument) {
                     if (importElement.isResource()) {
-                        result = RobotFileManager.findElement(argument.getPresentableText(), argument.getProject(), argument);
+                        result = RobotFileManager.findElement(positionalArgument.getPresentableText(), positionalArgument.getProject(), positionalArgument);
                     } else if (importElement.isLibrary() || importElement.isVariables()) {
-                        result = RobotFileManager.findElementInContext(argument.getPresentableText(), argument.getProject(), argument);
+                        result = RobotFileManager.findElementInContext(positionalArgument.getPresentableText(), positionalArgument.getProject(),
+                                                                       positionalArgument);
                     }
 
                     if (result == null) {
@@ -54,10 +55,10 @@ public class RobotArgumentReference extends PsiReferenceBase<Argument> implement
     public ResolveResult @NotNull [] multiResolve(boolean incompleteCode) {
         LinkedHashSet<ResolveResult> results = new LinkedHashSet<>();
 
-        Argument argument = getElement();
-        Project project = argument.getProject();
-        PsiElement parent = argument.getParent();
-        String presentableText = argument.getPresentableText();
+        PositionalArgument positionalArgument = getElement();
+        Project project = positionalArgument.getProject();
+        PsiElement parent = positionalArgument.getParent();
+        String presentableText = positionalArgument.getPresentableText();
 
         if (parent instanceof Import importElement) {
             if (importElement.isResource()) {

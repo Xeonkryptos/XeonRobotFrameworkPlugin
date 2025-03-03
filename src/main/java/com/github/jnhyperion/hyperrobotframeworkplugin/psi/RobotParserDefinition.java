@@ -1,6 +1,6 @@
 package com.github.jnhyperion.hyperrobotframeworkplugin.psi;
 
-import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.ArgumentImpl;
+import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.PositionalArgumentImpl;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.BracketSettingImpl;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.HeadingImpl;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.ImportImpl;
@@ -9,8 +9,8 @@ import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.KeywordDefini
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.KeywordInvokableImpl;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.KeywordPartImpl;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.KeywordStatementImpl;
+import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.NamedArgumentImpl;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.ParameterIdImpl;
-import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.ParameterImpl;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.RobotFileImpl;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.SettingImpl;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.VariableDefinitionIdImpl;
@@ -84,11 +84,11 @@ public class RobotParserDefinition implements ParserDefinition {
       } else if (node.getElementType() == RobotTokenTypes.HEADING) {
          return new HeadingImpl(node);
       } else if (node.getElementType() == RobotTokenTypes.PARAMETER) {
-         return new ParameterImpl(node);
+         return new NamedArgumentImpl(node);
       } else if (node.getElementType() == RobotTokenTypes.PARAMETER_ID) {
          return new ParameterIdImpl(node);
       } else if (node.getElementType() == RobotTokenTypes.ARGUMENT) {
-         return new ArgumentImpl(node);
+         return new PositionalArgumentImpl(node);
       } else if (node.getElementType() == RobotTokenTypes.VARIABLE) {
          return new VariableImpl(node);
       } else if (node.getElementType() == RobotTokenTypes.IMPORT) {

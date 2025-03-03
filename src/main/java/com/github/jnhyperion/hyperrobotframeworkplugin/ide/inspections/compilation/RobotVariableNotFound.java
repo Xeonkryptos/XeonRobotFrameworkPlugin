@@ -2,7 +2,7 @@ package com.github.jnhyperion.hyperrobotframeworkplugin.ide.inspections.compilat
 
 import com.github.jnhyperion.hyperrobotframeworkplugin.RobotBundle;
 import com.github.jnhyperion.hyperrobotframeworkplugin.ide.inspections.SimpleRobotInspection;
-import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.Argument;
+import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.PositionalArgument;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.KeywordStatement;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.Variable;
 import com.intellij.psi.PsiElement;
@@ -52,8 +52,8 @@ public class RobotVariableNotFound extends SimpleRobotInspection {
 
         KeywordStatement keywordStatement = PsiTreeUtil.getParentOfType(element, KeywordStatement.class);
         if (keywordStatement != null) {
-            List<Argument> arguments = keywordStatement.getArguments();
-            return keywordStatement.getGlobalVariable() != null && arguments.size() > 1 && element == arguments.get(0);
+            List<PositionalArgument> positionalArguments = keywordStatement.getPositionalArguments();
+            return keywordStatement.getGlobalVariable() != null && positionalArguments.size() > 1 && element == positionalArguments.get(0);
         }
 
         return false;
