@@ -4,9 +4,9 @@ import com.intellij.lang.ASTNode;
 import com.intellij.psi.util.PsiTreeUtil;
 import org.jetbrains.annotations.NotNull;
 
-public class NamedArgumentImpl extends RobotPsiElementBase implements NamedArgument {
+public class ParameterImpl extends RobotPsiElementBase implements Parameter {
 
-    public NamedArgumentImpl(@NotNull ASTNode node) {
+    public ParameterImpl(@NotNull ASTNode node) {
         super(node);
     }
 

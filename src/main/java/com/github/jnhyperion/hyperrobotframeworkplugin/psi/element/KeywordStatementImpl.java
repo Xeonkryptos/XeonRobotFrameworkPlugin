@@ -23,7 +23,7 @@ import java.util.Set;
 public class KeywordStatementImpl extends RobotPsiElementBase implements KeywordStatement {
 
     private List<Argument> arguments;
-    private List<NamedArgument> namedArguments;
+    private List<Parameter> parameters;
     private List<PositionalArgument> positionalArguments;
     private DefinedVariable variable;
     private KeywordInvokable invokable;
@@ -61,11 +61,11 @@ public class KeywordStatementImpl extends RobotPsiElementBase implements Keyword
     }
 
     @Override
-    public @NotNull List<NamedArgument> getNamedArguments() {
-        List<NamedArgument> results = this.namedArguments;
-        if (this.namedArguments == null) {
-            results = new ArrayList<>(PsiTreeUtil.getChildrenOfTypeAsList(this, NamedArgument.class));
-            this.namedArguments = results;
+    public @NotNull List<Parameter> getParameters() {
+        List<Parameter> results = this.parameters;
+        if (this.parameters == null) {
+            results = new ArrayList<>(PsiTreeUtil.getChildrenOfTypeAsList(this, Parameter.class));
+            this.parameters = results;
         }
         return results;
     }
@@ -139,7 +139,7 @@ public class KeywordStatementImpl extends RobotPsiElementBase implements Keyword
     @Override
     public void subtreeChanged() {
         super.subtreeChanged();
-        this.namedArguments = null;
+        this.parameters = null;
         this.positionalArguments = null;
         this.arguments = null;
         this.invokable = null;

@@ -17,10 +17,10 @@ public class KeywordInvokableImpl extends RobotPsiElementBase implements Keyword
 
    @NotNull
    @Override
-   public Collection<NamedArgument> getNamedArguments() {
+   public Collection<Parameter> getParameters() {
       PsiElement parent = this.getParent();
       if (parent instanceof KeywordStatement) {
-         return ((KeywordStatement) parent).getNamedArguments();
+         return ((KeywordStatement) parent).getParameters();
       } else {
          return Collections.emptySet();
       }

@@ -2,7 +2,7 @@ package com.github.jnhyperion.hyperrobotframeworkplugin.ide.parameterinfo;
 
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.Argument;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.KeywordStatement;
-import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.NamedArgument;
+import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.Parameter;
 import com.intellij.lang.parameterInfo.ParameterInfoUIContext;
 import com.intellij.lang.parameterInfo.ParameterInfoUIContextEx;
 import com.intellij.openapi.util.Pair;
@@ -208,14 +208,14 @@ public class ParameterInfoHandlerUtil {
 
         int implicitOffset = callableType.getImplicitOffset();
         int positionalContainerIndex = findPositionalContainerIndex(parameterList);
-        boolean namedArgumentFound = false;
+        boolean parameterFound = false;
         for (int i = 0; i < args.size(); i++) {
             Argument arg = args.get(i);
             boolean mustHighlight = currentParamIndex == i;
-            if (arg instanceof NamedArgument namedArgument) {
-                namedArgumentFound = true;
+            if (arg instanceof Parameter parameter) {
+                parameterFound = true;
 
-                String parameterName = namedArgument.getParameterName();
+                String parameterName = parameter.getParameterName();
                 if (nameToCallableParameterIndex.containsKey(parameterName)) {
                     PyCallableParameter pyCallableParameter = nameToCallableParameterIndex.get(parameterName);
                     highlightParameter(pyCallableParameter, parameterHintToIndex, hintFlags, mustHighlight);
@@ -227,7 +227,7 @@ public class ParameterInfoHandlerUtil {
                     }
                 }
             } else {
-                if (!namedArgumentFound) {
+                if (!parameterFound) {
                     int argIndex = Math.min(i + implicitOffset, positionalContainerIndex);
                     PyCallableParameter pyCallableParameter = parameterList.get(argIndex);
                     highlightParameter(pyCallableParameter, parameterHintToIndex, hintFlags, mustHighlight);

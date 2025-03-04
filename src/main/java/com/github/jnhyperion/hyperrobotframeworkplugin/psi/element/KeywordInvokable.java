@@ -7,7 +7,7 @@ import org.jetbrains.annotations.NotNull;
 public interface KeywordInvokable extends RobotStatement, PsiNamedElement {
 
    @NotNull
-   Collection<NamedArgument> getNamedArguments();
+   Collection<Parameter> getParameters();
 
    @NotNull
    Collection<PositionalArgument> getPositionalArguments();

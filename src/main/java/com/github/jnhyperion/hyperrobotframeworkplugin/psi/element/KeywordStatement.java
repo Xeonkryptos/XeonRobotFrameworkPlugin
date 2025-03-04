@@ -14,7 +14,7 @@ public interface KeywordStatement extends RobotStatement {
    List<Argument> getArguments();
 
    @NotNull
-   List<NamedArgument> getNamedArguments();
+   List<Parameter> getParameters();
 
    @NotNull
    List<PositionalArgument> getPositionalArguments();

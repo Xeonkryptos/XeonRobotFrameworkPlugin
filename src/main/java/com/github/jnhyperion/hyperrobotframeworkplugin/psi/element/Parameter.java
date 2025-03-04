@@ -1,6 +1,6 @@
 package com.github.jnhyperion.hyperrobotframeworkplugin.psi.element;
 
-public interface NamedArgument extends Argument {
+public interface Parameter extends Argument {
 
     String getParameterName();
 }

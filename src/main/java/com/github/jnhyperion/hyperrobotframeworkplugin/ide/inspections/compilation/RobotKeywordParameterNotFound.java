@@ -4,7 +4,7 @@ import com.github.jnhyperion.hyperrobotframeworkplugin.RobotBundle;
 import com.github.jnhyperion.hyperrobotframeworkplugin.ide.inspections.SimpleRobotInspection;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.DefinedParameter;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.KeywordStatement;
-import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.NamedArgument;
+import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.Parameter;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.util.PsiTreeUtil;
 import org.jetbrains.annotations.Nls;
@@ -23,13 +23,13 @@ public class RobotKeywordParameterNotFound extends SimpleRobotInspection {
 
     @Override
     public boolean skip(PsiElement element) {
-        if (element instanceof NamedArgument namedArgument) {
-            KeywordStatement keywordStatement = PsiTreeUtil.getParentOfType(namedArgument, KeywordStatement.class);
+        if (element instanceof Parameter parameter) {
+            KeywordStatement keywordStatement = PsiTreeUtil.getParentOfType(parameter, KeywordStatement.class);
             if (keywordStatement == null) {
                 return true;
             }
             Set<String> parameterNames = keywordStatement.getAvailableParameters().stream().map(DefinedParameter::getLookup).collect(Collectors.toSet());
-            String parameterName = namedArgument.getParameterName();
+            String parameterName = parameter.getParameterName();
             return parameterNames.contains(parameterName);
         }
         return true;
