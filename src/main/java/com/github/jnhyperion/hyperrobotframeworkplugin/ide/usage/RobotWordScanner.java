@@ -9,6 +9,7 @@ public class RobotWordScanner extends DefaultWordsScanner {
 
     private static final TokenSet IDENTIFIERS = TokenSet.create(RobotTokenTypes.KEYWORD_DEFINITION,
                                                                 RobotTokenTypes.KEYWORD_STATEMENT,
+                                                                RobotTokenTypes.PARAMETER,
                                                                 RobotTokenTypes.VARIABLE_DEFINITION);
     private static final TokenSet COMMENTS = TokenSet.create(RobotTokenTypes.COMMENT);
     private static final TokenSet LITERALS = TokenSet.create(RobotTokenTypes.ARGUMENT);
@@ -16,6 +17,6 @@ public class RobotWordScanner extends DefaultWordsScanner {
     public RobotWordScanner() {
         super(new RobotLexer(), IDENTIFIERS, COMMENTS, LITERALS);
 
-        this.setMayHaveFileRefsInLiterals(true);
+        setMayHaveFileRefsInLiterals(true);
     }
 }

@@ -31,10 +31,6 @@ import org.jetbrains.annotations.NotNull;
 
 public class RobotParserDefinition implements ParserDefinition {
 
-   private static final TokenSet WHITESPACE_SET = TokenSet.create(RobotTokenTypes.WHITESPACE);
-   private static final TokenSet COMMENTS_SET = TokenSet.create(RobotTokenTypes.COMMENT);
-   private static final TokenSet STRING_SET = TokenSet.create(RobotTokenTypes.GHERKIN, RobotTokenTypes.SYNTAX_MARKER);
-
    @NotNull
    public Lexer createLexer(Project project) {
       return new RobotLexer();
@@ -52,17 +48,17 @@ public class RobotParserDefinition implements ParserDefinition {
 
    @NotNull
    public TokenSet getWhitespaceTokens() {
-      return WHITESPACE_SET;
+      return RobotTokenSets.WHITESPACE_SET;
    }
 
    @NotNull
    public TokenSet getCommentTokens() {
-      return COMMENTS_SET;
+      return RobotTokenSets.COMMENTS_SET;
    }
 
    @NotNull
    public TokenSet getStringLiteralElements() {
-      return STRING_SET;
+      return RobotTokenSets.STRING_SET;
    }
 
    @NotNull

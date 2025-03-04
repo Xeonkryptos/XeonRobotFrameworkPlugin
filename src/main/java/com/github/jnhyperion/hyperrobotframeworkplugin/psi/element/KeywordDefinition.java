@@ -1,11 +1,12 @@
 package com.github.jnhyperion.hyperrobotframeworkplugin.psi.element;
 
-import com.intellij.psi.PsiNamedElement;
-import java.util.Collection;
-import java.util.List;
+import com.intellij.psi.PsiNameIdentifierOwner;
 import org.jetbrains.annotations.NotNull;
 
-public interface KeywordDefinition extends RobotStatement, PsiNamedElement {
+import java.util.Collection;
+import java.util.List;
+
+public interface KeywordDefinition extends RobotStatement, PsiNameIdentifierOwner {
 
    @NotNull
    List<KeywordInvokable> getInvokedKeywords();

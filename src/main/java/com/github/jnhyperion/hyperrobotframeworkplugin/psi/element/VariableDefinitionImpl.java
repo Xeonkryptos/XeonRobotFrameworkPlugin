@@ -5,7 +5,7 @@ import com.github.jnhyperion.hyperrobotframeworkplugin.psi.util.PatternUtil;
 import com.intellij.lang.ASTNode;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.psi.PsiElement;
-import com.intellij.psi.PsiNameIdentifierOwner;
+import com.intellij.psi.search.SearchScope;
 import com.intellij.psi.util.PsiTreeUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -13,12 +13,32 @@ import org.jetbrains.annotations.Nullable;
 import javax.swing.Icon;
 import java.util.regex.Pattern;
 
-public class VariableDefinitionImpl extends RobotPsiElementBase implements VariableDefinition, PsiNameIdentifierOwner {
+public class VariableDefinitionImpl extends RobotPsiElementBase implements VariableDefinition {
 
     private Pattern pattern;
 
     public VariableDefinitionImpl(@NotNull ASTNode node) {
         super(node);
+    }
+
+    @NotNull
+    @Override
+    public String getName() {
+        VariableDefinitionId variableId = PsiTreeUtil.getChildOfType(this, VariableDefinitionId.class);
+        if (variableId != null) {
+            return variableId.getText().substring(2, variableId.getText().length() - 1);
+        }
+        return super.getName();
+    }
+
+    @NotNull
+    @Override
+    public SearchScope getUseScope() {
+        KeywordDefinition keywordDefinition = PsiTreeUtil.getParentOfType(this, KeywordDefinition.class);
+        if (keywordDefinition != null) {
+            return keywordDefinition.getUseScope();
+        }
+        return super.getUseScope();
     }
 
     @Override
@@ -80,5 +100,10 @@ public class VariableDefinitionImpl extends RobotPsiElementBase implements Varia
     @Override
     public PsiElement getNameIdentifier() {
         return PsiTreeUtil.findChildOfType(this, VariableDefinitionId.class);
+    }
+
+    @Override
+    public String toString() {
+        return getName();
     }
 }

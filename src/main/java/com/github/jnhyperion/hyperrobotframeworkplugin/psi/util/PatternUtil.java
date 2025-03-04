@@ -89,8 +89,8 @@ public class PatternUtil {
     }
 
     @Nullable
-    public static String keywordToFunction(@Nullable String var0) {
-        return var0 == null ? null : var0.replaceAll(SPACE, UNDERSCORE).trim();
+    public static String keywordToFunction(@Nullable String keyword) {
+        return keyword == null ? null : keyword.replaceAll(SPACE, UNDERSCORE).trim();
     }
 
     @NotNull

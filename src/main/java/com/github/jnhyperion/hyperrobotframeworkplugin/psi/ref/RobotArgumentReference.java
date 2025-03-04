@@ -1,20 +1,20 @@
 package com.github.jnhyperion.hyperrobotframeworkplugin.psi.ref;
 
-import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.PositionalArgument;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.Import;
+import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.PositionalArgument;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiElementResolveResult;
 import com.intellij.psi.PsiFile;
-import com.intellij.psi.PsiPolyVariantReference;
-import com.intellij.psi.PsiReferenceBase;
+import com.intellij.psi.PsiPolyVariantReferenceBase;
 import com.intellij.psi.ResolveResult;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.LinkedHashSet;
+import java.util.Set;
 
-public class RobotArgumentReference extends PsiReferenceBase<PositionalArgument> implements PsiPolyVariantReference {
+public class RobotArgumentReference extends PsiPolyVariantReferenceBase<PositionalArgument> {
 
     public RobotArgumentReference(@NotNull PositionalArgument positionalArgument) {
         super(positionalArgument, false);
@@ -53,7 +53,7 @@ public class RobotArgumentReference extends PsiReferenceBase<PositionalArgument>
 
     @Override
     public ResolveResult @NotNull [] multiResolve(boolean incompleteCode) {
-        LinkedHashSet<ResolveResult> results = new LinkedHashSet<>();
+        Set<ResolveResult> results = new LinkedHashSet<>();
 
         PositionalArgument positionalArgument = getElement();
         Project project = positionalArgument.getProject();

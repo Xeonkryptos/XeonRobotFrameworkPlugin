@@ -1,4 +1,6 @@
 package com.github.jnhyperion.hyperrobotframeworkplugin.psi.element;
 
-public interface PositionalArgument extends Argument {
+import com.intellij.psi.PsiNamedElement;
+
+public interface PositionalArgument extends Argument, PsiNamedElement {
 }
