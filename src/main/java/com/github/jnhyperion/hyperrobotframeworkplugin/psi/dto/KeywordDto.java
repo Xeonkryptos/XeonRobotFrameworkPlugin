@@ -16,7 +16,9 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -58,7 +60,10 @@ public class KeywordDto implements DefinedKeyword {
     public Collection<DefinedParameter> getParameters() {
         if (parameters != null) {
             return parameters.stream()
-                             .filter(parameter -> !parameter.isSelf() && parameter.isPhysical() && parameter.getName() != null)
+                             .filter(parameter -> !parameter.isSelf())
+                             .map(PyParameter::getAsNamed)
+                             .filter(Objects::nonNull)
+                             .filter(parameter -> !parameter.isKeywordContainer() && !parameter.isPositionalContainer() && parameter.getName() != null)
                              .map(parameter -> {
                                  String defaultValue = null;
                                  if (parameter.hasDefaultValue()) {
@@ -66,7 +71,7 @@ public class KeywordDto implements DefinedKeyword {
                                  }
                                  return new ParameterDto(parameter, parameter.getName(), defaultValue);
                              })
-                             .collect(Collectors.toSet());
+                             .collect(Collectors.toCollection(LinkedHashSet::new));
         }
         return Collections.emptyList();
     }
@@ -79,11 +84,11 @@ public class KeywordDto implements DefinedKeyword {
         } else if (parameter.getDefaultValue() instanceof PyBoolLiteralExpression expression) {
             defaultValue = expression.getValue() ? ReservedVariable.TRUE.getVariable() : ReservedVariable.FALSE.getVariable();
         } else if (parameter.getDefaultValue() instanceof PyReferenceExpression) {
-            defaultValue = "${%s}".formatted(parameter.getText());
+            defaultValue = parameter.getDefaultValue().getName();
         } else if (parameter.getDefaultValue() instanceof PyNoneLiteralExpression) {
             defaultValue = ReservedVariable.NONE.getVariable();
         } else {
-           defaultValue = parameter.getDefaultValueText();
+            defaultValue = parameter.getDefaultValueText();
         }
         return defaultValue;
     }
