@@ -3,7 +3,6 @@ package com.github.jnhyperion.hyperrobotframeworkplugin.psi.element;
 import com.intellij.psi.PsiFile;
 import java.util.Collection;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 public interface RobotFile extends PsiFile {
 
@@ -34,7 +33,4 @@ public interface RobotFile extends PsiFile {
    Collection<DefinedVariable> getDefinedVariables();
 
    void importsChanged();
-
-   @NotNull
-   Collection<KeywordInvokable> getKeywordReferences(@Nullable KeywordDefinition var1);
 }

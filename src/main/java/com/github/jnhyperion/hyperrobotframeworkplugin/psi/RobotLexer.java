@@ -17,14 +17,15 @@ public class RobotLexer extends LexerBase {
     public static final int TEST_CASES_HEADING = 2;
     public static final int KEYWORDS_HEADING = 3;
     public static final int VARIABLES_HEADING = 4;
-    public static final int IMPORT = 5;
-    public static final int KEYWORD = 6;
-    public static final int SETTING = 7;
-    public static final int KEYWORD_DEFINITION = 8;
-    public static final int VARIABLE_DEFINITION = 9;
-    public static final int SYNTAX = 10;
-    public static final int GHERKIN = 11;
-    public static final int IF_CLAUSE = 12;
+    public static final int COMMENTS_HEADING = 5;
+    public static final int IMPORT = 6;
+    public static final int KEYWORD = 7;
+    public static final int SETTING = 8;
+    public static final int KEYWORD_DEFINITION = 9;
+    public static final int VARIABLE_DEFINITION = 10;
+    public static final int SYNTAX = 11;
+    public static final int GHERKIN = 12;
+    public static final int IF_CLAUSE = 13;
 
     private CharSequence buffer = Strings.EMPTY_CHAR_SEQUENCE;
     private int startOffset;
@@ -110,6 +111,9 @@ public class RobotLexer extends LexerBase {
         if (isSettings(line)) {
             this.level.clear();
             this.level.push(SETTINGS_HEADING);
+        } else if (isComments(line)) {
+            this.level.clear();
+            this.level.push(COMMENTS_HEADING);
         } else if (isTestCases(line) || isTasks(line)) {
             this.level.clear();
             this.level.push(TEST_CASES_HEADING);
@@ -133,6 +137,8 @@ public class RobotLexer extends LexerBase {
             handleSettingsHeading();
         } else if (state == VARIABLES_HEADING) {
             handleVariablesHeading();
+        } else if (state == COMMENTS_HEADING) {
+            handleComment();
         } else if (state != TEST_CASES_HEADING && state != KEYWORDS_HEADING) {
             handleOtherStates(state, parentState);
         } else {
@@ -174,9 +180,14 @@ public class RobotLexer extends LexerBase {
         if (isSuperSpace(this.position)) {
             skipWhitespace();
         }
-        goToVariableEnd();
-        this.level.push(VARIABLE_DEFINITION);
-        this.currentToken = RobotTokenTypes.VARIABLE_DEFINITION;
+        if (isVariable(this.position)) {
+            goToVariableEnd();
+            this.level.push(VARIABLE_DEFINITION);
+            this.currentToken = RobotStubTokenTypes.VARIABLE_DEFINITION;
+        } else {
+            skipWhitespace();
+            this.currentToken = RobotTokenTypes.WHITESPACE;
+        }
     }
 
     private void handleOtherStates(int state, int parentState) {
@@ -202,7 +213,7 @@ public class RobotLexer extends LexerBase {
                     this.currentToken = RobotTokenTypes.VARIABLE;
                     this.level.push(KEYWORD);
                 } else {
-                    this.currentToken = RobotTokenTypes.VARIABLE_DEFINITION;
+                    this.currentToken = RobotStubTokenTypes.VARIABLE_DEFINITION;
                     this.level.push(VARIABLE_DEFINITION);
                 }
             } else {
@@ -240,7 +251,7 @@ public class RobotLexer extends LexerBase {
                     this.currentToken = RobotTokenTypes.SYNTAX_MARKER;
                     this.level.push(IF_CLAUSE);
                 } else if (state == TEST_CASES_HEADING || state == KEYWORDS_HEADING) {
-                    this.currentToken = RobotTokenTypes.KEYWORD_DEFINITION;
+                    this.currentToken = RobotStubTokenTypes.KEYWORD_DEFINITION;
                     this.level.push(KEYWORD_DEFINITION);
                 } else if (state == KEYWORD_DEFINITION && isAssignment(this.position)) {
                     this.position++;
@@ -305,11 +316,11 @@ public class RobotLexer extends LexerBase {
         } else if (isVariable(this.position)) {
             goToVariableEnd();
             if (state == SETTING && isSuperSpacePrevious()) {
-                this.currentToken = RobotTokenTypes.VARIABLE_DEFINITION;
+                this.currentToken = RobotStubTokenTypes.VARIABLE_DEFINITION;
             } else if (!isWithinForLoop() && !isVarOrAsTokenPresent(this.position)) {
                 this.currentToken = RobotTokenTypes.VARIABLE;
             } else {
-                this.currentToken = RobotTokenTypes.VARIABLE_DEFINITION;
+                this.currentToken = RobotStubTokenTypes.VARIABLE_DEFINITION;
                 this.level.push(VARIABLE_DEFINITION);
             }
         } else if (state == KEYWORD && parentState == KEYWORD) {
@@ -325,7 +336,7 @@ public class RobotLexer extends LexerBase {
                 this.position++;
                 this.currentToken = RobotTokenTypes.WHITESPACE;
             } else if (this.startOffset == 0 || charAtEquals(this.startOffset - 1, '\n')) {
-                this.currentToken = RobotTokenTypes.KEYWORD_DEFINITION;
+                this.currentToken = RobotStubTokenTypes.KEYWORD_DEFINITION;
                 this.isBracketTemplate = false;
             } else if (RobotKeywordProvider.isSyntaxOfType(RobotTokenTypes.SYNTAX_MARKER, word)) {
                 this.currentToken = RobotTokenTypes.SYNTAX_MARKER;
@@ -340,7 +351,7 @@ public class RobotLexer extends LexerBase {
                     this.currentToken = RobotTokenTypes.ARGUMENT;
                 }
             } else {
-                this.currentToken = RobotTokenTypes.VARIABLE_DEFINITION;
+                this.currentToken = RobotStubTokenTypes.VARIABLE_DEFINITION;
             }
         }
     }
@@ -465,6 +476,10 @@ public class RobotLexer extends LexerBase {
 
     private static boolean isTasks(String line) {
         return "*** Tasks ***".equalsIgnoreCase(line) || "*** Task ***".equalsIgnoreCase(line);
+    }
+
+    private static boolean isComments(String line) {
+        return "*** Comments ***".equalsIgnoreCase(line) || "*** Comment ***".equalsIgnoreCase(line);
     }
 
     private boolean isHeading(int position) {

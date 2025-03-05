@@ -32,36 +32,43 @@ import org.jetbrains.annotations.NotNull;
 public class RobotParserDefinition implements ParserDefinition {
 
    @NotNull
+   @Override
    public Lexer createLexer(Project project) {
       return new RobotLexer();
    }
 
    @NotNull
+   @Override
    public PsiParser createParser(Project project) {
       return new RobotParser();
    }
 
    @NotNull
+   @Override
    public IFileElementType getFileNodeType() {
       return RobotTokenTypes.ROBOT_FILE;
    }
 
    @NotNull
+   @Override
    public TokenSet getWhitespaceTokens() {
       return RobotTokenSets.WHITESPACE_SET;
    }
 
    @NotNull
+   @Override
    public TokenSet getCommentTokens() {
       return RobotTokenSets.COMMENTS_SET;
    }
 
    @NotNull
+   @Override
    public TokenSet getStringLiteralElements() {
       return RobotTokenSets.STRING_SET;
    }
 
    @NotNull
+   @Override
    public PsiElement createElement(ASTNode node) {
       if (node.getElementType() == RobotTokenTypes.KEYWORD_DEFINITION) {
          return new KeywordDefinitionImpl(node);
@@ -101,6 +108,7 @@ public class RobotParserDefinition implements ParserDefinition {
    }
 
    @NotNull
+   @Override
    public PsiFile createFile(@NotNull FileViewProvider fileViewProvider) {
       return new RobotFileImpl(fileViewProvider);
    }

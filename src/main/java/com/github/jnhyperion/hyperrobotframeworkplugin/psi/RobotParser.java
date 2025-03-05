@@ -363,7 +363,7 @@ public class RobotParser implements PsiParser {
         marker.done(type);
     }
 
-    private static void done(@Nullable PsiBuilder.Marker marker, @NotNull RobotElementType type) {
+    private static void done(@Nullable PsiBuilder.Marker marker, @NotNull IElementType type) {
         if (marker != null) {
             marker.done(type);
         }

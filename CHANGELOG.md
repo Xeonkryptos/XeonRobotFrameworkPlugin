@@ -2,6 +2,16 @@
 
 # HyperRobotFrameworkPlugin Changelog
 
+## [0.1.22]
+
+### Added
+
+- Added support for Comments section
+
+### Fixed
+
+- Fixed parsing issue of variables section: Spaces in a new line without anything else was interpreted as a new variable definition
+
 ## [0.1.21]
 
 ### Added

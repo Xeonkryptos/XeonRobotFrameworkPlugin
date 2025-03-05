@@ -12,7 +12,6 @@ import com.intellij.psi.PsiFile;
 import com.intellij.psi.search.FilenameIndex;
 import com.intellij.psi.search.GlobalSearchScope;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -53,7 +52,7 @@ public class RobotFileImpl extends PsiFileBase implements KeywordFile, RobotFile
         for (Heading heading : collectHeadings()) {
             results.addAll(heading.getDefinedVariables());
         }
-//        results.addAll(collectRobotInitVariables());
+        //        results.addAll(collectRobotInitVariables());
         return results;
     }
 
@@ -172,12 +171,6 @@ public class RobotFileImpl extends PsiFileBase implements KeywordFile, RobotFile
         for (Heading heading : collectHeadings()) {
             heading.importsChanged();
         }
-    }
-
-    @NotNull
-    @Override
-    public final Collection<KeywordInvokable> getKeywordReferences(@Nullable KeywordDefinition keyword) {
-        return collectHeadings().stream().flatMap(heading -> heading.getInvokableKeywords(keyword).stream()).collect(Collectors.toList());
     }
 
     @NotNull

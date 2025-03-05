@@ -13,14 +13,8 @@ import com.intellij.codeInsight.lookup.LookupElementBuilder;
 import com.intellij.codeInsight.lookup.TailTypeDecorator;
 import com.intellij.icons.AllIcons.Nodes;
 import com.intellij.psi.PsiElement;
-import com.intellij.psi.PsiElementResolveResult;
 import com.intellij.psi.PsiFile;
-import com.intellij.psi.PsiPolyVariantReferenceBase;
-import com.intellij.psi.ResolveResult;
-import com.jetbrains.python.psi.PyDecorator;
-import com.jetbrains.python.psi.PyDecoratorList;
-import com.jetbrains.python.psi.PyExpression;
-import com.jetbrains.python.psi.PyFunction;
+import com.intellij.psi.PsiReferenceBase;
 import org.apache.commons.text.WordUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -29,41 +23,18 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
-import java.util.Objects;
 
-public class RobotKeywordReference extends PsiPolyVariantReferenceBase<KeywordInvokable> {
+public class RobotKeywordReference extends PsiReferenceBase<KeywordInvokable> {
 
     public RobotKeywordReference(@NotNull KeywordInvokable keyword) {
         super(keyword, false);
     }
 
+    @Nullable
     @Override
-    public @Nullable PsiElement resolve() {
-        ResolveResult[] resolveResults = multiResolve(false);
-        return resolveResults.length > 0 ? resolveResults[0].getElement() : null;
-    }
-
-    @Override
-    public ResolveResult @NotNull [] multiResolve(boolean incompleteCode) {
+    public PsiElement resolve() {
         KeywordInvokable keywordInvokable = getElement();
-        PsiElement referencedSourceElement = ResolverUtils.findKeywordElement(keywordInvokable.getPresentableText(), keywordInvokable.getContainingFile());
-        if (referencedSourceElement != null) {
-            PyFunction pyFunction = (PyFunction) referencedSourceElement;
-            PyDecoratorList decoratorList = pyFunction.getDecoratorList();
-            if (decoratorList != null) {
-                for (PyDecorator decorator : decoratorList.getDecorators()) {
-                    String decoratorName = decorator.getName();
-                    if (Objects.equals(decoratorName, "keyword")) {
-                        PyExpression keywordArgumentExpression = decorator.getArgument(0, "name", PyExpression.class);
-                        if (keywordArgumentExpression != null) {
-                            return new ResolveResult[] { new PsiElementResolveResult(referencedSourceElement), new PsiElementResolveResult(keywordArgumentExpression) };
-                        }
-                    }
-                }
-            }
-            return new ResolveResult[] { new PsiElementResolveResult(referencedSourceElement) };
-        }
-        return ResolveResult.EMPTY_ARRAY;
+        return ResolverUtils.findKeywordElement(keywordInvokable.getPresentableText(), keywordInvokable.getContainingFile());
     }
 
     @Override
