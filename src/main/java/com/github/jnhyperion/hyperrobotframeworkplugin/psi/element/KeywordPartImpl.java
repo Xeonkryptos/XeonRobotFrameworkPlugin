@@ -33,6 +33,6 @@ public class KeywordPartImpl extends RobotPsiElementBase implements KeywordInvok
    @NotNull
    @Override
    public final String getPresentableText() {
-      return getPresentableText(this.getNode().getTreeParent());
+      return getPresentableText(this.getNode().getTreeParent().getText());
    }
 }

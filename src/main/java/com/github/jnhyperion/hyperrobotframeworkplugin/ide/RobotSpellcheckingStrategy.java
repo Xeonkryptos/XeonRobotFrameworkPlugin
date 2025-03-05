@@ -1,5 +1,6 @@
 package com.github.jnhyperion.hyperrobotframeworkplugin.ide;
 
+import com.github.jnhyperion.hyperrobotframeworkplugin.psi.RobotStubTokenTypes;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.RobotTokenTypes;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.impl.source.tree.LeafPsiElement;
@@ -20,10 +21,10 @@ public class RobotSpellcheckingStrategy extends SpellcheckingStrategy {
             if (elementType == RobotTokenTypes.PARAMETER ||
                 elementType == RobotTokenTypes.ARGUMENT ||
                 elementType == RobotTokenTypes.VARIABLE ||
-                elementType == RobotTokenTypes.VARIABLE_DEFINITION ||
+                elementType == RobotStubTokenTypes.VARIABLE_DEFINITION ||
                 elementType == RobotTokenTypes.KEYWORD ||
-                elementType == RobotTokenTypes.KEYWORD_DEFINITION ||
-                elementType == RobotTokenTypes.KEYWORD_STATEMENT) {
+                elementType == RobotStubTokenTypes.KEYWORD_DEFINITION ||
+                elementType == RobotStubTokenTypes.KEYWORD_STATEMENT) {
                 return new LeafPsiElementTokenizer();
             }
         }

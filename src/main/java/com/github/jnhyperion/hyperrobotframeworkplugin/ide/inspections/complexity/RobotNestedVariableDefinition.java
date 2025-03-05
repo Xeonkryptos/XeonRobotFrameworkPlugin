@@ -2,7 +2,7 @@ package com.github.jnhyperion.hyperrobotframeworkplugin.ide.inspections.complexi
 
 import com.github.jnhyperion.hyperrobotframeworkplugin.RobotBundle;
 import com.github.jnhyperion.hyperrobotframeworkplugin.ide.inspections.SimpleRobotInspection;
-import com.github.jnhyperion.hyperrobotframeworkplugin.psi.RobotTokenTypes;
+import com.github.jnhyperion.hyperrobotframeworkplugin.psi.RobotStubTokenTypes;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.VariableDefinition;
 import com.intellij.psi.PsiElement;
 import org.jetbrains.annotations.Nls;
@@ -18,7 +18,7 @@ public class RobotNestedVariableDefinition extends SimpleRobotInspection {
     @Override
     public final boolean skip(PsiElement element) {
         PsiElement parentElement = element.getParent();
-        return element.getNode().getElementType() != RobotTokenTypes.VARIABLE_DEFINITION || !(parentElement instanceof VariableDefinition)
+        return element.getNode().getElementType() != RobotStubTokenTypes.VARIABLE_DEFINITION || !(parentElement instanceof VariableDefinition)
                || !((VariableDefinition) parentElement).isNested();
     }
 

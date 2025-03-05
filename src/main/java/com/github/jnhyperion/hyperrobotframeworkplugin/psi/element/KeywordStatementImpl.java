@@ -2,10 +2,12 @@ package com.github.jnhyperion.hyperrobotframeworkplugin.psi.element;
 
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.dto.ParameterDto;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.dto.VariableDto;
+import com.github.jnhyperion.hyperrobotframeworkplugin.psi.stub.element.KeywordStatementStub;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.util.PatternUtil;
 import com.intellij.lang.ASTNode;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiReference;
+import com.intellij.psi.stubs.IStubElementType;
 import com.intellij.psi.util.PsiTreeUtil;
 import com.jetbrains.python.psi.PyFunction;
 import com.jetbrains.python.psi.PyNamedParameter;
@@ -20,7 +22,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-public class KeywordStatementImpl extends RobotPsiElementBase implements KeywordStatement {
+public class KeywordStatementImpl extends RobotStubPsiElementBase<KeywordStatementStub, KeywordStatement> implements KeywordStatement {
 
     private List<Argument> arguments;
     private List<Parameter> parameters;
@@ -31,6 +33,10 @@ public class KeywordStatementImpl extends RobotPsiElementBase implements Keyword
 
     public KeywordStatementImpl(@NotNull ASTNode node) {
         super(node);
+    }
+
+    public KeywordStatementImpl(final KeywordStatementStub stub, final IStubElementType<KeywordStatementStub, KeywordStatement> nodeType) {
+        super(stub, nodeType);
     }
 
     @Nullable
@@ -60,8 +66,9 @@ public class KeywordStatementImpl extends RobotPsiElementBase implements Keyword
         return arguments;
     }
 
+    @NotNull
     @Override
-    public @NotNull List<Parameter> getParameters() {
+    public List<Parameter> getParameters() {
         List<Parameter> results = this.parameters;
         if (this.parameters == null) {
             results = new ArrayList<>(PsiTreeUtil.getChildrenOfTypeAsList(this, Parameter.class));

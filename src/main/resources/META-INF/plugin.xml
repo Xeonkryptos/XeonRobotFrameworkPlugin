@@ -20,6 +20,7 @@
         <completion.contributor language="Robot"
                                 implementationClass="com.github.jnhyperion.hyperrobotframeworkplugin.ide.completion.RobotCompletionContributor"/>
         <lang.findUsagesProvider language="Robot" implementationClass="com.github.jnhyperion.hyperrobotframeworkplugin.ide.usage.RobotFindUsagesProvider"/>
+        <findUsagesHandlerFactory implementation="com.github.jnhyperion.hyperrobotframeworkplugin.ide.usage.RobotPythonFindUsagesHandlerFactory"/>
         <fileStructureGroupRuleProvider implementation="com.github.jnhyperion.hyperrobotframeworkplugin.ide.usage.RobotKeywordGroupingRuleProvider"/>
         <referencesSearch implementation="com.github.jnhyperion.hyperrobotframeworkplugin.ide.search.RobotPythonReferenceSearch"/>
         <lang.syntaxHighlighterFactory language="Robot"
@@ -27,6 +28,9 @@
         <lang.commenter language="Robot" implementationClass="com.github.jnhyperion.hyperrobotframeworkplugin.ide.RobotCommenter"/>
         <lang.foldingBuilder language="Robot" implementationClass="com.github.jnhyperion.hyperrobotframeworkplugin.ide.RobotFoldingBuilder"/>
         <lang.parserDefinition language="Robot" implementationClass="com.github.jnhyperion.hyperrobotframeworkplugin.psi.RobotParserDefinition"/>
+        <stubElementTypeHolder class="com.github.jnhyperion.hyperrobotframeworkplugin.psi.RobotStubTokenTypes" externalIdPrefix="robot."/>
+        <stubIndex implementation="com.github.jnhyperion.hyperrobotframeworkplugin.psi.stub.index.KeywordStatementNameIndex" />
+        <stubIndex implementation="com.github.jnhyperion.hyperrobotframeworkplugin.psi.stub.index.VariableDefinitionIndex" />
         <lang.psiStructureViewFactory language="Robot"
                                       implementationClass="com.github.jnhyperion.hyperrobotframeworkplugin.ide.structure.RobotStructureViewFactory"/>
         <codeInsight.parameterInfo language="Robot" implementationClass="com.github.jnhyperion.hyperrobotframeworkplugin.ide.parameterinfo.RobotParameterInfoHandler" />

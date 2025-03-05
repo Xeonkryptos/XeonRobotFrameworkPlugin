@@ -6,6 +6,7 @@ import com.github.jnhyperion.hyperrobotframeworkplugin.psi.RecommendationWord;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.RobotElementType;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.RobotKeywordProvider;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.RobotResourceFileType;
+import com.github.jnhyperion.hyperrobotframeworkplugin.psi.RobotStubTokenTypes;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.RobotTokenTypes;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.dto.ImportType;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.dto.KeywordDto;
@@ -291,7 +292,7 @@ public class RobotCompletionContributor extends CompletionContributor {
     }
 
     private static PsiElementPattern.Capture<PsiElement> withArgumentInKeywordStatement() {
-        return PlatformPatterns.psiElement(RobotTokenTypes.ARGUMENT).withAncestor(3, PlatformPatterns.psiElement(RobotTokenTypes.KEYWORD_STATEMENT));
+        return PlatformPatterns.psiElement(RobotTokenTypes.ARGUMENT).withAncestor(3, PlatformPatterns.psiElement(RobotStubTokenTypes.KEYWORD_STATEMENT));
     }
 
     private static boolean isArgument(PsiElement current) {

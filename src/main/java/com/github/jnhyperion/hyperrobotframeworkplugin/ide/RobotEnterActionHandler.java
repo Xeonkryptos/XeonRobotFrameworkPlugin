@@ -1,5 +1,6 @@
 package com.github.jnhyperion.hyperrobotframeworkplugin.ide;
 
+import com.github.jnhyperion.hyperrobotframeworkplugin.psi.RobotStubTokenTypes;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.RobotTokenTypes;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.RobotFile;
 import com.intellij.codeInsight.editorActions.enter.EnterHandlerDelegateAdapter;
@@ -43,7 +44,7 @@ public class RobotEnterActionHandler extends EnterHandlerDelegateAdapter {
                 PsiElement element = results.get(0);
                 IElementType type = element.getNode().getElementType();
                 if (!results.isEmpty() &&
-                    (type == RobotTokenTypes.KEYWORD_DEFINITION || type == RobotTokenTypes.SYNTAX_MARKER && INTERACTION_WORDS.contains(element.getText()))) {
+                    (type == RobotStubTokenTypes.KEYWORD_DEFINITION || type == RobotTokenTypes.SYNTAX_MARKER && INTERACTION_WORDS.contains(element.getText()))) {
                     document.insertString(caretOffset, "    ");
                 }
             }

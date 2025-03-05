@@ -2,9 +2,11 @@ package com.github.jnhyperion.hyperrobotframeworkplugin.psi.element;
 
 import com.github.jnhyperion.hyperrobotframeworkplugin.ide.icons.RobotIcons;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.dto.VariableDto;
+import com.github.jnhyperion.hyperrobotframeworkplugin.psi.stub.element.KeywordDefinitionStub;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.util.ReservedVariableScope;
 import com.intellij.lang.ASTNode;
 import com.intellij.psi.PsiElement;
+import com.intellij.psi.stubs.IStubElementType;
 import com.intellij.psi.util.PsiTreeUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -17,7 +19,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class KeywordDefinitionImpl extends RobotPsiElementBase implements KeywordDefinition {
+public class KeywordDefinitionImpl extends RobotStubPsiElementBase<KeywordDefinitionStub, KeywordDefinition> implements KeywordDefinition {
 
     private List<KeywordInvokable> invokedKeywords;
     private Collection<DefinedVariable> inlineVariables;
@@ -26,6 +28,24 @@ public class KeywordDefinitionImpl extends RobotPsiElementBase implements Keywor
 
     public KeywordDefinitionImpl(@NotNull ASTNode node) {
         super(node);
+    }
+
+    public KeywordDefinitionImpl(@NotNull KeywordDefinitionStub stub, @NotNull IStubElementType<KeywordDefinitionStub, KeywordDefinition> nodeType) {
+        super(stub, nodeType);
+    }
+
+    @Nullable
+    @Override
+    public String getName() {
+        KeywordDefinitionStub stub = getStub();
+        if (stub != null) {
+            return stub.getName();
+        }
+        PsiElement nameIdentifier = getNameIdentifier();
+        if (nameIdentifier != null) {
+            return nameIdentifier.getText();
+        }
+        return null;
     }
 
     @NotNull
@@ -125,12 +145,16 @@ public class KeywordDefinitionImpl extends RobotPsiElementBase implements Keywor
 
     @Override
     public final String getKeywordName() {
-        return this.getPresentableText();
+        return getPresentableText();
     }
 
     @Nullable
     @Override
     public PsiElement getNameIdentifier() {
+        KeywordDefinitionStub stub = getStub();
+        if (stub != null) {
+            return PsiTreeUtil.findChildOfType(stub.getPsi(), KeywordDefinitionId.class);
+        }
         return PsiTreeUtil.findChildOfType(this, KeywordDefinitionId.class);
     }
 

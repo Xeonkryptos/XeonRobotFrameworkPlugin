@@ -46,7 +46,7 @@ public class RobotParserDefinition implements ParserDefinition {
    @NotNull
    @Override
    public IFileElementType getFileNodeType() {
-      return RobotTokenTypes.ROBOT_FILE;
+      return RobotStubTokenTypes.ROBOT_FILE;
    }
 
    @NotNull
@@ -70,17 +70,17 @@ public class RobotParserDefinition implements ParserDefinition {
    @NotNull
    @Override
    public PsiElement createElement(ASTNode node) {
-      if (node.getElementType() == RobotTokenTypes.KEYWORD_DEFINITION) {
+      if (node.getElementType() == RobotStubTokenTypes.KEYWORD_DEFINITION) {
          return new KeywordDefinitionImpl(node);
       } else if (node.getElementType() == RobotTokenTypes.KEYWORD_DEFINITION_ID) {
          return new KeywordDefinitionIdImpl(node);
-      } else if (node.getElementType() == RobotTokenTypes.KEYWORD_STATEMENT) {
+      } else if (node.getElementType() == RobotStubTokenTypes.KEYWORD_STATEMENT) {
          return new KeywordStatementImpl(node);
       } else if (node.getElementType() == RobotTokenTypes.KEYWORD) {
          return new KeywordInvokableImpl(node);
       } else if (node.getElementType() == RobotTokenTypes.SYNTAX_MARKER) {
          return new KeywordInvokableImpl(node);
-      } else if (node.getElementType() == RobotTokenTypes.VARIABLE_DEFINITION) {
+      } else if (node.getElementType() == RobotStubTokenTypes.VARIABLE_DEFINITION) {
          return new VariableDefinitionImpl(node);
       } else if (node.getElementType() == RobotTokenTypes.VARIABLE_DEFINITION_ID) {
          return new VariableDefinitionIdImpl(node);

@@ -1,11 +1,15 @@
 package com.github.jnhyperion.hyperrobotframeworkplugin.psi.element;
 
-import java.util.Collection;
-import java.util.List;
+import com.github.jnhyperion.hyperrobotframeworkplugin.psi.stub.element.KeywordStatementStub;
+import com.intellij.psi.PsiNamedElement;
+import com.intellij.psi.StubBasedPsiElement;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public interface KeywordStatement extends RobotStatement {
+import java.util.Collection;
+import java.util.List;
+
+public interface KeywordStatement extends RobotStatement, PsiNamedElement, StubBasedPsiElement<KeywordStatementStub> {
 
    @Nullable
    KeywordInvokable getInvokable();

@@ -1,5 +1,6 @@
 package com.github.jnhyperion.hyperrobotframeworkplugin.ide.execution;
 
+import com.github.jnhyperion.hyperrobotframeworkplugin.psi.RobotStubTokenTypes;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.RobotTokenTypes;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.Heading;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.KeywordDefinition;
@@ -150,7 +151,7 @@ public class RobotRunConfigurationProducer extends LazyRunConfigurationProducer<
             PsiElement element = location.getPsiElement();
             if (element instanceof LeafPsiElement leafPsiElement) {
                 IElementType type = leafPsiElement.getElementType();
-                return RobotTokenTypes.KEYWORD_DEFINITION.equals(type) || RobotTokenTypes.HEADING.equals(type);
+                return RobotStubTokenTypes.KEYWORD_DEFINITION.equals(type) || RobotTokenTypes.HEADING.equals(type);
             }
         }
         return false;

@@ -23,7 +23,7 @@ public class RobotHighlighter extends SyntaxHighlighterBase {
                                                                                                       DefaultLanguageHighlighterColors.DOC_COMMENT_TAG);
     public static final TextAttributesKey IMPORT = TextAttributesKey.createTextAttributesKey(RobotTokenTypes.IMPORT.toString(),
                                                                                              DefaultLanguageHighlighterColors.DOC_COMMENT_TAG_VALUE);
-    public static final TextAttributesKey KEYWORD_DEFINITION = TextAttributesKey.createTextAttributesKey(RobotTokenTypes.KEYWORD_DEFINITION.toString(),
+    public static final TextAttributesKey KEYWORD_DEFINITION = TextAttributesKey.createTextAttributesKey(RobotStubTokenTypes.KEYWORD_DEFINITION.toString(),
                                                                                                          DefaultLanguageHighlighterColors.KEYWORD);
     public static final TextAttributesKey KEYWORD = TextAttributesKey.createTextAttributesKey(RobotTokenTypes.KEYWORD.toString(),
                                                                                               DefaultLanguageHighlighterColors.FUNCTION_DECLARATION);
@@ -31,7 +31,7 @@ public class RobotHighlighter extends SyntaxHighlighterBase {
                                                                                                 DefaultLanguageHighlighterColors.PARAMETER);
     public static final TextAttributesKey ARGUMENT = TextAttributesKey.createTextAttributesKey(RobotTokenTypes.ARGUMENT.toString(),
                                                                                                DefaultLanguageHighlighterColors.STATIC_FIELD);
-    public static final TextAttributesKey VARIABLE_DEFINITION = TextAttributesKey.createTextAttributesKey(RobotTokenTypes.VARIABLE_DEFINITION.toString(),
+    public static final TextAttributesKey VARIABLE_DEFINITION = TextAttributesKey.createTextAttributesKey(RobotStubTokenTypes.VARIABLE_DEFINITION.toString(),
                                                                                                           DefaultLanguageHighlighterColors.MARKUP_ATTRIBUTE);
     public static final TextAttributesKey VARIABLE = TextAttributesKey.createTextAttributesKey(RobotTokenTypes.VARIABLE.toString(),
                                                                                                DefaultLanguageHighlighterColors.DOC_COMMENT_MARKUP);
@@ -59,9 +59,9 @@ public class RobotHighlighter extends SyntaxHighlighterBase {
         keys1.put(RobotTokenTypes.GHERKIN, GHERKIN);
         keys1.put(RobotTokenTypes.SYNTAX_MARKER, SYNTAX_MARKER);
         keys1.put(RobotTokenTypes.VARIABLE, VARIABLE);
-        keys1.put(RobotTokenTypes.VARIABLE_DEFINITION, VARIABLE_DEFINITION);
+        keys1.put(RobotStubTokenTypes.VARIABLE_DEFINITION, VARIABLE_DEFINITION);
         keys1.put(RobotTokenTypes.KEYWORD, KEYWORD);
-        keys1.put(RobotTokenTypes.KEYWORD_DEFINITION, KEYWORD_DEFINITION);
+        keys1.put(RobotStubTokenTypes.KEYWORD_DEFINITION, KEYWORD_DEFINITION);
         keys1.put(RobotTokenTypes.BRACKET_SETTING, BRACKET_SETTING);
         keys1.put(RobotTokenTypes.SETTING, SETTING);
         keys1.put(RobotTokenTypes.IMPORT, IMPORT);

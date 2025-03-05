@@ -1,18 +1,38 @@
 package com.github.jnhyperion.hyperrobotframeworkplugin.psi.element;
 
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.util.PatternUtil;
-import com.intellij.extapi.psi.ASTWrapperPsiElement;
+import com.intellij.extapi.psi.StubBasedPsiElementBase;
 import com.intellij.lang.ASTNode;
 import com.intellij.navigation.ItemPresentation;
 import com.intellij.psi.PsiElement;
+import com.intellij.psi.stubs.IStubElementType;
+import com.intellij.psi.stubs.StubElement;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.Icon;
 
-public abstract class RobotPsiElementBase extends ASTWrapperPsiElement implements RobotStatement {
+public abstract class RobotStubPsiElementBase<T extends StubElement<P>, P extends PsiElement> extends StubBasedPsiElementBase<T> implements RobotStatement {
 
-   public RobotPsiElementBase(@NotNull ASTNode node) {
+   public RobotStubPsiElementBase(@NotNull ASTNode node) {
       super(node);
+   }
+
+   public RobotStubPsiElementBase(final T stub, final IStubElementType<T, P> nodeType) {
+      super(stub, nodeType);
+   }
+
+   @NotNull
+   @Override
+   public String getPresentableText() {
+      T stub = getStub();
+      String text;
+      if (stub != null) {
+         P psiElement = stub.getPsi();
+         text = psiElement.getText();
+      } else {
+         text = getText();
+      }
+      return RobotPsiElementBase.getPresentableText(text);
    }
 
    @NotNull
@@ -26,7 +46,7 @@ public abstract class RobotPsiElementBase extends ASTWrapperPsiElement implement
 
          @Override
          public String getPresentableText() {
-            return RobotPsiElementBase.this.getPresentableText();
+            return RobotStubPsiElementBase.this.getPresentableText();
          }
 
          @Override
@@ -36,21 +56,14 @@ public abstract class RobotPsiElementBase extends ASTWrapperPsiElement implement
 
          @Override
          public Icon getIcon(boolean var1) {
-            return RobotPsiElementBase.this.getIcon(ICON_FLAG_VISIBILITY);
+            return RobotStubPsiElementBase.this.getIcon(ICON_FLAG_VISIBILITY);
          }
       };
    }
 
-   @NotNull
-   @Override
-   public String getPresentableText() {
-      return getPresentableText(getText());
-   }
-
-   @NotNull
    @Override
    public String getName() {
-      return this.getPresentableText();
+      return getPresentableText();
    }
 
    public PsiElement setName(@NotNull String newName) {

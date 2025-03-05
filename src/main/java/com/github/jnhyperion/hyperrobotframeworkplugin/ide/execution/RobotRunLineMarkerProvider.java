@@ -1,5 +1,6 @@
 package com.github.jnhyperion.hyperrobotframeworkplugin.ide.execution;
 
+import com.github.jnhyperion.hyperrobotframeworkplugin.psi.RobotStubTokenTypes;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.RobotTokenTypes;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.Heading;
 import com.intellij.execution.lineMarker.ExecutorAction;
@@ -30,7 +31,7 @@ public class RobotRunLineMarkerProvider extends RunLineMarkerContributor {
                                     elem -> StringUtil.join(ContainerUtil.mapNotNull(actions, action -> getText(action, createActionEvent(elem))), "\n"));
                 }
             } else {
-                if (RobotTokenTypes.KEYWORD_DEFINITION.equals(type)) {
+                if (RobotStubTokenTypes.KEYWORD_DEFINITION.equals(type)) {
                     Heading heading = getHeading(element);
                     if (heading != null && (heading.containsTasks() || heading.containsTestCases())) {
                         AnAction[] actions = ExecutorAction.getActions();
