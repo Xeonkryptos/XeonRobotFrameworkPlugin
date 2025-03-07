@@ -59,7 +59,7 @@ public class KeywordStatementStubElement extends IStubElementType<KeywordStateme
     @Override
     public void indexStub(@NotNull KeywordStatementStub stub, @NotNull IndexSink sink) {
         if (stub.getName() != null) {
-            sink.occurrence(KeywordStatementNameIndex.KEYWORD_STATEMENT_NAME, stub.getName());
+            sink.occurrence(KeywordStatementNameIndex.KEYWORD_STATEMENT_NAME, stub.getName().toLowerCase());
         }
     }
 }

@@ -46,6 +46,6 @@ public class KeywordStatementNameIndex extends StringStubIndexExtension<KeywordS
     }
 
     public Collection<KeywordStatement> getKeywordStatement(@NotNull String name, @NotNull Project project, @NotNull GlobalSearchScope scope) {
-        return StubIndex.getElements(getKey(), name, project, scope, KeywordStatement.class);
+        return StubIndex.getElements(getKey(), name.toLowerCase(), project, scope, KeywordStatement.class);
     }
 }
