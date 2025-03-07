@@ -1,6 +1,6 @@
 package com.github.jnhyperion.hyperrobotframeworkplugin.ide.usage;
 
-import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.KeywordDefinitionImpl;
+import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.KeywordDefinition;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.util.PsiTreeUtil;
@@ -32,7 +32,7 @@ public class RobotKeywordGroupingRuleProvider implements FileStructureGroupRuleP
                 return null;
             } else {
                 PsiElement psiElement = ((PsiElementUsage) usage).getElement();
-                KeywordDefinitionImpl definition = PsiTreeUtil.getParentOfType(psiElement, KeywordDefinitionImpl.class, false);
+                KeywordDefinition definition = PsiTreeUtil.getParentOfType(psiElement, KeywordDefinition.class, false);
                 return definition == null ? null : new PsiNamedElementUsageGroupBase<>(definition);
             }
         }

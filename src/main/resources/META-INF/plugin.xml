@@ -21,6 +21,7 @@
                                 implementationClass="com.github.jnhyperion.hyperrobotframeworkplugin.ide.completion.RobotCompletionContributor"/>
         <lang.findUsagesProvider language="Robot" implementationClass="com.github.jnhyperion.hyperrobotframeworkplugin.ide.usage.RobotFindUsagesProvider"/>
         <findUsagesHandlerFactory implementation="com.github.jnhyperion.hyperrobotframeworkplugin.ide.usage.RobotPythonFindUsagesHandlerFactory"/>
+        <usageTypeProvider implementation="com.github.jnhyperion.hyperrobotframeworkplugin.ide.usage.RobotUsageTypeProvider"/>
         <fileStructureGroupRuleProvider implementation="com.github.jnhyperion.hyperrobotframeworkplugin.ide.usage.RobotKeywordGroupingRuleProvider"/>
         <referencesSearch implementation="com.github.jnhyperion.hyperrobotframeworkplugin.ide.search.RobotPythonReferenceSearch"/>
         <lang.syntaxHighlighterFactory language="Robot"
