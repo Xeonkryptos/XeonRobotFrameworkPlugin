@@ -30,7 +30,6 @@
         <lang.parserDefinition language="Robot" implementationClass="com.github.jnhyperion.hyperrobotframeworkplugin.psi.RobotParserDefinition"/>
         <stubElementTypeHolder class="com.github.jnhyperion.hyperrobotframeworkplugin.psi.RobotStubTokenTypes" externalIdPrefix="robot."/>
         <stubIndex implementation="com.github.jnhyperion.hyperrobotframeworkplugin.psi.stub.index.KeywordStatementNameIndex" />
-        <stubIndex implementation="com.github.jnhyperion.hyperrobotframeworkplugin.psi.stub.index.VariableDefinitionIndex" />
         <lang.psiStructureViewFactory language="Robot"
                                       implementationClass="com.github.jnhyperion.hyperrobotframeworkplugin.ide.structure.RobotStructureViewFactory"/>
         <codeInsight.parameterInfo language="Robot" implementationClass="com.github.jnhyperion.hyperrobotframeworkplugin.ide.parameterinfo.RobotParameterInfoHandler" />

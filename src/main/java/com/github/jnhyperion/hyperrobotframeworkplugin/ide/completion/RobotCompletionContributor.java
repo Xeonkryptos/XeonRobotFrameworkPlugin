@@ -674,13 +674,13 @@ public class RobotCompletionContributor extends CompletionContributor {
         List<LookupElement> results = new ArrayList<>();
         Collection<RecommendationWord> words = RobotKeywordProvider.getRecommendationsForType(type);
         for (RecommendationWord word : words) {
-            String text = word.getLookup();
-            String lookupString = word.getPresentation();
+            String text = word.lookup();
+            String lookupString = word.presentation();
             String[] lookupStrings = { text, WordUtils.capitalize(text), lookupString, WordUtils.capitalize(lookupString), lookupString.toLowerCase() };
             LookupElement element = TailTypeDecorator.withTail(LookupElementBuilder.create(lookupString)
                                                                                    .withLookupStrings(Arrays.asList(lookupStrings))
                                                                                    .withPresentableText(lookupString)
-                                                                                   .withCaseSensitivity(true), word.getTailType());
+                                                                                   .withCaseSensitivity(true), word.tailType());
             results.add(element);
         }
         return results;

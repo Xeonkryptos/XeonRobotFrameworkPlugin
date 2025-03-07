@@ -3,7 +3,6 @@ package com.github.jnhyperion.hyperrobotframeworkplugin.psi.stub.element;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.RobotLanguage;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.VariableDefinition;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.VariableDefinitionImpl;
-import com.github.jnhyperion.hyperrobotframeworkplugin.psi.stub.index.VariableDefinitionIndex;
 import com.intellij.lang.ASTNode;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.StubBasedPsiElement;
@@ -57,9 +56,5 @@ public class VariableDefinitionStubElement extends IStubElementType<VariableDefi
     }
 
     @Override
-    public void indexStub(@NotNull VariableDefinitionStub stub, @NotNull IndexSink sink) {
-        if (stub.getName() != null) {
-            sink.occurrence(VariableDefinitionIndex.VARIABLE_DEFINITION_NAME, stub.getName());
-        }
-    }
+    public void indexStub(@NotNull VariableDefinitionStub stub, @NotNull IndexSink sink) {}
 }
