@@ -13,6 +13,7 @@ public class RobotConsoleProperties extends SMTRunnerConsoleProperties {
         
         // Enable default test tree features
         setIdBasedTestTree(true);
+        setPrintTestingStartedTime(false);
         setIfUndefined(TestConsoleProperties.HIDE_PASSED_TESTS, false);
         setIfUndefined(TestConsoleProperties.HIDE_IGNORED_TEST, false);
         setIfUndefined(TestConsoleProperties.SCROLL_TO_SOURCE, true);
