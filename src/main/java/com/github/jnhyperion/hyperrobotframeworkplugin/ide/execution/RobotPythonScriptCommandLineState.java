@@ -1,23 +1,29 @@
 package com.github.jnhyperion.hyperrobotframeworkplugin.ide.execution;
 
+import com.github.jnhyperion.hyperrobotframeworkplugin.ide.execution.ui.RobotTestRunnerFactory;
 import com.intellij.execution.ExecutionException;
 import com.intellij.execution.ExecutionResult;
 import com.intellij.execution.Executor;
 import com.intellij.execution.configurations.ParametersList;
 import com.intellij.execution.configurations.ParamsGroup;
 import com.intellij.execution.executors.DefaultDebugExecutor;
+import com.intellij.execution.process.ProcessHandler;
 import com.intellij.execution.runners.ExecutionEnvironment;
 import com.intellij.execution.target.TargetEnvironment;
 import com.intellij.execution.target.value.TargetEnvironmentFunctions;
+import com.intellij.execution.ui.ConsoleView;
 import com.intellij.openapi.application.PathManager;
+import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Key;
 import com.intellij.openapi.util.Ref;
 import com.intellij.util.ArrayUtil;
 import com.intellij.util.net.NetUtils;
 import com.jetbrains.python.PyBundle;
+import com.jetbrains.python.run.AbstractPythonRunConfiguration;
 import com.jetbrains.python.run.CommandLinePatcher;
 import com.jetbrains.python.run.PythonCommandLineState;
 import com.jetbrains.python.run.PythonExecution;
+import com.jetbrains.python.run.PythonImportErrorFilter;
 import com.jetbrains.python.run.PythonModuleExecution;
 import com.jetbrains.python.run.PythonScriptCommandLineState;
 import com.jetbrains.python.run.PythonScriptExecution;
@@ -85,6 +91,21 @@ public class RobotPythonScriptCommandLineState extends PythonScriptCommandLineSt
                 paramsGroup.getParametersList().add("--dryrun");
             }
         }
+    }
+
+    @NotNull
+    @Override
+    protected ConsoleView createAndAttachConsole(Project project, ProcessHandler processHandler, Executor executor) {
+        AbstractPythonRunConfiguration<?> config = getConfig();
+        ConsoleView consoleView = RobotTestRunnerFactory.createConsoleView(config, executor);
+        consoleView.attachToProcess(processHandler);
+
+        consoleView.addMessageFilter(createUrlFilter(processHandler));
+        consoleView.addMessageFilter(new PythonImportErrorFilter(project));
+
+        addTracebackFilter(project, consoleView, processHandler);
+
+        return consoleView;
     }
 
     @Nullable

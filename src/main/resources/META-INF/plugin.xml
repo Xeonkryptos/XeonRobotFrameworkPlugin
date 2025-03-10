@@ -33,7 +33,8 @@
         <stubIndex implementation="com.github.jnhyperion.hyperrobotframeworkplugin.psi.stub.index.KeywordStatementNameIndex"/>
         <lang.psiStructureViewFactory language="Robot"
                                       implementationClass="com.github.jnhyperion.hyperrobotframeworkplugin.ide.structure.RobotStructureViewFactory"/>
-        <codeInsight.parameterInfo language="Robot" implementationClass="com.github.jnhyperion.hyperrobotframeworkplugin.ide.parameterinfo.RobotParameterInfoHandler" />
+        <codeInsight.parameterInfo language="Robot"
+                                   implementationClass="com.github.jnhyperion.hyperrobotframeworkplugin.ide.parameterinfo.RobotParameterInfoHandler"/>
         <codeInsight.parameterInfo language="Robot"
                                    implementationClass="com.github.jnhyperion.hyperrobotframeworkplugin.ide.parameterinfo.RobotParameterInfoHandler"/>
         <!-- Manipulators -->

@@ -12,8 +12,6 @@ public class RobotRunConfiguration extends PythonRunConfiguration {
 
     public RobotRunConfiguration(Project project, ConfigurationFactory configurationFactory) {
         super(project, configurationFactory);
-
-        setEmulateTerminal(true);
     }
 
     @Override

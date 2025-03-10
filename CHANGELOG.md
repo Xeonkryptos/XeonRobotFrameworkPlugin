@@ -7,6 +7,7 @@
 ### Added
 
 - Added support for Comments section
+- Replaced simple console view with test cases result reports view like for xUnit test executions
 
 ### Fixed
 
