@@ -8,6 +8,7 @@
 
 - Added support for Comments section
 - Replaced simple console view with test cases result reports view like for xUnit test executions
+- Allow creation of run configurations from project explorer when mouse right-click on a directory
 
 ### Fixed
 
