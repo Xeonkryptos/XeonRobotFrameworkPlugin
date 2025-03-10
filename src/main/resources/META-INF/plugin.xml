@@ -30,10 +30,12 @@
         <lang.foldingBuilder language="Robot" implementationClass="com.github.jnhyperion.hyperrobotframeworkplugin.ide.RobotFoldingBuilder"/>
         <lang.parserDefinition language="Robot" implementationClass="com.github.jnhyperion.hyperrobotframeworkplugin.psi.RobotParserDefinition"/>
         <stubElementTypeHolder class="com.github.jnhyperion.hyperrobotframeworkplugin.psi.RobotStubTokenTypes" externalIdPrefix="robot."/>
-        <stubIndex implementation="com.github.jnhyperion.hyperrobotframeworkplugin.psi.stub.index.KeywordStatementNameIndex" />
+        <stubIndex implementation="com.github.jnhyperion.hyperrobotframeworkplugin.psi.stub.index.KeywordStatementNameIndex"/>
         <lang.psiStructureViewFactory language="Robot"
                                       implementationClass="com.github.jnhyperion.hyperrobotframeworkplugin.ide.structure.RobotStructureViewFactory"/>
         <codeInsight.parameterInfo language="Robot" implementationClass="com.github.jnhyperion.hyperrobotframeworkplugin.ide.parameterinfo.RobotParameterInfoHandler" />
+        <codeInsight.parameterInfo language="Robot"
+                                   implementationClass="com.github.jnhyperion.hyperrobotframeworkplugin.ide.parameterinfo.RobotParameterInfoHandler"/>
         <!-- Manipulators -->
         <lang.elementManipulator forClass="com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.KeywordInvokable"
                                  implementationClass="com.github.jnhyperion.hyperrobotframeworkplugin.psi.manip.KeywordInvokableManipulator"/>
