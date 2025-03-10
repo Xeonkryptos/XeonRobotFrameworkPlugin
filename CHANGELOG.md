@@ -11,6 +11,10 @@
 
 ### Fixed
 
+- Missing run marker on *** Test cases *** section with existing test cases available
+
+### Fixed
+
 - Fixed parsing issue of variables section: Spaces in a new line without anything else was interpreted as a new variable definition
 - Find Usages to do a reverse reference search for keywords from python functions
 

@@ -12,7 +12,6 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiReference;
 import com.intellij.psi.util.PsiTreeUtil;
-import com.intellij.util.containers.MultiMap;
 import com.jetbrains.python.psi.PyClass;
 import com.jetbrains.python.psi.PyFile;
 import org.jetbrains.annotations.NotNull;
@@ -33,10 +32,9 @@ public class HeadingImpl extends RobotPsiElementBase implements Heading {
     private static final String AS = "AS";
 
     private Collection<KeywordInvokable> invokedKeywords;
-    private MultiMap<String, KeywordInvokable> invokableReferences;
     private Collection<Variable> usedVariables;
     private Collection<DefinedKeyword> definedKeywords;
-    private Collection<DefinedKeyword> testCases;
+    private Collection<KeywordDefinition> testCases;
     private Collection<KeywordFile> keywordFiles;
     private Collection<PsiFile> referencedFiles;
     private Collection<DefinedVariable> declaredVariables;
@@ -95,7 +93,6 @@ public class HeadingImpl extends RobotPsiElementBase implements Heading {
         this.testCases = null;
         this.keywordFiles = null;
         this.invokedKeywords = null;
-        this.invokableReferences = null;
         this.usedVariables = null;
         this.referencedFiles = null;
         this.declaredVariables = null;
@@ -163,21 +160,17 @@ public class HeadingImpl extends RobotPsiElementBase implements Heading {
 
     @NotNull
     @Override
-    public final Collection<DefinedKeyword> getTestCases() {
-        Collection<DefinedKeyword> results = this.testCases;
+    public final Collection<KeywordDefinition> getTestCases() {
+        Collection<KeywordDefinition> results = this.testCases;
         if (results == null) {
             try {
-                if (!this.containsTestCases() && !this.containsTasks()) {
+                if (!containsTestCases() && !containsTasks()) {
                     results = Collections.emptySet();
                 } else {
-                    results = new LinkedHashSet<>();
-                    for (PsiElement child : getChildren()) {
-                        if (child instanceof DefinedKeyword) {
-                            results.add((DefinedKeyword) child);
-                        }
-                    }
+                    List<KeywordDefinition> keywordDefinitions = PsiTreeUtil.getChildrenOfTypeAsList(this, KeywordDefinition.class);
+                    results = new LinkedHashSet<>(keywordDefinitions);
                 }
-            } catch (Throwable var6) {
+            } catch (Throwable t) {
                 return Collections.emptySet();
             }
             this.testCases = results;
@@ -254,30 +247,6 @@ public class HeadingImpl extends RobotPsiElementBase implements Heading {
             this.invokedKeywords = results;
         }
         return results;
-    }
-
-    @NotNull
-    @Override
-    public final Collection<KeywordInvokable> getInvokableKeywords(@Nullable KeywordDefinition definition) {
-        MultiMap<String, KeywordInvokable> results = this.invokableReferences;
-        if (this.invokableReferences == null) {
-            try {
-                results = new MultiMap<>();
-                for (KeywordInvokable invokedKeyword : getInvokedKeywords()) {
-                    PsiReference reference = invokedKeyword.getReference();
-                    if (reference != null) {
-                        PsiElement resolvedReference = reference.resolve();
-                        if (resolvedReference instanceof KeywordDefinition) {
-                            results.putValue(((KeywordDefinition) resolvedReference).getPresentableText(), invokedKeyword);
-                        }
-                    }
-                }
-            } catch (Throwable t) {
-                return Collections.emptySet();
-            }
-            this.invokableReferences = results;
-        }
-        return definition == null ? Collections.emptySet() : results.get(definition.getPresentableText());
     }
 
     @NotNull

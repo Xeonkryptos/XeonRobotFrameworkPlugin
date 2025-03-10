@@ -24,7 +24,7 @@ public class RobotRunLineMarkerProvider extends RunLineMarkerContributor {
             IElementType type = ((LeafPsiElement) element).getElementType();
             if (RobotTokenTypes.HEADING.equals(type)) {
                 Heading heading = getHeading(element);
-                if (heading != null && !heading.getTestCases().isEmpty()) {
+                if (heading != null && (heading.containsTestCases() || heading.containsTasks())) {
                     AnAction[] actions = ExecutorAction.getActions();
                     return new Info(TestState.Green2,
                                     actions,

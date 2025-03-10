@@ -1,9 +1,9 @@
 package com.github.jnhyperion.hyperrobotframeworkplugin.psi.element;
 
 import com.intellij.psi.PsiFile;
-import java.util.Collection;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+
+import java.util.Collection;
 
 public interface Heading extends RobotStatement {
 
@@ -25,7 +25,7 @@ public interface Heading extends RobotStatement {
    Collection<DefinedKeyword> collectDefinedKeywords();
 
    @NotNull
-   Collection<DefinedKeyword> getTestCases();
+   Collection<KeywordDefinition> getTestCases();
 
    @NotNull
    Collection<PsiFile> getFilesFromInvokedKeywordsAndVariables();
@@ -37,7 +37,4 @@ public interface Heading extends RobotStatement {
    Collection<VariableDefinition> getVariableDefinitions();
 
    void importsChanged();
-
-   @NotNull
-   Collection<KeywordInvokable> getInvokableKeywords(@Nullable KeywordDefinition var1);
 }
