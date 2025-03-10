@@ -4,12 +4,14 @@ class RobotIntellijListener:
 
     def start_suite(self, data, result):
         location = f"file://{data.source}"
-        print(f"##teamcity[testSuiteStarted name='{escape_name(data.name)}' nodeId='{data.id}' parentNodeId='0' locationHint='{location}']")
+        parent_id = data.parent.id if not data.parent is None else '0'
+        print(f"##teamcity[testSuiteStarted name='{escape_name(data.name)}' nodeId='{data.id}' parentNodeId='{parent_id}' locationHint='{location}']")
 
     def end_suite(self, data, result):
         location = f"file://{data.source}"
         duration = int(result.elapsedtime)
-        print(f"##teamcity[testSuiteFinished name='{escape_name(data.name)}' nodeId='{data.id}' parentNodeId='0' locationHint='{location}' duration='{duration}']")
+        parent_id = data.parent.id if not data.parent is None else '0'
+        print(f"##teamcity[testSuiteFinished name='{escape_name(data.name)}' nodeId='{data.id}' parentNodeId='{parent_id}' locationHint='{location}' duration='{duration}']")
 
     def start_test(self, data, result):
         location = f"file://{data.source}:{data.lineno}"
