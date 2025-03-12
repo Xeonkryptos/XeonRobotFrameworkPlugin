@@ -2,6 +2,7 @@ package com.github.jnhyperion.hyperrobotframeworkplugin.psi.ref;
 
 import com.github.jnhyperion.hyperrobotframeworkplugin.ide.config.RobotOptionsProvider;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.dto.ImportType;
+import com.github.jnhyperion.hyperrobotframeworkplugin.psi.dto.KeywordFileWithDependentsWrapper;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.DefinedKeyword;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.DefinedVariable;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.KeywordDefinition;
@@ -14,11 +15,12 @@ import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiReference;
 import com.intellij.psi.util.PsiTreeUtil;
 import com.jetbrains.python.psi.PyFunction;
-import com.jetbrains.python.psi.PyParameter;
+import com.jetbrains.python.psi.PyNamedParameter;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -26,23 +28,25 @@ public class ResolverUtils {
     private ResolverUtils() {
     }
 
-    @Nullable
-    public static PsiElement findKeywordElement(@Nullable String keyword, @Nullable PsiFile psiFile) {
+    public static PsiReferenceResultWithImportPath findKeywordPyFunction(@Nullable String keyword, @Nullable PsiFile psiFile) {
         if (keyword == null || !(psiFile instanceof RobotFile robotFile)) {
             return null;
         }
 
         for (DefinedKeyword definedKeyword : robotFile.getDefinedKeywords()) {
             if (definedKeyword.matches(keyword)) {
-                return definedKeyword.reference();
+                return new PsiReferenceResultWithImportPath(definedKeyword.reference(), Collections.emptyList());
             }
         }
 
         boolean includeTransitive = RobotOptionsProvider.getInstance(psiFile.getProject()).allowTransitiveImports();
-        for (KeywordFile keywordFile : robotFile.getImportedFiles(includeTransitive)) {
-            for (DefinedKeyword definedKeyword : keywordFile.getDefinedKeywords()) {
+        Collection<KeywordFileWithDependentsWrapper> importedFilesWithDependents = robotFile.getImportedFilesWithDependents(includeTransitive);
+        for (KeywordFileWithDependentsWrapper wrapper : importedFilesWithDependents) {
+            for (DefinedKeyword definedKeyword : wrapper.keywordFile().getDefinedKeywords()) {
                 if (definedKeyword.matches(keyword)) {
-                    return definedKeyword.reference();
+                    PsiElement reference = definedKeyword.reference();
+                    Collection<KeywordFile> dependents = wrapper.dependents();
+                    return new PsiReferenceResultWithImportPath(reference, dependents);
                 }
             }
         }
@@ -177,19 +181,13 @@ public class ResolverUtils {
         return Collections.emptyList();
     }
 
-    public static PsiElement findKeywordParameterElement(String parameterName, KeywordStatement keywordStatement) {
-        KeywordInvokable invokable = keywordStatement.getInvokable();
-        if (invokable != null) {
-            PsiReference reference = invokable.getReference();
-            if (reference != null) {
-                PsiElement referencedElement = reference.resolve();
-                if (referencedElement instanceof PyFunction pyFunction) {
-                    for (PyParameter parameter : pyFunction.getParameterList().getParameters()) {
-                        if (parameterName.equals(parameter.getName())) {
-                            return parameter;
-                        }
-                    }
-                }
+    public static PsiReferenceResultWithImportPath findKeywordParameterElement(String parameterName, KeywordStatement keywordStatement) {
+        String keywordName = keywordStatement.getName();
+        PsiReferenceResultWithImportPath result = findKeywordPyFunction(keywordName, keywordStatement.getContainingFile());
+        if (result != null && result.reference() instanceof PyFunction pyFunction) {
+            PyNamedParameter parameterByName = pyFunction.getParameterList().findParameterByName(parameterName);
+            if (parameterByName != null) {
+                return new PsiReferenceResultWithImportPath(parameterByName, result.importFilePaths());
             }
         }
         return null;

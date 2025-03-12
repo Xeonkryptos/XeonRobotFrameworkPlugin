@@ -8,6 +8,8 @@ import com.intellij.psi.PsiElementResolveResult;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiPolyVariantReferenceBase;
 import com.intellij.psi.ResolveResult;
+import com.intellij.psi.util.CachedValueProvider;
+import com.intellij.psi.util.CachedValuesManager;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -23,42 +25,46 @@ public class RobotArgumentReference extends PsiPolyVariantReferenceBase<Position
     @Nullable
     @Override
     public PsiElement resolve() {
-        PsiElement result = null;
-
         PositionalArgument positionalArgument = getElement();
         PsiElement parent = positionalArgument.getParent();
         if (parent instanceof Import importElement) {
             PsiElement[] children = parent.getChildren();
             if (children.length > 0 && children[0] == positionalArgument) {
-                if (importElement.isResource()) {
-                    result = RobotFileManager.findElement(positionalArgument.getPresentableText(), positionalArgument.getProject(), positionalArgument);
-                } else if (importElement.isLibrary() || importElement.isVariables()) {
-                    result = RobotFileManager.findElementInContext(positionalArgument.getPresentableText(),
-                                                                   positionalArgument.getProject(),
-                                                                   positionalArgument);
-                }
-
-                if (result == null) {
-                    ResolveResult[] resolveResults = multiResolve(false);
-                    if (resolveResults.length == 1) {
-                        result = resolveResults[0].getElement();
+                return CachedValuesManager.getCachedValue(positionalArgument, () -> {
+                    PsiElement result = null;
+                    if (importElement.isResource()) {
+                        result = RobotFileManager.findElement(positionalArgument.getPresentableText(), positionalArgument.getProject(), positionalArgument);
+                    } else if (importElement.isLibrary() || importElement.isVariables()) {
+                        result = RobotFileManager.findElementInContext(positionalArgument.getPresentableText(),
+                                                                       positionalArgument.getProject(),
+                                                                       positionalArgument);
                     }
-                }
+
+                    if (result == null) {
+                        ResolveResult[] resolveResults = multiResolve(false);
+                        if (resolveResults.length == 1) {
+                            result = resolveResults[0].getElement();
+                        }
+                    }
+                    if (result != null) {
+                        return CachedValueProvider.Result.create(result, result, positionalArgument, importElement);
+                    }
+                    return null;
+                });
             }
         }
 
-        return result;
+        return null;
     }
 
     @Override
     public ResolveResult @NotNull [] multiResolve(boolean incompleteCode) {
-        Set<ResolveResult> results = new LinkedHashSet<>();
-
         PositionalArgument positionalArgument = getElement();
         Project project = positionalArgument.getProject();
         PsiElement parent = positionalArgument.getParent();
         String presentableText = positionalArgument.getPresentableText();
 
+        Set<ResolveResult> results = new LinkedHashSet<>();
         if (parent instanceof Import importElement) {
             if (importElement.isResource()) {
                 for (PsiFile file : RobotFileManager.findPsiFiles(presentableText, project)) {

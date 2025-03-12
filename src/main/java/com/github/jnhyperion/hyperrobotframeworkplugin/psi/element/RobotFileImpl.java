@@ -3,6 +3,7 @@ package com.github.jnhyperion.hyperrobotframeworkplugin.psi.element;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.RobotFeatureFileType;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.RobotLanguage;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.dto.ImportType;
+import com.github.jnhyperion.hyperrobotframeworkplugin.psi.dto.KeywordFileWithDependentsWrapper;
 import com.intellij.extapi.psi.PsiFileBase;
 import com.intellij.openapi.fileTypes.FileType;
 import com.intellij.openapi.vfs.VirtualFile;
@@ -13,10 +14,13 @@ import com.intellij.psi.search.FilenameIndex;
 import com.intellij.psi.search.GlobalSearchScope;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -140,6 +144,28 @@ public class RobotFileImpl extends PsiFileBase implements KeywordFile, RobotFile
 
     @NotNull
     @Override
+    public Collection<KeywordFileWithDependentsWrapper> getImportedFilesWithDependents(boolean includeTransitive) {
+        Set<KeywordFileWithParentWrapper> results = new LinkedHashSet<>();
+        Collection<Heading> headings = collectHeadings();
+        for (Heading heading : headings) {
+            for (KeywordFile keywordFile : heading.collectImportFiles()) {
+                collectTransitiveKeywordFilesWithDependencyTracking(results, this, keywordFile, includeTransitive);
+            }
+        }
+        Map<KeywordFile, KeywordFile> childParentIndex = results.stream().collect(Collectors.toMap(wrapper -> wrapper.keywordFile, wrapper -> wrapper.parent));
+        return results.stream().map(KeywordFileWithParentWrapper::keywordFile).map(keywordFile -> {
+            KeywordFile parent = childParentIndex.get(keywordFile);
+            List<KeywordFile> parents = new ArrayList<>();
+            while (parent != null) {
+                parents.add(parent);
+                parent = childParentIndex.get(parent);
+            }
+            return new KeywordFileWithDependentsWrapper(keywordFile, parents);
+        }).collect(Collectors.toCollection(LinkedHashSet::new));
+    }
+
+    @NotNull
+    @Override
     public final Collection<VirtualFile> getVirtualFiles(boolean includeTransitive) {
         Set<VirtualFile> files = new LinkedHashSet<>();
         for (KeywordFile keywordFile : getImportedFiles(includeTransitive)) {
@@ -162,6 +188,17 @@ public class RobotFileImpl extends PsiFileBase implements KeywordFile, RobotFile
         if (results.add(keywordFile) && includeTransitive) {
             for (KeywordFile child : keywordFile.getImportedFiles(false)) {
                 collectTransitiveKeywordFiles(results, child, true);
+            }
+        }
+    }
+
+    private void collectTransitiveKeywordFilesWithDependencyTracking(Collection<KeywordFileWithParentWrapper> results,
+                                                                     KeywordFile parentFile,
+                                                                     KeywordFile keywordFile,
+                                                                     boolean includeTransitive) {
+        if (results.add(new KeywordFileWithParentWrapper(keywordFile, parentFile)) && includeTransitive) {
+            for (KeywordFile child : keywordFile.getImportedFiles(false)) {
+                collectTransitiveKeywordFilesWithDependencyTracking(results, keywordFile, child, true);
             }
         }
     }
@@ -191,6 +228,8 @@ public class RobotFileImpl extends PsiFileBase implements KeywordFile, RobotFile
         }
         return results;
     }
+
+    private record KeywordFileWithParentWrapper(KeywordFile keywordFile, KeywordFile parent) {}
 
     @Override
     public String toString() {

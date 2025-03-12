@@ -1,36 +1,47 @@
 package com.github.jnhyperion.hyperrobotframeworkplugin.psi.element;
 
+import com.github.jnhyperion.hyperrobotframeworkplugin.psi.dto.KeywordFileWithDependentsWrapper;
 import com.intellij.psi.PsiFile;
-import java.util.Collection;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.Collection;
 
 public interface RobotFile extends PsiFile {
 
-   /**
-    * @return locally defined keywords.
-    */
-   @NotNull
-   Collection<DefinedKeyword> getDefinedKeywords();
+    /**
+     * @return locally defined keywords.
+     */
+    @NotNull Collection<DefinedKeyword> getDefinedKeywords();
 
-   void reset();
+    void reset();
 
-   /**
-    * @return all files that contain references to invoked keywords and used variables.
-    */
-   @NotNull
-   Collection<PsiFile> getFilesFromInvokedKeywordsAndVariables();
+    /**
+     * @return all files that contain references to invoked keywords and used variables.
+     */
+    @NotNull Collection<PsiFile> getFilesFromInvokedKeywordsAndVariables();
 
-   /**
-    * Gets all the imported keyword files that are considered in scope for this file.  This
-    * includes python libraries and robot resource files.
-    *
-    * @return a collection of keyword files that this files knows about.
-    */
-   @NotNull
-   Collection<KeywordFile> getImportedFiles(boolean includeTransitive);
+    /**
+     * Gets all the imported keyword files that are considered in scope for this file.  This
+     * includes python libraries and robot resource files.
+     *
+     * @return a collection of keyword files that this files knows about.
+     */
+    @NotNull
+    Collection<KeywordFile> getImportedFiles(boolean includeTransitive);
 
-   @NotNull
-   Collection<DefinedVariable> getDefinedVariables();
+    /**
+     * Gets all the imported keyword files that are considered in scope for this file. The result consists of a pair of files. The first parameter is the
+     * parent this file is imported from (e.g. the file that contains the import statement) and the second parameter is the imported file itself.
+     *
+     * @param includeTransitive if files that are imported by the imported files should be included as well
+     * @return a collection of keyword files that this file knows about
+     */
+    @NotNull
+    Collection<KeywordFileWithDependentsWrapper> getImportedFilesWithDependents(boolean includeTransitive);
 
-   void importsChanged();
+    @NotNull
+    Collection<DefinedVariable> getDefinedVariables();
+
+    void importsChanged();
+
 }
