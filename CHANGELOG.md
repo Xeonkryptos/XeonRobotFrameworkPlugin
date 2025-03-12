@@ -2,7 +2,7 @@
 
 # HyperRobotFrameworkPlugin Changelog
 
-## [0.1.22]
+## [0.2.0]
 
 ### Added
 
