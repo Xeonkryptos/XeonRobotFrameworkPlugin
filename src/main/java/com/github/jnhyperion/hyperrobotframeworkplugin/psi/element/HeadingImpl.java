@@ -2,6 +2,7 @@ package com.github.jnhyperion.hyperrobotframeworkplugin.psi.element;
 
 import com.github.jnhyperion.hyperrobotframeworkplugin.ide.icons.RobotIcons;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.dto.ImportType;
+import com.github.jnhyperion.hyperrobotframeworkplugin.psi.dto.KeywordDto;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.ref.PythonResolver;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.ref.ResolverUtils;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.ref.RobotFileManager;
@@ -23,6 +24,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class HeadingImpl extends RobotPsiElementBase implements Heading {
 
@@ -47,42 +49,38 @@ public class HeadingImpl extends RobotPsiElementBase implements Heading {
 
     @Override
     public final boolean isSettings() {
-        return this.getPresentableText().startsWith("*** Setting");
+        return getPresentableText().startsWith("*** Setting");
     }
 
     private boolean containsVariables() {
-        return this.getPresentableText().startsWith("*** Variable");
+        return getPresentableText().startsWith("*** Variable");
     }
 
     @Override
     public final boolean containsTestCases() {
-        return this.getPresentableText().startsWith("*** Test Case");
+        return getPresentableText().startsWith("*** Test Case");
     }
 
     @Override
     public final boolean containsTasks() {
-        return this.getPresentableText().equals("*** Tasks ***");
+        return getPresentableText().equals("*** Tasks ***");
     }
 
     @Override
     public final boolean containsKeywordDefinitions() {
-        String text = this.getPresentableText();
+        String text = getPresentableText();
         return text.startsWith("*** Keyword") || text.startsWith("*** User Keyword");
     }
 
     @Override
     public void subtreeChanged() {
         super.subtreeChanged();
-        try {
-            if (isSettings()) {
-                PsiFile file = getContainingFile();
-                if (file instanceof RobotFile robotFile) {
-                    robotFile.reset();
-                    robotFile.importsChanged();
-                }
+        if (isSettings()) {
+            PsiFile file = getContainingFile();
+            if (file instanceof RobotFile robotFile) {
+                robotFile.reset();
+                robotFile.importsChanged();
             }
-        } catch (Throwable t) {
-            // ignored
         }
         this.importsChanged();
     }
@@ -140,15 +138,18 @@ public class HeadingImpl extends RobotPsiElementBase implements Heading {
         Collection<DefinedKeyword> results = this.definedKeywords;
         if (results == null) {
             try {
-                if (!this.containsKeywordDefinitions()) {
-                    results = Collections.emptySet();
+                if (containsKeywordDefinitions()) {
+                    results = PsiTreeUtil.getChildrenOfTypeAsList(this, KeywordDefinition.class).stream().map(keywordDefinition -> {
+                        Collection<DefinedParameter> arguments = PsiTreeUtil.getChildrenOfTypeAsList(keywordDefinition, BracketSetting.class)
+                                                                            .stream()
+                                                                            .filter(BracketSetting::isArguments)
+                                                                            .map(BracketSetting::getArguments)
+                                                                            .flatMap(Collection::stream)
+                                                                            .collect(Collectors.toCollection(LinkedHashSet::new));
+                        return new KeywordDto(keywordDefinition, keywordDefinition.getKeywordName(), arguments);
+                    }).collect(Collectors.toCollection(LinkedHashSet::new));
                 } else {
-                    results = new LinkedHashSet<>();
-                    for (PsiElement child : getChildren()) {
-                        if (child instanceof DefinedKeyword) {
-                            results.add((DefinedKeyword) child);
-                        }
-                    }
+                    results = Collections.emptySet();
                 }
             } catch (Throwable e) {
                 return Collections.emptySet();

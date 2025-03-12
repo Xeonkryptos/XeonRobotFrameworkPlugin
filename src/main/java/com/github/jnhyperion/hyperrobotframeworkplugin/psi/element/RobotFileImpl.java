@@ -191,4 +191,9 @@ public class RobotFileImpl extends PsiFileBase implements KeywordFile, RobotFile
         }
         return results;
     }
+
+    @Override
+    public String toString() {
+        return "Robot: " + getName();
+    }
 }

@@ -9,8 +9,9 @@ import org.jetbrains.annotations.Nullable;
 
 public class VariableManipulator extends AbstractElementManipulator<Variable> {
 
+    @Nullable
     @Override
-    public @Nullable Variable handleContentChange(@NotNull Variable argument, @NotNull TextRange textRange, String newContent) throws IncorrectOperationException {
+    public Variable handleContentChange(@NotNull Variable argument, @NotNull TextRange textRange, String newContent) throws IncorrectOperationException {
         return null;
     }
 }

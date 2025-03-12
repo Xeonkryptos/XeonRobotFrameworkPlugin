@@ -9,8 +9,10 @@ import org.jetbrains.annotations.Nullable;
 
 public class PositionalArgumentManipulator extends AbstractElementManipulator<PositionalArgument> {
 
+    @Nullable
     @Override
-    public @Nullable PositionalArgument handleContentChange(@NotNull PositionalArgument positionalArgument, @NotNull TextRange textRange, String newContent) throws IncorrectOperationException {
+    public PositionalArgument handleContentChange(@NotNull PositionalArgument positionalArgument, @NotNull TextRange textRange, String newContent) throws
+                                                                                                                                                   IncorrectOperationException {
         return null;
     }
 }

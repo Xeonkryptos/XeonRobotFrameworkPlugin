@@ -12,7 +12,7 @@
 
 ### Fixed
 
-- Missing run marker on *** Test cases *** section with existing test cases available
+- Parsing and handling of custom keywords in robot files with defined input \[Arguments]
 
 ### Fixed
 

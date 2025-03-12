@@ -1,5 +1,7 @@
 package com.github.jnhyperion.hyperrobotframeworkplugin.psi.element;
 
+import java.util.Collection;
+
 public interface BracketSetting extends RobotStatement {
 
    /**
@@ -8,6 +10,8 @@ public interface BracketSetting extends RobotStatement {
     * @return true if this is an argument element; false otherwise.
     */
    boolean isArguments();
+
+   Collection<DefinedParameter> getArguments();
 
    /**
     * Determines if the current element is a '[Teardown]' element.

@@ -9,8 +9,10 @@ import org.jetbrains.annotations.Nullable;
 
 public class ParameterIdManipulator extends AbstractElementManipulator<ParameterId> {
 
+    @Nullable
     @Override
-    public @Nullable ParameterId handleContentChange(@NotNull ParameterId parameterId, @NotNull TextRange textRange, String newContent) throws IncorrectOperationException {
+    public ParameterId handleContentChange(@NotNull ParameterId parameterId, @NotNull TextRange textRange, String newContent) throws
+                                                                                                                              IncorrectOperationException {
         return null;
     }
 }

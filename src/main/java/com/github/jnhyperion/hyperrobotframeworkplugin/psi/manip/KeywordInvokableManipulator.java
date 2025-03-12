@@ -9,9 +9,10 @@ import org.jetbrains.annotations.Nullable;
 
 public class KeywordInvokableManipulator extends AbstractElementManipulator<KeywordInvokable> {
 
+    @Nullable
     @Override
-    public @Nullable KeywordInvokable handleContentChange(@NotNull KeywordInvokable keywordInvokable, @NotNull TextRange textRange, String newContent) throws
-                                                                                                                                                       IncorrectOperationException {
+    public KeywordInvokable handleContentChange(@NotNull KeywordInvokable keywordInvokable, @NotNull TextRange textRange, String newContent) throws
+                                                                                                                                             IncorrectOperationException {
         return null;
     }
 }

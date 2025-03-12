@@ -9,9 +9,13 @@ import org.jetbrains.annotations.Nullable;
 
 public class RobotParser implements PsiParser {
 
+    private String lineSeparator;
+
     @NotNull
     @Override
     public ASTNode parse(@NotNull IElementType type, @NotNull PsiBuilder builder) {
+        lineSeparator = detectLineSeparator(builder.getOriginalText());
+
         PsiBuilder.Marker marker = builder.mark();
         while (!builder.eof()) {
             IElementType tokenType = builder.getTokenType();
@@ -25,7 +29,7 @@ public class RobotParser implements PsiParser {
         return builder.getTreeBuilt();
     }
 
-    private static void parseHeading(@NotNull PsiBuilder builder) {
+    private void parseHeading(@NotNull PsiBuilder builder) {
         IElementType iElementType = builder.getTokenType();
         if (RobotTokenTypes.HEADING == iElementType) {
             PsiBuilder.Marker headingMarker = null;
@@ -61,7 +65,7 @@ public class RobotParser implements PsiParser {
         }
     }
 
-    private static void parseKeywordDefinition(@NotNull PsiBuilder builder) {
+    private void parseKeywordDefinition(@NotNull PsiBuilder builder) {
         PsiBuilder.Marker keywordMarker = null;
         PsiBuilder.Marker keywordIdMarker = null;
         while (true) {
@@ -110,7 +114,7 @@ public class RobotParser implements PsiParser {
         }
     }
 
-    private static void parseWithArguments(@NotNull PsiBuilder builder, @NotNull IElementType markType) {
+    private void parseWithArguments(@NotNull PsiBuilder builder, @NotNull IElementType markType) {
         IElementType type = builder.getTokenType();
         PsiBuilder.Marker marker = builder.mark();
         PsiBuilder.Marker id = null;
@@ -121,6 +125,7 @@ public class RobotParser implements PsiParser {
         if (id != null) {
             id.done(RobotTokenTypes.VARIABLE_DEFINITION_ID);
         }
+        String relevantLine = null;
         while (!builder.eof()) {
             type = builder.getTokenType();
             if (RobotTokenTypes.PARAMETER == type) {
@@ -133,12 +138,20 @@ public class RobotParser implements PsiParser {
                     builder.rawLookup(-3) == RobotTokenTypes.WHITESPACE) {
                     break;
                 }
+
+                String tokenText = builder.getTokenText();
+                if (relevantLine != null && relevantLine.equals(tokenText)) {
+                    break;
+                }
+
                 int currentOffset = builder.getCurrentOffset();
                 String originalText = builder.getOriginalText().toString();
-                String[] lines = originalText.split(System.lineSeparator());
-                int lineIndex = getLineIndex(originalText, currentOffset);
+                String lineText = getLineText(originalText, currentOffset);
 
-                if (lines[lineIndex].stripLeading().startsWith("...")) {
+                if (lineText != null && lineText.stripLeading().startsWith("...")) {
+                    parseVariableDefinitionWithDefaults(builder);
+                } else if (lineText != null && tokenText != null && !lineText.stripLeading().startsWith(tokenText)) {
+                    relevantLine = tokenText;
                     parseVariableDefinitionWithDefaults(builder);
                 } else {
                     break;
@@ -150,7 +163,7 @@ public class RobotParser implements PsiParser {
         marker.done(markType);
     }
 
-    private static PsiBuilder.Marker parseKeywordStatement(@NotNull PsiBuilder builder, @NotNull IElementType rootType, boolean isGherkin) {
+    private PsiBuilder.Marker parseKeywordStatement(@NotNull PsiBuilder builder, @NotNull IElementType rootType, boolean isGherkin) {
         PsiBuilder.Marker marker = builder.mark();
         boolean keywordFound = false;
         boolean inline = false;
@@ -207,7 +220,7 @@ public class RobotParser implements PsiParser {
         return inline ? null : marker;
     }
 
-    private static void parseKeyword(@NotNull PsiBuilder builder) {
+    private void parseKeyword(@NotNull PsiBuilder builder) {
         int offset = 1;
         boolean hasVariable = false;
         IElementType nextTokenType;
@@ -247,30 +260,30 @@ public class RobotParser implements PsiParser {
         }
     }
 
-    private static boolean isNextToken(@NotNull PsiBuilder builder, IElementType type) {
+    private boolean isNextToken(@NotNull PsiBuilder builder, IElementType type) {
         return isNextToken(builder, 1, type);
     }
 
-    private static boolean isNextToken(@NotNull PsiBuilder builder, int nextTokenCount, IElementType type) {
+    private boolean isNextToken(@NotNull PsiBuilder builder, int nextTokenCount, IElementType type) {
         nextTokenCount = Math.max(1, nextTokenCount);
         boolean allowEof = type == RobotTokenTypes.WHITESPACE;
         IElementType next = builder.rawLookup(nextTokenCount);
         return next == type || allowEof && next == null;
     }
 
-    private static int getLineIndex(String text, int offset) {
-        String[] lines = text.split(System.lineSeparator());
+    private String getLineText(String originalText, int offset) {
         int currentLength = 0;
-        for (int i = 0; i < lines.length; i++) {
-            currentLength += lines[i].length() + System.lineSeparator().length();
+        String[] lines = originalText.split(lineSeparator);
+        for (String line : lines) {
+            currentLength += line.length() + lineSeparator.length();
             if (currentLength > offset) {
-                return i;
+                return line;
             }
         }
-        return -1;
+        return null;
     }
 
-    private static void parseSetting(@NotNull PsiBuilder builder) {
+    private void parseSetting(@NotNull PsiBuilder builder) {
         PsiBuilder.Marker settingsMarker = builder.mark();
         PsiBuilder.Marker id = null;
         if (builder.getTokenType() == RobotStubTokenTypes.VARIABLE_DEFINITION) {
@@ -299,7 +312,7 @@ public class RobotParser implements PsiParser {
         settingsMarker.done(RobotTokenTypes.SETTING);
     }
 
-    private static void parseVariableDefinitionWithDefaults(@NotNull PsiBuilder builder) {
+    private void parseVariableDefinitionWithDefaults(@NotNull PsiBuilder builder) {
         PsiBuilder.Marker argMarker = builder.mark();
         PsiBuilder.Marker definitionMarker = builder.mark();
         PsiBuilder.Marker definitionIdMarker = builder.mark();
@@ -324,7 +337,7 @@ public class RobotParser implements PsiParser {
         argMarker.done(RobotStubTokenTypes.VARIABLE_DEFINITION);
     }
 
-    private static void parseWith(@NotNull PsiBuilder builder, @NotNull IElementType type) {
+    private void parseWith(@NotNull PsiBuilder builder, @NotNull IElementType type) {
         PsiBuilder.Marker arg = builder.mark();
         IElementType current = builder.getTokenType();
         PsiBuilder.Marker parameterId = null;
@@ -357,15 +370,29 @@ public class RobotParser implements PsiParser {
         arg.done(type);
     }
 
-    private static void parseSimple(@NotNull PsiBuilder builder, @NotNull IElementType type) {
+    private void parseSimple(@NotNull PsiBuilder builder, @NotNull IElementType type) {
         PsiBuilder.Marker marker = builder.mark();
         builder.advanceLexer();
         marker.done(type);
     }
 
-    private static void done(@Nullable PsiBuilder.Marker marker, @NotNull IElementType type) {
+    private void done(@Nullable PsiBuilder.Marker marker, @NotNull IElementType type) {
         if (marker != null) {
             marker.done(type);
         }
+    }
+
+    private String detectLineSeparator(@NotNull CharSequence text) {
+        int length = text.length();
+        for (int i = 0; i < length; i++) {
+            char c = text.charAt(i);
+            if (c == '\n') {
+                return i > 0 && text.charAt(i - 1) == '\r' ? "\r\n" : "\n";
+            } else if (c == '\r') {
+                return "\r";
+            }
+        }
+        // Default to platform line separator if none detected
+        return System.lineSeparator();
     }
 }

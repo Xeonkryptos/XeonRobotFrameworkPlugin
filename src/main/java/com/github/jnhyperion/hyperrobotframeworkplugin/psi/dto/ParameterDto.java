@@ -32,7 +32,7 @@ public class ParameterDto implements DefinedParameter {
     @NotNull
     @Override
     public final PsiElement reference() {
-        return this.reference;
+        return reference;
     }
 
     @Override
