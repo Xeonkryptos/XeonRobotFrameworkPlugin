@@ -72,6 +72,9 @@ public class KeywordDto implements DefinedKeyword {
     }
 
     private static Collection<DefinedParameter> convertPyParameters(Collection<PyParameter> parameters) {
+        if (parameters == null || parameters.isEmpty()) {
+            return Collections.emptyList();
+        }
         return parameters.stream()
                          .filter(parameter -> !parameter.isSelf())
                          .map(PyParameter::getAsNamed)

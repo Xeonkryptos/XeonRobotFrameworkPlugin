@@ -42,25 +42,17 @@ public class RobotPythonClass extends RobotPythonWrapper implements KeywordFile 
     @Override
     public final synchronized Collection<DefinedKeyword> getDefinedKeywords() {
         Collection<DefinedKeyword> keywords;
-        try {
-            Map<String, Collection<DefinedKeyword>> cachedKeywords = ProjectFileCache.getCachedKeywords(this.project);
-            keywords = cachedKeywords.get(this.uniqueIdentifier);
-            if (keywords == null) {
-                HashSet<DefinedKeyword> newKeywords = new HashSet<>();
-                if (this.importType.equals(ImportType.LIBRARY)) {
-                    try {
-                        addDefinedKeywords(this.pythonClass, this.library, newKeywords);
-                    } catch (Throwable e) {
-                        newKeywords.clear();
-                    }
-                }
-                if (!newKeywords.isEmpty()) {
-                    cachedKeywords.put(this.uniqueIdentifier, newKeywords);
-                }
-                return newKeywords;
+        Map<String, Collection<DefinedKeyword>> cachedKeywords = ProjectFileCache.getCachedKeywords(project);
+        keywords = cachedKeywords.get(uniqueIdentifier);
+        if (keywords == null) {
+            Set<DefinedKeyword> newKeywords = new HashSet<>();
+            if (importType == ImportType.LIBRARY) {
+                addDefinedKeywords(pythonClass, library, newKeywords);
             }
-        } catch (Throwable e) {
-            return new HashSet<>();
+            if (!newKeywords.isEmpty()) {
+                cachedKeywords.put(uniqueIdentifier, newKeywords);
+            }
+            return newKeywords;
         }
         return keywords;
     }
@@ -69,25 +61,21 @@ public class RobotPythonClass extends RobotPythonWrapper implements KeywordFile 
     @Override
     public final synchronized Collection<DefinedVariable> getDefinedVariables() {
         Collection<DefinedVariable> variables;
-        try {
-            Map<String, Collection<DefinedVariable>> cachedVariables = ProjectFileCache.getCachedVariables(this.project);
-            variables = cachedVariables.get(this.uniqueIdentifier);
-            if (variables == null) {
-                Set<DefinedVariable> newVariables = new HashSet<>();
-                if (this.importType.equals(ImportType.VARIABLES)) {
-                    try {
-                        addDefinedVariables(this.pythonClass, newVariables);
-                    } catch (Throwable t) {
-                        newVariables.clear();
-                    }
+        Map<String, Collection<DefinedVariable>> cachedVariables = ProjectFileCache.getCachedVariables(this.project);
+        variables = cachedVariables.get(this.uniqueIdentifier);
+        if (variables == null) {
+            Set<DefinedVariable> newVariables = new HashSet<>();
+            if (this.importType.equals(ImportType.VARIABLES)) {
+                try {
+                    addDefinedVariables(this.pythonClass, newVariables);
+                } catch (Throwable t) {
+                    newVariables.clear();
                 }
-                if (!newVariables.isEmpty()) {
-                    cachedVariables.put(this.uniqueIdentifier, newVariables);
-                }
-                return newVariables;
             }
-        } catch (Throwable t) {
-            return new HashSet<>();
+            if (!newVariables.isEmpty()) {
+                cachedVariables.put(this.uniqueIdentifier, newVariables);
+            }
+            return newVariables;
         }
         return variables;
     }
@@ -98,9 +86,8 @@ public class RobotPythonClass extends RobotPythonWrapper implements KeywordFile 
         return this.importType;
     }
 
-    @NotNull
     @Override
-    public final Collection<KeywordFile> getImportedFiles(boolean includeTransitive) {
+    public final @NotNull Collection<KeywordFile> getImportedFiles(boolean includeTransitive) {
         return Collections.emptyList();
     }
 

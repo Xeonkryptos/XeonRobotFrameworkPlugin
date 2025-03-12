@@ -300,8 +300,8 @@ public class HeadingImpl extends RobotPsiElementBase implements Heading {
                         if (positionalArgument != null) {
                             if (importElement.isResource()) {
                                 PsiElement resolution = resolveImport(positionalArgument);
-                                if (resolution instanceof KeywordFile) {
-                                    files.add((KeywordFile) resolution);
+                                if (resolution instanceof KeywordFile keywordFile) {
+                                    files.add(keywordFile);
                                 }
                             } else if (importElement.isLibrary() || importElement.isVariables()) {
                                 PsiElement resolved = resolveImport(positionalArgument);

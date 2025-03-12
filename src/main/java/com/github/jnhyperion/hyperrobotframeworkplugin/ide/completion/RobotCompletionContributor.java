@@ -10,8 +10,6 @@ import com.github.jnhyperion.hyperrobotframeworkplugin.psi.RobotStubTokenTypes;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.RobotTokenTypes;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.dto.ImportType;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.dto.KeywordDto;
-import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.Parameter;
-import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.PositionalArgument;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.DefinedKeyword;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.DefinedParameter;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.DefinedVariable;
@@ -22,7 +20,9 @@ import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.KeywordDefini
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.KeywordFile;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.KeywordStatement;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.LookupElementMarker;
+import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.Parameter;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.ParameterId;
+import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.PositionalArgument;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.RobotFile;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.RobotStatement;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.ref.RobotFileManager;

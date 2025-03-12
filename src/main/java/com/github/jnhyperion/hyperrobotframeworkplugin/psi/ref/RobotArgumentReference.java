@@ -27,22 +27,21 @@ public class RobotArgumentReference extends PsiPolyVariantReferenceBase<Position
 
         PositionalArgument positionalArgument = getElement();
         PsiElement parent = positionalArgument.getParent();
-        if (positionalArgument.getContainingFile().isValid()) {
-            if (parent instanceof Import importElement) {
-                PsiElement[] children = parent.getChildren();
-                if (children.length > 0 && children[0] == positionalArgument) {
-                    if (importElement.isResource()) {
-                        result = RobotFileManager.findElement(positionalArgument.getPresentableText(), positionalArgument.getProject(), positionalArgument);
-                    } else if (importElement.isLibrary() || importElement.isVariables()) {
-                        result = RobotFileManager.findElementInContext(positionalArgument.getPresentableText(), positionalArgument.getProject(),
-                                                                       positionalArgument);
-                    }
+        if (parent instanceof Import importElement) {
+            PsiElement[] children = parent.getChildren();
+            if (children.length > 0 && children[0] == positionalArgument) {
+                if (importElement.isResource()) {
+                    result = RobotFileManager.findElement(positionalArgument.getPresentableText(), positionalArgument.getProject(), positionalArgument);
+                } else if (importElement.isLibrary() || importElement.isVariables()) {
+                    result = RobotFileManager.findElementInContext(positionalArgument.getPresentableText(),
+                                                                   positionalArgument.getProject(),
+                                                                   positionalArgument);
+                }
 
-                    if (result == null) {
-                        ResolveResult[] resolveResults = multiResolve(false);
-                        if (resolveResults.length == 1) {
-                            result = resolveResults[0].getElement();
-                        }
+                if (result == null) {
+                    ResolveResult[] resolveResults = multiResolve(false);
+                    if (resolveResults.length == 1) {
+                        result = resolveResults[0].getElement();
                     }
                 }
             }
