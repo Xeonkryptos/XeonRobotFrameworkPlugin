@@ -14,12 +14,10 @@ import com.intellij.psi.search.FilenameIndex;
 import com.intellij.psi.search.GlobalSearchScope;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -152,16 +150,29 @@ public class RobotFileImpl extends PsiFileBase implements KeywordFile, RobotFile
                 collectTransitiveKeywordFilesWithDependencyTracking(results, this, keywordFile, includeTransitive);
             }
         }
-        Map<KeywordFile, KeywordFile> childParentIndex = results.stream().collect(Collectors.toMap(wrapper -> wrapper.keywordFile, wrapper -> wrapper.parent));
+        Map<KeywordFile, Set<KeywordFile>> childParentIndex = results.stream()
+                                                                     .collect(Collectors.groupingBy(wrapper -> wrapper.keywordFile,
+                                                                                                    Collectors.mapping(wrapper -> wrapper.parent,
+                                                                                                                       Collectors.toCollection(LinkedHashSet::new))));
         return results.stream().map(KeywordFileWithParentWrapper::keywordFile).map(keywordFile -> {
-            KeywordFile parent = childParentIndex.get(keywordFile);
-            List<KeywordFile> parents = new ArrayList<>();
-            while (parent != null) {
-                parents.add(parent);
-                parent = childParentIndex.get(parent);
+            Set<KeywordFile> detectedParents = childParentIndex.get(keywordFile);
+            Set<KeywordFile> parents = new LinkedHashSet<>();
+            for (KeywordFile detectedParent : detectedParents) {
+                collectCompleteImportParentTree(detectedParent, childParentIndex, parents);
             }
             return new KeywordFileWithDependentsWrapper(keywordFile, parents);
         }).collect(Collectors.toCollection(LinkedHashSet::new));
+    }
+
+    private void collectCompleteImportParentTree(KeywordFile parent, Map<KeywordFile, Set<KeywordFile>> childParentsIndex, Collection<KeywordFile> parents) {
+        if (parents.add(parent)) {
+            Set<KeywordFile> foundParents = childParentsIndex.get(parent);
+            if (foundParents != null) {
+                for (KeywordFile foundParent : foundParents) {
+                    collectCompleteImportParentTree(foundParent, childParentsIndex, parents);
+                }
+            }
+        }
     }
 
     @NotNull

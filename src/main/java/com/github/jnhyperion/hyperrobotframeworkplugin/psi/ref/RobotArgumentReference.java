@@ -8,8 +8,6 @@ import com.intellij.psi.PsiElementResolveResult;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiPolyVariantReferenceBase;
 import com.intellij.psi.ResolveResult;
-import com.intellij.psi.util.CachedValueProvider;
-import com.intellij.psi.util.CachedValuesManager;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -30,27 +28,22 @@ public class RobotArgumentReference extends PsiPolyVariantReferenceBase<Position
         if (parent instanceof Import importElement) {
             PsiElement[] children = parent.getChildren();
             if (children.length > 0 && children[0] == positionalArgument) {
-                return CachedValuesManager.getCachedValue(positionalArgument, () -> {
-                    PsiElement result = null;
-                    if (importElement.isResource()) {
-                        result = RobotFileManager.findElement(positionalArgument.getPresentableText(), positionalArgument.getProject(), positionalArgument);
-                    } else if (importElement.isLibrary() || importElement.isVariables()) {
-                        result = RobotFileManager.findElementInContext(positionalArgument.getPresentableText(),
-                                                                       positionalArgument.getProject(),
-                                                                       positionalArgument);
-                    }
+                PsiElement result = null;
+                if (importElement.isResource()) {
+                    result = RobotFileManager.findElement(positionalArgument.getPresentableText(), positionalArgument.getProject(), positionalArgument);
+                } else if (importElement.isLibrary() || importElement.isVariables()) {
+                    result = RobotFileManager.findElementInContext(positionalArgument.getPresentableText(),
+                                                                   positionalArgument.getProject(),
+                                                                   positionalArgument);
+                }
 
-                    if (result == null) {
-                        ResolveResult[] resolveResults = multiResolve(false);
-                        if (resolveResults.length == 1) {
-                            result = resolveResults[0].getElement();
-                        }
+                if (result == null) {
+                    ResolveResult[] resolveResults = multiResolve(false);
+                    if (resolveResults.length == 1) {
+                        result = resolveResults[0].getElement();
                     }
-                    if (result != null) {
-                        return CachedValueProvider.Result.create(result, result, positionalArgument, importElement);
-                    }
-                    return null;
-                });
+                }
+                return result;
             }
         }
 
