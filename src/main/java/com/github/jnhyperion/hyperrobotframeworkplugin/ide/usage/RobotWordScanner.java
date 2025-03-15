@@ -13,7 +13,7 @@ public class RobotWordScanner extends DefaultWordsScanner {
                                                                 RobotTokenTypes.PARAMETER,
                                                                 RobotStubTokenTypes.VARIABLE_DEFINITION);
     private static final TokenSet COMMENTS = TokenSet.create(RobotTokenTypes.COMMENT);
-    private static final TokenSet LITERALS = TokenSet.create(RobotTokenTypes.ARGUMENT);
+    private static final TokenSet LITERALS = TokenSet.create(RobotStubTokenTypes.ARGUMENT);
 
     public RobotWordScanner() {
         super(new RobotLexer(), IDENTIFIERS, COMMENTS, LITERALS);

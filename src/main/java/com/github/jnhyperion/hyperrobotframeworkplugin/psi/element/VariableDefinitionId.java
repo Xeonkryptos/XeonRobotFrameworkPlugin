@@ -1,4 +1,6 @@
 package com.github.jnhyperion.hyperrobotframeworkplugin.psi.element;
 
-public interface VariableDefinitionId extends RobotStatement {
+import com.intellij.psi.PsiNamedElement;
+
+public interface VariableDefinitionId extends RobotStatement, PsiNamedElement {
 }

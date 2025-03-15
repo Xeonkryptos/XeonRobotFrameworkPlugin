@@ -12,6 +12,8 @@ import java.util.List;
 
 public interface KeywordDefinition extends RobotStatement, PsiNamedElement, PsiNameIdentifierOwner, NavigationItem, StubBasedPsiElement<KeywordDefinitionStub> {
 
+   Collection<DefinedParameter> getParameters();
+
    @NotNull
    List<KeywordInvokable> getInvokedKeywords();
 

@@ -1,5 +1,6 @@
 package com.github.jnhyperion.hyperrobotframeworkplugin.ide.parameterinfo;
 
+import com.github.jnhyperion.hyperrobotframeworkplugin.psi.RobotStubTokenTypes;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.RobotTokenTypes;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.KeywordInvokable;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.KeywordStatement;
@@ -18,7 +19,6 @@ import com.intellij.psi.PsiReference;
 import com.intellij.psi.PsiWhiteSpace;
 import com.intellij.psi.SyntaxTraverser;
 import com.intellij.util.ArrayUtilRt;
-import com.jetbrains.python.psi.PyFunction;
 import one.util.streamex.MoreCollectors;
 import one.util.streamex.StreamEx;
 import org.jetbrains.annotations.NotNull;
@@ -29,7 +29,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class RobotParameterInfoHandler implements ParameterInfoHandler<KeywordStatement, PyFunction> {
+public class RobotParameterInfoHandler implements ParameterInfoHandler<KeywordStatement, PsiElement> {
 
     @Nullable
     @Override
@@ -37,6 +37,17 @@ public class RobotParameterInfoHandler implements ParameterInfoHandler<KeywordSt
         PsiFile psiFile = context.getFile();
         int offset = context.getOffset();
         KeywordStatement keywordStatement = ParameterInfoUtils.findParentOfType(psiFile, offset, KeywordStatement.class);
+        if (keywordStatement == null) {
+            PsiElement element = psiFile.findElementAt(offset);
+            if (element instanceof PsiWhiteSpace) {
+                do {
+                    element = element.getPrevSibling();
+                } while (element instanceof PsiWhiteSpace);
+            }
+            if (element instanceof KeywordStatement found) {
+                keywordStatement = found;
+            }
+        }
         if (keywordStatement != null) {
             KeywordInvokable invokable = keywordStatement.getInvokable();
             if (invokable == null) {
@@ -46,8 +57,8 @@ public class RobotParameterInfoHandler implements ParameterInfoHandler<KeywordSt
             if (reference == null) {
                 return null;
             }
-            PyFunction pyFunction = (PyFunction) reference.resolve();
-            context.setItemsToShow(new Object[] { pyFunction });
+            PsiElement resolvedElement = reference.resolve();
+            context.setItemsToShow(new Object[] { resolvedElement });
         }
         return keywordStatement;
     }
@@ -69,11 +80,17 @@ public class RobotParameterInfoHandler implements ParameterInfoHandler<KeywordSt
     public void updateParameterInfo(@NotNull KeywordStatement keywordStatement, @NotNull UpdateParameterInfoContext context) {
         int offset = context.getEditor().getCaretModel().getOffset();
         if (!keywordStatement.getTextRange().contains(offset)) {
-            context.removeHint();
-            return;
+            PsiElement element = context.getFile().findElementAt(offset);
+            if (element instanceof PsiWhiteSpace) {
+                do {
+                    element = element.getPrevSibling();
+                } while (element instanceof PsiWhiteSpace);
+            }
+            if (element != keywordStatement) {
+                context.removeHint();
+                return;
+            }
         }
-
-        context.getObjectsToView();
 
         // context.getOffset() isn't always the caret position, so we need to adjust it
         PsiFile psiFile = context.getFile();
@@ -88,12 +105,15 @@ public class RobotParameterInfoHandler implements ParameterInfoHandler<KeywordSt
         }
 
         SyntaxTraverser<PsiElement> syntaxTraverser = SyntaxTraverser.psiTraverser(keywordStatement).expandAndSkip(Conditions.is(keywordStatement));
-        int parameterIndex = ParameterInfoHandlerUtil.getCurrentParameterIndex(syntaxTraverser, offset, RobotTokenTypes.PARAMETER, RobotTokenTypes.ARGUMENT);
+        int parameterIndex = ParameterInfoHandlerUtil.getCurrentParameterIndex(syntaxTraverser,
+                                                                               offset,
+                                                                               RobotTokenTypes.PARAMETER,
+                                                                               RobotStubTokenTypes.ARGUMENT);
         context.setCurrentParameter(parameterIndex);
     }
 
     @Override
-    public void updateUI(PyFunction callingFunction, @NotNull ParameterInfoUIContext context) {
+    public void updateUI(PsiElement callingFunction, @NotNull ParameterInfoUIContext context) {
         final int currentParamIndex = context.getCurrentParameterIndex();
         if (currentParamIndex == -1) {
             return;

@@ -21,6 +21,9 @@ public class RobotVariableReference extends PsiReferenceBase<Variable> {
         String variableName = variable.getPresentableText();
         PsiElement parentElement = variable.getParent();
 
+        if (variable.isEmpty()) { // e.g. ${}, thus empty representation of a variable. There can be no reference.
+            return null;
+        }
         PsiElement resolvedElement = ResolverUtils.findVariableInKeyword(
             variableName,
             parentElement,

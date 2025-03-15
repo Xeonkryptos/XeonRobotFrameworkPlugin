@@ -90,7 +90,7 @@ public class RobotParserDefinition implements ParserDefinition {
          return new ParameterImpl(node);
       } else if (node.getElementType() == RobotTokenTypes.PARAMETER_ID) {
          return new ParameterIdImpl(node);
-      } else if (node.getElementType() == RobotTokenTypes.ARGUMENT) {
+      } else if (node.getElementType() == RobotStubTokenTypes.ARGUMENT) {
          return new PositionalArgumentImpl(node);
       } else if (node.getElementType() == RobotTokenTypes.VARIABLE) {
          return new VariableImpl(node);

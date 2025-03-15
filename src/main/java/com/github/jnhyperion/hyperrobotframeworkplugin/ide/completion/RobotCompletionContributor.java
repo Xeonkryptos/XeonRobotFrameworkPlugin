@@ -97,7 +97,7 @@ public class RobotCompletionContributor extends CompletionContributor {
         extend(CompletionType.BASIC,
                PlatformPatterns.psiElement()
                                .andNot(PlatformPatterns.psiComment())
-                               .andNot(PlatformPatterns.psiElement(RobotTokenTypes.ARGUMENT))
+                               .andNot(PlatformPatterns.psiElement(RobotStubTokenTypes.ARGUMENT))
                                .andNot(PlatformPatterns.psiElement(RobotTokenTypes.PARAMETER))
                                .inFile(PlatformPatterns.psiElement(RobotFile.class)),
                new CompletionProvider<>() {
@@ -116,7 +116,7 @@ public class RobotCompletionContributor extends CompletionContributor {
         extend(CompletionType.BASIC,
                PlatformPatterns.psiElement()
                                .andNot(PlatformPatterns.psiComment())
-                               .andNot(PlatformPatterns.psiElement(RobotTokenTypes.ARGUMENT))
+                               .andNot(PlatformPatterns.psiElement(RobotStubTokenTypes.ARGUMENT))
                                .inFile(PlatformPatterns.psiElement(RobotFile.class)),
                new CompletionProvider<>() {
                    @Override
@@ -134,7 +134,7 @@ public class RobotCompletionContributor extends CompletionContributor {
         extend(CompletionType.BASIC,
                PlatformPatterns.psiElement()
                                .andNot(PlatformPatterns.psiComment())
-                               .and(PlatformPatterns.psiElement(RobotTokenTypes.ARGUMENT)
+                               .and(PlatformPatterns.psiElement(RobotStubTokenTypes.ARGUMENT)
                                                     .withSuperParent(2, PlatformPatterns.psiElement(RobotTokenTypes.IMPORT)))
                                .inFile(PlatformPatterns.psiElement(RobotFile.class)),
                new CompletionProvider<>() {
@@ -162,7 +162,7 @@ public class RobotCompletionContributor extends CompletionContributor {
         extend(CompletionType.BASIC,
                PlatformPatterns.psiElement()
                                .andNot(PlatformPatterns.psiComment())
-                               .andNot(PlatformPatterns.psiElement(RobotTokenTypes.ARGUMENT))
+                               .andNot(PlatformPatterns.psiElement(RobotStubTokenTypes.ARGUMENT))
                                .andNot(PlatformPatterns.psiElement(RobotTokenTypes.PARAMETER))
                                .inFile(PlatformPatterns.psiElement(RobotFile.class)),
                new CompletionProvider<>() {
@@ -260,7 +260,7 @@ public class RobotCompletionContributor extends CompletionContributor {
         // Provide completions in context of variables or arguments
         extend(CompletionType.BASIC,
                PlatformPatterns.psiElement()
-                               .andOr(PlatformPatterns.psiElement(RobotTokenTypes.VARIABLE), PlatformPatterns.psiElement(RobotTokenTypes.ARGUMENT))
+                               .andOr(PlatformPatterns.psiElement(RobotTokenTypes.VARIABLE), PlatformPatterns.psiElement(RobotStubTokenTypes.ARGUMENT))
                                .inFile(PlatformPatterns.psiElement(RobotFile.class)),
                new CompletionProvider<>() {
                    @Override
@@ -292,7 +292,7 @@ public class RobotCompletionContributor extends CompletionContributor {
     }
 
     private static PsiElementPattern.Capture<PsiElement> withArgumentInKeywordStatement() {
-        return PlatformPatterns.psiElement(RobotTokenTypes.ARGUMENT).withAncestor(3, PlatformPatterns.psiElement(RobotStubTokenTypes.KEYWORD_STATEMENT));
+        return PlatformPatterns.psiElement(RobotStubTokenTypes.ARGUMENT).withAncestor(3, PlatformPatterns.psiElement(RobotStubTokenTypes.KEYWORD_STATEMENT));
     }
 
     private static boolean isArgument(PsiElement current) {

@@ -29,7 +29,7 @@ public class RobotHighlighter extends SyntaxHighlighterBase {
                                                                                               DefaultLanguageHighlighterColors.FUNCTION_DECLARATION);
     public static final TextAttributesKey PARAMETER = TextAttributesKey.createTextAttributesKey(RobotTokenTypes.PARAMETER.toString(),
                                                                                                 DefaultLanguageHighlighterColors.PARAMETER);
-    public static final TextAttributesKey ARGUMENT = TextAttributesKey.createTextAttributesKey(RobotTokenTypes.ARGUMENT.toString(),
+    public static final TextAttributesKey ARGUMENT = TextAttributesKey.createTextAttributesKey(RobotStubTokenTypes.ARGUMENT.toString(),
                                                                                                DefaultLanguageHighlighterColors.STATIC_FIELD);
     public static final TextAttributesKey VARIABLE_DEFINITION = TextAttributesKey.createTextAttributesKey(RobotStubTokenTypes.VARIABLE_DEFINITION.toString(),
                                                                                                           DefaultLanguageHighlighterColors.MARKUP_ATTRIBUTE);
@@ -54,7 +54,7 @@ public class RobotHighlighter extends SyntaxHighlighterBase {
         keys1.put(RobotTokenTypes.HEADING, HEADING);
         keys1.put(RobotTokenTypes.COMMENT, COMMENT);
         keys1.put(RobotTokenTypes.PARAMETER, PARAMETER);
-        keys1.put(RobotTokenTypes.ARGUMENT, ARGUMENT);
+        keys1.put(RobotStubTokenTypes.ARGUMENT, ARGUMENT);
         keys1.put(RobotTokenTypes.ERROR, ERROR);
         keys1.put(RobotTokenTypes.GHERKIN, GHERKIN);
         keys1.put(RobotTokenTypes.SYNTAX_MARKER, SYNTAX_MARKER);

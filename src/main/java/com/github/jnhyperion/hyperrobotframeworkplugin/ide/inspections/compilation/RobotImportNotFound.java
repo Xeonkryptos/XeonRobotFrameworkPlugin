@@ -2,7 +2,7 @@ package com.github.jnhyperion.hyperrobotframeworkplugin.ide.inspections.compilat
 
 import com.github.jnhyperion.hyperrobotframeworkplugin.RobotBundle;
 import com.github.jnhyperion.hyperrobotframeworkplugin.ide.inspections.SimpleRobotInspection;
-import com.github.jnhyperion.hyperrobotframeworkplugin.psi.RobotTokenTypes;
+import com.github.jnhyperion.hyperrobotframeworkplugin.psi.RobotStubTokenTypes;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.Import;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiReference;
@@ -18,7 +18,7 @@ public class RobotImportNotFound extends SimpleRobotInspection {
 
     @Override
     public final boolean skip(PsiElement element) {
-        if (element.getNode().getElementType() != RobotTokenTypes.ARGUMENT) {
+        if (element.getNode().getElementType() != RobotStubTokenTypes.ARGUMENT) {
             return true;
         } else {
             PsiElement parentElement = element.getParent();

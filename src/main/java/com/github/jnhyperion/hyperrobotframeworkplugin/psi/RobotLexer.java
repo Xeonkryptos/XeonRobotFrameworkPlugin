@@ -267,7 +267,7 @@ public class RobotLexer extends LexerBase {
                         if (isAssignment(this.position + 1)) {
                             this.currentToken = RobotTokenTypes.PARAMETER;
                         } else {
-                            this.currentToken = RobotTokenTypes.ARGUMENT;
+                            this.currentToken = RobotStubTokenTypes.ARGUMENT;
                         }
                         this.level.push(KEYWORD);
                     }
@@ -306,7 +306,7 @@ public class RobotLexer extends LexerBase {
                 this.currentToken = RobotTokenTypes.WHITESPACE;
             } else {
                 goToNextNewLineOrSuperSpace();
-                this.currentToken = RobotTokenTypes.ARGUMENT;
+                this.currentToken = RobotStubTokenTypes.ARGUMENT;
             }
         } else if (state == VARIABLE_DEFINITION && isVariableEnd(this.position - 1)) {
             goToNextNewLineOrSuperSpace();
@@ -348,7 +348,7 @@ public class RobotLexer extends LexerBase {
                 if (isAssignment(this.position)) {
                     this.currentToken = RobotTokenTypes.PARAMETER;
                 } else {
-                    this.currentToken = RobotTokenTypes.ARGUMENT;
+                    this.currentToken = RobotStubTokenTypes.ARGUMENT;
                 }
             } else {
                 this.currentToken = RobotStubTokenTypes.VARIABLE_DEFINITION;

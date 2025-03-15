@@ -27,16 +27,15 @@ public class RobotVariableNotFound extends SimpleRobotInspection {
 
     @Override
     public final boolean skip(PsiElement element) {
-        if (!(element instanceof Variable)) {
+        if (!(element instanceof Variable variable) || variable.isEmpty()) {
             return true;
         }
-
         PsiReference reference = element.getReference();
         if (reference != null && reference.resolve() != null) {
             return true;
         }
 
-        if (((Variable) element).isNested()) {
+        if (variable.isNested()) {
             return true;
         }
 

@@ -12,7 +12,7 @@ import java.util.Collection;
 
 public class KeywordStatementNameIndex extends StringStubIndexExtension<KeywordStatement> {
 
-    public static final StubIndexKey<String, KeywordStatement> KEYWORD_STATEMENT_NAME = StubIndexKey.createIndexKey("robot.keywordStatement");
+    private static final StubIndexKey<String, KeywordStatement> KEYWORD_STATEMENT_NAME = StubIndexKey.createIndexKey("robot.keywordStatement");
 
     private static final KeywordStatementNameIndex ourInstance = new KeywordStatementNameIndex();
 

@@ -65,11 +65,15 @@ public class VariableDefinitionImpl extends RobotStubPsiElementBase<VariableDefi
         }
         String myText = getPresentableText();
         Pattern pattern = this.pattern;
-        if (this.pattern == null) {
+        if (this.pattern == null && !isEmpty()) {
             pattern = Pattern.compile(PatternUtil.getVariablePattern(myText), Pattern.CASE_INSENSITIVE);
             this.pattern = pattern;
         }
-        return pattern.matcher(text).matches();
+        return pattern != null && pattern.matcher(text).matches();
+    }
+
+    private boolean isEmpty() {
+        return getPresentableText().length() <= 3;
     }
 
     @Override
@@ -109,10 +113,5 @@ public class VariableDefinitionImpl extends RobotStubPsiElementBase<VariableDefi
             return PsiTreeUtil.findChildOfType(stub.getPsi(), VariableDefinitionId.class);
         }
         return PsiTreeUtil.findChildOfType(this, VariableDefinitionId.class);
-    }
-
-    @Override
-    public String toString() {
-        return getName();
     }
 }

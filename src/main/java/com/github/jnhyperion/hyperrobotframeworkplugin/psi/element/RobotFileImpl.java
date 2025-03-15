@@ -69,8 +69,8 @@ public class RobotFileImpl extends PsiFileBase implements KeywordFile, RobotFile
                                                                   GlobalSearchScope.getScopeRestrictedByFileTypes(GlobalSearchScope.projectScope(this.getProject()),
                                                                                                                   RobotFeatureFileType.getInstance()));
                 for (PsiFile psiFile : psiFiles) {
-                    if (psiFile instanceof RobotFile) {
-                        results.addAll(((RobotFile) psiFile).getDefinedVariables());
+                    if (psiFile instanceof RobotFile robotFile) {
+                        results.addAll(robotFile.getDefinedVariables());
                     }
                 }
             } catch (Throwable t) {

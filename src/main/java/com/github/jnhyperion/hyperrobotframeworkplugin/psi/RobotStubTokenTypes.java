@@ -2,6 +2,7 @@ package com.github.jnhyperion.hyperrobotframeworkplugin.psi;
 
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.stub.element.KeywordDefinitionStubElement;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.stub.element.KeywordStatementStubElement;
+import com.github.jnhyperion.hyperrobotframeworkplugin.psi.stub.element.PositionalArgumentStubElement;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.stub.element.VariableDefinitionStubElement;
 
 public interface RobotStubTokenTypes {
@@ -11,4 +12,5 @@ public interface RobotStubTokenTypes {
     KeywordDefinitionStubElement KEYWORD_DEFINITION = new KeywordDefinitionStubElement("KEYWORD_DEFINITION");
     VariableDefinitionStubElement VARIABLE_DEFINITION = new VariableDefinitionStubElement("VARIABLE_DEFINITION");
     KeywordStatementStubElement KEYWORD_STATEMENT = new KeywordStatementStubElement("KEYWORD_STATEMENT");
+    PositionalArgumentStubElement ARGUMENT = new PositionalArgumentStubElement("ARGUMENT");
 }

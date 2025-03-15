@@ -28,7 +28,7 @@ public class ResolverUtils {
     private ResolverUtils() {
     }
 
-    public static PsiReferenceResultWithImportPath findKeywordPyFunction(@Nullable String keyword, @Nullable PsiFile psiFile) {
+    public static PsiReferenceResultWithImportPath findKeywordReference(@Nullable String keyword, @Nullable PsiFile psiFile) {
         if (keyword == null || !(psiFile instanceof RobotFile robotFile)) {
             return null;
         }
@@ -183,7 +183,7 @@ public class ResolverUtils {
 
     public static PsiReferenceResultWithImportPath findKeywordParameterElement(String parameterName, KeywordStatement keywordStatement) {
         String keywordName = keywordStatement.getName();
-        PsiReferenceResultWithImportPath result = findKeywordPyFunction(keywordName, keywordStatement.getContainingFile());
+        PsiReferenceResultWithImportPath result = findKeywordReference(keywordName, keywordStatement.getContainingFile());
         if (result != null && result.reference() instanceof PyFunction pyFunction) {
             PyNamedParameter parameterByName = pyFunction.getParameterList().findParameterByName(parameterName);
             if (parameterByName != null) {

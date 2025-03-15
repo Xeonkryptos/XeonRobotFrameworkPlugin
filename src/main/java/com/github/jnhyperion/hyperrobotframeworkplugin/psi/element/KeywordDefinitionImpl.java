@@ -6,6 +6,7 @@ import com.github.jnhyperion.hyperrobotframeworkplugin.psi.stub.element.KeywordD
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.util.ReservedVariableScope;
 import com.intellij.lang.ASTNode;
 import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiNamedElement;
 import com.intellij.psi.stubs.IStubElementType;
 import com.intellij.psi.util.PsiTreeUtil;
 import org.jetbrains.annotations.NotNull;
@@ -21,6 +22,7 @@ import java.util.stream.Collectors;
 
 public class KeywordDefinitionImpl extends RobotStubPsiElementBase<KeywordDefinitionStub, KeywordDefinition> implements KeywordDefinition {
 
+    private Collection<DefinedParameter> parameters;
     private List<KeywordInvokable> invokedKeywords;
     private Collection<DefinedVariable> inlineVariables;
     private Collection<DefinedVariable> definedVariables;
@@ -46,6 +48,21 @@ public class KeywordDefinitionImpl extends RobotStubPsiElementBase<KeywordDefini
             return nameIdentifier.getText();
         }
         return null;
+    }
+
+    @Override
+    public Collection<DefinedParameter> getParameters() {
+        Collection<DefinedParameter> results = this.parameters;
+        if (results == null) {
+            for (BracketSetting bracketSetting : PsiTreeUtil.getChildrenOfTypeAsList(this, BracketSetting.class)) {
+                if (bracketSetting.isArguments()) {
+                    results = bracketSetting.getArguments();
+                    break;
+                }
+            }
+            this.parameters = results != null ? results : List.of();
+        }
+        return results;
     }
 
     @NotNull
@@ -127,8 +144,11 @@ public class KeywordDefinitionImpl extends RobotStubPsiElementBase<KeywordDefini
     private Collection<DefinedVariable> getTestCaseVariables() {
         Set<DefinedVariable> results = new LinkedHashSet<>();
         for (VariableDefinition variableDefinition : PsiTreeUtil.getChildrenOfTypeAsList(this, VariableDefinition.class)) {
-            for (VariableDefinitionId variableDefinitionId : PsiTreeUtil.getChildrenOfTypeAsList(variableDefinition, VariableDefinitionId.class)) {
-                results.add(new VariableDto(variableDefinition, variableDefinitionId.getText(), ReservedVariableScope.TestCase));
+            PsiNamedElement identifyingElement = (PsiNamedElement) variableDefinition.getIdentifyingElement();
+            if (identifyingElement != null) {
+                String name = identifyingElement.getName();
+                assert name != null;
+                results.add(new VariableDto(variableDefinition, name, ReservedVariableScope.TestCase));
             }
         }
         return results;
@@ -137,6 +157,7 @@ public class KeywordDefinitionImpl extends RobotStubPsiElementBase<KeywordDefini
     @Override
     public void subtreeChanged() {
         super.subtreeChanged();
+        this.parameters = null;
         this.definedVariables = null;
         this.inlineVariables = null;
         this.testCaseVariables = null;

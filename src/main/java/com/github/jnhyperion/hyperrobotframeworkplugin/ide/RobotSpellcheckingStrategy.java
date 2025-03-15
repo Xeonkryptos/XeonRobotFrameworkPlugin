@@ -19,7 +19,7 @@ public class RobotSpellcheckingStrategy extends SpellcheckingStrategy {
         if (element instanceof LeafPsiElement) {
             elementType = ((LeafPsiElement) element).getElementType();
             if (elementType == RobotTokenTypes.PARAMETER ||
-                elementType == RobotTokenTypes.ARGUMENT ||
+                elementType == RobotStubTokenTypes.ARGUMENT ||
                 elementType == RobotTokenTypes.VARIABLE ||
                 elementType == RobotStubTokenTypes.VARIABLE_DEFINITION ||
                 elementType == RobotTokenTypes.KEYWORD ||
