@@ -138,6 +138,10 @@ public class KeywordStatementImpl extends RobotStubPsiElementBase<KeywordStateme
                         results.add(new ParameterDto(parameter, parameterName.getRepr(false), defaultValueText));
                     }
                 }
+            } else {
+                KeywordDefinition keywordDefinition = (KeywordDefinition) psiElement;
+                Collection<DefinedParameter> parameters = keywordDefinition.getParameters();
+                results.addAll(parameters);
             }
         }
         return results;

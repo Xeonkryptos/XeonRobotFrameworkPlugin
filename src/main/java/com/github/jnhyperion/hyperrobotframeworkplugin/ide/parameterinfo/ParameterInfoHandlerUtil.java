@@ -1,11 +1,14 @@
 package com.github.jnhyperion.hyperrobotframeworkplugin.ide.parameterinfo;
 
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.Argument;
+import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.DefinedParameter;
+import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.KeywordDefinition;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.KeywordStatement;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.Parameter;
 import com.intellij.lang.parameterInfo.ParameterInfoUIContext;
 import com.intellij.lang.parameterInfo.ParameterInfoUIContextEx;
 import com.intellij.openapi.util.Pair;
+import com.intellij.psi.PsiElement;
 import com.intellij.psi.SyntaxTraverser;
 import com.intellij.psi.tree.IElementType;
 import com.jetbrains.python.psi.PyFunction;
@@ -23,6 +26,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
@@ -56,37 +60,65 @@ public class ParameterInfoHandlerUtil {
         return index;
     }
 
-    static Pair<List<String>, List<String>> buildHintsAndAnnotationsWithHighlights(PyFunction callingFunction,
+    static Pair<List<String>, List<String>> buildHintsAndAnnotationsWithHighlights(PsiElement callingFunction,
                                                                                    @NotNull ParameterInfoUIContext context,
                                                                                    int currentParamIndex,
                                                                                    Map<Integer, EnumSet<ParameterInfoUIContextEx.Flag>> hintFlags) {
         KeywordStatement keywordStatement = (KeywordStatement) context.getParameterOwner();
         Argument[] arguments = keywordStatement.getArguments().toArray(Argument[]::new);
 
-        final Map<Integer, PyCallableParameter> indexToNamedParameter = new HashMap<>();
+        final Pair<List<String>, List<String>> hintsAndAnnotations;
+        if (callingFunction instanceof PyFunction pyFunction) {
+            final Map<Integer, PyCallableParameter> indexToNamedParameter = new HashMap<>();
 
-        // param -> hint index. indexes are not contiguous, because some hints are parentheses.
-        final Map<PyCallableParameter, Integer> parameterToHintIndex = new HashMap<>();
+            // param -> hint index. indexes are not contiguous, because some hints are parentheses.
+            final Map<PyCallableParameter, Integer> parameterToHintIndex = new HashMap<>();
 
-        final TypeEvalContext typeEvalContext = TypeEvalContext.codeAnalysis(keywordStatement.getProject(), callingFunction.getContainingFile());
-        final List<PyCallableParameter> parameters = callingFunction.getParameters(typeEvalContext);
-        final PyCallableType callableType = (PyCallableType) typeEvalContext.getType(callingFunction);
-        if (callableType == null) {
-            return null;
+            final TypeEvalContext typeEvalContext = TypeEvalContext.codeAnalysis(keywordStatement.getProject(), pyFunction.getContainingFile());
+            final List<PyCallableParameter> parameters = pyFunction.getParameters(typeEvalContext);
+            final PyCallableType callableType = (PyCallableType) typeEvalContext.getType(pyFunction);
+            if (callableType == null) {
+                return null;
+            }
+
+            hintsAndAnnotations = ParameterInfoHandlerUtil.buildParameterListHint(parameters,
+                                                                                  indexToNamedParameter,
+                                                                                  parameterToHintIndex,
+                                                                                  hintFlags,
+                                                                                  typeEvalContext);
+            ParameterInfoHandlerUtil.highlightParameters(Arrays.asList(arguments),
+                                                         callableType,
+                                                         parameters,
+                                                         indexToNamedParameter,
+                                                         parameterToHintIndex,
+                                                         hintFlags,
+                                                         currentParamIndex);
+        } else {
+            // param -> hint index. indexes are not contiguous, because some hints are parentheses.
+            final Map<DefinedParameter, Integer> parameterToHintIndex = new HashMap<>();
+
+            KeywordDefinition keyword = (KeywordDefinition) callingFunction;
+            Collection<DefinedParameter> parameters = keyword.getParameters();
+            List<String> hints = new ArrayList<>();
+            List<String> annotations = new ArrayList<>();
+            for (DefinedParameter parameter : parameters) {
+                String hint = parameter.getLookup();
+                if (parameter.hasDefaultValue()) {
+                    hint += " = " + parameter.getDefaultValue();
+                }
+                final int hintIndex = hints.size();
+                hintFlags.put(hintIndex, EnumSet.noneOf(ParameterInfoUIContextEx.Flag.class));
+                parameterToHintIndex.put(parameter, hintIndex);
+                hints.add(hint);
+                annotations.add("");
+            }
+            hintsAndAnnotations = Pair.create(hints, annotations);
+            ParameterInfoHandlerUtil.highlightParameters(List.copyOf(parameters),
+                                                         parameterToHintIndex,
+                                                         hintFlags,
+                                                         Arrays.asList(arguments),
+                                                         currentParamIndex);
         }
-
-        final Pair<List<String>, List<String>> hintsAndAnnotations = ParameterInfoHandlerUtil.buildParameterListHint(parameters,
-                                                                                                                     indexToNamedParameter,
-                                                                                                                     parameterToHintIndex,
-                                                                                                                     hintFlags,
-                                                                                                                     typeEvalContext);
-        ParameterInfoHandlerUtil.highlightParameters(Arrays.asList(arguments),
-                                                     callableType,
-                                                     parameters,
-                                                     indexToNamedParameter,
-                                                     parameterToHintIndex,
-                                                     hintFlags,
-                                                     currentParamIndex);
 
         return hintsAndAnnotations;
     }
@@ -236,6 +268,39 @@ public class ParameterInfoHandlerUtil {
         }
     }
 
+    /**
+     * match params to available args, highlight current param(s)
+     */
+    static void highlightParameters(@NotNull final List<DefinedParameter> parameterList,
+                                    @NotNull final Map<DefinedParameter, Integer> parameterHintToIndex,
+                                    @NotNull final Map<Integer, EnumSet<ParameterInfoUIContextEx.Flag>> hintFlags,
+                                    @NotNull final List<Argument> args,
+                                    int currentParamIndex) {
+        Map<String, DefinedParameter> nameToCallableParameterIndex = parameterList.stream()
+                                                                                  .filter(param -> param.getLookup() != null)
+                                                                                  .collect(Collectors.toMap(DefinedParameter::getLookup, param -> param));
+
+        boolean parameterFound = false;
+        for (int i = 0; i < args.size(); i++) {
+            Argument arg = args.get(i);
+            boolean mustHighlight = currentParamIndex == i;
+            if (arg instanceof Parameter parameter) {
+                parameterFound = true;
+
+                String parameterName = parameter.getParameterName();
+                if (nameToCallableParameterIndex.containsKey(parameterName)) {
+                    DefinedParameter pyCallableParameter = nameToCallableParameterIndex.get(parameterName);
+                    highlightParameter(pyCallableParameter, parameterHintToIndex, hintFlags, mustHighlight);
+                }
+            } else {
+                if (!parameterFound) {
+                    DefinedParameter pyCallableParameter = parameterList.get(i);
+                    highlightParameter(pyCallableParameter, parameterHintToIndex, hintFlags, mustHighlight);
+                }
+            }
+        }
+    }
+
     private static int findPositionalContainerIndex(@NotNull List<PyCallableParameter> parameterList) {
         for (int i = 0; i < parameterList.size(); i++) {
             PyCallableParameter parameter = parameterList.get(i);
@@ -248,6 +313,16 @@ public class ParameterInfoHandlerUtil {
 
     private static void highlightParameter(@NotNull final PyCallableParameter parameter,
                                            @NotNull final Map<PyCallableParameter, Integer> parameterToHintIndex,
+                                           @NotNull final Map<Integer, EnumSet<ParameterInfoUIContextEx.Flag>> hintFlags,
+                                           final boolean mustHighlight) {
+        final Integer hintIndex = parameterToHintIndex.get(parameter);
+        if (mustHighlight && hintIndex != null && hintFlags.containsKey(hintIndex)) {
+            hintFlags.get(hintIndex).add(ParameterInfoUIContextEx.Flag.HIGHLIGHT);
+        }
+    }
+
+    private static void highlightParameter(@NotNull final DefinedParameter parameter,
+                                           @NotNull final Map<DefinedParameter, Integer> parameterToHintIndex,
                                            @NotNull final Map<Integer, EnumSet<ParameterInfoUIContextEx.Flag>> hintFlags,
                                            final boolean mustHighlight) {
         final Integer hintIndex = parameterToHintIndex.get(parameter);

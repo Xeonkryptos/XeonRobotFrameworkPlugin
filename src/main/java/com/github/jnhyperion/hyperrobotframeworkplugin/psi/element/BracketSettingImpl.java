@@ -1,7 +1,11 @@
 package com.github.jnhyperion.hyperrobotframeworkplugin.psi.element;
 
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.dto.ParameterDto;
+import com.github.jnhyperion.hyperrobotframeworkplugin.psi.stub.element.PositionalArgumentStubElement;
 import com.intellij.lang.ASTNode;
+import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiWhiteSpace;
+import com.intellij.psi.impl.source.tree.LeafPsiElement;
 import com.intellij.psi.util.PsiTreeUtil;
 import org.jetbrains.annotations.NotNull;
 
@@ -35,7 +39,19 @@ public class BracketSettingImpl extends RobotPsiElementBase implements BracketSe
                                                  .stream()
                                                  .map(RobotStatement::getPresentableText)
                                                  .collect(Collectors.joining("  "));
-                if (defaultValue.isEmpty()) {
+                if (defaultValue.isEmpty() && variableDefinition.getChildren().length > 0) {
+                    // Special handling necessary to find the correct default value (argument) due to stubbing and what is cached ant what not.
+                    PsiElement element = variableDefinition.getChildren()[0].getNextSibling();
+                    if (element instanceof PsiWhiteSpace) {
+                        do {
+                            element = element.getNextSibling();
+                        } while (element instanceof PsiWhiteSpace);
+                    }
+                    defaultValue = element instanceof LeafPsiElement leaf && leaf.getElementType() instanceof PositionalArgumentStubElement ?
+                                   element.getText() :
+                                   null;
+                }
+                if (defaultValue != null && defaultValue.isEmpty()) {
                     defaultValue = null;
                 }
                 return new ParameterDto(variableDefinition, variableDefinition.getName(), defaultValue);
