@@ -38,11 +38,9 @@ download-robotcode:
   image: python:3.11
   script:
     - mkdir -p robotcode
-    - ls -la robotcode
+    - rm -rf robotcode/*.dist-info
     - pip install --upgrade -t robotcode robotcode[debugger]
-    - ls -la robotcode
     - rm -rf robotcode/robot && rm -rf robotcode/robotframework*
-    - ls -la robotcode
   cache:
     - <<: *robotcode-cache
       policy: pull-push
