@@ -3,6 +3,7 @@ package com.github.jnhyperion.hyperrobotframeworkplugin.ide.execution;
 import com.intellij.execution.configurations.RunProfile;
 import com.intellij.execution.configurations.RunProfileState;
 import com.intellij.execution.configurations.RunnerSettings;
+import com.intellij.execution.executors.DefaultRunExecutor;
 import com.intellij.execution.runners.AsyncProgramRunner;
 import com.intellij.execution.runners.ExecutionEnvironment;
 import com.intellij.execution.ui.RunContentDescriptor;
@@ -23,7 +24,8 @@ public class RobotRunner extends AsyncProgramRunner<RunnerSettings> {
 
     @Override
     public boolean canRun(@NotNull String executorId, @NotNull RunProfile profile) {
-        return RobotDryRunExecutor.EXECUTOR_ID.equals(executorId) && profile instanceof RobotRunConfiguration;
+        return profile instanceof RobotRunConfiguration &&
+               (DefaultRunExecutor.EXECUTOR_ID.equals(executorId) || RobotDryRunExecutor.EXECUTOR_ID.equals(executorId));
     }
 
     @NotNull
@@ -34,8 +36,12 @@ public class RobotRunner extends AsyncProgramRunner<RunnerSettings> {
 
     private static class CustomPythonRunner extends PythonRunner {
 
+        @NotNull
         @Override
-        public @NotNull Promise<@Nullable RunContentDescriptor> execute(@NotNull ExecutionEnvironment env, @NotNull RunProfileState state) {
+        public Promise<@Nullable RunContentDescriptor> execute(@NotNull ExecutionEnvironment env, @NotNull RunProfileState state) {
+            if (state instanceof RobotCommandLineState) {
+                state = new RobotPythonCommandLineState(((RobotCommandLineState) state).getRobotRunConfiguration(), env);
+            }
             return super.execute(env, state);
         }
     }

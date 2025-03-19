@@ -68,7 +68,7 @@ public class RobotDebugAdapterProtocolCommunicator implements ProcessListener {
             arguments.setSupportsRunInTerminalRequest(false);
             arguments.setSupportsStartDebuggingRequest(false);
 
-            Capabilities initializeResponse = robotDebugServer.initialize(arguments).get();
+            Capabilities initializeResponse = robotDebugServer.initialize(arguments).get(10L, TimeUnit.SECONDS);
             initialized = true;
             afterInitialize.fire(null);
 
@@ -79,7 +79,7 @@ public class RobotDebugAdapterProtocolCommunicator implements ProcessListener {
             robotDebugServer.attach(Map.of()).get();
         } catch (IOException e) {
             throw new UncheckedIOException(e);
-        } catch (ExecutionException | InterruptedException e) {
+        } catch (ExecutionException | InterruptedException | java.util.concurrent.TimeoutException e) {
             throw new RuntimeException(e);
         }
     }

@@ -42,14 +42,11 @@ public class RobotRunConfigurationProducer extends LazyRunConfigurationProducer<
         if (isValidRobotExecutableScript(context)) {
             String workingDirectory = getWorkingDirectoryToUse(runConfig);
             String runParam = getRunParameters(context, workingDirectory);
-            runConfig.setUseModuleSdk(true);
-            runConfig.setModuleMode(true);
-            runConfig.setScriptName("robotcode");
             runConfig.setWorkingDirectory(context.getProject().getBasePath());
             runConfig.setScriptParameters(runParam);
             Sdk sdk = ProjectRootManager.getInstance(context.getProject()).getProjectSdk();
             if (sdk != null) {
-                runConfig.setSdkHome(sdk.getHomePath());
+                runConfig.setSdk(sdk);
             }
             runConfig.setName(getRunDisplayName(context));
             return true;

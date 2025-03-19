@@ -15,10 +15,17 @@ plugins {
     id("io.gitlab.arturbosch.detekt") version "1.15.0"
     // ktlint linter - read more: https://github.com/JLLeitschuh/ktlint-gradle
     id("org.jlleitschuh.gradle.ktlint") version "10.0.0"
+
+    kotlin("jvm") version "1.9.0"
 }
 
 group = properties("pluginGroup")
 version = properties("pluginVersion")
+
+// Set the JVM language level used to build the project.
+kotlin {
+    jvmToolchain(17)
+}
 
 // Configure project's dependencies
 repositories {

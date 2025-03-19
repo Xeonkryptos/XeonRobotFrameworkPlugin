@@ -1,7 +1,8 @@
 package com.github.jnhyperion.hyperrobotframeworkplugin.ide.debugger;
 
 import com.github.jnhyperion.hyperrobotframeworkplugin.ide.debugger.dap.RobotDebugAdapterProtocolCommunicator;
-import com.github.jnhyperion.hyperrobotframeworkplugin.ide.execution.RobotPythonScriptCommandLineState;
+import com.github.jnhyperion.hyperrobotframeworkplugin.ide.execution.RobotCommandLineState;
+import com.github.jnhyperion.hyperrobotframeworkplugin.ide.execution.RobotPythonCommandLineState;
 import com.github.jnhyperion.hyperrobotframeworkplugin.ide.execution.RobotRunConfiguration;
 import com.intellij.execution.ExecutionException;
 import com.intellij.execution.ExecutionResult;
@@ -9,7 +10,6 @@ import com.intellij.execution.configurations.RunProfile;
 import com.intellij.execution.configurations.RunProfileState;
 import com.intellij.execution.configurations.RunnerSettings;
 import com.intellij.execution.executors.DefaultDebugExecutor;
-import com.intellij.execution.executors.DefaultRunExecutor;
 import com.intellij.execution.process.ProcessEvent;
 import com.intellij.execution.runners.ExecutionEnvironment;
 import com.intellij.execution.runners.ProgramRunner;
@@ -42,8 +42,7 @@ public class RobotDebugRunner implements ProgramRunner<RunnerSettings> {
 
     @Override
     public boolean canRun(@NotNull String executorId, @NotNull RunProfile profile) {
-        return profile instanceof RobotRunConfiguration && (DefaultDebugExecutor.EXECUTOR_ID.equals(executorId) || DefaultRunExecutor.EXECUTOR_ID.equals(
-                executorId));
+        return profile instanceof RobotRunConfiguration && (DefaultDebugExecutor.EXECUTOR_ID.equals(executorId));
     }
 
     @Override
@@ -59,11 +58,15 @@ public class RobotDebugRunner implements ProgramRunner<RunnerSettings> {
         @Override
         protected Promise<@Nullable RunContentDescriptor> execute(@NotNull ExecutionEnvironment environment, @NotNull RunProfileState state) throws
                                                                                                                                              ExecutionException {
+            if (state instanceof RobotCommandLineState) {
+                state = new RobotPythonCommandLineState(((RobotCommandLineState) state).getRobotRunConfiguration(), environment);
+            }
+            final RobotPythonCommandLineState robotPythonCommandLineState = (RobotPythonCommandLineState) state;
             return super.execute(environment, state).then(result -> {
                 Project project = environment.getProject();
                 try {
                     XDebuggerManager debuggerManager = XDebuggerManager.getInstance(project);
-                    Integer robotDebugPort = ((RobotPythonScriptCommandLineState) state).getRobotDebugPort();
+                    Integer robotDebugPort = robotPythonCommandLineState.getRobotDebugPort();
                     RobotDebugAdapterProtocolCommunicator robotDebugAdapterProtocolCommunicator = new RobotDebugAdapterProtocolCommunicator(robotDebugPort);
                     RunContentDescriptor runContentDescriptor = debuggerManager.startSession(environment, new XDebugProcessStarter() {
                         @NotNull
@@ -93,6 +96,12 @@ public class RobotDebugRunner implements ProgramRunner<RunnerSettings> {
                                                     PythonCommandLineState pyState) {
             executionResult = result;
             return super.createDebugProcess(session, serverSocket, result, pyState);
+        }
+
+        @Override
+        protected @NotNull PyDebugProcess createDebugProcess(@NotNull XDebugSession session, int serverPort, ExecutionResult result) {
+            executionResult = result;
+            return super.createDebugProcess(session, serverPort, result);
         }
     }
 }
