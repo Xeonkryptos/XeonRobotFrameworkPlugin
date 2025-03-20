@@ -24,7 +24,7 @@ version = properties("pluginVersion")
 
 // Set the JVM language level used to build the project.
 kotlin {
-    jvmToolchain(17)
+    jvmToolchain(21)
 }
 
 // Configure project's dependencies
@@ -111,14 +111,14 @@ intellijPlatform {
 }
 
 tasks {
-    // Set the compatibility versions to 17
+    // Set the compatibility versions to 21
     withType<JavaCompile> {
-        sourceCompatibility = "17"
-        targetCompatibility = "17"
+        sourceCompatibility = "21"
+        targetCompatibility = "21"
     }
 
     withType<Detekt> {
-        jvmTarget = "17"
+        jvmTarget = "21"
     }
 
     withType<PrepareSandboxTask> {
