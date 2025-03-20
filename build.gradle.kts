@@ -15,10 +15,17 @@ plugins {
     id("io.gitlab.arturbosch.detekt") version "1.15.0"
     // ktlint linter - read more: https://github.com/JLLeitschuh/ktlint-gradle
     id("org.jlleitschuh.gradle.ktlint") version "10.0.0"
+
+    kotlin("jvm") version "1.9.0"
 }
 
 group = properties("pluginGroup")
 version = properties("pluginVersion")
+
+// Set the JVM language level used to build the project.
+kotlin {
+    jvmToolchain(21)
+}
 
 // Configure project's dependencies
 repositories {
@@ -104,14 +111,14 @@ intellijPlatform {
 }
 
 tasks {
-    // Set the compatibility versions to 17
+    // Set the compatibility versions to 21
     withType<JavaCompile> {
-        sourceCompatibility = "17"
-        targetCompatibility = "17"
+        sourceCompatibility = "21"
+        targetCompatibility = "21"
     }
 
     withType<Detekt> {
-        jvmTarget = "17"
+        jvmTarget = "21"
     }
 
     withType<PrepareSandboxTask> {

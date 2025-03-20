@@ -41,7 +41,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 
-public class RobotPythonScriptCommandLineState extends PythonScriptCommandLineState {
+public class RobotPythonCommandLineState extends PythonScriptCommandLineState {
 
     public static final Key<Integer> ROBOT_DEBUG_PORT = Key.create("ROBOT_DEBUG_PORT");
 
@@ -52,12 +52,19 @@ public class RobotPythonScriptCommandLineState extends PythonScriptCommandLineSt
 
     private static final int DEBUGGER_DEFAULT_PORT = 6612;
 
-    private final RobotRunConfiguration robotRunConfiguration;
+    @NotNull
+    private final RobotRunConfiguration runConfiguration;
 
-    public RobotPythonScriptCommandLineState(RobotRunConfiguration robotRunConfiguration, @NotNull ExecutionEnvironment env) {
-        super(robotRunConfiguration, env);
+    public RobotPythonCommandLineState(RobotRunConfiguration runConfiguration, ExecutionEnvironment env) {
+        super(runConfiguration.getPythonRunConfiguration(), env);
 
-        this.robotRunConfiguration = robotRunConfiguration;
+        this.runConfiguration = runConfiguration;
+    }
+
+    @NotNull
+    @Override
+    public ProcessHandler startProcess() throws ExecutionException {
+        return super.startProcess();
     }
 
     @Nullable
@@ -82,7 +89,7 @@ public class RobotPythonScriptCommandLineState extends PythonScriptCommandLineSt
         paramsGroup.getParametersList().set(scriptIndex, ROBOTCODE_DIR + "/robotcode");
         if (robotExecutionMode == RobotExecutionMode.DEBUG) {
             int robotDebugPort = findAvailableSocketPort();
-            robotRunConfiguration.putUserData(ROBOT_DEBUG_PORT, robotDebugPort);
+            runConfiguration.putUserData(ROBOT_DEBUG_PORT, robotDebugPort);
 
             paramsGroup.getParametersList().addAll("debug", "--tcp", String.valueOf(robotDebugPort));
         } else {
@@ -113,7 +120,8 @@ public class RobotPythonScriptCommandLineState extends PythonScriptCommandLineSt
     @SuppressWarnings("UnstableApiUsage") // Might be unstable at the moment, but is an important extension point
     public ExecutionResult execute(@NotNull Executor executor, @NotNull PythonScriptTargetedCommandLineBuilder converter) throws ExecutionException {
         final RobotExecutionMode executionMode = computeRobotExecutionMode(executor);
-        return super.execute(executor, new MyPythonScriptTargetedCommandLineBuilder(converter, robotRunConfiguration, executionMode));
+        return super.execute(executor,
+                             new MyPythonScriptTargetedCommandLineBuilder(converter, runConfiguration, executionMode));
     }
 
     @SuppressWarnings("UnstableApiUsage") // Might be unstable at the moment, but is an important extension point
@@ -214,7 +222,7 @@ public class RobotPythonScriptCommandLineState extends PythonScriptCommandLineSt
     }
 
     public Integer getRobotDebugPort() {
-        return robotRunConfiguration.getUserData(ROBOT_DEBUG_PORT);
+        return runConfiguration.getUserData(ROBOT_DEBUG_PORT);
     }
 
     private enum RobotExecutionMode {
