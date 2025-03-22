@@ -653,9 +653,10 @@ public class RobotCompletionContributor extends CompletionContributor {
     private static String formatArguments(Collection<?> arguments) {
         List<String> argumentNames = new ArrayList<>();
         for (Object argument : arguments) {
-            if (argument instanceof PyParameter) {
-                String name = ((PyParameter) argument).getName();
-                if (!((PyParameter) argument).isSelf()) {
+            if (argument instanceof PyParameter parameter) {
+                String name = parameter.getName();
+                //noinspection UnstableApiUsage
+                if (!parameter.isSelf()) {
                     argumentNames.add(name);
                 }
             } else if (argument instanceof DefinedVariable) {
