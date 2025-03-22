@@ -1,7 +1,5 @@
-import io.gitlab.arturbosch.detekt.Detekt
 import org.jetbrains.changelog.markdownToHTML
 import org.jetbrains.intellij.platform.gradle.tasks.PrepareSandboxTask
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 fun properties(key: String) = project.findProperty(key).toString()
 
@@ -12,12 +10,10 @@ plugins {
     id("org.jetbrains.intellij.platform") version "2.2.1"
     // gradle-changelog-plugin - read more: https://github.com/JetBrains/gradle-changelog-plugin
     id("org.jetbrains.changelog") version "1.1.2"
-    // detekt linter - read more: https://detekt.github.io/detekt/gradle.html
-    id("io.gitlab.arturbosch.detekt") version "1.15.0"
     // ktlint linter - read more: https://github.com/JLLeitschuh/ktlint-gradle
     id("org.jlleitschuh.gradle.ktlint") version "10.0.0"
 
-    kotlin("jvm") version "1.9.0"
+    kotlin("jvm") version "2.1.20"
 }
 
 group = properties("pluginGroup")
@@ -38,8 +34,6 @@ repositories {
 }
 
 dependencies {
-    detektPlugins("io.gitlab.arturbosch.detekt:detekt-formatting:1.15.0")
-
     implementation("org.eclipse.lsp4j:org.eclipse.lsp4j.debug:0.24.0")
 
     intellijPlatform {
@@ -60,19 +54,6 @@ dependencies {
 changelog {
     version = properties("pluginVersion")
     groups = emptyList()
-}
-
-// Configure detekt plugin.
-// Read more: https://detekt.github.io/detekt/kotlindsl.html
-detekt {
-    config = files("./detekt-config.yml")
-    buildUponDefaultConfig = true
-
-    reports {
-        html.enabled = false
-        xml.enabled = false
-        txt.enabled = false
-    }
 }
 
 intellijPlatform {
@@ -115,16 +96,6 @@ tasks {
     withType<JavaCompile> {
         sourceCompatibility = "21"
         targetCompatibility = "21"
-    }
-
-    withType<KotlinCompile> {
-        kotlinOptions {
-            jvmTarget = "21"
-        }
-    }
-
-    withType<Detekt> {
-        jvmTarget = "21"
     }
 
     withType<PrepareSandboxTask> {
