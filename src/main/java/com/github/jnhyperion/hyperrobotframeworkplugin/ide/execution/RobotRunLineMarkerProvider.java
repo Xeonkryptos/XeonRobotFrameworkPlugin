@@ -7,11 +7,9 @@ import com.intellij.execution.lineMarker.ExecutorAction;
 import com.intellij.execution.lineMarker.RunLineMarkerContributor;
 import com.intellij.icons.AllIcons.RunConfigurations.TestState;
 import com.intellij.openapi.actionSystem.AnAction;
-import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.impl.source.tree.LeafPsiElement;
 import com.intellij.psi.tree.IElementType;
-import com.intellij.util.containers.ContainerUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -26,18 +24,14 @@ public class RobotRunLineMarkerProvider extends RunLineMarkerContributor {
                 Heading heading = getHeading(element);
                 if (heading != null && (heading.containsTestCases() || heading.containsTasks())) {
                     AnAction[] actions = ExecutorAction.getActions();
-                    return new Info(TestState.Green2,
-                                    actions,
-                                    elem -> StringUtil.join(ContainerUtil.mapNotNull(actions, action -> getText(action, createActionEvent(elem))), "\n"));
+                    return new Info(TestState.Green2, actions);
                 }
             } else {
                 if (RobotStubTokenTypes.KEYWORD_DEFINITION.equals(type)) {
                     Heading heading = getHeading(element);
                     if (heading != null && (heading.containsTasks() || heading.containsTestCases())) {
                         AnAction[] actions = ExecutorAction.getActions();
-                        return new Info(TestState.Run,
-                                        actions,
-                                        elem -> StringUtil.join(ContainerUtil.mapNotNull(actions, action -> getText(action, createActionEvent(elem))), "\n"));
+                        return new Info(TestState.Run, actions);
                     }
                 }
             }
