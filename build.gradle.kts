@@ -1,5 +1,6 @@
-import org.jetbrains.changelog.markdownToHTML
 import org.jetbrains.intellij.platform.gradle.tasks.PrepareSandboxTask
+import org.jetbrains.changelog.Changelog
+import org.jetbrains.changelog.markdownToHTML
 
 fun properties(key: String) = project.findProperty(key).toString()
 
@@ -7,11 +8,11 @@ plugins {
     // Java support
     id("java")
     // gradle-intellij-plugin - read more: https://github.com/JetBrains/gradle-intellij-plugin
-    id("org.jetbrains.intellij.platform") version "2.2.1"
+    id("org.jetbrains.intellij.platform") version "2.4.0"
     // gradle-changelog-plugin - read more: https://github.com/JetBrains/gradle-changelog-plugin
-    id("org.jetbrains.changelog") version "1.1.2"
+    id("org.jetbrains.changelog") version "2.2.1"
     // ktlint linter - read more: https://github.com/JLLeitschuh/ktlint-gradle
-    id("org.jlleitschuh.gradle.ktlint") version "10.0.0"
+    id("org.jlleitschuh.gradle.ktlint") version "12.2.0"
 
     kotlin("jvm") version "2.1.20"
 }
@@ -35,6 +36,7 @@ repositories {
 
 dependencies {
     implementation("org.eclipse.lsp4j:org.eclipse.lsp4j.debug:0.24.0")
+    implementation("org.apache.commons:commons-text:1.13.0")
 
     intellijPlatform {
         val platformVersion = properties("platformVersion")
@@ -53,7 +55,11 @@ dependencies {
 // Read more: https://github.com/JetBrains/gradle-changelog-plugin
 changelog {
     version = properties("pluginVersion")
-    groups = emptyList()
+    groups.set(listOf("Added", "Changed", "Deprecated", "Removed", "Fixed", "Security"))
+    path.set(file("CHANGELOG.md").canonicalPath)
+    itemPrefix.set("-")
+    lineSeparator.set("\n")
+    keepUnreleasedSection.set(false)
 }
 
 intellijPlatform {
@@ -71,7 +77,7 @@ intellijPlatform {
             }
             subList(indexOf(start) + 1, indexOf(end))
         }.joinToString("\n").run { markdownToHTML(this) }
-        changeNotes = changelog.getLatest().toHTML()
+        changeNotes = changelog.renderItem(changelog.getLatest(), Changelog.OutputType.HTML)
 
         ideaVersion {
             sinceBuild = properties("pluginSinceBuild")
@@ -106,5 +112,17 @@ tasks {
             exclude("**/__pycache__")
             into(pluginName.map { "$it/data" })
         }
+    }
+
+    patchPluginXml {
+        changeNotes.set(provider {
+            changelog.renderItem(
+                changelog
+                    .getUnreleased()
+                    .withHeader(false)
+                    .withEmptySections(false),
+                Changelog.OutputType.HTML
+            )
+        })
     }
 }

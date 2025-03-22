@@ -2,7 +2,7 @@
 
 # HyperRobotFrameworkPlugin Changelog
 
-## [0.2.0]
+## Unreleased
 
 ### Added
 
@@ -16,7 +16,7 @@
 - Fixed parsing issue of variables section: Spaces in a new line without anything else was interpreted as a new variable definition
 - Find Usages to do a reverse reference search for keywords from python functions
 
-## [0.1.21]
+## 0.1.21
 
 ### Added
 
@@ -41,7 +41,7 @@
 - Use module SDK when creating a new Robot run configuration
 - Handling of smart enclosing of variables when typing $, @, & optimized - changed handling to IntelliJ's default behavior
 
-## [0.1.20]
+## 0.1.20
 
 ### Fixed
 
@@ -50,13 +50,13 @@
 - When breakpoints are muted tell the debugger to continue
 - IllegalArgumentException on creating run configuration: When base path doesn't match file path for relativization
 
-## [0.1.19]
+## 0.1.19
 
 ### Added
 
 - Added support for debugging of Robot files
 
-## [0.1.18-1]
+## 0.1.18-1
 
 ### Added
 
@@ -67,21 +67,21 @@
 - Parsing of keyword parameters changed
 - Optimized code completion suggestions
 
-## [0.1.18]
+## 0.1.18
 
 ### Added
 
 - This is [中秋节 🥮](https://en.wikipedia.org/wiki/Mid-Autumn_Festival) special edition, please enjoy! 🍻
 - Support syntax markers `VAR` ([#73](https://github.com/jnhyperion/HyperRobotFrameworkPlugin/issues/73))
 
-## [0.1.17]
+## 0.1.17
 
 ### Added
 
 - Support Gherkin syntax markers `BUT` ([#69](https://github.com/jnhyperion/HyperRobotFrameworkPlugin/issues/69))
 - Support code completion with library alias after `AS` / `WITH NAME` ([#14](https://github.com/jnhyperion/HyperRobotFrameworkPlugin/issues/14))
 
-## [0.1.16]
+## 0.1.16
 
 ### Added
 
@@ -92,13 +92,13 @@
 - Code completion enhancement
 - Inspection performance improvements
 
-## [0.1.15]
+## 0.1.15
 
 ### Added
 
 - Support Robot file spellcheck
 
-## [0.1.14]
+## 0.1.14
 
 ### Added
 
@@ -110,7 +110,7 @@
 - Some keywords with absolute library path cannot be resolved properly
 - Some libraries with relative imports cannot be resolved properly
 
-## [0.1.13]
+## 0.1.13
 
 ### Added
 
@@ -118,59 +118,59 @@
 - Always insert 4 whitespace when typing `Tab`
 - Folding for all syntax markers block
 
-## [0.1.12]
+## 0.1.12
 
 ### Added
 
 - Smart auto indent when pressing enter button
 - Support syntax markers `AS`, `IN`, `IN RANGE`, `IN ENUMERATE`
 
-## [0.1.11]
+## 0.1.11
 
 ### Fixed
 
 - [[BUG]](https://github.com/jnhyperion/HyperRobotFrameworkPlugin/issues/54): Plugin error "Cannot distinguish StubFileElementTypes"
 
-## [0.1.10]
+## 0.1.10
 
 ### Fixed
 
 - `Variables/Keywords` defined in python files are resolved incorrectly when python file is modified sometimes
 
-## [0.1.9]
+## 0.1.9
 
 ### Added
 
 - Keyword with decorator @keyword defined in python file library can be resolved
 - Support parsing robot variables defined in python class members and properties
 
-## [0.1.8]
+## 0.1.8
 
 ### Fixed
 
 - [[BUG]](https://github.com/jnhyperion/HyperRobotFrameworkPlugin/issues/50): Variables defined in resource file cannot be resolved
 
-## [0.1.7]
+## 0.1.7
 
 ### Fixed
 
 - Keyword parsing is broken in data driven style Robot file
 
-## [0.1.6]
+## 0.1.6
 
 ### Fixed
 
 - Library is incorrectly resolved sometimes when multi library classes found
 - Library is incorrectly resolved sometimes when multi `PyCharm` windows is opened
 
-## [0.1.5]
+## 0.1.5
 
 ### Fixed
 
 - Robot builtin keywords cannot be resolved sometimes
 - Other minor bugs
 
-## [0.1.4]
+## 0.1.4
 
 ### Added
 
@@ -183,7 +183,7 @@
 - Builtin library with prefix `robot.libraries` cannot be recognized
 - Library is incorrectly resolved sometimes
 
-## [0.1.3]
+## 0.1.3
 
 ### Changed
 
@@ -195,14 +195,14 @@
 - Low performance in code inspections
 - IDE UI freeze when project files are modified sometimes
 
-## [0.1.2]
+## 0.1.2
 
 ### Fixed
 
 - Resource file import cannot be resolved in `Windows`
 - Resource file import code completion is incorrect in `Windows`
 
-## [0.1.1]
+## 0.1.1
 
 ### Added
 
@@ -214,7 +214,7 @@
 - Variable embedded Keyword navigation not working properly
 - Library import reference is incorrect sometimes
 
-## [0.1.0]
+## 0.1.0]
 
 ### Added
 
@@ -225,7 +225,7 @@
 
 - No word completion for `tasks`
 
-## [0.0.9]
+## 0.0.9
 
 ### Changed
 
@@ -237,7 +237,7 @@
 - Incorrect paring after robot syntax markers
 - Other minor bugs
 
-## [0.0.8]
+## 0.0.8
 
 ### Fixed
 
@@ -245,7 +245,7 @@
 - Incorrect inspection warning when `resource` file is not directly used in transitive import
 - Cannot parse variable properly in syntax maker statement block
 
-## [0.0.7]
+## 0.0.7
 
 ### Added
 
@@ -262,7 +262,7 @@
 - Some defined variables are missing in word completion list
 - Some defined variables' formats are incorrect in word completion list
 
-## [0.0.6]
+## 0.0.6
 
 ### Added
 
@@ -273,14 +273,14 @@
 
 - Incorrect import reference when there are multi python/resource files with the same name
 
-## [0.0.5]
+## 0.0.5
 
 ### Fixed
 
 - Some plugin errors when updating project structure
 - Some plugin errors when updating project python interpreter
 
-## [0.0.4]
+## 0.0.4
 
 ### Added
 
@@ -295,7 +295,7 @@
 - Number variable such as `${1}` will be recognized as undefined variable
 - Variable definition is not recognized after `FOR` statement
 
-## [0.0.3]
+## 0.0.3
 
 ### Fixed
 
