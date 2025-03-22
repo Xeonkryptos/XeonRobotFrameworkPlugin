@@ -74,6 +74,7 @@ public class RobotCompletionContributor extends CompletionContributor {
         extend(CompletionType.BASIC,
                PlatformPatterns.psiElement()
                                .andNot(PlatformPatterns.psiComment())
+                               .andNot(withTagsWithoutCodeCompletionSupport())
                                .andNot(withArgumentInKeywordStatement())
                                .andNot(PlatformPatterns.psiElement(RobotTokenTypes.SYNTAX_MARKER))
                                .inFile(PlatformPatterns.psiElement(RobotFile.class)),
@@ -97,6 +98,7 @@ public class RobotCompletionContributor extends CompletionContributor {
         extend(CompletionType.BASIC,
                PlatformPatterns.psiElement()
                                .andNot(PlatformPatterns.psiComment())
+                               .andNot(withTagsWithoutCodeCompletionSupport())
                                .andNot(PlatformPatterns.psiElement(RobotStubTokenTypes.ARGUMENT))
                                .andNot(PlatformPatterns.psiElement(RobotTokenTypes.PARAMETER))
                                .inFile(PlatformPatterns.psiElement(RobotFile.class)),
@@ -116,6 +118,7 @@ public class RobotCompletionContributor extends CompletionContributor {
         extend(CompletionType.BASIC,
                PlatformPatterns.psiElement()
                                .andNot(PlatformPatterns.psiComment())
+                               .andNot(withTagsWithoutCodeCompletionSupport())
                                .andNot(PlatformPatterns.psiElement(RobotStubTokenTypes.ARGUMENT))
                                .inFile(PlatformPatterns.psiElement(RobotFile.class)),
                new CompletionProvider<>() {
@@ -134,6 +137,7 @@ public class RobotCompletionContributor extends CompletionContributor {
         extend(CompletionType.BASIC,
                PlatformPatterns.psiElement()
                                .andNot(PlatformPatterns.psiComment())
+                               .andNot(withTagsWithoutCodeCompletionSupport())
                                .and(PlatformPatterns.psiElement(RobotStubTokenTypes.ARGUMENT)
                                                     .withSuperParent(2, PlatformPatterns.psiElement(RobotTokenTypes.IMPORT)))
                                .inFile(PlatformPatterns.psiElement(RobotFile.class)),
@@ -162,6 +166,7 @@ public class RobotCompletionContributor extends CompletionContributor {
         extend(CompletionType.BASIC,
                PlatformPatterns.psiElement()
                                .andNot(PlatformPatterns.psiComment())
+                               .andNot(withTagsWithoutCodeCompletionSupport())
                                .andNot(PlatformPatterns.psiElement(RobotStubTokenTypes.ARGUMENT))
                                .andNot(PlatformPatterns.psiElement(RobotTokenTypes.PARAMETER))
                                .inFile(PlatformPatterns.psiElement(RobotFile.class)),
@@ -178,6 +183,7 @@ public class RobotCompletionContributor extends CompletionContributor {
                });
         extend(CompletionType.BASIC,
                PlatformPatterns.psiElement()
+                               .andNot(withTagsWithoutCodeCompletionSupport())
                                .andNot(PlatformPatterns.psiComment())
                                .andNot(withArgumentInKeywordStatement())
                                .inFile(PlatformPatterns.psiElement(RobotFile.class)),
@@ -213,6 +219,7 @@ public class RobotCompletionContributor extends CompletionContributor {
                });
         extend(CompletionType.BASIC,
                PlatformPatterns.psiElement()
+                               .andNot(withTagsWithoutCodeCompletionSupport())
                                .andNot(PlatformPatterns.psiComment())
                                .andNot(withArgumentInKeywordStatement())
                                .inFile(PlatformPatterns.psiElement(RobotFile.class)),
@@ -236,6 +243,7 @@ public class RobotCompletionContributor extends CompletionContributor {
         extend(CompletionType.BASIC,
                PlatformPatterns.psiElement()
                                .andNot(PlatformPatterns.psiComment())
+                               .andNot(withTagsWithoutCodeCompletionSupport())
                                .and(withArgumentInKeywordStatement())
                                .inFile(PlatformPatterns.psiElement(RobotFile.class)),
                new CompletionProvider<>() {
@@ -260,6 +268,7 @@ public class RobotCompletionContributor extends CompletionContributor {
         // Provide completions in context of variables or arguments
         extend(CompletionType.BASIC,
                PlatformPatterns.psiElement()
+                               .andNot(withTagsWithoutCodeCompletionSupport())
                                .andOr(PlatformPatterns.psiElement(RobotTokenTypes.VARIABLE), PlatformPatterns.psiElement(RobotStubTokenTypes.ARGUMENT))
                                .inFile(PlatformPatterns.psiElement(RobotFile.class)),
                new CompletionProvider<>() {
@@ -293,6 +302,12 @@ public class RobotCompletionContributor extends CompletionContributor {
 
     private static PsiElementPattern.Capture<PsiElement> withArgumentInKeywordStatement() {
         return PlatformPatterns.psiElement(RobotStubTokenTypes.ARGUMENT).withAncestor(3, PlatformPatterns.psiElement(RobotStubTokenTypes.KEYWORD_STATEMENT));
+    }
+
+    private static PsiElementPattern.Capture<PsiElement> withTagsWithoutCodeCompletionSupport() {
+        return PlatformPatterns.psiElement(RobotStubTokenTypes.ARGUMENT)
+                               .withAncestor(2,
+                                             PlatformPatterns.psiElement(RobotTokenTypes.BRACKET_SETTING).withName("[Documentation]", "[Tags]", "[Arguments]"));
     }
 
     private static boolean isArgument(PsiElement current) {

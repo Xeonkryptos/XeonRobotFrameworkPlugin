@@ -15,6 +15,7 @@
 - Parsing and handling of custom keywords in robot files with defined input \[Arguments]
 - Fixed parsing issue of variables section: Spaces in a new line without anything else was interpreted as a new variable definition
 - Find Usages to do a reverse reference search for keywords from python functions
+- Don't provide code completion in the following bracket settings: Documentation, Arguments, Tags
 
 ## 0.1.21
 

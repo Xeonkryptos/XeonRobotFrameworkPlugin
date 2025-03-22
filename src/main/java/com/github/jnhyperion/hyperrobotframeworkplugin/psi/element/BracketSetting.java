@@ -1,8 +1,10 @@
 package com.github.jnhyperion.hyperrobotframeworkplugin.psi.element;
 
+import com.intellij.psi.PsiNamedElement;
+
 import java.util.Collection;
 
-public interface BracketSetting extends RobotStatement {
+public interface BracketSetting extends RobotStatement, PsiNamedElement {
 
    /**
     * Determines if the current element is an '[Arguments]' element.
