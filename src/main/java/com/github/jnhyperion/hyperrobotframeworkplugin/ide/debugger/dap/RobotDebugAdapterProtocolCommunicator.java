@@ -20,6 +20,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import static com.intellij.openapi.progress.util.ProgressIndicatorUtils.withTimeout;
 
@@ -68,7 +69,7 @@ public class RobotDebugAdapterProtocolCommunicator implements ProcessListener {
             arguments.setSupportsRunInTerminalRequest(false);
             arguments.setSupportsStartDebuggingRequest(false);
 
-            Capabilities initializeResponse = robotDebugServer.initialize(arguments).get(10L, TimeUnit.SECONDS);
+            Capabilities initializeResponse = robotDebugServer.initialize(arguments).get(5L, TimeUnit.SECONDS);
             initialized = true;
             afterInitialize.fire(null);
 
@@ -79,8 +80,10 @@ public class RobotDebugAdapterProtocolCommunicator implements ProcessListener {
             robotDebugServer.attach(Map.of()).get();
         } catch (IOException e) {
             throw new UncheckedIOException(e);
-        } catch (ExecutionException | InterruptedException | java.util.concurrent.TimeoutException e) {
+        } catch (ExecutionException | InterruptedException e) {
             throw new RuntimeException(e);
+        } catch (TimeoutException e) {
+            throw new RuntimeException("Failed to connect to debug server", e);
         }
     }
 
