@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+## 0.2.0
+
 ### Added
 
 - Added support for Comments section
