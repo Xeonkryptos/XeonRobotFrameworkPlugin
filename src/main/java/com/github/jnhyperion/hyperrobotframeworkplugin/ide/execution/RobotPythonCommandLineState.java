@@ -15,7 +15,6 @@ import com.intellij.execution.ui.ConsoleView;
 import com.intellij.openapi.application.PathManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Key;
-import com.intellij.openapi.util.Ref;
 import com.intellij.util.ArrayUtil;
 import com.intellij.util.net.NetUtils;
 import com.jetbrains.python.PyBundle;
@@ -24,7 +23,6 @@ import com.jetbrains.python.run.CommandLinePatcher;
 import com.jetbrains.python.run.PythonCommandLineState;
 import com.jetbrains.python.run.PythonExecution;
 import com.jetbrains.python.run.PythonImportErrorFilter;
-import com.jetbrains.python.run.PythonModuleExecution;
 import com.jetbrains.python.run.PythonScriptCommandLineState;
 import com.jetbrains.python.run.PythonScriptExecution;
 import com.jetbrains.python.run.PythonScriptTargetedCommandLineBuilder;
@@ -50,7 +48,7 @@ public class RobotPythonCommandLineState extends PythonScriptCommandLineState {
     private static final Path TOOL_DIR = BUNDLED_DIR.resolve("tool");
     private static final Path ROBOTCODE_DIR = TOOL_DIR.resolve("robotcode");
 
-    private static final int DEBUGGER_DEFAULT_PORT = 6612;
+    private static final int DEBUGGER_DEFAULT_PORT = 6611;
 
     @NotNull
     private final RobotRunConfiguration runConfiguration;
@@ -74,19 +72,14 @@ public class RobotPythonCommandLineState extends PythonScriptCommandLineState {
         return super.execute(executor, processStarter, ArrayUtil.append(patchers, commandLine -> {
             ParametersList parametersList = commandLine.getParametersList();
             ParamsGroup moduleGroup = parametersList.getParamsGroup(PythonCommandLineState.GROUP_MODULE);
-            if (moduleGroup != null && moduleGroup.getParameters().contains("robotcode")) {
-                modifyCommandLine(moduleGroup, 1, executionMode);
-            } else {
-                ParamsGroup scriptGroup = parametersList.getParamsGroup(PythonCommandLineState.GROUP_SCRIPT);
-                if (scriptGroup != null && scriptGroup.getParameters().contains("robotcode")) {
-                    modifyCommandLine(scriptGroup, 0, executionMode);
-                }
+            if (moduleGroup != null) {
+                modifyCommandLine(moduleGroup, executionMode);
             }
         }));
     }
 
-    private void modifyCommandLine(ParamsGroup paramsGroup, int scriptIndex, RobotExecutionMode robotExecutionMode) {
-        paramsGroup.getParametersList().set(scriptIndex, ROBOTCODE_DIR + "/robotcode");
+    private void modifyCommandLine(ParamsGroup paramsGroup, RobotExecutionMode robotExecutionMode) {
+        paramsGroup.getParametersList().set(1, ROBOTCODE_DIR + "/robotcode");
         if (robotExecutionMode == RobotExecutionMode.DEBUG) {
             int robotDebugPort = findAvailableSocketPort();
             runConfiguration.putUserData(ROBOT_DEBUG_PORT, robotDebugPort);
@@ -133,24 +126,6 @@ public class RobotPythonCommandLineState extends PythonScriptCommandLineState {
         @Override
         public PythonExecution build(@NotNull HelpersAwareTargetEnvironmentRequest helpersAwareTargetEnvironmentRequest,
                                      @NotNull PythonExecution pythonExecution) {
-            Ref<Boolean> robotCodeModuleRef = new Ref<>(false);
-            pythonExecution.accept(new PythonExecution.Visitor() {
-                @Override
-                public void visit(@NotNull PythonScriptExecution pythonScriptExecution) {
-                    robotCodeModuleRef.set(false);
-                }
-
-                @Override
-                public void visit(@NotNull PythonModuleExecution pythonModuleExecution) {
-                    boolean robotcodeModule = "robotcode".equals(pythonModuleExecution.getModuleName());
-                    robotCodeModuleRef.set(robotcodeModule);
-                }
-            });
-
-            if (!robotCodeModuleRef.get()) {
-                return parentBuilder.build(helpersAwareTargetEnvironmentRequest, pythonExecution);
-            }
-
             List<Function<TargetEnvironment, String>> additionalParameters = new ArrayList<>();
             if (executionMode == RobotExecutionMode.DEBUG) {
                 int robotDebugPort = findAvailableSocketPort();
