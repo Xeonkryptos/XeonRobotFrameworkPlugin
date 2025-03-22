@@ -1,7 +1,7 @@
 import io.gitlab.arturbosch.detekt.Detekt
 import org.jetbrains.changelog.markdownToHTML
 import org.jetbrains.intellij.platform.gradle.tasks.PrepareSandboxTask
-import org.jetbrains.kotlin.gradle.tasks.UsesKotlinJavaToolchain
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 fun properties(key: String) = project.findProperty(key).toString()
 
@@ -22,6 +22,10 @@ plugins {
 
 group = properties("pluginGroup")
 version = properties("pluginVersion")
+
+kotlin {
+    jvmToolchain(21)
+}
 
 // Configure project's dependencies
 repositories {
@@ -113,6 +117,12 @@ tasks {
         targetCompatibility = "21"
     }
 
+    withType<KotlinCompile> {
+        kotlinOptions {
+            jvmTarget = "21"
+        }
+    }
+
     withType<Detekt> {
         jvmTarget = "21"
     }
@@ -126,12 +136,4 @@ tasks {
             into(pluginName.map { "$it/data" })
         }
     }
-}
-
-val service = project.extensions.getByType<JavaToolchainService>()
-val customLauncher = service.launcherFor {
-    languageVersion.set(JavaLanguageVersion.of(21))
-}
-project.tasks.withType<UsesKotlinJavaToolchain>().configureEach {
-    kotlinJavaToolchain.toolchain.use(customLauncher)
 }
