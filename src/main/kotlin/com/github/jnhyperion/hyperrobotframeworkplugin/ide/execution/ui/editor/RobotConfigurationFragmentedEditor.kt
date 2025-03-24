@@ -17,8 +17,7 @@ import java.awt.BorderLayout
 import java.awt.event.ComponentAdapter
 import java.awt.event.ComponentEvent
 
-class RobotConfigurationFragmentedEditor(val runConfiguration: RobotRunConfiguration) :
-    RunConfigurationFragmentedEditor<RobotRunConfiguration>(runConfiguration) {
+class RobotConfigurationFragmentedEditor(private val runConfiguration: RobotRunConfiguration) : RunConfigurationFragmentedEditor<RobotRunConfiguration>(runConfiguration) {
 
     override fun createRunFragments(): MutableList<SettingsEditorFragment<RobotRunConfiguration, *>> {
         val fragments: MutableList<SettingsEditorFragment<RobotRunConfiguration, *>> = ArrayList()
@@ -39,8 +38,7 @@ class RobotConfigurationFragmentedEditor(val runConfiguration: RobotRunConfigura
     }
 
     private fun createEnvironmentFragments(
-        fragments: MutableList<SettingsEditorFragment<RobotRunConfiguration, *>>,
-        runConfiguration: RobotRunConfiguration
+        fragments: MutableList<SettingsEditorFragment<RobotRunConfiguration, *>>, runConfiguration: RobotRunConfiguration
     ) {
         RobotPluginCommonFragmentsBuilder().createEnvironmentFragments(fragments, runConfiguration)
     }
@@ -53,9 +51,10 @@ class RobotConfigurationFragmentedEditor(val runConfiguration: RobotRunConfigura
                 "py.script.parameters",
                 PyBundle.message("python.run.configuration.fragments.script.parameters"),
                 PyBundle.message("python.run.configuration.fragments.python.group"),
-                parametersEditor, SettingsEditorFragmentType.COMMAND_LINE,
-                { config: RobotRunConfiguration, field: RawCommandLineEditor -> field.text = config.scriptParameters },
-                { config: RobotRunConfiguration, field: RawCommandLineEditor -> config.scriptParameters = field.text.trim() },
+                parametersEditor,
+                SettingsEditorFragmentType.COMMAND_LINE,
+                { config: RobotRunConfiguration, field: RawCommandLineEditor -> field.text = config.pythonRunConfiguration.scriptParameters },
+                { config: RobotRunConfiguration, field: RawCommandLineEditor -> config.pythonRunConfiguration.scriptParameters = field.text.trim() },
                 { true })
         MacrosDialog.addMacroSupport(parametersEditor.editorField, MacrosDialog.Filters.ALL) { false }
         parametersEditor.editorField.emptyText.setText(PyBundle.message("python.run.configuration.fragments.script.parameters.hint"))
@@ -85,8 +84,7 @@ class RobotConfigurationFragmentedEditor(val runConfiguration: RobotRunConfigura
         val inputFile = TextFieldWithBrowseButton()
         inputFile.addBrowseFolderListener(
             TextBrowseFolderListener(
-                FileChooserDescriptorFactory.createSingleFileDescriptor(),
-                runConfiguration.project
+                FileChooserDescriptorFactory.createSingleFileDescriptor(), runConfiguration.project
             )
         )
         val labeledComponent = LabeledComponent.create<TextFieldWithBrowseButton>(inputFile, ExecutionBundle.message("redirect.input.from"))
@@ -173,8 +171,7 @@ class RobotConfigurationFragmentedEditor(val runConfiguration: RobotRunConfigura
     }
 
     private fun addToFragmentsBeforeEditors(
-        fragments: MutableList<SettingsEditorFragment<RobotRunConfiguration, *>>,
-        newFragment: SettingsEditorFragment<RobotRunConfiguration, *>
+        fragments: MutableList<SettingsEditorFragment<RobotRunConfiguration, *>>, newFragment: SettingsEditorFragment<RobotRunConfiguration, *>
     ) {
         // Q: not sure whether it makes sense to make it more generic, not only for EDITOR type
         val index = fragments.indexOfFirst { it.isEditor }

@@ -42,11 +42,11 @@ public class RobotRunConfigurationProducer extends LazyRunConfigurationProducer<
         if (isValidRobotExecutableScript(context)) {
             String workingDirectory = getWorkingDirectoryToUse(runConfig);
             String runParam = getRunParameters(context, workingDirectory);
-            runConfig.setWorkingDirectory(context.getProject().getBasePath());
-            runConfig.setScriptParameters(runParam);
+            runConfig.getPythonRunConfiguration().setWorkingDirectory(context.getProject().getBasePath());
+            runConfig.getPythonRunConfiguration().setScriptParameters(runParam);
             Sdk sdk = ProjectRootManager.getInstance(context.getProject()).getProjectSdk();
             if (sdk != null) {
-                runConfig.setSdk(sdk);
+                runConfig.getPythonRunConfiguration().setSdk(sdk);
             }
             runConfig.setName(getRunDisplayName(context));
             return true;
@@ -59,7 +59,7 @@ public class RobotRunConfigurationProducer extends LazyRunConfigurationProducer<
         if (isValidRobotExecutableScript(context)) {
             String workingDirectory = getWorkingDirectoryToUse(runConfig);
             String runParam = getRunParameters(context, workingDirectory);
-            boolean ret = runParam.trim().equals(runConfig.getScriptParameters().trim());
+            boolean ret = runParam.trim().equals(runConfig.getPythonRunConfiguration().getScriptParameters().trim());
             if (ret) {
                 runConfig.setName(getRunDisplayName(context));
             }
@@ -69,9 +69,9 @@ public class RobotRunConfigurationProducer extends LazyRunConfigurationProducer<
     }
 
     private String getWorkingDirectoryToUse(@NotNull RobotRunConfiguration runConfig) {
-        String workingDirectory = runConfig.getWorkingDirectory();
+        String workingDirectory = runConfig.getPythonRunConfiguration().getWorkingDirectory();
         if (workingDirectory == null || workingDirectory.isEmpty()) {
-            workingDirectory = runConfig.getWorkingDirectorySafe();
+            workingDirectory = runConfig.getPythonRunConfiguration().getWorkingDirectorySafe();
         }
         return workingDirectory;
     }

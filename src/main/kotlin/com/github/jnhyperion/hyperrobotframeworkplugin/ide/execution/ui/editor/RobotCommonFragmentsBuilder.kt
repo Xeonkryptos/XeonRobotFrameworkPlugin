@@ -19,8 +19,7 @@ import javax.swing.JComponent
 
 abstract class RobotCommonFragmentsBuilder {
     abstract fun createEnvironmentFragments(
-        fragments: MutableList<SettingsEditorFragment<RobotRunConfiguration, *>>,
-        config: RobotRunConfiguration
+        fragments: MutableList<SettingsEditorFragment<RobotRunConfiguration, *>>, config: RobotRunConfiguration
     )
 
     fun createWorkingDirectoryFragment(
@@ -31,15 +30,18 @@ abstract class RobotCommonFragmentsBuilder {
         val descriptor = FileChooserDescriptorFactory.createSingleFolderDescriptor().withTitle(ExecutionBundle.message("select.working.directory.message"))
         workingDirectoryField.addBrowseFolderListener(project, descriptor, TextComponentAccessor.TEXT_FIELD_WHOLE_TEXT)
         val field = LabeledComponent.create(
-            workingDirectoryField,
-            ExecutionBundle.message("run.configuration.working.directory.label"),
-            BorderLayout.WEST
+            workingDirectoryField, ExecutionBundle.message("run.configuration.working.directory.label"), BorderLayout.WEST
         )
         val workingDirectorySettings = SettingsEditorFragment(
             "workingDirectory",
-            ExecutionBundle.message("run.configuration.working.directory.name"), null, field,
-            { config: RobotRunConfiguration, component: LabeledComponent<TextFieldWithBrowseButton> -> component.component.text = config.workingDirectory },
-            { config: RobotRunConfiguration, component: LabeledComponent<TextFieldWithBrowseButton> -> config.workingDirectory = component.component.text },
+            ExecutionBundle.message("run.configuration.working.directory.name"),
+            null,
+            field,
+            { config: RobotRunConfiguration, component: LabeledComponent<TextFieldWithBrowseButton> ->
+                component.component.text =
+                    config.pythonRunConfiguration.workingDirectory
+            },
+            { config: RobotRunConfiguration, component: LabeledComponent<TextFieldWithBrowseButton> -> config.pythonRunConfiguration.workingDirectory = component.component.text },
             Predicates.alwaysTrue()
         )
         MacrosDialog.addMacroSupport(workingDirectoryField.textField as ExtendableTextField, MacrosDialog.Filters.ALL) { false }
@@ -55,7 +57,8 @@ abstract class RobotCommonFragmentsBuilder {
         val fragment = SettingsEditorFragment<RobotRunConfiguration, JComponent>(
             "environmentVariables",
             ExecutionBundle.message("environment.variables.fragment.name"),
-            ExecutionBundle.message("group.operating.system"), env,
+            ExecutionBundle.message("group.operating.system"),
+            env,
             { config: RobotRunConfiguration, _: JComponent? ->
                 env.envs = config.envs
                 env.isPassParentEnvs = config.isPassParentEnvs

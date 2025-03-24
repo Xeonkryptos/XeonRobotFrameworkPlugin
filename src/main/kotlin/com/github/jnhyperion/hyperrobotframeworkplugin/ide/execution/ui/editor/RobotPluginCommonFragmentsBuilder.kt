@@ -19,7 +19,7 @@ class RobotPluginCommonFragmentsBuilder : RobotCommonFragmentsBuilder() {
 
         fragments.add(createWorkingDirectoryFragment(config.project))
         fragments.add(createEnvParameters())
-        fragments.add(createEnvFilesFragment { VirtualFileManager.getInstance().findFileByNioPath(Path(config.workingDirectorySafe)) })
+        fragments.add(createEnvFilesFragment { VirtualFileManager.getInstance().findFileByNioPath(Path(config.pythonRunConfiguration.workingDirectorySafe)) })
         fragments.add(RobotPathMappingsEditorFragment(sdkFragment as PyInterpreterModeNotifier))
     }
 }

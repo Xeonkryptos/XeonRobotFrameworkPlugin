@@ -121,7 +121,7 @@ class RobotPluginSdkFragment : SettingsEditorFragment<RobotRunConfiguration, JPa
       s.pythonRunConfiguration.module = module
       module?.let {
         val moduleSdk = ModuleRootManager.getInstance(it).sdk
-          s.sdk = moduleSdk
+          s.pythonRunConfiguration.sdk = moduleSdk
       }
     }
     else if (currentMode == SDK_FROM_LIST) {

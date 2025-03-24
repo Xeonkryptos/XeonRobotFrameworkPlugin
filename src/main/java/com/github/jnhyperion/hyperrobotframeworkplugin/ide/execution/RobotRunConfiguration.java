@@ -11,7 +11,6 @@ import com.intellij.execution.runners.ExecutionEnvironment;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.options.SettingsEditor;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.projectRoots.Sdk;
 import com.intellij.openapi.util.InvalidDataException;
 import com.intellij.openapi.util.WriteExternalException;
 import com.jetbrains.python.run.AbstractPythonRunConfiguration;
@@ -80,42 +79,5 @@ public class RobotRunConfiguration extends AbstractRunConfiguration implements E
 
     public PythonRunConfiguration getPythonRunConfiguration() {
         return pythonRunConfiguration;
-    }
-
-    /**
-     * Note to inheritors: Always check {@link #getWorkingDirectory()} first. You should return it, if it is not empty since
-     * user should be able to set dir explicitly. Then, do your guess and return super as last resort.
-     *
-     * @return working directory to run, never null, does its best to guess which dir to use.
-     * Unlike {@link #getWorkingDirectory()} it does not simply take directory from config.
-     */
-    @NotNull
-    public String getWorkingDirectorySafe() {
-        return pythonRunConfiguration.getWorkingDirectorySafe();
-    }
-
-    public String getWorkingDirectory() {
-        return pythonRunConfiguration.getWorkingDirectory();
-    }
-
-    public void setWorkingDirectory(String workingDirectory) {
-        pythonRunConfiguration.setWorkingDirectory(workingDirectory);
-    }
-
-    public String getScriptParameters() {
-        return pythonRunConfiguration.getScriptParameters();
-    }
-
-    public void setScriptParameters(String scriptParameters) {
-        pythonRunConfiguration.setScriptParameters(scriptParameters);
-    }
-
-    @SuppressWarnings("unused") // Used in Kotlin code
-    public Sdk getSdk() {
-        return pythonRunConfiguration.getSdk();
-    }
-
-    public void setSdk(Sdk sdk) {
-        pythonRunConfiguration.setSdk(sdk);
     }
 }

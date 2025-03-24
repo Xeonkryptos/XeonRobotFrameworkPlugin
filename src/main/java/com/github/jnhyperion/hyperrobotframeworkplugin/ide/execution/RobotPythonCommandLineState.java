@@ -185,10 +185,12 @@ public class RobotPythonCommandLineState extends PythonScriptCommandLineState {
                 try {
                     //noinspection WaitNotInLoop
                     serverSocket.wait(1);
-                } catch (InterruptedException ignored) {}
+                } catch (InterruptedException ignored) {
+                }
             }
             return serverSocket.getLocalPort();
-        } catch (Exception ignored) {}
+        } catch (Exception ignored) {
+        }
         try {
             return NetUtils.findAvailableSocketPort();
         } catch (IOException e) {
