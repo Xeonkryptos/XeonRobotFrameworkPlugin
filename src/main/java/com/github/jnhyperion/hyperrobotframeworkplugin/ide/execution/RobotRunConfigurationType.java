@@ -46,4 +46,9 @@ public class RobotRunConfigurationType implements ConfigurationType {
     public final RobotConfigurationFactory getConfigurationFactory() {
         return this.configurationFactory;
     }
+
+    @Override
+    public boolean isDumbAware() {
+        return true;
+    }
 }

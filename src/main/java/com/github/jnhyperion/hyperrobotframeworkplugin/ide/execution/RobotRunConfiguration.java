@@ -34,6 +34,7 @@ public class RobotRunConfiguration extends AbstractRunConfiguration implements E
         pythonRunConfiguration.setUseModuleSdk(true);
         pythonRunConfiguration.setModuleMode(true);
         pythonRunConfiguration.setScriptName("robotcode");
+        pythonRunConfiguration.setEmulateTerminal(false);
     }
 
     @Override
