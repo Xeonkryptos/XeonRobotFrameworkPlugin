@@ -57,8 +57,10 @@ public class RobotPythonCommandLineState extends PythonScriptCommandLineState {
         super(runConfiguration.getPythonRunConfiguration(), env);
 
         this.runConfiguration = runConfiguration;
+        this.setMultiprocessDebug(true);
     }
 
+    // Overridden to provide access to the method from another class (it is protected otherwise)
     @NotNull
     @Override
     public ProcessHandler startProcess() throws ExecutionException {
@@ -97,15 +99,14 @@ public class RobotPythonCommandLineState extends PythonScriptCommandLineState {
     @Override
     protected ConsoleView createAndAttachConsole(Project project, ProcessHandler processHandler, Executor executor) {
         AbstractPythonRunConfiguration<?> config = getConfig();
-        ConsoleView consoleView = RobotTestRunnerFactory.createConsoleView(config, executor);
-        consoleView.attachToProcess(processHandler);
+        ConsoleView smtRunnerConsoleView = RobotTestRunnerFactory.createConsoleView(config, executor);
+        smtRunnerConsoleView.attachToProcess(processHandler);
 
-        consoleView.addMessageFilter(createUrlFilter(processHandler));
-        consoleView.addMessageFilter(new PythonImportErrorFilter(project));
+        smtRunnerConsoleView.addMessageFilter(createUrlFilter(processHandler));
+        smtRunnerConsoleView.addMessageFilter(new PythonImportErrorFilter(project));
 
-        addTracebackFilter(project, consoleView, processHandler);
-
-        return consoleView;
+        addTracebackFilter(project, smtRunnerConsoleView, processHandler);
+        return smtRunnerConsoleView;
     }
 
     @Nullable

@@ -4,6 +4,10 @@
 
 ## Unreleased
 
+### Fixed
+
+- Fixed issue with debugging of Python code (python debugger holding at breakpoints, but view doesn't show any data like variables and stack frames)
+
 ## 0.2.0
 
 ### Added

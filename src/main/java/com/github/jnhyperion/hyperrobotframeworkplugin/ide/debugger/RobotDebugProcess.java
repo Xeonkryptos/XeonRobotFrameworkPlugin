@@ -1,20 +1,15 @@
 package com.github.jnhyperion.hyperrobotframeworkplugin.ide.debugger;
 
 import com.github.jnhyperion.hyperrobotframeworkplugin.ide.debugger.dap.RobotDebugAdapterProtocolCommunicator;
-import com.intellij.execution.ExecutionResult;
-import com.intellij.execution.process.ProcessHandler;
-import com.intellij.execution.ui.ExecutionConsole;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.util.ArrayUtil;
-import com.intellij.xdebugger.XDebugProcess;
 import com.intellij.xdebugger.XDebugSession;
 import com.intellij.xdebugger.XExpression;
 import com.intellij.xdebugger.XSourcePosition;
 import com.intellij.xdebugger.breakpoints.XBreakpoint;
 import com.intellij.xdebugger.breakpoints.XBreakpointHandler;
 import com.intellij.xdebugger.breakpoints.XLineBreakpoint;
-import com.intellij.xdebugger.evaluation.XDebuggerEditorsProvider;
 import com.intellij.xdebugger.frame.XSuspendContext;
 import com.jetbrains.rd.util.lifetime.Lifetime;
 import org.eclipse.lsp4j.debug.Breakpoint;
@@ -47,11 +42,10 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.locks.ReentrantLock;
 
-public class RobotDebugProcess extends XDebugProcess {
+public class RobotDebugProcess {
 
-    private final RobotDebuggerEditorsProvider editorsProvider = new RobotDebuggerEditorsProvider();
+    private final XDebugSession session;
 
-    private final ExecutionResult executionResult;
     private final RobotDebugAdapterProtocolCommunicator robotDAPCommunicator;
 
     private final List<ExceptionBreakpointInfo> exceptionBreakpoints = new ArrayList<>();
@@ -65,13 +59,9 @@ public class RobotDebugProcess extends XDebugProcess {
 
     private OneTimeBreakpointInfo _oneTimeBreakpointInfo;
 
-    public RobotDebugProcess(@NotNull XDebugSession session, ExecutionResult executionResult, RobotDebugAdapterProtocolCommunicator robotDAPCommunicator) {
-        super(session);
-
-        this.executionResult = executionResult;
+    public RobotDebugProcess(@NotNull XDebugSession session, RobotDebugAdapterProtocolCommunicator robotDAPCommunicator) {
+        this.session = session;
         this.robotDAPCommunicator = robotDAPCommunicator;
-
-        session.setPauseActionSupported(true);
 
         robotDAPCommunicator.getAfterInitialize().advise(Lifetime.Companion.getEternal(), ignore -> {
             ApplicationManager.getApplication().executeOnPooledThread(() -> sendBreakpointRequest());
@@ -88,13 +78,13 @@ public class RobotDebugProcess extends XDebugProcess {
         StackTraceArguments stackTraceArguments = new StackTraceArguments();
         stackTraceArguments.setThreadId(threadId);
         StackTraceResponse stackTraceResponse = debugServer.stackTrace(stackTraceArguments).get(5L, TimeUnit.SECONDS);
-        return new RobotSuspendContext(stackTraceResponse, threadId, debugServer, getSession());
+        return new RobotSuspendContext(stackTraceResponse, threadId, debugServer, session);
     }
 
     private void handleOnStopped(StoppedEventArguments args) {
         try {
             final RobotSuspendContext robotCodeSuspendContext = createRobotCodeSuspendContext(args.getThreadId());
-            if (getSession().areBreakpointsMuted()) {
+            if (session.areBreakpointsMuted()) {
                 ContinueArguments continueArguments = new ContinueArguments();
                 continueArguments.setThreadId(args.getThreadId());
                 robotDAPCommunicator.getDebugServer().continue_(continueArguments).get();
@@ -109,13 +99,13 @@ public class RobotDebugProcess extends XDebugProcess {
                                                    .orElse(null);
 
                     if (bp instanceof LineBreakpointInfo lineBreakpointInfo) {
-                        if (!getSession().breakpointReached(lineBreakpointInfo.breakpoint, null, robotCodeSuspendContext)) {
+                        if (!session.breakpointReached(lineBreakpointInfo.breakpoint, null, robotCodeSuspendContext)) {
                             ContinueArguments continueArguments = new ContinueArguments();
                             continueArguments.setThreadId(args.getThreadId());
                             robotDAPCommunicator.getDebugServer().continue_(continueArguments).get();
                         }
                     } else {
-                        getSession().positionReached(robotCodeSuspendContext);
+                        session.positionReached(robotCodeSuspendContext);
                     }
                 }
                 case "exception" -> {
@@ -123,18 +113,18 @@ public class RobotDebugProcess extends XDebugProcess {
                     ExceptionBreakpointInfo exceptionBreakpointInfo = null;
                     try {
                         if (!exceptionBreakpoints.isEmpty()) {
-                            exceptionBreakpointInfo = exceptionBreakpoints.get(0);
+                            exceptionBreakpointInfo = exceptionBreakpoints.getFirst();
                         }
                     } finally {
                         breakpointsMapMutex.unlock();
                     }
-                    if (exceptionBreakpointInfo == null || !getSession().breakpointReached(exceptionBreakpointInfo.breakpoint, null, robotCodeSuspendContext)) {
+                    if (exceptionBreakpointInfo == null || !session.breakpointReached(exceptionBreakpointInfo.breakpoint, null, robotCodeSuspendContext)) {
                         ContinueArguments continueArguments = new ContinueArguments();
                         continueArguments.setThreadId(args.getThreadId());
                         robotDAPCommunicator.getDebugServer().continue_(continueArguments).get();
                     }
                 }
-                default -> getSession().positionReached(robotCodeSuspendContext);
+                default -> session.positionReached(robotCodeSuspendContext);
             }
             removeCurrentOneTimeBreakpoint();
         } catch (ExecutionException | InterruptedException | TimeoutException e) {
@@ -250,9 +240,9 @@ public class RobotDebugProcess extends XDebugProcess {
 
                     LineBreakpointInfo lineBreakpointInfo = (LineBreakpointInfo) breakpoint;
                     if (responseBreakpoint.isVerified()) {
-                        getSession().setBreakpointVerified(lineBreakpointInfo.breakpoint);
+                        session.setBreakpointVerified(lineBreakpointInfo.breakpoint);
                     } else {
-                        getSession().setBreakpointInvalid(lineBreakpointInfo.breakpoint, "Invalid breakpoint");
+                        session.setBreakpointInvalid(lineBreakpointInfo.breakpoint, "Invalid breakpoint");
                     }
                 }
             });
@@ -272,7 +262,6 @@ public class RobotDebugProcess extends XDebugProcess {
         }
     }
 
-    @Override
     public void startStepOver(@Nullable XSuspendContext context) {
         if (context instanceof RobotSuspendContext robotSuspendContext) {
             NextArguments nextArguments = new NextArguments();
@@ -285,7 +274,6 @@ public class RobotDebugProcess extends XDebugProcess {
         }
     }
 
-    @Override
     public void startStepInto(@Nullable XSuspendContext context) {
         if (context instanceof RobotSuspendContext robotSuspendContext) {
             StepInArguments stepInArguments = new StepInArguments();
@@ -298,7 +286,6 @@ public class RobotDebugProcess extends XDebugProcess {
         }
     }
 
-    @Override
     public void startStepOut(@Nullable XSuspendContext context) {
         if (context instanceof RobotSuspendContext robotSuspendContext) {
             StepOutArguments stepOutArguments = new StepOutArguments();
@@ -311,7 +298,6 @@ public class RobotDebugProcess extends XDebugProcess {
         }
     }
 
-    @Override
     public void runToPosition(@NotNull XSourcePosition position, @Nullable XSuspendContext context) {
         if (!breakpointMap.containsKey(position.getFile())) {
             breakpointMap.put(position.getFile(), new LinkedHashMap<>());
@@ -329,7 +315,6 @@ public class RobotDebugProcess extends XDebugProcess {
         resume(context);
     }
 
-    @Override
     public void startPausing() {
         PauseArguments pauseArguments = new PauseArguments();
         pauseArguments.setThreadId(0);
@@ -340,7 +325,6 @@ public class RobotDebugProcess extends XDebugProcess {
         }
     }
 
-    @Override
     public void resume(@Nullable XSuspendContext context) {
         if (context instanceof RobotSuspendContext robotSuspendContext) {
             ContinueArguments continueArguments = new ContinueArguments();
@@ -353,7 +337,6 @@ public class RobotDebugProcess extends XDebugProcess {
         }
     }
 
-    @Override
     public void stop() {
         try {
             TerminateArguments terminateArguments = new TerminateArguments();
@@ -364,27 +347,8 @@ public class RobotDebugProcess extends XDebugProcess {
         }
     }
 
-    @Override
     public XBreakpointHandler<?> @NotNull [] getBreakpointHandlers() {
         return new XBreakpointHandler[] { breakpointHandler, exceptionBreakpointHandler };
-    }
-
-    @Nullable
-    @Override
-    protected ProcessHandler doGetProcessHandler() {
-        return executionResult.getProcessHandler();
-    }
-
-    @NotNull
-    @Override
-    public ExecutionConsole createConsole() {
-        return executionResult.getExecutionConsole();
-    }
-
-    @NotNull
-    @Override
-    public XDebuggerEditorsProvider getEditorsProvider() {
-        return editorsProvider;
     }
 
     private static class BreakPointInfo {

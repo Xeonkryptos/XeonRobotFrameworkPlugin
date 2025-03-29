@@ -11,14 +11,16 @@ import com.intellij.execution.configurations.RunProfileState;
 import com.intellij.execution.configurations.RunnerSettings;
 import com.intellij.execution.executors.DefaultDebugExecutor;
 import com.intellij.execution.process.ProcessEvent;
+import com.intellij.execution.process.ProcessHandler;
 import com.intellij.execution.runners.ExecutionEnvironment;
 import com.intellij.execution.runners.ProgramRunner;
+import com.intellij.execution.ui.ExecutionConsole;
 import com.intellij.execution.ui.RunContentDescriptor;
-import com.intellij.openapi.project.Project;
-import com.intellij.xdebugger.XDebugProcess;
-import com.intellij.xdebugger.XDebugProcessStarter;
+import com.intellij.util.ArrayUtil;
 import com.intellij.xdebugger.XDebugSession;
-import com.intellij.xdebugger.XDebuggerManager;
+import com.intellij.xdebugger.XSourcePosition;
+import com.intellij.xdebugger.breakpoints.XBreakpointHandler;
+import com.intellij.xdebugger.frame.XSuspendContext;
 import com.jetbrains.python.debugger.PyDebugProcess;
 import com.jetbrains.python.debugger.PyDebugRunner;
 import com.jetbrains.python.run.PythonCommandLineState;
@@ -30,8 +32,6 @@ import org.jetbrains.concurrency.Promise;
 import java.net.ServerSocket;
 
 public class RobotDebugRunner implements ProgramRunner<RunnerSettings> {
-
-    private final PyDebugRunner pyDebugRunner = new CustomPyDebugRunner();
 
     @NonNls
     @NotNull
@@ -47,12 +47,12 @@ public class RobotDebugRunner implements ProgramRunner<RunnerSettings> {
 
     @Override
     public void execute(@NotNull ExecutionEnvironment environment) throws ExecutionException {
-        pyDebugRunner.execute(environment);
+        new CustomPyDebugRunner().execute(environment);
     }
 
     private static class CustomPyDebugRunner extends PyDebugRunner {
 
-        private ExecutionResult executionResult;
+        private RobotPythonCommandLineState robotPythonCommandLineState;
 
         @NotNull
         @Override
@@ -61,31 +61,8 @@ public class RobotDebugRunner implements ProgramRunner<RunnerSettings> {
             if (state instanceof RobotCommandLineState) {
                 state = new RobotPythonCommandLineState(((RobotCommandLineState) state).getRobotRunConfiguration(), environment);
             }
-            final RobotPythonCommandLineState robotPythonCommandLineState = (RobotPythonCommandLineState) state;
-            return super.execute(environment, state).then(result -> {
-                Project project = environment.getProject();
-                try {
-                    XDebuggerManager debuggerManager = XDebuggerManager.getInstance(project);
-                    Integer robotDebugPort = robotPythonCommandLineState.getRobotDebugPort();
-                    RobotDebugAdapterProtocolCommunicator robotDebugAdapterProtocolCommunicator = new RobotDebugAdapterProtocolCommunicator(robotDebugPort);
-                    RunContentDescriptor runContentDescriptor = debuggerManager.startSession(environment, new XDebugProcessStarter() {
-                        @NotNull
-                        @Override
-                        public XDebugProcess start(@NotNull final XDebugSession session) {
-                            return new RobotDebugProcess(session, executionResult, robotDebugAdapterProtocolCommunicator);
-                        }
-                    }).getRunContentDescriptor();
-
-                    executionResult.getProcessHandler().addProcessListener(robotDebugAdapterProtocolCommunicator);
-                    // Usually, startNotified would be called by the ProcessHandler itself and in reality, it is called by it. Sadly, when we're reaching this point,
-                    // the process is already running and the method called. Therefore, we have to emulate the call ourselves to connect to our debug server
-                    robotDebugAdapterProtocolCommunicator.startNotified(new ProcessEvent(executionResult.getProcessHandler()));
-
-                    return runContentDescriptor;
-                } catch (ExecutionException e) {
-                    throw new RuntimeException(e);
-                }
-            });
+            robotPythonCommandLineState = (RobotPythonCommandLineState) state;
+            return super.execute(environment, state);
         }
 
         @NotNull
@@ -94,14 +71,126 @@ public class RobotDebugRunner implements ProgramRunner<RunnerSettings> {
                                                     ServerSocket serverSocket,
                                                     ExecutionResult result,
                                                     PythonCommandLineState pyState) {
-            executionResult = result;
-            return super.createDebugProcess(session, serverSocket, result, pyState);
+            return new MyPyDebugProcess(session,
+                                        serverSocket,
+                                        result.getExecutionConsole(),
+                                        result.getProcessHandler(),
+                                        pyState.isMultiprocessDebug(),
+                                        robotPythonCommandLineState);
+        }
+
+        @NotNull
+        @Override
+        protected PyDebugProcess createDebugProcess(@NotNull XDebugSession session, int serverPort, ExecutionResult result) {
+            return new MyPyDebugProcess(session, result, serverPort, robotPythonCommandLineState);
+        }
+    }
+
+    private static class MyPyDebugProcess extends PyDebugProcess {
+
+        private final RobotPythonCommandLineState robotPythonCommandLineState;
+
+        private final RobotDebugProcess robotDebugProcess;
+
+        public MyPyDebugProcess(@NotNull XDebugSession session,
+                                @NotNull ServerSocket serverSocket,
+                                @NotNull ExecutionConsole executionConsole,
+                                @Nullable ProcessHandler processHandler,
+                                boolean multiProcess,
+                                RobotPythonCommandLineState robotPythonCommandLineState) {
+            super(session, serverSocket, executionConsole, processHandler, multiProcess);
+
+            this.robotPythonCommandLineState = robotPythonCommandLineState;
+            this.robotDebugProcess = initRobotProcess();
+        }
+
+        public MyPyDebugProcess(@NotNull XDebugSession session,
+                                ExecutionResult result,
+                                int serverPort,
+                                RobotPythonCommandLineState robotPythonCommandLineState) {
+            super(session, result.getExecutionConsole(), result.getProcessHandler(), "localhost", serverPort);
+
+            this.robotPythonCommandLineState = robotPythonCommandLineState;
+            this.robotDebugProcess = initRobotProcess();
+        }
+
+        private RobotDebugProcess initRobotProcess() {
+            Integer robotDebugPort = robotPythonCommandLineState.getRobotDebugPort();
+            RobotDebugAdapterProtocolCommunicator robotDebugAdapterProtocolCommunicator = new RobotDebugAdapterProtocolCommunicator(robotDebugPort);
+            RobotDebugProcess robotDebugProcess = new RobotDebugProcess(getSession(), robotDebugAdapterProtocolCommunicator);
+
+            ProcessHandler processHandler = getProcessHandler();
+            processHandler.addProcessListener(robotDebugAdapterProtocolCommunicator);
+            if (processHandler.isStartNotified()) {
+                // Usually, startNotified would be called by the ProcessHandler itself and in reality, it is called by it. Sadly, when we're reaching this point,
+                // the process is already running and the method called. Therefore, we have to emulate the call ourselves to connect to our debug server
+                robotDebugAdapterProtocolCommunicator.startNotified(new ProcessEvent(processHandler));
+            }
+            return robotDebugProcess;
         }
 
         @Override
-        protected @NotNull PyDebugProcess createDebugProcess(@NotNull XDebugSession session, int serverPort, ExecutionResult result) {
-            executionResult = result;
-            return super.createDebugProcess(session, serverPort, result);
+        public XBreakpointHandler<?> @NotNull [] getBreakpointHandlers() {
+            XBreakpointHandler<?>[] pythonBreakpointHandlers = super.getBreakpointHandlers();
+            XBreakpointHandler<?>[] robotBreakpointHandlers = robotDebugProcess.getBreakpointHandlers();
+            return ArrayUtil.mergeArrays(pythonBreakpointHandlers, robotBreakpointHandlers);
+        }
+
+        @Override
+        public void startStepOver(@Nullable XSuspendContext context) {
+            if (context instanceof RobotSuspendContext) {
+                robotDebugProcess.startStepOver(context);
+            } else {
+                super.startStepOver(context);
+            }
+        }
+
+        @Override
+        public void startStepInto(@Nullable XSuspendContext context) {
+            if (context instanceof RobotSuspendContext) {
+                robotDebugProcess.startStepInto(context);
+            } else {
+                super.startStepInto(context);
+            }
+        }
+
+        @Override
+        public void startStepOut(@Nullable XSuspendContext context) {
+            if (context instanceof RobotSuspendContext) {
+                robotDebugProcess.startStepOut(context);
+            } else {
+                super.startStepOut(context);
+            }
+        }
+
+        @Override
+        public void runToPosition(@NotNull XSourcePosition position, @Nullable XSuspendContext context) {
+            if (context instanceof RobotSuspendContext) {
+                robotDebugProcess.runToPosition(position, context);
+            } else {
+                super.runToPosition(position, context);
+            }
+        }
+
+        @Override
+        public void resume(@Nullable XSuspendContext context) {
+            if (context instanceof RobotSuspendContext) {
+                robotDebugProcess.resume(context);
+            } else {
+                super.resume(context);
+            }
+        }
+
+        @Override
+        public void startPausing() {
+            robotDebugProcess.startPausing();
+            super.startPausing();
+        }
+
+        @Override
+        public void stop() {
+            robotDebugProcess.stop();
+            super.stop();
         }
     }
 }

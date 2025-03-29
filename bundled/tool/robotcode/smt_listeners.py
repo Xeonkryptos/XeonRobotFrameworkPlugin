@@ -27,10 +27,6 @@ class RobotIntellijListener:
             print(f"##teamcity[testIgnored name='{escape_name(data.name)}' nodeId='{data.id}' parentNodeId='{data.parent.id}' locationHint='{location}']")
         print(f"##teamcity[testFinished name='{escape_name(data.name)}' nodeId='{data.id}' parentNodeId='{data.parent.id}' locationHint='{location}' duration='{duration}']")
 
-    def log_message(self, message):
-        if message.level == 'WARN':
-            print(f"{message.message}")
-
 def escape_name(name):
     # Escape special characters for TeamCity service messages
     return name.replace('|', '||').replace("'", "|'").replace("\n", "|n").replace("\r", "|r")

@@ -97,6 +97,7 @@ public class RobotDebugAdapterProtocolCommunicator implements ProcessListener {
 
     @Override
     public void processTerminated(@NotNull ProcessEvent event) {
+        event.getProcessHandler().removeProcessListener(this);
         if (socket != null) {
             try {
                 socket.close();
