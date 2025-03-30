@@ -23,6 +23,7 @@ import com.jetbrains.python.run.CommandLinePatcher;
 import com.jetbrains.python.run.PythonCommandLineState;
 import com.jetbrains.python.run.PythonExecution;
 import com.jetbrains.python.run.PythonImportErrorFilter;
+import com.jetbrains.python.run.PythonRunConfiguration;
 import com.jetbrains.python.run.PythonScriptCommandLineState;
 import com.jetbrains.python.run.PythonScriptExecution;
 import com.jetbrains.python.run.PythonScriptTargetedCommandLineBuilder;
@@ -37,6 +38,7 @@ import java.nio.charset.Charset;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
 
 public class RobotPythonCommandLineState extends PythonScriptCommandLineState {
@@ -95,6 +97,14 @@ public class RobotPythonCommandLineState extends PythonScriptCommandLineState {
         }
     }
 
+    @Override
+    public void customizeEnvironmentVars(Map<String, String> envs, boolean passParentEnvs) {
+        super.customizeEnvironmentVars(envs, passParentEnvs);
+        if (((PythonRunConfiguration) getConfig()).emulateTerminal()) {
+            envs.put("NO_TEAMCITY", "1");
+        }
+    }
+
     @NotNull
     @Override
     protected ConsoleView createAndAttachConsole(Project project, ProcessHandler processHandler, Executor executor) {
@@ -114,8 +124,8 @@ public class RobotPythonCommandLineState extends PythonScriptCommandLineState {
     @SuppressWarnings("UnstableApiUsage") // Might be unstable at the moment, but is an important extension point
     public ExecutionResult execute(@NotNull Executor executor, @NotNull PythonScriptTargetedCommandLineBuilder converter) throws ExecutionException {
         final RobotExecutionMode executionMode = computeRobotExecutionMode(executor);
-        return super.execute(executor,
-                             new MyPythonScriptTargetedCommandLineBuilder(converter, runConfiguration, executionMode));
+        var wrappedConverter = new MyPythonScriptTargetedCommandLineBuilder(converter, runConfiguration, executionMode);
+        return super.execute(executor, wrappedConverter);
     }
 
     @SuppressWarnings("UnstableApiUsage") // Might be unstable at the moment, but is an important extension point
@@ -146,6 +156,10 @@ public class RobotPythonCommandLineState extends PythonScriptCommandLineState {
             delegateExecution.setPythonScriptPath(TargetEnvironmentFunctions.constant(ROBOTCODE_DIR.toString()));
             List<Function<TargetEnvironment, String>> parameters = delegateExecution.getParameters();
             parameters.addAll(0, additionalParameters);
+
+            if (configuration.getPythonRunConfiguration().emulateTerminal()) {
+                delegateExecution.addEnvironmentVariable("NO_TEAMCITY", "1");
+            }
 
             return parentBuilder.build(helpersAwareTargetEnvironmentRequest, delegateExecution);
         }

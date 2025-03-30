@@ -3,7 +3,6 @@ import pathlib
 import site
 import sys
 
-
 def update_sys_path(path_to_add: str, strategy: str) -> None:
     if path_to_add not in sys.path and pathlib.Path(path_to_add).is_dir():
         if any(p for p in pathlib.Path(path_to_add).iterdir() if p.suffix == ".pth"):
@@ -27,9 +26,10 @@ if __name__ == "__main__":
     if module_dir not in sys.path:
         sys.path.insert(0, module_dir)
 
-    # Use module name with dot notation
-    insert_pos = 2
-    sys.argv.insert(insert_pos, "--listener=smt_listeners.RobotIntellijListener")
+    if os.getenv("NO_TEAMCITY", '0').lower() not in ('true', '1', 'yes'):
+        # Use module name with dot notation
+        insert_pos = 2
+        sys.argv.insert(insert_pos, "--listener=smt_listeners.RobotIntellijListener")
 
     from robotcode.cli import robotcode
 
