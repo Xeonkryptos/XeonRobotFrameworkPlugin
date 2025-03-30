@@ -4,9 +4,12 @@
 
 ## Unreleased
 
+## 0.2.1
+
 ### Fixed
 
 - Fixed issue with debugging of Python code (python debugger holding at breakpoints, but view doesn't show any data like variables and stack frames)
+- Don't show teamcity messages for split view when terminal is emulated and no split-view shown
 
 ## 0.2.0
 
