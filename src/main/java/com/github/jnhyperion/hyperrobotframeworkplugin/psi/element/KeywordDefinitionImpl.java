@@ -166,7 +166,7 @@ public class KeywordDefinitionImpl extends RobotStubPsiElementBase<KeywordDefini
 
     @Override
     public final String getKeywordName() {
-        return getPresentableText();
+        return getName();
     }
 
     @Nullable

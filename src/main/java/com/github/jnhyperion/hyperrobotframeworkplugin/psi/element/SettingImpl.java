@@ -5,17 +5,32 @@ import org.jetbrains.annotations.NotNull;
 
 public class SettingImpl extends RobotPsiElementBase implements Setting {
 
-   public SettingImpl(@NotNull ASTNode node) {
-      super(node);
-   }
+    private final SettingType settingType;
 
-   @Override
-   public final boolean isSuiteTeardown() {
-      return "Suite Teardown".equalsIgnoreCase(this.getPresentableText());
-   }
+    public SettingImpl(@NotNull ASTNode node) {
+        super(node);
 
-   @Override
-   public final boolean isTestTeardown() {
-      return "Test Teardown".equalsIgnoreCase(this.getPresentableText());
-   }
+        String presentableText = getPresentableText();
+        if ("Suite Teardown".equalsIgnoreCase(presentableText)) {
+            settingType = SettingType.SUITE_TEARDOWN;
+        } else if ("Test Teardown".equalsIgnoreCase(presentableText)) {
+            settingType = SettingType.TEST_TEARDOWN;
+        } else {
+            settingType = null;
+        }
+    }
+
+    @Override
+    public final boolean isSuiteTeardown() {
+        return settingType == SettingType.SUITE_TEARDOWN;
+    }
+
+    @Override
+    public final boolean isTestTeardown() {
+        return settingType == SettingType.TEST_TEARDOWN;
+    }
+
+    private enum SettingType {
+        SUITE_TEARDOWN, TEST_TEARDOWN
+    }
 }

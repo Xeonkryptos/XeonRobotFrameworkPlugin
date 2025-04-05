@@ -63,7 +63,7 @@ public class VariableDefinitionImpl extends RobotStubPsiElementBase<VariableDefi
         if (text == null) {
             return false;
         }
-        String myText = getPresentableText();
+        String myText = getName();
         Pattern pattern = this.pattern;
         if (this.pattern == null && !isEmpty()) {
             pattern = Pattern.compile(PatternUtil.getVariablePattern(myText), Pattern.CASE_INSENSITIVE);
@@ -73,7 +73,7 @@ public class VariableDefinitionImpl extends RobotStubPsiElementBase<VariableDefi
     }
 
     private boolean isEmpty() {
-        return getPresentableText().length() <= 3;
+        return getName().length() <= 3;
     }
 
     @Override
@@ -94,7 +94,7 @@ public class VariableDefinitionImpl extends RobotStubPsiElementBase<VariableDefi
 
     @Override
     public final boolean isNested() {
-        String text = getPresentableText();
+        String text = getName();
         return StringUtil.getOccurrenceCount(text, "}") > 1 &&
                StringUtil.getOccurrenceCount(text, "${") + StringUtil.getOccurrenceCount(text, "@{") + StringUtil.getOccurrenceCount(text, "%{") > 1;
     }

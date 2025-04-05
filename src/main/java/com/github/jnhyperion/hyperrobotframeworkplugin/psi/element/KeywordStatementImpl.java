@@ -106,13 +106,13 @@ public class KeywordStatementImpl extends RobotStubPsiElementBase<KeywordStateme
         if (result == null) {
             KeywordInvokable invokable = getInvokable();
             if (invokable != null) {
-                String text = invokable.getPresentableText();
+                String text = invokable.getName();
                 if (PatternUtil.isVariableSettingKeyword(text)) {
                     List<PositionalArgument> positionalArguments = getPositionalArguments();
                     if (!positionalArguments.isEmpty()) {
-                        PositionalArgument variable = positionalArguments.get(0);
+                        PositionalArgument variable = positionalArguments.getFirst();
                         // already formatted ${X}
-                        result = new VariableDto(variable, variable.getPresentableText(), null);
+                        result = new VariableDto(variable, variable.getContent(), null);
                     }
                 }
             }

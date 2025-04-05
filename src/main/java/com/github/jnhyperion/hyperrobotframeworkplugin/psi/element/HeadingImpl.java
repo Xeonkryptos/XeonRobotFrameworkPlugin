@@ -33,6 +33,8 @@ public class HeadingImpl extends RobotPsiElementBase implements Heading {
     private static final String WITH_NAME = "WITH NAME";
     private static final String AS = "AS";
 
+    private final String headerText;
+
     private Collection<KeywordInvokable> invokedKeywords;
     private Collection<Variable> usedVariables;
     private Collection<DefinedKeyword> definedKeywords;
@@ -45,30 +47,32 @@ public class HeadingImpl extends RobotPsiElementBase implements Heading {
 
     public HeadingImpl(@NotNull ASTNode node) {
         super(node);
+
+        headerText = getPresentableText();
     }
 
     @Override
     public final boolean isSettings() {
-        return getPresentableText().startsWith("*** Setting");
+        return headerText.startsWith("*** Setting");
     }
 
     private boolean containsVariables() {
-        return getPresentableText().startsWith("*** Variable");
+        return headerText.startsWith("*** Variable");
     }
 
     @Override
     public final boolean containsTestCases() {
-        return getPresentableText().startsWith("*** Test Case");
+        return headerText.startsWith("*** Test Case");
     }
 
     @Override
     public final boolean containsTasks() {
-        return getPresentableText().equals("*** Tasks ***");
+        return headerText.equals("*** Tasks ***");
     }
 
     @Override
     public final boolean containsKeywordDefinitions() {
-        String text = getPresentableText();
+        String text = headerText;
         return text.startsWith("*** Keyword") || text.startsWith("*** User Keyword");
     }
 
@@ -308,7 +312,7 @@ public class HeadingImpl extends RobotPsiElementBase implements Heading {
                                 PyClass resolution = PythonResolver.castClass(resolved);
                                 if (resolution != null) {
                                     String namespace = getNamespace(importElement, positionalArgument);
-                                    boolean isDifferentNamespace = !positionalArgument.getPresentableText().equals(namespace);
+                                    boolean isDifferentNamespace = !positionalArgument.getContent().equals(namespace);
                                     files.add(new RobotPythonClass(namespace,
                                                                    resolution,
                                                                    ImportType.getType(importElement.getPresentableText()),
@@ -318,7 +322,7 @@ public class HeadingImpl extends RobotPsiElementBase implements Heading {
                                 PyFile file = PythonResolver.castFile(resolved);
                                 if (file != null) {
                                     String namespace = getNamespace(importElement, positionalArgument);
-                                    boolean isDifferentNamespace = !positionalArgument.getPresentableText().equals(namespace);
+                                    boolean isDifferentNamespace = !positionalArgument.getContent().equals(namespace);
                                     files.add(new RobotPythonFile(namespace,
                                                                   file,
                                                                   ImportType.getType(importElement.getPresentableText()),
@@ -362,20 +366,20 @@ public class HeadingImpl extends RobotPsiElementBase implements Heading {
      */
     private static String getNamespace(Import imp, PositionalArgument library) {
         List<RobotStatement> args = PsiTreeUtil.getChildrenOfAnyType(imp, RobotStatement.class);
-        String results = library.getPresentableText();
+        String results = library.getContent();
         if (!args.isEmpty()) {
-            results = args.get(0).getPresentableText();
+            results = args.getFirst().getPresentableText();
         }
 
         if (args.size() >= 3) {
-            RobotStatement firstStatement = args.get(args.size() - 1);
+            RobotStatement firstStatement = args.getLast();
             RobotStatement secondStatement = args.get(args.size() - 2);
-            if (secondStatement instanceof PositionalArgument && WITH_NAME.equals(secondStatement.getPresentableText())) {
+            if (secondStatement instanceof PositionalArgument argument && WITH_NAME.equals(argument.getContent())) {
                 results = firstStatement.getPresentableText();
-            } else if (secondStatement instanceof KeywordInvokable &&
-                       AS.equals(secondStatement.getPresentableText()) &&
-                       firstStatement instanceof VariableDefinition) {
-                results = firstStatement.getPresentableText();
+            } else if (secondStatement instanceof KeywordInvokable invokable &&
+                       AS.equals(invokable.getName()) &&
+                       firstStatement instanceof VariableDefinition variable) {
+                results = variable.getName();
             }
         }
 

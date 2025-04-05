@@ -21,8 +21,8 @@ public class RobotKeywordDefinitionStartingWithGherkin extends SimpleRobotInspec
 
     @Override
     public final boolean skip(PsiElement element) {
-        if (element instanceof KeywordDefinition) {
-            String text = ((KeywordDefinition) element).getPresentableText();
+        if (element instanceof KeywordDefinition keywordDefinition) {
+            String text = keywordDefinition.getKeywordName();
             Set<String> syntax = RobotKeywordProvider.getSyntaxOfType(RobotTokenTypes.GHERKIN);
             int index = text.indexOf(" ");
             String word;

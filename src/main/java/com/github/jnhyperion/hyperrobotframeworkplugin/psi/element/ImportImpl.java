@@ -6,18 +6,36 @@ import org.jetbrains.annotations.NotNull;
 
 public class ImportImpl extends RobotPsiElementBase implements Import {
 
+    private final ImportType importType;
+
     public ImportImpl(@NotNull ASTNode node) {
         super(node);
+
+        String presentableText = getPresentableText();
+        if ("Library".equalsIgnoreCase(presentableText)) {
+            importType = ImportType.LIBRARY;
+        } else if ("Resource".equalsIgnoreCase(presentableText)) {
+            importType = ImportType.RESOURCE;
+        } else if ("Variables".equalsIgnoreCase(presentableText)) {
+            importType = ImportType.VARIABLES;
+        } else {
+            importType = null;
+        }
+    }
+
+    @Override
+    public final boolean isLibrary() {
+        return importType == ImportType.LIBRARY;
     }
 
     @Override
     public final boolean isResource() {
-        return "Resource".equals(this.getPresentableText());
+        return importType == ImportType.RESOURCE;
     }
 
     @Override
     public final boolean isVariables() {
-        return "Variables".equals(this.getPresentableText());
+        return importType == ImportType.VARIABLES;
     }
 
     @Override
@@ -26,8 +44,7 @@ public class ImportImpl extends RobotPsiElementBase implements Import {
         return isResource() && children.length > 0 ? getPresentableText() + "    " + children[0].getText() : getText();
     }
 
-    @Override
-    public final boolean isLibrary() {
-        return "Library".equals(this.getPresentableText());
+    private enum ImportType {
+        LIBRARY, RESOURCE, VARIABLES
     }
 }

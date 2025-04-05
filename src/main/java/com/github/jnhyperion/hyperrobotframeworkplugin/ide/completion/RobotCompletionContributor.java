@@ -24,7 +24,6 @@ import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.Parameter;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.ParameterId;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.PositionalArgument;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.RobotFile;
-import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.RobotStatement;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.ref.RobotFileManager;
 import com.intellij.codeInsight.TailType;
 import com.intellij.codeInsight.TailTypes;
@@ -488,7 +487,7 @@ public class RobotCompletionContributor extends CompletionContributor {
         Set<String> arguments = keywordStatement.getParameters()
                                                 .stream()
                                                 .flatMap(parameter -> PsiTreeUtil.getChildrenOfTypeAsList(parameter, ParameterId.class).stream())
-                                                .map(RobotStatement::getPresentableText)
+                                                .map(ParameterId::getName)
                                                 .collect(Collectors.toSet());
         availableParameters.removeIf(variable -> arguments.contains(variable.getLookup()));
 

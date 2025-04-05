@@ -14,9 +14,8 @@ public class ParameterImpl extends RobotPsiElementBase implements Parameter {
 
     @Override
     public String getParameterName() {
-        ParameterId parameterId = PsiTreeUtil.getChildOfType(this, ParameterId.class);
-        assert parameterId != null;
-        return parameterId.getPresentableText();
+        ParameterId parameterId = PsiTreeUtil.getRequiredChildOfType(this, ParameterId.class);
+        return parameterId.getName();
     }
 
     @Nullable

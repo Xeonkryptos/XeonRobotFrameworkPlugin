@@ -19,13 +19,13 @@ public class VariableImpl extends RobotPsiElementBase implements Variable {
 
    @Override
    public final boolean isNested() {
-      String text = getPresentableText();
+      String text = getName();
       return StringUtil.getOccurrenceCount(text, "}") > 1
          && StringUtil.getOccurrenceCount(text, "${") + StringUtil.getOccurrenceCount(text, "@{") + StringUtil.getOccurrenceCount(text, "%{") > 1;
    }
 
    @Override
    public boolean isEmpty() {
-      return getPresentableText().length() <= 3;
+      return getName().length() <= 3;
    }
 }

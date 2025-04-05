@@ -30,9 +30,9 @@ public class RobotArgumentReference extends PsiPolyVariantReferenceBase<Position
             if (children.length > 0 && children[0] == positionalArgument) {
                 PsiElement result = null;
                 if (importElement.isResource()) {
-                    result = RobotFileManager.findElement(positionalArgument.getPresentableText(), positionalArgument.getProject(), positionalArgument);
+                    result = RobotFileManager.findElement(positionalArgument.getContent(), positionalArgument.getProject(), positionalArgument);
                 } else if (importElement.isLibrary() || importElement.isVariables()) {
-                    result = RobotFileManager.findElementInContext(positionalArgument.getPresentableText(),
+                    result = RobotFileManager.findElementInContext(positionalArgument.getContent(),
                                                                    positionalArgument.getProject(),
                                                                    positionalArgument);
                 }
@@ -55,7 +55,7 @@ public class RobotArgumentReference extends PsiPolyVariantReferenceBase<Position
         PositionalArgument positionalArgument = getElement();
         Project project = positionalArgument.getProject();
         PsiElement parent = positionalArgument.getParent();
-        String presentableText = positionalArgument.getPresentableText();
+        String presentableText = positionalArgument.getContent();
 
         Set<ResolveResult> results = new LinkedHashSet<>();
         if (parent instanceof Import importElement) {

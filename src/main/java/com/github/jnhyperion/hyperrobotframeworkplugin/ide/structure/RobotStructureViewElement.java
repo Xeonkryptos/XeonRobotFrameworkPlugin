@@ -112,10 +112,10 @@ public class RobotStructureViewElement implements StructureViewTreeElement {
 
     @NotNull
     private String getDisplayName() {
-        if (this.element instanceof RobotFile) {
-            return ((RobotFile) this.element).getName();
-        } else if (this.element instanceof RobotStatement) {
-            return ((RobotStatement) this.element).getPresentableText();
+        if (element instanceof RobotFile robotFile) {
+            return robotFile.getName();
+        } else if (element instanceof RobotStatement robotStatement) {
+            return robotStatement.getPresentableText();
         } else {
             return UNKNOWN;
         }

@@ -7,4 +7,6 @@ import com.intellij.psi.StubBasedPsiElement;
 public interface PositionalArgument extends Argument, PsiNamedElement, StubBasedPsiElement<PositionalArgumentStub> {
 
     boolean isImportArgument();
+
+    String getContent();
 }

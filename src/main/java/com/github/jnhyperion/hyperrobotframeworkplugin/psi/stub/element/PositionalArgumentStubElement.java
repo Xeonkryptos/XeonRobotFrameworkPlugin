@@ -31,7 +31,7 @@ public class PositionalArgumentStubElement extends IStubElementType<PositionalAr
     @NotNull
     @Override
     public PositionalArgumentStub createStub(@NotNull PositionalArgument psi, StubElement<? extends PsiElement> parentStub) {
-        return new PositionalArgumentStubImpl(parentStub, psi.getPresentableText(), psi.isImportArgument());
+        return new PositionalArgumentStubImpl(parentStub, psi.getContent(), psi.isImportArgument());
     }
 
     @Override
