@@ -496,7 +496,7 @@ public class RobotCompletionContributor extends CompletionContributor {
 
         TailType assignmentTailType = TailType.createSimpleTailType('=');
         for (DefinedParameter parameter : availableParameters) {
-            addLookupElement(parameter, Nodes.Parameter, true, assignmentTailType, resultSet).ifPresent(lookupElement -> {
+            addLookupElement(parameter, Nodes.Parameter, !parameter.hasDefaultValue(), assignmentTailType, resultSet).ifPresent(lookupElement -> {
                 lookupElement.putUserData(CompletionKeys.ROBOT_LOOKUP_CONTEXT, RobotLookupContext.WITHIN_KEYWORD_STATEMENT);
                 lookupElement.putUserData(CompletionKeys.ROBOT_LOOKUP_ELEMENT_TYPE, RobotLookupElementType.PARAMETER);
             });
