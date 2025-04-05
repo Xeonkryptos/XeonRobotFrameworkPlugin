@@ -5,6 +5,7 @@ import com.github.jnhyperion.hyperrobotframeworkplugin.psi.RobotStubTokenTypes;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.RobotTokenTypes;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.Heading;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.KeywordDefinition;
+import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.RobotFile;
 import com.intellij.execution.Location;
 import com.intellij.execution.actions.ConfigurationContext;
 import com.intellij.execution.actions.ConfigurationFromContext;
@@ -18,6 +19,7 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.impl.source.tree.LeafPsiElement;
 import com.intellij.psi.tree.IElementType;
+import com.intellij.psi.util.PsiTreeUtil;
 import org.jetbrains.annotations.NotNull;
 
 import java.nio.file.Path;
@@ -147,19 +149,23 @@ public class RobotRunConfigurationProducer extends LazyRunConfigurationProducer<
         Location<PsiElement> location = context.getLocation();
         if (location != null) {
             VirtualFile virtualFile = location.getVirtualFile();
-            if (virtualFile != null && virtualFile.isDirectory()) {
-                Ref<Boolean> containsRobotFiles = Ref.create(false);
-                VfsUtil.processFileRecursivelyWithoutIgnored(virtualFile, file -> {
-                    if (file.isDirectory()) {
+            if (virtualFile != null) {
+                if (virtualFile.isDirectory()) {
+                    Ref<Boolean> containsRobotFiles = Ref.create(false);
+                    VfsUtil.processFileRecursivelyWithoutIgnored(virtualFile, file -> {
+                        if (file.isDirectory()) {
+                            return true;
+                        }
+                        if (RobotFeatureFileType.getInstance() == file.getFileType()) {
+                            containsRobotFiles.set(true);
+                            return false;
+                        }
                         return true;
-                    }
-                    if (RobotFeatureFileType.getInstance() == file.getFileType()) {
-                        containsRobotFiles.set(true);
-                        return false;
-                    }
-                    return true;
-                });
-                return containsRobotFiles.get();
+                    });
+                    return containsRobotFiles.get();
+                } else if (location.getPsiElement() instanceof RobotFile robotFile) {
+                    return containsExecutableElements(robotFile);
+                }
             } else {
                 PsiElement element = location.getPsiElement();
                 if (element instanceof LeafPsiElement leafPsiElement) {
@@ -169,6 +175,12 @@ public class RobotRunConfigurationProducer extends LazyRunConfigurationProducer<
             }
         }
         return false;
+    }
+
+    private static boolean containsExecutableElements(PsiElement psiElement) {
+        return PsiTreeUtil.getChildrenOfTypeAsList(psiElement, Heading.class)
+                          .stream()
+                          .anyMatch(heading -> heading.containsTestCases() || heading.containsTasks());
     }
 
     @NotNull
