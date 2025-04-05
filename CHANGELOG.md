@@ -12,6 +12,10 @@
 
 - Improved performance by reducing usages of PSI#getText() calls
 
+### Fixed
+
+- Fixed invalid showing code completion in keyword arguments for other keyword calls
+
 ## 0.2.1
 
 ### Fixed

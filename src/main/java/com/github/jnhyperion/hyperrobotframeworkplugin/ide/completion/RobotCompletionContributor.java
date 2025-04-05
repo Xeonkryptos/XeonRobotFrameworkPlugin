@@ -255,7 +255,8 @@ public class RobotCompletionContributor extends CompletionContributor {
                            PsiElement psiParent = parameters.getPosition().getParent();
                            PsiElement superParent = psiParent.getParent();
                            if (superParent instanceof Parameter) {
-                               if ("=".equals(psiParent.getPrevSibling().getText())) {
+                               PsiElement prevSibling = psiParent.getPrevSibling();
+                               if (prevSibling != null && "=".equals(prevSibling.getText())) {
                                    return;
                                }
                                result = result.withPrefixMatcher("");
@@ -300,7 +301,9 @@ public class RobotCompletionContributor extends CompletionContributor {
     }
 
     private static PsiElementPattern.Capture<PsiElement> withArgumentInKeywordStatement() {
-        return PlatformPatterns.psiElement(RobotStubTokenTypes.ARGUMENT).withAncestor(3, PlatformPatterns.psiElement(RobotStubTokenTypes.KEYWORD_STATEMENT));
+        return PlatformPatterns.psiElement()
+                               .andOr(PlatformPatterns.psiElement(RobotTokenTypes.PARAMETER), PlatformPatterns.psiElement(RobotStubTokenTypes.ARGUMENT))
+                               .withAncestor(3, PlatformPatterns.psiElement(RobotStubTokenTypes.KEYWORD_STATEMENT));
     }
 
     private static PsiElementPattern.Capture<PsiElement> withTagsWithoutCodeCompletionSupport() {
