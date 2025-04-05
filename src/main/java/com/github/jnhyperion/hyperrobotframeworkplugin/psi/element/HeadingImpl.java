@@ -33,7 +33,7 @@ public class HeadingImpl extends RobotPsiElementBase implements Heading {
     private static final String WITH_NAME = "WITH NAME";
     private static final String AS = "AS";
 
-    private final String headerText;
+    private String headerText;
 
     private Collection<KeywordInvokable> invokedKeywords;
     private Collection<Variable> usedVariables;
@@ -100,6 +100,7 @@ public class HeadingImpl extends RobotPsiElementBase implements Heading {
         this.declaredVariables = null;
         this.metadataStatements = null;
         this.variableDefinitions = null;
+        headerText = getPresentableText();
     }
 
     @NotNull

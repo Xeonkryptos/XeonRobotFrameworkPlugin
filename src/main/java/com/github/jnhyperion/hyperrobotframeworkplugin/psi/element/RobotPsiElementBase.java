@@ -11,7 +11,7 @@ import javax.swing.Icon;
 
 public abstract class RobotPsiElementBase extends ASTWrapperPsiElement implements RobotStatement {
 
-   private final String name;
+   private String name;
 
    public RobotPsiElementBase(@NotNull ASTNode node) {
       super(node);
@@ -55,6 +55,13 @@ public abstract class RobotPsiElementBase extends ASTWrapperPsiElement implement
    @Override
    public String getName() {
       return name;
+   }
+
+   @Override
+   public void subtreeChanged() {
+      super.subtreeChanged();
+
+      name = getPresentableText();
    }
 
    public PsiElement setName(@NotNull String newName) {

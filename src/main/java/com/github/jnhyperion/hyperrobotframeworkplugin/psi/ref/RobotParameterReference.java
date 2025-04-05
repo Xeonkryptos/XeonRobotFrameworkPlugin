@@ -18,25 +18,22 @@ public class RobotParameterReference extends PsiReferenceBase<ParameterId> imple
     @Nullable
     @Override
     public PsiElement resolve() {
-        PsiElement result = null;
-
         ParameterId parameterId = getElement();
         KeywordStatement keywordStatement = PsiTreeUtil.getParentOfType(parameterId, KeywordStatement.class);
         if (keywordStatement != null) {
-                String parameterName = parameterId.getName();
-                PsiReferenceResultWithImportPath wrapper = ResolverUtils.findKeywordParameterElement(parameterName, keywordStatement);
-                if (wrapper == null) {
-                    // Fall back to PyFunction element. The parameter itself couldn't be found
-                    wrapper = ResolverUtils.findKeywordReference(keywordStatement.getName(), keywordStatement.getContainingFile());
-                } else {
-                    return wrapper.reference();
-                }
-                if (wrapper == null) {
-                    return null;
-                }
+            String parameterName = parameterId.getName();
+            PsiReferenceResultWithImportPath wrapper = ResolverUtils.findKeywordParameterElement(parameterName, keywordStatement);
+            if (wrapper == null) {
+                // Fall back to PyFunction element. The parameter itself couldn't be found
+                wrapper = ResolverUtils.findKeywordReference(keywordStatement.getName(), keywordStatement.getContainingFile());
+            } else {
                 return wrapper.reference();
+            }
+            if (wrapper == null) {
+                return null;
+            }
+            return wrapper.reference();
         }
-
-        return result;
+        return null;
     }
 }
