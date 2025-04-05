@@ -12,6 +12,7 @@
 
 - Improved performance by reducing usages of PSI#getText() calls
 - Mark only mandatory parameters of keywords as bold, optional parameters are not bold anymore
+- Use annotators for compilation errors/warnings rather than inspections
 
 ### Fixed
 

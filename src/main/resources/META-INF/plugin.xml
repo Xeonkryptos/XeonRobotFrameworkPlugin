@@ -48,24 +48,16 @@
                                  implementationClass="com.github.jnhyperion.hyperrobotframeworkplugin.psi.manip.VariableManipulator"/>
         <lang.elementManipulator forClass="com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.ParameterId"
                                  implementationClass="com.github.jnhyperion.hyperrobotframeworkplugin.psi.manip.ParameterIdManipulator"/>
+        <!-- Annotations -->
+        <annotator language="Robot"
+                   implementationClass="com.github.jnhyperion.hyperrobotframeworkplugin.ide.inspections.compilation.RobotParameterAnnotator"/>
+        <annotator language="Robot"
+                   implementationClass="com.github.jnhyperion.hyperrobotframeworkplugin.ide.inspections.compilation.RobotKeywordAnnotator"/>
+        <annotator language="Robot"
+                   implementationClass="com.github.jnhyperion.hyperrobotframeworkplugin.ide.inspections.compilation.RobotImportAnnotator"/>
+        <annotator language="Robot"
+                   implementationClass="com.github.jnhyperion.hyperrobotframeworkplugin.ide.inspections.compilation.RobotVariableAnnotator"/>
         <!-- Inspections -->
-        <!-- Inspections: Compilation -->
-        <localInspection language="Robot" shortName="RobotKeywordNotFound" bundle="messages.RobotBundle" key="INSP.NAME.keyword.undefined" groupPath="Robot"
-                         groupKey="INSP.GROUP.compilation" enabledByDefault="true" level="INFO"
-                         implementationClass="com.github.jnhyperion.hyperrobotframeworkplugin.ide.inspections.compilation.RobotKeywordNotFound"/>
-        <localInspection language="Robot" shortName="RobotVariableNotFound" bundle="messages.RobotBundle" key="INSP.NAME.variable.undefined" groupPath="Robot"
-                         groupKey="INSP.GROUP.compilation" enabledByDefault="true" level="INFO"
-                         implementationClass="com.github.jnhyperion.hyperrobotframeworkplugin.ide.inspections.compilation.RobotVariableNotFound"/>
-        <localInspection language="Robot" shortName="RobotImportNotFound" bundle="messages.RobotBundle" key="INSP.NAME.import.undefined" groupPath="Robot"
-                         groupKey="INSP.GROUP.compilation" enabledByDefault="true" level="WARNING"
-                         implementationClass="com.github.jnhyperion.hyperrobotframeworkplugin.ide.inspections.compilation.RobotImportNotFound"/>
-        <localInspection language="Robot" shortName="RobotKeywordParameterNotFound" bundle="messages.RobotBundle" key="INSP.Name.keyword.parameter.undefined"
-                         groupPath="Robot" groupKey="INSP.GROUP.compilation" enabledByDefault="true" level="WARNING"
-                         implementationClass="com.github.jnhyperion.hyperrobotframeworkplugin.ide.inspections.compilation.RobotKeywordParameterNotFound"/>
-        <localInspection language="Robot" shortName="RobotKeywordParameterMissingValue" bundle="messages.RobotBundle"
-                         key="INSP.Name.keyword.parameter.value.undefined" groupPath="Robot" groupKey="INSP.GROUP.compilation" enabledByDefault="true"
-                         level="WEAK WARNING"
-                         implementationClass="com.github.jnhyperion.hyperrobotframeworkplugin.ide.inspections.compilation.RobotKeywordParameterMissingValue"/>
         <!-- TODO: inspection: error?: resource import is not a robot file -->
         <!-- TODO: inspection: warn: import python file vs class -->
         <!-- Inspections: Cleanup -->
