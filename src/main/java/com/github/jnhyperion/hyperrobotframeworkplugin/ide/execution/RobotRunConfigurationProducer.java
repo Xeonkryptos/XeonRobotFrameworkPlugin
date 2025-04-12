@@ -1,8 +1,6 @@
 package com.github.jnhyperion.hyperrobotframeworkplugin.ide.execution;
 
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.RobotFeatureFileType;
-import com.github.jnhyperion.hyperrobotframeworkplugin.psi.RobotStubTokenTypes;
-import com.github.jnhyperion.hyperrobotframeworkplugin.psi.RobotTokenTypes;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.Heading;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.KeywordDefinition;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.RobotFile;
@@ -17,8 +15,6 @@ import com.intellij.openapi.util.Ref;
 import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiElement;
-import com.intellij.psi.impl.source.tree.LeafPsiElement;
-import com.intellij.psi.tree.IElementType;
 import com.intellij.psi.util.PsiTreeUtil;
 import org.jetbrains.annotations.NotNull;
 
@@ -148,6 +144,16 @@ public class RobotRunConfigurationProducer extends LazyRunConfigurationProducer<
     private static boolean isValidRobotExecutableScript(@NotNull ConfigurationContext context) {
         Location<PsiElement> location = context.getLocation();
         if (location != null) {
+            PsiElement element = location.getPsiElement();
+            PsiElement executableParent = PsiTreeUtil.getParentOfType(element, KeywordDefinition.class, Heading.class);
+            if (executableParent != null) {
+                if (executableParent instanceof Heading heading) {
+                    return heading.containsTestCases() || heading.containsTasks();
+                } else if (executableParent instanceof KeywordDefinition) {
+                    return true;
+                }
+            }
+
             VirtualFile virtualFile = location.getVirtualFile();
             if (virtualFile != null) {
                 if (virtualFile.isDirectory()) {
@@ -165,12 +171,6 @@ public class RobotRunConfigurationProducer extends LazyRunConfigurationProducer<
                     return containsRobotFiles.get();
                 } else if (location.getPsiElement() instanceof RobotFile robotFile) {
                     return containsExecutableElements(robotFile);
-                }
-            } else {
-                PsiElement element = location.getPsiElement();
-                if (element instanceof LeafPsiElement leafPsiElement) {
-                    IElementType type = leafPsiElement.getElementType();
-                    return RobotStubTokenTypes.KEYWORD_DEFINITION.equals(type) || RobotTokenTypes.HEADING.equals(type);
                 }
             }
         }

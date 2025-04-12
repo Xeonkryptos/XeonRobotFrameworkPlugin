@@ -6,7 +6,7 @@
 
 ### Added
 
-- Make it possible to create run configurations when right-clicking on a robot file with test cases
+- Make it possible to create run configurations when right-clicking on a robot file with test cases and when in a robot file with keywords
 
 ### Changed
 
