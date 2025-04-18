@@ -93,13 +93,17 @@ public abstract class RobotPythonWrapper {
     }
 
     protected static void addDefinedKeywords(@NotNull PyClass pyClass, @NotNull String namespace, @NotNull Collection<DefinedKeyword> keywords) {
-        Map<String, PsiElement> methods = new LinkedHashMap<>();
+        Map<String, PyFunction> methods = new LinkedHashMap<>();
         String className = pyClass.getName();
         pyClass.visitMethods(method -> {
             boolean propertyDecorated = Optional.ofNullable(method.getDecoratorList())
                                                 .map(decoratorList -> decoratorList.findDecorator("property"))
                                                 .isPresent();
             if (propertyDecorated) {
+                String attributeName = getValidName(method.getName());
+                if (attributeName != null) {
+                    keywords.add(new KeywordDto(method, namespace, attributeName));
+                }
                 return true;
             }
             String methodName = getValidName(method.getName());
@@ -122,7 +126,7 @@ public abstract class RobotPythonWrapper {
     protected static void addDefinedKeywords(@NotNull PsiElement sourceElement,
                                              @NotNull String namespace,
                                              @NotNull Collection<DefinedKeyword> keywords,
-                                             Map<String, PsiElement> methods) {
+                                             Map<String, PyFunction> methods) {
         addDefinedKeywords(sourceElement, namespace, keywords, null, methods);
     }
 
@@ -130,41 +134,47 @@ public abstract class RobotPythonWrapper {
                                              @NotNull String namespace,
                                              @NotNull Collection<DefinedKeyword> keywords,
                                              @Nullable String className,
-                                             Map<String, PsiElement> methods) {
+                                             Map<String, PyFunction> methods) {
         RobotOptionsProvider robotOptionsProvider = RobotOptionsProvider.getInstance(sourceElement.getProject());
-        if (robotOptionsProvider.pythonLiveInspection()) {
-            String inspectionNamespace = namespace;
-            if (className != null && namespace.endsWith("." + className)) {
-                inspectionNamespace = namespace.substring(0, namespace.length() - className.length() - 1);
+        Map<String, PyFunction> methodsToLiveInspect = new LinkedHashMap<>();
+        Map<String, PyFunction> methodsToStaticallyInspect = new LinkedHashMap<>();
+        methods.forEach((methodName, pyFunction) -> {
+            if (robotOptionsProvider.analyzeViaPythonLiveInspection(pyFunction)) {
+                methodsToLiveInspect.put(methodName, pyFunction);
+            } else {
+                methodsToStaticallyInspect.put(methodName, pyFunction);
             }
-            Map<String, PythonInspector.PythonInspectorParameter[]> analyzedFunctions = PythonInspector.inspectPythonFunctions(sourceElement,
-                                                                                                                               inspectionNamespace,
-                                                                                                                               className,
-                                                                                                                               methods);
-            for (Entry<String, PythonInspector.PythonInspectorParameter[]> entry : analyzedFunctions.entrySet()) {
-                String methodName = entry.getKey();
-                PythonInspector.PythonInspectorParameter[] parameters = entry.getValue();
+        });
+        String inspectionNamespace = namespace;
+        if (className != null && namespace.endsWith("." + className)) {
+            inspectionNamespace = namespace.substring(0, namespace.length() - className.length() - 1);
+        }
+        Map<String, PythonInspector.PythonInspectorParameter[]> analyzedFunctions = PythonInspector.inspectPythonFunctions(sourceElement,
+                                                                                                                           inspectionNamespace,
+                                                                                                                           className,
+                                                                                                                           methodsToLiveInspect);
+        for (Entry<String, PythonInspector.PythonInspectorParameter[]> entry : analyzedFunctions.entrySet()) {
+            String methodName = entry.getKey();
+            PythonInspector.PythonInspectorParameter[] parameters = entry.getValue();
 
-                PyFunction method = (PyFunction) methods.get(methodName);
-                String keywordName = getKeywordName(method);
-                if (keywordName != null) {
-                    methodName = keywordName;
-                }
-                keywords.add(new KeywordDto(method,
-                                            namespace,
-                                            methodName,
-                                            PythonInspector.convertPyParameters(parameters, method.getParameterList().getParameters(), true)));
+            PyFunction method = methods.get(methodName);
+            String keywordName = getKeywordName(method);
+            if (keywordName != null) {
+                methodName = keywordName;
             }
-        } else {
-            for (PsiElement psiElement : methods.values()) {
-                PyFunction method = (PyFunction) psiElement;
-                String methodName = method.getName();
-                String keywordName = getKeywordName(method);
-                if (keywordName != null) {
-                    methodName = keywordName;
-                }
-                keywords.add(new KeywordDto(method, namespace, methodName, Arrays.asList(method.getParameterList().getParameters())));
+            keywords.add(new KeywordDto(method,
+                                        namespace,
+                                        methodName,
+                                        PythonInspector.convertPyParameters(parameters, method.getParameterList().getParameters(), true)));
+        }
+        for (Map.Entry<String, PyFunction> entry : methodsToStaticallyInspect.entrySet()) {
+            String methodName = entry.getKey();
+            PyFunction method = entry.getValue();
+            String keywordName = getKeywordName(method);
+            if (keywordName != null) {
+                methodName = keywordName;
             }
+            keywords.add(new KeywordDto(method, namespace, methodName, Arrays.asList(method.getParameterList().getParameters())));
         }
     }
 }

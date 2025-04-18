@@ -56,7 +56,7 @@ public class RobotPythonFile extends RobotPythonWrapper implements KeywordFile {
         return CachedValuesManager.getCachedValue(pythonFile, () -> {
             Set<DefinedKeyword> keywordSet = new HashSet<>();
             if (importType == ImportType.LIBRARY) {
-                Map<String, PsiElement> functions = new LinkedHashMap<>();
+                Map<String, PyFunction> functions = new LinkedHashMap<>();
                 for (PyFunction function : pythonFile.getTopLevelFunctions()) {
                     String functionName = getValidName(function.getName());
                     if (functionName != null) {

@@ -141,7 +141,7 @@ public class KeywordStatementImpl extends RobotStubPsiElementBase<KeywordStateme
             if (psiElement instanceof PyFunction pyFunction) {
                 RobotOptionsProvider robotOptionsProvider = RobotOptionsProvider.getInstance(pyFunction.getProject());
                 PyParameter[] pyParameters = pyFunction.getParameterList().getParameters();
-                if (robotOptionsProvider.pythonLiveInspection()) {
+                if (robotOptionsProvider.analyzeViaPythonLiveInspection(pyFunction)) {
                     PyClass containingClass = pyFunction.getContainingClass();
                     PythonInspector.PythonInspectorParameter[] parameters = PythonInspector.inspectPythonFunction(pyFunction);
                     Collection<DefinedParameter> definedParameters = PythonInspector.convertPyParameters(parameters, pyParameters, containingClass != null);

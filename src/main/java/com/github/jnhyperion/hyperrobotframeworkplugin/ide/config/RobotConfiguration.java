@@ -20,6 +20,8 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import java.awt.FlowLayout;
 import java.awt.event.ItemEvent;
+import java.util.Arrays;
+import java.util.List;
 
 public class RobotConfiguration implements NoScroll, SearchableConfigurable {
 
@@ -32,8 +34,8 @@ public class RobotConfiguration implements NoScroll, SearchableConfigurable {
     private final JCheckBox reformatOnSave;
     private final JCheckBox smartAutoEncloseVariable;
     private final JCheckBox pythonLiveInspection;
-    private final JLabel customArgumentsLabel;
     private final JTextField pythonLiveInspectionCustomArgumentsTextField;
+    private final JTextField pythonLiveInspectionForDecoratorsTextField;
 
     public RobotConfiguration() {
         JPanel mainPanel = new JPanel();
@@ -41,7 +43,7 @@ public class RobotConfiguration implements NoScroll, SearchableConfigurable {
         mainPanel.setLayout(new GridLayoutManager(2, 2, JBUI.emptyInsets(), -1, -1, false, false));
 
         JPanel checkBoxPanel = new JPanel();
-        checkBoxPanel.setLayout(new GridLayoutManager(9, 1, JBUI.emptyInsets(), -1, -1, false, false));
+        checkBoxPanel.setLayout(new GridLayoutManager(10, 1, JBUI.emptyInsets(), -1, -1, false, false));
         mainPanel.add(checkBoxPanel, new GridConstraints(0, 0, 1, 2, 0, 3, 3, 3, null, null, null));
 
         JCheckBox transitiveImportsCheckBox = new JCheckBox();
@@ -88,7 +90,7 @@ public class RobotConfiguration implements NoScroll, SearchableConfigurable {
         customArgumentsPanel.setLayout(new FlowLayout());
         checkBoxPanel.add(customArgumentsPanel, new GridConstraints(8, 0, 1, 1, 8, 0, 3, 0, null, null, null));
 
-        customArgumentsLabel = new JLabel();
+        JLabel customArgumentsLabel = new JLabel();
         customArgumentsLabel.setText("Python Inspection Custom Arguments: ");
         customArgumentsPanel.add(customArgumentsLabel);
         customArgumentsLabel.setToolTipText(RobotBundle.getMessage("options.inspection.custom.arguments.tooltip"));
@@ -97,12 +99,33 @@ public class RobotConfiguration implements NoScroll, SearchableConfigurable {
         this.pythonLiveInspectionCustomArgumentsTextField = pythonLiveInspectionCustomArgumentsTextField;
         pythonLiveInspectionCustomArgumentsTextField.setText("Custom Arguments");
         customArgumentsPanel.add(pythonLiveInspectionCustomArgumentsTextField);
+
+        JPanel pythonLiveInspectionForDecoratorsPanel = new JPanel();
+        pythonLiveInspectionForDecoratorsPanel.setLayout(new FlowLayout());
+        checkBoxPanel.add(pythonLiveInspectionForDecoratorsPanel, new GridConstraints(9, 0, 1, 1, 8, 0, 3, 0, null, null, null));
+
+        JLabel pythonLiveInspectionForDecoratorsLabel = new JLabel();
+        pythonLiveInspectionForDecoratorsLabel.setText("Python Inspection For Decorators: ");
+        pythonLiveInspectionForDecoratorsLabel.setToolTipText(RobotBundle.getMessage("options.inspection.decorators.tooltip"));
+        pythonLiveInspectionForDecoratorsPanel.add(pythonLiveInspectionForDecoratorsLabel);
+
+        JTextField pythonLiveInspectionForDecoratorsTextField = new JTextField();
+        this.pythonLiveInspectionForDecoratorsTextField = pythonLiveInspectionForDecoratorsTextField;
+        pythonLiveInspectionForDecoratorsTextField.setText("");
+        pythonLiveInspectionForDecoratorsPanel.add(pythonLiveInspectionForDecoratorsTextField);
+
         pythonLiveInspection.addItemListener(e -> {
             int selectionStateChange = e.getStateChange();
             boolean enabled = selectionStateChange == ItemEvent.SELECTED;
             customArgumentsLabel.setEnabled(enabled);
             pythonLiveInspectionCustomArgumentsTextField.setEnabled(enabled);
+            pythonLiveInspectionForDecoratorsLabel.setEnabled(enabled);
+            pythonLiveInspectionForDecoratorsTextField.setEnabled(enabled);
         });
+        customArgumentsLabel.setEnabled(pythonLiveInspectionCheckBox.isSelected());
+        pythonLiveInspectionCustomArgumentsTextField.setEnabled(pythonLiveInspectionCheckBox.isSelected());
+        pythonLiveInspectionForDecoratorsLabel.setEnabled(pythonLiveInspectionCheckBox.isSelected());
+        pythonLiveInspectionForDecoratorsTextField.setEnabled(pythonLiveInspectionCheckBox.isSelected());
 
         Spacer spacer = new Spacer();
         mainPanel.add(spacer, new GridConstraints(1, 1, 1, 1, 0, 2, 1, 6, null, null, null));
@@ -141,17 +164,16 @@ public class RobotConfiguration implements NoScroll, SearchableConfigurable {
     @Override
     public boolean isModified() {
         RobotOptionsProvider provider = getOptionProvider();
-        return provider != null &&
-               (provider.isDebug() != this.enableDebug.isSelected() ||
-                provider.allowTransitiveImports() != this.allowTransitiveImports.isSelected() ||
-                provider.allowGlobalVariables() != this.allowGlobalVariables.isSelected() ||
-                provider.capitalizeKeywords() != this.capitalizeKeywords.isSelected() ||
-                provider.inlineVariableSearch() != this.inlineVariableSearch.isSelected() ||
-                provider.reformatOnSave() != this.reformatOnSave.isSelected() ||
-                provider.smartAutoEncloseVariable() != this.smartAutoEncloseVariable.isSelected() ||
-                provider.pythonLiveInspection() != this.pythonLiveInspection.isSelected() ||
-                provider.pythonLiveInspection() &&
-                !provider.getPythonLiveInspectionAdditionalArguments().equals(this.pythonLiveInspectionCustomArgumentsTextField.getText()));
+        return provider != null && (provider.isDebug() != this.enableDebug.isSelected()
+                                    || provider.allowTransitiveImports() != this.allowTransitiveImports.isSelected()
+                                    || provider.allowGlobalVariables() != this.allowGlobalVariables.isSelected()
+                                    || provider.capitalizeKeywords() != this.capitalizeKeywords.isSelected()
+                                    || provider.inlineVariableSearch() != this.inlineVariableSearch.isSelected()
+                                    || provider.reformatOnSave() != this.reformatOnSave.isSelected()
+                                    || provider.smartAutoEncloseVariable() != this.smartAutoEncloseVariable.isSelected()
+                                    || provider.pythonLiveInspection() != this.pythonLiveInspection.isSelected() || provider.pythonLiveInspection() && (
+                !provider.getPythonLiveInspectionAdditionalArguments().equals(this.pythonLiveInspectionCustomArgumentsTextField.getText())
+                || !provider.getPythonLiveInspectionDecorators().equals(convertToDecoratorNames())));
     }
 
     @Override
@@ -167,7 +189,17 @@ public class RobotConfiguration implements NoScroll, SearchableConfigurable {
             provider.setSmartAutoEncloseVariable(this.smartAutoEncloseVariable.isSelected());
             provider.setPythonLiveInspection(this.pythonLiveInspection.isSelected());
             provider.setPythonLiveInspectionAdditionalArguments(this.pythonLiveInspectionCustomArgumentsTextField.getText());
+            List<String> decoratorNames = convertToDecoratorNames();
+            provider.setPythonLiveInspectionDecorators(decoratorNames);
         }
+    }
+
+    private List<String> convertToDecoratorNames() {
+        String[] decorators = this.pythonLiveInspectionForDecoratorsTextField.getText().split("\\s*,\\s*");
+        return Arrays.stream(decorators)
+                     .map(decorator -> decorator.startsWith("@") ? decorator.substring(1) : decorator)
+                     .filter(decorator -> !decorator.isBlank())
+                     .toList();
     }
 
     @Override
@@ -183,8 +215,7 @@ public class RobotConfiguration implements NoScroll, SearchableConfigurable {
             this.smartAutoEncloseVariable.setSelected(provider.smartAutoEncloseVariable());
             this.pythonLiveInspection.setSelected(provider.pythonLiveInspection());
             this.pythonLiveInspectionCustomArgumentsTextField.setText(provider.getPythonLiveInspectionAdditionalArguments());
-            this.pythonLiveInspectionCustomArgumentsTextField.setEnabled(pythonLiveInspection.isSelected());
-            this.customArgumentsLabel.setEnabled(pythonLiveInspection.isSelected());
+            this.pythonLiveInspectionForDecoratorsTextField.setText(String.join(", ", provider.getPythonLiveInspectionDecorators()));
         }
     }
 }

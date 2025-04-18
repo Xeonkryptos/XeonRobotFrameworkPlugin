@@ -91,7 +91,7 @@ public class PythonInspector {
             namespace = namespace.substring(0, namespace.length() - functionName.length() - 1);
         }
 
-        Map<String, PsiElement> elements = Map.of(functionName, function);
+        Map<String, PyFunction> elements = Map.of(functionName, function);
         Map<String, PythonInspectorParameter[]> result = inspectPythonFunctions(sourceElement, namespace, className, elements);
         return result.getOrDefault(functionName, PythonInspectorParameter.EMPTY);
     }
@@ -99,7 +99,7 @@ public class PythonInspector {
     public static Map<String, PythonInspectorParameter[]> inspectPythonFunctions(PsiElement sourceElement,
                                                                                  String namespace,
                                                                                  String className,
-                                                                                 Map<String, PsiElement> elements) {
+                                                                                 Map<String, PyFunction> elements) {
         if (elements == null || elements.isEmpty()) {
             return Map.of();
         }
@@ -152,7 +152,7 @@ public class PythonInspector {
                                                                  PsiElement sourceElement,
                                                                  String namespace,
                                                                  @Nullable String className,
-                                                                 Map<String, PsiElement> elements) {
+                                                                 Map<String, PyFunction> elements) {
         RobotOptionsProvider robotOptionsProvider = RobotOptionsProvider.getInstance(sourceElement.getProject());
         String additionalArguments = robotOptionsProvider.getPythonLiveInspectionAdditionalArguments();
 
@@ -174,7 +174,7 @@ public class PythonInspector {
     }
 
     @NotNull
-    private static Map<String, PythonInspectorParameter[]> extractFunctionParameters(Map<String, PsiElement> elements, BufferedReader reader) throws
+    private static Map<String, PythonInspectorParameter[]> extractFunctionParameters(Map<String, PyFunction> elements, BufferedReader reader) throws
                                                                                                                                               IOException {
         String input;
         Map<String, PythonInspectorParameter[]> functions = new LinkedHashMap<>(elements.size());

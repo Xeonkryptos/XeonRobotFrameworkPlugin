@@ -4,8 +4,13 @@ import com.intellij.openapi.components.PersistentStateComponent;
 import com.intellij.openapi.components.State;
 import com.intellij.openapi.components.Storage;
 import com.intellij.openapi.project.Project;
+import com.jetbrains.python.psi.PyDecorator;
+import com.jetbrains.python.psi.PyDecoratorList;
+import com.jetbrains.python.psi.PyFunction;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.List;
 
 @State(name = "RobotOptionsProvider", storages = { @Storage("$WORKSPACE_FILE$") })
 public class RobotOptionsProvider implements PersistentStateComponent<RobotOptionsProvider.State> {
@@ -88,6 +93,30 @@ public class RobotOptionsProvider implements PersistentStateComponent<RobotOptio
         this.state.pythonLiveInspectionAdditionalArguments = pythonLiveInspectionAdditionalArguments;
     }
 
+    public final List<String> getPythonLiveInspectionDecorators() {
+        return this.state.pythonLiveInspectionDecorators;
+    }
+
+    public final void setPythonLiveInspectionDecorators(List<String> pythonLiveInspectionDecorators) {
+        this.state.pythonLiveInspectionDecorators = pythonLiveInspectionDecorators;
+    }
+
+    public final boolean analyzeViaPythonLiveInspection(PyFunction function) {
+        if (this.state.pythonLiveInspection) {
+            PyDecoratorList decoratorList = function.getDecoratorList();
+            if (decoratorList != null) {
+                for (PyDecorator decorator : decoratorList.getDecorators()) {
+                    String decoratorName = decorator.getName();
+                    if (!"keyword".equals(decoratorName) && (this.state.pythonLiveInspectionDecorators.isEmpty()
+                                                             || this.state.pythonLiveInspectionDecorators.contains(decoratorName))) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
     @Override
     public @Nullable State getState() {
         return this.state;
@@ -104,6 +133,7 @@ public class RobotOptionsProvider implements PersistentStateComponent<RobotOptio
         this.state.smartAutoEncloseVariable = state.smartAutoEncloseVariable;
         this.state.pythonLiveInspection = state.pythonLiveInspection;
         this.state.pythonLiveInspectionAdditionalArguments = state.pythonLiveInspectionAdditionalArguments;
+        this.state.pythonLiveInspectionDecorators = state.pythonLiveInspectionDecorators;
     }
 
     public static class State {
@@ -116,5 +146,6 @@ public class RobotOptionsProvider implements PersistentStateComponent<RobotOptio
         public boolean smartAutoEncloseVariable = true;
         public boolean pythonLiveInspection = true;
         public String pythonLiveInspectionAdditionalArguments = "-m robot.libdoc .robotframework-ls";
+        public List<String> pythonLiveInspectionDecorators = List.of();
     }
 }
