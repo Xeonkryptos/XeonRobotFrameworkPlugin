@@ -36,7 +36,6 @@ public class RobotFileManager {
         ProjectFileCache.getCachedFiles(project).clear();
         ProjectFileCache.getGlobalVariables(project).clear();
         ProjectFileCache.getCachedVariables(project).clear();
-        ProjectFileCache.getCachedKeywords(project).clear();
     }
 
     @Nullable

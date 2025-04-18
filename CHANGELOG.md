@@ -4,6 +4,14 @@
 
 ## Unreleased
 
+### Added
+
+- Use live inspection of python functions to resolve parameters modified through decorators
+
+### Fixed
+
+- Caching issue leading to incorrectly marked parameters
+
 ## 0.2.2
 
 ### Added

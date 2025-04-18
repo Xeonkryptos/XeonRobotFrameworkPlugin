@@ -72,6 +72,22 @@ public class RobotOptionsProvider implements PersistentStateComponent<RobotOptio
         this.state.smartAutoEncloseVariable = smartAutoEncloseVariable;
     }
 
+    public final boolean pythonLiveInspection() {
+        return this.state.pythonLiveInspection;
+    }
+
+    public final void setPythonLiveInspection(boolean pythonLiveInspection) {
+        this.state.pythonLiveInspection = pythonLiveInspection;
+    }
+
+    public final String getPythonLiveInspectionAdditionalArguments() {
+        return this.state.pythonLiveInspectionAdditionalArguments;
+    }
+
+    public final void setPythonLiveInspectionAdditionalArguments(String pythonLiveInspectionAdditionalArguments) {
+        this.state.pythonLiveInspectionAdditionalArguments = pythonLiveInspectionAdditionalArguments;
+    }
+
     @Override
     public @Nullable State getState() {
         return this.state;
@@ -86,6 +102,8 @@ public class RobotOptionsProvider implements PersistentStateComponent<RobotOptio
         this.state.inlineVariableSearch = state.inlineVariableSearch;
         this.state.reformatOnSave = state.reformatOnSave;
         this.state.smartAutoEncloseVariable = state.smartAutoEncloseVariable;
+        this.state.pythonLiveInspection = state.pythonLiveInspection;
+        this.state.pythonLiveInspectionAdditionalArguments = state.pythonLiveInspectionAdditionalArguments;
     }
 
     public static class State {
@@ -96,5 +114,7 @@ public class RobotOptionsProvider implements PersistentStateComponent<RobotOptio
         public boolean inlineVariableSearch = false;
         public boolean reformatOnSave = true;
         public boolean smartAutoEncloseVariable = true;
+        public boolean pythonLiveInspection = true;
+        public String pythonLiveInspectionAdditionalArguments = "-m robot.libdoc .robotframework-ls";
     }
 }

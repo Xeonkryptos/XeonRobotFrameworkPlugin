@@ -14,7 +14,7 @@ plugins {
     // ktlint linter - read more: https://github.com/JLLeitschuh/ktlint-gradle
     id("org.jlleitschuh.gradle.ktlint") version "12.2.0"
 
-    kotlin("jvm") version "2.1.20"
+    kotlin("jvm") version "2.1.10"
 }
 
 group = properties("pluginGroup")

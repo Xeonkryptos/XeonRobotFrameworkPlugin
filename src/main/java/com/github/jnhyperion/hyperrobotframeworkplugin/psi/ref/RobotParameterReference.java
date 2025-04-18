@@ -1,5 +1,6 @@
 package com.github.jnhyperion.hyperrobotframeworkplugin.psi.ref;
 
+import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.DefinedParameter;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.KeywordStatement;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.ParameterId;
 import com.intellij.psi.PsiElement;
@@ -19,20 +20,23 @@ public class RobotParameterReference extends PsiReferenceBase<ParameterId> imple
     @Override
     public PsiElement resolve() {
         ParameterId parameterId = getElement();
+        String parameterName = parameterId.getName();
         KeywordStatement keywordStatement = PsiTreeUtil.getParentOfType(parameterId, KeywordStatement.class);
-        if (keywordStatement != null) {
-            String parameterName = parameterId.getName();
-            PsiReferenceResultWithImportPath wrapper = ResolverUtils.findKeywordParameterElement(parameterName, keywordStatement);
-            if (wrapper == null) {
-                // Fall back to PyFunction element. The parameter itself couldn't be found
-                wrapper = ResolverUtils.findKeywordReference(keywordStatement.getName(), keywordStatement.getContainingFile());
-            } else {
+        if (keywordStatement != null && parameterName != null) {
+            PsiElement reference = keywordStatement.getAvailableParameters()
+                                                   .stream()
+                                                   .filter(param -> parameterName.equals(param.getLookup()))
+                                                   .findFirst()
+                                                   .map(DefinedParameter::reference)
+                                                   .orElse(null);
+            if (reference != null) {
+                return reference;
+            }
+            // Fall back to PyFunction element. The parameter itself couldn't be found
+            PsiReferenceResultWithImportPath wrapper = ResolverUtils.findKeywordReference(keywordStatement.getName(), keywordStatement.getContainingFile());
+            if (wrapper != null) {
                 return wrapper.reference();
             }
-            if (wrapper == null) {
-                return null;
-            }
-            return wrapper.reference();
         }
         return null;
     }

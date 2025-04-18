@@ -7,6 +7,8 @@ import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.KeywordFile;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiFile;
+import com.intellij.psi.util.CachedValueProvider.Result;
+import com.intellij.psi.util.CachedValuesManager;
 import com.jetbrains.python.psi.PyClass;
 import org.jetbrains.annotations.NotNull;
 
@@ -15,6 +17,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Stream;
 
 public class RobotPythonClass extends RobotPythonWrapper implements KeywordFile {
 
@@ -40,26 +43,20 @@ public class RobotPythonClass extends RobotPythonWrapper implements KeywordFile 
 
     @NotNull
     @Override
-    public final synchronized Collection<DefinedKeyword> getDefinedKeywords() {
-        Collection<DefinedKeyword> keywords;
-        Map<String, Collection<DefinedKeyword>> cachedKeywords = ProjectFileCache.getCachedKeywords(project);
-        keywords = cachedKeywords.get(uniqueIdentifier);
-        if (keywords == null) {
+    public final Collection<DefinedKeyword> getDefinedKeywords() {
+        return CachedValuesManager.getCachedValue(pythonClass, () -> {
             Set<DefinedKeyword> newKeywords = new HashSet<>();
             if (importType == ImportType.LIBRARY) {
                 addDefinedKeywords(pythonClass, library, newKeywords);
             }
-            if (!newKeywords.isEmpty()) {
-                cachedKeywords.put(uniqueIdentifier, newKeywords);
-            }
-            return newKeywords;
-        }
-        return keywords;
+            Object[] dependents = Stream.concat(Stream.of(pythonClass), newKeywords.stream().map(DefinedKeyword::reference)).toArray();
+            return new Result<>(newKeywords, dependents);
+        });
     }
 
     @NotNull
     @Override
-    public final synchronized Collection<DefinedVariable> getDefinedVariables() {
+    public final Collection<DefinedVariable> getDefinedVariables() {
         Collection<DefinedVariable> variables;
         Map<String, Collection<DefinedVariable>> cachedVariables = ProjectFileCache.getCachedVariables(this.project);
         variables = cachedVariables.get(this.uniqueIdentifier);

@@ -1,11 +1,14 @@
 package com.github.jnhyperion.hyperrobotframeworkplugin.psi.ref;
 
+import com.github.jnhyperion.hyperrobotframeworkplugin.ide.config.RobotOptionsProvider;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.dto.KeywordDto;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.dto.VariableDto;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.DefinedKeyword;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.DefinedVariable;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.util.ReservedVariable;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.util.ReservedVariableScope;
+import com.github.jnhyperion.hyperrobotframeworkplugin.util.PythonInspector;
+import com.intellij.psi.PsiElement;
 import com.jetbrains.python.psi.Property;
 import com.jetbrains.python.psi.PyClass;
 import com.jetbrains.python.psi.PyDecorator;
@@ -20,7 +23,10 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 
 public abstract class RobotPythonWrapper {
 
@@ -87,17 +93,22 @@ public abstract class RobotPythonWrapper {
     }
 
     protected static void addDefinedKeywords(@NotNull PyClass pyClass, @NotNull String namespace, @NotNull Collection<DefinedKeyword> keywords) {
+        Map<String, PsiElement> methods = new LinkedHashMap<>();
+        String className = pyClass.getName();
         pyClass.visitMethods(method -> {
+            boolean propertyDecorated = Optional.ofNullable(method.getDecoratorList())
+                                                .map(decoratorList -> decoratorList.findDecorator("property"))
+                                                .isPresent();
+            if (propertyDecorated) {
+                return true;
+            }
             String methodName = getValidName(method.getName());
             if (methodName != null) {
-                String keywordName = getKeywordName(method);
-                if (keywordName != null) {
-                    methodName = keywordName;
-                }
-                keywords.add(new KeywordDto(method, namespace, methodName, Arrays.asList(method.getParameterList().getParameters())));
+                methods.put(methodName, method);
             }
             return true;
         }, true, null);
+        addDefinedKeywords(pyClass, namespace, keywords, className, methods);
 
         pyClass.visitClassAttributes(attribute -> {
             String attributeName = getValidName(attribute.getName());
@@ -106,5 +117,54 @@ public abstract class RobotPythonWrapper {
             }
             return true;
         }, true, null);
+    }
+
+    protected static void addDefinedKeywords(@NotNull PsiElement sourceElement,
+                                             @NotNull String namespace,
+                                             @NotNull Collection<DefinedKeyword> keywords,
+                                             Map<String, PsiElement> methods) {
+        addDefinedKeywords(sourceElement, namespace, keywords, null, methods);
+    }
+
+    protected static void addDefinedKeywords(@NotNull PsiElement sourceElement,
+                                             @NotNull String namespace,
+                                             @NotNull Collection<DefinedKeyword> keywords,
+                                             @Nullable String className,
+                                             Map<String, PsiElement> methods) {
+        RobotOptionsProvider robotOptionsProvider = RobotOptionsProvider.getInstance(sourceElement.getProject());
+        if (robotOptionsProvider.pythonLiveInspection()) {
+            String inspectionNamespace = namespace;
+            if (className != null && namespace.endsWith("." + className)) {
+                inspectionNamespace = namespace.substring(0, namespace.length() - className.length() - 1);
+            }
+            Map<String, PythonInspector.PythonInspectorParameter[]> analyzedFunctions = PythonInspector.inspectPythonFunctions(sourceElement,
+                                                                                                                               inspectionNamespace,
+                                                                                                                               className,
+                                                                                                                               methods);
+            for (Entry<String, PythonInspector.PythonInspectorParameter[]> entry : analyzedFunctions.entrySet()) {
+                String methodName = entry.getKey();
+                PythonInspector.PythonInspectorParameter[] parameters = entry.getValue();
+
+                PyFunction method = (PyFunction) methods.get(methodName);
+                String keywordName = getKeywordName(method);
+                if (keywordName != null) {
+                    methodName = keywordName;
+                }
+                keywords.add(new KeywordDto(method,
+                                            namespace,
+                                            methodName,
+                                            PythonInspector.convertPyParameters(parameters, method.getParameterList().getParameters(), true)));
+            }
+        } else {
+            for (PsiElement psiElement : methods.values()) {
+                PyFunction method = (PyFunction) psiElement;
+                String methodName = method.getName();
+                String keywordName = getKeywordName(method);
+                if (keywordName != null) {
+                    methodName = keywordName;
+                }
+                keywords.add(new KeywordDto(method, namespace, methodName, Arrays.asList(method.getParameterList().getParameters())));
+            }
+        }
     }
 }

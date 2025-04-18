@@ -40,17 +40,12 @@ public class ProjectFileCache {
       return getCache(project).VARIABLE_CACHE;
    }
 
-   public static Map<String, Collection<DefinedKeyword>> getCachedKeywords(Project project) {
-      return getCache(project).KEYWORD_CACHE;
-   }
-
    private final static class Cache {
 
       final HashMap<String, PsiElement> ELEMENT_CACHE = new HashMap<>();
       final HashMap<String, PsiFile> FILE_CACHE = new HashMap<>();
       final Collection<DefinedVariable> GLOBAL_VARIABLES_CACHE = new LinkedHashSet<>();
       final ConcurrentHashMap<String, Collection<DefinedVariable>> VARIABLE_CACHE = new ConcurrentHashMap<>();
-      final ConcurrentHashMap<String, Collection<DefinedKeyword>> KEYWORD_CACHE = new ConcurrentHashMap<>();
 
       private Cache() {
       }

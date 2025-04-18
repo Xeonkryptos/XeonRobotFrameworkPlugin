@@ -1,14 +1,17 @@
 package com.github.jnhyperion.hyperrobotframeworkplugin.psi.element;
 
+import com.github.jnhyperion.hyperrobotframeworkplugin.ide.config.RobotOptionsProvider;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.dto.ParameterDto;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.dto.VariableDto;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.stub.element.KeywordStatementStub;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.util.PatternUtil;
+import com.github.jnhyperion.hyperrobotframeworkplugin.util.PythonInspector;
 import com.intellij.lang.ASTNode;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiReference;
 import com.intellij.psi.stubs.IStubElementType;
 import com.intellij.psi.util.PsiTreeUtil;
+import com.jetbrains.python.psi.PyClass;
 import com.jetbrains.python.psi.PyFunction;
 import com.jetbrains.python.psi.PyNamedParameter;
 import com.jetbrains.python.psi.PyParameter;
@@ -17,6 +20,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
@@ -30,6 +34,8 @@ public class KeywordStatementImpl extends RobotStubPsiElementBase<KeywordStateme
     private DefinedVariable variable;
     private KeywordInvokable invokable;
     private Collection<DefinedParameter> availableKeywordParameters;
+
+    private boolean liveInspectionEnabledLastTime;
 
     public KeywordStatementImpl(@NotNull ASTNode node) {
         super(node);
@@ -92,11 +98,13 @@ public class KeywordStatementImpl extends RobotStubPsiElementBase<KeywordStateme
     @Override
     public Collection<DefinedParameter> getAvailableParameters() {
         Collection<DefinedParameter> localDefinedParameters = this.availableKeywordParameters;
-        if (this.availableKeywordParameters == null) {
+        boolean pythonLiveInspection = RobotOptionsProvider.getInstance(getProject()).pythonLiveInspection();
+        if (this.availableKeywordParameters == null || liveInspectionEnabledLastTime != pythonLiveInspection) {
             localDefinedParameters = collectKeywordParameters();
-            this.availableKeywordParameters = localDefinedParameters;
+            availableKeywordParameters = localDefinedParameters;
+            liveInspectionEnabledLastTime = pythonLiveInspection;
         }
-        return localDefinedParameters;
+        return localDefinedParameters != null ? localDefinedParameters : Collections.emptySet();
     }
 
     @Nullable
@@ -121,21 +129,30 @@ public class KeywordStatementImpl extends RobotStubPsiElementBase<KeywordStateme
         return result;
     }
 
-    @NotNull
+    @SuppressWarnings("UnstableApiUsage")
     private Collection<DefinedParameter> collectKeywordParameters() {
         Set<DefinedParameter> results = new LinkedHashSet<>();
+
         Optional<PsiElement> resolvedReferenceOpt = Optional.ofNullable(PsiTreeUtil.findChildOfType(this, KeywordInvokable.class))
                                                             .map(KeywordInvokable::getReference)
                                                             .map(PsiReference::resolve);
         if (resolvedReferenceOpt.isPresent()) {
             PsiElement psiElement = resolvedReferenceOpt.get();
             if (psiElement instanceof PyFunction pyFunction) {
-                PyParameter[] parameters = pyFunction.getParameterList().getParameters();
-                for (PyParameter parameter : parameters) {
-                    PyNamedParameter parameterName = parameter.getAsNamed();
-                    if (parameterName != null && !parameterName.isSelf() && !parameterName.isPositionalContainer() && !parameterName.isKeywordContainer()) {
-                        String defaultValueText = parameter.getDefaultValueText();
-                        results.add(new ParameterDto(parameter, parameterName.getRepr(false), defaultValueText));
+                RobotOptionsProvider robotOptionsProvider = RobotOptionsProvider.getInstance(pyFunction.getProject());
+                PyParameter[] pyParameters = pyFunction.getParameterList().getParameters();
+                if (robotOptionsProvider.pythonLiveInspection()) {
+                    PyClass containingClass = pyFunction.getContainingClass();
+                    PythonInspector.PythonInspectorParameter[] parameters = PythonInspector.inspectPythonFunction(pyFunction);
+                    Collection<DefinedParameter> definedParameters = PythonInspector.convertPyParameters(parameters, pyParameters, containingClass != null);
+                    results.addAll(definedParameters);
+                } else {
+                    for (PyParameter parameter : pyParameters) {
+                        PyNamedParameter parameterName = parameter.getAsNamed();
+                        if (parameterName != null && !parameterName.isSelf() && !parameterName.isPositionalContainer() && !parameterName.isKeywordContainer()) {
+                            String defaultValueText = parameter.getDefaultValueText();
+                            results.add(new ParameterDto(parameter, parameterName.getRepr(false), defaultValueText));
+                        }
                     }
                 }
             } else {
@@ -143,6 +160,8 @@ public class KeywordStatementImpl extends RobotStubPsiElementBase<KeywordStateme
                 Collection<DefinedParameter> parameters = keywordDefinition.getParameters();
                 results.addAll(parameters);
             }
+        } else {
+            return null;
         }
         return results;
     }

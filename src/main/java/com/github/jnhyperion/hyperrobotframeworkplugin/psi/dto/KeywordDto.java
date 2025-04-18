@@ -5,6 +5,7 @@ import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.DefinedParame
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.util.PatternBuilder;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.util.PatternUtil;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.util.ReservedVariable;
+import com.github.jnhyperion.hyperrobotframeworkplugin.util.PythonInspector;
 import com.intellij.psi.PsiElement;
 import com.jetbrains.python.psi.PyBoolLiteralExpression;
 import com.jetbrains.python.psi.PyNoneLiteralExpression;
@@ -41,7 +42,7 @@ public class KeywordDto implements DefinedKeyword {
         this(reference, namespace, name, convertPyParameters(parameters));
     }
 
-    private KeywordDto(@NotNull PsiElement reference,
+    public KeywordDto(@NotNull PsiElement reference,
                        @NotNull String namespace,
                        @NotNull String name,
                        Collection<DefinedParameter> parameters,
@@ -60,7 +61,7 @@ public class KeywordDto implements DefinedKeyword {
 
     @Override
     public final boolean hasParameters() {
-        return this.args;
+        return args;
     }
 
     @Override

@@ -1,5 +1,6 @@
 package com.github.jnhyperion.hyperrobotframeworkplugin.psi.element;
 
+import com.github.jnhyperion.hyperrobotframeworkplugin.psi.dto.ImportType;
 import com.intellij.lang.ASTNode;
 import com.intellij.psi.PsiElement;
 import org.jetbrains.annotations.NotNull;
@@ -30,6 +31,11 @@ public class ImportImpl extends RobotPsiElementBase implements Import {
     }
 
     @Override
+    public ImportType getImportType() {
+        return importType;
+    }
+
+    @Override
     public final String getImportText() {
         PsiElement[] children = getChildren();
         return isResource() && children.length > 0 ? getPresentableText() + "    " + children[0].getText() : getText();
@@ -53,9 +59,5 @@ public class ImportImpl extends RobotPsiElementBase implements Import {
         } else {
             importType = null;
         }
-    }
-
-    private enum ImportType {
-        LIBRARY, RESOURCE, VARIABLES
     }
 }
