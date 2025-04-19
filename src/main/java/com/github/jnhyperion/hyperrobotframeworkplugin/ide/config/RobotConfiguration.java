@@ -5,6 +5,9 @@ import com.intellij.openapi.options.Configurable.NoScroll;
 import com.intellij.openapi.options.SearchableConfigurable;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.project.ProjectManager;
+import com.intellij.ui.components.JBLabel;
+import com.intellij.ui.components.JBPanel;
+import com.intellij.ui.components.JBTextField;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
@@ -13,12 +16,12 @@ import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import javax.swing.BoxLayout;
 import javax.swing.JCheckBox;
 import javax.swing.JComponent;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
-import java.awt.FlowLayout;
+import java.awt.GridBagConstraints;
 import java.awt.event.ItemEvent;
 import java.util.Arrays;
 import java.util.List;
@@ -86,30 +89,30 @@ public class RobotConfiguration implements NoScroll, SearchableConfigurable {
         pythonLiveInspectionCheckBox.setText("Python Arguments Live Inspection");
         checkBoxPanel.add(pythonLiveInspectionCheckBox, new GridConstraints(7, 0, 1, 1, 8, 0, 3, 0, null, null, null));
 
-        JPanel customArgumentsPanel = new JPanel();
-        customArgumentsPanel.setLayout(new FlowLayout());
-        checkBoxPanel.add(customArgumentsPanel, new GridConstraints(8, 0, 1, 1, 8, 0, 3, 0, null, null, null));
+        JBPanel<?> customArgumentsPanel = new JBPanel<>();
+        customArgumentsPanel.setLayout(new BoxLayout(customArgumentsPanel, BoxLayout.LINE_AXIS));
+        checkBoxPanel.add(customArgumentsPanel, new GridConstraints(8, 0, 1, 1, 8, GridBagConstraints.HORIZONTAL, 3, 0, null, null, null));
 
-        JLabel customArgumentsLabel = new JLabel();
-        customArgumentsLabel.setText("Python Inspection Custom Arguments: ");
+        JBLabel customArgumentsLabel = new JBLabel();
+        customArgumentsLabel.setText("Python inspection custom arguments: ");
         customArgumentsPanel.add(customArgumentsLabel);
         customArgumentsLabel.setToolTipText(RobotBundle.getMessage("options.inspection.custom.arguments.tooltip"));
 
-        JTextField pythonLiveInspectionCustomArgumentsTextField = new JTextField();
+        JBTextField pythonLiveInspectionCustomArgumentsTextField = new JBTextField();
         this.pythonLiveInspectionCustomArgumentsTextField = pythonLiveInspectionCustomArgumentsTextField;
         pythonLiveInspectionCustomArgumentsTextField.setText("Custom Arguments");
         customArgumentsPanel.add(pythonLiveInspectionCustomArgumentsTextField);
 
-        JPanel pythonLiveInspectionForDecoratorsPanel = new JPanel();
-        pythonLiveInspectionForDecoratorsPanel.setLayout(new FlowLayout());
-        checkBoxPanel.add(pythonLiveInspectionForDecoratorsPanel, new GridConstraints(9, 0, 1, 1, 8, 0, 3, 0, null, null, null));
+        JBPanel<?> pythonLiveInspectionForDecoratorsPanel = new JBPanel<>();
+        pythonLiveInspectionForDecoratorsPanel.setLayout(new BoxLayout(pythonLiveInspectionForDecoratorsPanel, BoxLayout.LINE_AXIS));
+        checkBoxPanel.add(pythonLiveInspectionForDecoratorsPanel, new GridConstraints(9, 0, 1, 1, 8, GridBagConstraints.HORIZONTAL, 3, 0, null, null, null));
 
-        JLabel pythonLiveInspectionForDecoratorsLabel = new JLabel();
-        pythonLiveInspectionForDecoratorsLabel.setText("Python Inspection For Decorators: ");
+        JBLabel pythonLiveInspectionForDecoratorsLabel = new JBLabel();
+        pythonLiveInspectionForDecoratorsLabel.setText("Python inspection for decorators: ");
         pythonLiveInspectionForDecoratorsLabel.setToolTipText(RobotBundle.getMessage("options.inspection.decorators.tooltip"));
         pythonLiveInspectionForDecoratorsPanel.add(pythonLiveInspectionForDecoratorsLabel);
 
-        JTextField pythonLiveInspectionForDecoratorsTextField = new JTextField();
+        JBTextField pythonLiveInspectionForDecoratorsTextField = new JBTextField();
         this.pythonLiveInspectionForDecoratorsTextField = pythonLiveInspectionForDecoratorsTextField;
         pythonLiveInspectionForDecoratorsTextField.setText("");
         pythonLiveInspectionForDecoratorsPanel.add(pythonLiveInspectionForDecoratorsTextField);
