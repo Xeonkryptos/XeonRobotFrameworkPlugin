@@ -10,11 +10,17 @@ public class ParameterDto implements DefinedParameter {
     private final PsiElement reference;
     private final String name;
     private final String defaultValue;
+    private final boolean keywordContainer;
 
     public ParameterDto(@NotNull PsiElement reference, String name, String defaultValue) {
+        this(reference, name, defaultValue, false);
+    }
+
+    public ParameterDto(@NotNull PsiElement reference, String name, String defaultValue, boolean keywordContainer) {
         this.reference = reference;
         this.name = name.trim();
         this.defaultValue = defaultValue;
+        this.keywordContainer = keywordContainer;
     }
 
     @Nullable
@@ -27,6 +33,11 @@ public class ParameterDto implements DefinedParameter {
     @Override
     public String getDefaultValue() {
         return defaultValue;
+    }
+
+    @Override
+    public boolean isKeywordContainer() {
+        return keywordContainer;
     }
 
     @NotNull

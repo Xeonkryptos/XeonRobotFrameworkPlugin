@@ -201,7 +201,7 @@ public class PythonInspector {
         return functions;
     }
 
-    public static void setupPythonPathForModule(ProcessBuilder processBuilder, Module module) {
+    private static void setupPythonPathForModule(ProcessBuilder processBuilder, Module module) {
         if (module == null) {
             return;
         }
@@ -270,13 +270,13 @@ public class PythonInspector {
         }
         return matchedParameters.stream()
                                 .filter(parameter -> !instanceFunction || !"self".equals(parameter.parameter.name()))
-                                .filter(parameter -> parameter.parameter.type() != PythonInspector.ParameterType.VAR_KEYWORD
-                                                     && parameter.parameter.type() != PythonInspector.ParameterType.VAR_POSITIONAL)
+                                .filter(parameter -> parameter.parameter.type() != PythonInspector.ParameterType.VAR_POSITIONAL)
                                 .map(parameter -> {
                                     String defaultValue = parameter.parameter.defaultValue();
                                     return new ParameterDto(parameter.pyParameter,
                                                             parameter.parameter.name(),
-                                                            defaultValue);
+                                                            defaultValue,
+                                                            parameter.parameter.type() == ParameterType.VAR_KEYWORD);
                                 })
                                 .collect(Collectors.toCollection(LinkedHashSet::new));
     }

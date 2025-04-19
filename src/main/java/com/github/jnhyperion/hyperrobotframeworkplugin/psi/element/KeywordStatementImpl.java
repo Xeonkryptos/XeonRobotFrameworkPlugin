@@ -104,7 +104,7 @@ public class KeywordStatementImpl extends RobotStubPsiElementBase<KeywordStateme
             availableKeywordParameters = localDefinedParameters;
             liveInspectionEnabledLastTime = pythonLiveInspection;
         }
-        return localDefinedParameters != null ? localDefinedParameters : Collections.emptySet();
+        return localDefinedParameters != null ? new ArrayList<>(localDefinedParameters) : Collections.emptySet();
     }
 
     @Nullable
@@ -152,6 +152,9 @@ public class KeywordStatementImpl extends RobotStubPsiElementBase<KeywordStateme
                         if (parameterName != null && !parameterName.isSelf() && !parameterName.isPositionalContainer() && !parameterName.isKeywordContainer()) {
                             String defaultValueText = parameter.getDefaultValueText();
                             results.add(new ParameterDto(parameter, parameterName.getRepr(false), defaultValueText));
+                        }
+                        if (parameterName != null && parameterName.isKeywordContainer()) {
+                            results.add(new ParameterDto(parameter, parameterName.getRepr(false), null, true));
                         }
                     }
                 }

@@ -17,6 +17,7 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.util.PsiTreeUtil;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Collection;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -30,9 +31,10 @@ public class RobotParameterAnnotator implements Annotator, DumbAware {
 
         KeywordStatement keywordStatement = PsiTreeUtil.getParentOfType(parameter, KeywordStatement.class);
         if (keywordStatement != null) {
-            Set<String> parameterNames = keywordStatement.getAvailableParameters().stream().map(DefinedParameter::getLookup).collect(Collectors.toSet());
+            Collection<DefinedParameter> availableParameters = keywordStatement.getAvailableParameters();
+            Set<String> parameterNames = availableParameters.stream().map(DefinedParameter::getLookup).collect(Collectors.toSet());
             String parameterName = parameter.getParameterName();
-            if (!parameterNames.contains(parameterName)) {
+            if (!parameterNames.contains(parameterName) && availableParameters.stream().noneMatch(DefinedParameter::isKeywordContainer)) {
                 holder.newAnnotation(HighlightSeverity.ERROR, RobotBundle.getMessage("annotation.keyword.parameter.not-found")).range(parameter).create();
             }
         }

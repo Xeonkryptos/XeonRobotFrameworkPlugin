@@ -16,6 +16,8 @@ public interface DefinedParameter extends LookupElementMarker {
    @Nullable
    String getDefaultValue();
 
+   boolean isKeywordContainer();
+
    @NotNull
    PsiElement reference();
 }

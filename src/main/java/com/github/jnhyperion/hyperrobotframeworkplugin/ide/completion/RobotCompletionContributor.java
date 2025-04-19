@@ -492,7 +492,7 @@ public class RobotCompletionContributor extends CompletionContributor {
                                                 .flatMap(parameter -> PsiTreeUtil.getChildrenOfTypeAsList(parameter, ParameterId.class).stream())
                                                 .map(ParameterId::getName)
                                                 .collect(Collectors.toSet());
-        availableParameters.removeIf(variable -> arguments.contains(variable.getLookup()));
+        availableParameters.removeIf(parameter -> arguments.contains(parameter.getLookup()) || parameter.isKeywordContainer());
 
         TailType assignmentTailType = TailType.createSimpleTailType('=');
         for (DefinedParameter parameter : availableParameters) {

@@ -10,6 +10,8 @@ import com.intellij.psi.util.PsiTreeUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Comparator;
+
 public class RobotParameterReference extends PsiReferenceBase<ParameterId> implements PsiReference {
 
     public RobotParameterReference(@NotNull ParameterId parameter) {
@@ -25,8 +27,9 @@ public class RobotParameterReference extends PsiReferenceBase<ParameterId> imple
         if (keywordStatement != null && parameterName != null) {
             PsiElement reference = keywordStatement.getAvailableParameters()
                                                    .stream()
-                                                   .filter(param -> parameterName.equals(param.getLookup()))
-                                                   .findFirst()
+                                                   .filter(param -> parameterName.equals(param.getLookup()) || param.isKeywordContainer())
+                                                   .min(Comparator.comparing(DefinedParameter::isKeywordContainer,
+                                                                             (kc1, kc2) -> kc1 == kc2 ? 0 : kc1 ? 1 : -1))
                                                    .map(DefinedParameter::reference)
                                                    .orElse(null);
             if (reference != null) {

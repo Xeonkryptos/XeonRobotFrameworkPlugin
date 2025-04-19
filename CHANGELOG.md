@@ -12,6 +12,7 @@
 
 - Caching issue leading to incorrectly marked parameters
 - Fixed parsing issue with new keyword definitions following after a bracket template keyword definition
+- Don't mark unknown parameters as failure when there is a keyword container. Also, jump to the keyword container when jumping to the referenced parameter
 
 ## 0.2.2
 
