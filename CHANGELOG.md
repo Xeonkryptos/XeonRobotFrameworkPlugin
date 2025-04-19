@@ -11,6 +11,7 @@
 ### Fixed
 
 - Caching issue leading to incorrectly marked parameters
+- Fixed parsing issue with new keyword definitions following after a bracket template keyword definition
 
 ## 0.2.2
 

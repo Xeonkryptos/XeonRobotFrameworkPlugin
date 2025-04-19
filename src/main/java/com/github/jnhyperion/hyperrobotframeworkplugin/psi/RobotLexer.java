@@ -251,6 +251,9 @@ public class RobotLexer extends LexerBase {
                     this.currentToken = RobotTokenTypes.SYNTAX_MARKER;
                     this.level.push(IF_CLAUSE);
                 } else if (state == TEST_CASES_HEADING || state == KEYWORDS_HEADING) {
+                    if (isBracketTemplate) {
+                        isBracketTemplate = false;
+                    }
                     this.currentToken = RobotStubTokenTypes.KEYWORD_DEFINITION;
                     this.level.push(KEYWORD_DEFINITION);
                 } else if (state == KEYWORD_DEFINITION && isAssignment(this.position)) {
@@ -370,8 +373,8 @@ public class RobotLexer extends LexerBase {
     private boolean isWithinForLoop() {
         int startOffset = this.startOffset;
         List<TokenWord> tokenWords = extractTokenWords();
-        if (!tokenWords.isEmpty() && "FOR".equals(tokenWords.get(0).word)) {
-            TokenWord forToken = tokenWords.get(0);
+        if (!tokenWords.isEmpty() && "FOR".equals(tokenWords.getFirst().word)) {
+            TokenWord forToken = tokenWords.getFirst();
             TokenWord inToken = null;
             for (TokenWord token : tokenWords) {
                 if (token.word.startsWith("IN")) {
