@@ -107,9 +107,8 @@ public class RobotCompletionContributor extends CompletionContributor {
                                                  @NotNull ProcessingContext context,
                                                  @NotNull CompletionResultSet result) {
                        Heading heading = getHeading(parameters.getOriginalPosition());
-                       if (isIndexPositionAWhitespaceCharacter(parameters) &&
-                           heading != null &&
-                           (heading.containsTestCases() || heading.containsKeywordDefinitions())) {
+                       if (isIndexPositionAWhitespaceCharacter(parameters) && heading != null && (heading.containsTestCases()
+                                                                                                  || heading.containsKeywordDefinitions())) {
                            RobotCompletionContributor.addSyntaxLookup(RobotTokenTypes.BRACKET_SETTING, result);
                        }
                    }
@@ -192,9 +191,8 @@ public class RobotCompletionContributor extends CompletionContributor {
                                                  @NotNull ProcessingContext context,
                                                  @NotNull CompletionResultSet result) {
                        Heading heading = getHeading(parameters.getOriginalPosition());
-                       if (isIndexPositionAWhitespaceCharacter(parameters) &&
-                           heading != null &&
-                           (heading.containsTestCases() || heading.containsKeywordDefinitions())) {
+                       if (isIndexPositionAWhitespaceCharacter(parameters) && heading != null && (heading.containsTestCases()
+                                                                                                  || heading.containsKeywordDefinitions())) {
                            List<LookupElement> lookupElements = addSyntaxLookup(RobotTokenTypes.SYNTAX_MARKER);
                            List<LookupElement> nonSpecialElements = new ArrayList<>();
                            List<LookupElement> specialElements = new ArrayList<>();
@@ -228,9 +226,9 @@ public class RobotCompletionContributor extends CompletionContributor {
                                                  @NotNull ProcessingContext context,
                                                  @NotNull CompletionResultSet result) {
                        Heading heading = getHeading(parameters.getPosition());
-                       if (isIndexPositionAWhitespaceCharacter(parameters) &&
-                           heading != null &&
-                           (heading.containsTestCases() || heading.containsKeywordDefinitions() || heading.containsTasks())) {
+                       if (isIndexPositionAWhitespaceCharacter(parameters) && heading != null && (heading.containsTestCases()
+                                                                                                  || heading.containsKeywordDefinitions()
+                                                                                                  || heading.containsTasks())) {
                            boolean startingWithSlash = isStartingWithSlash(parameters);
                            addDefinedKeywordsFromFile(result, parameters.getOriginalFile(), startingWithSlash);
                        } else if (heading != null && heading.isSettings()) {
@@ -516,8 +514,8 @@ public class RobotCompletionContributor extends CompletionContributor {
                                                                .withIcon(icon)
                                                                .withPsiElement(lookupElementMarker.reference())
                                                                .withInsertHandler((context, item) -> {
-                                                                   if (item.getUserData(CompletionKeys.ROBOT_LOOKUP_ELEMENT_TYPE) ==
-                                                                       RobotLookupElementType.VARIABLE) {
+                                                                   if (item.getUserData(CompletionKeys.ROBOT_LOOKUP_ELEMENT_TYPE)
+                                                                       == RobotLookupElementType.VARIABLE) {
                                                                        String lookupString = item.getLookupString();
 
                                                                        Editor editor = context.getEditor();
@@ -698,6 +696,21 @@ public class RobotCompletionContributor extends CompletionContributor {
             LookupElement element = TailTypeDecorator.withTail(LookupElementBuilder.create(lookupString)
                                                                                    .withLookupStrings(Arrays.asList(lookupStrings))
                                                                                    .withPresentableText(lookupString)
+                                                                                   .withInsertHandler((context, item) -> {
+                                                                                       if (type == RobotTokenTypes.HEADING) {
+                                                                                           Editor editor = context.getEditor();
+                                                                                           Document document = context.getDocument();
+                                                                                           int startOffset = context.getStartOffset();
+                                                                                           int lineNumber = document.getLineNumber(startOffset);
+                                                                                           int lineStartOffset = document.getLineStartOffset(lineNumber);
+                                                                                           int lineEndOffset = document.getLineEndOffset(lineNumber);
+
+                                                                                           int newEndOffset = lineStartOffset + lookupString.length();
+                                                                                           document.replaceString(lineStartOffset, lineEndOffset, lookupString);
+                                                                                           editor.getCaretModel().moveToOffset(newEndOffset);
+                                                                                           context.setTailOffset(newEndOffset);
+                                                                                       }
+                                                                                   })
                                                                                    .withCaseSensitivity(true), word.tailType());
             results.add(element);
         }

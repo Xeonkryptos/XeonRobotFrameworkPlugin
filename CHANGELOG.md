@@ -15,6 +15,7 @@
 - Fixed parsing issue with new keyword definitions following after a bracket template keyword definition
 - Don't mark unknown parameters as failure when there is a keyword container. Also, jump to the keyword container when jumping to the referenced parameter
 - StringIndexOutOfBoundsException when requesting code completion for an argument of a keyword parameter
+- When auto completing a section and typed for example `***` the suggested section part overwrites the `***` part instead of adding it again
 
 ### Changed
 
