@@ -2,10 +2,10 @@ package com.github.jnhyperion.hyperrobotframeworkplugin.psi.dto;
 
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.DefinedKeyword;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.DefinedParameter;
+import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.DefinedVariable;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.util.PatternBuilder;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.util.PatternUtil;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.util.ReservedVariable;
-import com.github.jnhyperion.hyperrobotframeworkplugin.util.PythonInspector;
 import com.intellij.psi.PsiElement;
 import com.jetbrains.python.psi.PyBoolLiteralExpression;
 import com.jetbrains.python.psi.PyNoneLiteralExpression;
@@ -15,13 +15,16 @@ import com.jetbrains.python.psi.PyStringLiteralExpression;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Objects;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+@SuppressWarnings("UnstableApiUsage")
 public class KeywordDto implements DefinedKeyword {
 
     private final PsiElement reference;
@@ -116,6 +119,30 @@ public class KeywordDto implements DefinedKeyword {
     @Override
     public final PsiElement reference() {
         return this.reference;
+    }
+
+    @Nullable
+    public String getArgumentsDisplayable() {
+        if (!hasParameters()) {
+            return null;
+        }
+        return formatArguments(getParameters());
+    }
+
+    private String formatArguments(Collection<?> arguments) {
+        List<String> argumentNames = new ArrayList<>();
+        for (Object argument : arguments) {
+            if (argument instanceof PyParameter parameter) {
+                String name = parameter.getName();
+                //noinspection UnstableApiUsage
+                if (!parameter.isSelf()) {
+                    argumentNames.add(name);
+                }
+            } else if (argument instanceof DefinedVariable) {
+                argumentNames.add(((DefinedVariable) argument).getLookup());
+            }
+        }
+        return " (" + String.join(", ", argumentNames) + ")";
     }
 
     @Override

@@ -1,7 +1,7 @@
 package com.github.jnhyperion.hyperrobotframeworkplugin.psi.ref;
 
+import com.github.jnhyperion.hyperrobotframeworkplugin.ide.LookupElementUtil;
 import com.github.jnhyperion.hyperrobotframeworkplugin.ide.RobotTailTypes;
-import com.github.jnhyperion.hyperrobotframeworkplugin.ide.completion.RobotCompletionContributor;
 import com.github.jnhyperion.hyperrobotframeworkplugin.ide.config.RobotOptionsProvider;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.dto.ImportType;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.DefinedKeyword;
@@ -68,9 +68,9 @@ public class RobotKeywordReference extends PsiReferenceBase<KeywordInvokable> {
                                                                                      .withCaseSensitivity(true)
                                                                                      .withIcon(Nodes.Function);
 
-                            lookupElement = RobotCompletionContributor.addReferenceType(definedKeyword.reference(), lookupElement);
+                            lookupElement = LookupElementUtil.addReferenceType(definedKeyword.reference(), lookupElement);
 
-                            String keywordArguments = RobotCompletionContributor.getKeywordArguments(definedKeyword);
+                            String keywordArguments = definedKeyword.getArgumentsDisplayable();
                             if (keywordArguments != null) {
                                 lookupElement = lookupElement.withTailText(keywordArguments);
                             }

@@ -15,4 +15,6 @@ public interface DefinedKeyword {
    boolean matches(String text);
 
    PsiElement reference();
+
+   String getArgumentsDisplayable();
 }
