@@ -339,7 +339,7 @@ public class RobotCompletionContributor extends CompletionContributor {
         int lineNumber = document.getLineNumber(offset);
         int lineStartOffset = document.getLineStartOffset(lineNumber);
         String textBeforeOffset = document.getText(new TextRange(lineStartOffset, offset));
-        if (textBeforeOffset.isEmpty()) {
+        if (textBeforeOffset.trim().isEmpty()) {
             return false;
         }
         int firstCharacterInLine = textBeforeOffset.trim().codePointAt(0);
