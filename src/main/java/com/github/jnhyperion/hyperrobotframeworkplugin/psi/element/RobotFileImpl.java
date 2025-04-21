@@ -124,8 +124,8 @@ public class RobotFileImpl extends PsiFileBase implements KeywordFile, RobotFile
             results.addAll(heading.getFilesFromInvokedKeywordsAndVariables());
         }
 
-        Collection<KeywordFile> importedFiles = getImportedFiles(true);
-        Collection<VirtualFile> virtualFiles = getVirtualFiles(true);
+        Collection<KeywordFile> importedFiles = getImportedFiles(false);
+        Collection<VirtualFile> virtualFiles = getVirtualFiles(false);
 
         Set<PsiFile> psiFilesCopy = new HashSet<>(results);
         for (PsiFile psiFile : psiFilesCopy) {

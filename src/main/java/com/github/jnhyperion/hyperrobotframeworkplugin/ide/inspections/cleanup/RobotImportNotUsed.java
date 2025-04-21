@@ -2,67 +2,76 @@ package com.github.jnhyperion.hyperrobotframeworkplugin.ide.inspections.cleanup;
 
 import com.github.jnhyperion.hyperrobotframeworkplugin.RobotBundle;
 import com.github.jnhyperion.hyperrobotframeworkplugin.ide.inspections.SimpleRobotInspection;
-import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.PositionalArgument;
+import com.github.jnhyperion.hyperrobotframeworkplugin.psi.RobotFeatureFileType;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.Import;
+import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.PositionalArgument;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.RobotFile;
 import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiReference;
 import com.intellij.psi.util.PsiTreeUtil;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
+
 public class RobotImportNotUsed extends SimpleRobotInspection {
 
-   @Nls
-   @NotNull
-   @Override
-   public String getDisplayName() {
-      return RobotBundle.getMessage("INSP.NAME.import.unused");
-   }
+    @Nls
+    @NotNull
+    @Override
+    public String getDisplayName() {
+        return RobotBundle.getMessage("INSP.NAME.import.unused");
+    }
 
-   @Override
-   public final boolean skip(PsiElement element) {
-       try {
-           PsiElement parentElement;
-           PsiReference elementReference;
-           PsiElement resolvedElement;
+    @Override
+    public final boolean skip(PsiElement element) {
+        if (element.getContainingFile().getFileType() != RobotFeatureFileType.getInstance()) {
+            // TODO: Workaround for now. Don't "analyze" imports in Resource files. To be able to do that a more sophisticated usage analysis is needed.
+            return true;
+        }
+        if (element instanceof PositionalArgument) {
+            PsiElement parentElement = element.getParent();
+            if (parentElement instanceof Import importElem && importElem.isResource()) {
+                PsiElement resolvedElement = Optional.ofNullable(element.getReference()).map(PsiReference::resolve).orElse(null);
+                if (resolvedElement instanceof RobotFile) {
+                    Collection<Import> importElements = PsiTreeUtil.findChildrenOfType(element.getContainingFile(), Import.class);
+                    List<String> importIdentifiers = new ArrayList<>(importElements.size());
 
-           if (element instanceof PositionalArgument && (parentElement = element.getParent()) instanceof Import && ((Import) parentElement).isResource()
-               && (elementReference = element.getReference()) != null && (resolvedElement = elementReference.resolve()) instanceof RobotFile) {
+                    for (Import importElement : importElements) {
+                        String importText = importElement.getImportText();
+                        importIdentifiers.add(importText);
+                    }
 
-               Collection<Import> importElements = PsiTreeUtil.findChildrenOfType(element.getContainingFile(), Import.class);
-               List<String> importIdentifiers = new ArrayList<>();
+                    String importText = importElem.getImportText();
+                    int firstOccurrenceIndex = importIdentifiers.indexOf(importText);
+                    int lastOccurrenceIndex = importIdentifiers.lastIndexOf(importText);
 
-               for (Import importElement : importElements) {
-                   importIdentifiers.add(importElement.getImportText());
-               }
+                    List<Import> importsCopy = new ArrayList<>(importElements);
+                    if (firstOccurrenceIndex != lastOccurrenceIndex && importsCopy.indexOf(parentElement) != firstOccurrenceIndex) {
+                        return false;
+                    }
 
-               int firstOccurrenceIndex = importIdentifiers.indexOf(((Import) parentElement).getImportText());
-               int lastOccurrenceIndex = importIdentifiers.lastIndexOf(((Import) parentElement).getImportText());
+                    Collection<PsiFile> filesFromInvokedKeywordsAndVariables = ((RobotFile) element.getContainingFile()).getFilesFromInvokedKeywordsAndVariables();
+                    PsiFile importedFile = resolvedElement.getContainingFile();
+                    return filesFromInvokedKeywordsAndVariables.contains(importedFile);
+                }
+            }
+        }
+        return true;
+    }
 
-               if (firstOccurrenceIndex != lastOccurrenceIndex && new ArrayList<>(importElements).indexOf(parentElement) != firstOccurrenceIndex) {
-                   return false;
-               }
+    @Override
+    public final String getMessage() {
+        return RobotBundle.getMessage("INSP.import.unused");
+    }
 
-               return ((RobotFile) element.getContainingFile()).getFilesFromInvokedKeywordsAndVariables().contains(resolvedElement.getContainingFile());
-           }
-       } catch (Throwable ignored) {
-       }
-       return true;
-   }
-
-   @Override
-   public final String getMessage() {
-      return RobotBundle.getMessage("INSP.import.unused");
-   }
-
-   @NotNull
-   @Override
-   protected final String getGroupNameKey() {
-      return "INSP.GROUP.cleanup";
-   }
+    @NotNull
+    @Override
+    protected final String getGroupNameKey() {
+        return "INSP.GROUP.cleanup";
+    }
 }
