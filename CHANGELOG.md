@@ -7,6 +7,7 @@
 ### Added
 
 - Use live inspection of python functions to resolve parameters modified through decorators
+- Include `__init__.robot` files when looking for defined variables
 
 ### Fixed
 

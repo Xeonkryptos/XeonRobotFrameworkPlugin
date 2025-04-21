@@ -1,21 +1,20 @@
 package com.github.jnhyperion.hyperrobotframeworkplugin.psi.element;
 
-import com.github.jnhyperion.hyperrobotframeworkplugin.psi.RobotFeatureFileType;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.RobotLanguage;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.dto.ImportType;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.dto.KeywordFileWithDependentsWrapper;
 import com.intellij.extapi.psi.PsiFileBase;
+import com.intellij.openapi.application.ReadAction;
 import com.intellij.openapi.fileTypes.FileType;
+import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.FileViewProvider;
-import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
-import com.intellij.psi.search.FilenameIndex;
-import com.intellij.psi.search.GlobalSearchScope;
+import com.intellij.psi.PsiManager;
+import com.intellij.psi.util.PsiTreeUtil;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Map;
@@ -32,29 +31,28 @@ public class RobotFileImpl extends PsiFileBase implements KeywordFile, RobotFile
     public RobotFileImpl(FileViewProvider fileViewProvider) {
         super(fileViewProvider, RobotLanguage.INSTANCE);
 
-        this.fileType = fileViewProvider.getFileType();
+        fileType = fileViewProvider.getFileType();
     }
 
     @NotNull
     @Override
     public FileType getFileType() {
-        return this.fileType;
+        return fileType;
     }
 
     @Override
     public void subtreeChanged() {
         super.subtreeChanged();
-        this.reset();
+        reset();
     }
 
     @NotNull
     @Override
     public final Collection<DefinedVariable> getDefinedVariables() {
-        Set<DefinedVariable> results = new LinkedHashSet<>();
-        for (Heading heading : collectHeadings()) {
-            results.addAll(heading.getDefinedVariables());
-        }
-        //        results.addAll(collectRobotInitVariables());
+        Collection<DefinedVariable> headingVariables = getHeadingVariables();
+        Set<DefinedVariable> results = new LinkedHashSet<>(headingVariables);
+        Collection<DefinedVariable> definedVariables = collectRobotInitVariables();
+        results.addAll(definedVariables);
         return results;
     }
 
@@ -62,21 +60,40 @@ public class RobotFileImpl extends PsiFileBase implements KeywordFile, RobotFile
     public final Collection<DefinedVariable> collectRobotInitVariables() {
         Collection<DefinedVariable> results = this.robotInitVariables;
         if (results == null) {
-            try {
-                results = new LinkedHashSet<>();
-                PsiFile[] psiFiles = FilenameIndex.getFilesByName(this.getProject(),
-                                                                  "__init__.robot",
-                                                                  GlobalSearchScope.getScopeRestrictedByFileTypes(GlobalSearchScope.projectScope(this.getProject()),
-                                                                                                                  RobotFeatureFileType.getInstance()));
-                for (PsiFile psiFile : psiFiles) {
-                    if (psiFile instanceof RobotFile robotFile) {
-                        results.addAll(robotFile.getDefinedVariables());
+            Set<VirtualFile> virtualFiles = new LinkedHashSet<>();
+            results = ReadAction.compute(() -> {
+                Set<DefinedVariable> localResults = new LinkedHashSet<>();
+                for (KeywordFile importedFile : getImportedFiles(true)) {
+                    if (importedFile instanceof RobotFile robotFile) {
+                        VirtualFile virtualRobotFile = robotFile.getVirtualFile();
+                        VirtualFile virtualRobotFileDir = virtualRobotFile.getParent();
+                        VirtualFile initFile = virtualRobotFileDir.findChild("__init__.robot");
+                        if (initFile != null) {
+                            virtualFiles.add(initFile);
+                        }
                     }
                 }
-            } catch (Throwable t) {
-                return new LinkedHashSet<>();
-            }
+
+                Project project = getProject();
+                PsiManager psiManager = PsiManager.getInstance(project);
+                for (VirtualFile virtualFile : virtualFiles) {
+                    RobotFileImpl robotFile = (RobotFileImpl) psiManager.findFile(virtualFile);
+                    if (robotFile != null) {
+                        Collection<DefinedVariable> definedVariables = robotFile.getHeadingVariables();
+                        localResults.addAll(definedVariables);
+                    }
+                }
+                return localResults;
+            });
             this.robotInitVariables = results;
+        }
+        return results;
+    }
+
+    private Collection<DefinedVariable> getHeadingVariables() {
+        Set<DefinedVariable> results = new LinkedHashSet<>();
+        for (Heading heading : collectHeadings()) {
+            results.addAll(heading.getDefinedVariables());
         }
         return results;
     }
@@ -103,26 +120,23 @@ public class RobotFileImpl extends PsiFileBase implements KeywordFile, RobotFile
     @Override
     public final Collection<PsiFile> getFilesFromInvokedKeywordsAndVariables() {
         Set<PsiFile> results = new HashSet<>();
-        try {
-            for (Heading var3 : this.collectHeadings()) {
-                results.addAll(var3.getFilesFromInvokedKeywordsAndVariables());
-            }
+        for (Heading heading : collectHeadings()) {
+            results.addAll(heading.getFilesFromInvokedKeywordsAndVariables());
+        }
 
-            Collection<KeywordFile> importedFiles = this.getImportedFiles(false);
-            Collection<VirtualFile> virtualFiles = this.getVirtualFiles(false);
+        Collection<KeywordFile> importedFiles = getImportedFiles(true);
+        Collection<VirtualFile> virtualFiles = getVirtualFiles(true);
 
-            Set<PsiFile> psiFilesCopy = new HashSet<>(results);
-            for (PsiFile psiFile : psiFilesCopy) {
-                if (!virtualFiles.contains(psiFile.getVirtualFile())) {
-                    for (KeywordFile importedFile : importedFiles) {
-                        if (importedFile.getVirtualFiles(true).contains(psiFile.getVirtualFile())) {
-                            results.add(importedFile.getPsiFile());
-                            break;
-                        }
+        Set<PsiFile> psiFilesCopy = new HashSet<>(results);
+        for (PsiFile psiFile : psiFilesCopy) {
+            if (!virtualFiles.contains(psiFile.getVirtualFile())) {
+                for (KeywordFile importedFile : importedFiles) {
+                    if (importedFile.getVirtualFiles(true).contains(psiFile.getVirtualFile())) {
+                        results.add(importedFile.getPsiFile());
+                        break;
                     }
                 }
             }
-        } catch (Throwable ignored) {
         }
         return results;
     }
@@ -223,21 +237,10 @@ public class RobotFileImpl extends PsiFileBase implements KeywordFile, RobotFile
 
     @NotNull
     private Collection<Heading> collectHeadings() {
-        Collection<Heading> results = this.headings;
-        if (results == null) {
-            try {
-                results = new LinkedHashSet<>();
-                for (PsiElement child : getChildren()) {
-                    if (child instanceof Heading) {
-                        results.add((Heading) child);
-                    }
-                }
-            } catch (Throwable var6) {
-                return Collections.emptyList();
-            }
-            this.headings = results;
+        if (headings == null) {
+            headings = new LinkedHashSet<>(PsiTreeUtil.getChildrenOfTypeAsList(this, Heading.class));
         }
-        return results;
+        return headings;
     }
 
     private record KeywordFileWithParentWrapper(KeywordFile keywordFile, KeywordFile parent) {}
