@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+## 0.2.3
+
 ### Added
 
 - Use live inspection of python functions to resolve parameters modified through decorators
