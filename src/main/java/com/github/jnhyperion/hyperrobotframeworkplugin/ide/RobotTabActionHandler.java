@@ -1,6 +1,5 @@
 package com.github.jnhyperion.hyperrobotframeworkplugin.ide;
 
-import com.github.jnhyperion.hyperrobotframeworkplugin.ide.config.RobotOptionsProvider;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.RobotFile;
 import com.intellij.codeInsight.completion.NextPrevParameterHandler;
 import com.intellij.openapi.actionSystem.DataContext;
@@ -21,7 +20,6 @@ public class RobotTabActionHandler extends NextPrevParameterHandler {
    public void executeWriteAction(@NotNull Editor editor, @NotNull Caret caret, DataContext dataContext) {
        Project project = editor.getProject();
        if (project != null
-           && RobotOptionsProvider.getInstance(project).reformatOnSave()
            && PsiDocumentManager.getInstance(project).getPsiFile(editor.getDocument()) instanceof RobotFile) {
            int offset = caret.getOffset();
            String documentText = editor.getDocument().getText();

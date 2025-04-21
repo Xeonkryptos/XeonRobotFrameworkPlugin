@@ -53,22 +53,6 @@ public class RobotOptionsProvider implements PersistentStateComponent<RobotOptio
         this.state.capitalizeKeywords = capitalizeKeywords;
     }
 
-    public final boolean inlineVariableSearch() {
-        return this.state.inlineVariableSearch;
-    }
-
-    public final void setInlineVariableSearch(boolean inlineVariableSearch) {
-        this.state.inlineVariableSearch = inlineVariableSearch;
-    }
-
-    public final boolean reformatOnSave() {
-        return this.state.reformatOnSave;
-    }
-
-    public final void setReformatOnSave(boolean reformatOnSave) {
-        this.state.reformatOnSave = reformatOnSave;
-    }
-
     public final boolean smartAutoEncloseVariable() {
         return this.state.smartAutoEncloseVariable;
     }
@@ -101,6 +85,7 @@ public class RobotOptionsProvider implements PersistentStateComponent<RobotOptio
         this.state.pythonLiveInspectionDecorators = pythonLiveInspectionDecorators;
     }
 
+    @SuppressWarnings("UnstableApiUsage")
     public final boolean analyzeViaPythonLiveInspection(PyFunction function) {
         if (this.state.pythonLiveInspection) {
             PyDecoratorList decoratorList = function.getDecoratorList();
@@ -128,8 +113,6 @@ public class RobotOptionsProvider implements PersistentStateComponent<RobotOptio
         this.state.transitiveImports = state.transitiveImports;
         this.state.globalVariables = state.globalVariables;
         this.state.capitalizeKeywords = state.capitalizeKeywords;
-        this.state.inlineVariableSearch = state.inlineVariableSearch;
-        this.state.reformatOnSave = state.reformatOnSave;
         this.state.smartAutoEncloseVariable = state.smartAutoEncloseVariable;
         this.state.pythonLiveInspection = state.pythonLiveInspection;
         this.state.pythonLiveInspectionAdditionalArguments = state.pythonLiveInspectionAdditionalArguments;
@@ -141,8 +124,6 @@ public class RobotOptionsProvider implements PersistentStateComponent<RobotOptio
         public boolean globalVariables = true;
         public boolean debug = false;
         public boolean capitalizeKeywords = true;
-        public boolean inlineVariableSearch = false;
-        public boolean reformatOnSave = true;
         public boolean smartAutoEncloseVariable = true;
         public boolean pythonLiveInspection = true;
         public String pythonLiveInspectionAdditionalArguments = "-m robot.libdoc .robotframework-ls";
