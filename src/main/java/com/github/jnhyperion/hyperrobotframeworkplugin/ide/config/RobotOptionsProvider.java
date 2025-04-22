@@ -125,7 +125,7 @@ public class RobotOptionsProvider implements PersistentStateComponent<RobotOptio
         public boolean debug = false;
         public boolean capitalizeKeywords = true;
         public boolean smartAutoEncloseVariable = true;
-        public boolean pythonLiveInspection = true;
+        public boolean pythonLiveInspection = false;
         public String pythonLiveInspectionAdditionalArguments = "-m robot.libdoc .robotframework-ls";
         public List<String> pythonLiveInspectionDecorators = List.of();
     }
