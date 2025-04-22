@@ -6,12 +6,11 @@ import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.KeywordInvoka
 import com.intellij.lang.annotation.AnnotationHolder;
 import com.intellij.lang.annotation.Annotator;
 import com.intellij.lang.annotation.HighlightSeverity;
-import com.intellij.openapi.project.DumbAware;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiReference;
 import org.jetbrains.annotations.NotNull;
 
-public class RobotKeywordAnnotator implements Annotator, DumbAware {
+public class RobotKeywordAnnotator implements Annotator {
 
     @Override
     public void annotate(@NotNull PsiElement element, @NotNull AnnotationHolder holder) {

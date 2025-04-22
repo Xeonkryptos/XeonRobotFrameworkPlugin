@@ -23,6 +23,7 @@
 
 - Removed obsolete configuration entries
 - Not analyzing `*.resource` files for unused dependencies. A more sophisticated approach is needed. Will be implemented at a later time
+- Made some annotators not DumbAware to be able to access the index correctly
 
 ## 0.2.2
 
