@@ -1,5 +1,6 @@
 package com.github.jnhyperion.hyperrobotframeworkplugin.psi.ref;
 
+import com.github.jnhyperion.hyperrobotframeworkplugin.MyLogger;
 import com.github.jnhyperion.hyperrobotframeworkplugin.ide.config.RobotOptionsProvider;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.dto.KeywordDto;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.dto.VariableDto;
@@ -145,27 +146,34 @@ public abstract class RobotPythonWrapper {
                 methodsToStaticallyInspect.put(methodName, pyFunction);
             }
         });
-        String inspectionNamespace = namespace;
-        if (className != null && namespace.endsWith("." + className)) {
-            inspectionNamespace = namespace.substring(0, namespace.length() - className.length() - 1);
-        }
-        Map<String, PythonInspector.PythonInspectorParameter[]> analyzedFunctions = PythonInspector.inspectPythonFunctions(sourceElement,
-                                                                                                                           inspectionNamespace,
-                                                                                                                           className,
-                                                                                                                           methodsToLiveInspect);
-        for (Entry<String, PythonInspector.PythonInspectorParameter[]> entry : analyzedFunctions.entrySet()) {
-            String methodName = entry.getKey();
-            PythonInspector.PythonInspectorParameter[] parameters = entry.getValue();
-
-            PyFunction method = methods.get(methodName);
-            String keywordName = getKeywordName(method);
-            if (keywordName != null) {
-                methodName = keywordName;
+        if (robotOptionsProvider.pythonLiveInspection()) {
+            String inspectionNamespace = namespace;
+            if (className != null && namespace.endsWith("." + className)) {
+                inspectionNamespace = namespace.substring(0, namespace.length() - className.length() - 1);
             }
-            keywords.add(new KeywordDto(method,
-                                        namespace,
-                                        methodName,
-                                        PythonInspector.convertPyParameters(parameters, method.getParameterList().getParameters(), true)));
+            try {
+                Map<String, PythonInspector.PythonInspectorParameter[]> analyzedFunctions = PythonInspector.inspectPythonFunctions(sourceElement,
+                                                                                                                                   inspectionNamespace,
+                                                                                                                                   className,
+                                                                                                                                   methodsToLiveInspect);
+                for (Entry<String, PythonInspector.PythonInspectorParameter[]> entry : analyzedFunctions.entrySet()) {
+                    String methodName = entry.getKey();
+                    PythonInspector.PythonInspectorParameter[] parameters = entry.getValue();
+
+                    PyFunction method = methods.get(methodName);
+                    String keywordName = getKeywordName(method);
+                    if (keywordName != null) {
+                        methodName = keywordName;
+                    }
+                    keywords.add(new KeywordDto(method,
+                                                namespace,
+                                                methodName,
+                                                PythonInspector.convertPyParameters(parameters, method.getParameterList().getParameters(), true)));
+                }
+            } catch (Exception e) {
+                MyLogger.logger.warn("Error while inspecting Python functions. Falling back to static analysis.", e);
+                methodsToStaticallyInspect.putAll(methodsToLiveInspect);
+            }
         }
         for (Map.Entry<String, PyFunction> entry : methodsToStaticallyInspect.entrySet()) {
             String methodName = entry.getKey();

@@ -1,5 +1,6 @@
 package com.github.jnhyperion.hyperrobotframeworkplugin.psi.element;
 
+import com.github.jnhyperion.hyperrobotframeworkplugin.MyLogger;
 import com.github.jnhyperion.hyperrobotframeworkplugin.ide.config.RobotOptionsProvider;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.dto.ParameterDto;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.dto.VariableDto;
@@ -129,7 +130,6 @@ public class KeywordStatementImpl extends RobotStubPsiElementBase<KeywordStateme
         return result;
     }
 
-    @SuppressWarnings("UnstableApiUsage")
     private Collection<DefinedParameter> collectKeywordParameters() {
         Set<DefinedParameter> results = new LinkedHashSet<>();
 
@@ -143,20 +143,17 @@ public class KeywordStatementImpl extends RobotStubPsiElementBase<KeywordStateme
                 PyParameter[] pyParameters = pyFunction.getParameterList().getParameters();
                 if (robotOptionsProvider.analyzeViaPythonLiveInspection(pyFunction)) {
                     PyClass containingClass = pyFunction.getContainingClass();
-                    PythonInspector.PythonInspectorParameter[] parameters = PythonInspector.inspectPythonFunction(pyFunction);
-                    Collection<DefinedParameter> definedParameters = PythonInspector.convertPyParameters(parameters, pyParameters, containingClass != null);
-                    results.addAll(definedParameters);
-                } else {
-                    for (PyParameter parameter : pyParameters) {
-                        PyNamedParameter parameterName = parameter.getAsNamed();
-                        if (parameterName != null && !parameterName.isSelf() && !parameterName.isPositionalContainer() && !parameterName.isKeywordContainer()) {
-                            String defaultValueText = parameter.getDefaultValueText();
-                            results.add(new ParameterDto(parameter, parameterName.getRepr(false), defaultValueText));
-                        }
-                        if (parameterName != null && parameterName.isKeywordContainer()) {
-                            results.add(new ParameterDto(parameter, parameterName.getRepr(false), null, true));
-                        }
+                    try {
+                        PythonInspector.PythonInspectorParameter[] parameters = PythonInspector.inspectPythonFunction(pyFunction);
+                        Collection<DefinedParameter> definedParameters = PythonInspector.convertPyParameters(parameters, pyParameters, containingClass != null);
+                        results.addAll(definedParameters);
+                    } catch (RuntimeException e) {
+                        MyLogger.logger.warn("Error while inspecting Python function: " + pyFunction.getName() + " of keyword " + getName()
+                                             + ". Falling back to static analysis.", e);
+                        inspectPythonFunctionStatically(pyParameters, results);
                     }
+                } else {
+                    inspectPythonFunctionStatically(pyParameters, results);
                 }
             } else {
                 KeywordDefinition keywordDefinition = (KeywordDefinition) psiElement;
@@ -167,6 +164,20 @@ public class KeywordStatementImpl extends RobotStubPsiElementBase<KeywordStateme
             return null;
         }
         return results;
+    }
+
+    @SuppressWarnings("UnstableApiUsage")
+    private static void inspectPythonFunctionStatically(PyParameter[] pyParameters, Set<DefinedParameter> results) {
+        for (PyParameter parameter : pyParameters) {
+            PyNamedParameter parameterName = parameter.getAsNamed();
+            if (parameterName != null && !parameterName.isSelf() && !parameterName.isPositionalContainer() && !parameterName.isKeywordContainer()) {
+                String defaultValueText = parameter.getDefaultValueText();
+                results.add(new ParameterDto(parameter, parameterName.getRepr(false), defaultValueText));
+            }
+            if (parameterName != null && parameterName.isKeywordContainer()) {
+                results.add(new ParameterDto(parameter, parameterName.getRepr(false), null, true));
+            }
+        }
     }
 
     @Override
