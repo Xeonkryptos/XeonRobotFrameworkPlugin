@@ -233,8 +233,10 @@ public class RobotFileImpl extends PsiFileBase implements KeywordFile, RobotFile
 
     @NotNull
     private Collection<Heading> collectHeadings() {
-        if (headings == null) {
-            headings = new LinkedHashSet<>(PsiTreeUtil.getChildrenOfTypeAsList(this, Heading.class));
+        Collection<Heading> result = headings;
+        if (result == null) {
+            result = new LinkedHashSet<>(PsiTreeUtil.getChildrenOfTypeAsList(this, Heading.class));
+            headings = result;
         }
         return headings;
     }
