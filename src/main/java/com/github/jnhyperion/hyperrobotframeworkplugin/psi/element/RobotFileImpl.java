@@ -238,7 +238,7 @@ public class RobotFileImpl extends PsiFileBase implements KeywordFile, RobotFile
             result = new LinkedHashSet<>(PsiTreeUtil.getChildrenOfTypeAsList(this, Heading.class));
             headings = result;
         }
-        return headings;
+        return result;
     }
 
     private record KeywordFileWithParentWrapper(KeywordFile keywordFile, KeywordFile parent) {}

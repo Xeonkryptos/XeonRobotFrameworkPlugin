@@ -4,6 +4,12 @@
 
 ## Unreleased
 
+## 0.2.4
+
+### Fixed
+
+- Fixed issues starting run/debug sessions of robot runs after last update
+
 ## 0.2.3
 
 ### Added
