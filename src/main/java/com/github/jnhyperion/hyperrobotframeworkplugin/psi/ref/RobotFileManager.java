@@ -63,7 +63,7 @@ public class RobotFileManager {
         }
         String cacheKey = null;
         VirtualFile virtualFile = contextElement.getContainingFile().getVirtualFile();
-        if (virtualFile != null) {
+        if (virtualFile != null && virtualFile.getParent() != null) {
             cacheKey = virtualFile.getParent().getPath() + "#" + elementName;
             PsiElement cachedElement = getCachedElement(project, cacheKey);
             if (cachedElement != null) {
