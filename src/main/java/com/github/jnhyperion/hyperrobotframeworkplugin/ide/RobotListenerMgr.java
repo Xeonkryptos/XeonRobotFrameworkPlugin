@@ -94,30 +94,27 @@ public class RobotListenerMgr {
 
     private void updateRobotFiles(Project project) {
         ApplicationManager.getApplication().executeOnPooledThread(() -> {
-            try {
-                ReadAction.nonBlocking(() -> {
-                    List<VirtualFile> robotFiles = new ArrayList<>();
-                    ProjectFileIndex.getInstance(project).iterateContent(file -> {
-                        if (!file.isDirectory() && isRobotFile(file)) {
-                            robotFiles.add(file);
-                        }
-                        return true;
-                    });
-
-                    for (VirtualFile file : robotFiles) {
-                        PsiFile psiFile = PsiManager.getInstance(project).findFile(file);
-                        if (psiFile instanceof RobotFileImpl robotFile) {
-                            robotFile.reset();
-                            robotFile.importsChanged();
-                        }
+            ReadAction.nonBlocking(() -> {
+                List<VirtualFile> robotFiles = new ArrayList<>();
+                ProjectFileIndex.getInstance(project).iterateContent(file -> {
+                    if (!file.isDirectory() && isRobotFile(file)) {
+                        robotFiles.add(file);
                     }
+                    return true;
+                });
 
-                    MyLogger.logger.debug("Update robot file: " + robotFiles.size());
-                    RobotFileManager.clearProjectCache(project);
-                    return null;
-                }).executeSynchronously();
-            } catch (Throwable ignored) {
-            }
+                for (VirtualFile file : robotFiles) {
+                    PsiFile psiFile = PsiManager.getInstance(project).findFile(file);
+                    if (psiFile instanceof RobotFileImpl robotFile) {
+                        robotFile.reset();
+                        robotFile.importsChanged();
+                    }
+                }
+
+                MyLogger.logger.debug("Update robot file: " + robotFiles.size());
+                RobotFileManager.clearProjectCache(project);
+                return null;
+            }).executeSynchronously();
         });
     }
 

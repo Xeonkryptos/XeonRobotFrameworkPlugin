@@ -4,7 +4,6 @@ import com.github.jnhyperion.hyperrobotframeworkplugin.psi.RobotLanguage;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.dto.ImportType;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.dto.KeywordFileWithDependentsWrapper;
 import com.intellij.extapi.psi.PsiFileBase;
-import com.intellij.openapi.application.ReadAction;
 import com.intellij.openapi.fileTypes.FileType;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
@@ -61,30 +60,27 @@ public class RobotFileImpl extends PsiFileBase implements KeywordFile, RobotFile
         Collection<DefinedVariable> results = this.robotInitVariables;
         if (results == null) {
             Set<VirtualFile> virtualFiles = new LinkedHashSet<>();
-            results = ReadAction.compute(() -> {
-                Set<DefinedVariable> localResults = new LinkedHashSet<>();
-                for (KeywordFile importedFile : getImportedFiles(true)) {
-                    if (importedFile instanceof RobotFile robotFile) {
-                        VirtualFile virtualRobotFile = robotFile.getVirtualFile();
-                        VirtualFile virtualRobotFileDir = virtualRobotFile.getParent();
-                        VirtualFile initFile = virtualRobotFileDir.findChild("__init__.robot");
-                        if (initFile != null) {
-                            virtualFiles.add(initFile);
-                        }
+            results = new LinkedHashSet<>();
+            for (KeywordFile importedFile : getImportedFiles(true)) {
+                if (importedFile instanceof RobotFile robotFile) {
+                    VirtualFile virtualRobotFile = robotFile.getVirtualFile();
+                    VirtualFile virtualRobotFileDir = virtualRobotFile.getParent();
+                    VirtualFile initFile = virtualRobotFileDir.findChild("__init__.robot");
+                    if (initFile != null) {
+                        virtualFiles.add(initFile);
                     }
                 }
+            }
 
-                Project project = getProject();
-                PsiManager psiManager = PsiManager.getInstance(project);
-                for (VirtualFile virtualFile : virtualFiles) {
-                    RobotFileImpl robotFile = (RobotFileImpl) psiManager.findFile(virtualFile);
-                    if (robotFile != null) {
-                        Collection<DefinedVariable> definedVariables = robotFile.getHeadingVariables();
-                        localResults.addAll(definedVariables);
-                    }
+            Project project = getProject();
+            PsiManager psiManager = PsiManager.getInstance(project);
+            for (VirtualFile virtualFile : virtualFiles) {
+                RobotFileImpl robotFile = (RobotFileImpl) psiManager.findFile(virtualFile);
+                if (robotFile != null) {
+                    Collection<DefinedVariable> definedVariables = robotFile.getHeadingVariables();
+                    results.addAll(definedVariables);
                 }
-                return localResults;
-            });
+            }
             this.robotInitVariables = results;
         }
         return results;
