@@ -12,6 +12,7 @@
 ### Changed
 
 - Improved performance by reducing usages of PSI#getText() calls
+- Don't keep executor buttons in an unusable state when an internal error occurred (usually because of a missing interpreter configuration)
 
 ### Fixed
 

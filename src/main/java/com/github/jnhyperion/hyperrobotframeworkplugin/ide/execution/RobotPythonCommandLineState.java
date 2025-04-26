@@ -1,5 +1,6 @@
 package com.github.jnhyperion.hyperrobotframeworkplugin.ide.execution;
 
+import com.github.jnhyperion.hyperrobotframeworkplugin.MyLogger;
 import com.github.jnhyperion.hyperrobotframeworkplugin.ide.execution.config.RobotRunConfiguration;
 import com.github.jnhyperion.hyperrobotframeworkplugin.ide.execution.ui.RobotTestRunnerFactory;
 import com.intellij.execution.ExecutionException;
@@ -74,15 +75,22 @@ public class RobotPythonCommandLineState extends PythonScriptCommandLineState {
     @Override
     public ExecutionResult execute(Executor executor, PythonProcessStarter processStarter, CommandLinePatcher... patchers) throws ExecutionException {
         final RobotExecutionMode executionMode = computeRobotExecutionMode(executor);
-        ExecutionResult executionResult = super.execute(executor, processStarter, ArrayUtil.append(patchers, commandLine -> {
-            ParametersList parametersList = commandLine.getParametersList();
-            ParamsGroup moduleGroup = parametersList.getParamsGroup(PythonCommandLineState.GROUP_MODULE);
-            if (moduleGroup != null) {
-                modifyCommandLine(moduleGroup, executionMode);
-            }
-        }));
-        enrichExecutionResult(executionResult);
-        return executionResult;
+        try {
+            ExecutionResult executionResult = super.execute(executor, processStarter, ArrayUtil.append(patchers, commandLine -> {
+                ParametersList parametersList = commandLine.getParametersList();
+                ParamsGroup moduleGroup = parametersList.getParamsGroup(PythonCommandLineState.GROUP_MODULE);
+                if (moduleGroup != null) {
+                    modifyCommandLine(moduleGroup, executionMode);
+                }
+            }));
+            enrichExecutionResult(executionResult);
+            return executionResult;
+        } catch (ExecutionException e) {
+            throw e;
+        } catch (Exception e) {
+            MyLogger.logger.error(e);
+            return null;
+        }
     }
 
     private void modifyCommandLine(ParamsGroup paramsGroup, RobotExecutionMode robotExecutionMode) {
@@ -129,9 +137,16 @@ public class RobotPythonCommandLineState extends PythonScriptCommandLineState {
     public ExecutionResult execute(@NotNull Executor executor, @NotNull PythonScriptTargetedCommandLineBuilder converter) throws ExecutionException {
         final RobotExecutionMode executionMode = computeRobotExecutionMode(executor);
         var wrappedConverter = new MyPythonScriptTargetedCommandLineBuilder(converter, runConfiguration, executionMode);
-        ExecutionResult executionResult = super.execute(executor, wrappedConverter);
-        enrichExecutionResult(executionResult);
-        return executionResult;
+        try {
+            ExecutionResult executionResult = super.execute(executor, wrappedConverter);
+            enrichExecutionResult(executionResult);
+            return executionResult;
+        } catch (ExecutionException e) {
+            throw e;
+        } catch (Exception e) {
+            MyLogger.logger.error(e);
+            return null;
+        }
     }
 
     private void enrichExecutionResult(@Nullable ExecutionResult executionResult) {
