@@ -4,6 +4,7 @@ import com.github.jnhyperion.hyperrobotframeworkplugin.ide.icons.RobotIcons;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.stub.element.VariableDefinitionStub;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.util.PatternUtil;
 import com.intellij.lang.ASTNode;
+import com.intellij.lang.injection.InjectedLanguageManager;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.search.SearchScope;
@@ -35,7 +36,8 @@ public class VariableDefinitionImpl extends RobotStubPsiElementBase<VariableDefi
             assert stub.getName() != null;
             return stub.getName();
         }
-        VariableDefinitionId variableId = (VariableDefinitionId) getNameIdentifier();
+        VariableDefinitionId variableId = getNameIdentifier();
+        InjectedLanguageManager injectedLanguageManager = InjectedLanguageManager.getInstance(getProject());
         if (variableId != null) {
             String unescapedText = injectedLanguageManager.getUnescapedText(variableId);
             if (!unescapedText.isEmpty()) {
@@ -111,7 +113,7 @@ public class VariableDefinitionImpl extends RobotStubPsiElementBase<VariableDefi
 
     @Nullable
     @Override
-    public PsiElement getNameIdentifier() {
+    public VariableDefinitionId getNameIdentifier() {
         VariableDefinitionStub stub = getStub();
         if (stub != null) {
             return PsiTreeUtil.findChildOfType(stub.getPsi(), VariableDefinitionId.class);

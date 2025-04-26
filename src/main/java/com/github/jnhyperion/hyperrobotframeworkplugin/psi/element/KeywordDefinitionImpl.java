@@ -5,6 +5,7 @@ import com.github.jnhyperion.hyperrobotframeworkplugin.psi.dto.VariableDto;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.stub.element.KeywordDefinitionStub;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.util.ReservedVariableScope;
 import com.intellij.lang.ASTNode;
+import com.intellij.lang.injection.InjectedLanguageManager;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiNamedElement;
 import com.intellij.psi.stubs.IStubElementType;
@@ -45,7 +46,7 @@ public class KeywordDefinitionImpl extends RobotStubPsiElementBase<KeywordDefini
         }
         PsiElement nameIdentifier = getNameIdentifier();
         if (nameIdentifier != null) {
-            return injectedLanguageManager.getUnescapedText(nameIdentifier);
+            return InjectedLanguageManager.getInstance(getProject()).getUnescapedText(nameIdentifier);
         }
         return null;
     }

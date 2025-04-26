@@ -5,7 +5,6 @@ import com.intellij.extapi.psi.ASTWrapperPsiElement;
 import com.intellij.lang.ASTNode;
 import com.intellij.lang.injection.InjectedLanguageManager;
 import com.intellij.navigation.ItemPresentation;
-import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiElement;
 import org.jetbrains.annotations.NotNull;
 
@@ -13,15 +12,10 @@ import javax.swing.Icon;
 
 public abstract class RobotPsiElementBase extends ASTWrapperPsiElement implements RobotStatement {
 
-   protected final InjectedLanguageManager injectedLanguageManager;
-
    private String name;
 
    public RobotPsiElementBase(@NotNull ASTNode node) {
       super(node);
-
-      Project project = getProject();
-      injectedLanguageManager = InjectedLanguageManager.getInstance(project);
    }
 
    @NotNull
@@ -62,7 +56,7 @@ public abstract class RobotPsiElementBase extends ASTWrapperPsiElement implement
    @NotNull
    @Override
    public String getPresentableText() {
-      String unescapedText = injectedLanguageManager.getUnescapedText(this);
+      String unescapedText = InjectedLanguageManager.getInstance(getProject()).getUnescapedText(this);
       return getPresentableText(unescapedText);
    }
 

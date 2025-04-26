@@ -5,7 +5,6 @@ import com.intellij.extapi.psi.StubBasedPsiElementBase;
 import com.intellij.lang.ASTNode;
 import com.intellij.lang.injection.InjectedLanguageManager;
 import com.intellij.navigation.ItemPresentation;
-import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.stubs.IStubElementType;
 import com.intellij.psi.stubs.StubElement;
@@ -15,20 +14,12 @@ import javax.swing.Icon;
 
 public abstract class RobotStubPsiElementBase<T extends StubElement<P>, P extends PsiElement> extends StubBasedPsiElementBase<T> implements RobotStatement {
 
-    protected final InjectedLanguageManager injectedLanguageManager;
-
     public RobotStubPsiElementBase(@NotNull ASTNode node) {
         super(node);
-
-        Project project = getProject();
-        injectedLanguageManager = InjectedLanguageManager.getInstance(project);
     }
 
     public RobotStubPsiElementBase(final T stub, final IStubElementType<T, P> nodeType) {
         super(stub, nodeType);
-
-        Project project = getProject();
-        injectedLanguageManager = InjectedLanguageManager.getInstance(project);
     }
 
     @NotNull
@@ -36,6 +27,7 @@ public abstract class RobotStubPsiElementBase<T extends StubElement<P>, P extend
     public String getPresentableText() {
         T stub = getStub();
         String text;
+        InjectedLanguageManager injectedLanguageManager = InjectedLanguageManager.getInstance(getProject());
         if (stub != null) {
             P psiElement = stub.getPsi();
             text = injectedLanguageManager.getUnescapedText(psiElement);
