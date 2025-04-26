@@ -48,15 +48,15 @@ public class KeywordStatementImpl extends RobotStubPsiElementBase<KeywordStateme
     @Nullable
     @Override
     public final KeywordInvokable getInvokable() {
-        KeywordInvokable result = this.invokable;
-        if (this.invokable == null) {
+        KeywordInvokable result = invokable;
+        if (invokable == null) {
             for (PsiElement child : getChildren()) {
                 if (child instanceof KeywordInvokable) {
                     result = (KeywordInvokable) child;
                     break;
                 }
             }
-            this.invokable = result;
+            invokable = result;
         }
         return result;
     }
@@ -75,10 +75,10 @@ public class KeywordStatementImpl extends RobotStubPsiElementBase<KeywordStateme
     @NotNull
     @Override
     public List<Parameter> getParameters() {
-        List<Parameter> results = this.parameters;
-        if (this.parameters == null) {
+        List<Parameter> results = parameters;
+        if (parameters == null) {
             results = PsiTreeUtil.getChildrenOfTypeAsList(this, Parameter.class);
-            this.parameters = results;
+            parameters = results;
         }
         return results;
     }
@@ -86,10 +86,10 @@ public class KeywordStatementImpl extends RobotStubPsiElementBase<KeywordStateme
     @NotNull
     @Override
     public final List<PositionalArgument> getPositionalArguments() {
-        List<PositionalArgument> results = this.positionalArguments;
-        if (this.positionalArguments == null) {
+        List<PositionalArgument> results = positionalArguments;
+        if (positionalArguments == null) {
             results = PsiTreeUtil.getChildrenOfTypeAsList(this, PositionalArgument.class);
-            this.positionalArguments = results;
+            positionalArguments = results;
         }
         return results;
     }
@@ -97,9 +97,9 @@ public class KeywordStatementImpl extends RobotStubPsiElementBase<KeywordStateme
     @NotNull
     @Override
     public Collection<DefinedParameter> getAvailableParameters() {
-        Collection<DefinedParameter> localDefinedParameters = this.availableKeywordParameters;
+        Collection<DefinedParameter> localDefinedParameters = availableKeywordParameters;
         boolean pythonLiveInspection = RobotOptionsProvider.getInstance(getProject()).pythonLiveInspection();
-        if (this.availableKeywordParameters == null || liveInspectionEnabledLastTime != pythonLiveInspection) {
+        if (availableKeywordParameters == null || liveInspectionEnabledLastTime != pythonLiveInspection) {
             localDefinedParameters = collectKeywordParameters();
             availableKeywordParameters = localDefinedParameters;
             liveInspectionEnabledLastTime = pythonLiveInspection;
@@ -183,6 +183,12 @@ public class KeywordStatementImpl extends RobotStubPsiElementBase<KeywordStateme
     @Override
     public void subtreeChanged() {
         super.subtreeChanged();
+
+        reset();
+    }
+
+    @Override
+    public void reset() {
         parameters = null;
         positionalArguments = null;
         arguments = null;

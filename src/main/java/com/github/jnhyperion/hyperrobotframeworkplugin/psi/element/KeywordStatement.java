@@ -28,4 +28,6 @@ public interface KeywordStatement extends RobotStatement, PsiNamedElement, StubB
 
    @Nullable
    DefinedVariable getGlobalVariable();
+
+   void reset();
 }

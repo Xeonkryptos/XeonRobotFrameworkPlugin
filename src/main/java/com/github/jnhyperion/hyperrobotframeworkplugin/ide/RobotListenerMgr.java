@@ -1,6 +1,7 @@
 package com.github.jnhyperion.hyperrobotframeworkplugin.ide;
 
 import com.github.jnhyperion.hyperrobotframeworkplugin.MyLogger;
+import com.github.jnhyperion.hyperrobotframeworkplugin.psi.RobotKeywordReferenceUpdater;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.RobotFileImpl;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.ref.RobotFileManager;
 import com.intellij.openapi.application.ApplicationManager;
@@ -90,6 +91,7 @@ public class RobotListenerMgr {
                 }
             }
         });
+        PsiManager.getInstance(project).addPsiTreeChangeListener(new RobotKeywordReferenceUpdater(), PythonPluginDisposable.getInstance(project));
     }
 
     private void updateRobotFiles(Project project) {

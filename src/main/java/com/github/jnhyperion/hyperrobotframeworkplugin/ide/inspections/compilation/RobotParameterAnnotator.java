@@ -30,6 +30,7 @@ public class RobotParameterAnnotator implements Annotator {
 
         KeywordStatement keywordStatement = PsiTreeUtil.getParentOfType(parameter, KeywordStatement.class);
         if (keywordStatement != null) {
+            keywordStatement.reset();
             Collection<DefinedParameter> availableParameters = keywordStatement.getAvailableParameters();
             Set<String> parameterNames = availableParameters.stream().map(DefinedParameter::getLookup).collect(Collectors.toSet());
             String parameterName = parameter.getParameterName();

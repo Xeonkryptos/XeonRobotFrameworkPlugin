@@ -7,6 +7,7 @@
 ### Added
 
 - Hyperlinking of Robot reports with opening them in the browser on click
+- Retriggering annotations processing on changes in python functions used in robot keywords
 
 ### Changed
 
