@@ -5,6 +5,7 @@ import com.github.jnhyperion.hyperrobotframeworkplugin.psi.RobotTokenTypes;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.KeywordInvokable;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.KeywordStatement;
 import com.intellij.codeInsight.CodeInsightBundle;
+import com.intellij.lang.injection.InjectedLanguageManager;
 import com.intellij.lang.parameterInfo.CreateParameterInfoContext;
 import com.intellij.lang.parameterInfo.ParameterInfoHandler;
 import com.intellij.lang.parameterInfo.ParameterInfoUIContext;
@@ -36,18 +37,7 @@ public class RobotParameterInfoHandler implements ParameterInfoHandler<KeywordSt
     public KeywordStatement findElementForParameterInfo(@NotNull CreateParameterInfoContext context) {
         PsiFile psiFile = context.getFile();
         int offset = context.getOffset();
-        KeywordStatement keywordStatement = ParameterInfoUtils.findParentOfType(psiFile, offset, KeywordStatement.class);
-        if (keywordStatement == null) {
-            PsiElement element = psiFile.findElementAt(offset);
-            if (element instanceof PsiWhiteSpace) {
-                do {
-                    element = element.getPrevSibling();
-                } while (element instanceof PsiWhiteSpace);
-            }
-            if (element instanceof KeywordStatement found) {
-                keywordStatement = found;
-            }
-        }
+        KeywordStatement keywordStatement = findKeywordStatement(psiFile, offset);
         if (keywordStatement != null) {
             KeywordInvokable invokable = keywordStatement.getInvokable();
             if (invokable == null) {
@@ -73,7 +63,36 @@ public class RobotParameterInfoHandler implements ParameterInfoHandler<KeywordSt
     public KeywordStatement findElementForUpdatingParameterInfo(@NotNull UpdateParameterInfoContext context) {
         PsiFile psiFile = context.getFile();
         int offset = context.getOffset();
-        return ParameterInfoUtils.findParentOfType(psiFile, offset, KeywordStatement.class);
+        return findKeywordStatement(psiFile, offset);
+    }
+
+    private KeywordStatement findKeywordStatement(PsiFile psiFile, int offset) {
+        KeywordStatement keywordStatement = ParameterInfoUtils.findParentOfType(psiFile, offset, KeywordStatement.class);
+        if (keywordStatement == null) {
+            InjectedLanguageManager injectedLanguageManager = InjectedLanguageManager.getInstance(psiFile.getProject());
+            PsiElement element = psiFile.findElementAt(offset);
+            if (element instanceof PsiWhiteSpace) {
+                boolean firstElement = true;
+                boolean newLineAssignedToStatement = false;
+                do {
+                    String unescapedWhitespaceText = injectedLanguageManager.getUnescapedText(element);
+                    if ("...".equals(unescapedWhitespaceText)) {
+                        newLineAssignedToStatement = true;
+                    } else if ("\n".equals(unescapedWhitespaceText) && !firstElement) {
+                        if (!newLineAssignedToStatement) {
+                            break;
+                        }
+                        newLineAssignedToStatement = false;
+                    }
+                    firstElement = false;
+                    element = element.getPrevSibling();
+                } while (element instanceof PsiWhiteSpace);
+            }
+            if (element instanceof KeywordStatement found) {
+                keywordStatement = found;
+            }
+        }
+        return keywordStatement;
     }
 
     @Override
@@ -92,33 +111,18 @@ public class RobotParameterInfoHandler implements ParameterInfoHandler<KeywordSt
             }
         }
 
-        // context.getOffset() isn't always the caret position, so we need to adjust it
-        PsiFile psiFile = context.getFile();
-        PsiElement element = psiFile.findElementAt(offset);
-        if (element instanceof PsiWhiteSpace) {
-            // Move the offset a little to highlight the correct parameter especially when the caret is at the beginning or the end of the parameter
-            if (!(psiFile.findElementAt(offset + 1) instanceof PsiWhiteSpace)) {
-                offset += 1;
-            } else {
-                offset -= 1;
-            }
-        }
-
         SyntaxTraverser<PsiElement> syntaxTraverser = SyntaxTraverser.psiTraverser(keywordStatement).expandAndSkip(Conditions.is(keywordStatement));
         int parameterIndex = ParameterInfoHandlerUtil.getCurrentParameterIndex(syntaxTraverser,
                                                                                offset,
                                                                                RobotTokenTypes.PARAMETER,
                                                                                RobotStubTokenTypes.ARGUMENT);
+        parameterIndex = parameterIndex - 1;
         context.setCurrentParameter(parameterIndex);
     }
 
     @Override
     public void updateUI(PsiElement callingFunction, @NotNull ParameterInfoUIContext context) {
         final int currentParamIndex = context.getCurrentParameterIndex();
-        if (currentParamIndex == -1) {
-            return;
-        }
-
         // formatting of hints: hint index -> flags. this includes flags for parens.
         final Map<Integer, EnumSet<ParameterInfoUIContextEx.Flag>> hintFlags = new HashMap<>();
 

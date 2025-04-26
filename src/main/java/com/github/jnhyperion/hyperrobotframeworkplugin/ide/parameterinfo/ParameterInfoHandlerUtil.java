@@ -34,6 +34,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+@SuppressWarnings("UnstableApiUsage")
 public class ParameterInfoHandlerUtil {
 
     static <V> int getCurrentParameterIndex(SyntaxTraverser<V> traverser, int offset, IElementType... delimiterTypes) {
@@ -48,6 +49,10 @@ public class ParameterInfoHandlerUtil {
         for (V child : traverser) {
             curOffset += traverser.api.rangeOf(child).getLength();
             if (offset < curOffset) {
+                IElementType type = traverser.api.typeOf(child);
+                if (delimiterTypeSet.contains(type)) {
+                    index++;
+                }
                 break;
             }
 
