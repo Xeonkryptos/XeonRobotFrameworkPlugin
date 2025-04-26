@@ -1,4 +1,4 @@
-package com.github.jnhyperion.hyperrobotframeworkplugin.ide.execution;
+package com.github.jnhyperion.hyperrobotframeworkplugin.ide.execution.config;
 
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.RobotFeatureFileType;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.Heading;

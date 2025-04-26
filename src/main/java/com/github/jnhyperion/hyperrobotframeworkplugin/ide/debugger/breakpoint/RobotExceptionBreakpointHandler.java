@@ -1,5 +1,6 @@
-package com.github.jnhyperion.hyperrobotframeworkplugin.ide.debugger;
+package com.github.jnhyperion.hyperrobotframeworkplugin.ide.debugger.breakpoint;
 
+import com.github.jnhyperion.hyperrobotframeworkplugin.ide.debugger.RobotDebugProcess;
 import com.intellij.xdebugger.breakpoints.XBreakpoint;
 import com.intellij.xdebugger.breakpoints.XBreakpointHandler;
 import org.jetbrains.annotations.NotNull;

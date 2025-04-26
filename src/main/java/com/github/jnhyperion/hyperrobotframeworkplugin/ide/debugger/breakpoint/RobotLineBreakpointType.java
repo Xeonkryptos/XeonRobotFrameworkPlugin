@@ -1,4 +1,4 @@
-package com.github.jnhyperion.hyperrobotframeworkplugin.ide.debugger;
+package com.github.jnhyperion.hyperrobotframeworkplugin.ide.debugger.breakpoint;
 
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.RobotFeatureFileType;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.RobotLanguage;

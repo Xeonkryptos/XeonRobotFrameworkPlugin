@@ -1,5 +1,6 @@
-package com.github.jnhyperion.hyperrobotframeworkplugin.ide.execution;
+package com.github.jnhyperion.hyperrobotframeworkplugin.ide.execution.config;
 
+import com.github.jnhyperion.hyperrobotframeworkplugin.ide.execution.RobotCommandLineState;
 import com.github.jnhyperion.hyperrobotframeworkplugin.ide.execution.ui.editor.RobotConfigurationFragmentedEditor;
 import com.intellij.execution.EnvFilesOptions;
 import com.intellij.execution.Executor;

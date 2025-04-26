@@ -1,6 +1,6 @@
 package com.github.jnhyperion.hyperrobotframeworkplugin.ide.execution.ui;
 
-import com.github.jnhyperion.hyperrobotframeworkplugin.ide.execution.RobotRunConfiguration;
+import com.github.jnhyperion.hyperrobotframeworkplugin.ide.execution.config.RobotRunConfiguration;
 import com.intellij.execution.Executor;
 import com.intellij.execution.configurations.RunConfiguration;
 import com.intellij.execution.configurations.RunProfile;

@@ -1,4 +1,4 @@
-package com.github.jnhyperion.hyperrobotframeworkplugin.ide.execution;
+package com.github.jnhyperion.hyperrobotframeworkplugin.ide.execution.config;
 
 import com.intellij.execution.configurations.ConfigurationFactory;
 import com.intellij.execution.configurations.ConfigurationType;

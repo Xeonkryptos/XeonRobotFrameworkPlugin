@@ -1,4 +1,4 @@
-package com.github.jnhyperion.hyperrobotframeworkplugin.ide.debugger;
+package com.github.jnhyperion.hyperrobotframeworkplugin.ide.debugger.breakpoint;
 
 import com.intellij.icons.AllIcons;
 import com.intellij.xdebugger.breakpoints.XBreakpoint;

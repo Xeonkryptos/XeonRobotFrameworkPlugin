@@ -1,7 +1,7 @@
 // Copyright 2000-2024 JetBrains s.r.o. and contributors. Use of this source code is governed by the Apache 2.0 license.
 package com.github.jnhyperion.hyperrobotframeworkplugin.ide.execution.ui.editor
 
-import com.github.jnhyperion.hyperrobotframeworkplugin.ide.execution.RobotRunConfiguration
+import com.github.jnhyperion.hyperrobotframeworkplugin.ide.execution.config.RobotRunConfiguration
 import com.intellij.execution.ui.SettingsEditorFragment
 import com.intellij.openapi.vfs.VirtualFileManager
 import com.jetbrains.python.run.EnvFileComponent.Companion.createEnvFilesFragment

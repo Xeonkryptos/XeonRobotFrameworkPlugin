@@ -86,7 +86,7 @@
                          implementationClass="com.github.jnhyperion.hyperrobotframeworkplugin.ide.inspections.complexity.RobotNestedVariableDefinition"/>
         <!-- Inspections: Deprecated -->
         <!-- TODO: inspection: warn: deprecated settings; '*** user keywords ***', timeout, etc -->
-        <runConfigurationProducer implementation="com.github.jnhyperion.hyperrobotframeworkplugin.ide.execution.RobotRunConfigurationProducer"/>
+        <runConfigurationProducer implementation="com.github.jnhyperion.hyperrobotframeworkplugin.ide.execution.config.RobotRunConfigurationProducer"/>
         <runLineMarkerContributor language="Robot" id="gradleGroovyRunLineMarkerProvider"
                                   implementationClass="com.github.jnhyperion.hyperrobotframeworkplugin.ide.execution.RobotRunLineMarkerProvider"/>
         <postStartupActivity implementation="com.github.jnhyperion.hyperrobotframeworkplugin.ide.PostStartupActivity"/>
@@ -95,11 +95,11 @@
         <enterHandlerDelegate implementation="com.github.jnhyperion.hyperrobotframeworkplugin.ide.RobotEnterActionHandler"/>
         <typedHandler implementation="com.github.jnhyperion.hyperrobotframeworkplugin.ide.RobotTypedActionHandler"/>
         <editorActionHandler action="EditorTab" implementationClass="com.github.jnhyperion.hyperrobotframeworkplugin.ide.RobotTabActionHandler"/>
-        <configurationType implementation="com.github.jnhyperion.hyperrobotframeworkplugin.ide.execution.RobotRunConfigurationType"/>
+        <configurationType implementation="com.github.jnhyperion.hyperrobotframeworkplugin.ide.execution.config.RobotRunConfigurationType"/>
         <spellchecker.support language="Robot" implementationClass="com.github.jnhyperion.hyperrobotframeworkplugin.ide.RobotSpellcheckingStrategy"/>
 
-        <xdebugger.breakpointType implementation="com.github.jnhyperion.hyperrobotframeworkplugin.ide.debugger.RobotLineBreakpointType"/>
-        <xdebugger.breakpointType implementation="com.github.jnhyperion.hyperrobotframeworkplugin.ide.debugger.RobotExceptionBreakpointType"/>
+        <xdebugger.breakpointType implementation="com.github.jnhyperion.hyperrobotframeworkplugin.ide.debugger.breakpoint.RobotLineBreakpointType"/>
+        <xdebugger.breakpointType implementation="com.github.jnhyperion.hyperrobotframeworkplugin.ide.debugger.breakpoint.RobotExceptionBreakpointType"/>
 
         <programRunner implementation="com.github.jnhyperion.hyperrobotframeworkplugin.ide.execution.RobotRunner" id="robotRunner" order="first"/>
         <programRunner implementation="com.github.jnhyperion.hyperrobotframeworkplugin.ide.debugger.RobotDebugRunner" id="robotDebugRunner"

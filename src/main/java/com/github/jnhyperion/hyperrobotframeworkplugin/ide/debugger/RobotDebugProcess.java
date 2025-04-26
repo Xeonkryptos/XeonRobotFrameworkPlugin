@@ -1,5 +1,9 @@
 package com.github.jnhyperion.hyperrobotframeworkplugin.ide.debugger;
 
+import com.github.jnhyperion.hyperrobotframeworkplugin.ide.debugger.breakpoint.RobotExceptionBreakpointHandler;
+import com.github.jnhyperion.hyperrobotframeworkplugin.ide.debugger.breakpoint.RobotExceptionBreakpointProperties;
+import com.github.jnhyperion.hyperrobotframeworkplugin.ide.debugger.breakpoint.RobotLineBreakpointHandler;
+import com.github.jnhyperion.hyperrobotframeworkplugin.ide.debugger.breakpoint.RobotLineBreakpointProperties;
 import com.github.jnhyperion.hyperrobotframeworkplugin.ide.debugger.dap.RobotDebugAdapterProtocolCommunicator;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.vfs.VirtualFile;
