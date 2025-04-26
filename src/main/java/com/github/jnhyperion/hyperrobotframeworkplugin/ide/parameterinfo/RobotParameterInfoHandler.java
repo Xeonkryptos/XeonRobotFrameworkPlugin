@@ -79,7 +79,7 @@ public class RobotParameterInfoHandler implements ParameterInfoHandler<KeywordSt
     @Override
     public void updateParameterInfo(@NotNull KeywordStatement keywordStatement, @NotNull UpdateParameterInfoContext context) {
         int offset = context.getEditor().getCaretModel().getOffset();
-        if (!keywordStatement.getTextRange().contains(offset)) {
+        if (!keywordStatement.getTextRange().containsOffset(offset)) {
             PsiElement element = context.getFile().findElementAt(offset);
             if (element instanceof PsiWhiteSpace) {
                 do {

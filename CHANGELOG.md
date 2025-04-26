@@ -13,6 +13,10 @@
 
 - Improved performance by reducing usages of PSI#getText() calls
 
+### Fixed
+
+- Parameter info not shown when at the end position of a keyword statement (cursor at the last position of line in the statement)
+
 ## 0.2.4
 
 ### Fixed
