@@ -3,7 +3,9 @@ package com.github.jnhyperion.hyperrobotframeworkplugin.psi.element;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.util.PatternUtil;
 import com.intellij.extapi.psi.ASTWrapperPsiElement;
 import com.intellij.lang.ASTNode;
+import com.intellij.lang.injection.InjectedLanguageManager;
 import com.intellij.navigation.ItemPresentation;
+import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiElement;
 import org.jetbrains.annotations.NotNull;
 
@@ -11,12 +13,15 @@ import javax.swing.Icon;
 
 public abstract class RobotPsiElementBase extends ASTWrapperPsiElement implements RobotStatement {
 
+   protected final InjectedLanguageManager injectedLanguageManager;
+
    private String name;
 
    public RobotPsiElementBase(@NotNull ASTNode node) {
       super(node);
 
-      name = getPresentableText();
+      Project project = getProject();
+      injectedLanguageManager = InjectedLanguageManager.getInstance(project);
    }
 
    @NotNull
@@ -39,7 +44,7 @@ public abstract class RobotPsiElementBase extends ASTWrapperPsiElement implement
          }
 
          @Override
-         public Icon getIcon(boolean var1) {
+         public Icon getIcon(boolean unused) {
             return RobotPsiElementBase.this.getIcon(ICON_FLAG_VISIBILITY);
          }
       };
@@ -47,21 +52,25 @@ public abstract class RobotPsiElementBase extends ASTWrapperPsiElement implement
 
    @NotNull
    @Override
-   public String getPresentableText() {
-      return getPresentableText(getText());
+   public String getName() {
+      if (name == null) {
+         name = getPresentableText();
+      }
+      return name;
    }
 
    @NotNull
    @Override
-   public String getName() {
-      return name;
+   public String getPresentableText() {
+      String unescapedText = injectedLanguageManager.getUnescapedText(this);
+      return getPresentableText(unescapedText);
    }
 
    @Override
    public void subtreeChanged() {
       super.subtreeChanged();
 
-      name = getPresentableText();
+      name = null;
    }
 
    public PsiElement setName(@NotNull String newName) {

@@ -18,31 +18,21 @@ public class BracketSettingImpl extends RobotPsiElementBase implements BracketSe
     private static final String ARGUMENTS = "[Arguments]";
     private static final String TEARDOWN = "[Teardown]";
 
-    private final BracketSettingType bracketSettingType;
-
+    private BracketSettingType bracketSettingType;
     private Collection<DefinedParameter> arguments;
 
     public BracketSettingImpl(@NotNull ASTNode node) {
         super(node);
-
-        String presentableText = getPresentableText();
-        if (ARGUMENTS.equalsIgnoreCase(presentableText)) {
-            bracketSettingType = BracketSettingType.ARGUMENTS;
-        } else if (TEARDOWN.equalsIgnoreCase(presentableText)) {
-            bracketSettingType = BracketSettingType.TEARDOWN;
-        } else {
-            bracketSettingType = null;
-        }
     }
 
     @Override
     public final boolean isArguments() {
-        return bracketSettingType == BracketSettingType.ARGUMENTS;
+        return getBracketSettingType() == BracketSettingType.ARGUMENTS;
     }
 
     @Override
     public final boolean isTeardown() {
-        return bracketSettingType == BracketSettingType.TEARDOWN;
+        return getBracketSettingType() == BracketSettingType.TEARDOWN;
     }
 
     @Override
@@ -82,6 +72,19 @@ public class BracketSettingImpl extends RobotPsiElementBase implements BracketSe
         super.subtreeChanged();
 
         arguments = null;
+        bracketSettingType = null;
+    }
+
+    private BracketSettingType getBracketSettingType() {
+        if (bracketSettingType == null) {
+            String presentableText = getPresentableText();
+            if (ARGUMENTS.equalsIgnoreCase(presentableText)) {
+                bracketSettingType = BracketSettingType.ARGUMENTS;
+            } else if (TEARDOWN.equalsIgnoreCase(presentableText)) {
+                bracketSettingType = BracketSettingType.TEARDOWN;
+            }
+        }
+        return bracketSettingType;
     }
 
     private enum BracketSettingType {

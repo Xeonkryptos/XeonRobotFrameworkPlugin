@@ -3,3 +3,4 @@
 build
 .intellijPlatform
 bundled/libs
+*.iml

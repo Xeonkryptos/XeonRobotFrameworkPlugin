@@ -9,25 +9,17 @@ import org.jetbrains.annotations.NotNull;
 
 public class PositionalArgumentImpl extends RobotStubPsiElementBase<PositionalArgumentStub, PositionalArgument> implements PositionalArgument {
 
-    private String argumentText;
-
     public PositionalArgumentImpl(@NotNull ASTNode node) {
         super(node);
-
-        argumentText = getPresentableText();
     }
 
     public PositionalArgumentImpl(@NotNull PositionalArgumentStub stub, @NotNull IStubElementType<PositionalArgumentStub, PositionalArgument> nodeType) {
         super(stub, nodeType);
-
-        argumentText = stub.getValue();
     }
 
     @Override
     public void subtreeChanged() {
         super.subtreeChanged();
-
-        argumentText = getPresentableText();
     }
 
     @NotNull
@@ -36,9 +28,6 @@ public class PositionalArgumentImpl extends RobotStubPsiElementBase<PositionalAr
         PositionalArgumentStub stub = getStub();
         if (stub != null) {
             return stub.getValue();
-        }
-        if (argumentText != null) {
-            return argumentText;
         }
         return super.getPresentableText();
     }
@@ -49,7 +38,7 @@ public class PositionalArgumentImpl extends RobotStubPsiElementBase<PositionalAr
         if (stub != null) {
             return stub.getValue();
         }
-        return argumentText;
+        return super.getPresentableText();
     }
 
     @Override

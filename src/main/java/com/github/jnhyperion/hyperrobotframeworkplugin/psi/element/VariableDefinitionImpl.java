@@ -36,10 +36,13 @@ public class VariableDefinitionImpl extends RobotStubPsiElementBase<VariableDefi
             return stub.getName();
         }
         VariableDefinitionId variableId = (VariableDefinitionId) getNameIdentifier();
-        if (variableId != null && !variableId.getText().isEmpty()) {
-            return variableId.getText().substring(2, variableId.getText().length() - 1);
+        if (variableId != null) {
+            String unescapedText = injectedLanguageManager.getUnescapedText(variableId);
+            if (!unescapedText.isEmpty()) {
+                return unescapedText.substring(2, variableId.getText().length() - 1);
+            }
         }
-        return getText();
+        return injectedLanguageManager.getUnescapedText(this);
     }
 
     @NotNull
@@ -55,6 +58,7 @@ public class VariableDefinitionImpl extends RobotStubPsiElementBase<VariableDefi
     @Override
     public void subtreeChanged() {
         super.subtreeChanged();
+
         this.pattern = null;
     }
 

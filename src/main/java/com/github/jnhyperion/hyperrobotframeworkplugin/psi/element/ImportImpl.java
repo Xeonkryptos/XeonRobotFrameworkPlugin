@@ -11,27 +11,37 @@ public class ImportImpl extends RobotPsiElementBase implements Import {
 
     public ImportImpl(@NotNull ASTNode node) {
         super(node);
-
-        updateImportType();
     }
 
     @Override
     public final boolean isLibrary() {
-        return importType == ImportType.LIBRARY;
+        return getImportType() == ImportType.LIBRARY;
     }
 
     @Override
     public final boolean isResource() {
-        return importType == ImportType.RESOURCE;
+        return getImportType() == ImportType.RESOURCE;
     }
 
     @Override
     public final boolean isVariables() {
-        return importType == ImportType.VARIABLES;
+        return getImportType() == ImportType.VARIABLES;
     }
 
     @Override
     public ImportType getImportType() {
+        if (importType == null) {
+            String presentableText = getPresentableText();
+            if ("Library".equalsIgnoreCase(presentableText)) {
+                importType = ImportType.LIBRARY;
+            } else if ("Resource".equalsIgnoreCase(presentableText)) {
+                importType = ImportType.RESOURCE;
+            } else if ("Variables".equalsIgnoreCase(presentableText)) {
+                importType = ImportType.VARIABLES;
+            } else {
+                importType = null;
+            }
+        }
         return importType;
     }
 
@@ -45,19 +55,6 @@ public class ImportImpl extends RobotPsiElementBase implements Import {
     public void subtreeChanged() {
         super.subtreeChanged();
 
-        updateImportType();
-    }
-
-    private void updateImportType() {
-        String presentableText = getPresentableText();
-        if ("Library".equalsIgnoreCase(presentableText)) {
-            importType = ImportType.LIBRARY;
-        } else if ("Resource".equalsIgnoreCase(presentableText)) {
-            importType = ImportType.RESOURCE;
-        } else if ("Variables".equalsIgnoreCase(presentableText)) {
-            importType = ImportType.VARIABLES;
-        } else {
-            importType = null;
-        }
+        importType = null;
     }
 }

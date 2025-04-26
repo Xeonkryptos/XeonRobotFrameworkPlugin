@@ -108,8 +108,8 @@ public class RobotFileImpl extends PsiFileBase implements KeywordFile, RobotFile
 
     @Override
     public final void reset() {
-        this.headings = null;
-        this.robotInitVariables = null;
+        headings = null;
+        robotInitVariables = null;
     }
 
     @NotNull

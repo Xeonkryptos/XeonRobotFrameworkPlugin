@@ -9,36 +9,37 @@ public class SettingImpl extends RobotPsiElementBase implements Setting {
 
     public SettingImpl(@NotNull ASTNode node) {
         super(node);
-
-        updateSettingType();
     }
 
     @Override
     public void subtreeChanged() {
         super.subtreeChanged();
 
-        updateSettingType();
-    }
-
-    private void updateSettingType() {
-        String presentableText = getPresentableText();
-        if ("Suite Teardown".equalsIgnoreCase(presentableText)) {
-            settingType = SettingType.SUITE_TEARDOWN;
-        } else if ("Test Teardown".equalsIgnoreCase(presentableText)) {
-            settingType = SettingType.TEST_TEARDOWN;
-        } else {
-            settingType = null;
-        }
+        settingType = null;
     }
 
     @Override
     public final boolean isSuiteTeardown() {
-        return settingType == SettingType.SUITE_TEARDOWN;
+        return getSettingType() == SettingType.SUITE_TEARDOWN;
     }
 
     @Override
     public final boolean isTestTeardown() {
-        return settingType == SettingType.TEST_TEARDOWN;
+        return getSettingType() == SettingType.TEST_TEARDOWN;
+    }
+
+    private SettingType getSettingType() {
+        if (settingType == null) {
+            String presentableText = getPresentableText();
+            if ("Suite Teardown".equalsIgnoreCase(presentableText)) {
+                settingType = SettingType.SUITE_TEARDOWN;
+            } else if ("Test Teardown".equalsIgnoreCase(presentableText)) {
+                settingType = SettingType.TEST_TEARDOWN;
+            } else {
+                settingType = null;
+            }
+        }
+        return settingType;
     }
 
     private enum SettingType {

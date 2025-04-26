@@ -45,14 +45,14 @@ public class KeywordDefinitionImpl extends RobotStubPsiElementBase<KeywordDefini
         }
         PsiElement nameIdentifier = getNameIdentifier();
         if (nameIdentifier != null) {
-            return nameIdentifier.getText();
+            return injectedLanguageManager.getUnescapedText(nameIdentifier);
         }
         return null;
     }
 
     @Override
     public Collection<DefinedParameter> getParameters() {
-        Collection<DefinedParameter> results = this.parameters;
+        Collection<DefinedParameter> results = parameters;
         if (results == null) {
             for (BracketSetting bracketSetting : PsiTreeUtil.getChildrenOfTypeAsList(this, BracketSetting.class)) {
                 if (bracketSetting.isArguments()) {
@@ -60,7 +60,7 @@ public class KeywordDefinitionImpl extends RobotStubPsiElementBase<KeywordDefini
                     break;
                 }
             }
-            this.parameters = results != null ? results : List.of();
+            parameters = results != null ? results : List.of();
         }
         return results;
     }
@@ -68,15 +68,15 @@ public class KeywordDefinitionImpl extends RobotStubPsiElementBase<KeywordDefini
     @NotNull
     @Override
     public final List<KeywordInvokable> getInvokedKeywords() {
-        List<KeywordInvokable> results = this.invokedKeywords;
-        if (this.invokedKeywords == null) {
+        List<KeywordInvokable> results = invokedKeywords;
+        if (invokedKeywords == null) {
             results = new ArrayList<>();
             for (PsiElement statement : getChildren()) {
                 if (statement instanceof KeywordStatement || statement instanceof BracketSetting) {
                     results.addAll(PsiTreeUtil.collectElementsOfType(statement, KeywordInvokable.class));
                 }
             }
-            this.invokedKeywords = results;
+            invokedKeywords = results;
         }
         return results;
     }
@@ -87,10 +87,10 @@ public class KeywordDefinitionImpl extends RobotStubPsiElementBase<KeywordDefini
         Set<DefinedVariable> results = new LinkedHashSet<>();
         results.addAll(getDefinedVariables());
         results.addAll(getInlineVariables());
-        Collection<DefinedVariable> localTestCaseVariables = this.testCaseVariables;
-        if (this.testCaseVariables == null) {
+        Collection<DefinedVariable> localTestCaseVariables = testCaseVariables;
+        if (testCaseVariables == null) {
             localTestCaseVariables = getTestCaseVariables();
-            this.testCaseVariables = localTestCaseVariables;
+            testCaseVariables = localTestCaseVariables;
         }
         results.addAll(localTestCaseVariables);
         return results;
@@ -98,10 +98,10 @@ public class KeywordDefinitionImpl extends RobotStubPsiElementBase<KeywordDefini
 
     @NotNull
     private Collection<DefinedVariable> getInlineVariables() {
-        Collection<DefinedVariable> results = this.inlineVariables;
-        if (this.inlineVariables == null) {
-            results = this.collectInlineVariables();
-            this.inlineVariables = results;
+        Collection<DefinedVariable> results = inlineVariables;
+        if (inlineVariables == null) {
+            results = collectInlineVariables();
+            inlineVariables = results;
         }
         return results;
     }
@@ -123,10 +123,10 @@ public class KeywordDefinitionImpl extends RobotStubPsiElementBase<KeywordDefini
 
     @NotNull
     public final Collection<DefinedVariable> getDefinedVariables() {
-        Collection<DefinedVariable> results = this.definedVariables;
-        if (this.definedVariables == null) {
+        Collection<DefinedVariable> results = definedVariables;
+        if (definedVariables == null) {
             results = collectDefinedVariables();
-            this.definedVariables = results;
+            definedVariables = results;
         }
         return results;
     }
@@ -157,11 +157,11 @@ public class KeywordDefinitionImpl extends RobotStubPsiElementBase<KeywordDefini
     @Override
     public void subtreeChanged() {
         super.subtreeChanged();
-        this.parameters = null;
-        this.definedVariables = null;
-        this.inlineVariables = null;
-        this.testCaseVariables = null;
-        this.invokedKeywords = null;
+        parameters = null;
+        definedVariables = null;
+        inlineVariables = null;
+        testCaseVariables = null;
+        invokedKeywords = null;
     }
 
     @Override

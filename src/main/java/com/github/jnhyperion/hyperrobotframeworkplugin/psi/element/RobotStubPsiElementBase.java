@@ -3,7 +3,9 @@ package com.github.jnhyperion.hyperrobotframeworkplugin.psi.element;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.util.PatternUtil;
 import com.intellij.extapi.psi.StubBasedPsiElementBase;
 import com.intellij.lang.ASTNode;
+import com.intellij.lang.injection.InjectedLanguageManager;
 import com.intellij.navigation.ItemPresentation;
+import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.stubs.IStubElementType;
 import com.intellij.psi.stubs.StubElement;
@@ -13,65 +15,73 @@ import javax.swing.Icon;
 
 public abstract class RobotStubPsiElementBase<T extends StubElement<P>, P extends PsiElement> extends StubBasedPsiElementBase<T> implements RobotStatement {
 
-   public RobotStubPsiElementBase(@NotNull ASTNode node) {
-      super(node);
-   }
+    protected final InjectedLanguageManager injectedLanguageManager;
 
-   public RobotStubPsiElementBase(final T stub, final IStubElementType<T, P> nodeType) {
-      super(stub, nodeType);
-   }
+    public RobotStubPsiElementBase(@NotNull ASTNode node) {
+        super(node);
 
-   @NotNull
-   @Override
-   public String getPresentableText() {
-      T stub = getStub();
-      String text;
-      if (stub != null) {
-         P psiElement = stub.getPsi();
-         text = psiElement.getText();
-      } else {
-         text = getText();
-      }
-      return RobotPsiElementBase.getPresentableText(text);
-   }
+        Project project = getProject();
+        injectedLanguageManager = InjectedLanguageManager.getInstance(project);
+    }
 
-   @NotNull
-   public static String getPresentableText(String text) {
-      return PatternUtil.getPresentableText(text);
-   }
+    public RobotStubPsiElementBase(final T stub, final IStubElementType<T, P> nodeType) {
+        super(stub, nodeType);
 
-   @Override
-   public ItemPresentation getPresentation() {
-      return new ItemPresentation() {
+        Project project = getProject();
+        injectedLanguageManager = InjectedLanguageManager.getInstance(project);
+    }
 
-         @Override
-         public String getPresentableText() {
-            return RobotStubPsiElementBase.this.getPresentableText();
-         }
+    @NotNull
+    @Override
+    public String getPresentableText() {
+        T stub = getStub();
+        String text;
+        if (stub != null) {
+            P psiElement = stub.getPsi();
+            text = injectedLanguageManager.getUnescapedText(psiElement);
+        } else {
+            text = injectedLanguageManager.getUnescapedText(this);
+        }
+        return RobotPsiElementBase.getPresentableText(text);
+    }
 
-         @Override
-         public String getLocationString() {
-            return null;
-         }
+    @NotNull
+    public static String getPresentableText(String text) {
+        return PatternUtil.getPresentableText(text);
+    }
 
-         @Override
-         public Icon getIcon(boolean var1) {
-            return RobotStubPsiElementBase.this.getIcon(ICON_FLAG_VISIBILITY);
-         }
-      };
-   }
+    @Override
+    public ItemPresentation getPresentation() {
+        return new ItemPresentation() {
 
-   @Override
-   public String getName() {
-      return getPresentableText();
-   }
+            @Override
+            public String getPresentableText() {
+                return RobotStubPsiElementBase.this.getPresentableText();
+            }
 
-   public PsiElement setName(@NotNull String newName) {
-      return this;
-   }
+            @Override
+            public String getLocationString() {
+                return null;
+            }
 
-   @Override
-   public String toString() {
-      return super.toString() + "(" + getPresentableText() + ")";
-   }
+            @Override
+            public Icon getIcon(boolean var1) {
+                return RobotStubPsiElementBase.this.getIcon(ICON_FLAG_VISIBILITY);
+            }
+        };
+    }
+
+    @Override
+    public String getName() {
+        return getPresentableText();
+    }
+
+    public PsiElement setName(@NotNull String newName) {
+        return this;
+    }
+
+    @Override
+    public String toString() {
+        return super.toString() + "(" + getPresentableText() + ")";
+    }
 }

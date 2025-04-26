@@ -4,6 +4,10 @@
 
 ## Unreleased
 
+### Changed
+
+- Improved performance by reducing usages of PSI#getText() calls
+
 ## 0.2.4
 
 ### Fixed

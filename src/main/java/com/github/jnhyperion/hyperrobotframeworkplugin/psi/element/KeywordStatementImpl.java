@@ -19,7 +19,6 @@ import com.jetbrains.python.psi.PyParameter;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashSet;
@@ -78,7 +77,7 @@ public class KeywordStatementImpl extends RobotStubPsiElementBase<KeywordStateme
     public List<Parameter> getParameters() {
         List<Parameter> results = this.parameters;
         if (this.parameters == null) {
-            results = new ArrayList<>(PsiTreeUtil.getChildrenOfTypeAsList(this, Parameter.class));
+            results = PsiTreeUtil.getChildrenOfTypeAsList(this, Parameter.class);
             this.parameters = results;
         }
         return results;
@@ -89,7 +88,7 @@ public class KeywordStatementImpl extends RobotStubPsiElementBase<KeywordStateme
     public final List<PositionalArgument> getPositionalArguments() {
         List<PositionalArgument> results = this.positionalArguments;
         if (this.positionalArguments == null) {
-            results = new ArrayList<>(PsiTreeUtil.getChildrenOfTypeAsList(this, PositionalArgument.class));
+            results = PsiTreeUtil.getChildrenOfTypeAsList(this, PositionalArgument.class);
             this.positionalArguments = results;
         }
         return results;
@@ -105,13 +104,13 @@ public class KeywordStatementImpl extends RobotStubPsiElementBase<KeywordStateme
             availableKeywordParameters = localDefinedParameters;
             liveInspectionEnabledLastTime = pythonLiveInspection;
         }
-        return localDefinedParameters != null ? new ArrayList<>(localDefinedParameters) : Collections.emptySet();
+        return localDefinedParameters != null ? localDefinedParameters : Collections.emptySet();
     }
 
     @Nullable
     @Override
     public final DefinedVariable getGlobalVariable() {
-        DefinedVariable result = this.variable;
+        DefinedVariable result = variable;
         if (result == null) {
             KeywordInvokable invokable = getInvokable();
             if (invokable != null) {
@@ -125,11 +124,12 @@ public class KeywordStatementImpl extends RobotStubPsiElementBase<KeywordStateme
                     }
                 }
             }
-            this.variable = result;
+            variable = result;
         }
         return result;
     }
 
+    @SuppressWarnings("UnstableApiUsage")
     private Collection<DefinedParameter> collectKeywordParameters() {
         Set<DefinedParameter> results = new LinkedHashSet<>();
 
@@ -183,11 +183,11 @@ public class KeywordStatementImpl extends RobotStubPsiElementBase<KeywordStateme
     @Override
     public void subtreeChanged() {
         super.subtreeChanged();
-        this.parameters = null;
-        this.positionalArguments = null;
-        this.arguments = null;
-        this.invokable = null;
-        this.variable = null;
-        this.availableKeywordParameters = null;
+        parameters = null;
+        positionalArguments = null;
+        arguments = null;
+        invokable = null;
+        variable = null;
+        availableKeywordParameters = null;
     }
 }

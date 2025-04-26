@@ -47,32 +47,30 @@ public class HeadingImpl extends RobotPsiElementBase implements Heading {
 
     public HeadingImpl(@NotNull ASTNode node) {
         super(node);
-
-        headerText = getPresentableText();
     }
 
     @Override
     public final boolean isSettings() {
-        return headerText.startsWith("*** Setting");
+        return getHeaderText().startsWith("*** Setting");
     }
 
     private boolean containsVariables() {
-        return headerText.startsWith("*** Variable");
+        return getHeaderText().startsWith("*** Variable");
     }
 
     @Override
     public final boolean containsTestCases() {
-        return headerText.startsWith("*** Test Case");
+        return getHeaderText().startsWith("*** Test Case");
     }
 
     @Override
     public final boolean containsTasks() {
-        return headerText.equals("*** Tasks ***");
+        return getHeaderText().equals("*** Tasks ***");
     }
 
     @Override
     public final boolean containsKeywordDefinitions() {
-        String text = headerText;
+        String text = getHeaderText();
         return text.startsWith("*** Keyword") || text.startsWith("*** User Keyword");
     }
 
@@ -86,7 +84,7 @@ public class HeadingImpl extends RobotPsiElementBase implements Heading {
                 robotFile.importsChanged();
             }
         }
-        this.importsChanged();
+        importsChanged();
     }
 
     @Override
@@ -100,39 +98,42 @@ public class HeadingImpl extends RobotPsiElementBase implements Heading {
         this.declaredVariables = null;
         this.metadataStatements = null;
         this.variableDefinitions = null;
-        headerText = getPresentableText();
+        this.headerText = null;
+    }
+
+    private String getHeaderText() {
+        if (headerText == null) {
+            headerText = getPresentableText();
+        }
+        return headerText;
     }
 
     @NotNull
     @Override
     public final Collection<DefinedVariable> getDefinedVariables() {
-        Collection<DefinedVariable> results = this.declaredVariables;
+        Collection<DefinedVariable> results = declaredVariables;
         if (results == null) {
-            try {
-                results = new LinkedHashSet<>(RobotFileManager.getGlobalVariables(getProject()));
-                if (containsVariables()) {
-                    for (PsiElement child : getChildren()) {
-                        if (child instanceof DefinedVariable definedVariable) {
-                            results.add(definedVariable);
-                        }
+            results = new LinkedHashSet<>(RobotFileManager.getGlobalVariables(getProject()));
+            if (containsVariables()) {
+                for (PsiElement child : getChildren()) {
+                    if (child instanceof DefinedVariable definedVariable) {
+                        results.add(definedVariable);
                     }
-                } else if (isSettings()) {
-                    PsiElement[] children = getChildren();
-                    for (int i = 0; i < children.length; i++) {
-                        PsiElement child = children[i];
-                        if (child instanceof Setting setting) {
-                            if (setting.getText().equalsIgnoreCase("Suite Setup")
-                                || setting.getText().equalsIgnoreCase("Test Setup") && i + 1 < children.length && children[i + 1] instanceof KeywordStatement) {
-                                List<DefinedVariable> resolvedVariablesInKeywords = ResolverUtils.walkKeyword((KeywordStatement) children[i + 1]);
-                                results.addAll(resolvedVariablesInKeywords);
-                            }
+                }
+            } else if (isSettings()) {
+                PsiElement[] children = getChildren();
+                for (int i = 0; i < children.length; i++) {
+                    PsiElement child = children[i];
+                    if (child instanceof Setting setting) {
+                        if (setting.getText().equalsIgnoreCase("Suite Setup")
+                            || setting.getText().equalsIgnoreCase("Test Setup") && i + 1 < children.length && children[i + 1] instanceof KeywordStatement) {
+                            List<DefinedVariable> resolvedVariablesInKeywords = ResolverUtils.walkKeyword((KeywordStatement) children[i + 1]);
+                            results.addAll(resolvedVariablesInKeywords);
                         }
                     }
                 }
-            } catch (Throwable t) {
-                return Collections.emptySet();
             }
-            this.declaredVariables = results;
+            declaredVariables = results;
         }
         return results;
     }
@@ -140,26 +141,22 @@ public class HeadingImpl extends RobotPsiElementBase implements Heading {
     @NotNull
     @Override
     public final Collection<DefinedKeyword> collectDefinedKeywords() {
-        Collection<DefinedKeyword> results = this.definedKeywords;
+        Collection<DefinedKeyword> results = definedKeywords;
         if (results == null) {
-            try {
-                if (containsKeywordDefinitions()) {
-                    results = PsiTreeUtil.getChildrenOfTypeAsList(this, KeywordDefinition.class).stream().map(keywordDefinition -> {
-                        Collection<DefinedParameter> arguments = PsiTreeUtil.getChildrenOfTypeAsList(keywordDefinition, BracketSetting.class)
-                                                                            .stream()
-                                                                            .filter(BracketSetting::isArguments)
-                                                                            .map(BracketSetting::getArguments)
-                                                                            .flatMap(Collection::stream)
-                                                                            .collect(Collectors.toCollection(LinkedHashSet::new));
-                        return new KeywordDto(keywordDefinition, keywordDefinition.getKeywordName(), arguments);
-                    }).collect(Collectors.toCollection(LinkedHashSet::new));
-                } else {
-                    results = Collections.emptySet();
-                }
-            } catch (Throwable e) {
-                return Collections.emptySet();
+            if (containsKeywordDefinitions()) {
+                results = PsiTreeUtil.getChildrenOfTypeAsList(this, KeywordDefinition.class).stream().map(keywordDefinition -> {
+                    Collection<DefinedParameter> arguments = PsiTreeUtil.getChildrenOfTypeAsList(keywordDefinition, BracketSetting.class)
+                                                                        .stream()
+                                                                        .filter(BracketSetting::isArguments)
+                                                                        .map(BracketSetting::getArguments)
+                                                                        .flatMap(Collection::stream)
+                                                                        .collect(Collectors.toCollection(LinkedHashSet::new));
+                    return new KeywordDto(keywordDefinition, keywordDefinition.getKeywordName(), arguments);
+                }).collect(Collectors.toCollection(LinkedHashSet::new));
+            } else {
+                results = Collections.emptySet();
             }
-            this.definedKeywords = results;
+            definedKeywords = results;
         }
         return results;
     }
@@ -167,19 +164,15 @@ public class HeadingImpl extends RobotPsiElementBase implements Heading {
     @NotNull
     @Override
     public final Collection<KeywordDefinition> getTestCases() {
-        Collection<KeywordDefinition> results = this.testCases;
+        Collection<KeywordDefinition> results = testCases;
         if (results == null) {
-            try {
-                if (!containsTestCases() && !containsTasks()) {
-                    results = Collections.emptySet();
-                } else {
-                    List<KeywordDefinition> keywordDefinitions = PsiTreeUtil.getChildrenOfTypeAsList(this, KeywordDefinition.class);
-                    results = new LinkedHashSet<>(keywordDefinitions);
-                }
-            } catch (Throwable t) {
-                return Collections.emptySet();
+            if (!containsTestCases() && !containsTasks()) {
+                results = Collections.emptySet();
+            } else {
+                List<KeywordDefinition> keywordDefinitions = PsiTreeUtil.getChildrenOfTypeAsList(this, KeywordDefinition.class);
+                results = new LinkedHashSet<>(keywordDefinitions);
             }
-            this.testCases = results;
+            testCases = results;
         }
         return results;
     }
@@ -187,7 +180,7 @@ public class HeadingImpl extends RobotPsiElementBase implements Heading {
     @NotNull
     @Override
     public final Collection<PsiFile> getFilesFromInvokedKeywordsAndVariables() {
-        if (this.referencedFiles == null) {
+        if (referencedFiles == null) {
             Collection<PsiFile> results = new LinkedHashSet<>();
             for (KeywordInvokable invokedKeyword : getInvokedKeywords()) {
                 Optional.ofNullable(invokedKeyword.getReference()).map(PsiReference::resolve).map(PsiElement::getContainingFile).ifPresent(results::add);
@@ -220,10 +213,10 @@ public class HeadingImpl extends RobotPsiElementBase implements Heading {
 
     @NotNull
     private Collection<KeywordInvokable> getInvokedKeywords() {
-        Collection<KeywordInvokable> results = this.invokedKeywords;
-        if (this.invokedKeywords == null) {
+        Collection<KeywordInvokable> results = invokedKeywords;
+        if (invokedKeywords == null) {
             results = PsiTreeUtil.findChildrenOfType(this, KeywordInvokable.class);
-            this.invokedKeywords = results;
+            invokedKeywords = results;
         }
         return results;
     }
@@ -246,10 +239,10 @@ public class HeadingImpl extends RobotPsiElementBase implements Heading {
     @NotNull
     @Override
     public final Collection<RobotStatement> getMetadataStatements() {
-        Collection<RobotStatement> statement = this.metadataStatements;
-        if (this.metadataStatements == null) {
+        Collection<RobotStatement> statement = metadataStatements;
+        if (metadataStatements == null) {
             statement = new LinkedHashSet<>(PsiTreeUtil.findChildrenOfAnyType(this, Import.class, Setting.class));
-            this.metadataStatements = statement;
+            metadataStatements = statement;
         }
         return statement;
     }
@@ -257,8 +250,8 @@ public class HeadingImpl extends RobotPsiElementBase implements Heading {
     @NotNull
     @Override
     public final Collection<KeywordFile> collectImportFiles() {
-        Collection<KeywordFile> files = this.keywordFiles;
-        if (this.keywordFiles == null) {
+        Collection<KeywordFile> files = keywordFiles;
+        if (keywordFiles == null) {
             files = new LinkedHashSet<>();
             addBuiltInImports(files);
             if (isSettings()) {
@@ -276,13 +269,13 @@ public class HeadingImpl extends RobotPsiElementBase implements Heading {
                             if (resolution != null) {
                                 String namespace = getNamespace(importElement, positionalArgument);
                                 boolean isDifferentNamespace = !positionalArgument.getContent().equals(namespace);
-                                files.add(new RobotPythonClass(namespace, resolution, importElement.getImportType(), this.getProject(), isDifferentNamespace));
+                                files.add(new RobotPythonClass(namespace, resolution, importElement.getImportType(), getProject(), isDifferentNamespace));
                             }
                             PyFile file = PythonResolver.castFile(resolved);
                             if (file != null) {
                                 String namespace = getNamespace(importElement, positionalArgument);
                                 boolean isDifferentNamespace = !positionalArgument.getContent().equals(namespace);
-                                files.add(new RobotPythonFile(namespace, file, importElement.getImportType(), this.getProject(), isDifferentNamespace));
+                                files.add(new RobotPythonFile(namespace, file, importElement.getImportType(), getProject(), isDifferentNamespace));
                             }
                         }
                     }
@@ -297,7 +290,7 @@ public class HeadingImpl extends RobotPsiElementBase implements Heading {
                 return files;
             }
 
-            this.keywordFiles = files;
+            keywordFiles = files;
         }
         return files;
     }
@@ -305,7 +298,7 @@ public class HeadingImpl extends RobotPsiElementBase implements Heading {
     private void addBuiltInImports(@NotNull Collection<KeywordFile> files) {
         PyClass builtIn = PythonResolver.findClass(ROBOT_BUILT_IN, getProject());
         if (builtIn != null) {
-            files.add(new RobotPythonClass(ROBOT_BUILT_IN, builtIn, ImportType.LIBRARY, this.getProject(), false));
+            files.add(new RobotPythonClass(ROBOT_BUILT_IN, builtIn, ImportType.LIBRARY, getProject(), false));
         }
     }
 

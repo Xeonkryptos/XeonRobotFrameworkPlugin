@@ -2,6 +2,7 @@ package com.github.jnhyperion.hyperrobotframeworkplugin.psi.element;
 
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.ref.RobotKeywordReference;
 import com.intellij.lang.ASTNode;
+import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiReference;
 import org.jetbrains.annotations.NotNull;
 
@@ -33,6 +34,8 @@ public class KeywordPartImpl extends RobotPsiElementBase implements KeywordInvok
    @NotNull
    @Override
    public final String getPresentableText() {
-      return getPresentableText(this.getNode().getTreeParent().getText());
+      PsiElement parent = getParent();
+      String unescapedText = injectedLanguageManager.getUnescapedText(parent);
+      return getPresentableText(unescapedText);
    }
 }
