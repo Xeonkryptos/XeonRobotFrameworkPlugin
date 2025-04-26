@@ -7,6 +7,7 @@ import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.Variable;
 import com.intellij.lang.annotation.AnnotationHolder;
 import com.intellij.lang.annotation.Annotator;
 import com.intellij.lang.annotation.HighlightSeverity;
+import com.intellij.lang.injection.InjectedLanguageManager;
 import com.intellij.openapi.project.DumbAware;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiReference;
@@ -31,7 +32,8 @@ public class RobotVariableAnnotator implements Annotator, DumbAware {
             return;
         }
 
-        String elementText = element.getText();
+        InjectedLanguageManager injectedLanguageManager = InjectedLanguageManager.getInstance(element.getProject());
+        String elementText = injectedLanguageManager.getUnescapedText(element);
         Matcher matcher = VARIABLE_PATTERN.matcher(elementText);
         if (matcher.matches()) {
             try {
