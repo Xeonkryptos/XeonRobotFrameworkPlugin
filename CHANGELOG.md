@@ -4,6 +4,10 @@
 
 ## Unreleased
 
+### Added
+
+- Hyperlinking of Robot reports with opening them in the browser on click
+
 ### Changed
 
 - Improved performance by reducing usages of PSI#getText() calls

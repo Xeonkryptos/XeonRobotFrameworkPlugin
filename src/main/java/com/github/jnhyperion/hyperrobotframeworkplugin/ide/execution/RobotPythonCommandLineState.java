@@ -74,13 +74,15 @@ public class RobotPythonCommandLineState extends PythonScriptCommandLineState {
     @Override
     public ExecutionResult execute(Executor executor, PythonProcessStarter processStarter, CommandLinePatcher... patchers) throws ExecutionException {
         final RobotExecutionMode executionMode = computeRobotExecutionMode(executor);
-        return super.execute(executor, processStarter, ArrayUtil.append(patchers, commandLine -> {
+        ExecutionResult executionResult = super.execute(executor, processStarter, ArrayUtil.append(patchers, commandLine -> {
             ParametersList parametersList = commandLine.getParametersList();
             ParamsGroup moduleGroup = parametersList.getParamsGroup(PythonCommandLineState.GROUP_MODULE);
             if (moduleGroup != null) {
                 modifyCommandLine(moduleGroup, executionMode);
             }
         }));
+        enrichExecutionResult(executionResult);
+        return executionResult;
     }
 
     private void modifyCommandLine(ParamsGroup paramsGroup, RobotExecutionMode robotExecutionMode) {
@@ -115,6 +117,7 @@ public class RobotPythonCommandLineState extends PythonScriptCommandLineState {
 
         smtRunnerConsoleView.addMessageFilter(createUrlFilter(processHandler));
         smtRunnerConsoleView.addMessageFilter(new PythonImportErrorFilter(project));
+        smtRunnerConsoleView.addMessageFilter(new RobotReportsFilter());
 
         addTracebackFilter(project, smtRunnerConsoleView, processHandler);
         return smtRunnerConsoleView;
@@ -126,7 +129,16 @@ public class RobotPythonCommandLineState extends PythonScriptCommandLineState {
     public ExecutionResult execute(@NotNull Executor executor, @NotNull PythonScriptTargetedCommandLineBuilder converter) throws ExecutionException {
         final RobotExecutionMode executionMode = computeRobotExecutionMode(executor);
         var wrappedConverter = new MyPythonScriptTargetedCommandLineBuilder(converter, runConfiguration, executionMode);
-        return super.execute(executor, wrappedConverter);
+        ExecutionResult executionResult = super.execute(executor, wrappedConverter);
+        enrichExecutionResult(executionResult);
+        return executionResult;
+    }
+
+    private void enrichExecutionResult(@Nullable ExecutionResult executionResult) {
+        if (runConfiguration.getPythonRunConfiguration().emulateTerminal() && executionResult != null
+            && executionResult.getExecutionConsole() instanceof ConsoleView consoleView) {
+            consoleView.addMessageFilter(new RobotReportsFilter());
+        }
     }
 
     @SuppressWarnings("UnstableApiUsage") // Might be unstable at the moment, but is an important extension point
