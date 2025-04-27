@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+## 0.2.5
+
 ### Added
 
 - Hyperlinking of Robot reports with opening them in the browser on click
