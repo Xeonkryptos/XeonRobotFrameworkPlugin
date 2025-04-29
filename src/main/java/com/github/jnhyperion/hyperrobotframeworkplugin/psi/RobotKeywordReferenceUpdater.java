@@ -2,12 +2,14 @@ package com.github.jnhyperion.hyperrobotframeworkplugin.psi;
 
 import com.github.jnhyperion.hyperrobotframeworkplugin.MyLogger;
 import com.intellij.codeInsight.daemon.DaemonCodeAnalyzer;
+import com.intellij.openapi.application.ReadAction;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiTreeChangeAdapter;
 import com.intellij.psi.PsiTreeChangeEvent;
 import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.psi.search.searches.ReferencesSearch;
+import com.intellij.util.concurrency.AppExecutorUtil;
 import com.jetbrains.python.psi.PyDecorator;
 import com.jetbrains.python.psi.PyDecoratorList;
 import com.jetbrains.python.psi.PyFunction;
@@ -107,15 +109,18 @@ public class RobotKeywordReferenceUpdater extends PsiTreeChangeAdapter {
     }
 
     private void restartAnnotatorForReferencingKeywords(PyFunction pythonFunction) {
-        Set<PsiFile> processedFiles = new HashSet<>();
-        ReferencesSearch.search(pythonFunction, GlobalSearchScope.projectScope(pythonFunction.getProject())).forEach(reference -> {
-            PsiElement element = reference.getElement();
-            PsiFile robotFile = element.getContainingFile();
-            if (robotFile != null) {
-                processedFiles.add(robotFile);
-            }
-            return true;
-        });
-        processedFiles.forEach(robotFile -> DaemonCodeAnalyzer.getInstance(robotFile.getProject()).restart(robotFile));
+        ReadAction.nonBlocking(() -> {
+            Set<PsiFile> processedFiles = new HashSet<>();
+            ReferencesSearch.search(pythonFunction, GlobalSearchScope.projectScope(pythonFunction.getProject())).forEach(reference -> {
+                PsiElement element = reference.getElement();
+                PsiFile robotFile = element.getContainingFile();
+                if (robotFile != null) {
+                    processedFiles.add(robotFile);
+                }
+                return true;
+            });
+            processedFiles.forEach(robotFile -> DaemonCodeAnalyzer.getInstance(robotFile.getProject()).restart(robotFile));
+            return null;
+        }).inSmartMode(pythonFunction.getProject()).submit(AppExecutorUtil.getAppExecutorService());
     }
 }
