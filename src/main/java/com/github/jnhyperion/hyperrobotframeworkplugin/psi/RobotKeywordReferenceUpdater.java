@@ -3,6 +3,7 @@ package com.github.jnhyperion.hyperrobotframeworkplugin.psi;
 import com.github.jnhyperion.hyperrobotframeworkplugin.MyLogger;
 import com.intellij.codeInsight.daemon.DaemonCodeAnalyzer;
 import com.intellij.openapi.application.ReadAction;
+import com.intellij.openapi.util.SimpleModificationTracker;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiTreeChangeAdapter;
@@ -22,6 +23,8 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class RobotKeywordReferenceUpdater extends PsiTreeChangeAdapter {
+
+    private final SimpleModificationTracker simpleModificationTracker = new SimpleModificationTracker();
 
     @Override
     public void childAdded(@NotNull PsiTreeChangeEvent event) {
@@ -109,18 +112,23 @@ public class RobotKeywordReferenceUpdater extends PsiTreeChangeAdapter {
     }
 
     private void restartAnnotatorForReferencingKeywords(PyFunction pythonFunction) {
+        simpleModificationTracker.incModificationCount();
+        final long currentModificationCount = simpleModificationTracker.getModificationCount();
         ReadAction.nonBlocking(() -> {
-            Set<PsiFile> processedFiles = new HashSet<>();
-            ReferencesSearch.search(pythonFunction, GlobalSearchScope.projectScope(pythonFunction.getProject())).forEach(reference -> {
-                PsiElement element = reference.getElement();
-                PsiFile robotFile = element.getContainingFile();
-                if (robotFile != null) {
-                    processedFiles.add(robotFile);
-                }
-                return true;
-            });
-            processedFiles.forEach(robotFile -> DaemonCodeAnalyzer.getInstance(robotFile.getProject()).restart(robotFile));
-            return null;
-        }).inSmartMode(pythonFunction.getProject()).submit(AppExecutorUtil.getAppExecutorService());
+                      Set<PsiFile> processedFiles = new HashSet<>();
+                      ReferencesSearch.search(pythonFunction, GlobalSearchScope.projectScope(pythonFunction.getProject())).forEach(reference -> {
+                          PsiElement element = reference.getElement();
+                          PsiFile robotFile = element.getContainingFile();
+                          if (robotFile != null) {
+                              processedFiles.add(robotFile);
+                          }
+                          return true;
+                      });
+                      processedFiles.forEach(robotFile -> DaemonCodeAnalyzer.getInstance(robotFile.getProject()).restart(robotFile));
+                      return null;
+                  })
+                  .inSmartMode(pythonFunction.getProject())
+                  .expireWhen(() -> currentModificationCount != simpleModificationTracker.getModificationCount())
+                  .submit(AppExecutorUtil.getAppExecutorService());
     }
 }

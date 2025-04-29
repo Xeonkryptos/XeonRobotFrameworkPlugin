@@ -4,7 +4,6 @@ import com.github.jnhyperion.hyperrobotframeworkplugin.MyLogger;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.RobotKeywordReferenceUpdater;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.RobotFileImpl;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.ref.RobotFileManager;
-import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.ReadAction;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.editor.EditorFactory;
@@ -17,6 +16,7 @@ import com.intellij.openapi.project.DumbService;
 import com.intellij.openapi.project.DumbService.DumbModeListener;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.roots.ProjectFileIndex;
+import com.intellij.openapi.util.SimpleModificationTracker;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.vfs.VirtualFileManager;
 import com.intellij.openapi.vfs.newvfs.BulkFileListener;
@@ -25,17 +25,21 @@ import com.intellij.openapi.vfs.newvfs.events.VFileEvent;
 import com.intellij.openapi.vfs.newvfs.impl.VirtualDirectoryImpl;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiManager;
+import com.intellij.util.concurrency.AppExecutorUtil;
 import com.jetbrains.python.PythonPluginDisposable;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class RobotListenerMgr {
     private static final AtomicBoolean isPythonFileChanged = new AtomicBoolean(false);
     private static final RobotListenerMgr INSTANCE = new RobotListenerMgr();
+
+    private final SimpleModificationTracker modificationTracker = new SimpleModificationTracker();
 
     private RobotListenerMgr() {
     }
@@ -56,7 +60,7 @@ public class RobotListenerMgr {
                             String filePath = file.getPath();
                             if (projectBasePath != null && filePath.startsWith(projectBasePath)) {
                                 MyLogger.logger.debug("Received event: " + file.getName() + " - " + project);
-                                updateRobotFiles(project);
+                                updateRobotFiles(project, file);
                                 return;
                             }
                         }
@@ -87,37 +91,44 @@ public class RobotListenerMgr {
                 if ((file = event.getNewFile()) != null && ("robot".equals(file.getExtension()) || "resource".equals(file.getExtension()))
                     && RobotListenerMgr.isPythonFileChanged.getAndSet(false)) {
                     MyLogger.logger.debug("selectionChanged: " + file.getName());
-                    updateRobotFiles(project);
+                    updateRobotFiles(project, file);
                 }
             }
         });
         PsiManager.getInstance(project).addPsiTreeChangeListener(new RobotKeywordReferenceUpdater(), PythonPluginDisposable.getInstance(project));
     }
 
-    private void updateRobotFiles(Project project) {
-        ApplicationManager.getApplication().executeOnPooledThread(() -> {
-            ReadAction.nonBlocking(() -> {
-                List<VirtualFile> robotFiles = new ArrayList<>();
+    private void updateRobotFiles(Project project, VirtualFile... files) {
+        modificationTracker.incModificationCount();
+        final long currentModificationCount = modificationTracker.getModificationCount();
+        ReadAction.nonBlocking(() -> {
+            List<VirtualFile> robotFiles = new ArrayList<>();
+            if (files != null) {
+                robotFiles.addAll(Arrays.asList(files));
+            } else {
                 ProjectFileIndex.getInstance(project).iterateContent(file -> {
                     if (!file.isDirectory() && isRobotFile(file)) {
                         robotFiles.add(file);
                     }
                     return true;
                 });
+            }
 
-                for (VirtualFile file : robotFiles) {
-                    PsiFile psiFile = PsiManager.getInstance(project).findFile(file);
-                    if (psiFile instanceof RobotFileImpl robotFile) {
-                        robotFile.reset();
-                        robotFile.importsChanged();
-                    }
+            for (VirtualFile file : robotFiles) {
+                PsiFile psiFile = PsiManager.getInstance(project).findFile(file);
+                if (psiFile instanceof RobotFileImpl robotFile) {
+                    robotFile.reset();
+                    robotFile.importsChanged();
                 }
+            }
 
-                MyLogger.logger.debug("Update robot file: " + robotFiles.size());
-                RobotFileManager.clearProjectCache(project);
-                return null;
-            }).executeSynchronously();
-        });
+            MyLogger.logger.debug("Update robot file: " + robotFiles.size());
+            RobotFileManager.clearProjectCache(project);
+            return null;
+        }).inSmartMode(project)
+                  .withDocumentsCommitted(project)
+                  .expireWhen(() -> currentModificationCount != modificationTracker.getModificationCount())
+                  .submit(AppExecutorUtil.getAppExecutorService());
     }
 
     private boolean isRobotFile(@Nullable VirtualFile file) {
