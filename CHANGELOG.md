@@ -4,6 +4,13 @@
 
 ## Unreleased
 
+## 0.2.6
+
+### Fixed
+
+- Reduced CPU usage
+- Fixed invalid index accesses
+
 ## 0.2.5
 
 ### Added
