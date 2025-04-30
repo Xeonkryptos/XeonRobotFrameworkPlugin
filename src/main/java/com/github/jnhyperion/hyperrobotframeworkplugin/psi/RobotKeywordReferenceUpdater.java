@@ -115,16 +115,18 @@ public class RobotKeywordReferenceUpdater extends PsiTreeChangeAdapter {
         simpleModificationTracker.incModificationCount();
         final long currentModificationCount = simpleModificationTracker.getModificationCount();
         ReadAction.nonBlocking(() -> {
-                      Set<PsiFile> processedFiles = new HashSet<>();
-                      ReferencesSearch.search(pythonFunction, GlobalSearchScope.projectScope(pythonFunction.getProject())).forEach(reference -> {
-                          PsiElement element = reference.getElement();
-                          PsiFile robotFile = element.getContainingFile();
-                          if (robotFile != null) {
-                              processedFiles.add(robotFile);
-                          }
-                          return true;
-                      });
-                      processedFiles.forEach(robotFile -> DaemonCodeAnalyzer.getInstance(robotFile.getProject()).restart(robotFile));
+                      if (pythonFunction.isValid()) {
+                          Set<PsiFile> processedFiles = new HashSet<>();
+                          ReferencesSearch.search(pythonFunction, GlobalSearchScope.projectScope(pythonFunction.getProject())).forEach(reference -> {
+                              PsiElement element = reference.getElement();
+                              PsiFile robotFile = element.getContainingFile();
+                              if (robotFile != null) {
+                                  processedFiles.add(robotFile);
+                              }
+                              return true;
+                          });
+                          processedFiles.forEach(robotFile -> DaemonCodeAnalyzer.getInstance(robotFile.getProject()).restart(robotFile));
+                      }
                       return null;
                   })
                   .inSmartMode(pythonFunction.getProject())
