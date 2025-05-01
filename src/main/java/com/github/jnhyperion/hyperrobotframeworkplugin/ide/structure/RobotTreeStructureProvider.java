@@ -21,8 +21,11 @@ public class RobotTreeStructureProvider implements TreeStructureProvider, DumbAw
     public @NotNull Collection<AbstractTreeNode<?>> modify(@NotNull AbstractTreeNode<?> parent,
                                                            @NotNull Collection<AbstractTreeNode<?>> children,
                                                            ViewSettings viewSettings) {
-        Collection<AbstractTreeNode<?>> result = new LinkedHashSet<>(children);
+        if (!viewSettings.isShowMembers()) {
+            return children;
+        }
 
+        Collection<AbstractTreeNode<?>> result = new LinkedHashSet<>(children);
         for (AbstractTreeNode<?> child : children) {
             if (child instanceof PsiFileNode fileNode) {
                 PsiFile file = fileNode.getValue();
