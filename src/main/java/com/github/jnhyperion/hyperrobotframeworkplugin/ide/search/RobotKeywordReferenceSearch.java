@@ -28,6 +28,7 @@ public class RobotKeywordReferenceSearch extends QueryExecutorBase<PsiReference,
     }
 
     @Override
+    @SuppressWarnings("UnstableApiUsage")
     public void processQuery(@NotNull SearchParameters queryParameters, @NotNull Processor<? super PsiReference> consumer) {
         PsiElement element = queryParameters.getElementToSearch();
         Project project = queryParameters.getProject();
@@ -44,10 +45,7 @@ public class RobotKeywordReferenceSearch extends QueryExecutorBase<PsiReference,
                                                             .map(decorator -> decorator.getArgument(0, "name", PyExpression.class))
                                                             .map(keywordNameExp -> (PyStringLiteralExpression) keywordNameExp)
                                                             .map(StringLiteralExpression::getStringValue);
-            if (customKeywordNameOpt.isPresent()) {
-                String customKeywordName = customKeywordNameOpt.get();
-                searchForKeywordsInIndex(customKeywordName, project, globalSearchScope, consumer);
-            }
+            customKeywordNameOpt.ifPresent(customKeywordName -> searchForKeywordsInIndex(customKeywordName, project, globalSearchScope, consumer));
         } else if (element instanceof KeywordDefinition keywordDefinition) {
             String keywordName = keywordDefinition.getName();
             if (keywordName != null) {

@@ -42,12 +42,10 @@ public class PythonResolver {
 
     @Nullable
     public static PsiElement resolveElement(@NotNull String elementName, @NotNull Project project) {
-        Map<String, PsiFile> cachedFiles = RobotFileManager.getCachedFiles(project);
-
+        Map<String, PsiFile> cachedFiles = RobotFileManager.getCachedRobotSystemFiles(project);
         if (elementName.startsWith("robot.libraries.")) {
             elementName = elementName.replace("robot.libraries.", "");
         }
-
         if (cachedFiles.containsKey(elementName)) {
             return cachedFiles.get(elementName);
         }
@@ -59,18 +57,15 @@ public class PythonResolver {
 
         PyFile pyFile = findModule(elementName, project);
         if (pyFile != null) {
-            try {
-                for (PyImportStatementBase importStatement : pyFile.getImportBlock()) {
-                    for (String fullyQualifiedName : importStatement.getFullyQualifiedObjectNames()) {
-                        if (elementName.equals(fullyQualifiedName)) {
-                            PyClass importedClass = findClass(elementName + "." + elementName, project);
-                            if (importedClass != null) {
-                                return importedClass;
-                            }
+            for (PyImportStatementBase importStatement : pyFile.getImportBlock()) {
+                for (String fullyQualifiedName : importStatement.getFullyQualifiedObjectNames()) {
+                    if (elementName.equals(fullyQualifiedName)) {
+                        PyClass importedClass = findClass(elementName + "." + elementName, project);
+                        if (importedClass != null) {
+                            return importedClass;
                         }
                     }
                 }
-            } catch (Throwable ignored) {
             }
             return pyFile;
         }
@@ -96,8 +91,7 @@ public class PythonResolver {
                 }
             }
         }
-
-        return matchingClasses.isEmpty() ? null : matchingClasses.get(0);
+        return matchingClasses.isEmpty() ? null : matchingClasses.getFirst();
     }
 
     @Nullable
@@ -156,7 +150,7 @@ public class PythonResolver {
                     matchedByName = pyClass;
                 }
             }
-            return matchedByName != null ? matchedByName : matchedByNames.get(0);
+            return matchedByName != null ? matchedByName : matchedByNames.getFirst();
         }
     }
 

@@ -5,7 +5,7 @@ import com.github.jnhyperion.hyperrobotframeworkplugin.psi.RobotFeatureFileType;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.RobotKeywordReferenceUpdater;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.RobotResourceFileType;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.RobotFile;
-import com.github.jnhyperion.hyperrobotframeworkplugin.psi.ref.RobotFileManager;
+import com.github.jnhyperion.hyperrobotframeworkplugin.psi.ref.ProjectFileCache;
 import com.intellij.openapi.application.ReadAction;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.editor.EditorFactory;
@@ -75,6 +75,8 @@ public class RobotListenerMgr {
         project.getMessageBus().connect().subscribe(DumbService.DUMB_MODE, new DumbModeListener() {
             @Override
             public void exitDumbMode() {
+                // Clearing library references after re-index
+                ProjectFileCache.clearProjectCache(project);
                 updateRobotFiles(project);
             }
         });
@@ -82,8 +84,8 @@ public class RobotListenerMgr {
             @Override
             public void documentChanged(@NotNull DocumentEvent event) {
                 Document document = event.getDocument();
-                VirtualFile file;
-                if ((file = FileDocumentManager.getInstance().getFile(document)) != null && file.getName().endsWith(".py")) {
+                VirtualFile file = FileDocumentManager.getInstance().getFile(document);
+                if (file != null && file.getName().endsWith(".py")) {
                     isPythonFileChanged.set(true);
                 }
             }
@@ -91,8 +93,8 @@ public class RobotListenerMgr {
         project.getMessageBus().connect().subscribe(FileEditorManagerListener.FILE_EDITOR_MANAGER, new FileEditorManagerListener() {
             @Override
             public void selectionChanged(@NotNull FileEditorManagerEvent event) {
-                VirtualFile file;
-                if ((file = event.getNewFile()) != null && ("robot".equals(file.getExtension()) || "resource".equals(file.getExtension()))
+                VirtualFile file = event.getNewFile();
+                if (file != null && ("robot".equals(file.getExtension()) || "resource".equals(file.getExtension()))
                     && RobotListenerMgr.isPythonFileChanged.getAndSet(false)) {
                     MyLogger.logger.debug("selectionChanged: " + file.getName());
                     updateRobotFiles(project);
@@ -126,7 +128,6 @@ public class RobotListenerMgr {
                       }
 
                       MyLogger.logger.debug("Update robot file: " + robotFiles.size());
-                      RobotFileManager.clearProjectCache(project);
                       return null;
                   })
                   .inSmartMode(project)

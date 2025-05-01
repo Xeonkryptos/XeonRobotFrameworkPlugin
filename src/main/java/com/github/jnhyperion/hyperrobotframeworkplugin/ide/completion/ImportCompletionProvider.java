@@ -52,7 +52,7 @@ class ImportCompletionProvider extends CompletionProvider<CompletionParameters> 
         if (!(file instanceof RobotFile)) {
             return;
         }
-        Map<String, ?> cachedFiles = RobotFileManager.getCachedFiles(file.getProject());
+        Map<String, ?> cachedFiles = RobotFileManager.getCachedRobotSystemFiles(file.getProject());
         for (String libraryName : cachedFiles.keySet()) {
             String[] lookupStrings = { libraryName, WordUtils.capitalize(libraryName), libraryName.toLowerCase() };
             LookupElementBuilder elementBuilder = LookupElementBuilder.create(libraryName)

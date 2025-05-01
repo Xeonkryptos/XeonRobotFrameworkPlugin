@@ -10,9 +10,11 @@ import org.jetbrains.annotations.Nullable;
 import java.util.regex.Pattern;
 
 public class VariableDto implements DefinedVariable {
+
     private final PsiElement reference;
     private final String name;
     private final ReservedVariableScope scope;
+
     private Pattern pattern;
 
     public VariableDto(@NotNull PsiElement reference, @NotNull String name, @Nullable ReservedVariableScope scope) {
@@ -59,9 +61,8 @@ public class VariableDto implements DefinedVariable {
         } else if (o != null && this.getClass() == o.getClass()) {
             VariableDto variable = (VariableDto) o;
             return this.name.equals(variable.name);
-        } else {
-            return false;
         }
+        return false;
     }
 
     @Override
