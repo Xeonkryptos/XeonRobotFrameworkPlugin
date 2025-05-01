@@ -4,7 +4,6 @@ import com.github.jnhyperion.hyperrobotframeworkplugin.psi.dto.ImportType;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.DefinedKeyword;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.DefinedVariable;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.KeywordFile;
-import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.util.CachedValueProvider.Result;
@@ -15,7 +14,6 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
 
@@ -24,20 +22,12 @@ public class RobotPythonClass extends RobotPythonWrapper implements KeywordFile 
     private final String library;
     private final PyClass pythonClass;
     private final ImportType importType;
-    private final String uniqueIdentifier;
-    private final Project project;
     private final boolean isDifferentNamespace;
 
-    public RobotPythonClass(@NotNull String library,
-                            @NotNull PyClass pythonClass,
-                            @NotNull ImportType importType,
-                            @NotNull Project project,
-                            boolean isDifferentNamespace) {
+    public RobotPythonClass(@NotNull String library, @NotNull PyClass pythonClass, @NotNull ImportType importType, boolean isDifferentNamespace) {
         this.library = library;
         this.pythonClass = pythonClass;
         this.importType = importType;
-        this.uniqueIdentifier = this.pythonClass.getName() + "#" + this.library + "#" + this.pythonClass.hashCode();
-        this.project = project;
         this.isDifferentNamespace = isDifferentNamespace;
     }
 
@@ -57,30 +47,20 @@ public class RobotPythonClass extends RobotPythonWrapper implements KeywordFile 
     @NotNull
     @Override
     public final Collection<DefinedVariable> getDefinedVariables() {
-        Collection<DefinedVariable> variables;
-        Map<String, Collection<DefinedVariable>> cachedVariables = ProjectFileCache.getCachedVariables(this.project);
-        variables = cachedVariables.get(this.uniqueIdentifier);
-        if (variables == null) {
+        return CachedValuesManager.getCachedValue(pythonClass, () -> {
             Set<DefinedVariable> newVariables = new HashSet<>();
-            if (this.importType.equals(ImportType.VARIABLES)) {
-                try {
-                    addDefinedVariables(this.pythonClass, newVariables);
-                } catch (Throwable t) {
-                    newVariables.clear();
-                }
+            if (importType == ImportType.VARIABLES) {
+                addDefinedVariables(pythonClass, newVariables);
             }
-            if (!newVariables.isEmpty()) {
-                cachedVariables.put(this.uniqueIdentifier, newVariables);
-            }
-            return newVariables;
-        }
-        return variables;
+            Object[] dependents = Stream.concat(Stream.of(pythonClass), newVariables.stream().map(DefinedVariable::reference)).toArray();
+            return new Result<>(newVariables, dependents);
+        });
     }
 
     @NotNull
     @Override
     public final ImportType getImportType() {
-        return this.importType;
+        return importType;
     }
 
     @Override

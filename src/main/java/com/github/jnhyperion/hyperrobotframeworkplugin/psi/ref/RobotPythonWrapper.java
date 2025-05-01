@@ -70,26 +70,21 @@ public abstract class RobotPythonWrapper {
     @Nullable
     protected static String getKeywordName(@NotNull PyFunction function) {
         String keywordName = null;
-
-        try {
-            PyDecoratorList decoratorList = function.getDecoratorList();
-            if (decoratorList != null) {
-                PyDecorator keywordDecorator = decoratorList.findDecorator("keyword");
-                if (keywordDecorator != null && keywordDecorator.hasArgumentList()) {
-                    PyExpression nameArgument = keywordDecorator.getKeywordArgument("name");
-                    if (nameArgument != null) {
-                        keywordName = nameArgument.getText().replaceAll("^\"|\"|'|'$", "");
-                    } else {
-                        PyExpression[] arguments = keywordDecorator.getArguments();
-                        if (arguments.length > 0 && arguments[0].getName() == null) {
-                            keywordName = arguments[0].getText().replaceAll("^\"|\"|'|'$", "");
-                        }
+        PyDecoratorList decoratorList = function.getDecoratorList();
+        if (decoratorList != null) {
+            PyDecorator keywordDecorator = decoratorList.findDecorator("keyword");
+            if (keywordDecorator != null && keywordDecorator.hasArgumentList()) {
+                PyExpression nameArgument = keywordDecorator.getKeywordArgument("name");
+                if (nameArgument != null) {
+                    keywordName = nameArgument.getText().replaceAll("^\"|\"|'|'$", "");
+                } else {
+                    PyExpression[] arguments = keywordDecorator.getArguments();
+                    if (arguments.length > 0 && arguments[0].getName() == null) {
+                        keywordName = arguments[0].getText().replaceAll("^\"|\"|'|'$", "");
                     }
                 }
             }
-        } catch (Throwable ignored) {
         }
-
         return keywordName;
     }
 
@@ -100,14 +95,15 @@ public abstract class RobotPythonWrapper {
             boolean propertyDecorated = Optional.ofNullable(method.getDecoratorList())
                                                 .map(decoratorList -> decoratorList.findDecorator("property"))
                                                 .isPresent();
+            String methodName = method.getName();
             if (propertyDecorated) {
-                String attributeName = getValidName(method.getName());
+                String attributeName = getValidName(methodName);
                 if (attributeName != null) {
                     keywords.add(new KeywordDto(method, namespace, attributeName));
                 }
                 return true;
             }
-            String methodName = getValidName(method.getName());
+            methodName = getValidName(methodName);
             if (methodName != null) {
                 methods.put(methodName, method);
             }

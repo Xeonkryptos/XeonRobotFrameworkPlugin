@@ -8,9 +8,7 @@ import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.DefinedVariab
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.KeywordFile;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.util.ReservedVariable;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.util.ReservedVariableScope;
-import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
-import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.util.CachedValueProvider.Result;
 import com.intellij.psi.util.CachedValuesManager;
@@ -33,20 +31,12 @@ public class RobotPythonFile extends RobotPythonWrapper implements KeywordFile {
     private final String namespace;
     private final PyFile pythonFile;
     private final ImportType importType;
-    private final String uniqueIdentifier;
-    private final Project project;
     private final boolean isDifferentNamespace;
 
-    public RobotPythonFile(@NotNull String namespace,
-                           @NotNull PyFile pythonFile,
-                           @NotNull ImportType importType,
-                           @NotNull Project project,
-                           boolean isDifferentNamespace) {
+    public RobotPythonFile(@NotNull String namespace, @NotNull PyFile pythonFile, @NotNull ImportType importType, boolean isDifferentNamespace) {
         this.namespace = namespace;
         this.pythonFile = pythonFile;
         this.importType = importType;
-        this.uniqueIdentifier = pythonFile.getVirtualFile().getPath() + "#" + namespace;
-        this.project = project;
         this.isDifferentNamespace = isDifferentNamespace;
     }
 
@@ -68,18 +58,19 @@ public class RobotPythonFile extends RobotPythonWrapper implements KeywordFile {
                 for (PyTargetExpression attribute : pythonFile.getTopLevelAttributes()) {
                     String attributeName = getValidName(attribute.getName());
                     if (attributeName != null) {
-                        keywordSet.add(new KeywordDto(attribute, this.namespace, attributeName));
+                        keywordSet.add(new KeywordDto(attribute, namespace, attributeName));
                     }
                 }
 
                 for (PyClass pyClass : pythonFile.getTopLevelClasses()) {
-                    if (pyClass.getName() != null && !pyClass.getName().startsWith("_")) {
-                        String className = pyClass.getQualifiedName();
+                    String className = pyClass.getName();
+                    if (className != null && !className.startsWith("_")) {
+                        className = pyClass.getQualifiedName();
                         if (className == null) {
                             className = "";
                         }
-                        if (this.namespace.equals(pyClass.getName()) || this.isDifferentNamespace) {
-                            className = this.namespace;
+                        if (namespace.equals(className) || isDifferentNamespace) {
+                            className = namespace;
                         }
                         addDefinedKeywords(pyClass, className, keywordSet);
                     }
@@ -93,45 +84,28 @@ public class RobotPythonFile extends RobotPythonWrapper implements KeywordFile {
     @NotNull
     @Override
     public final synchronized Collection<DefinedVariable> getDefinedVariables() {
-        Collection<DefinedVariable> variables;
-        try {
-            Map<String, Collection<DefinedVariable>> cachedVariables = ProjectFileCache.getCachedVariables(this.project);
-            variables = cachedVariables.get(this.uniqueIdentifier);
-            if (variables == null) {
-                HashSet<DefinedVariable> variableSet = new HashSet<>();
-                if (this.importType.equals(ImportType.VARIABLES)) {
-                    try {
-                        for (PyTargetExpression attribute : this.pythonFile.getTopLevelAttributes()) {
-                            String attributeName = attribute.getName();
-                            if (attributeName != null) {
-                                variableSet.add(new VariableDto(attribute, ReservedVariable.wrapToScalar(attributeName), ReservedVariableScope.Global));
-                            }
-                        }
-
-                        for (PyClass pyClass : this.pythonFile.getTopLevelClasses()) {
-                            addDefinedVariables(pyClass, variableSet);
-                        }
-                    } catch (Throwable t) {
-                        variableSet.clear();
+        return CachedValuesManager.getCachedValue(pythonFile, () -> {
+            Set<DefinedVariable> variables = new HashSet<>();
+            if (importType == ImportType.VARIABLES) {
+                for (PyTargetExpression attribute : pythonFile.getTopLevelAttributes()) {
+                    String attributeName = attribute.getName();
+                    if (attributeName != null) {
+                        variables.add(new VariableDto(attribute, ReservedVariable.wrapToScalar(attributeName), ReservedVariableScope.Global));
                     }
                 }
-
-                if (!variableSet.isEmpty()) {
-                    cachedVariables.put(this.uniqueIdentifier, variableSet);
+                for (PyClass pyClass : pythonFile.getTopLevelClasses()) {
+                    addDefinedVariables(pyClass, variables);
                 }
-
-                return variableSet;
             }
-        } catch (Throwable t) {
-            return new HashSet<>();
-        }
-        return variables;
+            Object[] dependents = Stream.concat(Stream.of(pythonFile), variables.stream().map(DefinedVariable::reference)).toArray();
+            return new Result<>(variables, dependents);
+        });
     }
 
     @NotNull
     @Override
     public final ImportType getImportType() {
-        return this.importType;
+        return importType;
     }
 
     @Override
@@ -164,21 +138,21 @@ public class RobotPythonFile extends RobotPythonWrapper implements KeywordFile {
 
     @Override
     public String toString() {
-        return this.namespace;
+        return namespace;
     }
 
     @Override
     public VirtualFile getVirtualFile() {
-        return this.pythonFile.getVirtualFile();
+        return pythonFile.getVirtualFile();
     }
 
     @Override
     public final PsiFile getPsiFile() {
-        return this.pythonFile;
+        return pythonFile;
     }
 
     @Override
     public final boolean isDifferentNamespace() {
-        return this.isDifferentNamespace;
+        return isDifferentNamespace;
     }
 }

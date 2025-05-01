@@ -33,8 +33,6 @@ public class HeadingImpl extends RobotPsiElementBase implements Heading {
     private static final String WITH_NAME = "WITH NAME";
     private static final String AS = "AS";
 
-    private String headerText;
-
     private Collection<KeywordInvokable> invokedKeywords;
     private Collection<Variable> usedVariables;
     private Collection<DefinedKeyword> definedKeywords;
@@ -51,26 +49,26 @@ public class HeadingImpl extends RobotPsiElementBase implements Heading {
 
     @Override
     public final boolean isSettings() {
-        return getHeaderText().startsWith("*** Setting");
+        return getPresentableText().startsWith("*** Setting");
     }
 
     private boolean containsVariables() {
-        return getHeaderText().startsWith("*** Variable");
+        return getPresentableText().startsWith("*** Variable");
     }
 
     @Override
     public final boolean containsTestCases() {
-        return getHeaderText().startsWith("*** Test Case");
+        return getPresentableText().startsWith("*** Test Case");
     }
 
     @Override
     public final boolean containsTasks() {
-        return getHeaderText().equals("*** Tasks ***");
+        return getPresentableText().equals("*** Tasks ***");
     }
 
     @Override
     public final boolean containsKeywordDefinitions() {
-        String text = getHeaderText();
+        String text = getPresentableText();
         return text.startsWith("*** Keyword") || text.startsWith("*** User Keyword");
     }
 
@@ -98,14 +96,6 @@ public class HeadingImpl extends RobotPsiElementBase implements Heading {
         this.declaredVariables = null;
         this.metadataStatements = null;
         this.variableDefinitions = null;
-        this.headerText = null;
-    }
-
-    private String getHeaderText() {
-        if (headerText == null) {
-            headerText = getPresentableText();
-        }
-        return headerText;
     }
 
     @NotNull
@@ -269,13 +259,13 @@ public class HeadingImpl extends RobotPsiElementBase implements Heading {
                             if (resolution != null) {
                                 String namespace = getNamespace(importElement, positionalArgument);
                                 boolean isDifferentNamespace = !positionalArgument.getContent().equals(namespace);
-                                files.add(new RobotPythonClass(namespace, resolution, importElement.getImportType(), getProject(), isDifferentNamespace));
+                                files.add(new RobotPythonClass(namespace, resolution, importElement.getImportType(), isDifferentNamespace));
                             }
                             PyFile file = PythonResolver.castFile(resolved);
                             if (file != null) {
                                 String namespace = getNamespace(importElement, positionalArgument);
                                 boolean isDifferentNamespace = !positionalArgument.getContent().equals(namespace);
-                                files.add(new RobotPythonFile(namespace, file, importElement.getImportType(), getProject(), isDifferentNamespace));
+                                files.add(new RobotPythonFile(namespace, file, importElement.getImportType(), isDifferentNamespace));
                             }
                         }
                     }
@@ -298,7 +288,7 @@ public class HeadingImpl extends RobotPsiElementBase implements Heading {
     private void addBuiltInImports(@NotNull Collection<KeywordFile> files) {
         PyClass builtIn = PythonResolver.findClass(ROBOT_BUILT_IN, getProject());
         if (builtIn != null) {
-            files.add(new RobotPythonClass(ROBOT_BUILT_IN, builtIn, ImportType.LIBRARY, getProject(), false));
+            files.add(new RobotPythonClass(ROBOT_BUILT_IN, builtIn, ImportType.LIBRARY, false));
         }
     }
 
