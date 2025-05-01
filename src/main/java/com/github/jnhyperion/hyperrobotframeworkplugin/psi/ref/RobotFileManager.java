@@ -104,7 +104,7 @@ public class RobotFileManager {
         return psiFiles;
     }
 
-    public static Map<String, PsiFile> getCachedRobotSystemFiles(Project project) {
+    public static synchronized Map<String, PsiFile> getCachedRobotSystemFiles(Project project) {
         Map<String, PsiFile> cachedFiles = ProjectFileCache.getCachedRobotSystemFiles(project);
         if (!cachedFiles.isEmpty()) {
             return cachedFiles;
