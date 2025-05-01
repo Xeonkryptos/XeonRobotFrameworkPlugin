@@ -3,6 +3,7 @@ package com.github.jnhyperion.hyperrobotframeworkplugin.psi;
 import com.github.jnhyperion.hyperrobotframeworkplugin.MyLogger;
 import com.intellij.codeInsight.daemon.DaemonCodeAnalyzer;
 import com.intellij.openapi.application.ReadAction;
+import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.util.SimpleModificationTracker;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
@@ -117,7 +118,9 @@ public class RobotKeywordReferenceUpdater extends PsiTreeChangeAdapter {
         ReadAction.nonBlocking(() -> {
                       if (pythonFunction.isValid()) {
                           Set<PsiFile> processedFiles = new HashSet<>();
+                          ProgressManager.checkCanceled();
                           ReferencesSearch.search(pythonFunction, GlobalSearchScope.projectScope(pythonFunction.getProject())).forEach(reference -> {
+                              ProgressManager.checkCanceled();
                               PsiElement element = reference.getElement();
                               PsiFile robotFile = element.getContainingFile();
                               if (robotFile != null) {
@@ -130,7 +133,7 @@ public class RobotKeywordReferenceUpdater extends PsiTreeChangeAdapter {
                       return null;
                   })
                   .inSmartMode(pythonFunction.getProject())
-                  .expireWhen(() -> currentModificationCount != simpleModificationTracker.getModificationCount())
+                  .expireWhen(() -> currentModificationCount != simpleModificationTracker.getModificationCount() || !pythonFunction.isValid())
                   .submit(AppExecutorUtil.getAppExecutorService());
     }
 }
