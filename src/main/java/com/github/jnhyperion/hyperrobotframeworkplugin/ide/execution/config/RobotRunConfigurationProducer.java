@@ -9,6 +9,7 @@ import com.intellij.execution.actions.ConfigurationContext;
 import com.intellij.execution.actions.ConfigurationFromContext;
 import com.intellij.execution.actions.LazyRunConfigurationProducer;
 import com.intellij.execution.configurations.ConfigurationFactory;
+import com.intellij.openapi.actionSystem.LangDataKeys;
 import com.intellij.openapi.projectRoots.Sdk;
 import com.intellij.openapi.roots.ProjectRootManager;
 import com.intellij.openapi.util.Ref;
@@ -39,13 +40,13 @@ public class RobotRunConfigurationProducer extends LazyRunConfigurationProducer<
                                                     @NotNull Ref<PsiElement> sourceElement) {
         if (isValidRobotExecutableScript(context)) {
             String workingDirectory = getWorkingDirectoryToUse(runConfig);
-            String runParam = getRunParameters(context, workingDirectory);
+            String runParam = getRunParametersForMultiSelection(context, workingDirectory);
             runConfig.getPythonRunConfiguration().setScriptParameters(runParam);
             Sdk sdk = ProjectRootManager.getInstance(context.getProject()).getProjectSdk();
             if (sdk != null) {
                 runConfig.getPythonRunConfiguration().setSdk(sdk);
             }
-            runConfig.setName(getRunDisplayName(context));
+            runConfig.setName(getRunDisplayNameForMultiSelection(context));
             return true;
         }
         return false;
@@ -55,10 +56,10 @@ public class RobotRunConfigurationProducer extends LazyRunConfigurationProducer<
     public boolean isConfigurationFromContext(@NotNull RobotRunConfiguration runConfig, @NotNull ConfigurationContext context) {
         if (isValidRobotExecutableScript(context)) {
             String workingDirectory = getWorkingDirectoryToUse(runConfig);
-            String runParam = getRunParameters(context, workingDirectory);
+            String runParam = getRunParametersForMultiSelection(context, workingDirectory);
             boolean ret = runParam.trim().equals(runConfig.getPythonRunConfiguration().getScriptParameters().trim());
             if (ret) {
-                runConfig.setName(getRunDisplayName(context));
+                runConfig.setName(getRunDisplayNameForMultiSelection(context));
             }
             return ret;
         }
@@ -87,6 +88,58 @@ public class RobotRunConfigurationProducer extends LazyRunConfigurationProducer<
             element = element.getParent();
         }
         return heading.containsTasks() && !heading.containsTestCases();
+    }
+
+    @NotNull
+    private String getRunParametersForMultiSelection(@NotNull ConfigurationContext context, String basePath) {
+        PsiElement[] selectedElements = getSelectedPsiElements(context);
+        if (selectedElements.length <= 1) {
+            // Verwende bisherige Logik für einzelne Selektion
+            return getRunParameters(context, basePath);
+        }
+
+        StringBuilder parameters = new StringBuilder();
+        boolean containsRpa = false;
+
+        for (PsiElement element : selectedElements) {
+            String testName = getKeywordNameFromAnyElement(element);
+            if (!testName.isEmpty()) {
+                if (!parameters.isEmpty()) {
+                    parameters.append(" ");
+                }
+                parameters.append("--test \"").append(testName.replace("\"", "\\\"")).append("\"");
+            }
+
+            PsiElement current = element;
+            while (current != null) {
+                if (current instanceof Heading) {
+                    if (((Heading) current).containsTasks() && !((Heading) current).containsTestCases()) {
+                        containsRpa = true;
+                    }
+                    break;
+                }
+                current = current.getParent();
+            }
+        }
+
+        if (parameters.isEmpty()) {
+            parameters.append("--test *");
+        }
+
+        Location<?> location = context.getLocation();
+        assert location != null;
+        VirtualFile virtualFile = location.getVirtualFile();
+        assert virtualFile != null;
+
+        String filePath = virtualFile.getPath();
+        String relativePath = relativizePath(basePath, filePath);
+        parameters.append(" \"").append(relativePath.replace("\"", "\\\"")).append("\"");
+
+        if (containsRpa) {
+            parameters.insert(0, "--rpa ");
+        }
+
+        return parameters.toString();
     }
 
     @NotNull
@@ -203,8 +256,35 @@ public class RobotRunConfigurationProducer extends LazyRunConfigurationProducer<
         return ((KeywordDefinition) element).getKeywordName();
     }
 
+    private PsiElement[] getSelectedPsiElements(@NotNull ConfigurationContext context) {
+        PsiElement[] elements = LangDataKeys.PSI_ELEMENT_ARRAY.getData(context.getDataContext());
+        return elements != null && elements.length > 0 ? elements : new PsiElement[] { context.getPsiLocation() };
+    }
+
     @NotNull
-    private static String getRunDisplayName(@NotNull ConfigurationContext context) {
-        return getTestCaseOrFileName(context);
+    private String getRunDisplayNameForMultiSelection(@NotNull ConfigurationContext context) {
+        PsiElement[] selectedElements = getSelectedPsiElements(context);
+
+        if (selectedElements.length <= 1) {
+            return getTestCaseOrFileName(context);
+        }
+
+        int testCount = 0;
+        for (PsiElement element : selectedElements) {
+            String testName = getKeywordNameFromAnyElement(element);
+            if (!testName.isEmpty()) {
+                testCount++;
+            }
+        }
+
+        if (testCount > 0) {
+            return testCount + " Tests";
+        }
+
+        // Fallback auf Dateiname
+        Location<?> location = context.getLocation();
+        assert location != null;
+        VirtualFile virtualFile = location.getVirtualFile();
+        return virtualFile != null ? virtualFile.getName() : "Multiple Robot Tests";
     }
 }
