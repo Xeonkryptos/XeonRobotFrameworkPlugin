@@ -1,6 +1,6 @@
-import org.jetbrains.intellij.platform.gradle.tasks.PrepareSandboxTask
 import org.jetbrains.changelog.Changelog
 import org.jetbrains.changelog.markdownToHTML
+import org.jetbrains.intellij.platform.gradle.tasks.PrepareSandboxTask
 
 fun properties(key: String) = project.findProperty(key).toString()
 
@@ -117,11 +117,7 @@ tasks {
     patchPluginXml {
         changeNotes.set(provider {
             changelog.renderItem(
-                changelog
-                    .getUnreleased()
-                    .withHeader(false)
-                    .withEmptySections(false),
-                Changelog.OutputType.HTML
+                changelog.getLatest().withHeader(false).withEmptySections(false), Changelog.OutputType.HTML
             )
         })
     }

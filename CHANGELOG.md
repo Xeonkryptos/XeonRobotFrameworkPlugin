@@ -4,6 +4,18 @@
 
 ## Unreleased
 
+### Added
+
+- Improved performance by adding more caches
+
+### Changed
+
+- Removed global caches and replaced with element-centric ones where useful (should improve memory footprint)
+
+### Fixed
+
+- Different reasons for invalid PSI element accesses fixed
+
 ## 0.2.6
 
 ### Fixed
