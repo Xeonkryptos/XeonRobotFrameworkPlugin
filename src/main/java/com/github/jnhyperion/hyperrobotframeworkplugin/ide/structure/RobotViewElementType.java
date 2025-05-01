@@ -79,7 +79,7 @@ public enum RobotViewElementType {
     };
 
     @Nullable
-    protected abstract Icon getIcon(@Nullable PsiElement var1);
+    protected abstract Icon getIcon(@Nullable PsiElement element);
 
     @NotNull
     protected abstract String getMessage();

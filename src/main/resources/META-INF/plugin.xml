@@ -22,9 +22,14 @@
         <lang.findUsagesProvider language="Robot" implementationClass="com.github.jnhyperion.hyperrobotframeworkplugin.ide.usage.RobotFindUsagesProvider"/>
         <findUsagesHandlerFactory implementation="com.github.jnhyperion.hyperrobotframeworkplugin.ide.usage.RobotPythonFindUsagesHandlerFactory"/>
         <usageTypeProvider implementation="com.github.jnhyperion.hyperrobotframeworkplugin.ide.usage.RobotUsageTypeProvider"/>
-        <fileStructureGroupRuleProvider implementation="com.github.jnhyperion.hyperrobotframeworkplugin.ide.usage.RobotKeywordGroupingRuleProvider"/>
         <referencesSearch implementation="com.github.jnhyperion.hyperrobotframeworkplugin.ide.search.RobotKeywordReferenceSearch"/>
         <referencesSearch implementation="com.github.jnhyperion.hyperrobotframeworkplugin.ide.search.RobotImportArgumentReferenceSearch"/>
+
+        <fileStructureGroupRuleProvider implementation="com.github.jnhyperion.hyperrobotframeworkplugin.ide.usage.RobotKeywordGroupingRuleProvider"/>
+        <treeStructureProvider implementation="com.github.jnhyperion.hyperrobotframeworkplugin.ide.structure.RobotTreeStructureProvider"/>
+        <lang.psiStructureViewFactory language="Robot"
+                                      implementationClass="com.github.jnhyperion.hyperrobotframeworkplugin.ide.structure.RobotStructureViewFactory"/>
+
         <lang.syntaxHighlighterFactory language="Robot"
                                        implementationClass="com.github.jnhyperion.hyperrobotframeworkplugin.psi.RobotSyntaxHighlightingFactory"/>
         <lang.commenter language="Robot" implementationClass="com.github.jnhyperion.hyperrobotframeworkplugin.ide.RobotCommenter"/>
@@ -33,8 +38,6 @@
         <stubElementTypeHolder class="com.github.jnhyperion.hyperrobotframeworkplugin.psi.RobotStubTokenTypes" externalIdPrefix="robot."/>
         <stubIndex implementation="com.github.jnhyperion.hyperrobotframeworkplugin.psi.stub.index.KeywordStatementNameIndex"/>
         <stubIndex implementation="com.github.jnhyperion.hyperrobotframeworkplugin.psi.stub.index.PositionalArgumentImportIndex"/>
-        <lang.psiStructureViewFactory language="Robot"
-                                      implementationClass="com.github.jnhyperion.hyperrobotframeworkplugin.ide.structure.RobotStructureViewFactory"/>
         <codeInsight.parameterInfo language="Robot"
                                    implementationClass="com.github.jnhyperion.hyperrobotframeworkplugin.ide.parameterinfo.RobotParameterInfoHandler"/>
         <codeInsight.parameterInfo language="Robot"

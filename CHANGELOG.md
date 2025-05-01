@@ -7,6 +7,7 @@
 ### Added
 
 - Improved performance by adding more caches
+- Added structural view of members in project explorer for robot files
 
 ### Changed
 

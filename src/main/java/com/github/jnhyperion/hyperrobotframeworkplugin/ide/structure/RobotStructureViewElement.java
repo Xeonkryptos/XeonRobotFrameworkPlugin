@@ -44,31 +44,31 @@ public class RobotStructureViewElement implements StructureViewTreeElement {
 
     @Override
     public PsiElement getValue() {
-        return this.element;
+        return element;
     }
 
     @Override
     public void navigate(boolean requestFocus) {
-        if (this.element instanceof Navigatable) {
-            ((Navigatable) this.element).navigate(requestFocus);
+        if (element instanceof Navigatable navigatable) {
+            navigatable.navigate(requestFocus);
         }
     }
 
     @Override
     public boolean canNavigate() {
-        return this.type != RobotViewElementType.File && this.element instanceof Navigatable && ((Navigatable) this.element).canNavigate();
+        return type != RobotViewElementType.File && element instanceof Navigatable navigatable && navigatable.canNavigate();
     }
 
     @Override
     public boolean canNavigateToSource() {
-        return this.type != RobotViewElementType.File && this.element instanceof Navigatable && ((Navigatable) this.element).canNavigateToSource();
+        return type != RobotViewElementType.File && element instanceof Navigatable navigatable && navigatable.canNavigateToSource();
     }
 
     @Override
     public boolean equals(Object o) {
-        if (o instanceof RobotStructureViewElement) {
+        if (o instanceof RobotStructureViewElement viewElement) {
             String name = getDisplayName();
-            String otherName = ((RobotStructureViewElement) o).getDisplayName();
+            String otherName = viewElement.getDisplayName();
             return name.equals(otherName);
         }
         return false;
@@ -82,14 +82,14 @@ public class RobotStructureViewElement implements StructureViewTreeElement {
     @Override
     public TreeElement @NotNull [] getChildren() {
         List<StructureViewTreeElement> elements = new ArrayList<>();
-        if (this.element instanceof RobotFile) {
-            Heading[] headings = PsiTreeUtil.getChildrenOfType(this.element, Heading.class);
+        if (element instanceof RobotFile) {
+            Heading[] headings = PsiTreeUtil.getChildrenOfType(element, Heading.class);
             if (headings != null) {
                 for (Heading heading : headings) {
                     elements.add(createChild(heading, RobotViewElementType.Heading));
                 }
             }
-        } else if (this.element instanceof Heading heading) {
+        } else if (element instanceof Heading heading) {
             Collection<RobotStatement> statements = heading.getMetadataStatements();
             for (RobotStatement statement : statements) {
                 elements.add(createChild(statement, RobotViewElementType.Settings));
@@ -107,7 +107,7 @@ public class RobotStructureViewElement implements StructureViewTreeElement {
                 elements.add(createChild(variableDefinition, RobotViewElementType.Variable));
             }
         }
-        return elements.toArray(new StructureViewTreeElement[0]);
+        return elements.toArray(StructureViewTreeElement.EMPTY_ARRAY);
     }
 
     @NotNull
@@ -123,12 +123,12 @@ public class RobotStructureViewElement implements StructureViewTreeElement {
 
     @NotNull
     public final RobotViewElementType getType() {
-        return this.type;
+        return type;
     }
 
     @Nullable
     private Icon getDisplayIcon() {
-        return this.type.getIcon(this.element);
+        return type.getIcon(element);
     }
 
     @NotNull
