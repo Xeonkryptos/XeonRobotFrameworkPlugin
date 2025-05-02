@@ -40,24 +40,20 @@ public class RobotParser implements PsiParser {
                     headingMarker = builder.mark();
                     builder.advanceLexer();
                 } else {
-                    type = builder.getTokenType();
-                    if (RobotTokenTypes.HEADING != type) {
-                        if (RobotTokenTypes.SETTING == type) {
-                            parseSetting(builder);
-                        } else if (RobotStubTokenTypes.VARIABLE_DEFINITION == type && isNextToken(builder, RobotTokenTypes.WHITESPACE)) {
-                            parseWithArguments(builder, RobotStubTokenTypes.VARIABLE_DEFINITION);
-                        } else if (RobotTokenTypes.BRACKET_SETTING == type) {
-                            parseWithArguments(builder, RobotTokenTypes.BRACKET_SETTING);
-                        } else if (RobotStubTokenTypes.KEYWORD_DEFINITION == type ||
-                                   (RobotStubTokenTypes.VARIABLE_DEFINITION == type && isNextToken(builder, RobotStubTokenTypes.KEYWORD_DEFINITION))) {
-                            parseKeywordDefinition(builder);
-                        } else if (RobotTokenTypes.KEYWORD == type) {
-                            parseKeywordStatement(builder, RobotStubTokenTypes.KEYWORD_STATEMENT, false);
-                        } else if (RobotTokenTypes.IMPORT == type) {
-                            parseWithArguments(builder, RobotTokenTypes.IMPORT);
-                        } else {
-                            builder.advanceLexer();
-                        }
+                    if (RobotTokenTypes.SETTING == type) {
+                        parseSetting(builder);
+                    } else if (RobotStubTokenTypes.VARIABLE_DEFINITION == type && isNextToken(builder, RobotTokenTypes.WHITESPACE)) {
+                        parseWithArguments(builder, RobotStubTokenTypes.VARIABLE_DEFINITION);
+                    } else if (RobotTokenTypes.BRACKET_SETTING == type) {
+                        parseWithArguments(builder, RobotTokenTypes.BRACKET_SETTING);
+                    } else if (RobotStubTokenTypes.KEYWORD_DEFINITION == type) {
+                        parseKeywordDefinition(builder);
+                    } else if (RobotTokenTypes.KEYWORD == type) {
+                        parseKeywordStatement(builder, RobotStubTokenTypes.KEYWORD_STATEMENT, false);
+                    } else if (RobotTokenTypes.IMPORT == type) {
+                        parseWithArguments(builder, RobotTokenTypes.IMPORT);
+                    } else {
+                        builder.advanceLexer();
                     }
                 }
             }
@@ -70,46 +66,38 @@ public class RobotParser implements PsiParser {
         PsiBuilder.Marker keywordIdMarker = null;
         while (true) {
             IElementType type = builder.getTokenType();
-            if (RobotStubTokenTypes.KEYWORD_DEFINITION == type ||
-                (RobotStubTokenTypes.VARIABLE_DEFINITION == type && isNextToken(builder, RobotStubTokenTypes.KEYWORD_DEFINITION))) {
-                if (builder.rawLookup(-1) != RobotStubTokenTypes.VARIABLE_DEFINITION) {
-                    done(keywordIdMarker, RobotTokenTypes.KEYWORD_DEFINITION_ID);
-                    done(keywordMarker, RobotStubTokenTypes.KEYWORD_DEFINITION);
-                    keywordMarker = builder.mark();
-                    keywordIdMarker = builder.mark();
-                }
-                if (RobotStubTokenTypes.KEYWORD_DEFINITION == type) {
-                    builder.advanceLexer();
-                }
+            if (RobotStubTokenTypes.KEYWORD_DEFINITION == type) {
+                done(keywordIdMarker, RobotTokenTypes.KEYWORD_DEFINITION_ID);
+                done(keywordMarker, RobotStubTokenTypes.KEYWORD_DEFINITION);
+
+                keywordMarker = builder.mark();
+                keywordIdMarker = builder.mark();
+
+                builder.advanceLexer();
+                type = builder.getTokenType();
             }
-            if (builder.eof()) {
+            if (builder.eof() || RobotTokenTypes.HEADING == type) {
                 done(keywordIdMarker, RobotTokenTypes.KEYWORD_DEFINITION_ID);
                 done(keywordMarker, RobotStubTokenTypes.KEYWORD_DEFINITION);
                 break;
-            } else {
-                type = builder.getTokenType();
-                // not all the time; all cases but VAR_DEF (when in keyword definition only)
-                if (RobotTokenTypes.HEADING == type) {
-                    done(keywordIdMarker, RobotTokenTypes.KEYWORD_DEFINITION_ID);
-                    done(keywordMarker, RobotStubTokenTypes.KEYWORD_DEFINITION);
-                    break;
-                } else if (RobotTokenTypes.BRACKET_SETTING == type) {
-                    done(keywordIdMarker, RobotTokenTypes.KEYWORD_DEFINITION_ID);
+            }
+
+            if (RobotTokenTypes.BRACKET_SETTING == type) {
+                done(keywordIdMarker, RobotTokenTypes.KEYWORD_DEFINITION_ID);
+                keywordIdMarker = null;
+                parseWithArguments(builder, RobotTokenTypes.BRACKET_SETTING);
+            } else if (RobotTokenTypes.ERROR == type) {
+                builder.advanceLexer();
+            } else if (RobotStubTokenTypes.VARIABLE_DEFINITION == type) {
+                PsiBuilder.Marker statement = parseKeywordStatement(builder, RobotTokenTypes.VARIABLE_DEFINITION_GROUP, true);
+                if (statement != null && keywordIdMarker != null) {
+                    keywordIdMarker.doneBefore(RobotTokenTypes.KEYWORD_DEFINITION_ID, statement);
                     keywordIdMarker = null;
-                    parseWithArguments(builder, RobotTokenTypes.BRACKET_SETTING);
-                } else if (RobotTokenTypes.ERROR == type) {
-                    builder.advanceLexer();
-                } else if (RobotStubTokenTypes.VARIABLE_DEFINITION == type) {
-                    PsiBuilder.Marker statement = parseKeywordStatement(builder, RobotStubTokenTypes.VARIABLE_DEFINITION, true);
-                    if (statement != null && keywordIdMarker != null) {
-                        keywordIdMarker.doneBefore(RobotTokenTypes.KEYWORD_DEFINITION_ID, statement);
-                        keywordIdMarker = null;
-                    }
-                } else {
-                    done(keywordIdMarker, RobotTokenTypes.KEYWORD_DEFINITION_ID);
-                    keywordIdMarker = null;
-                    parseKeywordStatement(builder, RobotStubTokenTypes.KEYWORD_STATEMENT, false);
                 }
+            } else {
+                done(keywordIdMarker, RobotTokenTypes.KEYWORD_DEFINITION_ID);
+                keywordIdMarker = null;
+                parseKeywordStatement(builder, RobotStubTokenTypes.KEYWORD_STATEMENT, false);
             }
         }
     }
@@ -133,9 +121,8 @@ public class RobotParser implements PsiParser {
             } else if (RobotStubTokenTypes.ARGUMENT == type || RobotTokenTypes.VARIABLE == type) {
                 parseWith(builder, RobotStubTokenTypes.ARGUMENT);
             } else if (RobotStubTokenTypes.VARIABLE_DEFINITION == type && RobotStubTokenTypes.VARIABLE_DEFINITION != markType) {
-                if (builder.rawLookup(-1) != RobotTokenTypes.WHITESPACE &&
-                    builder.rawLookup(-2) != RobotTokenTypes.WHITESPACE &&
-                    builder.rawLookup(-3) == RobotTokenTypes.WHITESPACE) {
+                if (builder.rawLookup(-1) != RobotTokenTypes.WHITESPACE && builder.rawLookup(-2) != RobotTokenTypes.WHITESPACE
+                    && builder.rawLookup(-3) == RobotTokenTypes.WHITESPACE) {
                     break;
                 }
 
@@ -179,7 +166,7 @@ public class RobotParser implements PsiParser {
                 break;
             }
 
-            if (tokenType == RobotTokenTypes.KEYWORD || (tokenType == RobotTokenTypes.VARIABLE && isNextToken(builder, RobotTokenTypes.KEYWORD))) {
+            if (tokenType == RobotTokenTypes.KEYWORD || tokenType == RobotTokenTypes.VARIABLE && isVariableFollowedByKeyword(builder)) {
                 if (keywordFound) {
                     break;
                 }
@@ -190,19 +177,25 @@ public class RobotParser implements PsiParser {
 
             if (tokenType == RobotTokenTypes.PARAMETER) {
                 parseWith(builder, RobotTokenTypes.PARAMETER);
-            } else if ((tokenType == RobotStubTokenTypes.ARGUMENT || tokenType == RobotTokenTypes.VARIABLE) && builder.rawLookup(1) != RobotTokenTypes.KEYWORD) {
+            } else if ((tokenType == RobotStubTokenTypes.ARGUMENT || tokenType == RobotTokenTypes.VARIABLE)
+                       && builder.rawLookup(1) != RobotTokenTypes.KEYWORD) {
                 parseWith(builder, RobotStubTokenTypes.ARGUMENT);
             } else if (tokenType == RobotStubTokenTypes.VARIABLE_DEFINITION) {
                 if (keywordFound) {
                     break;
                 }
 
-                keywordFound = true;
-                boolean isKeywordDefinition = builder.rawLookup(-1) == RobotStubTokenTypes.KEYWORD_DEFINITION ||
-                                              isNextToken(builder, RobotStubTokenTypes.KEYWORD_DEFINITION);
-                PsiBuilder.Marker variableMarker = builder.mark();
+                keywordFound = getNextNonWhitespaceToken(builder) != RobotStubTokenTypes.VARIABLE_DEFINITION;
+                boolean isKeywordDefinition =
+                        builder.rawLookup(-1) == RobotStubTokenTypes.KEYWORD_DEFINITION || isNextToken(builder, RobotStubTokenTypes.KEYWORD_DEFINITION);
+                PsiBuilder.Marker variableDefinitionMarker = null;
+                if (rootType == RobotTokenTypes.VARIABLE_DEFINITION_GROUP) {
+                    variableDefinitionMarker = builder.mark();
+                }
+                PsiBuilder.Marker variableIdMarker = builder.mark();
                 builder.advanceLexer();
-                done(variableMarker, RobotTokenTypes.VARIABLE_DEFINITION_ID);
+                done(variableIdMarker, RobotTokenTypes.VARIABLE_DEFINITION_ID);
+                done(variableDefinitionMarker, RobotStubTokenTypes.VARIABLE_DEFINITION);
                 inline = isKeywordDefinition;
 
                 if (!isKeywordDefinition && builder.getTokenType() == RobotTokenTypes.KEYWORD) {
@@ -269,6 +262,21 @@ public class RobotParser implements PsiParser {
         boolean allowEof = type == RobotTokenTypes.WHITESPACE;
         IElementType next = builder.rawLookup(nextTokenCount);
         return next == type || allowEof && next == null;
+    }
+
+    private boolean isVariableFollowedByKeyword(@NotNull PsiBuilder builder) {
+        IElementType nextNonWhitespaceToken = getNextNonWhitespaceToken(builder);
+        return nextNonWhitespaceToken == RobotTokenTypes.KEYWORD || nextNonWhitespaceToken == RobotTokenTypes.VARIABLE;
+    }
+
+    private IElementType getNextNonWhitespaceToken(@NotNull PsiBuilder builder) {
+        int i = 1;
+        IElementType nextToken;
+        do {
+            nextToken = builder.rawLookup(i);
+            ++i;
+        } while (nextToken == RobotTokenTypes.WHITESPACE);
+        return nextToken;
     }
 
     private String getLineText(String originalText, int offset) {
@@ -341,16 +349,12 @@ public class RobotParser implements PsiParser {
         PsiBuilder.Marker arg = builder.mark();
         IElementType current = builder.getTokenType();
         PsiBuilder.Marker parameterId = null;
-        while (!builder.eof() &&
-               (type == current ||
-                type == RobotTokenTypes.PARAMETER && current == RobotStubTokenTypes.ARGUMENT ||
-                RobotTokenTypes.VARIABLE == current ||
-                RobotStubTokenTypes.VARIABLE_DEFINITION == current)) {
-            boolean end = (current != RobotTokenTypes.PARAMETER || isNextToken(builder, 2, RobotTokenTypes.WHITESPACE)) &&
-                          isNextToken(builder, RobotTokenTypes.WHITESPACE);
-            if (type == RobotTokenTypes.PARAMETER && current == RobotStubTokenTypes.ARGUMENT ||
-                RobotTokenTypes.VARIABLE == current ||
-                RobotStubTokenTypes.VARIABLE_DEFINITION == current) {
+        while (!builder.eof() && (type == current || type == RobotTokenTypes.PARAMETER && current == RobotStubTokenTypes.ARGUMENT
+                                  || RobotTokenTypes.VARIABLE == current || RobotStubTokenTypes.VARIABLE_DEFINITION == current)) {
+            boolean end = (current != RobotTokenTypes.PARAMETER || isNextToken(builder, 2, RobotTokenTypes.WHITESPACE)) && isNextToken(builder,
+                                                                                                                                       RobotTokenTypes.WHITESPACE);
+            if (type == RobotTokenTypes.PARAMETER && current == RobotStubTokenTypes.ARGUMENT || RobotTokenTypes.VARIABLE == current
+                || RobotStubTokenTypes.VARIABLE_DEFINITION == current) {
                 parseSimple(builder, current);
             } else {
                 if (current == RobotTokenTypes.PARAMETER) {

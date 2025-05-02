@@ -152,6 +152,10 @@ public class KeywordDefinitionImpl extends RobotStubPsiElementBase<KeywordDefini
                 results.add(new VariableDto(variableDefinition, name, ReservedVariableScope.TestCase));
             }
         }
+        for (VariableDefinitionGroup variableDefinitionGroup : PsiTreeUtil.getChildrenOfTypeAsList(this, VariableDefinitionGroup.class)) {
+            Collection<DefinedVariable> definedVariables = variableDefinitionGroup.getDefinedVariables();
+            results.addAll(definedVariables);
+        }
         return results;
     }
 

@@ -26,6 +26,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 public class RobotFileManager {
 
@@ -71,7 +72,13 @@ public class RobotFileManager {
         Path file = Path.of(filePath);
         Collection<VirtualFile> foundFiles = FilenameIndex.getVirtualFilesByName(file.getFileName().toString(), searchScope);
         if (!file.isAbsolute()) {
-            String parentPath = element.getContainingFile().getVirtualFile().getParent().getPath();
+            Optional<String> parentFilePathOpt = Optional.ofNullable(element.getContainingFile().getVirtualFile())
+                                                         .map(VirtualFile::getParent)
+                                                         .map(VirtualFile::getPath);
+            if (parentFilePathOpt.isEmpty()) {
+                return null;
+            }
+            String parentPath = parentFilePathOpt.get();
             file = Path.of(parentPath, filePath);
         }
         String canonicalPath = file.toAbsolutePath().toString();

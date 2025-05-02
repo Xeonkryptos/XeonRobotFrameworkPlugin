@@ -318,7 +318,7 @@ public class RobotLexer extends LexerBase {
             handleVariableDefinitionInKeyword();
         } else if (isVariable(this.position)) {
             goToVariableEnd();
-            if (state == SETTING && isSuperSpacePrevious()) {
+            if (state == SETTING && isSuperSpacePrevious() || state == VARIABLE_DEFINITION) {
                 this.currentToken = RobotStubTokenTypes.VARIABLE_DEFINITION;
             } else if (!isWithinForLoop() && !isVarOrAsTokenPresent(this.position)) {
                 this.currentToken = RobotTokenTypes.VARIABLE;

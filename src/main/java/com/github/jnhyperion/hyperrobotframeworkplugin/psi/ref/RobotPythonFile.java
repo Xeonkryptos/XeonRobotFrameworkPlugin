@@ -43,9 +43,9 @@ public class RobotPythonFile extends RobotPythonWrapper implements KeywordFile {
     @NotNull
     @Override
     public final Collection<DefinedKeyword> getDefinedKeywords() {
-        return CachedValuesManager.getCachedValue(pythonFile, () -> {
-            Set<DefinedKeyword> keywordSet = new HashSet<>();
-            if (importType == ImportType.LIBRARY) {
+        if (importType == ImportType.LIBRARY) {
+            return CachedValuesManager.getCachedValue(pythonFile, () -> {
+                Set<DefinedKeyword> keywordSet = new HashSet<>();
                 Map<String, PyFunction> functions = new LinkedHashMap<>();
                 for (PyFunction function : pythonFile.getTopLevelFunctions()) {
                     String functionName = getValidName(function.getName());
@@ -75,18 +75,19 @@ public class RobotPythonFile extends RobotPythonWrapper implements KeywordFile {
                         addDefinedKeywords(pyClass, className, keywordSet);
                     }
                 }
-            }
-            Object[] dependents = Stream.concat(Stream.of(pythonFile), keywordSet.stream().map(DefinedKeyword::reference)).toArray();
-            return new Result<>(keywordSet, dependents);
-        });
+                Object[] dependents = Stream.concat(Stream.of(pythonFile), keywordSet.stream().map(DefinedKeyword::reference)).toArray();
+                return new Result<>(keywordSet, dependents);
+            });
+        }
+        return Set.of();
     }
 
     @NotNull
     @Override
     public final synchronized Collection<DefinedVariable> getDefinedVariables() {
-        return CachedValuesManager.getCachedValue(pythonFile, () -> {
-            Set<DefinedVariable> variables = new HashSet<>();
-            if (importType == ImportType.VARIABLES) {
+        if (importType == ImportType.VARIABLES) {
+            return CachedValuesManager.getCachedValue(pythonFile, () -> {
+                Set<DefinedVariable> variables = new HashSet<>();
                 for (PyTargetExpression attribute : pythonFile.getTopLevelAttributes()) {
                     String attributeName = attribute.getName();
                     if (attributeName != null) {
@@ -96,10 +97,11 @@ public class RobotPythonFile extends RobotPythonWrapper implements KeywordFile {
                 for (PyClass pyClass : pythonFile.getTopLevelClasses()) {
                     addDefinedVariables(pyClass, variables);
                 }
-            }
-            Object[] dependents = Stream.concat(Stream.of(pythonFile), variables.stream().map(DefinedVariable::reference)).toArray();
-            return new Result<>(variables, dependents);
-        });
+                Object[] dependents = Stream.concat(Stream.of(pythonFile), variables.stream().map(DefinedVariable::reference)).toArray();
+                return new Result<>(variables, dependents);
+            });
+        }
+        return Set.of();
     }
 
     @NotNull

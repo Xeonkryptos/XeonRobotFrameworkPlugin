@@ -34,27 +34,29 @@ public class RobotPythonClass extends RobotPythonWrapper implements KeywordFile 
     @NotNull
     @Override
     public final Collection<DefinedKeyword> getDefinedKeywords() {
-        return CachedValuesManager.getCachedValue(pythonClass, () -> {
-            Set<DefinedKeyword> newKeywords = new HashSet<>();
-            if (importType == ImportType.LIBRARY) {
+        if (importType == ImportType.LIBRARY) {
+            return CachedValuesManager.getCachedValue(pythonClass, () -> {
+                Set<DefinedKeyword> newKeywords = new HashSet<>();
                 addDefinedKeywords(pythonClass, library, newKeywords);
-            }
-            Object[] dependents = Stream.concat(Stream.of(pythonClass), newKeywords.stream().map(DefinedKeyword::reference)).toArray();
-            return new Result<>(newKeywords, dependents);
-        });
+                Object[] dependents = Stream.concat(Stream.of(pythonClass), newKeywords.stream().map(DefinedKeyword::reference)).toArray();
+                return new Result<>(newKeywords, dependents);
+            });
+        }
+        return Set.of();
     }
 
     @NotNull
     @Override
     public final Collection<DefinedVariable> getDefinedVariables() {
-        return CachedValuesManager.getCachedValue(pythonClass, () -> {
-            Set<DefinedVariable> newVariables = new HashSet<>();
-            if (importType == ImportType.VARIABLES) {
+        if (importType == ImportType.VARIABLES) {
+            return CachedValuesManager.getCachedValue(pythonClass, () -> {
+                Set<DefinedVariable> newVariables = new HashSet<>();
                 addDefinedVariables(pythonClass, newVariables);
-            }
-            Object[] dependents = Stream.concat(Stream.of(pythonClass), newVariables.stream().map(DefinedVariable::reference)).toArray();
-            return new Result<>(newVariables, dependents);
-        });
+                Object[] dependents = Stream.concat(Stream.of(pythonClass), newVariables.stream().map(DefinedVariable::reference)).toArray();
+                return new Result<>(newVariables, dependents);
+            });
+        }
+        return Set.of();
     }
 
     @NotNull

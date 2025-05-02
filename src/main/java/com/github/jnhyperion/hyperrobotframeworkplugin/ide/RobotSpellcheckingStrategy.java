@@ -16,8 +16,8 @@ public class RobotSpellcheckingStrategy extends SpellcheckingStrategy {
     @Override
     public Tokenizer<?> getTokenizer(PsiElement element) {
         IElementType elementType;
-        if (element instanceof LeafPsiElement) {
-            elementType = ((LeafPsiElement) element).getElementType();
+        if (element instanceof LeafPsiElement leafPsiElement) {
+            elementType = leafPsiElement.getElementType();
             if (elementType == RobotTokenTypes.PARAMETER ||
                 elementType == RobotStubTokenTypes.ARGUMENT ||
                 elementType == RobotTokenTypes.VARIABLE ||

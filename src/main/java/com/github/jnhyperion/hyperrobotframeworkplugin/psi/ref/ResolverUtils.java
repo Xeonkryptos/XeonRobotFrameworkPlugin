@@ -14,8 +14,6 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiReference;
 import com.intellij.psi.util.PsiTreeUtil;
-import com.jetbrains.python.psi.PyFunction;
-import com.jetbrains.python.psi.PyNamedParameter;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -25,6 +23,7 @@ import java.util.Collections;
 import java.util.List;
 
 public class ResolverUtils {
+
     private ResolverUtils() {
     }
 
@@ -92,10 +91,10 @@ public class ResolverUtils {
                 if (child == element) {
                     foundElement = true;
                 } else if (foundElement) {
-                    if (child instanceof DefinedVariable && ((DefinedVariable) child).matches(variableName)) {
+                    if (child instanceof DefinedVariable definedVariable && definedVariable.matches(variableName)) {
                         return child;
-                    } else if (child instanceof KeywordStatement) {
-                        PsiElement result = searchInKeywordStatements ? findVariableInStatement((KeywordStatement) child, variableName) : null;
+                    } else if (child instanceof KeywordStatement keywordStatement) {
+                        PsiElement result = searchInKeywordStatements ? findVariableInStatement(keywordStatement, variableName) : null;
                         if (result != null) {
                             return result;
                         }
@@ -147,49 +146,33 @@ public class ResolverUtils {
 
     @NotNull
     public static List<DefinedVariable> walkKeyword(@Nullable KeywordStatement keywordStatement) {
-        try {
-            if (keywordStatement == null) {
-                return Collections.emptyList();
-            }
+        if (keywordStatement == null) {
+            return Collections.emptyList();
+        }
 
-            // set test variable  ${x}  ${y}
-            DefinedVariable globalVariable = keywordStatement.getGlobalVariable();
-            if (globalVariable != null) {
-                return Collections.singletonList(globalVariable);
-            }
+        // set test variable  ${x}  ${y}
+        DefinedVariable globalVariable = keywordStatement.getGlobalVariable();
+        if (globalVariable != null) {
+            return Collections.singletonList(globalVariable);
+        }
 
-            List<DefinedVariable> variables = new ArrayList<>();
-            KeywordInvokable invokable = keywordStatement.getInvokable();
-            if (invokable != null) {
-                PsiReference reference = invokable.getReference();
-                if (reference != null) {
-                    PsiElement resolvedElement = reference.resolve();
-                    if (resolvedElement instanceof KeywordDefinition) {
-                        for (KeywordInvokable invokedKeyword : ((KeywordDefinition) resolvedElement).getInvokedKeywords()) {
-                            PsiElement parent = invokedKeyword.getParent();
-                            if (parent instanceof KeywordStatement) {
-                                List<DefinedVariable> results = walkKeyword((KeywordStatement) parent);
-                                variables.addAll(results);
-                            }
+        List<DefinedVariable> variables = new ArrayList<>();
+        KeywordInvokable invokable = keywordStatement.getInvokable();
+        if (invokable != null) {
+            PsiReference reference = invokable.getReference();
+            if (reference != null) {
+                PsiElement resolvedElement = reference.resolve();
+                if (resolvedElement instanceof KeywordDefinition) {
+                    for (KeywordInvokable invokedKeyword : ((KeywordDefinition) resolvedElement).getInvokedKeywords()) {
+                        PsiElement parent = invokedKeyword.getParent();
+                        if (parent instanceof KeywordStatement) {
+                            List<DefinedVariable> results = walkKeyword((KeywordStatement) parent);
+                            variables.addAll(results);
                         }
                     }
                 }
             }
-            return variables;
-        } catch (Throwable ignored) {
         }
-        return Collections.emptyList();
-    }
-
-    public static PsiReferenceResultWithImportPath findKeywordParameterElement(String parameterName, KeywordStatement keywordStatement) {
-        String keywordName = keywordStatement.getName();
-        PsiReferenceResultWithImportPath result = findKeywordReference(keywordName, keywordStatement.getContainingFile());
-        if (result != null && result.reference() instanceof PyFunction pyFunction) {
-            PyNamedParameter parameterByName = pyFunction.getParameterList().findParameterByName(parameterName);
-            if (parameterByName != null) {
-                return new PsiReferenceResultWithImportPath(parameterByName, result.importFilePaths());
-            }
-        }
-        return null;
+        return variables;
     }
 }

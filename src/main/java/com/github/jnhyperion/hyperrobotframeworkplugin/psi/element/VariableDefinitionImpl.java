@@ -71,7 +71,7 @@ public class VariableDefinitionImpl extends RobotStubPsiElementBase<VariableDefi
         }
         String myText = getName();
         Pattern pattern = this.pattern;
-        if (this.pattern == null && !isEmpty()) {
+        if (pattern == null && !isEmpty()) {
             pattern = Pattern.compile(PatternUtil.getVariablePattern(myText), Pattern.CASE_INSENSITIVE);
             this.pattern = pattern;
         }
@@ -79,7 +79,7 @@ public class VariableDefinitionImpl extends RobotStubPsiElementBase<VariableDefi
     }
 
     private boolean isEmpty() {
-        return getName().length() <= 3;
+        return getName().isEmpty();
     }
 
     @Override

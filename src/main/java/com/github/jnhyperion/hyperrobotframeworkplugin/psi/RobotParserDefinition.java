@@ -13,6 +13,7 @@ import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.ParameterImpl
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.ParameterIdImpl;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.RobotFileImpl;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.SettingImpl;
+import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.VariableDefinitionGroupImpl;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.VariableDefinitionIdImpl;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.VariableDefinitionImpl;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.VariableImpl;
@@ -80,6 +81,8 @@ public class RobotParserDefinition implements ParserDefinition {
          return new KeywordInvokableImpl(node);
       } else if (node.getElementType() == RobotTokenTypes.SYNTAX_MARKER) {
          return new KeywordInvokableImpl(node);
+      } else if (node.getElementType() == RobotTokenTypes.VARIABLE_DEFINITION_GROUP) {
+         return new VariableDefinitionGroupImpl(node);
       } else if (node.getElementType() == RobotStubTokenTypes.VARIABLE_DEFINITION) {
          return new VariableDefinitionImpl(node);
       } else if (node.getElementType() == RobotTokenTypes.VARIABLE_DEFINITION_ID) {
@@ -102,9 +105,8 @@ public class RobotParserDefinition implements ParserDefinition {
          return new BracketSettingImpl(node);
       } else if (node.getElementType() == RobotTokenTypes.KEYWORD_PART) {
          return new KeywordPartImpl(node);
-      } else {
-         return PsiUtilCore.NULL_PSI_ELEMENT;
       }
+      return PsiUtilCore.NULL_PSI_ELEMENT;
    }
 
    @NotNull
