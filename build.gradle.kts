@@ -117,7 +117,7 @@ tasks {
     patchPluginXml {
         changeNotes.set(provider {
             changelog.renderItem(
-                changelog.getLatest().withHeader(false).withEmptySections(false), Changelog.OutputType.HTML
+                changelog.getLatest().withHeader(true).withEmptySections(false), Changelog.OutputType.HTML
             )
         })
     }

@@ -17,6 +17,7 @@
 ### Fixed
 
 - Different reasons for invalid PSI element accesses fixed
+- Parsing of arguments containing an equal sign in the argument part
 
 ## 0.2.6
 
