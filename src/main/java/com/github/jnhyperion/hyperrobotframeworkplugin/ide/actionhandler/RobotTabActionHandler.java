@@ -1,6 +1,7 @@
-package com.github.jnhyperion.hyperrobotframeworkplugin.ide;
+package com.github.jnhyperion.hyperrobotframeworkplugin.ide.actionhandler;
 
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.RobotFile;
+import com.github.jnhyperion.hyperrobotframeworkplugin.util.GlobalConstants;
 import com.intellij.codeInsight.completion.NextPrevParameterHandler;
 import com.intellij.openapi.actionSystem.DataContext;
 import com.intellij.openapi.editor.Caret;
@@ -23,7 +24,7 @@ public class RobotTabActionHandler extends NextPrevParameterHandler {
            && PsiDocumentManager.getInstance(project).getPsiFile(editor.getDocument()) instanceof RobotFile) {
            int offset = caret.getOffset();
            String documentText = editor.getDocument().getText();
-           String newText = documentText.substring(0, offset) + "    " + documentText.substring(offset);
+           String newText = documentText.substring(0, offset) + GlobalConstants.DEFAULT_INDENTATION + documentText.substring(offset);
            editor.getDocument().setText(newText);
            caret.moveToOffset(offset + 4);
        } else {

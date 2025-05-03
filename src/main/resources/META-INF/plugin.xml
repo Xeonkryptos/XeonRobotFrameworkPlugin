@@ -95,9 +95,10 @@
         <postStartupActivity implementation="com.github.jnhyperion.hyperrobotframeworkplugin.ide.PostStartupActivity"/>
         <internalFileTemplate name="Robot Feature File"/>
         <internalFileTemplate name="Robot Resource File"/>
-        <enterHandlerDelegate implementation="com.github.jnhyperion.hyperrobotframeworkplugin.ide.RobotEnterActionHandler"/>
-        <typedHandler implementation="com.github.jnhyperion.hyperrobotframeworkplugin.ide.RobotTypedActionHandler"/>
-        <editorActionHandler action="EditorTab" implementationClass="com.github.jnhyperion.hyperrobotframeworkplugin.ide.RobotTabActionHandler"/>
+        <enterHandlerDelegate implementation="com.github.jnhyperion.hyperrobotframeworkplugin.ide.actionhandler.RobotEnterActionHandler"/>
+        <enterHandlerDelegate implementation="com.github.jnhyperion.hyperrobotframeworkplugin.ide.actionhandler.RobotDocumentationEnterActionHandler"/>
+        <typedHandler implementation="com.github.jnhyperion.hyperrobotframeworkplugin.ide.actionhandler.RobotTypedActionHandler"/>
+        <editorActionHandler action="EditorTab" implementationClass="com.github.jnhyperion.hyperrobotframeworkplugin.ide.actionhandler.RobotTabActionHandler"/>
         <configurationType implementation="com.github.jnhyperion.hyperrobotframeworkplugin.ide.execution.config.RobotRunConfigurationType"/>
         <spellchecker.support language="Robot" implementationClass="com.github.jnhyperion.hyperrobotframeworkplugin.ide.RobotSpellcheckingStrategy"/>
 

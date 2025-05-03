@@ -21,4 +21,6 @@ public interface BracketSetting extends RobotStatement, PsiNamedElement {
     * @return true if this is a teardown element; false otherwise.
     */
    boolean isTeardown();
+
+   boolean isDocumentation();
 }

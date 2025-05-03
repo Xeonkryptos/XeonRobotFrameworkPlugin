@@ -1,4 +1,4 @@
-package com.github.jnhyperion.hyperrobotframeworkplugin.ide;
+package com.github.jnhyperion.hyperrobotframeworkplugin.ide.actionhandler;
 
 import com.github.jnhyperion.hyperrobotframeworkplugin.ide.config.RobotOptionsProvider;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.RobotFile;

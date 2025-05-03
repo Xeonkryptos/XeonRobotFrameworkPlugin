@@ -17,6 +17,7 @@ public class BracketSettingImpl extends RobotPsiElementBase implements BracketSe
 
     private static final String ARGUMENTS = "[Arguments]";
     private static final String TEARDOWN = "[Teardown]";
+    private static final String DOCUMENTATION = "[Documentation]";
 
     private BracketSettingType bracketSettingType;
     private Collection<DefinedParameter> arguments;
@@ -33,6 +34,11 @@ public class BracketSettingImpl extends RobotPsiElementBase implements BracketSe
     @Override
     public final boolean isTeardown() {
         return getBracketSettingType() == BracketSettingType.TEARDOWN;
+    }
+
+    @Override
+    public boolean isDocumentation() {
+        return getBracketSettingType() == BracketSettingType.DOCUMENTATION;
     }
 
     @Override
@@ -82,12 +88,14 @@ public class BracketSettingImpl extends RobotPsiElementBase implements BracketSe
                 bracketSettingType = BracketSettingType.ARGUMENTS;
             } else if (TEARDOWN.equalsIgnoreCase(presentableText)) {
                 bracketSettingType = BracketSettingType.TEARDOWN;
+            } else if (DOCUMENTATION.equalsIgnoreCase(presentableText)) {
+                bracketSettingType = BracketSettingType.DOCUMENTATION;
             }
         }
         return bracketSettingType;
     }
 
     private enum BracketSettingType {
-        ARGUMENTS, TEARDOWN
+        ARGUMENTS, TEARDOWN, DOCUMENTATION
     }
 }
