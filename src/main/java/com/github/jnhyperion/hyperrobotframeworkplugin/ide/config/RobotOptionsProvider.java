@@ -53,6 +53,14 @@ public class RobotOptionsProvider implements PersistentStateComponent<RobotOptio
         this.state.smartAutoEncloseVariable = smartAutoEncloseVariable;
     }
 
+    public final boolean multilineIndentation() {
+        return this.state.multilineIndentation;
+    }
+
+    public final void setMultilineIndentation(boolean multilineIndentation) {
+        this.state.multilineIndentation = multilineIndentation;
+    }
+
     public final boolean pythonLiveInspection() {
         return this.state.pythonLiveInspection;
     }
@@ -105,6 +113,7 @@ public class RobotOptionsProvider implements PersistentStateComponent<RobotOptio
         this.state.transitiveImports = state.transitiveImports;
         this.state.capitalizeKeywords = state.capitalizeKeywords;
         this.state.smartAutoEncloseVariable = state.smartAutoEncloseVariable;
+        this.state.multilineIndentation = state.multilineIndentation;
         this.state.pythonLiveInspection = state.pythonLiveInspection;
         this.state.pythonLiveInspectionAdditionalArguments = state.pythonLiveInspectionAdditionalArguments;
         this.state.pythonLiveInspectionDecorators = state.pythonLiveInspectionDecorators;
@@ -115,6 +124,7 @@ public class RobotOptionsProvider implements PersistentStateComponent<RobotOptio
         public boolean debug = false;
         public boolean capitalizeKeywords = true;
         public boolean smartAutoEncloseVariable = true;
+        public boolean multilineIndentation = true;
         public boolean pythonLiveInspection = false;
         public String pythonLiveInspectionAdditionalArguments = "-m robot.libdoc .robotframework-ls";
         public List<String> pythonLiveInspectionDecorators = List.of();

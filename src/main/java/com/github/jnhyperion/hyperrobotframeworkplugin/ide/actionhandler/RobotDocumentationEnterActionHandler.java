@@ -1,5 +1,6 @@
 package com.github.jnhyperion.hyperrobotframeworkplugin.ide.actionhandler;
 
+import com.github.jnhyperion.hyperrobotframeworkplugin.ide.config.RobotOptionsProvider;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.RobotFeatureFileType;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.RobotResourceFileType;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.Argument;
@@ -27,6 +28,11 @@ public class RobotDocumentationEnterActionHandler extends EnterHandlerDelegateAd
     public Result postProcessEnter(@NotNull PsiFile file, @NotNull Editor editor, @NotNull DataContext dataContext) {
         FileType fileType = file.getFileType();
         if (fileType == RobotFeatureFileType.getInstance() || fileType == RobotResourceFileType.getInstance()) {
+            RobotOptionsProvider robotOptionsProvider = RobotOptionsProvider.getInstance(file.getProject());
+            if (!robotOptionsProvider.multilineIndentation()) {
+                return Result.Continue;
+            }
+
             Document document = editor.getDocument();
             // Committing document changes before to be able to search on the PSI tree
             PsiDocumentManager.getInstance(file.getProject()).commitDocument(document);
@@ -61,13 +67,13 @@ public class RobotDocumentationEnterActionHandler extends EnterHandlerDelegateAd
         return Result.Continue;
     }
 
-    private void addEllipsisAndIndentationIntoNewLine(@NotNull PsiFile file, @NotNull Editor editor, BracketSetting bracketSetting, int lineNumber) {
+    private void addEllipsisAndIndentationIntoNewLine(@NotNull PsiFile file, @NotNull Editor editor, PsiElement multilinePsiElement, int lineNumber) {
         String textToInsert = GlobalConstants.ELLIPSIS;
         String whitespacesToInsert = GlobalConstants.DEFAULT_INDENTATION;
         Document document = editor.getDocument();
         int lineStartOffset = document.getLineStartOffset(lineNumber);
         int lineEndOffset = document.getLineEndOffset(lineNumber);
-        int bracketSettingTextOffset = bracketSetting.getTextOffset();
+        int bracketSettingTextOffset = multilinePsiElement.getTextOffset();
         int bracketSettingLineNumber = document.getLineNumber(bracketSettingTextOffset);
         int caretOffset = editor.getCaretModel().getOffset();
         if (lineNumber != bracketSettingLineNumber) {
