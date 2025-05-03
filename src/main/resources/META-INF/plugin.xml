@@ -97,6 +97,7 @@
         <internalFileTemplate name="Robot Resource File"/>
         <enterHandlerDelegate implementation="com.github.jnhyperion.hyperrobotframeworkplugin.ide.actionhandler.RobotEnterActionHandler"/>
         <enterHandlerDelegate implementation="com.github.jnhyperion.hyperrobotframeworkplugin.ide.actionhandler.RobotDocumentationEnterActionHandler"/>
+        <enterHandlerDelegate implementation="com.github.jnhyperion.hyperrobotframeworkplugin.ide.actionhandler.RobotKeywordEnterActionHandler"/>
         <typedHandler implementation="com.github.jnhyperion.hyperrobotframeworkplugin.ide.actionhandler.RobotTypedActionHandler"/>
         <editorActionHandler action="EditorTab" implementationClass="com.github.jnhyperion.hyperrobotframeworkplugin.ide.actionhandler.RobotTabActionHandler"/>
         <configurationType implementation="com.github.jnhyperion.hyperrobotframeworkplugin.ide.execution.config.RobotRunConfigurationType"/>

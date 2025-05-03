@@ -9,7 +9,7 @@
 - Improved performance by adding more caches
 - Added structural view of members in project explorer for robot files
 - Support for assignment of multiple variables based on the return value of a keyword
-- Add ellipsis and indentation automatically when typing documentation
+- Add ellipsis and indentation automatically when typing in documentation settings and keyword statements
 
 ### Changed
 
