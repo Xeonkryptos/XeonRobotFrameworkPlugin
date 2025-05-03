@@ -1,10 +1,11 @@
 package com.github.jnhyperion.hyperrobotframeworkplugin.psi.ref;
 
-import com.github.jnhyperion.hyperrobotframeworkplugin.ide.config.RobotOptionsProvider;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.Variable;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiReferenceBase;
+import com.intellij.psi.util.CachedValueProvider.Result;
+import com.intellij.psi.util.CachedValuesManager;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -18,22 +19,18 @@ public class RobotVariableReference extends PsiReferenceBase<Variable> {
     @Override
     public PsiElement resolve() {
         Variable variable = getElement();
-        String variableName = variable.getPresentableText();
-        PsiElement parentElement = variable.getParent();
-
-        if (variable.isEmpty()) { // e.g. ${}, thus empty representation of a variable. There can be no reference.
-            return null;
-        }
-        PsiElement resolvedElement = ResolverUtils.findVariableInKeyword(
-            variableName,
-            parentElement,
-            RobotOptionsProvider.getInstance(variable.getProject()).allowGlobalVariables()
-        );
-
-        if (resolvedElement != null) {
-            return resolvedElement;
-        }
-        PsiFile containingFile = variable.getContainingFile();
-        return ResolverUtils.findVariableElement(variableName, containingFile);
+        return CachedValuesManager.getCachedValue(variable, () -> {
+            if (variable.isEmpty()) { // e.g. ${}, thus empty representation of a variable. There can be no reference.
+                return null;
+            }
+            String variableName = variable.getPresentableText();
+            PsiElement parentElement = variable.getParent();
+            PsiElement resolvedElement = ResolverUtils.findVariableInKeyword(variableName, parentElement);
+            if (resolvedElement == null) {
+                PsiFile containingFile = variable.getContainingFile();
+                resolvedElement = ResolverUtils.findVariableElement(variableName, containingFile);
+            }
+            return new Result<>(resolvedElement, variable, parentElement);
+        });
     }
 }

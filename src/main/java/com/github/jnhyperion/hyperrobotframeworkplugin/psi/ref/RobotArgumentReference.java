@@ -51,7 +51,6 @@ public class RobotArgumentReference extends PsiPolyVariantReferenceBase<Position
             }
             return null;
         }
-
         return null;
     }
 

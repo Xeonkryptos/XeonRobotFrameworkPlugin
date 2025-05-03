@@ -29,7 +29,6 @@ public class RobotConfiguration implements NoScroll, SearchableConfigurable {
     private final JBPanel<?> panel;
     private final JBCheckBox enableDebug;
     private final JBCheckBox allowTransitiveImports;
-    private final JBCheckBox allowGlobalVariables;
     private final JBCheckBox capitalizeKeywords;
     private final JBCheckBox smartAutoEncloseVariable;
     private final JBCheckBox pythonLiveInspection;
@@ -49,11 +48,6 @@ public class RobotConfiguration implements NoScroll, SearchableConfigurable {
         this.allowTransitiveImports = transitiveImportsCheckBox;
         transitiveImportsCheckBox.setText("Allow Transitive Imports (performance concern)");
         checkBoxPanel.add(transitiveImportsCheckBox, new GridConstraints(0, 0, 1, 1, 8, 0, 3, 3, null, null, null));
-
-        JBCheckBox globalVariablesCheckBox = new JBCheckBox();
-        this.allowGlobalVariables = globalVariablesCheckBox;
-        globalVariablesCheckBox.setText("Allow Global Variables (performance concern)");
-        checkBoxPanel.add(globalVariablesCheckBox, new GridConstraints(1, 0, 1, 1, 8, 0, 3, 3, null, null, null));
 
         JBCheckBox debugCheckBox = new JBCheckBox();
         this.enableDebug = debugCheckBox;
@@ -155,7 +149,6 @@ public class RobotConfiguration implements NoScroll, SearchableConfigurable {
         RobotOptionsProvider provider = getOptionProvider();
         return provider != null && (provider.isDebug() != this.enableDebug.isSelected()
                                     || provider.allowTransitiveImports() != this.allowTransitiveImports.isSelected()
-                                    || provider.allowGlobalVariables() != this.allowGlobalVariables.isSelected()
                                     || provider.capitalizeKeywords() != this.capitalizeKeywords.isSelected()
                                     || provider.smartAutoEncloseVariable() != this.smartAutoEncloseVariable.isSelected()
                                     || provider.pythonLiveInspection() != this.pythonLiveInspection.isSelected() || provider.pythonLiveInspection() && (
@@ -169,7 +162,6 @@ public class RobotConfiguration implements NoScroll, SearchableConfigurable {
         if (provider != null) {
             provider.setDebug(this.enableDebug.isSelected());
             provider.setAllowTransitiveImports(this.allowTransitiveImports.isSelected());
-            provider.setGlobalVariables(this.allowGlobalVariables.isSelected());
             provider.setCapitalizeKeywords(this.capitalizeKeywords.isSelected());
             provider.setSmartAutoEncloseVariable(this.smartAutoEncloseVariable.isSelected());
             provider.setPythonLiveInspection(this.pythonLiveInspection.isSelected());
@@ -193,7 +185,6 @@ public class RobotConfiguration implements NoScroll, SearchableConfigurable {
         if (provider != null) {
             this.enableDebug.setSelected(provider.isDebug());
             this.allowTransitiveImports.setSelected(provider.allowTransitiveImports());
-            this.allowGlobalVariables.setSelected(provider.allowGlobalVariables());
             this.capitalizeKeywords.setSelected(provider.capitalizeKeywords());
             this.smartAutoEncloseVariable.setSelected(provider.smartAutoEncloseVariable());
             this.pythonLiveInspection.setSelected(provider.pythonLiveInspection());

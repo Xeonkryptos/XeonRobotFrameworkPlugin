@@ -15,6 +15,8 @@ import com.intellij.icons.AllIcons.Nodes;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiReferenceBase;
+import com.intellij.psi.util.CachedValueProvider.Result;
+import com.intellij.psi.util.CachedValuesManager;
 import org.apache.commons.text.WordUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -34,8 +36,13 @@ public class RobotKeywordReference extends PsiReferenceBase<KeywordInvokable> {
     @Override
     public PsiElement resolve() {
         KeywordInvokable keywordInvokable = getElement();
-        PsiReferenceResultWithImportPath result = ResolverUtils.findKeywordReference(keywordInvokable.getName(), keywordInvokable.getContainingFile());
-        return result != null ? result.reference() : null;
+        return CachedValuesManager.getCachedValue(keywordInvokable, () -> {
+            String keywordInvokableName = keywordInvokable.getName();
+            PsiFile containingFile = keywordInvokable.getContainingFile();
+            PsiReferenceResultWithImportPath result = ResolverUtils.findKeywordReference(keywordInvokableName, containingFile);
+            PsiElement reference = result != null ? result.reference() : null;
+            return new Result<>(reference, keywordInvokable);
+        });
     }
 
     @Override

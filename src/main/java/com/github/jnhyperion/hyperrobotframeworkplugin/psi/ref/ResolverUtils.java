@@ -78,7 +78,7 @@ public class ResolverUtils {
     }
 
     @Nullable
-    public static PsiElement findVariableInKeyword(@Nullable String variableName, @Nullable PsiElement element, boolean searchInKeywordStatements) {
+    public static PsiElement findVariableInKeyword(@Nullable String variableName, @Nullable PsiElement element) {
         if (variableName == null || element == null) {
             return null;
         }
@@ -94,7 +94,7 @@ public class ResolverUtils {
                     if (child instanceof DefinedVariable definedVariable && definedVariable.matches(variableName)) {
                         return child;
                     } else if (child instanceof KeywordStatement keywordStatement) {
-                        PsiElement result = searchInKeywordStatements ? findVariableInStatement(keywordStatement, variableName) : null;
+                        PsiElement result = findVariableInStatement(keywordStatement, variableName);
                         if (result != null) {
                             return result;
                         }
