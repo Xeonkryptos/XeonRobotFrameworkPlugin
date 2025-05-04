@@ -3,6 +3,7 @@ package com.github.jnhyperion.hyperrobotframeworkplugin.psi.ref;
 import com.github.jnhyperion.hyperrobotframeworkplugin.ide.LookupElementUtil;
 import com.github.jnhyperion.hyperrobotframeworkplugin.ide.RobotTailTypes;
 import com.github.jnhyperion.hyperrobotframeworkplugin.ide.config.RobotOptionsProvider;
+import com.github.jnhyperion.hyperrobotframeworkplugin.psi.ImportModificationTracker;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.dto.ImportType;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.DefinedKeyword;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.KeywordFile;
@@ -40,7 +41,7 @@ public class RobotKeywordReference extends PsiReferenceBase<KeywordInvokable> {
             String keywordInvokableName = keywordInvokable.getName();
             PsiFile containingFile = keywordInvokable.getContainingFile();
             PsiElement reference = ResolverUtils.findKeywordReference(keywordInvokableName, containingFile);
-            return new Result<>(reference, keywordInvokable);
+            return new Result<>(reference, keywordInvokable, ImportModificationTracker.getInstance());
         });
     }
 

@@ -1,6 +1,7 @@
 package com.github.jnhyperion.hyperrobotframeworkplugin.ide;
 
 import com.github.jnhyperion.hyperrobotframeworkplugin.MyLogger;
+import com.github.jnhyperion.hyperrobotframeworkplugin.psi.ImportModificationTracker;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.RobotFeatureFileType;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.RobotKeywordReferenceUpdater;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.RobotResourceFileType;
@@ -31,6 +32,7 @@ import com.intellij.psi.PsiManager;
 import com.intellij.psi.search.FileTypeIndex;
 import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.util.concurrency.AppExecutorUtil;
+import com.jetbrains.python.PythonFileType;
 import com.jetbrains.python.PythonPluginDisposable;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -65,7 +67,7 @@ public class RobotListenerMgr {
                             String filePath = file.getPath();
                             if (projectBasePath != null && filePath.startsWith(projectBasePath)) {
                                 MyLogger.logger.debug("Received event: " + file.getName() + " - " + project);
-                                updateRobotFiles(project);
+                                updateRobotFiles(project, file.getFileType() == RobotResourceFileType.getInstance());
                                 break;
                             }
                         }
@@ -78,7 +80,7 @@ public class RobotListenerMgr {
             public void exitDumbMode() {
                 // Clearing library references after re-index
                 ProjectFileCache.clearProjectCache(project);
-                updateRobotFiles(project);
+                updateRobotFiles(project, false);
             }
         });
         EditorFactory.getInstance().getEventMulticaster().addDocumentListener(new DocumentListener() {
@@ -86,8 +88,10 @@ public class RobotListenerMgr {
             public void documentChanged(@NotNull DocumentEvent event) {
                 Document document = event.getDocument();
                 VirtualFile file = FileDocumentManager.getInstance().getFile(document);
-                if (file != null && file.getName().endsWith(".py")) {
+                if (file != null && file.getFileType() == PythonFileType.INSTANCE) {
                     isPythonFileChanged.set(true);
+                } else if (file != null && file.getFileType() == RobotResourceFileType.getInstance()) {
+                    updateRobotFiles(project, true);
                 }
             }
         }, PythonPluginDisposable.getInstance(project));
@@ -95,17 +99,17 @@ public class RobotListenerMgr {
             @Override
             public void selectionChanged(@NotNull FileEditorManagerEvent event) {
                 VirtualFile file = event.getNewFile();
-                if (file != null && ("robot".equals(file.getExtension()) || "resource".equals(file.getExtension()))
+                if (file != null && (file.getFileType() == RobotFeatureFileType.getInstance() || file.getFileType() == RobotResourceFileType.getInstance())
                     && RobotListenerMgr.isPythonFileChanged.getAndSet(false)) {
                     MyLogger.logger.debug("selectionChanged: " + file.getName());
-                    updateRobotFiles(project);
+                    updateRobotFiles(project, false);
                 }
             }
         });
         PsiManager.getInstance(project).addPsiTreeChangeListener(new RobotKeywordReferenceUpdater(), PythonPluginDisposable.getInstance(project));
     }
 
-    private void updateRobotFiles(Project project) {
+    private void updateRobotFiles(Project project, boolean importUpdate) {
         modificationTracker.incModificationCount();
         final long currentModificationCount = modificationTracker.getModificationCount();
         ReadAction.nonBlocking(() -> {
@@ -127,7 +131,10 @@ public class RobotListenerMgr {
                               robotFile.importsChanged();
                           }
                       }
-                      DaemonCodeAnalyzer.getInstance(project).restart();
+                      if (importUpdate) {
+                          ImportModificationTracker.getInstance().incModificationCount();
+                          DaemonCodeAnalyzer.getInstance(project).restart();
+                      }
 
                       MyLogger.logger.debug("Update robot file: " + robotFiles.size());
                       return null;

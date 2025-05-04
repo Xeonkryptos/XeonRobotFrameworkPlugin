@@ -1,5 +1,6 @@
 package com.github.jnhyperion.hyperrobotframeworkplugin.psi.ref;
 
+import com.github.jnhyperion.hyperrobotframeworkplugin.psi.ImportModificationTracker;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.DefinedParameter;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.KeywordStatement;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.ParameterId;
@@ -43,7 +44,7 @@ public class RobotParameterReference extends PsiReferenceBase<ParameterId> imple
                     reference = ResolverUtils.findKeywordReference(keywordStatementName, containingFile);
                 }
             }
-            return new Result<>(reference, parameterId, keywordStatement);
+            return new Result<>(reference, parameterId, keywordStatement, ImportModificationTracker.getInstance());
         });
     }
 }
