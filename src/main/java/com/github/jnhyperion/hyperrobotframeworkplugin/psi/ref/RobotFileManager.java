@@ -4,6 +4,7 @@ import com.github.jnhyperion.hyperrobotframeworkplugin.psi.dto.VariableDto;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.DefinedVariable;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.util.ReservedVariable;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.util.SystemInfo;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
@@ -15,7 +16,6 @@ import com.intellij.psi.util.QualifiedName;
 import com.jetbrains.python.psi.PyFile;
 import com.jetbrains.python.psi.search.PySearchUtilBase;
 import com.jetbrains.python.psi.stubs.PyModuleNameIndex;
-import org.apache.commons.lang3.SystemUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -74,6 +74,7 @@ public class RobotFileManager {
         if (!file.isAbsolute()) {
             Optional<String> parentFilePathOpt = Optional.ofNullable(element.getContainingFile().getVirtualFile())
                                                          .map(VirtualFile::getParent)
+                                                         .map(VirtualFile::getParent)
                                                          .map(VirtualFile::getPath);
             if (parentFilePathOpt.isEmpty()) {
                 return null;
@@ -82,12 +83,14 @@ public class RobotFileManager {
             file = Path.of(parentPath, filePath);
         }
         String canonicalPath = file.toAbsolutePath().toString();
-        if (SystemUtils.IS_OS_WINDOWS) {
+        if (SystemInfo.isWindows) {
             canonicalPath = canonicalPath.replace("\\", "/");
         }
         PsiManager psiManager = PsiManager.getInstance(project);
         for (VirtualFile virtualFile : foundFiles) {
-            if (virtualFile.getPath().equals(canonicalPath)) {
+            String virtualFilePath = virtualFile.getPath();
+            boolean samePath = !SystemInfo.isFileSystemCaseSensitive ? virtualFilePath.equalsIgnoreCase(canonicalPath) : virtualFilePath.equals(canonicalPath);
+            if (samePath) {
                 return psiManager.findFile(virtualFile);
             }
         }

@@ -6,6 +6,7 @@ import com.github.jnhyperion.hyperrobotframeworkplugin.psi.RobotKeywordReference
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.RobotResourceFileType;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.RobotFile;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.ref.ProjectFileCache;
+import com.intellij.codeInsight.daemon.DaemonCodeAnalyzer;
 import com.intellij.openapi.application.ReadAction;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.editor.EditorFactory;
@@ -65,7 +66,7 @@ public class RobotListenerMgr {
                             if (projectBasePath != null && filePath.startsWith(projectBasePath)) {
                                 MyLogger.logger.debug("Received event: " + file.getName() + " - " + project);
                                 updateRobotFiles(project);
-                                return;
+                                break;
                             }
                         }
                     }
@@ -126,6 +127,7 @@ public class RobotListenerMgr {
                               robotFile.importsChanged();
                           }
                       }
+                      DaemonCodeAnalyzer.getInstance(project).restart();
 
                       MyLogger.logger.debug("Update robot file: " + robotFiles.size());
                       return null;

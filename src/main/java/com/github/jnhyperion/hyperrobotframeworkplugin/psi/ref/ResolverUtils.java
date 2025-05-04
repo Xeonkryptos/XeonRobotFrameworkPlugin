@@ -2,7 +2,6 @@ package com.github.jnhyperion.hyperrobotframeworkplugin.psi.ref;
 
 import com.github.jnhyperion.hyperrobotframeworkplugin.ide.config.RobotOptionsProvider;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.dto.ImportType;
-import com.github.jnhyperion.hyperrobotframeworkplugin.psi.dto.KeywordFileWithDependentsWrapper;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.DefinedKeyword;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.DefinedVariable;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.KeywordDefinition;
@@ -27,29 +26,26 @@ public class ResolverUtils {
     private ResolverUtils() {
     }
 
-    public static PsiReferenceResultWithImportPath findKeywordReference(@Nullable String keyword, @Nullable PsiFile psiFile) {
+    public static PsiElement findKeywordReference(@Nullable String keyword, @Nullable PsiFile psiFile) {
         if (keyword == null || !(psiFile instanceof RobotFile robotFile)) {
             return null;
         }
 
         for (DefinedKeyword definedKeyword : robotFile.getDefinedKeywords()) {
             if (definedKeyword.matches(keyword)) {
-                return new PsiReferenceResultWithImportPath(definedKeyword.reference(), Collections.emptyList());
+                return definedKeyword.reference();
             }
         }
 
         boolean includeTransitive = RobotOptionsProvider.getInstance(psiFile.getProject()).allowTransitiveImports();
-        Collection<KeywordFileWithDependentsWrapper> importedFilesWithDependents = robotFile.getImportedFilesWithDependents(includeTransitive);
-        for (KeywordFileWithDependentsWrapper wrapper : importedFilesWithDependents) {
-            for (DefinedKeyword definedKeyword : wrapper.keywordFile().getDefinedKeywords()) {
+        Collection<KeywordFile> importedFiles = robotFile.getImportedFiles(includeTransitive);
+        for (KeywordFile keywordFile : importedFiles) {
+            for (DefinedKeyword definedKeyword : keywordFile.getDefinedKeywords()) {
                 if (definedKeyword.matches(keyword)) {
-                    PsiElement reference = definedKeyword.reference();
-                    Collection<KeywordFile> dependents = wrapper.dependents();
-                    return new PsiReferenceResultWithImportPath(reference, dependents);
+                    return definedKeyword.reference();
                 }
             }
         }
-
         return null;
     }
 

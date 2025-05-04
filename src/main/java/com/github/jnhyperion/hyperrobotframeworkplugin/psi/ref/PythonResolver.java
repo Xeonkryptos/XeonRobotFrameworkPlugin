@@ -3,6 +3,7 @@ package com.github.jnhyperion.hyperrobotframeworkplugin.psi.ref;
 import com.intellij.notification.NotificationDisplayType;
 import com.intellij.notification.NotificationsConfiguration;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.util.SystemInfo;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.util.QualifiedName;
@@ -24,20 +25,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+@SuppressWarnings("UnstableApiUsage")
 public class PythonResolver {
 
     private PythonResolver() {
         NotificationsConfiguration.getNotificationsConfiguration().register("intellibot.debug", NotificationDisplayType.NONE);
-    }
-
-    @Nullable
-    public static PyClass castClass(@Nullable PsiElement element) {
-        return element instanceof PyClass ? (PyClass) element : null;
-    }
-
-    @Nullable
-    public static PyFile castFile(@Nullable PsiElement element) {
-        return element instanceof PyFile ? (PyFile) element : null;
     }
 
     @Nullable
@@ -133,9 +125,9 @@ public class PythonResolver {
         for (PyClass pyClass : classes) {
             String qName = pyClass.getQualifiedName();
             if (qName != null) {
-                if (qName.equals(name)) {
+                if (qName.equals(name) || !SystemInfo.isFileSystemCaseSensitive && qName.equalsIgnoreCase(name)) {
                     matchedByNames.add(pyClass);
-                } else if (qName.equals(name + "." + shortName)) {
+                } else if (qName.equals(name + "." + shortName) || !SystemInfo.isFileSystemCaseSensitive && qName.equalsIgnoreCase(name + "." + shortName)) {
                     matchedByNames.add(pyClass);
                 }
             }

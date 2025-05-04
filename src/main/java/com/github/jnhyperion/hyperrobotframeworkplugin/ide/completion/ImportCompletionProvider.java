@@ -13,11 +13,11 @@ import com.intellij.codeInsight.lookup.LookupElement;
 import com.intellij.codeInsight.lookup.LookupElementBuilder;
 import com.intellij.codeInsight.lookup.TailTypeDecorator;
 import com.intellij.icons.AllIcons;
+import com.intellij.openapi.util.SystemInfo;
 import com.intellij.openapi.util.io.FileUtil;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.util.ProcessingContext;
-import org.apache.commons.lang3.SystemUtils;
 import org.apache.commons.text.WordUtils;
 import org.jetbrains.annotations.NotNull;
 
@@ -74,7 +74,7 @@ class ImportCompletionProvider extends CompletionProvider<CompletionParameters> 
                         String relativePath = FileUtil.getRelativePath(new File(robotFile.getContainingDirectory().getVirtualFile().getPath()),
                                                                        new File(filePath));
                         if (relativePath != null) {
-                            if (SystemUtils.IS_OS_WINDOWS) {
+                            if (SystemInfo.isWindows) {
                                 relativePath = relativePath.replace("\\", "/");
                             }
 

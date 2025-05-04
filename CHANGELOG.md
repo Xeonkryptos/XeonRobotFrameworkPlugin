@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+## 0.2.7
+
 ### Added
 
 - Improved performance by adding more caches
@@ -22,6 +24,7 @@
 
 - Different reasons for invalid PSI element accesses fixed
 - Parsing of arguments containing an equal sign in the argument part
+- Issues with case-sensitivity leading to incorrectly marked keywords as unresolvable on a case-insensitive file system
 
 ## 0.2.6
 

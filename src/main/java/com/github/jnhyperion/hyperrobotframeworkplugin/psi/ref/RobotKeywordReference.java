@@ -39,8 +39,7 @@ public class RobotKeywordReference extends PsiReferenceBase<KeywordInvokable> {
         return CachedValuesManager.getCachedValue(keywordInvokable, () -> {
             String keywordInvokableName = keywordInvokable.getName();
             PsiFile containingFile = keywordInvokable.getContainingFile();
-            PsiReferenceResultWithImportPath result = ResolverUtils.findKeywordReference(keywordInvokableName, containingFile);
-            PsiElement reference = result != null ? result.reference() : null;
+            PsiElement reference = ResolverUtils.findKeywordReference(keywordInvokableName, containingFile);
             return new Result<>(reference, keywordInvokable);
         });
     }

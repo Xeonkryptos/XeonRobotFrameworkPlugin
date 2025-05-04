@@ -50,6 +50,7 @@ public class PositionalArgumentImpl extends RobotStubPsiElementBase<PositionalAr
         return getParent() instanceof Import;
     }
 
+    @NotNull
     @Override
     public PsiReference getReference() {
         return new RobotArgumentReference(this);

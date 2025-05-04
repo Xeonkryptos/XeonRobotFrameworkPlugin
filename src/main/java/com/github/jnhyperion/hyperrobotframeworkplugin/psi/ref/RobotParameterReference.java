@@ -40,10 +40,7 @@ public class RobotParameterReference extends PsiReferenceBase<ParameterId> imple
                     // Fall back to PyFunction element. The parameter itself couldn't be found
                     String keywordStatementName = keywordStatement.getName();
                     PsiFile containingFile = keywordStatement.getContainingFile();
-                    PsiReferenceResultWithImportPath wrapper = ResolverUtils.findKeywordReference(keywordStatementName, containingFile);
-                    if (wrapper != null) {
-                        reference = wrapper.reference();
-                    }
+                    reference = ResolverUtils.findKeywordReference(keywordStatementName, containingFile);
                 }
             }
             return new Result<>(reference, parameterId, keywordStatement);

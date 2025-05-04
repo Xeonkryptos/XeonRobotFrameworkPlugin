@@ -16,7 +16,6 @@ import com.intellij.psi.util.PsiTreeUtil;
 import com.jetbrains.python.psi.PyClass;
 import com.jetbrains.python.psi.PyFile;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import javax.swing.Icon;
 import java.util.Collection;
@@ -197,7 +196,8 @@ public class HeadingImpl extends RobotPsiElementBase implements Heading {
 
     private static void addReferencedArguments(@NotNull Collection<PsiFile> results, @NotNull KeywordInvokable keyword) {
         for (PositionalArgument positionalArgument : keyword.getPositionalArguments()) {
-            Optional.ofNullable(positionalArgument.getReference()).map(PsiReference::resolve).map(PsiElement::getContainingFile).ifPresent(results::add);
+            PsiElement resolvedElement = positionalArgument.getReference().resolve();
+            Optional.ofNullable(resolvedElement).map(PsiElement::getContainingFile).ifPresent(results::add);
         }
     }
 
@@ -249,20 +249,17 @@ public class HeadingImpl extends RobotPsiElementBase implements Heading {
                     PositionalArgument positionalArgument = PsiTreeUtil.findChildOfType(importElement, PositionalArgument.class);
                     if (positionalArgument != null) {
                         if (importElement.isResource()) {
-                            PsiElement resolution = resolveImport(positionalArgument);
+                            PsiElement resolution = positionalArgument.getReference().resolve();
                             if (resolution instanceof KeywordFile keywordFile) {
                                 files.add(keywordFile);
                             }
                         } else if (importElement.isLibrary() || importElement.isVariables()) {
-                            PsiElement resolved = resolveImport(positionalArgument);
-                            PyClass resolution = PythonResolver.castClass(resolved);
-                            if (resolution != null) {
+                            PsiElement resolved = positionalArgument.getReference().resolve();
+                            if (resolved instanceof PyClass pyClass) {
                                 String namespace = getNamespace(importElement, positionalArgument);
                                 boolean isDifferentNamespace = !positionalArgument.getContent().equals(namespace);
-                                files.add(new RobotPythonClass(namespace, resolution, importElement.getImportType(), isDifferentNamespace));
-                            }
-                            PyFile file = PythonResolver.castFile(resolved);
-                            if (file != null) {
+                                files.add(new RobotPythonClass(namespace, pyClass, importElement.getImportType(), isDifferentNamespace));
+                            } else if (resolved instanceof PyFile file) {
                                 String namespace = getNamespace(importElement, positionalArgument);
                                 boolean isDifferentNamespace = !positionalArgument.getContent().equals(namespace);
                                 files.add(new RobotPythonFile(namespace, file, importElement.getImportType(), isDifferentNamespace));
@@ -319,15 +316,6 @@ public class HeadingImpl extends RobotPsiElementBase implements Heading {
         }
 
         return results;
-    }
-
-    @Nullable
-    private static PsiElement resolveImport(@NotNull PositionalArgument positionalArgument) {
-        PsiReference reference = positionalArgument.getReference();
-        if (reference != null) {
-            return reference.resolve();
-        }
-        return null;
     }
 
     @NotNull
