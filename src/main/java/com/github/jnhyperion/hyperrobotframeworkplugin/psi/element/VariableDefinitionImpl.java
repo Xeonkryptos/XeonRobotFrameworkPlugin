@@ -14,6 +14,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.Icon;
+import java.util.Objects;
 import java.util.regex.Pattern;
 
 public class VariableDefinitionImpl extends RobotStubPsiElementBase<VariableDefinitionStub, VariableDefinition> implements VariableDefinition {
@@ -38,13 +39,8 @@ public class VariableDefinitionImpl extends RobotStubPsiElementBase<VariableDefi
         }
         VariableDefinitionId variableId = getNameIdentifier();
         InjectedLanguageManager injectedLanguageManager = InjectedLanguageManager.getInstance(getProject());
-        if (variableId != null) {
-            String unescapedText = injectedLanguageManager.getUnescapedText(variableId);
-            if (!unescapedText.isEmpty()) {
-                return unescapedText.substring(2, variableId.getText().length() - 1);
-            }
-        }
-        return injectedLanguageManager.getUnescapedText(this);
+        PsiElement sourceElement = Objects.requireNonNullElse(variableId, this);
+        return injectedLanguageManager.getUnescapedText(sourceElement);
     }
 
     @NotNull
@@ -79,7 +75,8 @@ public class VariableDefinitionImpl extends RobotStubPsiElementBase<VariableDefi
     }
 
     private boolean isEmpty() {
-        return getName().isEmpty();
+        // A variable contains always $, @ or % and at enclosing brackets. Meaning, a variable consists of at least 3 characters even when no name is defined
+        return getName().length() <= 3;
     }
 
     @Override
