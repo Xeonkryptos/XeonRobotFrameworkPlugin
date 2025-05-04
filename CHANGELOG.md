@@ -10,6 +10,7 @@
 - Added structural view of members in project explorer for robot files
 - Support for assignment of multiple variables based on the return value of a keyword
 - Add ellipsis and indentation automatically when typing in documentation settings and keyword statements
+- Extended completion provider for keyword statements to add only mandatory parameters by prefixing the keyword completion with a `*`
 
 ### Changed
 

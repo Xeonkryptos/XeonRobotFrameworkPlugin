@@ -8,6 +8,7 @@ import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.DefinedParame
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.Heading;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.KeywordFile;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.RobotFile;
+import com.github.jnhyperion.hyperrobotframeworkplugin.util.GlobalConstants;
 import com.intellij.codeInsight.TailType;
 import com.intellij.codeInsight.TailTypes;
 import com.intellij.codeInsight.completion.CompletionParameters;
@@ -24,6 +25,7 @@ import com.intellij.psi.PsiFile;
 import com.intellij.util.ProcessingContext;
 import org.apache.commons.text.WordUtils;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -37,13 +39,18 @@ class KeywordCompletionProvider extends CompletionProvider<CompletionParameters>
         if (CompletionProviderUtils.isIndexPositionAWhitespaceCharacter(parameters)) {
             Heading heading = CompletionProviderUtils.getHeading(parameters.getPosition());
             if (heading != null && (heading.containsTestCases() || heading.containsKeywordDefinitions() || heading.containsTasks())) {
-                boolean startingWithSlash = isStartingWithSlash(parameters);
-                addDefinedKeywordsFromFile(result, parameters.getOriginalFile(), startingWithSlash);
+                KeywordCompletionModification keywordCompletionModification = Arrays.stream(KeywordCompletionModification.values())
+                                                                                    .filter(modification -> modification.getIdentifier() != null)
+                                                                                    .filter(modification -> isStartingWithCharacter(parameters,
+                                                                                                                                    modification.getIdentifier()))
+                                                                                    .findFirst()
+                                                                                    .orElse(KeywordCompletionModification.NONE);
+                addDefinedKeywordsFromFile(result, parameters.getOriginalFile(), keywordCompletionModification);
             }
         }
     }
 
-    private boolean isStartingWithSlash(@NotNull CompletionParameters parameters) {
+    private boolean isStartingWithCharacter(@NotNull CompletionParameters parameters, char modificationCharacter) {
         int offset = parameters.getOffset();
 
         Document document = parameters.getEditor().getDocument();
@@ -54,13 +61,13 @@ class KeywordCompletionProvider extends CompletionProvider<CompletionParameters>
             return false;
         }
         int firstCharacterInLine = textBeforeOffset.trim().codePointAt(0);
-        return "/".equals(Character.toString(firstCharacterInLine));
+        return modificationCharacter == firstCharacterInLine;
     }
 
-    private void addDefinedKeywordsFromFile(CompletionResultSet resultSet, PsiFile file, boolean addKeywordParametersOnInsert) {
+    private void addDefinedKeywordsFromFile(CompletionResultSet resultSet, PsiFile file, KeywordCompletionModification keywordCompletionModification) {
         if (file instanceof RobotFile robotFile) {
             boolean capitalizeKeywords = RobotOptionsProvider.getInstance(robotFile.getProject()).capitalizeKeywords();
-            addDefinedKeywords(robotFile.getDefinedKeywords(), resultSet, capitalizeKeywords, addKeywordParametersOnInsert).forEach(lookupElement -> {
+            addDefinedKeywords(robotFile.getDefinedKeywords(), resultSet, capitalizeKeywords, keywordCompletionModification).forEach(lookupElement -> {
                 lookupElement.putUserData(CompletionKeys.ROBOT_LOOKUP_CONTEXT, RobotLookupContext.KEYWORDS);
                 lookupElement.putUserData(CompletionKeys.ROBOT_LOOKUP_ELEMENT_TYPE, RobotLookupElementType.KEYWORD);
             });
@@ -70,7 +77,7 @@ class KeywordCompletionProvider extends CompletionProvider<CompletionParameters>
                     addDefinedKeywords(importedFile.getDefinedKeywords(),
                                        resultSet,
                                        capitalizeKeywords,
-                                       addKeywordParametersOnInsert).forEach(lookupElement -> {
+                                       keywordCompletionModification).forEach(lookupElement -> {
                         lookupElement.putUserData(CompletionKeys.ROBOT_LOOKUP_CONTEXT, RobotLookupContext.KEYWORDS);
                         lookupElement.putUserData(CompletionKeys.ROBOT_LOOKUP_ELEMENT_TYPE, RobotLookupElementType.KEYWORD);
                     });
@@ -80,15 +87,15 @@ class KeywordCompletionProvider extends CompletionProvider<CompletionParameters>
     }
 
     private Collection<LookupElement> addDefinedKeywords(Collection<DefinedKeyword> keywords,
-                                                                CompletionResultSet resultSet,
-                                                                boolean capitalize,
-                                                                boolean addKeywordParametersOnInsert) {
+                                                         CompletionResultSet resultSet,
+                                                         boolean capitalize,
+                                                         KeywordCompletionModification keywordCompletionModification) {
         List<LookupElement> lookupElements = new ArrayList<>();
         for (DefinedKeyword keyword : keywords) {
             String keywordName = keyword.getKeywordName();
             String displayName = capitalize ? WordUtils.capitalize(keywordName) : keywordName;
             String[] lookupStrings = new String[] { keywordName, WordUtils.capitalize(keywordName), keywordName.toLowerCase() };
-            lookupStrings = Arrays.stream(lookupStrings).map(lookup -> "/" + lookup).toArray(String[]::new);
+            lookupStrings = Arrays.stream(lookupStrings).map(lookup -> keywordCompletionModification.getIdentifier() + lookup).toArray(String[]::new);
             LookupElementBuilder lookupElement = LookupElementBuilder.create(displayName)
                                                                      .withLookupStrings(Arrays.asList(lookupStrings))
                                                                      .withPresentableText(displayName)
@@ -102,34 +109,7 @@ class KeywordCompletionProvider extends CompletionProvider<CompletionParameters>
 
             TailTypeDecorator<LookupElementBuilder> tailTypeDecorator;
             if (keyword.hasParameters()) {
-                if (addKeywordParametersOnInsert) {
-                    tailTypeDecorator = TailTypeDecorator.withTail(decoratedElement, new TailType() {
-                        @Override
-                        public int processTail(Editor editor, int tailOffset) {
-                            Document document = editor.getDocument();
-
-                            int lineNumber = document.getLineNumber(tailOffset);
-                            int lineStartOffset = document.getLineStartOffset(lineNumber);
-                            int keywordStartOffset = tailOffset - keywordName.length();
-                            String spaceBeforeOffset = document.getText(new TextRange(lineStartOffset, keywordStartOffset));
-
-                            int currentOffset = tailOffset;
-                            int addedOffset = 0;
-                            for (DefinedParameter parameter : keyword.getParameters()) {
-                                String parameterInsertString = "\n" + spaceBeforeOffset + "...    " + parameter.getLookup() + "=";
-                                if (parameter.hasDefaultValue()) {
-                                    parameterInsertString += parameter.getDefaultValue();
-                                }
-                                document.insertString(currentOffset, parameterInsertString);
-                                currentOffset += parameterInsertString.length();
-                                addedOffset += parameterInsertString.length();
-                            }
-                            return moveCaret(editor, tailOffset, addedOffset);
-                        }
-                    });
-                } else {
-                    tailTypeDecorator = TailTypeDecorator.withTail(decoratedElement, TailTypes.noneType());
-                }
+                tailTypeDecorator = keywordCompletionModification.createTail(decoratedElement, keyword);
             } else {
                 tailTypeDecorator = TailTypeDecorator.withTail(decoratedElement, TailTypes.noneType());
             }
@@ -137,5 +117,96 @@ class KeywordCompletionProvider extends CompletionProvider<CompletionParameters>
             lookupElements.add(tailTypeDecorator);
         }
         return lookupElements;
+    }
+
+    private enum KeywordCompletionModification {
+        NONE {
+            @Nullable
+            @Override
+            public Character getIdentifier() {
+                return null;
+            }
+
+            @Override
+            public TailTypeDecorator<LookupElementBuilder> createTail(LookupElementBuilder decoratedElement, DefinedKeyword keyword) {
+                return TailTypeDecorator.withTail(decoratedElement, TailTypes.noneType());
+            }
+        }, ONLY_MANDATORY {
+            @NotNull
+            @Override
+            public Character getIdentifier() {
+                return '*';
+            }
+
+            @Override
+            public TailTypeDecorator<LookupElementBuilder> createTail(LookupElementBuilder decoratedElement, DefinedKeyword keyword) {
+                return TailTypeDecorator.withTail(decoratedElement, new TailType() {
+                    @Override
+                    public int processTail(Editor editor, int tailOffset) {
+                        String keywordName = keyword.getKeywordName();
+                        Document document = editor.getDocument();
+
+                        int lineNumber = document.getLineNumber(tailOffset);
+                        int lineStartOffset = document.getLineStartOffset(lineNumber);
+                        int keywordStartOffset = tailOffset - keywordName.length();
+                        String spaceBeforeOffset = document.getText(new TextRange(lineStartOffset, keywordStartOffset));
+                        String prefixIndentationText = "\n" + spaceBeforeOffset + GlobalConstants.ELLIPSIS + GlobalConstants.DEFAULT_INDENTATION;
+
+                        int currentOffset = tailOffset;
+                        int addedOffset = 0;
+                        for (DefinedParameter parameter : keyword.getParameters()) {
+                            if (!parameter.hasDefaultValue()) {
+                                String parameterInsertString = prefixIndentationText + parameter.getLookup() + "=";
+                                document.insertString(currentOffset, parameterInsertString);
+                                currentOffset += parameterInsertString.length();
+                                addedOffset += parameterInsertString.length();
+                            }
+                        }
+                        return moveCaret(editor, tailOffset, addedOffset);
+                    }
+                });
+            }
+        }, ALL {
+            @NotNull
+            @Override
+            public Character getIdentifier() {
+                return '/';
+            }
+
+            @Override
+            public TailTypeDecorator<LookupElementBuilder> createTail(LookupElementBuilder decoratedElement, DefinedKeyword keyword) {
+                return TailTypeDecorator.withTail(decoratedElement, new TailType() {
+                    @Override
+                    public int processTail(Editor editor, int tailOffset) {
+                        String keywordName = keyword.getKeywordName();
+                        Document document = editor.getDocument();
+
+                        int lineNumber = document.getLineNumber(tailOffset);
+                        int lineStartOffset = document.getLineStartOffset(lineNumber);
+                        int keywordStartOffset = tailOffset - keywordName.length();
+                        String spaceBeforeOffset = document.getText(new TextRange(lineStartOffset, keywordStartOffset));
+                        String prefixIndentationText = "\n" + spaceBeforeOffset + GlobalConstants.ELLIPSIS + GlobalConstants.DEFAULT_INDENTATION;
+
+                        int currentOffset = tailOffset;
+                        int addedOffset = 0;
+                        for (DefinedParameter parameter : keyword.getParameters()) {
+                            String parameterInsertString = prefixIndentationText + parameter.getLookup() + "=";
+                            if (parameter.hasDefaultValue()) {
+                                parameterInsertString += parameter.getDefaultValue();
+                            }
+                            document.insertString(currentOffset, parameterInsertString);
+                            currentOffset += parameterInsertString.length();
+                            addedOffset += parameterInsertString.length();
+                        }
+                        return moveCaret(editor, tailOffset, addedOffset);
+                    }
+                });
+            }
+        };
+
+        @Nullable
+        public abstract Character getIdentifier();
+
+        public abstract TailTypeDecorator<LookupElementBuilder> createTail(LookupElementBuilder decoratedElement, DefinedKeyword keyword);
     }
 }
