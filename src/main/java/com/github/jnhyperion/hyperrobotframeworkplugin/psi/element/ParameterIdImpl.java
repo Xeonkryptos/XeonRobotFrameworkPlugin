@@ -11,6 +11,7 @@ public class ParameterIdImpl extends RobotPsiElementBase implements ParameterId 
         super(node);
     }
 
+    @NotNull
     @Override
     public PsiReference getReference() {
         return new RobotParameterReference(this);

@@ -50,13 +50,7 @@ public class KeywordStatementImpl extends RobotStubPsiElementBase<KeywordStateme
     public final KeywordInvokable getInvokable() {
         KeywordInvokable result = invokable;
         if (invokable == null) {
-            for (PsiElement child : getChildren()) {
-                if (child instanceof KeywordInvokable) {
-                    result = (KeywordInvokable) child;
-                    break;
-                }
-            }
-            invokable = result;
+            invokable = PsiTreeUtil.findChildOfType(this, KeywordInvokable.class);
         }
         return result;
     }

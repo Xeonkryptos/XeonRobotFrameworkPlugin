@@ -29,6 +29,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 
+@SuppressWarnings("UnstableApiUsage")
 public abstract class RobotPythonWrapper {
 
     protected static String getValidName(@Nullable String name) {
