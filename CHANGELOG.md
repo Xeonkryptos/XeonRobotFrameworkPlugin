@@ -11,6 +11,8 @@
 - Support for assignment of multiple variables based on the return value of a keyword
 - Add ellipsis and indentation automatically when typing in documentation settings and keyword statements
 - Extended completion provider for keyword statements to add only mandatory parameters by prefixing the keyword completion with a `*`
+- Provide enum values for code completions in parameters when one of the defined data types references an enum
+- Mark used keywords in robot files and code completion as deprecated when they are marked as deprecated (`@deprecated` decorator even a custom one)
 
 ### Changed
 

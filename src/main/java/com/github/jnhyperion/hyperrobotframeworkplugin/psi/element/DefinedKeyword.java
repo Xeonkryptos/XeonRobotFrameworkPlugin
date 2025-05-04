@@ -17,4 +17,6 @@ public interface DefinedKeyword {
    PsiElement reference();
 
    String getArgumentsDisplayable();
+
+   boolean isDeprecated();
 }

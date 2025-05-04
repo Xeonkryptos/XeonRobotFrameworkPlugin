@@ -100,7 +100,8 @@ class KeywordCompletionProvider extends CompletionProvider<CompletionParameters>
                                                                      .withLookupStrings(Arrays.asList(lookupStrings))
                                                                      .withPresentableText(displayName)
                                                                      .withCaseSensitivity(true)
-                                                                     .withIcon(Nodes.Function);
+                                                                     .withIcon(Nodes.Function)
+                                                                     .withStrikeoutness(keyword.isDeprecated());
             LookupElementBuilder decoratedElement = LookupElementUtil.addReferenceType(keyword.reference(), lookupElement);
             displayName = keyword.getArgumentsDisplayable();
             if (displayName != null) {
