@@ -30,6 +30,7 @@ public class RobotParameterReference extends PsiReferenceBase<ParameterId> imple
             String parameterName = parameterId.getName();
             KeywordStatement keywordStatement = PsiTreeUtil.getParentOfType(parameterId, KeywordStatement.class);
             PsiElement reference = null;
+            Object[] dependents;
             if (keywordStatement != null && parameterName != null) {
                 reference = keywordStatement.getAvailableParameters()
                                             .stream()
@@ -43,8 +44,11 @@ public class RobotParameterReference extends PsiReferenceBase<ParameterId> imple
                     PsiFile containingFile = keywordStatement.getContainingFile();
                     reference = ResolverUtils.findKeywordReference(keywordStatementName, containingFile);
                 }
+                dependents = new Object[] { parameterId, keywordStatement, ImportModificationTracker.getInstance() };
+            } else {
+                dependents = new Object[] { parameterId, ImportModificationTracker.getInstance() };
             }
-            return new Result<>(reference, parameterId, keywordStatement, ImportModificationTracker.getInstance());
+            return new Result<>(reference, dependents);
         });
     }
 }
