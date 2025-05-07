@@ -3,7 +3,6 @@ package com.github.jnhyperion.hyperrobotframeworkplugin.psi.ref;
 import com.github.jnhyperion.hyperrobotframeworkplugin.ide.LookupElementUtil;
 import com.github.jnhyperion.hyperrobotframeworkplugin.ide.RobotTailTypes;
 import com.github.jnhyperion.hyperrobotframeworkplugin.ide.config.RobotOptionsProvider;
-import com.github.jnhyperion.hyperrobotframeworkplugin.psi.ImportModificationTracker;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.dto.ImportType;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.DefinedKeyword;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.KeywordFile;
@@ -16,8 +15,7 @@ import com.intellij.icons.AllIcons.Nodes;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiReferenceBase;
-import com.intellij.psi.util.CachedValueProvider.Result;
-import com.intellij.psi.util.CachedValuesManager;
+import com.intellij.psi.impl.source.resolve.ResolveCache;
 import org.apache.commons.text.WordUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -37,12 +35,12 @@ public class RobotKeywordReference extends PsiReferenceBase<KeywordInvokable> {
     @Override
     public PsiElement resolve() {
         KeywordInvokable keywordInvokable = getElement();
-        return CachedValuesManager.getCachedValue(keywordInvokable, () -> {
+        ResolveCache resolveCache = ResolveCache.getInstance(keywordInvokable.getProject());
+        return resolveCache.resolveWithCaching(this, (robotKeywordReference, incompleteCode) -> {
             String keywordInvokableName = keywordInvokable.getName();
             PsiFile containingFile = keywordInvokable.getContainingFile();
-            PsiElement reference = ResolverUtils.findKeywordReference(keywordInvokableName, containingFile);
-            return new Result<>(reference, keywordInvokable, ImportModificationTracker.getInstance());
-        });
+            return ResolverUtils.findKeywordReference(keywordInvokableName, containingFile);
+        }, false, false);
     }
 
     @Override

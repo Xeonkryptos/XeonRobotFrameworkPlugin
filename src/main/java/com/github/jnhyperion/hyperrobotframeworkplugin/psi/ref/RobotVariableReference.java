@@ -1,12 +1,10 @@
 package com.github.jnhyperion.hyperrobotframeworkplugin.psi.ref;
 
-import com.github.jnhyperion.hyperrobotframeworkplugin.psi.ImportModificationTracker;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.Variable;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiReferenceBase;
-import com.intellij.psi.util.CachedValueProvider.Result;
-import com.intellij.psi.util.CachedValuesManager;
+import com.intellij.psi.impl.source.resolve.ResolveCache;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -20,7 +18,8 @@ public class RobotVariableReference extends PsiReferenceBase<Variable> {
     @Override
     public PsiElement resolve() {
         Variable variable = getElement();
-        return CachedValuesManager.getCachedValue(variable, () -> {
+        ResolveCache resolveCache = ResolveCache.getInstance(variable.getProject());
+        return resolveCache.resolveWithCaching(this, (robotVariableReference, incompleteCode) -> {
             if (variable.isEmpty()) { // e.g. ${}, thus empty representation of a variable. There can be no reference.
                 return null;
             }
@@ -31,7 +30,7 @@ public class RobotVariableReference extends PsiReferenceBase<Variable> {
                 PsiFile containingFile = variable.getContainingFile();
                 resolvedElement = ResolverUtils.findVariableElement(variableName, containingFile);
             }
-            return new Result<>(resolvedElement, variable, parentElement, ImportModificationTracker.getInstance());
-        });
+            return resolvedElement;
+        }, false, false);
     }
 }

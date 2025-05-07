@@ -1,7 +1,6 @@
 package com.github.jnhyperion.hyperrobotframeworkplugin.ide;
 
 import com.github.jnhyperion.hyperrobotframeworkplugin.MyLogger;
-import com.github.jnhyperion.hyperrobotframeworkplugin.psi.ImportModificationTracker;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.RobotFeatureFileType;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.RobotKeywordReferenceUpdater;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.RobotResourceFileType;
@@ -132,7 +131,6 @@ public class RobotListenerMgr {
                           }
                       }
                       if (importUpdate) {
-                          ImportModificationTracker.getInstance().incModificationCount();
                           DaemonCodeAnalyzer.getInstance(project).restart();
                       }
 

@@ -1,6 +1,5 @@
 package com.github.jnhyperion.hyperrobotframeworkplugin.psi.ref;
 
-import com.github.jnhyperion.hyperrobotframeworkplugin.psi.ImportModificationTracker;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.DefinedParameter;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.KeywordStatement;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.ParameterId;
@@ -8,8 +7,7 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiReference;
 import com.intellij.psi.PsiReferenceBase;
-import com.intellij.psi.util.CachedValueProvider.Result;
-import com.intellij.psi.util.CachedValuesManager;
+import com.intellij.psi.impl.source.resolve.ResolveCache;
 import com.intellij.psi.util.PsiTreeUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -26,11 +24,11 @@ public class RobotParameterReference extends PsiReferenceBase<ParameterId> imple
     @Override
     public PsiElement resolve() {
         ParameterId parameterId = getElement();
-        return CachedValuesManager.getCachedValue(parameterId, () -> {
+        ResolveCache resolveCache = ResolveCache.getInstance(parameterId.getProject());
+        return resolveCache.resolveWithCaching(this, (robotParameterReference, incompleteCode) -> {
             String parameterName = parameterId.getName();
             KeywordStatement keywordStatement = PsiTreeUtil.getParentOfType(parameterId, KeywordStatement.class);
             PsiElement reference = null;
-            Object[] dependents;
             if (keywordStatement != null && parameterName != null) {
                 reference = keywordStatement.getAvailableParameters()
                                             .stream()
@@ -44,11 +42,8 @@ public class RobotParameterReference extends PsiReferenceBase<ParameterId> imple
                     PsiFile containingFile = keywordStatement.getContainingFile();
                     reference = ResolverUtils.findKeywordReference(keywordStatementName, containingFile);
                 }
-                dependents = new Object[] { parameterId, keywordStatement, ImportModificationTracker.getInstance() };
-            } else {
-                dependents = new Object[] { parameterId, ImportModificationTracker.getInstance() };
             }
-            return new Result<>(reference, dependents);
-        });
+            return reference;
+        }, false, false);
     }
 }
