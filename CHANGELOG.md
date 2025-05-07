@@ -4,6 +4,14 @@
 
 ## Unreleased
 
+### Fixed
+
+- Fixed reason for StackOverflowError
+
+### Changed
+
+- Parameters without an argument are interpreted as an argument themselves
+
 ## 0.2.7
 
 ### Added
