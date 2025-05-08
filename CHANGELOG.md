@@ -10,7 +10,13 @@
 
 ### Changed
 
+- Interpret parameters without a value as an argument
+- Detected parameters in a data template setup correctly
+
+### Changed
+
 - Parameters without an argument are interpreted as an argument themselves
+- Switched from CachedValuesManager to ResolveCache
 
 ## 0.2.7
 

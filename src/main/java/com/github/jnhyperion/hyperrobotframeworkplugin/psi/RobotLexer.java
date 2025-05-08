@@ -232,7 +232,7 @@ public class RobotLexer extends LexerBase {
                 setCurrentToken(RobotTokenTypes.GHERKIN);
                 this.level.push(GHERKIN);
             } else {
-                goToNextNewLineOrSuperSpaceOrVariable();
+                goToNextNewLineOrSuperSpaceOrVariableOrArgument();
                 word = getTokenText();
                 if (RobotKeywordProvider.isSyntaxOfType(RobotTokenTypes.BRACKET_SETTING, word)) {
                     setCurrentToken(RobotTokenTypes.BRACKET_SETTING);
@@ -258,7 +258,7 @@ public class RobotLexer extends LexerBase {
                     }
                     setCurrentToken(RobotStubTokenTypes.KEYWORD_DEFINITION);
                     this.level.push(KEYWORD_DEFINITION);
-                } else if (state == KEYWORD_DEFINITION && isAssignment(this.position)) {
+                } else if (state == KEYWORD_DEFINITION && isAssignment(this.position) && word.isEmpty()) {
                     this.position++;
                     setCurrentToken(RobotTokenTypes.WHITESPACE);
                 } else {
@@ -269,7 +269,7 @@ public class RobotLexer extends LexerBase {
                             this.level.push(KEYWORD);
                         }
                     } else {
-                        if (isAssignment(this.position + 1)) {
+                        if (isAssignment(position) && !isSuperSpaceOrNewline(position + 1) && !isTab(position + 1)) {
                             setCurrentToken(RobotTokenTypes.PARAMETER);
                         } else {
                             setCurrentToken(RobotStubTokenTypes.ARGUMENT);
@@ -350,7 +350,7 @@ public class RobotLexer extends LexerBase {
                 this.level.push(KEYWORD);
                 setCurrentToken(RobotTokenTypes.KEYWORD);
             } else if (parentState != IMPORT || state != IF_CLAUSE) {
-                if (isAssignment(this.position) && previousToken != RobotTokenTypes.PARAMETER) {
+                if (isAssignment(this.position) && previousToken != RobotTokenTypes.PARAMETER && !isSuperSpaceOrNewline(position) && !isTab(position)) {
                     setCurrentToken(RobotTokenTypes.PARAMETER);
                 } else {
                     setCurrentToken(RobotStubTokenTypes.ARGUMENT);
