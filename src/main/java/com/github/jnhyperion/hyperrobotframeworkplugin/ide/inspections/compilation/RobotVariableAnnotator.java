@@ -8,7 +8,10 @@ import com.intellij.lang.annotation.AnnotationHolder;
 import com.intellij.lang.annotation.Annotator;
 import com.intellij.lang.annotation.HighlightSeverity;
 import com.intellij.lang.injection.InjectedLanguageManager;
+import com.intellij.openapi.application.Application;
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.project.DumbAware;
+import com.intellij.openapi.util.Computable;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiReference;
 import com.intellij.psi.util.PsiTreeUtil;
@@ -28,8 +31,12 @@ public class RobotVariableAnnotator implements Annotator, DumbAware {
             return;
         }
         PsiReference reference = element.getReference();
-        if (reference != null && reference.resolve() != null) {
-            return;
+        Application application = ApplicationManager.getApplication();
+        if (reference != null) {
+            PsiElement resolvedReference = application.runReadAction((Computable<? extends PsiElement>) reference::resolve);
+            if (resolvedReference != null) {
+                return;
+            }
         }
 
         InjectedLanguageManager injectedLanguageManager = InjectedLanguageManager.getInstance(element.getProject());
@@ -43,13 +50,15 @@ public class RobotVariableAnnotator implements Annotator, DumbAware {
             }
         }
 
-        KeywordStatement keywordStatement = PsiTreeUtil.getParentOfType(element, KeywordStatement.class);
-        if (keywordStatement != null) {
-            List<PositionalArgument> positionalArguments = keywordStatement.getPositionalArguments();
-            if (keywordStatement.getGlobalVariable() != null && positionalArguments.size() > 1 && element == positionalArguments.getFirst()) {
-                return;
+        if (element.isValid()) {
+            KeywordStatement keywordStatement = PsiTreeUtil.getParentOfType(element, KeywordStatement.class);
+            if (keywordStatement != null) {
+                List<PositionalArgument> positionalArguments = application.runReadAction((Computable<? extends List<PositionalArgument>>) keywordStatement::getPositionalArguments);
+                if (keywordStatement.getGlobalVariable() != null && positionalArguments.size() > 1 && element == positionalArguments.getFirst()) {
+                    return;
+                }
             }
+            holder.newAnnotation(HighlightSeverity.ERROR, RobotBundle.getMessage("annotation.variable.not-found")).range(element).create();
         }
-        holder.newAnnotation(HighlightSeverity.ERROR, RobotBundle.getMessage("annotation.variable.not-found")).range(element).create();
     }
 }
