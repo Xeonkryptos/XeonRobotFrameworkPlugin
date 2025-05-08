@@ -240,6 +240,9 @@ public class HeadingImpl extends RobotPsiElementBase implements Heading {
     @NotNull
     @Override
     public final Collection<KeywordFile> collectImportFiles() {
+        if (!isValid()) {
+            return List.of();
+        }
         Collection<KeywordFile> files = keywordFiles;
         if (keywordFiles == null) {
             files = new LinkedHashSet<>();
