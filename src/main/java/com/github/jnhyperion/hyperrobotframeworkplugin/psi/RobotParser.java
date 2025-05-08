@@ -357,10 +357,8 @@ public class RobotParser implements PsiParser {
                 || RobotStubTokenTypes.VARIABLE_DEFINITION == current) {
                 parseSimple(builder, current);
             } else {
-                if (current == RobotTokenTypes.PARAMETER && builder.rawLookup(1) != RobotTokenTypes.WHITESPACE) {
+                if (current == RobotTokenTypes.PARAMETER) {
                     parameterId = builder.mark();
-                } else if (current == RobotTokenTypes.PARAMETER) {
-                    type = RobotStubTokenTypes.ARGUMENT;
                 }
                 builder.advanceLexer();
                 if (parameterId != null) {
