@@ -139,6 +139,7 @@ public class RobotListenerMgr {
                   })
                   .inSmartMode(project)
                   .withDocumentsCommitted(project)
+                  .coalesceBy(modificationTracker)
                   .expireWhen(() -> currentModificationCount != modificationTracker.getModificationCount())
                   .submit(AppExecutorUtil.getAppExecutorService());
     }

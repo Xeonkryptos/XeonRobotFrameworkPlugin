@@ -9,9 +9,6 @@ import com.intellij.codeInspection.ProblemHighlightType;
 import com.intellij.lang.annotation.AnnotationHolder;
 import com.intellij.lang.annotation.Annotator;
 import com.intellij.lang.annotation.HighlightSeverity;
-import com.intellij.openapi.application.Application;
-import com.intellij.openapi.application.ApplicationManager;
-import com.intellij.openapi.util.Computable;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiReference;
 import com.jetbrains.python.psi.PyElement;
@@ -26,8 +23,7 @@ public class RobotKeywordAnnotator implements Annotator {
             return;
         }
         PsiReference reference = element.getReference();
-        Application application = ApplicationManager.getApplication();
-        PsiElement resolvedElement = reference != null ? application.runReadAction((Computable<? extends PsiElement>) reference::resolve) : null;
+        PsiElement resolvedElement = reference != null ? reference.resolve() : null;
         boolean isResolved = resolvedElement != null;
 
         if (!isResolved && element.getNode().getElementType() == RobotTokenTypes.SYNTAX_MARKER) {

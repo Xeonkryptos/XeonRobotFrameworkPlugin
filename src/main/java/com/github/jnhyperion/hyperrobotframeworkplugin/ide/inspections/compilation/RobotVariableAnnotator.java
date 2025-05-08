@@ -31,12 +31,8 @@ public class RobotVariableAnnotator implements Annotator, DumbAware {
             return;
         }
         PsiReference reference = element.getReference();
-        Application application = ApplicationManager.getApplication();
-        if (reference != null) {
-            PsiElement resolvedReference = application.runReadAction((Computable<? extends PsiElement>) reference::resolve);
-            if (resolvedReference != null) {
-                return;
-            }
+        if (reference != null && reference.resolve() != null) {
+            return;
         }
 
         InjectedLanguageManager injectedLanguageManager = InjectedLanguageManager.getInstance(element.getProject());
@@ -53,7 +49,7 @@ public class RobotVariableAnnotator implements Annotator, DumbAware {
         if (element.isValid()) {
             KeywordStatement keywordStatement = PsiTreeUtil.getParentOfType(element, KeywordStatement.class);
             if (keywordStatement != null) {
-                List<PositionalArgument> positionalArguments = application.runReadAction((Computable<? extends List<PositionalArgument>>) keywordStatement::getPositionalArguments);
+                List<PositionalArgument> positionalArguments = keywordStatement.getPositionalArguments();
                 if (keywordStatement.getGlobalVariable() != null && positionalArguments.size() > 1 && element == positionalArguments.getFirst()) {
                     return;
                 }
