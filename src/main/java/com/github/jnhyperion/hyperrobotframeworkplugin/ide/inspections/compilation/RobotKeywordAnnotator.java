@@ -19,18 +19,13 @@ public class RobotKeywordAnnotator implements Annotator {
 
     @Override
     public void annotate(@NotNull PsiElement element, @NotNull AnnotationHolder holder) {
-        if (!(element instanceof KeywordInvokable)) {
+        if (!element.isValid() || !(element instanceof KeywordInvokable)) {
             return;
         }
         PsiReference reference = element.getReference();
         PsiElement resolvedElement = reference != null ? reference.resolve() : null;
         boolean isResolved = resolvedElement != null;
-
-        if (!isResolved && element.getNode().getElementType() == RobotTokenTypes.SYNTAX_MARKER) {
-            return;
-        }
-
-        if (!isResolved) {
+        if (!isResolved && element.getNode().getElementType() != RobotTokenTypes.SYNTAX_MARKER) {
             holder.newAnnotation(HighlightSeverity.ERROR, RobotBundle.getMessage("annotation.keyword.not-found")).range(element).create();
         } else if (resolvedElement instanceof PyElement pyElement) {
             PyElementDeprecatedVisitor pyElementDeprecatedVisitor = new PyElementDeprecatedVisitor();

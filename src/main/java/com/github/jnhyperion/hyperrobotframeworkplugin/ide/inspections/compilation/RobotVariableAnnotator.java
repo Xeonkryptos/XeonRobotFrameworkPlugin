@@ -8,10 +8,7 @@ import com.intellij.lang.annotation.AnnotationHolder;
 import com.intellij.lang.annotation.Annotator;
 import com.intellij.lang.annotation.HighlightSeverity;
 import com.intellij.lang.injection.InjectedLanguageManager;
-import com.intellij.openapi.application.Application;
-import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.project.DumbAware;
-import com.intellij.openapi.util.Computable;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiReference;
 import com.intellij.psi.util.PsiTreeUtil;
@@ -27,7 +24,7 @@ public class RobotVariableAnnotator implements Annotator, DumbAware {
 
     @Override
     public void annotate(@NotNull PsiElement element, @NotNull AnnotationHolder holder) {
-        if (!(element instanceof Variable variable) || variable.isEmpty() || variable.isNested()) {
+        if (!element.isValid() || !(element instanceof Variable variable) || variable.isEmpty() || variable.isNested()) {
             return;
         }
         PsiReference reference = element.getReference();

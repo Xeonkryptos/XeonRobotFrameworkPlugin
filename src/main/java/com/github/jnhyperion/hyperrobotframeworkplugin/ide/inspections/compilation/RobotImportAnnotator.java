@@ -13,7 +13,7 @@ public class RobotImportAnnotator implements Annotator {
 
     @Override
     public void annotate(@NotNull PsiElement element, @NotNull AnnotationHolder holder) {
-        if (!(element instanceof Import importElement)) {
+        if (!element.isValid() || !(element instanceof Import importElement)) {
             return;
         }
 

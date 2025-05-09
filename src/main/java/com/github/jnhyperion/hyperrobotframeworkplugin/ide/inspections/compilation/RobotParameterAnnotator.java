@@ -24,30 +24,26 @@ public class RobotParameterAnnotator implements Annotator {
 
     @Override
     public void annotate(@NotNull PsiElement element, @NotNull AnnotationHolder holder) {
-        if (!(element instanceof Parameter parameter)) {
+        if (!element.isValid() || !(element instanceof Parameter parameter)) {
             return;
         }
-        if (element.isValid()) {
-            KeywordStatement keywordStatement = PsiTreeUtil.getParentOfType(parameter, KeywordStatement.class);
-            if (keywordStatement != null) {
-                keywordStatement.reset();
-                Collection<DefinedParameter> availableParameters = keywordStatement.getAvailableParameters();
-                Set<String> parameterNames = availableParameters.stream().map(DefinedParameter::getLookup).collect(Collectors.toSet());
-                String parameterName = parameter.getParameterName();
-                if (!parameterNames.contains(parameterName) && availableParameters.stream().noneMatch(DefinedParameter::isKeywordContainer)) {
-                    holder.newAnnotation(HighlightSeverity.ERROR, RobotBundle.getMessage("annotation.keyword.parameter.not-found")).range(parameter).create();
-                }
+        KeywordStatement keywordStatement = PsiTreeUtil.getParentOfType(parameter, KeywordStatement.class);
+        if (keywordStatement != null) {
+            keywordStatement.reset();
+            Collection<DefinedParameter> availableParameters = keywordStatement.getAvailableParameters();
+            Set<String> parameterNames = availableParameters.stream().map(DefinedParameter::getLookup).collect(Collectors.toSet());
+            String parameterName = parameter.getParameterName();
+            if (!parameterNames.contains(parameterName) && availableParameters.stream().noneMatch(DefinedParameter::isKeywordContainer)) {
+                holder.newAnnotation(HighlightSeverity.ERROR, RobotBundle.getMessage("annotation.keyword.parameter.not-found")).range(parameter).create();
             }
-
-            RobotStatement argument = PsiTreeUtil.findChildOfAnyType(parameter, PositionalArgument.class, Variable.class);
-            if (argument == null) {
-                holder.newAnnotation(HighlightSeverity.WARNING, RobotBundle.getMessage("annotation.keyword.parameter.value.not-found"))
-                      .range(parameter)
-                      .create();
-            }
-
-            ParameterId parameterId = PsiTreeUtil.getRequiredChildOfType(parameter, ParameterId.class);
-            holder.newSilentAnnotation(HighlightSeverity.INFORMATION).range(parameterId).textAttributes(DefaultLanguageHighlighterColors.PARAMETER).create();
         }
+
+        RobotStatement argument = PsiTreeUtil.findChildOfAnyType(parameter, PositionalArgument.class, Variable.class);
+        if (argument == null) {
+            holder.newAnnotation(HighlightSeverity.WARNING, RobotBundle.getMessage("annotation.keyword.parameter.value.not-found")).range(parameter).create();
+        }
+
+        ParameterId parameterId = PsiTreeUtil.getRequiredChildOfType(parameter, ParameterId.class);
+        holder.newSilentAnnotation(HighlightSeverity.INFORMATION).range(parameterId).textAttributes(DefaultLanguageHighlighterColors.PARAMETER).create();
     }
 }
