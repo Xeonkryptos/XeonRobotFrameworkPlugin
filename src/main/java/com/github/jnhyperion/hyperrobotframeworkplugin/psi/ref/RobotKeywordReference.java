@@ -46,7 +46,6 @@ public class RobotKeywordReference extends PsiReferenceBase<KeywordInvokable> {
     @Override
     public Object @NotNull [] getVariants() {
         String name = getElement().getName();
-        assert name != null;
         String keywordPrefix = name.split("\\.")[0];
         PsiFile containingFile = getElement().getContainingFile();
 

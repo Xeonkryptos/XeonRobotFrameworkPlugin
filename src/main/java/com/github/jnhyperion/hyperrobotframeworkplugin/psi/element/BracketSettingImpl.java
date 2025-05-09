@@ -46,7 +46,6 @@ public class BracketSettingImpl extends RobotPsiElementBase implements BracketSe
         Collection<DefinedParameter> localArguments = arguments;
         if (localArguments == null) {
             localArguments = PsiTreeUtil.getChildrenOfTypeAsList(this, VariableDefinition.class).stream().map(variableDefinition -> {
-                assert variableDefinition.getName() != null;
                 String defaultValue = PsiTreeUtil.getChildrenOfTypeAsList(variableDefinition, Argument.class)
                                                  .stream()
                                                  .map(RobotStatement::getPresentableText)
@@ -66,7 +65,7 @@ public class BracketSettingImpl extends RobotPsiElementBase implements BracketSe
                 if (defaultValue != null && defaultValue.isEmpty()) {
                     defaultValue = null;
                 }
-                return new ParameterDto(variableDefinition, variableDefinition.getName(), defaultValue);
+                return new ParameterDto(variableDefinition, variableDefinition.getUnwrappedName(), defaultValue);
             }).collect(Collectors.toCollection(LinkedHashSet::new));
             arguments = localArguments;
         }

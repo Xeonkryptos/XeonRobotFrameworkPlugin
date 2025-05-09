@@ -7,7 +7,6 @@ import com.github.jnhyperion.hyperrobotframeworkplugin.psi.util.ReservedVariable
 import com.intellij.lang.ASTNode;
 import com.intellij.lang.injection.InjectedLanguageManager;
 import com.intellij.psi.PsiElement;
-import com.intellij.psi.PsiNamedElement;
 import com.intellij.psi.stubs.IStubElementType;
 import com.intellij.psi.util.PsiTreeUtil;
 import org.jetbrains.annotations.NotNull;
@@ -145,12 +144,8 @@ public class KeywordDefinitionImpl extends RobotStubPsiElementBase<KeywordDefini
     private Collection<DefinedVariable> getTestCaseVariables() {
         Set<DefinedVariable> results = new LinkedHashSet<>();
         for (VariableDefinition variableDefinition : PsiTreeUtil.getChildrenOfTypeAsList(this, VariableDefinition.class)) {
-            PsiNamedElement identifyingElement = (PsiNamedElement) variableDefinition.getIdentifyingElement();
-            if (identifyingElement != null) {
-                String name = identifyingElement.getName();
-                assert name != null;
-                results.add(new VariableDto(variableDefinition, name, ReservedVariableScope.TestCase));
-            }
+            String name = variableDefinition.getName();
+            results.add(new VariableDto(variableDefinition, name, ReservedVariableScope.TestCase));
         }
         for (VariableDefinitionGroup variableDefinitionGroup : PsiTreeUtil.getChildrenOfTypeAsList(this, VariableDefinitionGroup.class)) {
             Collection<DefinedVariable> definedVariables = variableDefinitionGroup.getDefinedVariables();

@@ -34,7 +34,6 @@ public class VariableDefinitionImpl extends RobotStubPsiElementBase<VariableDefi
     public String getName() {
         VariableDefinitionStub stub = getStub();
         if (stub != null) {
-            assert stub.getName() != null;
             return stub.getName();
         }
         VariableDefinitionId variableId = getNameIdentifier();
@@ -74,7 +73,8 @@ public class VariableDefinitionImpl extends RobotStubPsiElementBase<VariableDefi
         return pattern != null && pattern.matcher(text).matches();
     }
 
-    private boolean isEmpty() {
+    @Override
+    public boolean isEmpty() {
         // A variable contains always $, @ or % and at enclosing brackets. Meaning, a variable consists of at least 3 characters even when no name is defined
         return getName().length() <= 3;
     }

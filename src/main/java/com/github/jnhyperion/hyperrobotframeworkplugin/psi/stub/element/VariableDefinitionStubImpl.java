@@ -4,6 +4,7 @@ import com.github.jnhyperion.hyperrobotframeworkplugin.psi.RobotStubTokenTypes;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.VariableDefinition;
 import com.intellij.psi.stubs.StubBase;
 import com.intellij.psi.stubs.StubElement;
+import org.jetbrains.annotations.NotNull;
 
 public class VariableDefinitionStubImpl extends StubBase<VariableDefinition> implements VariableDefinitionStub {
 
@@ -16,7 +17,7 @@ public class VariableDefinitionStubImpl extends StubBase<VariableDefinition> imp
     }
 
     @Override
-    public String getName() {
+    public @NotNull String getName() {
         return myName;
     }
 }
