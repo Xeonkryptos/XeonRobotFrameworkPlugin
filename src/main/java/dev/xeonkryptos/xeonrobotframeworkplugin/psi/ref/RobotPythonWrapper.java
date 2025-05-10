@@ -1,5 +1,6 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.psi.ref;
 
+import com.intellij.openapi.progress.ProcessCanceledException;
 import dev.xeonkryptos.xeonrobotframeworkplugin.MyLogger;
 import dev.xeonkryptos.xeonrobotframeworkplugin.ide.config.RobotOptionsProvider;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.dto.KeywordDto;
@@ -167,6 +168,8 @@ public abstract class RobotPythonWrapper {
                                                 methodName,
                                                 PythonInspector.convertPyParameters(parameters, method.getParameterList().getParameters(), true)));
                 }
+            } catch (ProcessCanceledException e) {
+                throw e;
             } catch (Exception e) {
                 MyLogger.logger.warn("Error while inspecting Python functions. Falling back to static analysis.", e);
                 methodsToStaticallyInspect.putAll(methodsToLiveInspect);

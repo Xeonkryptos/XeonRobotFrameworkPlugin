@@ -98,7 +98,7 @@ public class RobotStackFrame extends XStackFrame {
                     variablesArguments = new VariablesArguments();
                     variablesArguments.setVariablesReference(variableRef);
                     VariablesResponse variables = debugServer.variables(variablesArguments).get();
-                    RobotValueGroup group = new RobotValueGroup(groupName, variables, variableRef, debugServer, session);
+                    RobotValueGroup group = new RobotValueGroup(groupName, variables, debugServer, session);
                     list.addBottomGroup(group);
                 }
             }

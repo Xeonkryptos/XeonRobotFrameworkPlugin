@@ -1,12 +1,10 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.psi.ref;
 
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.Import;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.Parameter;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.PositionalArgument;
 import com.intellij.codeInsight.lookup.LookupElement;
 import com.intellij.codeInsight.lookup.LookupElementBuilder;
 import com.intellij.icons.AllIcons.Nodes;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiElementResolveResult;
 import com.intellij.psi.PsiFile;
@@ -34,6 +32,9 @@ import com.jetbrains.python.psi.PyStringLiteralExpression;
 import com.jetbrains.python.psi.PyTargetExpression;
 import com.jetbrains.python.psi.PyTupleExpression;
 import com.jetbrains.python.psi.stubs.PyModuleNameIndex;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.Import;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.Parameter;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.PositionalArgument;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -64,12 +65,24 @@ public class RobotArgumentReference extends PsiPolyVariantReferenceBase<Position
         Set<ResolveResult> results = new LinkedHashSet<>();
         if (parent instanceof Import importElement) {
             if (importElement.isResource()) {
-                for (PsiFile file : RobotFileManager.findPsiFiles(argumentValue, project)) {
+                PsiElement result = RobotFileManager.findElement(argumentValue, project, importElement);
+                if (result != null) {
+                    results.add(new PsiElementResolveResult(result));
+                }
+                VirtualFile virtualFile = importElement.getContainingFile().getVirtualFile();
+                PsiFile file = RobotFileManager.findPsiFiles(argumentValue, virtualFile, project);
+                if (file != null) {
                     results.add(new PsiElementResolveResult(file));
                 }
             } else if ((importElement.isLibrary() || importElement.isVariables())) {
+                PsiElement result = RobotFileManager.findElementInContext(argumentValue, project, importElement);
+                if (result != null) {
+                    results.add(new PsiElementResolveResult(result));
+                }
                 if (argumentValue.endsWith(".py")) {
-                    for (PsiFile file : RobotFileManager.findPsiFiles(argumentValue, project)) {
+                    VirtualFile virtualFile = importElement.getContainingFile().getVirtualFile();
+                    PsiFile file = RobotFileManager.findPsiFiles(argumentValue, virtualFile, project);
+                    if (file != null) {
                         results.add(new PsiElementResolveResult(file));
                     }
                 } else {
