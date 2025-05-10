@@ -7,6 +7,8 @@
 ### Fixed
 
 - Fixed reason for StackOverflowError
+- Fixed reasons for PsiInvalidElementAccessExceptions
+- Fixed not showing of Bracket settings in code completion
 
 ### Changed
 

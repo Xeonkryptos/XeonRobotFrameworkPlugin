@@ -13,7 +13,7 @@ class BracketSettingsCompletionProvider extends CompletionProvider<CompletionPar
     @Override
     protected void addCompletions(@NotNull CompletionParameters parameters, @NotNull ProcessingContext context, @NotNull CompletionResultSet result) {
         if (CompletionProviderUtils.isIndexPositionAWhitespaceCharacter(parameters)) {
-            Heading heading = CompletionProviderUtils.getHeading(parameters.getOriginalPosition());
+            Heading heading = CompletionProviderUtils.getHeading(parameters.getPosition());
             if (heading != null && (heading.containsTestCases() || heading.containsKeywordDefinitions())) {
                 CompletionProviderUtils.addSyntaxLookup(RobotTokenTypes.BRACKET_SETTING, result);
             }
