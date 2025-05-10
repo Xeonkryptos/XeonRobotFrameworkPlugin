@@ -13,7 +13,6 @@ import java.util.Map;
 public class RobotHighlighter extends SyntaxHighlighterBase {
 
     private static final Map<IElementType, TextAttributesKey> keys1 = new HashMap<>();
-    private static final Map<IElementType, TextAttributesKey> keys2 = new HashMap<>();
 
     public static final TextAttributesKey HEADING = TextAttributesKey.createTextAttributesKey(RobotTokenTypes.HEADING.toString(),
                                                                                               DefaultLanguageHighlighterColors.STRING);
@@ -70,6 +69,6 @@ public class RobotHighlighter extends SyntaxHighlighterBase {
     @NotNull
     @Override
     public TextAttributesKey @NotNull [] getTokenHighlights(IElementType tokenType) {
-        return pack(keys1.get(tokenType), keys2.get(tokenType));
+        return pack(keys1.get(tokenType));
     }
 }
