@@ -269,7 +269,7 @@ public class RobotLexer extends LexerBase {
                             this.level.push(KEYWORD);
                         }
                     } else {
-                        if (isAssignment(position) && !isSuperSpaceOrNewline(position + 1) && !isTab(position + 1)) {
+                        if (isParameter(position)) {
                             setCurrentToken(RobotTokenTypes.PARAMETER);
                         } else {
                             setCurrentToken(RobotStubTokenTypes.ARGUMENT);
@@ -350,7 +350,7 @@ public class RobotLexer extends LexerBase {
                 this.level.push(KEYWORD);
                 setCurrentToken(RobotTokenTypes.KEYWORD);
             } else if (parentState != IMPORT || state != IF_CLAUSE) {
-                if (isAssignment(this.position) && previousToken != RobotTokenTypes.PARAMETER && !isSuperSpaceOrNewline(position) && !isTab(position)) {
+                if (isParameter(position)) {
                     setCurrentToken(RobotTokenTypes.PARAMETER);
                 } else {
                     setCurrentToken(RobotStubTokenTypes.ARGUMENT);
@@ -403,6 +403,10 @@ public class RobotLexer extends LexerBase {
         return false;
     }
 
+    private boolean isParameter(int position) {
+        return isAssignment(position) && previousToken != RobotTokenTypes.PARAMETER && !isSuperSpaceOrNewline(position + 1) && !isTab(position + 1);
+    }
+
     private boolean isVariable(int position) {
         if (isVariableStart(position)) {
             position += 2;
@@ -432,8 +436,9 @@ public class RobotLexer extends LexerBase {
     }
 
     private boolean isVariableStart(int position) {
-        return (charAtEquals(position, '$') || charAtEquals(position, '@') || charAtEquals(position, '&') || charAtEquals(position, '%')) &&
-               charAtEquals(position + 1, '{');
+        return (charAtEquals(position, '$') || charAtEquals(position, '@') || charAtEquals(position, '&') || charAtEquals(position, '%')) && charAtEquals(
+                position + 1,
+                '{');
     }
 
     private List<TokenWord> extractTokenWords() {
@@ -526,9 +531,9 @@ public class RobotLexer extends LexerBase {
     }
 
     private boolean isVariableDefinition(int position) {
-        return isSuperSpaceOrNewline(position) ||
-               charAtEquals(position, '=') && isSuperSpaceOrNewline(position + 1) ||
-               isSpace(position) && charAtEquals(position + 1, '=') && isSuperSpaceOrNewline(position + 2);
+        return isSuperSpaceOrNewline(position) || charAtEquals(position, '=') && isSuperSpaceOrNewline(position + 1) || isSpace(position) && charAtEquals(
+                position + 1,
+                '=') && isSuperSpaceOrNewline(position + 2);
     }
 
     private void goToEndOfLine() {
@@ -639,8 +644,11 @@ public class RobotLexer extends LexerBase {
     private boolean charAtEquals(int position, char c) {
         return position < this.endOffset && this.buffer.charAt(position) == c;
     }
-    
+
     private void setCurrentToken(IElementType token) {
+        if (token == RobotStubTokenTypes.ARGUMENT && isAssignment(position)) {
+            goToNextNewLineOrSuperSpaceOrVariable();
+        }
         previousToken = currentToken;
         currentToken = token;
     }
