@@ -10,7 +10,7 @@ public class RobotDocumentationEnterActionHandler extends AbstractRobotSmartMult
 
     @Override
     protected BracketSetting getExpectedElement(@Nullable PsiElement element) {
-        return element instanceof BracketSetting ? (BracketSetting) element : PsiTreeUtil.getParentOfType(element, BracketSetting.class);
+        return element instanceof BracketSetting bracketSetting ? bracketSetting : PsiTreeUtil.getParentOfType(element, BracketSetting.class);
     }
 
     @Override

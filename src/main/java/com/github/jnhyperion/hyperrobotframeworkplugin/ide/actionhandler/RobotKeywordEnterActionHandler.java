@@ -10,7 +10,14 @@ public class RobotKeywordEnterActionHandler extends AbstractRobotSmartMultilineE
 
     @Override
     protected KeywordStatement getExpectedElement(@Nullable PsiElement element) {
-        return element instanceof KeywordStatement ? (KeywordStatement) element : PsiTreeUtil.getParentOfType(element, KeywordStatement.class);
+        if (element instanceof KeywordStatement keywordStatement) {
+            return keywordStatement;
+        }
+        KeywordStatement keywordStatement = PsiTreeUtil.getParentOfType(element, KeywordStatement.class);
+        if (keywordStatement != null) {
+            return keywordStatement;
+        }
+        return PsiTreeUtil.findChildOfType(element, KeywordStatement.class);
     }
 
     @Override

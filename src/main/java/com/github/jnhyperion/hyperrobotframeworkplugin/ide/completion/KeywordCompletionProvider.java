@@ -1,6 +1,6 @@
 package com.github.jnhyperion.hyperrobotframeworkplugin.ide.completion;
 
-import com.github.jnhyperion.hyperrobotframeworkplugin.ide.LookupElementUtil;
+import com.github.jnhyperion.hyperrobotframeworkplugin.util.LookupElementUtil;
 import com.github.jnhyperion.hyperrobotframeworkplugin.ide.config.RobotOptionsProvider;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.dto.ImportType;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.DefinedKeyword;

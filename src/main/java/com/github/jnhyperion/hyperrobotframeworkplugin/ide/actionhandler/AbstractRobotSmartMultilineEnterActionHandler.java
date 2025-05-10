@@ -3,7 +3,6 @@ package com.github.jnhyperion.hyperrobotframeworkplugin.ide.actionhandler;
 import com.github.jnhyperion.hyperrobotframeworkplugin.ide.config.RobotOptionsProvider;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.RobotFeatureFileType;
 import com.github.jnhyperion.hyperrobotframeworkplugin.psi.RobotResourceFileType;
-import com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.Argument;
 import com.github.jnhyperion.hyperrobotframeworkplugin.util.GlobalConstants;
 import com.intellij.codeInsight.editorActions.enter.EnterHandlerDelegateAdapter;
 import com.intellij.openapi.actionSystem.DataContext;
@@ -85,7 +84,7 @@ public abstract class AbstractRobotSmartMultilineEnterActionHandler<T extends Ps
         if (lineNumber != bracketSettingLineNumber) {
             // When there is already a text in a new line after the bracket setting definition, extract the indentation from there by finding the argument
             // of that line and its start offset and the diff to the ellipsis. This is then to be used as indentation for after the ellipsis.
-            whitespacesToInsert = evaluateCustomIndentationBasedOnArgument(file, lineStartOffset, lineEndOffset);
+            whitespacesToInsert = evaluateCustomIndentationBasedOnFirstNonWhitespaceElement(file, lineStartOffset, lineEndOffset);
         }
 
         textToInsert = textToInsert + whitespacesToInsert;
@@ -93,14 +92,14 @@ public abstract class AbstractRobotSmartMultilineEnterActionHandler<T extends Ps
         editor.getCaretModel().moveToOffset(caretOffset + textToInsert.length());
     }
 
-    private String evaluateCustomIndentationBasedOnArgument(@NotNull PsiFile file, int lineStartOffset, int lineEndOffset) {
+    private String evaluateCustomIndentationBasedOnFirstNonWhitespaceElement(@NotNull PsiFile file, int lineStartOffset, int lineEndOffset) {
         String whitespacesToInsert = GlobalConstants.DEFAULT_INDENTATION;
         PsiElement elementForIndentation = file.findElementAt(lineStartOffset);
-        while (elementForIndentation != null && !(elementForIndentation instanceof Argument) && elementForIndentation.getTextOffset() <= lineEndOffset) {
+        while (elementForIndentation instanceof PsiWhiteSpace && elementForIndentation.getTextOffset() <= lineEndOffset) {
             elementForIndentation = elementForIndentation.getNextSibling();
         }
 
-        if (elementForIndentation instanceof Argument) {
+        if (elementForIndentation != null && !(elementForIndentation instanceof PsiWhiteSpace)) {
             int argumentForIndentationOffset = elementForIndentation.getTextOffset();
             PsiElement ellipsisElement = elementForIndentation;
             do {

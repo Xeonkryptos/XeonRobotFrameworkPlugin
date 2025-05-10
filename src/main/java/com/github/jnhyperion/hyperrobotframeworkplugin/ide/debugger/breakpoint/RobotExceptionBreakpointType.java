@@ -47,8 +47,6 @@ public class RobotExceptionBreakpointType extends XBreakpointType<XBreakpoint<Ro
     @Nullable
     @Override
     public XBreakpoint<RobotExceptionBreakpointProperties> createDefaultBreakpoint(@NotNull XBreakpointCreator<RobotExceptionBreakpointProperties> creator) {
-        var breakpoint = creator.createBreakpoint(new RobotExceptionBreakpointProperties());
-        breakpoint.setEnabled(true);
-        return breakpoint;
+        return creator.createBreakpoint(new RobotExceptionBreakpointProperties());
     }
 }
