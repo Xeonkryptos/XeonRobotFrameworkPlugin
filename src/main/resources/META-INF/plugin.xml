@@ -8,73 +8,73 @@
     <depends>com.intellij.modules.xdebugger</depends>
 
     <extensions defaultExtensionNs="com.intellij">
-        <projectConfigurable groupId="language" instance="com.github.jnhyperion.hyperrobotframeworkplugin.ide.config.RobotConfiguration"
+        <projectConfigurable groupId="language" instance="dev.xeonkryptos.xeonrobotframeworkplugin.ide.config.RobotConfiguration"
                              displayName="Robot Options"/>
-        <projectService serviceImplementation="com.github.jnhyperion.hyperrobotframeworkplugin.ide.config.RobotOptionsProvider"/>
-        <fileType name="Robot Feature" implementationClass="com.github.jnhyperion.hyperrobotframeworkplugin.psi.RobotFeatureFileType" fieldName="INSTANCE"
+        <projectService serviceImplementation="dev.xeonkryptos.xeonrobotframeworkplugin.ide.config.RobotOptionsProvider"/>
+        <fileType name="Robot Feature" implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotFeatureFileType" fieldName="INSTANCE"
                   language="Robot" extensions="robot"/>
-        <fileType name="Robot Resource" implementationClass="com.github.jnhyperion.hyperrobotframeworkplugin.psi.RobotResourceFileType" fieldName="INSTANCE"
+        <fileType name="Robot Resource" implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotResourceFileType" fieldName="INSTANCE"
                   language="Robot" extensions="resource"/>
-        <colorSettingsPage implementation="com.github.jnhyperion.hyperrobotframeworkplugin.ide.config.RobotColorsPage"/>
+        <colorSettingsPage implementation="dev.xeonkryptos.xeonrobotframeworkplugin.ide.config.RobotColorsPage"/>
         <!-- IDE Hooks -->
         <completion.contributor language="Robot"
-                                implementationClass="com.github.jnhyperion.hyperrobotframeworkplugin.ide.completion.RobotCompletionContributor"/>
-        <lang.findUsagesProvider language="Robot" implementationClass="com.github.jnhyperion.hyperrobotframeworkplugin.ide.usage.RobotFindUsagesProvider"/>
-        <findUsagesHandlerFactory implementation="com.github.jnhyperion.hyperrobotframeworkplugin.ide.usage.RobotPythonFindUsagesHandlerFactory"/>
-        <usageTypeProvider implementation="com.github.jnhyperion.hyperrobotframeworkplugin.ide.usage.RobotUsageTypeProvider"/>
-        <referencesSearch implementation="com.github.jnhyperion.hyperrobotframeworkplugin.ide.search.RobotKeywordReferenceSearch"/>
-        <referencesSearch implementation="com.github.jnhyperion.hyperrobotframeworkplugin.ide.search.RobotImportArgumentReferenceSearch"/>
+                                implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.ide.completion.RobotCompletionContributor"/>
+        <lang.findUsagesProvider language="Robot" implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.ide.usage.RobotFindUsagesProvider"/>
+        <findUsagesHandlerFactory implementation="dev.xeonkryptos.xeonrobotframeworkplugin.ide.usage.RobotPythonFindUsagesHandlerFactory"/>
+        <usageTypeProvider implementation="dev.xeonkryptos.xeonrobotframeworkplugin.ide.usage.RobotUsageTypeProvider"/>
+        <referencesSearch implementation="dev.xeonkryptos.xeonrobotframeworkplugin.ide.search.RobotKeywordReferenceSearch"/>
+        <referencesSearch implementation="dev.xeonkryptos.xeonrobotframeworkplugin.ide.search.RobotImportArgumentReferenceSearch"/>
 
-        <fileStructureGroupRuleProvider implementation="com.github.jnhyperion.hyperrobotframeworkplugin.ide.usage.RobotKeywordGroupingRuleProvider"/>
-        <treeStructureProvider implementation="com.github.jnhyperion.hyperrobotframeworkplugin.ide.structure.RobotTreeStructureProvider"/>
+        <fileStructureGroupRuleProvider implementation="dev.xeonkryptos.xeonrobotframeworkplugin.ide.usage.RobotKeywordGroupingRuleProvider"/>
+        <treeStructureProvider implementation="dev.xeonkryptos.xeonrobotframeworkplugin.ide.structure.RobotTreeStructureProvider"/>
         <lang.psiStructureViewFactory language="Robot"
-                                      implementationClass="com.github.jnhyperion.hyperrobotframeworkplugin.ide.structure.RobotStructureViewFactory"/>
+                                      implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.ide.structure.RobotStructureViewFactory"/>
 
         <lang.syntaxHighlighterFactory language="Robot"
-                                       implementationClass="com.github.jnhyperion.hyperrobotframeworkplugin.psi.RobotSyntaxHighlightingFactory"/>
-        <lang.commenter language="Robot" implementationClass="com.github.jnhyperion.hyperrobotframeworkplugin.ide.RobotCommenter"/>
-        <lang.foldingBuilder language="Robot" implementationClass="com.github.jnhyperion.hyperrobotframeworkplugin.ide.RobotFoldingBuilder"/>
-        <lang.parserDefinition language="Robot" implementationClass="com.github.jnhyperion.hyperrobotframeworkplugin.psi.RobotParserDefinition"/>
-        <stubElementTypeHolder class="com.github.jnhyperion.hyperrobotframeworkplugin.psi.RobotStubTokenTypes" externalIdPrefix="robot."/>
-        <stubIndex implementation="com.github.jnhyperion.hyperrobotframeworkplugin.psi.stub.index.KeywordStatementNameIndex"/>
-        <stubIndex implementation="com.github.jnhyperion.hyperrobotframeworkplugin.psi.stub.index.PositionalArgumentImportIndex"/>
+                                       implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotSyntaxHighlightingFactory"/>
+        <lang.commenter language="Robot" implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.ide.RobotCommenter"/>
+        <lang.foldingBuilder language="Robot" implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.ide.RobotFoldingBuilder"/>
+        <lang.parserDefinition language="Robot" implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotParserDefinition"/>
+        <stubElementTypeHolder class="dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotStubTokenTypes" externalIdPrefix="robot."/>
+        <stubIndex implementation="dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.index.KeywordStatementNameIndex"/>
+        <stubIndex implementation="dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.index.PositionalArgumentImportIndex"/>
         <codeInsight.parameterInfo language="Robot"
-                                   implementationClass="com.github.jnhyperion.hyperrobotframeworkplugin.ide.parameterinfo.RobotParameterInfoHandler"/>
+                                   implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.ide.parameterinfo.RobotParameterInfoHandler"/>
         <codeInsight.parameterInfo language="Robot"
-                                   implementationClass="com.github.jnhyperion.hyperrobotframeworkplugin.ide.parameterinfo.RobotParameterInfoHandler"/>
+                                   implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.ide.parameterinfo.RobotParameterInfoHandler"/>
         <!-- Manipulators -->
-        <lang.elementManipulator forClass="com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.KeywordInvokable"
-                                 implementationClass="com.github.jnhyperion.hyperrobotframeworkplugin.psi.manip.KeywordInvokableManipulator"/>
-        <lang.elementManipulator forClass="com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.PositionalArgument"
-                                 implementationClass="com.github.jnhyperion.hyperrobotframeworkplugin.psi.manip.PositionalArgumentManipulator"/>
-        <lang.elementManipulator forClass="com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.Variable"
-                                 implementationClass="com.github.jnhyperion.hyperrobotframeworkplugin.psi.manip.VariableManipulator"/>
-        <lang.elementManipulator forClass="com.github.jnhyperion.hyperrobotframeworkplugin.psi.element.ParameterId"
-                                 implementationClass="com.github.jnhyperion.hyperrobotframeworkplugin.psi.manip.ParameterIdManipulator"/>
+        <lang.elementManipulator forClass="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.KeywordInvokable"
+                                 implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.psi.manip.KeywordInvokableManipulator"/>
+        <lang.elementManipulator forClass="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.PositionalArgument"
+                                 implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.psi.manip.PositionalArgumentManipulator"/>
+        <lang.elementManipulator forClass="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.Variable"
+                                 implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.psi.manip.VariableManipulator"/>
+        <lang.elementManipulator forClass="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.ParameterId"
+                                 implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.psi.manip.ParameterIdManipulator"/>
         <!-- Annotations -->
         <annotator language="Robot"
-                   implementationClass="com.github.jnhyperion.hyperrobotframeworkplugin.ide.inspections.compilation.RobotParameterAnnotator"/>
+                   implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.ide.inspections.compilation.RobotParameterAnnotator"/>
         <annotator language="Robot"
-                   implementationClass="com.github.jnhyperion.hyperrobotframeworkplugin.ide.inspections.compilation.RobotKeywordAnnotator"/>
+                   implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.ide.inspections.compilation.RobotKeywordAnnotator"/>
         <annotator language="Robot"
-                   implementationClass="com.github.jnhyperion.hyperrobotframeworkplugin.ide.inspections.compilation.RobotImportAnnotator"/>
+                   implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.ide.inspections.compilation.RobotImportAnnotator"/>
         <annotator language="Robot"
-                   implementationClass="com.github.jnhyperion.hyperrobotframeworkplugin.ide.inspections.compilation.RobotVariableAnnotator"/>
+                   implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.ide.inspections.compilation.RobotVariableAnnotator"/>
         <!-- Inspections -->
         <!-- TODO: inspection: error?: resource import is not a robot file -->
         <!-- TODO: inspection: warn: import python file vs class -->
         <!-- Inspections: Cleanup -->
         <localInspection language="Robot" shortName="RobotImportNotUsed" bundle="messages.RobotBundle" key="INSP.NAME.import.unused" groupPath="Robot"
                          groupKey="INSP.GROUP.cleanup" enabledByDefault="true" level="WARNING"
-                         implementationClass="com.github.jnhyperion.hyperrobotframeworkplugin.ide.inspections.cleanup.RobotImportNotUsed"/>
+                         implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.ide.inspections.cleanup.RobotImportNotUsed"/>
         <!-- Inspections: Readability -->
         <localInspection language="Robot" shortName="RobotGherkinInspection" bundle="messages.RobotBundle" key="INSP.NAME.gherkin.format" groupPath="Robot"
                          groupKey="INSP.GROUP.readability" enabledByDefault="true" level="WARNING"
-                         implementationClass="com.github.jnhyperion.hyperrobotframeworkplugin.ide.inspections.readability.RobotGherkinInspection"/>
+                         implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.ide.inspections.readability.RobotGherkinInspection"/>
         <localInspection language="Robot" shortName="RobotKeywordDefinitionStartingWithGherkin" bundle="messages.RobotBundle"
                          key="INSP.NAME.define.keyword.gherkin.start" groupPath="Robot" groupKey="INSP.GROUP.readability" enabledByDefault="true"
                          level="WARNING"
-                         implementationClass="com.github.jnhyperion.hyperrobotframeworkplugin.ide.inspections.readability.RobotKeywordDefinitionStartingWithGherkin"/>
+                         implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.ide.inspections.readability.RobotKeywordDefinitionStartingWithGherkin"/>
         <!-- TODO: inspection: warn: use of I in keyword; decreased readability -->
         <!-- TODO: inspection: warn: scenario step does not start with gherkin; decreased readability -->
         <!-- TODO: inspection: warn: scenario step is not a keyword (ie variable); decreased readability -->
@@ -83,40 +83,40 @@
         <!-- TODO: inspection: warn: keyword definitions that contain gherkin; trying to do too much -->
         <localInspection language="Robot" shortName="RobotNestedVariable" bundle="messages.RobotBundle" key="INSP.NAME.variable.nested" groupPath="Robot"
                          groupKey="INSP.GROUP.complexity" enabledByDefault="true" level="WARNING"
-                         implementationClass="com.github.jnhyperion.hyperrobotframeworkplugin.ide.inspections.complexity.RobotNestedVariable"/>
+                         implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.ide.inspections.complexity.RobotNestedVariable"/>
         <localInspection language="Robot" shortName="RobotNestedVariableDefinition" bundle="messages.RobotBundle" key="INSP.NAME.variableDefinition.nested"
                          groupPath="Robot" groupKey="INSP.GROUP.complexity" enabledByDefault="true" level="WARNING"
-                         implementationClass="com.github.jnhyperion.hyperrobotframeworkplugin.ide.inspections.complexity.RobotNestedVariableDefinition"/>
+                         implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.ide.inspections.complexity.RobotNestedVariableDefinition"/>
         <!-- Inspections: Deprecated -->
         <!-- TODO: inspection: warn: deprecated settings; '*** user keywords ***', timeout, etc -->
-        <runConfigurationProducer implementation="com.github.jnhyperion.hyperrobotframeworkplugin.ide.execution.config.RobotRunConfigurationProducer"/>
+        <runConfigurationProducer implementation="dev.xeonkryptos.xeonrobotframeworkplugin.ide.execution.config.RobotRunConfigurationProducer"/>
         <runLineMarkerContributor language="Robot" id="gradleGroovyRunLineMarkerProvider"
-                                  implementationClass="com.github.jnhyperion.hyperrobotframeworkplugin.ide.execution.RobotRunLineMarkerProvider"/>
-        <postStartupActivity implementation="com.github.jnhyperion.hyperrobotframeworkplugin.ide.PostStartupActivity"/>
+                                  implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.ide.execution.RobotRunLineMarkerProvider"/>
+        <postStartupActivity implementation="dev.xeonkryptos.xeonrobotframeworkplugin.ide.PostStartupActivity"/>
         <internalFileTemplate name="Robot Feature File"/>
         <internalFileTemplate name="Robot Resource File"/>
-        <enterHandlerDelegate implementation="com.github.jnhyperion.hyperrobotframeworkplugin.ide.actionhandler.RobotEnterActionHandler"/>
-        <enterHandlerDelegate implementation="com.github.jnhyperion.hyperrobotframeworkplugin.ide.actionhandler.RobotDocumentationEnterActionHandler"/>
-        <enterHandlerDelegate implementation="com.github.jnhyperion.hyperrobotframeworkplugin.ide.actionhandler.RobotKeywordEnterActionHandler"/>
-        <typedHandler implementation="com.github.jnhyperion.hyperrobotframeworkplugin.ide.actionhandler.RobotTypedActionHandler"/>
-        <editorActionHandler action="EditorTab" implementationClass="com.github.jnhyperion.hyperrobotframeworkplugin.ide.actionhandler.RobotTabActionHandler"/>
-        <configurationType implementation="com.github.jnhyperion.hyperrobotframeworkplugin.ide.execution.config.RobotRunConfigurationType"/>
-        <spellchecker.support language="Robot" implementationClass="com.github.jnhyperion.hyperrobotframeworkplugin.ide.RobotSpellcheckingStrategy"/>
+        <enterHandlerDelegate implementation="dev.xeonkryptos.xeonrobotframeworkplugin.ide.actionhandler.RobotEnterActionHandler"/>
+        <enterHandlerDelegate implementation="dev.xeonkryptos.xeonrobotframeworkplugin.ide.actionhandler.RobotDocumentationEnterActionHandler"/>
+        <enterHandlerDelegate implementation="dev.xeonkryptos.xeonrobotframeworkplugin.ide.actionhandler.RobotKeywordEnterActionHandler"/>
+        <typedHandler implementation="dev.xeonkryptos.xeonrobotframeworkplugin.ide.actionhandler.RobotTypedActionHandler"/>
+        <editorActionHandler action="EditorTab" implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.ide.actionhandler.RobotTabActionHandler"/>
+        <configurationType implementation="dev.xeonkryptos.xeonrobotframeworkplugin.ide.execution.config.RobotRunConfigurationType"/>
+        <spellchecker.support language="Robot" implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.ide.RobotSpellcheckingStrategy"/>
 
-        <xdebugger.breakpointType implementation="com.github.jnhyperion.hyperrobotframeworkplugin.ide.debugger.breakpoint.RobotLineBreakpointType"/>
-        <xdebugger.breakpointType implementation="com.github.jnhyperion.hyperrobotframeworkplugin.ide.debugger.breakpoint.RobotExceptionBreakpointType"/>
+        <xdebugger.breakpointType implementation="dev.xeonkryptos.xeonrobotframeworkplugin.ide.debugger.breakpoint.RobotLineBreakpointType"/>
+        <xdebugger.breakpointType implementation="dev.xeonkryptos.xeonrobotframeworkplugin.ide.debugger.breakpoint.RobotExceptionBreakpointType"/>
 
-        <programRunner implementation="com.github.jnhyperion.hyperrobotframeworkplugin.ide.execution.RobotRunner" id="robotRunner" order="first"/>
-        <programRunner implementation="com.github.jnhyperion.hyperrobotframeworkplugin.ide.debugger.RobotDebugRunner" id="robotDebugRunner"
+        <programRunner implementation="dev.xeonkryptos.xeonrobotframeworkplugin.ide.execution.RobotRunner" id="robotRunner" order="first"/>
+        <programRunner implementation="dev.xeonkryptos.xeonrobotframeworkplugin.ide.debugger.RobotDebugRunner" id="robotDebugRunner"
                        order="after robotRunner"/>
 
-        <executor implementation="com.github.jnhyperion.hyperrobotframeworkplugin.ide.execution.RobotDryRunExecutor"/>
+        <executor implementation="dev.xeonkryptos.xeonrobotframeworkplugin.ide.execution.RobotDryRunExecutor"/>
 
-        <weigher key="completion" implementationClass="com.github.jnhyperion.hyperrobotframeworkplugin.ide.completion.RobotContextLevelWeigher" id="context"
+        <weigher key="completion" implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.ide.completion.RobotContextLevelWeigher" id="context"
                  order="first"/>
     </extensions>
     <actions>
-        <action id="HyperRobotFrameworkPlugin.CreateNew" class="com.github.jnhyperion.hyperrobotframeworkplugin.ide.RobotCreateAction">
+        <action id="HyperRobotFrameworkPlugin.CreateNew" class="dev.xeonkryptos.xeonrobotframeworkplugin.ide.RobotCreateAction">
             <add-to-group group-id="NewGroup"/>
         </action>
     </actions>

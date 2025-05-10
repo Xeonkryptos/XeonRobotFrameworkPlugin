@@ -1,0 +1,26 @@
+package dev.xeonkryptos.xeonrobotframeworkplugin.psi.element;
+
+import com.intellij.lang.ASTNode;
+import com.intellij.psi.PsiElement;
+import com.intellij.psi.util.PsiTreeUtil;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
+public class ParameterImpl extends RobotPsiElementBase implements Parameter {
+
+    public ParameterImpl(@NotNull ASTNode node) {
+        super(node);
+    }
+
+    @Override
+    public String getParameterName() {
+        ParameterId parameterId = PsiTreeUtil.getRequiredChildOfType(this, ParameterId.class);
+        return parameterId.getName();
+    }
+
+    @Nullable
+    @Override
+    public PsiElement getNameIdentifier() {
+        return PsiTreeUtil.findChildOfType(this, ParameterId.class);
+    }
+}
