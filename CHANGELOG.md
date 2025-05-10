@@ -14,6 +14,7 @@
 - Fixed reasons for PsiInvalidElementAccessExceptions
 - Fixed not showing of Bracket settings in code completion
 - Automatically add ellipsis and indentation on enter in keyword statements which are preceded by a variable definition
+- Fixed too many started threads when a lot of file changes are detected at once
 
 ### Changed
 
