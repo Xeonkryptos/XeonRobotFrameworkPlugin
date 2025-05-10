@@ -638,11 +638,11 @@ public class RobotLexer extends LexerBase {
     }
 
     private boolean isAssignment(int position) {
-        return charAtEquals(position, '=') && !charAtEquals(position + 1, '=');
+        return !charAtEquals(position - 1, '\\') && charAtEquals(position, '=') && !charAtEquals(position + 1, '=');
     }
 
     private boolean charAtEquals(int position, char c) {
-        return position < this.endOffset && this.buffer.charAt(position) == c;
+        return position >= 0 && position < this.endOffset && this.buffer.charAt(position) == c;
     }
 
     private void setCurrentToken(IElementType token) {

@@ -4,6 +4,10 @@
 
 ## Unreleased
 
+### Added
+
+- Support escaping of equals sign to signal an argument rather than a parameter
+
 ### Fixed
 
 - Fixed reason for StackOverflowError
@@ -14,9 +18,6 @@
 
 - Interpret parameters without a value as an argument
 - Detected parameters in a data template setup correctly
-
-### Changed
-
 - Parameters without an argument are interpreted as an argument themselves
 - Switched from CachedValuesManager to ResolveCache
 
