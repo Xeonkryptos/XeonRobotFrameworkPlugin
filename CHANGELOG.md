@@ -7,6 +7,7 @@
 ### Added
 
 - Support escaping of equals sign to signal an argument rather than a parameter
+- Reference fully qualified python modules in arguments to allow jumping to them
 
 ### Fixed
 

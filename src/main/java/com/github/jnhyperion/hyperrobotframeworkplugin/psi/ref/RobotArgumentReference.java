@@ -13,7 +13,10 @@ import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiPolyVariantReferenceBase;
 import com.intellij.psi.PsiReference;
 import com.intellij.psi.ResolveResult;
+import com.intellij.psi.impl.source.resolve.ResolveCache;
+import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.psi.util.PsiTreeUtil;
+import com.intellij.psi.util.QualifiedName;
 import com.intellij.util.ArrayUtilRt;
 import com.jetbrains.python.psi.PyAnnotation;
 import com.jetbrains.python.psi.PyCallExpression;
@@ -21,6 +24,7 @@ import com.jetbrains.python.psi.PyClass;
 import com.jetbrains.python.psi.PyDictLiteralExpression;
 import com.jetbrains.python.psi.PyElementVisitor;
 import com.jetbrains.python.psi.PyExpression;
+import com.jetbrains.python.psi.PyFile;
 import com.jetbrains.python.psi.PyKeyValueExpression;
 import com.jetbrains.python.psi.PyListLiteralExpression;
 import com.jetbrains.python.psi.PyParameter;
@@ -29,8 +33,8 @@ import com.jetbrains.python.psi.PyReferenceExpression;
 import com.jetbrains.python.psi.PyStringLiteralExpression;
 import com.jetbrains.python.psi.PyTargetExpression;
 import com.jetbrains.python.psi.PyTupleExpression;
+import com.jetbrains.python.psi.stubs.PyModuleNameIndex;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -43,46 +47,15 @@ import java.util.stream.Stream;
 public class RobotArgumentReference extends PsiPolyVariantReferenceBase<PositionalArgument> {
 
     public RobotArgumentReference(@NotNull PositionalArgument positionalArgument) {
-        super(positionalArgument, false);
-    }
-
-    @Nullable
-    @Override
-    public PsiElement resolve() {
-        PositionalArgument currentPositionalArgument = getElement();
-        PsiElement parent = currentPositionalArgument.getParent();
-        if (parent instanceof Import importElement) {
-            PsiElement[] children = importElement.getChildren();
-            if (children.length > 0 && children[0] == currentPositionalArgument) {
-                PsiElement result = null;
-                Project project = importElement.getProject();
-                String importFileArgument = currentPositionalArgument.getContent();
-                if (importElement.isResource()) {
-                    result = RobotFileManager.findElement(importFileArgument, project, importElement);
-                } else if (importElement.isLibrary() || importElement.isVariables()) {
-                    result = RobotFileManager.findElementInContext(importFileArgument, project, importElement);
-                }
-
-                if (result == null) {
-                    ResolveResult[] resolveResults = multiResolve(currentPositionalArgument);
-                    if (resolveResults.length == 1) {
-                        result = resolveResults[0].getElement();
-                    }
-                }
-                return result;
-            }
-            return null;
-        }
-        return null;
+        super(positionalArgument);
     }
 
     @Override
     public ResolveResult @NotNull [] multiResolve(boolean incompleteCode) {
-        PositionalArgument positionalArgument = getElement();
-        return multiResolve(positionalArgument);
+        return ResolveCache.getInstance(getElement().getProject())
+                           .resolveWithCaching(this, (resolver, incompCode) -> multiResolve(resolver.getElement()), false, incompleteCode);
     }
 
-    // A static implementation of multiResolve is needed to avoid side effects in the CachedValueProvider implementation
     private static ResolveResult @NotNull [] multiResolve(PositionalArgument positionalArgument) {
         Project project = positionalArgument.getProject();
         PsiElement parent = positionalArgument.getParent();
@@ -94,9 +67,17 @@ public class RobotArgumentReference extends PsiPolyVariantReferenceBase<Position
                 for (PsiFile file : RobotFileManager.findPsiFiles(argumentValue, project)) {
                     results.add(new PsiElementResolveResult(file));
                 }
-            } else if ((importElement.isLibrary() || importElement.isVariables()) && argumentValue.endsWith(".py")) {
-                for (PsiFile file : RobotFileManager.findPsiFiles(argumentValue, project)) {
-                    results.add(new PsiElementResolveResult(file));
+            } else if ((importElement.isLibrary() || importElement.isVariables())) {
+                if (argumentValue.endsWith(".py")) {
+                    for (PsiFile file : RobotFileManager.findPsiFiles(argumentValue, project)) {
+                        results.add(new PsiElementResolveResult(file));
+                    }
+                } else {
+                    for (PyFile pyFile : PyModuleNameIndex.findByQualifiedName(QualifiedName.fromDottedString(argumentValue),
+                                                                               project,
+                                                                               GlobalSearchScope.allScope(project))) {
+                        results.add(new PsiElementResolveResult(pyFile));
+                    }
                 }
             }
         }
