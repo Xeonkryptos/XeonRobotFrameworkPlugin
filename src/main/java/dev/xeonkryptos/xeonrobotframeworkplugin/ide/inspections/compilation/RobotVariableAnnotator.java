@@ -51,7 +51,7 @@ public class RobotVariableAnnotator implements Annotator, DumbAware {
                     return;
                 }
             }
-            holder.newAnnotation(HighlightSeverity.ERROR, RobotBundle.getMessage("annotation.variable.not-found")).range(element).create();
+            holder.newAnnotation(HighlightSeverity.WEAK_WARNING, RobotBundle.getMessage("annotation.variable.not-found")).range(element).create();
         }
     }
 }

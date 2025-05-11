@@ -6,6 +6,7 @@ import com.intellij.codeInsight.completion.CompletionResultSet;
 import com.intellij.codeInsight.lookup.LookupElement;
 import com.intellij.codeInsight.lookup.LookupElementBuilder;
 import com.intellij.icons.AllIcons;
+import com.intellij.icons.AllIcons.Nodes;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.openapi.vfs.VirtualFile;
@@ -14,6 +15,8 @@ import com.intellij.psi.search.FilenameIndex;
 import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.util.ProcessingContext;
+import com.jetbrains.python.psi.PyClass;
+import com.jetbrains.python.psi.stubs.PyClassNameIndex;
 import dev.xeonkryptos.xeonrobotframeworkplugin.ide.icons.RobotIcons;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTokenTypes;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.Import;
@@ -42,8 +45,23 @@ class ImportCompletionProvider extends CompletionProvider<CompletionParameters> 
             }
         }
 
-        if (importElement != null && importElement.isResource()) {
-            addResourceFilePaths(result, parameters.getOriginalFile());
+        if (importElement != null) {
+            if (importElement.isResource()) {
+                addResourceFilePaths(result, parameters.getOriginalFile());
+            } else if (importElement.isLibrary()) {
+                Project project = importElement.getProject();
+                Collection<String> classNameKeys = PyClassNameIndex.allKeys(project);
+
+                GlobalSearchScope projectScope = GlobalSearchScope.projectScope(project);
+                GlobalSearchScope projectExcludedScope = GlobalSearchScope.notScope(projectScope);
+                for (String classNameKey : classNameKeys) {
+                    Collection<PyClass> projectPyClasses = PyClassNameIndex.find(classNameKey, project, projectScope);
+                    addPythonClassCompletions(projectPyClasses, classNameKey, RobotLookupScope.PROJECT_SCOPE, result);
+
+                    Collection<PyClass> pyClasses = PyClassNameIndex.find(classNameKey, project, projectExcludedScope);
+                    addPythonClassCompletions(pyClasses, classNameKey, RobotLookupScope.LIBRARY_SCOPE, result);
+                }
+            }
         }
     }
 
@@ -79,5 +97,20 @@ class ImportCompletionProvider extends CompletionProvider<CompletionParameters> 
                                        .withCaseSensitivity(true)
                                        .withPresentableText(relativePath);
         }).filter(Objects::nonNull).forEach(resultSet::addElement);
+    }
+
+    private void addPythonClassCompletions(Collection<PyClass> pyClasses, String classNameKey, RobotLookupScope lookupScope, CompletionResultSet result) {
+        if (classNameKey.startsWith("_")) { // Excluding as private indicated classes
+            return;
+        }
+        pyClasses.stream()
+                 .map(pyClass -> pyClass.getQualifiedName() != null ? pyClass.getQualifiedName() : classNameKey)
+                 .distinct()
+                 .map(className -> LookupElementBuilder.create(className).withIcon(Nodes.Class).withCaseSensitivity(true))
+                 .forEach(element -> {
+                     element.putUserData(CompletionKeys.ROBOT_LOOKUP_CONTEXT, RobotLookupContext.IMPORT);
+                     element.putUserData(CompletionKeys.ROBOT_LOOKUP_SCOPE, lookupScope);
+                     result.addElement(element);
+                 });
     }
 }

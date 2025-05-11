@@ -28,6 +28,9 @@ import com.jetbrains.python.psi.PyReferenceExpression;
 import com.jetbrains.python.psi.PyStringLiteralExpression;
 import com.jetbrains.python.psi.PyTargetExpression;
 import com.jetbrains.python.psi.PyTupleExpression;
+import dev.xeonkryptos.xeonrobotframeworkplugin.ide.completion.CompletionKeys;
+import dev.xeonkryptos.xeonrobotframeworkplugin.ide.completion.RobotLookupContext;
+import dev.xeonkryptos.xeonrobotframeworkplugin.ide.completion.RobotLookupElementType;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.Import;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.Parameter;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.PositionalArgument;
@@ -111,11 +114,26 @@ public class RobotArgumentReference extends PsiPolyVariantReferenceBase<Position
 
     private Stream<?> handleResolvedEnumExpression(PsiElement resolvedExpression) {
         if (isEnumConstructor(resolvedExpression)) {
-            return ((PyClass) resolvedExpression).getClassAttributes().stream();
+            return ((PyClass) resolvedExpression).getClassAttributes().stream().map(RobotArgumentReference::createEnumLookupElement);
         }
         PyFunctionalEnumElementVisitor pyElementVisitor = new PyFunctionalEnumElementVisitor();
         resolvedExpression.accept(pyElementVisitor);
         return pyElementVisitor.extractedEnumValues;
+    }
+
+    private static LookupElementBuilder createEnumLookupElement(PyTargetExpression targetExpression) {
+        return createEnumLookupElement(LookupElementBuilder.create(targetExpression));
+    }
+
+    private static LookupElementBuilder createEnumLookupElement(String enumExpression) {
+        return createEnumLookupElement(LookupElementBuilder.create(enumExpression));
+    }
+
+    private static LookupElementBuilder createEnumLookupElement(LookupElementBuilder enumElementBuilder) {
+        LookupElementBuilder lookupElementBuilder = enumElementBuilder.withCaseSensitivity(true).withIcon(Nodes.Enum).withBoldness(true);
+        lookupElementBuilder.putUserData(CompletionKeys.ROBOT_LOOKUP_CONTEXT, RobotLookupContext.WITHIN_KEYWORD_STATEMENT);
+        lookupElementBuilder.putUserData(CompletionKeys.ROBOT_LOOKUP_ELEMENT_TYPE, RobotLookupElementType.ARGUMENT);
+        return lookupElementBuilder;
     }
 
     private static boolean isEnumConstructor(PsiElement element) {
@@ -205,9 +223,7 @@ public class RobotArgumentReference extends PsiPolyVariantReferenceBase<Position
             String enumValue = node.getStringValue();
             if (!enumValue.isBlank()) {
                 String[] partedEnumValues = enumValue.split("[,\\s]+");
-                Arrays.stream(partedEnumValues)
-                      .map(value -> LookupElementBuilder.create(value).withCaseSensitivity(true).withIcon(Nodes.Enum))
-                      .forEach(extractedEnumValues::add);
+                Arrays.stream(partedEnumValues).map(RobotArgumentReference::createEnumLookupElement).forEach(extractedEnumValues::add);
             }
         }
     }

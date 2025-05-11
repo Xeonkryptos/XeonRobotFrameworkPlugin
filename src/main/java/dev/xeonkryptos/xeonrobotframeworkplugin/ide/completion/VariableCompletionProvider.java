@@ -1,12 +1,5 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.ide.completion;
 
-import dev.xeonkryptos.xeonrobotframeworkplugin.ide.config.RobotOptionsProvider;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.dto.ImportType;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.DefinedVariable;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.KeywordDefinition;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.KeywordFile;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.Parameter;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotFile;
 import com.intellij.codeInsight.TailType;
 import com.intellij.codeInsight.TailTypes;
 import com.intellij.codeInsight.completion.CompletionParameters;
@@ -18,6 +11,13 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.util.ProcessingContext;
+import dev.xeonkryptos.xeonrobotframeworkplugin.ide.config.RobotOptionsProvider;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.dto.ImportType;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.DefinedVariable;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.KeywordDefinition;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.KeywordFile;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.Parameter;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotFile;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -51,19 +51,18 @@ class VariableCompletionProvider extends CompletionProvider<CompletionParameters
     }
 
     private void addDefinedVariablesFromImportedFiles(@NotNull CompletionResultSet resultSet, @NotNull PsiFile file, @Nullable PsiElement element) {
-        if (file instanceof RobotFile robotFile) {
-            addDefinedVariables(robotFile.getDefinedVariables(), resultSet, element).forEach(lookupElement -> {
-                lookupElement.putUserData(CompletionKeys.ROBOT_LOOKUP_CONTEXT, RobotLookupContext.WITHIN_KEYWORD_STATEMENT);
-                lookupElement.putUserData(CompletionKeys.ROBOT_LOOKUP_ELEMENT_TYPE, RobotLookupElementType.VARIABLE);
-            });
-            boolean allowTransitiveImports = RobotOptionsProvider.getInstance(file.getProject()).allowTransitiveImports();
-            for (KeywordFile importedFile : robotFile.getImportedFiles(allowTransitiveImports)) {
-                if (importedFile.getImportType() == ImportType.VARIABLES || importedFile.getImportType() == ImportType.RESOURCE) {
-                    addDefinedVariables(importedFile.getDefinedVariables(), resultSet, element).forEach(lookupElement -> {
-                        lookupElement.putUserData(CompletionKeys.ROBOT_LOOKUP_CONTEXT, RobotLookupContext.WITHIN_KEYWORD_STATEMENT);
-                        lookupElement.putUserData(CompletionKeys.ROBOT_LOOKUP_ELEMENT_TYPE, RobotLookupElementType.VARIABLE);
-                    });
-                }
+        RobotFile robotFile = (RobotFile) file;
+        addDefinedVariables(robotFile.getDefinedVariables(),
+                            resultSet,
+                            element).forEach(lookupElement -> lookupElement.putUserData(CompletionKeys.ROBOT_LOOKUP_ELEMENT_TYPE,
+                                                                                        RobotLookupElementType.VARIABLE));
+        boolean allowTransitiveImports = RobotOptionsProvider.getInstance(file.getProject()).allowTransitiveImports();
+        for (KeywordFile importedFile : robotFile.getImportedFiles(allowTransitiveImports)) {
+            if (importedFile.getImportType() == ImportType.VARIABLES || importedFile.getImportType() == ImportType.RESOURCE) {
+                addDefinedVariables(importedFile.getDefinedVariables(),
+                                    resultSet,
+                                    element).forEach(lookupElement -> lookupElement.putUserData(CompletionKeys.ROBOT_LOOKUP_ELEMENT_TYPE,
+                                                                                                RobotLookupElementType.VARIABLE));
             }
         }
     }

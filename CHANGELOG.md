@@ -4,10 +4,13 @@
 
 ## Unreleased
 
+## 0.2.8
+
 ### Added
 
 - Support escaping of equals sign to signal an argument rather than a parameter
 - Reference fully qualified python modules in arguments to allow jumping to them
+- Code completion when defining a library import
 
 ### Fixed
 
@@ -27,6 +30,7 @@
 - Detected parameters in a data template setup correctly
 - Parameters without an argument are interpreted as an argument themselves
 - Switched from CachedValuesManager to ResolveCache
+- Changed the annotation level of unknown/unresolved variables to a weak warning
 
 ## 0.2.7
 
