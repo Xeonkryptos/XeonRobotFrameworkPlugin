@@ -45,9 +45,7 @@ public class RobotNamedValue extends XNamedValue {
                     list.add(receivedVariable.getName(), new RobotNamedValue(receivedVariable, debugServer, session));
                 }
                 node.addChildren(list, true);
-            } catch (InterruptedException | ExecutionException e) {
-                throw new RuntimeException(e);
-            }
+            } catch (InterruptedException | ExecutionException ignored) {}
         }
     }
 }

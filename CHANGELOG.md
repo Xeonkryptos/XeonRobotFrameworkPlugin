@@ -14,9 +14,12 @@
 - Fixed reason for StackOverflowError
 - Fixed reasons for PsiInvalidElementAccessExceptions
 - Fixed not showing of Bracket settings in code completion
-- Automatically add ellipsis and indentation on enter in keyword statements which are preceded by a variable definition
+- Automatically add ellipsis and indentation on enter in keyword statements which are preceded by a variable definition or the current line followed by a
+  comment
 - Fixed too many started threads when a lot of file changes are detected at once
 - Annotation of import definitions that can't be resolved
+- Fixed auto-completion for resource imports
+- Fixed auto-completion that provided sections at incorrect places
 
 ### Changed
 

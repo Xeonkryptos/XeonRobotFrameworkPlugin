@@ -21,7 +21,7 @@ class ControlStructureCompletionProvider extends CompletionProvider<CompletionPa
         Heading heading = CompletionProviderUtils.getHeading(parameters.getOriginalPosition());
         if (CompletionProviderUtils.isIndexPositionAWhitespaceCharacter(parameters) && heading != null && (heading.containsTestCases()
                                                                                                            || heading.containsKeywordDefinitions())) {
-            List<LookupElement> lookupElements = CompletionProviderUtils.addSyntaxLookup(RobotTokenTypes.SYNTAX_MARKER);
+            List<LookupElement> lookupElements = CompletionProviderUtils.computeAdditionalSyntaxLookups(RobotTokenTypes.SYNTAX_MARKER);
             List<LookupElement> nonSpecialElements = new ArrayList<>();
             List<LookupElement> specialElements = new ArrayList<>();
 

@@ -60,12 +60,20 @@ final class CompletionProviderUtils {
         return Character.isWhitespace(firstCharacterInLine);
     }
 
+    static boolean isIndexPositionStartOfLine(@NotNull CompletionParameters parameters) {
+        int offset = parameters.getOffset();
+        Document document = parameters.getEditor().getDocument();
+        int lineNumber = document.getLineNumber(offset);
+        int lineStartOffset = document.getLineStartOffset(lineNumber);
+        return lineStartOffset == offset;
+    }
+
     static void addSyntaxLookup(@NotNull RobotElementType elementType, @NotNull CompletionResultSet resultSet) {
-        List<LookupElement> lookupElements = addSyntaxLookup(elementType);
+        List<LookupElement> lookupElements = computeAdditionalSyntaxLookups(elementType);
         resultSet.addAllElements(lookupElements);
     }
 
-    static List<LookupElement> addSyntaxLookup(@NotNull RobotElementType type) {
+    static List<LookupElement> computeAdditionalSyntaxLookups(@NotNull RobotElementType type) {
         List<LookupElement> results = new ArrayList<>();
         Collection<RecommendationWord> words = RobotKeywordProvider.getRecommendationsForType(type);
         for (RecommendationWord word : words) {

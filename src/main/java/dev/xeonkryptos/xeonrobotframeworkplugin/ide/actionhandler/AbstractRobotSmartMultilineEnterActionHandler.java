@@ -40,7 +40,13 @@ public abstract class AbstractRobotSmartMultilineEnterActionHandler<T extends Ps
             while (currentElement instanceof PsiWhiteSpace) {
                 currentElement = currentElement.getPrevSibling();
             }
-            T element = getExpectedElement(currentElement);
+            if (currentElement == null) {
+                return Result.Continue;
+            }
+            int elementTextOffset = currentElement.getTextOffset();
+            int lineNumber = document.getLineNumber(elementTextOffset);
+            int lineStartOffset = document.getLineStartOffset(lineNumber);
+            T element = getExpectedElement(currentElement, lineStartOffset);
             if (element != null && isMultilineSupportedFor(element)) {
                 handleSmartMultilineIndentation(file, editor, element);
             }
@@ -48,7 +54,8 @@ public abstract class AbstractRobotSmartMultilineEnterActionHandler<T extends Ps
         return Result.Continue;
     }
 
-    protected abstract T getExpectedElement(@Nullable PsiElement element);
+    @Nullable
+    protected abstract T getExpectedElement(@Nullable PsiElement element, int lineStartOffset);
 
     protected abstract boolean isMultilineSupportedFor(@NotNull T element);
 

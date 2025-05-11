@@ -135,7 +135,7 @@ public class RobotArgumentReference extends PsiPolyVariantReferenceBase<Position
     private static class PyFunctionalEnumElementVisitor extends PyElementVisitor {
 
         private PyCallExpression pyCallExpression;
-        private Stream<?> extractedEnumValues = Stream.empty();
+        private Stream<LookupElement> extractedEnumValues = Stream.empty();
 
         @Override
         public void visitPyTargetExpression(@NotNull PyTargetExpression node) {
@@ -162,7 +162,7 @@ public class RobotArgumentReference extends PsiPolyVariantReferenceBase<Position
             }
         }
 
-        private Stream<?> extractEnumValues(PyCallExpression pyCallExpression) {
+        private Stream<LookupElement> extractEnumValues(PyCallExpression pyCallExpression) {
             PyExpression[] arguments = pyCallExpression.getArguments();
             if (arguments.length >= 2) {
                 PyExpression enumValuesArg = arguments[1];

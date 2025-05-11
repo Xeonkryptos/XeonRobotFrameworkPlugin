@@ -8,8 +8,9 @@ import org.jetbrains.annotations.Nullable;
 
 public class RobotDocumentationEnterActionHandler extends AbstractRobotSmartMultilineEnterActionHandler<BracketSetting> {
 
+    @Nullable
     @Override
-    protected BracketSetting getExpectedElement(@Nullable PsiElement element) {
+    protected BracketSetting getExpectedElement(@Nullable PsiElement element, int lineStartOffset) {
         return element instanceof BracketSetting bracketSetting ? bracketSetting : PsiTreeUtil.getParentOfType(element, BracketSetting.class);
     }
 

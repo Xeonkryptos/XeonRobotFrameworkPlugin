@@ -1,31 +1,30 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.ide.completion;
 
-import dev.xeonkryptos.xeonrobotframeworkplugin.ide.icons.RobotIcons;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTokenTypes;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.Import;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotFile;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.ref.RobotFileManager;
-import com.intellij.codeInsight.TailTypes;
 import com.intellij.codeInsight.completion.CompletionParameters;
 import com.intellij.codeInsight.completion.CompletionProvider;
 import com.intellij.codeInsight.completion.CompletionResultSet;
 import com.intellij.codeInsight.lookup.LookupElement;
 import com.intellij.codeInsight.lookup.LookupElementBuilder;
-import com.intellij.codeInsight.lookup.TailTypeDecorator;
 import com.intellij.icons.AllIcons;
-import com.intellij.openapi.util.SystemInfo;
-import com.intellij.openapi.util.io.FileUtil;
+import com.intellij.openapi.project.Project;
+import com.intellij.openapi.vfs.VfsUtil;
+import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiFile;
+import com.intellij.psi.search.FilenameIndex;
+import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.util.ProcessingContext;
+import dev.xeonkryptos.xeonrobotframeworkplugin.ide.icons.RobotIcons;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTokenTypes;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.Import;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.ref.RobotFileManager;
 import org.apache.commons.text.WordUtils;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.File;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
+import java.util.Collection;
 import java.util.Map;
+import java.util.Objects;
 
 class ImportCompletionProvider extends CompletionProvider<CompletionParameters> {
 
@@ -35,7 +34,7 @@ class ImportCompletionProvider extends CompletionProvider<CompletionParameters> 
         if (importElement != null && importElement.isLibrary()) {
             addBuiltinLibraryCompletions(result, parameters.getOriginalFile());
             if (importElement.getChildren().length > 1) {
-                for (LookupElement lookupElement : CompletionProviderUtils.addSyntaxLookup(RobotTokenTypes.SYNTAX_MARKER)) {
+                for (LookupElement lookupElement : CompletionProviderUtils.computeAdditionalSyntaxLookups(RobotTokenTypes.SYNTAX_MARKER)) {
                     if ("AS".equals(lookupElement.getLookupString())) {
                         result.addElement(lookupElement);
                     }
@@ -49,9 +48,6 @@ class ImportCompletionProvider extends CompletionProvider<CompletionParameters> 
     }
 
     private void addBuiltinLibraryCompletions(CompletionResultSet resultSet, PsiFile file) {
-        if (!(file instanceof RobotFile)) {
-            return;
-        }
         Map<String, ?> cachedFiles = RobotFileManager.getCachedRobotSystemFiles(file.getProject());
         for (String libraryName : cachedFiles.keySet()) {
             String[] lookupStrings = { libraryName, WordUtils.capitalize(libraryName), libraryName.toLowerCase() };
@@ -61,49 +57,27 @@ class ImportCompletionProvider extends CompletionProvider<CompletionParameters> 
                                                                       .withCaseSensitivity(true)
                                                                       .withIcon(AllIcons.Nodes.Package)
                                                                       .withTypeText("robot.libraries.Builtin");
-            resultSet.addElement(TailTypeDecorator.withTail(elementBuilder, TailTypes.noneType()));
+            resultSet.addElement(elementBuilder);
         }
     }
 
     private void addResourceFilePaths(CompletionResultSet resultSet, PsiFile file) {
-        if (file instanceof RobotFile robotFile) {
-            String basePath = robotFile.getProject().getBasePath();
-            if (basePath != null) {
-                for (String filePath : collectFilePaths(new File(basePath))) {
-                    if (filePath.endsWith(".resource")) {
-                        String relativePath = FileUtil.getRelativePath(new File(robotFile.getContainingDirectory().getVirtualFile().getPath()),
-                                                                       new File(filePath));
-                        if (relativePath != null) {
-                            if (SystemInfo.isWindows) {
-                                relativePath = relativePath.replace("\\", "/");
-                            }
-
-                            String[] lookupStrings = { relativePath, WordUtils.capitalize(relativePath), relativePath.toLowerCase() };
-                            LookupElementBuilder elementBuilder = LookupElementBuilder.create(relativePath)
-                                                                                      .withPresentableText(relativePath)
-                                                                                      .withLookupStrings(Arrays.asList(lookupStrings))
-                                                                                      .withCaseSensitivity(true)
-                                                                                      .withIcon(RobotIcons.RESOURCE);
-                            resultSet.addElement(TailTypeDecorator.withTail(elementBuilder, TailTypes.noneType()));
-                        }
-                    }
-                }
+        Project project = file.getProject();
+        VirtualFile sourceFile = file.getVirtualFile();
+        Collection<VirtualFile> resourceFiles = FilenameIndex.getAllFilesByExt(project, "resource", GlobalSearchScope.projectScope(project));
+        resourceFiles.stream().filter(resourceFile -> !resourceFile.equals(sourceFile)).map(virtualFile -> {
+            VirtualFile commonAncestor = VfsUtil.getCommonAncestor(virtualFile, sourceFile);
+            if (commonAncestor == null) {
+                return null;
             }
-        }
-    }
-
-    private List<String> collectFilePaths(File directory) {
-        List<String> filePaths = new ArrayList<>();
-        File[] files = directory.listFiles();
-        if (files != null) {
-            for (File file : files) {
-                if (file.isDirectory()) {
-                    filePaths.addAll(collectFilePaths(file));
-                } else {
-                    filePaths.add(file.getPath());
-                }
-            }
-        }
-        return filePaths;
+            String relativePath = VfsUtil.getRelativePath(virtualFile, commonAncestor);
+            assert relativePath != null;
+            String[] lookupStrings = { relativePath, WordUtils.capitalize(relativePath), relativePath.toLowerCase() };
+            return LookupElementBuilder.create(relativePath)
+                                       .withIcon(RobotIcons.RESOURCE)
+                                       .withLookupStrings(Arrays.asList(lookupStrings))
+                                       .withCaseSensitivity(true)
+                                       .withPresentableText(relativePath);
+        }).filter(Objects::nonNull).forEach(resultSet::addElement);
     }
 }

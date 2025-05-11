@@ -17,10 +17,9 @@ class SectionCompletionProvider extends CompletionProvider<CompletionParameters>
 
     @Override
     protected void addCompletions(@NotNull CompletionParameters parameters, @NotNull ProcessingContext context, @NotNull CompletionResultSet result) {
-        if (!CompletionProviderUtils.isIndexPositionAWhitespaceCharacter(parameters)) {
-            boolean isResource = parameters.getOriginalFile().getFileType() instanceof RobotResourceFileType;
-
-            for (LookupElement element : CompletionProviderUtils.addSyntaxLookup(RobotTokenTypes.HEADING)) {
+        if (CompletionProviderUtils.isIndexPositionStartOfLine(parameters)) {
+            boolean isResource = parameters.getOriginalFile().getFileType() == RobotResourceFileType.getInstance();
+            for (LookupElement element : CompletionProviderUtils.computeAdditionalSyntaxLookups(RobotTokenTypes.HEADING)) {
                 String lookupString = element.getLookupString();
                 if (!isResource || !excludedSections.contains(lookupString)) {
                     result.addElement(element);
