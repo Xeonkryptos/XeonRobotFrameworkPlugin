@@ -1,7 +1,7 @@
 <idea-plugin>
     <id>com.github.jnhyperion.hyperrobotframeworkplugin</id>
-    <name>Hyper RobotFramework Support</name>
-    <vendor>jnhyperion</vendor>
+    <name>Xeon RobotFramework Support</name>
+    <vendor>Xeonkryptos</vendor>
 
     <depends>com.intellij.modules.python</depends>
     <depends>com.intellij.modules.platform</depends>
@@ -116,7 +116,7 @@
                  order="first"/>
     </extensions>
     <actions>
-        <action id="HyperRobotFrameworkPlugin.CreateNew" class="dev.xeonkryptos.xeonrobotframeworkplugin.ide.RobotCreateAction">
+        <action id="XeonRobotFrameworkPlugin.CreateNew" class="dev.xeonkryptos.xeonrobotframeworkplugin.ide.RobotCreateAction">
             <add-to-group group-id="NewGroup"/>
         </action>
     </actions>
