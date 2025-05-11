@@ -12,9 +12,7 @@ import com.intellij.psi.PsiPolyVariantReferenceBase;
 import com.intellij.psi.PsiReference;
 import com.intellij.psi.ResolveResult;
 import com.intellij.psi.impl.source.resolve.ResolveCache;
-import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.psi.util.PsiTreeUtil;
-import com.intellij.psi.util.QualifiedName;
 import com.intellij.util.ArrayUtilRt;
 import com.jetbrains.python.psi.PyAnnotation;
 import com.jetbrains.python.psi.PyCallExpression;
@@ -22,7 +20,6 @@ import com.jetbrains.python.psi.PyClass;
 import com.jetbrains.python.psi.PyDictLiteralExpression;
 import com.jetbrains.python.psi.PyElementVisitor;
 import com.jetbrains.python.psi.PyExpression;
-import com.jetbrains.python.psi.PyFile;
 import com.jetbrains.python.psi.PyKeyValueExpression;
 import com.jetbrains.python.psi.PyListLiteralExpression;
 import com.jetbrains.python.psi.PyParameter;
@@ -31,7 +28,6 @@ import com.jetbrains.python.psi.PyReferenceExpression;
 import com.jetbrains.python.psi.PyStringLiteralExpression;
 import com.jetbrains.python.psi.PyTargetExpression;
 import com.jetbrains.python.psi.PyTupleExpression;
-import com.jetbrains.python.psi.stubs.PyModuleNameIndex;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.Import;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.Parameter;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.PositionalArgument;
@@ -84,12 +80,6 @@ public class RobotArgumentReference extends PsiPolyVariantReferenceBase<Position
                     PsiFile file = RobotFileManager.findPsiFiles(argumentValue, virtualFile, project);
                     if (file != null) {
                         results.add(new PsiElementResolveResult(file));
-                    }
-                } else {
-                    for (PyFile pyFile : PyModuleNameIndex.findByQualifiedName(QualifiedName.fromDottedString(argumentValue),
-                                                                               project,
-                                                                               GlobalSearchScope.allScope(project))) {
-                        results.add(new PsiElementResolveResult(pyFile));
                     }
                 }
             }
