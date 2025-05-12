@@ -74,12 +74,10 @@ public class HeadingImpl extends RobotPsiElementBase implements Heading {
     @Override
     public void subtreeChanged() {
         super.subtreeChanged();
-        if (isSettings()) {
-            PsiFile file = getContainingFile();
-            if (file instanceof RobotFile robotFile) {
-                robotFile.reset();
-                robotFile.importsChanged();
-            }
+        PsiFile file = getContainingFile();
+        if (file instanceof RobotFile robotFile) {
+            robotFile.reset();
+            robotFile.importsChanged();
         }
         importsChanged();
     }
