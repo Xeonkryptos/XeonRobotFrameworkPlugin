@@ -1,6 +1,6 @@
 <!-- Keep a Changelog guide -> https://keepachangelog.com -->
 
-# HyperRobotFrameworkPlugin Changelog
+# XeonRobotFrameworkPlugin Changelog
 
 ## Unreleased
 

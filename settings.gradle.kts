@@ -1,1 +1,1 @@
-rootProject.name = "Hyper RobotFramework Support"
+rootProject.name = "Xeon RobotFramework Support"
