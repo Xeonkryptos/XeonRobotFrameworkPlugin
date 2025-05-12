@@ -47,7 +47,7 @@ public class RobotPythonCommandLineState extends PythonScriptCommandLineState {
 
     public static final Key<Integer> ROBOT_DEBUG_PORT = Key.create("ROBOT_DEBUG_PORT");
 
-    private static final Path DATA_DIR = PathManager.getPluginsDir().resolve("Hyper RobotFramework Support").resolve("data");
+    private static final Path DATA_DIR = PathManager.getPluginsDir().resolve("Xeon RobotFramework Support").resolve("data");
     private static final Path BUNDLED_DIR = DATA_DIR.resolve("bundled");
     private static final Path TOOL_DIR = BUNDLED_DIR.resolve("tool");
     private static final Path ROBOTCODE_DIR = TOOL_DIR.resolve("robotcode");
