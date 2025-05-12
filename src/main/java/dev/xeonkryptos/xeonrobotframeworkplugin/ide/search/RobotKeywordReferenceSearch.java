@@ -1,5 +1,6 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.ide.search;
 
+import dev.xeonkryptos.xeonrobotframeworkplugin.MyLogger;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.KeywordDefinition;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.KeywordInvokable;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.KeywordStatement;
@@ -59,11 +60,16 @@ public class RobotKeywordReferenceSearch extends QueryExecutorBase<PsiReference,
                                                     GlobalSearchScope globalSearchScope,
                                                     @NotNull Processor<? super PsiReference> consumer) {
         KeywordStatementNameIndex keywordStatementNameIndex = KeywordStatementNameIndex.getInstance();
-        for (KeywordStatement keywordStatement : keywordStatementNameIndex.getKeywordStatement(keywordName, project, globalSearchScope)) {
-            KeywordInvokable invokable = keywordStatement.getInvokable();
-            if (invokable != null && !consumer.process(invokable.getReference())) {
-                return true;
+        try {
+            for (KeywordStatement keywordStatement : keywordStatementNameIndex.getKeywordStatement(keywordName, project, globalSearchScope)) {
+                KeywordInvokable invokable = keywordStatement.getInvokable();
+                if (invokable != null && !consumer.process(invokable.getReference())) {
+                    return true;
+                }
             }
+        } catch (RuntimeException e) {
+            // TODO: Seeing index issues here often with outdated PositionalArgumentImpl or requiredClass doesn't match
+            MyLogger.logger.warn(e);
         }
         return false;
     }
