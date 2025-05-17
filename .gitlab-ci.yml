@@ -44,6 +44,17 @@ build-plugin:
   cache:
     - <<: *robotcode-cache
 
+sign-plugin:
+  stage: build
+  script:
+    - mv robotcode bundled/libs
+    - gradle buildPlugin
+  artifacts:
+    paths:
+      - build/distributions/*.zip
+  cache:
+    - <<: *robotcode-cache
+
 verify-plugin:
   stage: test
   script: gradle verifyPlugin
