@@ -43,3 +43,8 @@ build-plugin:
       - build/distributions/*.zip
   cache:
     - <<: *robotcode-cache
+
+publish-plugin:
+  stage: publish
+  script:
+    - gradle --build-cache publishPlugin
