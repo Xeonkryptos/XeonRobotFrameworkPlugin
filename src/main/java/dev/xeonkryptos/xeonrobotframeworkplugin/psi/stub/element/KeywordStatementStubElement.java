@@ -6,7 +6,6 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.KeywordStatementImpl
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.index.KeywordStatementNameIndex;
 import com.intellij.lang.ASTNode;
 import com.intellij.psi.PsiElement;
-import com.intellij.psi.StubBasedPsiElement;
 import com.intellij.psi.stubs.IStubElementType;
 import com.intellij.psi.stubs.IndexSink;
 import com.intellij.psi.stubs.StubElement;
@@ -36,7 +35,7 @@ public class KeywordStatementStubElement extends IStubElementType<KeywordStateme
 
     @Override
     public boolean shouldCreateStub(ASTNode node) {
-        return node.getPsi() instanceof StubBasedPsiElement;
+        return node.getPsi() instanceof KeywordStatement;
     }
 
     @NotNull

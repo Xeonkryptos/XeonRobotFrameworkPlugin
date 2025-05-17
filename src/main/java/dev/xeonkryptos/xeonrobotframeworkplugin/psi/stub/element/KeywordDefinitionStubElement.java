@@ -5,7 +5,6 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.KeywordDefinition;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.KeywordDefinitionImpl;
 import com.intellij.lang.ASTNode;
 import com.intellij.psi.PsiElement;
-import com.intellij.psi.StubBasedPsiElement;
 import com.intellij.psi.stubs.IStubElementType;
 import com.intellij.psi.stubs.IndexSink;
 import com.intellij.psi.stubs.StubElement;
@@ -35,7 +34,7 @@ public class KeywordDefinitionStubElement extends IStubElementType<KeywordDefini
 
     @Override
     public boolean shouldCreateStub(ASTNode node) {
-        return node.getPsi() instanceof StubBasedPsiElement;
+        return node.getPsi() instanceof KeywordDefinition;
     }
 
     @NotNull

@@ -1,11 +1,5 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.ide.search;
 
-import dev.xeonkryptos.xeonrobotframeworkplugin.MyLogger;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.KeywordDefinition;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.KeywordInvokable;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.KeywordStatement;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.index.KeywordStatementNameIndex;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.PatternUtil;
 import com.intellij.openapi.application.QueryExecutorBase;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiElement;
@@ -18,6 +12,11 @@ import com.jetbrains.python.psi.PyExpression;
 import com.jetbrains.python.psi.PyFunction;
 import com.jetbrains.python.psi.PyStringLiteralExpression;
 import com.jetbrains.python.psi.StringLiteralExpression;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.KeywordDefinition;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.KeywordInvokable;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.KeywordStatement;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.index.KeywordStatementNameIndex;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.PatternUtil;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
@@ -60,16 +59,11 @@ public class RobotKeywordReferenceSearch extends QueryExecutorBase<PsiReference,
                                                     GlobalSearchScope globalSearchScope,
                                                     @NotNull Processor<? super PsiReference> consumer) {
         KeywordStatementNameIndex keywordStatementNameIndex = KeywordStatementNameIndex.getInstance();
-        try {
-            for (KeywordStatement keywordStatement : keywordStatementNameIndex.getKeywordStatement(keywordName, project, globalSearchScope)) {
-                KeywordInvokable invokable = keywordStatement.getInvokable();
-                if (invokable != null && !consumer.process(invokable.getReference())) {
-                    return true;
-                }
+        for (KeywordStatement keywordStatement : keywordStatementNameIndex.getKeywordStatement(keywordName, project, globalSearchScope)) {
+            KeywordInvokable invokable = keywordStatement.getInvokable();
+            if (invokable != null && !consumer.process(invokable.getReference())) {
+                return true;
             }
-        } catch (RuntimeException e) {
-            // TODO: Seeing index issues here often with outdated PositionalArgumentImpl or requiredClass doesn't match
-            MyLogger.logger.warn(e);
         }
         return false;
     }

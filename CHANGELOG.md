@@ -4,6 +4,10 @@
 
 ## Unreleased
 
+### Fixed
+
+- Restrict stub creation to only the corresponding elements
+
 ## 0.2.8
 
 ### Added
