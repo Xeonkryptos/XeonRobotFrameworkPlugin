@@ -1,4 +1,4 @@
-# HyperRobotFrameworkPlugin
+# XeonRobotFrameworkPlugin
 <!-- Plugin description -->
 Robot Framework plugin for PyCharm.
 

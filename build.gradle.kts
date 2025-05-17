@@ -85,10 +85,16 @@ intellijPlatform {
         }
     }
 
-//    publishing {
-//        token = System.getenv("PUBLISH_TOKEN")
-//        channels = properties("pluginVersion").split('-').getOrElse(1) { "default" }.split('.')
-//    }
+    signing {
+        certificateChainFile.set(file(providers.environmentVariable("CERTIFICATE_CHAIN_FILE")))
+        privateKeyFile.set(file(providers.environmentVariable("PRIVATE_KEY_FILE")))
+        password.set(providers.environmentVariable("PRIVATE_KEY_PASSWORD"))
+    }
+
+    publishing {
+        token = providers.environmentVariable("PUBLISH_TOKEN")
+        channels = properties("pluginVersion").split('-').getOrElse(1) { "default" }.split('.')
+    }
 
     pluginVerification {
         ides {
