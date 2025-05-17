@@ -31,22 +31,28 @@ download-robotcode:
 
 compile-code:
   stage: preparation
-  script: gradle --build-cache jarSearchableOptions
+  script: gradle jarSearchableOptions
 
 build-plugin:
   stage: build
   script:
     - mv robotcode bundled/libs
-    - gradle --build-cache buildPlugin
+    - gradle buildPlugin
   artifacts:
     paths:
       - build/distributions/*.zip
   cache:
     - <<: *robotcode-cache
 
-publish-plugin:
-  stage: publish
-  rules:
-    - if: $CI_COMMIT_REF_NAME == "main"
-  script:
-    - gradle --build-cache publishPlugin
+verify-plugin:
+  stage: test
+  script: gradle verifyPlugin
+
+#publish-plugin:
+#  stage: publish
+#  rules:
+#    - if: $CI_COMMIT_REF_NAME == "main"
+#  script:
+#    - gradle publishPlugin
+#  cache:
+#    - <<: *robotcode-cache
