@@ -7,6 +7,7 @@
 ### Fixed
 
 - Restrict stub creation to only the corresponding elements
+- Fixed reasons for PsiInvalidElementAccessExceptions
 
 ## 0.2.8
 

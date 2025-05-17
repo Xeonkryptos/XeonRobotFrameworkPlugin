@@ -1,8 +1,5 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.psi.element;
 
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotLanguage;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.dto.ImportType;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.dto.KeywordFileWithDependentsWrapper;
 import com.intellij.extapi.psi.PsiFileBase;
 import com.intellij.openapi.fileTypes.FileType;
 import com.intellij.openapi.project.Project;
@@ -11,11 +8,15 @@ import com.intellij.psi.FileViewProvider;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiManager;
 import com.intellij.psi.util.PsiTreeUtil;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotLanguage;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.dto.ImportType;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.dto.KeywordFileWithDependentsWrapper;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -140,6 +141,9 @@ public class RobotFileImpl extends PsiFileBase implements KeywordFile, RobotFile
     @NotNull
     @Override
     public final Collection<KeywordFile> getImportedFiles(boolean includeTransitive) {
+        if (!isValid()) {
+            return List.of();
+        }
         Set<KeywordFile> results = new LinkedHashSet<>();
         Collection<Heading> headings = collectHeadings();
         for (Heading heading : headings) {
@@ -153,6 +157,9 @@ public class RobotFileImpl extends PsiFileBase implements KeywordFile, RobotFile
     @NotNull
     @Override
     public Collection<KeywordFileWithDependentsWrapper> getImportedFilesWithDependents(boolean includeTransitive) {
+        if (!isValid()) {
+            return List.of();
+        }
         Set<KeywordFileWithParentWrapper> results = new LinkedHashSet<>();
         Collection<Heading> headings = collectHeadings();
         for (Heading heading : headings) {
@@ -234,7 +241,7 @@ public class RobotFileImpl extends PsiFileBase implements KeywordFile, RobotFile
     @NotNull
     private Collection<Heading> collectHeadings() {
         Collection<Heading> result = headings;
-        if (result == null) {
+        if (result == null || result.stream().anyMatch(heading -> !heading.isValid())) {
             result = new LinkedHashSet<>(PsiTreeUtil.getChildrenOfTypeAsList(this, Heading.class));
             headings = result;
         }
