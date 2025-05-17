@@ -15,6 +15,7 @@ stages:
   - preparation
   - build
   - test
+  - verify
   - publish
 
 download-robotcode:
@@ -29,10 +30,6 @@ download-robotcode:
     - <<: *robotcode-cache
       policy: pull-push
 
-compile-code:
-  stage: preparation
-  script: gradle jarSearchableOptions
-
 sign-plugin:
   stage: build
   script:
@@ -45,7 +42,7 @@ sign-plugin:
     - <<: *robotcode-cache
 
 verify-plugin:
-  stage: test
+  stage: verify
   script: gradle verifyPlugin
 
 #publish-plugin:
