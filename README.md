@@ -38,7 +38,7 @@ to the completion list for the parameter.
 <!-- Plugin description end -->
 
 ## Buy Me A Coffee
-![](https://raw.githubusercontent.com/xeonkryptos/XeonRobotFrameworkPlugin/main/docs/imgs/qr.png)
+![](https://raw.githubusercontent.com/xeonkryptos/XeonRobotFrameworkPlugin/main/docs/imgs/qr.jpg)
 
 ## Credits
 
