@@ -34,7 +34,7 @@ public class RobotPythonClass extends RobotPythonWrapper implements KeywordFile 
     @NotNull
     @Override
     public final Collection<DefinedKeyword> getDefinedKeywords() {
-        if (importType == ImportType.LIBRARY) {
+        if (importType == ImportType.LIBRARY && pythonClass.isValid()) {
             return CachedValuesManager.getCachedValue(pythonClass, () -> {
                 Set<DefinedKeyword> newKeywords = new HashSet<>();
                 addDefinedKeywords(pythonClass, library, newKeywords);
@@ -48,7 +48,7 @@ public class RobotPythonClass extends RobotPythonWrapper implements KeywordFile 
     @NotNull
     @Override
     public final Collection<DefinedVariable> getDefinedVariables() {
-        if (importType == ImportType.VARIABLES) {
+        if (importType == ImportType.VARIABLES && pythonClass.isValid()) {
             return CachedValuesManager.getCachedValue(pythonClass, () -> {
                 Set<DefinedVariable> newVariables = new HashSet<>();
                 addDefinedVariables(pythonClass, newVariables);
