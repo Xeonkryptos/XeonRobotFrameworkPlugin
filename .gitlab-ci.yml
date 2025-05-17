@@ -46,5 +46,7 @@ build-plugin:
 
 publish-plugin:
   stage: publish
+  rules:
+    - if: $CI_COMMIT_REF_NAME == "main"
   script:
     - gradle --build-cache publishPlugin
