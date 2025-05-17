@@ -1,5 +1,5 @@
 <idea-plugin>
-    <id>com.github.jnhyperion.hyperrobotframeworkplugin</id>
+    <id>dev.xeonkryptos.xeonrobotframeworkplugin</id>
     <name>Xeon RobotFramework Support</name>
     <vendor email="info@xeonkryptos.dev" url="https://github.com/Xeonkryptos/XeonRobotFrameworkPlugin">Xeonkryptos</vendor>
     <description>
