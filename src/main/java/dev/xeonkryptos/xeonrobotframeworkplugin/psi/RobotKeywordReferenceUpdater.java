@@ -1,6 +1,5 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.psi;
 
-import dev.xeonkryptos.xeonrobotframeworkplugin.MyLogger;
 import com.intellij.codeInsight.daemon.DaemonCodeAnalyzer;
 import com.intellij.openapi.application.ReadAction;
 import com.intellij.openapi.progress.ProgressManager;
@@ -21,6 +20,7 @@ import com.jetbrains.python.psi.PyDecoratorList;
 import com.jetbrains.python.psi.PyFunction;
 import com.jetbrains.python.psi.PyParameter;
 import com.jetbrains.python.psi.PyParameterList;
+import dev.xeonkryptos.xeonrobotframeworkplugin.MyLogger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -148,6 +148,7 @@ public class RobotKeywordReferenceUpdater extends PsiTreeChangeAdapter {
                       return null;
                   })
                   .inSmartMode(pythonFunction.getProject())
+                  .coalesceBy(simpleModificationTracker)
                   .expireWhen(() -> currentModificationCount != simpleModificationTracker.getModificationCount())
                   .submit(AppExecutorUtil.getAppExecutorService());
     }
@@ -175,6 +176,7 @@ public class RobotKeywordReferenceUpdater extends PsiTreeChangeAdapter {
                       return null;
                   })
                   .inSmartMode(project)
+                  .coalesceBy(simpleModificationTracker)
                   .expireWhen(() -> currentModificationCount != simpleModificationTracker.getModificationCount() || project.isDisposed())
                   .submit(AppExecutorUtil.getAppExecutorService());
     }
