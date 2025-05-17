@@ -8,6 +8,7 @@
 
 - Restrict stub creation to only the corresponding elements
 - Fixed reasons for PsiInvalidElementAccessExceptions
+- Fixed reason for too many started read actions with the same stacktrace
 
 ## 0.2.8
 
