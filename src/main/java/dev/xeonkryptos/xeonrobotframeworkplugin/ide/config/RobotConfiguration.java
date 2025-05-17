@@ -136,7 +136,7 @@ public class RobotConfiguration implements NoScroll, SearchableConfigurable {
     @Nls
     @Override
     public String getDisplayName() {
-        return "Robot Options";
+        return RobotBundle.getMessage("options.entrypoint");
     }
 
     @NotNull
