@@ -22,17 +22,15 @@ public class RobotKeywordEnterActionHandler extends AbstractRobotSmartMultilineE
         }
         if (element instanceof PsiComment) {
             PsiElement prevSibling = element.getPrevSibling();
-            if (prevSibling instanceof KeywordStatement) {
-                return (KeywordStatement) prevSibling;
-            } else {
-                while (prevSibling instanceof PsiWhiteSpace && prevSibling.getTextRange().getStartOffset() >= lineStartOffset) {
-                    prevSibling = prevSibling.getPrevSibling();
-                }
-                return prevSibling instanceof KeywordStatement foundStatement ?
-                       foundStatement :
-                       PsiTreeUtil.getParentOfType(prevSibling, KeywordStatement.class);
+            if (prevSibling instanceof KeywordStatement foundStatement) {
+                return foundStatement;
             }
+            while (prevSibling instanceof PsiWhiteSpace && prevSibling.getTextRange().getStartOffset() >= lineStartOffset) {
+                prevSibling = prevSibling.getPrevSibling();
+            }
+            return prevSibling instanceof KeywordStatement foundStatement ? foundStatement : PsiTreeUtil.getParentOfType(prevSibling, KeywordStatement.class);
         }
+        // Child in case of a Variable Definition
         return PsiTreeUtil.findChildOfType(element, KeywordStatement.class);
     }
 

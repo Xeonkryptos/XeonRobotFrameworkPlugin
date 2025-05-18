@@ -9,6 +9,7 @@
 - Restrict stub creation to only the corresponding elements
 - Fixed reasons for PsiInvalidElementAccessExceptions
 - Fixed reason for too many started read actions with the same stacktrace
+- Fixed multiline support detection for documentation settings when cursor is placed at a comment
 
 ## 0.2.8
 
