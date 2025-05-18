@@ -10,7 +10,7 @@ public interface DefinedVariable extends LookupElementMarker {
 
    boolean isInScope(@NotNull PsiElement position);
 
-   @Nullable
+   @NotNull
    PsiElement reference();
 
    @Nullable

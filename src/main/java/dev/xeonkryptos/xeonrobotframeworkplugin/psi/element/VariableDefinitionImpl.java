@@ -104,7 +104,7 @@ public class VariableDefinitionImpl extends RobotStubPsiElementBase<VariableDefi
     }
 
     @Override
-    public final PsiElement reference() {
+    public final @NotNull PsiElement reference() {
         return this;
     }
 

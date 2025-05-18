@@ -36,7 +36,7 @@ public class KeywordDefinitionImpl extends RobotStubPsiElementBase<KeywordDefini
         super(stub, nodeType);
     }
 
-    @Nullable
+    @NotNull
     @Override
     public String getName() {
         KeywordDefinitionStub stub = getStub();
@@ -47,13 +47,13 @@ public class KeywordDefinitionImpl extends RobotStubPsiElementBase<KeywordDefini
         if (nameIdentifier != null) {
             return InjectedLanguageManager.getInstance(getProject()).getUnescapedText(nameIdentifier);
         }
-        return null;
+        return "";
     }
 
     @Override
     public Collection<DefinedParameter> getParameters() {
         Collection<DefinedParameter> results = parameters;
-        if (results == null) {
+        if (results == null || results.stream().map(DefinedParameter::reference).anyMatch(element -> !element.isValid())) {
             for (BracketSetting bracketSetting : PsiTreeUtil.getChildrenOfTypeAsList(this, BracketSetting.class)) {
                 if (bracketSetting.isArguments()) {
                     results = bracketSetting.getArguments();
@@ -69,7 +69,7 @@ public class KeywordDefinitionImpl extends RobotStubPsiElementBase<KeywordDefini
     @Override
     public final List<KeywordInvokable> getInvokedKeywords() {
         List<KeywordInvokable> results = invokedKeywords;
-        if (invokedKeywords == null) {
+        if (invokedKeywords == null || results.stream().anyMatch(element -> !element.isValid())) {
             results = new ArrayList<>();
             for (PsiElement statement : getChildren()) {
                 if (statement instanceof KeywordStatement || statement instanceof BracketSetting) {
@@ -88,7 +88,7 @@ public class KeywordDefinitionImpl extends RobotStubPsiElementBase<KeywordDefini
         results.addAll(getDefinedVariables());
         results.addAll(getInlineVariables());
         Collection<DefinedVariable> localTestCaseVariables = testCaseVariables;
-        if (testCaseVariables == null) {
+        if (testCaseVariables == null || results.stream().map(DefinedVariable::reference).anyMatch(element -> !element.isValid())) {
             localTestCaseVariables = getTestCaseVariables();
             testCaseVariables = localTestCaseVariables;
         }
@@ -99,7 +99,7 @@ public class KeywordDefinitionImpl extends RobotStubPsiElementBase<KeywordDefini
     @NotNull
     private Collection<DefinedVariable> getInlineVariables() {
         Collection<DefinedVariable> results = inlineVariables;
-        if (inlineVariables == null) {
+        if (inlineVariables == null || results.stream().map(DefinedVariable::reference).anyMatch(element -> !element.isValid())) {
             results = collectInlineVariables();
             inlineVariables = results;
         }
@@ -124,7 +124,7 @@ public class KeywordDefinitionImpl extends RobotStubPsiElementBase<KeywordDefini
     @NotNull
     public final Collection<DefinedVariable> getDefinedVariables() {
         Collection<DefinedVariable> results = definedVariables;
-        if (definedVariables == null) {
+        if (definedVariables == null || results.stream().map(DefinedVariable::reference).anyMatch(element -> !element.isValid())) {
             results = collectDefinedVariables();
             definedVariables = results;
         }

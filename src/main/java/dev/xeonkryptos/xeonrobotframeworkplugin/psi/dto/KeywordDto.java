@@ -129,6 +129,7 @@ public class KeywordDto implements DefinedKeyword {
         return text != null && this.namePattern.matcher(PatternUtil.keywordToFunction(text).trim()).matches();
     }
 
+    @NotNull
     @Override
     public final PsiElement reference() {
         return this.reference;

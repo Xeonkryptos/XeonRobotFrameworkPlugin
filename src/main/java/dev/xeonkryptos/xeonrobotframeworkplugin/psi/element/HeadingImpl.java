@@ -1,5 +1,11 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.psi.element;
 
+import com.intellij.lang.ASTNode;
+import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiFile;
+import com.intellij.psi.util.PsiTreeUtil;
+import com.jetbrains.python.psi.PyClass;
+import com.jetbrains.python.psi.PyFile;
 import dev.xeonkryptos.xeonrobotframeworkplugin.ide.icons.RobotIcons;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.dto.ImportType;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.dto.KeywordDto;
@@ -8,13 +14,6 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.ref.ResolverUtils;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.ref.RobotFileManager;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.ref.RobotPythonClass;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.ref.RobotPythonFile;
-import com.intellij.lang.ASTNode;
-import com.intellij.psi.PsiElement;
-import com.intellij.psi.PsiFile;
-import com.intellij.psi.PsiReference;
-import com.intellij.psi.util.PsiTreeUtil;
-import com.jetbrains.python.psi.PyClass;
-import com.jetbrains.python.psi.PyFile;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.Icon;
@@ -100,7 +99,7 @@ public class HeadingImpl extends RobotPsiElementBase implements Heading {
     @Override
     public final Collection<DefinedVariable> getDefinedVariables() {
         Collection<DefinedVariable> results = declaredVariables;
-        if (results == null) {
+        if (results == null || results.stream().map(DefinedVariable::reference).anyMatch(element -> !element.isValid())) {
             results = new LinkedHashSet<>(RobotFileManager.getGlobalVariables(getProject()));
             if (containsVariables()) {
                 for (PsiElement child : getChildren()) {
@@ -130,7 +129,7 @@ public class HeadingImpl extends RobotPsiElementBase implements Heading {
     @Override
     public final Collection<DefinedKeyword> collectDefinedKeywords() {
         Collection<DefinedKeyword> results = definedKeywords;
-        if (results == null) {
+        if (results == null || results.stream().map(DefinedKeyword::reference).anyMatch(element -> !element.isValid())) {
             if (containsKeywordDefinitions()) {
                 results = PsiTreeUtil.getChildrenOfTypeAsList(this, KeywordDefinition.class).stream().map(keywordDefinition -> {
                     Collection<DefinedParameter> arguments = PsiTreeUtil.getChildrenOfTypeAsList(keywordDefinition, BracketSetting.class)
@@ -153,7 +152,7 @@ public class HeadingImpl extends RobotPsiElementBase implements Heading {
     @Override
     public final Collection<KeywordDefinition> getTestCases() {
         Collection<KeywordDefinition> results = testCases;
-        if (results == null) {
+        if (results == null || results.stream().anyMatch(element -> !element.isValid())) {
             if (!containsTestCases() && !containsTasks()) {
                 results = Collections.emptySet();
             } else {
@@ -171,7 +170,8 @@ public class HeadingImpl extends RobotPsiElementBase implements Heading {
         if (referencedFiles == null) {
             Collection<PsiFile> results = new LinkedHashSet<>();
             for (KeywordInvokable invokedKeyword : getInvokedKeywords()) {
-                Optional.ofNullable(invokedKeyword.getReference()).map(PsiReference::resolve).map(PsiElement::getContainingFile).ifPresent(results::add);
+                PsiElement resolvedElement = invokedKeyword.getReference().resolve();
+                Optional.ofNullable(resolvedElement).map(PsiElement::getContainingFile).ifPresent(results::add);
                 addReferencedArguments(results, invokedKeyword);
             }
 
@@ -187,7 +187,7 @@ public class HeadingImpl extends RobotPsiElementBase implements Heading {
 
     private Collection<Variable> getUsedVariables() {
         Collection<Variable> results = this.usedVariables;
-        if (usedVariables == null) {
+        if (usedVariables == null || results.stream().anyMatch(element -> !element.isValid())) {
             results = PsiTreeUtil.findChildrenOfType(this, Variable.class);
             usedVariables = results;
         }
@@ -204,7 +204,7 @@ public class HeadingImpl extends RobotPsiElementBase implements Heading {
     @NotNull
     private Collection<KeywordInvokable> getInvokedKeywords() {
         Collection<KeywordInvokable> results = invokedKeywords;
-        if (invokedKeywords == null) {
+        if (invokedKeywords == null || results.stream().anyMatch(element -> !element.isValid())) {
             results = PsiTreeUtil.findChildrenOfType(this, KeywordInvokable.class);
             invokedKeywords = results;
         }
@@ -215,7 +215,7 @@ public class HeadingImpl extends RobotPsiElementBase implements Heading {
     @Override
     public final Collection<VariableDefinition> getVariableDefinitions() {
         Collection<VariableDefinition> variableDefinitions = this.variableDefinitions;
-        if (variableDefinitions == null) {
+        if (variableDefinitions == null || variableDefinitions.stream().anyMatch(element -> !element.isValid())) {
             if (containsVariables()) {
                 variableDefinitions = PsiTreeUtil.findChildrenOfType(this, VariableDefinition.class);
             } else {
@@ -230,7 +230,7 @@ public class HeadingImpl extends RobotPsiElementBase implements Heading {
     @Override
     public final Collection<RobotStatement> getMetadataStatements() {
         Collection<RobotStatement> statement = metadataStatements;
-        if (metadataStatements == null) {
+        if (metadataStatements == null || statement.stream().anyMatch(element -> !element.isValid())) {
             statement = new LinkedHashSet<>(PsiTreeUtil.findChildrenOfAnyType(this, Import.class, Setting.class));
             metadataStatements = statement;
         }
@@ -244,7 +244,7 @@ public class HeadingImpl extends RobotPsiElementBase implements Heading {
             return List.of();
         }
         Collection<KeywordFile> files = keywordFiles;
-        if (keywordFiles == null) {
+        if (keywordFiles == null || files.stream().map(KeywordFile::getPsiFile).anyMatch(element -> !element.isValid())) {
             files = new LinkedHashSet<>();
             addBuiltInImports(files);
             if (isSettings()) {

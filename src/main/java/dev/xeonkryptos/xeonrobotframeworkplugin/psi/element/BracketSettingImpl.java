@@ -44,7 +44,7 @@ public class BracketSettingImpl extends RobotPsiElementBase implements BracketSe
     @Override
     public Collection<DefinedParameter> getArguments() {
         Collection<DefinedParameter> localArguments = arguments;
-        if (localArguments == null) {
+        if (localArguments == null || localArguments.stream().map(DefinedParameter::reference).anyMatch(element -> !element.isValid())) {
             localArguments = PsiTreeUtil.getChildrenOfTypeAsList(this, VariableDefinition.class).stream().map(variableDefinition -> {
                 String defaultValue = PsiTreeUtil.getChildrenOfTypeAsList(variableDefinition, Argument.class)
                                                  .stream()

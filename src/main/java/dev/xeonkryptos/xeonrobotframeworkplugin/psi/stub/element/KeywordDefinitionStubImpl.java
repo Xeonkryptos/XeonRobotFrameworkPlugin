@@ -4,6 +4,7 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotStubTokenTypes;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.KeywordDefinition;
 import com.intellij.psi.stubs.StubBase;
 import com.intellij.psi.stubs.StubElement;
+import org.jetbrains.annotations.NotNull;
 
 public class KeywordDefinitionStubImpl extends StubBase<KeywordDefinition> implements KeywordDefinitionStub {
 
@@ -16,7 +17,7 @@ public class KeywordDefinitionStubImpl extends StubBase<KeywordDefinition> imple
     }
 
     @Override
-    public String getName() {
+    public @NotNull String getName() {
         return myName;
     }
 }

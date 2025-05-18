@@ -1,12 +1,5 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.psi.element;
 
-import dev.xeonkryptos.xeonrobotframeworkplugin.MyLogger;
-import dev.xeonkryptos.xeonrobotframeworkplugin.ide.config.RobotOptionsProvider;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.dto.ParameterDto;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.dto.VariableDto;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.element.KeywordStatementStub;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.PatternUtil;
-import dev.xeonkryptos.xeonrobotframeworkplugin.util.PythonInspector;
 import com.intellij.lang.ASTNode;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiReference;
@@ -16,6 +9,13 @@ import com.jetbrains.python.psi.PyClass;
 import com.jetbrains.python.psi.PyFunction;
 import com.jetbrains.python.psi.PyNamedParameter;
 import com.jetbrains.python.psi.PyParameter;
+import dev.xeonkryptos.xeonrobotframeworkplugin.MyLogger;
+import dev.xeonkryptos.xeonrobotframeworkplugin.ide.config.RobotOptionsProvider;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.dto.ParameterDto;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.dto.VariableDto;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.element.KeywordStatementStub;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.PatternUtil;
+import dev.xeonkryptos.xeonrobotframeworkplugin.util.PythonInspector;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -49,7 +49,7 @@ public class KeywordStatementImpl extends RobotStubPsiElementBase<KeywordStateme
     @Override
     public final KeywordInvokable getInvokable() {
         KeywordInvokable result = invokable;
-        if (invokable == null) {
+        if (invokable == null || !invokable.isValid()) {
             result = PsiTreeUtil.getRequiredChildOfType(this, KeywordInvokable.class);
             this.invokable = result;
         }
@@ -60,7 +60,7 @@ public class KeywordStatementImpl extends RobotStubPsiElementBase<KeywordStateme
     @Override
     public List<Argument> getArguments() {
         List<Argument> arguments = this.arguments;
-        if (arguments == null) {
+        if (arguments == null || arguments.stream().anyMatch(element -> !element.isValid())) {
             arguments = PsiTreeUtil.getChildrenOfTypeAsList(this, Argument.class);
             this.arguments = arguments;
         }
@@ -71,7 +71,7 @@ public class KeywordStatementImpl extends RobotStubPsiElementBase<KeywordStateme
     @Override
     public List<Parameter> getParameters() {
         List<Parameter> results = parameters;
-        if (parameters == null) {
+        if (parameters == null || results.stream().anyMatch(element -> !element.isValid())) {
             results = PsiTreeUtil.getChildrenOfTypeAsList(this, Parameter.class);
             parameters = results;
         }
@@ -82,7 +82,7 @@ public class KeywordStatementImpl extends RobotStubPsiElementBase<KeywordStateme
     @Override
     public final List<PositionalArgument> getPositionalArguments() {
         List<PositionalArgument> results = positionalArguments;
-        if (positionalArguments == null) {
+        if (positionalArguments == null || results.stream().anyMatch(element -> !element.isValid())) {
             results = PsiTreeUtil.getChildrenOfTypeAsList(this, PositionalArgument.class);
             positionalArguments = results;
         }
@@ -94,7 +94,9 @@ public class KeywordStatementImpl extends RobotStubPsiElementBase<KeywordStateme
     public Collection<DefinedParameter> getAvailableParameters() {
         Collection<DefinedParameter> localDefinedParameters = availableKeywordParameters;
         boolean pythonLiveInspection = RobotOptionsProvider.getInstance(getProject()).pythonLiveInspection();
-        if (availableKeywordParameters == null || liveInspectionEnabledLastTime != pythonLiveInspection) {
+        if (availableKeywordParameters == null || liveInspectionEnabledLastTime != pythonLiveInspection || localDefinedParameters.stream()
+                                                                                                                                 .map(DefinedParameter::reference)
+                                                                                                                                 .anyMatch(element -> !element.isValid())) {
             localDefinedParameters = collectKeywordParameters();
             availableKeywordParameters = localDefinedParameters;
             liveInspectionEnabledLastTime = pythonLiveInspection;
@@ -106,7 +108,7 @@ public class KeywordStatementImpl extends RobotStubPsiElementBase<KeywordStateme
     @Override
     public final DefinedVariable getGlobalVariable() {
         DefinedVariable result = variable;
-        if (result == null) {
+        if (result == null || !result.reference().isValid()) {
             KeywordInvokable invokable = getInvokable();
             String text = invokable.getName();
             if (PatternUtil.isVariableSettingKeyword(text)) {

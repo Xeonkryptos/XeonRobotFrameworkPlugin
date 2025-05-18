@@ -42,7 +42,7 @@ public class VariableDto implements DefinedVariable {
         return this.scope == null || this.scope.isInScope(reference, position);
     }
 
-    @Nullable
+    @NotNull
     @Override
     public final PsiElement reference() {
         return this.reference;

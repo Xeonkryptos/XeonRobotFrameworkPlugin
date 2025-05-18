@@ -8,9 +8,4 @@ public class KeywordDefinitionIdImpl extends RobotPsiElementBase implements Keyw
    public KeywordDefinitionIdImpl(@NotNull ASTNode node) {
          super(node);
    }
-
-    @Override
-    public void subtreeChanged() {
-        super.subtreeChanged();
-    }
 }

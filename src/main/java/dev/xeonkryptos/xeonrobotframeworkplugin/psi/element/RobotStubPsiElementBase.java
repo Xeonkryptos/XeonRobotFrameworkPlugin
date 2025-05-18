@@ -63,6 +63,7 @@ public abstract class RobotStubPsiElementBase<T extends StubElement<P>, P extend
         };
     }
 
+    @NotNull
     @Override
     public String getName() {
         return getPresentableText();

@@ -17,11 +17,6 @@ public class PositionalArgumentImpl extends RobotStubPsiElementBase<PositionalAr
         super(stub, nodeType);
     }
 
-    @Override
-    public void subtreeChanged() {
-        super.subtreeChanged();
-    }
-
     @NotNull
     @Override
     public String getPresentableText() {
