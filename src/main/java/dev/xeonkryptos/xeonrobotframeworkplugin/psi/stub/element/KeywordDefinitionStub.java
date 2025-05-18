@@ -1,10 +1,8 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.element;
 
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.KeywordDefinition;
 import com.intellij.psi.stubs.NamedStub;
-import org.jetbrains.annotations.NonNls;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.KeywordDefinition;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 public interface KeywordDefinitionStub extends NamedStub<KeywordDefinition> {
 
