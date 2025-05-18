@@ -1,0 +1,67 @@
+name: Single Unit Test
+
+on:
+  workflow_call:
+    inputs:
+      gradleVersion:
+        type: string
+        required: true
+        description: 'Gradle version – see: https://github.com/gradle/gradle/releases'
+      os:
+        type: string
+        required: true
+        description: 'Operation system'
+      cacheReadOnly:
+        type: boolean
+        default: false
+        required: false
+        description: 'Controls writing the Gradle cache'
+      testName:
+        type: string
+        required: false
+        description: 'Optional test name to run'
+
+jobs:
+  unitTests:
+    name: Gradle ${{ inputs.gradleVersion }} @ ${{ inputs.os }}
+    runs-on: ${{ inputs.os }}
+    permissions:
+      checks: write
+    steps:
+
+      # Free GitHub Actions Environment Disk Space
+      - name: Maximize Build Space
+        if: runner.os == 'Linux'
+        uses: jlumbroso/free-disk-space@main
+        with:
+          tool-cache: false
+          large-packages: false
+
+      - name: Fetch Sources
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: zulu
+          java-version: 17
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          cache-read-only: ${{ inputs.cacheReadOnly }}
+
+      - name: Run Tests
+        env:
+          DEVELOCITY_ACCESS_KEY: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
+          TEST_NAME: ${{ inputs.testName }}
+        shell: bash
+        run: |
+          [ -z "$TEST_NAME" ] && TESTS="" || TESTS="--tests $TEST_NAME"
+          
+          ./gradlew check test \
+            -PtestGradleVersion="${{ inputs.gradleVersion }}" \
+            ${{ runner.os == 'Windows' && '-PtestGradleUserHome="C:\\testGradleHome"' || '' }} \
+            $TESTS \
+            --console=plain \
+            --no-build-cache

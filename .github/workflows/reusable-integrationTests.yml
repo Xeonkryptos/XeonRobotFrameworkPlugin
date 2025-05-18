@@ -1,0 +1,63 @@
+name: Reusable Integration Tests
+
+on:
+  workflow_call:
+    inputs:
+      platformVersion:
+        required: false
+        default: 2022.1.4
+        type: string
+
+jobs:
+  integrationTests:
+    name: Gradle ${{ matrix.gradleVersion }} @ ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        gradleVersion:
+          - "8.5"
+          - "8.14"
+          - "nightly"
+        os:
+          - windows-latest
+          - ubuntu-latest
+          - macos-latest
+
+    steps:
+
+      # Free GitHub Actions Environment Disk Space
+      - name: Maximize Build Space
+        if: runner.os == 'Linux'
+        uses: jlumbroso/free-disk-space@main
+        with:
+          tool-cache: false
+          large-packages: false
+
+      - name: Fetch Sources
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: zulu
+          java-version: 17
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          cache-read-only: true
+
+      - name: Run Tests
+        env:
+          DEVELOCITY_ACCESS_KEY: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
+          TEST_NAME: ${{ inputs.testName }}
+        shell: bash
+        run: |
+          [ -z "$TEST_NAME" ] && TESTS="" || TESTS="--tests $TEST_NAME"
+          
+          ./gradlew integrationTest \
+            -PtestGradleVersion="${{ matrix.gradleVersion }}" \
+            ${{ runner.os == 'Windows' && '-PtestGradleUserHome="C:\\testGradleHome"' || '' }} \
+            --console=plain \
+            --no-build-cache
