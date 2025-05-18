@@ -15,11 +15,13 @@
 - Fixed reasons for PsiInvalidElementAccessExceptions
 - Fixed reason for too many started read actions with the same stacktrace
 - Fixed multiline support detection for documentation settings when cursor is placed at a comment
+- Fixed invalid code completion for keywords using meta characters like `*` or `/` with a variable definition before the keyword
 
 ### Changed
 
 - Restrict error marking on unresolved parameter to the parameter name only
 - Don't expect a keyword statement for every variable definition. When the argument of a variable definition is unresolvable, interpret it as a simple argument
+- Add only parameters in code completion for keywords with meta characters that aren't defined yet
 
 ## 0.2.8
 

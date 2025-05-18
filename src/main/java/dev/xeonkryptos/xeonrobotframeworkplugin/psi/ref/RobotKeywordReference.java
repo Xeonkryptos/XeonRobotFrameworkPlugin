@@ -1,5 +1,6 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.psi.ref;
 
+import dev.xeonkryptos.xeonrobotframeworkplugin.ide.completion.KeywordCompletionModification;
 import dev.xeonkryptos.xeonrobotframeworkplugin.util.LookupElementUtil;
 import dev.xeonkryptos.xeonrobotframeworkplugin.ide.RobotTailTypes;
 import dev.xeonkryptos.xeonrobotframeworkplugin.ide.config.RobotOptionsProvider;
@@ -38,6 +39,9 @@ public class RobotKeywordReference extends PsiReferenceBase<KeywordInvokable> {
         ResolveCache resolveCache = ResolveCache.getInstance(keywordInvokable.getProject());
         return resolveCache.resolveWithCaching(this, (robotKeywordReference, incompleteCode) -> {
             String keywordInvokableName = keywordInvokable.getName();
+            if (KeywordCompletionModification.isKeywordStartsWithModifier(keywordInvokableName)) {
+                keywordInvokableName = keywordInvokableName.substring(1);
+            }
             PsiFile containingFile = keywordInvokable.getContainingFile();
             return ResolverUtils.findKeywordReference(keywordInvokableName, containingFile);
         }, false, false);
