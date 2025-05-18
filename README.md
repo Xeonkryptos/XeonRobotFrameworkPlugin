@@ -29,6 +29,12 @@ mandatory or all parameters.
 If you also use type hints in your Python code and one of the parameters you want to fill references to an enum, the enum values are added
 to the completion list for the parameter.
 
+### SMT Console View
+
+The SMT Console View is a console view that shows the output of the Robot Framework test execution. It is the same view used for all test 
+executions in Jetbrains IDEs. It shows the output of the test execution in a tree view, with the ability to expand and collapse the test cases 
+and keywords.
+
 ## Prerequisites
   * Set your `Python` interpreter properly for your `PyCharm`
 

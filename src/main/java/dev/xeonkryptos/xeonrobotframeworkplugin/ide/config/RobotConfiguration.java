@@ -27,7 +27,6 @@ import java.util.List;
 public class RobotConfiguration implements NoScroll, SearchableConfigurable {
 
     private final JBPanel<?> panel;
-    private final JBCheckBox enableDebug;
     private final JBCheckBox allowTransitiveImports;
     private final JBCheckBox capitalizeKeywords;
     private final JBCheckBox smartAutoEncloseVariable;
@@ -42,19 +41,14 @@ public class RobotConfiguration implements NoScroll, SearchableConfigurable {
         mainPanel.setLayout(new GridLayoutManager(2, 2, JBUI.emptyInsets(), -1, -1, false, false));
 
         JBPanel<?> checkBoxPanel = new JBPanel<>();
-        checkBoxPanel.setLayout(new GridLayoutManager(9, 1, JBUI.emptyInsets(), -1, -1, false, false));
+        checkBoxPanel.setLayout(new GridLayoutManager(8, 1, JBUI.emptyInsets(), -1, -1, false, false));
         mainPanel.add(checkBoxPanel, new GridConstraints(0, 0, 1, 2, 0, 3, 3, 3, null, null, null));
 
         int row = 0;
         JBCheckBox transitiveImportsCheckBox = new JBCheckBox();
         this.allowTransitiveImports = transitiveImportsCheckBox;
-        transitiveImportsCheckBox.setText("Allow Transitive Imports (performance concern)");
+        transitiveImportsCheckBox.setText("Allow Transitive Imports");
         checkBoxPanel.add(transitiveImportsCheckBox, new GridConstraints(row++, 0, 1, 1, 8, 0, 3, 3, null, null, null));
-
-        JBCheckBox debugCheckBox = new JBCheckBox();
-        this.enableDebug = debugCheckBox;
-        debugCheckBox.setText("Enable Debug Trace");
-        checkBoxPanel.add(debugCheckBox, new GridConstraints(row++, 0, 1, 1, 8, 0, 3, 3, null, null, null));
 
         JBCheckBox capitalizeKeywordsCheckBox = new JBCheckBox();
         this.capitalizeKeywords = capitalizeKeywordsCheckBox;
@@ -78,21 +72,21 @@ public class RobotConfiguration implements NoScroll, SearchableConfigurable {
 
         JBPanel<?> customArgumentsPanel = new JBPanel<>();
         customArgumentsPanel.setLayout(new BoxLayout(customArgumentsPanel, BoxLayout.LINE_AXIS));
-        checkBoxPanel.add(customArgumentsPanel, new GridConstraints(row++, 0, 1, 1, 8, GridBagConstraints.BOTH, 3, 0, null, null, null));
+//        checkBoxPanel.add(customArgumentsPanel, new GridConstraints(row++, 0, 1, 1, 8, GridBagConstraints.BOTH, 3, 0, null, null, null));
 
         JBLabel customArgumentsLabel = new JBLabel();
         customArgumentsLabel.setText("Python inspection custom arguments: ");
-        customArgumentsPanel.add(customArgumentsLabel);
+//        customArgumentsPanel.add(customArgumentsLabel);
         customArgumentsLabel.setToolTipText(RobotBundle.getMessage("options.inspection.custom.arguments.tooltip"));
 
         JBTextField pythonLiveInspectionCustomArgumentsTextField = new JBTextField();
         this.pythonLiveInspectionCustomArgumentsTextField = pythonLiveInspectionCustomArgumentsTextField;
         pythonLiveInspectionCustomArgumentsTextField.setText("Custom Arguments");
-        customArgumentsPanel.add(pythonLiveInspectionCustomArgumentsTextField);
+//        customArgumentsPanel.add(pythonLiveInspectionCustomArgumentsTextField);
 
         JBPanel<?> pythonLiveInspectionForDecoratorsPanel = new JBPanel<>();
         pythonLiveInspectionForDecoratorsPanel.setLayout(new BoxLayout(pythonLiveInspectionForDecoratorsPanel, BoxLayout.LINE_AXIS));
-        checkBoxPanel.add(pythonLiveInspectionForDecoratorsPanel, new GridConstraints(row, 0, 1, 1, 8, GridBagConstraints.BOTH, 3, 0, null, null, null));
+//        checkBoxPanel.add(pythonLiveInspectionForDecoratorsPanel, new GridConstraints(row, 0, 1, 1, 8, GridBagConstraints.BOTH, 3, 0, null, null, null));
 
         JBLabel pythonLiveInspectionForDecoratorsLabel = new JBLabel();
         pythonLiveInspectionForDecoratorsLabel.setText("Python inspection for decorators: ");
@@ -154,8 +148,7 @@ public class RobotConfiguration implements NoScroll, SearchableConfigurable {
     @Override
     public boolean isModified() {
         RobotOptionsProvider provider = getOptionProvider();
-        return provider != null && (provider.isDebug() != this.enableDebug.isSelected()
-                                    || provider.allowTransitiveImports() != this.allowTransitiveImports.isSelected()
+        return provider != null && (provider.allowTransitiveImports() != this.allowTransitiveImports.isSelected()
                                     || provider.capitalizeKeywords() != this.capitalizeKeywords.isSelected()
                                     || provider.smartAutoEncloseVariable() != this.smartAutoEncloseVariable.isSelected()
                                     || provider.multilineIndentation() != this.multilineIndentation.isSelected()
@@ -168,7 +161,6 @@ public class RobotConfiguration implements NoScroll, SearchableConfigurable {
     public void apply() {
         RobotOptionsProvider provider = getOptionProvider();
         if (provider != null) {
-            provider.setDebug(this.enableDebug.isSelected());
             provider.setAllowTransitiveImports(this.allowTransitiveImports.isSelected());
             provider.setCapitalizeKeywords(this.capitalizeKeywords.isSelected());
             provider.setSmartAutoEncloseVariable(this.smartAutoEncloseVariable.isSelected());
@@ -192,7 +184,6 @@ public class RobotConfiguration implements NoScroll, SearchableConfigurable {
     public void reset() {
         RobotOptionsProvider provider = getOptionProvider();
         if (provider != null) {
-            this.enableDebug.setSelected(provider.isDebug());
             this.allowTransitiveImports.setSelected(provider.allowTransitiveImports());
             this.capitalizeKeywords.setSelected(provider.capitalizeKeywords());
             this.smartAutoEncloseVariable.setSelected(provider.smartAutoEncloseVariable());

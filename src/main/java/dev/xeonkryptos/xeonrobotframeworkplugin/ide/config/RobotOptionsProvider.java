@@ -21,14 +21,6 @@ public class RobotOptionsProvider implements PersistentStateComponent<RobotOptio
         return project.getService(RobotOptionsProvider.class);
     }
 
-    public final boolean isDebug() {
-        return this.state.debug;
-    }
-
-    public final void setDebug(boolean debug) {
-        this.state.debug = debug;
-    }
-
     public final boolean allowTransitiveImports() {
         return this.state.transitiveImports;
     }
@@ -109,7 +101,6 @@ public class RobotOptionsProvider implements PersistentStateComponent<RobotOptio
 
     @Override
     public void loadState(@NotNull State state) {
-        this.state.debug = state.debug;
         this.state.transitiveImports = state.transitiveImports;
         this.state.capitalizeKeywords = state.capitalizeKeywords;
         this.state.smartAutoEncloseVariable = state.smartAutoEncloseVariable;
@@ -121,7 +112,6 @@ public class RobotOptionsProvider implements PersistentStateComponent<RobotOptio
 
     public static class State {
         public boolean transitiveImports = true;
-        public boolean debug = false;
         public boolean capitalizeKeywords = true;
         public boolean smartAutoEncloseVariable = true;
         public boolean multilineIndentation = true;
