@@ -40,13 +40,7 @@ public class RobotParameterInfoHandler implements ParameterInfoHandler<KeywordSt
         KeywordStatement keywordStatement = findKeywordStatement(psiFile, offset);
         if (keywordStatement != null) {
             KeywordInvokable invokable = keywordStatement.getInvokable();
-            if (invokable == null) {
-                return null;
-            }
             PsiReference reference = invokable.getReference();
-            if (reference == null) {
-                return null;
-            }
             PsiElement resolvedElement = reference.resolve();
             context.setItemsToShow(new Object[] { resolvedElement });
         }

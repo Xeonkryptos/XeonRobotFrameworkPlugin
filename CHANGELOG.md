@@ -6,7 +6,8 @@
 
 ### Added
 
-- Support for Find Usages of defined variables implemented
+- Support for Find Usages of defined variables
+- Annotate/Highlight unused variables as such and provide a quick-fix to remove them
 
 ### Fixed
 
@@ -18,6 +19,7 @@
 ### Changed
 
 - Restrict error marking on unresolved parameter to the parameter name only
+- Don't expect a keyword statement for every variable definition. When the argument of a variable definition is unresolvable, interpret it as a simple argument
 
 ## 0.2.8
 

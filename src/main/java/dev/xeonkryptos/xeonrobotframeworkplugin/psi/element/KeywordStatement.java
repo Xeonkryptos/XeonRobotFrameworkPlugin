@@ -1,8 +1,8 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.psi.element;
 
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.element.KeywordStatementStub;
 import com.intellij.psi.PsiNamedElement;
 import com.intellij.psi.StubBasedPsiElement;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.element.KeywordStatementStub;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -11,7 +11,7 @@ import java.util.List;
 
 public interface KeywordStatement extends RobotStatement, PsiNamedElement, StubBasedPsiElement<KeywordStatementStub> {
 
-   @Nullable
+   @NotNull
    KeywordInvokable getInvokable();
 
    @NotNull
@@ -30,4 +30,8 @@ public interface KeywordStatement extends RobotStatement, PsiNamedElement, StubB
    DefinedVariable getGlobalVariable();
 
    void reset();
+
+   @NotNull
+   @Override
+   String getName();
 }

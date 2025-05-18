@@ -118,21 +118,17 @@ public class ResolverUtils {
         }
 
         KeywordInvokable keywordInvokable = keywordStatement.getInvokable();
-        if (keywordInvokable != null) {
-            PsiReference reference = keywordInvokable.getReference();
-            if (reference != null) {
-                PsiElement resolvedElement = reference.resolve();
-                if (resolvedElement instanceof KeywordDefinition) {
-                    List<KeywordInvokable> invokedKeywords = ((KeywordDefinition) resolvedElement).getInvokedKeywords();
-                    Collections.reverse(invokedKeywords);
-                    for (KeywordInvokable invokedKeyword : invokedKeywords) {
-                        PsiElement parent = invokedKeyword.getParent();
-                        if (parent instanceof KeywordStatement) {
-                            PsiElement result = findVariableInStatement((KeywordStatement) parent, variableName);
-                            if (result != null) {
-                                return result;
-                            }
-                        }
+        PsiReference reference = keywordInvokable.getReference();
+        PsiElement resolvedElement = reference.resolve();
+        if (resolvedElement instanceof KeywordDefinition) {
+            List<KeywordInvokable> invokedKeywords = ((KeywordDefinition) resolvedElement).getInvokedKeywords();
+            Collections.reverse(invokedKeywords);
+            for (KeywordInvokable invokedKeyword : invokedKeywords) {
+                PsiElement parent = invokedKeyword.getParent();
+                if (parent instanceof KeywordStatement) {
+                    PsiElement result = findVariableInStatement((KeywordStatement) parent, variableName);
+                    if (result != null) {
+                        return result;
                     }
                 }
             }
@@ -154,18 +150,14 @@ public class ResolverUtils {
 
         List<DefinedVariable> variables = new ArrayList<>();
         KeywordInvokable invokable = keywordStatement.getInvokable();
-        if (invokable != null) {
-            PsiReference reference = invokable.getReference();
-            if (reference != null) {
-                PsiElement resolvedElement = reference.resolve();
-                if (resolvedElement instanceof KeywordDefinition) {
-                    for (KeywordInvokable invokedKeyword : ((KeywordDefinition) resolvedElement).getInvokedKeywords()) {
-                        PsiElement parent = invokedKeyword.getParent();
-                        if (parent instanceof KeywordStatement) {
-                            List<DefinedVariable> results = walkKeyword((KeywordStatement) parent);
-                            variables.addAll(results);
-                        }
-                    }
+        PsiReference reference = invokable.getReference();
+        PsiElement resolvedElement = reference.resolve();
+        if (resolvedElement instanceof KeywordDefinition keywordDefinition) {
+            for (KeywordInvokable invokedKeyword : keywordDefinition.getInvokedKeywords()) {
+                PsiElement parent = invokedKeyword.getParent();
+                if (parent instanceof KeywordStatement) {
+                    List<DefinedVariable> results = walkKeyword((KeywordStatement) parent);
+                    variables.addAll(results);
                 }
             }
         }

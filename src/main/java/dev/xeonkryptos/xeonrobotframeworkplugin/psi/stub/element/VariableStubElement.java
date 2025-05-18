@@ -16,8 +16,12 @@ import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class VariableStubElement extends IStubElementType<VariableStub, Variable> {
+
+    private static final Pattern VARIABLE_NAME_IN_EXTENDED_PATTERN = Pattern.compile("([\\p{L}\\p{N}_]+)", Pattern.UNICODE_CHARACTER_CLASS);
 
     public VariableStubElement(@NotNull @NonNls String debugName) {
         super(debugName, RobotLanguage.INSTANCE);
@@ -62,6 +66,13 @@ public class VariableStubElement extends IStubElementType<VariableStub, Variable
         if (!stub.isEmpty() && !stub.isEnvironmentVariable()) {
             StubIndexKey<String, Variable> stubIndexKey = VariableNameIndex.getInstance().getKey();
             String unwrappedVariableNameInLowerCase = stub.getUnwrappedName().toLowerCase();
+            Matcher matcher = VARIABLE_NAME_IN_EXTENDED_PATTERN.matcher(unwrappedVariableNameInLowerCase);
+            if (matcher.find()) {
+                String simplifiedVariableName = matcher.group();
+                if (!simplifiedVariableName.equals(unwrappedVariableNameInLowerCase)) {
+                    sink.occurrence(stubIndexKey, simplifiedVariableName);
+                }
+            }
             sink.occurrence(stubIndexKey, unwrappedVariableNameInLowerCase);
         }
     }

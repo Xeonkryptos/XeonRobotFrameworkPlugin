@@ -45,12 +45,13 @@ public class KeywordStatementImpl extends RobotStubPsiElementBase<KeywordStateme
         super(stub, nodeType);
     }
 
-    @Nullable
+    @NotNull
     @Override
     public final KeywordInvokable getInvokable() {
         KeywordInvokable result = invokable;
         if (invokable == null) {
-            invokable = PsiTreeUtil.findChildOfType(this, KeywordInvokable.class);
+            result = PsiTreeUtil.getRequiredChildOfType(this, KeywordInvokable.class);
+            this.invokable = result;
         }
         return result;
     }
@@ -107,15 +108,13 @@ public class KeywordStatementImpl extends RobotStubPsiElementBase<KeywordStateme
         DefinedVariable result = variable;
         if (result == null) {
             KeywordInvokable invokable = getInvokable();
-            if (invokable != null) {
-                String text = invokable.getName();
-                if (PatternUtil.isVariableSettingKeyword(text)) {
-                    List<PositionalArgument> positionalArguments = getPositionalArguments();
-                    if (!positionalArguments.isEmpty()) {
-                        PositionalArgument variable = positionalArguments.getFirst();
-                        // already formatted ${X}
-                        result = new VariableDto(variable, variable.getContent(), null);
-                    }
+            String text = invokable.getName();
+            if (PatternUtil.isVariableSettingKeyword(text)) {
+                List<PositionalArgument> positionalArguments = getPositionalArguments();
+                if (!positionalArguments.isEmpty()) {
+                    PositionalArgument variable = positionalArguments.getFirst();
+                    // already formatted ${X}
+                    result = new VariableDto(variable, variable.getContent(), null);
                 }
             }
             variable = result;

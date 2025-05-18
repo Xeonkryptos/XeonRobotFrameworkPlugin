@@ -14,17 +14,21 @@
         <projectConfigurable groupId="language" instance="dev.xeonkryptos.xeonrobotframeworkplugin.ide.config.RobotConfiguration" key="options.entrypoint"
                              bundle="messages.RobotBundle"/>
         <projectService serviceImplementation="dev.xeonkryptos.xeonrobotframeworkplugin.ide.config.RobotOptionsProvider"/>
+
         <fileType name="Robot Feature" implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotFeatureFileType" fieldName="INSTANCE"
                   language="Robot" extensions="robot"/>
         <fileType name="Robot Resource" implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotResourceFileType" fieldName="INSTANCE"
                   language="Robot" extensions="resource"/>
+
         <colorSettingsPage implementation="dev.xeonkryptos.xeonrobotframeworkplugin.ide.config.RobotColorsPage"/>
+
         <!-- IDE Hooks -->
         <completion.contributor language="Robot"
                                 implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.ide.completion.RobotCompletionContributor"/>
         <lang.findUsagesProvider language="Robot" implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.ide.usage.RobotFindUsagesProvider"/>
         <findUsagesHandlerFactory implementation="dev.xeonkryptos.xeonrobotframeworkplugin.ide.usage.RobotPythonFindUsagesHandlerFactory"/>
         <usageTypeProvider implementation="dev.xeonkryptos.xeonrobotframeworkplugin.ide.usage.RobotUsageTypeProvider"/>
+
         <referencesSearch implementation="dev.xeonkryptos.xeonrobotframeworkplugin.ide.search.RobotKeywordReferenceSearch"/>
         <referencesSearch implementation="dev.xeonkryptos.xeonrobotframeworkplugin.ide.search.RobotVariableReferenceSearch"/>
         <referencesSearch implementation="dev.xeonkryptos.xeonrobotframeworkplugin.ide.search.RobotImportArgumentReferenceSearch"/>
@@ -47,8 +51,7 @@
 
         <codeInsight.parameterInfo language="Robot"
                                    implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.ide.parameterinfo.RobotParameterInfoHandler"/>
-        <codeInsight.parameterInfo language="Robot"
-                                   implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.ide.parameterinfo.RobotParameterInfoHandler"/>
+
         <!-- Manipulators -->
         <lang.elementManipulator forClass="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.KeywordInvokable"
                                  implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.psi.manip.KeywordInvokableManipulator"/>
@@ -58,15 +61,15 @@
                                  implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.psi.manip.VariableManipulator"/>
         <lang.elementManipulator forClass="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.ParameterId"
                                  implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.psi.manip.ParameterIdManipulator"/>
+
         <!-- Annotations -->
-        <annotator language="Robot"
-                   implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.ide.inspections.compilation.RobotParameterAnnotator"/>
-        <annotator language="Robot"
-                   implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.ide.inspections.compilation.RobotKeywordAnnotator"/>
-        <annotator language="Robot"
-                   implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.ide.inspections.compilation.RobotImportAnnotator"/>
-        <annotator language="Robot"
-                   implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.ide.inspections.compilation.RobotVariableAnnotator"/>
+        <annotator language="Robot" implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.ide.inspections.compilation.RobotParameterAnnotator"/>
+        <annotator language="Robot" implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.ide.inspections.compilation.RobotKeywordAnnotator"/>
+        <annotator language="Robot" implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.ide.inspections.compilation.RobotImportAnnotator"/>
+        <annotator language="Robot" implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.ide.inspections.compilation.RobotVariableAnnotator"/>
+        <annotator language="Robot" implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.ide.inspections.cleanup.RobotUnusedVariableAnnotator"/>
+        <annotator language="Robot" implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.ide.inspections.compilation.RobotVariableArgumentAnnotator"/>
+
         <!-- Inspections -->
         <!-- TODO: inspection: error?: resource import is not a robot file -->
         <!-- TODO: inspection: warn: import python file vs class -->

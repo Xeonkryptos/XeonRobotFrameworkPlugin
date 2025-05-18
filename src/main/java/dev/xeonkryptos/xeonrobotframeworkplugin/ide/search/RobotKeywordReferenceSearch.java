@@ -61,7 +61,7 @@ public class RobotKeywordReferenceSearch extends QueryExecutorBase<PsiReference,
         KeywordStatementNameIndex keywordStatementNameIndex = KeywordStatementNameIndex.getInstance();
         for (KeywordStatement keywordStatement : keywordStatementNameIndex.getKeywordStatements(keywordName, project, globalSearchScope)) {
             KeywordInvokable invokable = keywordStatement.getInvokable();
-            if (invokable != null && !consumer.process(invokable.getReference())) {
+            if (!consumer.process(invokable.getReference())) {
                 return true;
             }
         }

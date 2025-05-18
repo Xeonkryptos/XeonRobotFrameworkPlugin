@@ -24,7 +24,7 @@ public class RobotParameterAnnotator implements Annotator {
 
     @Override
     public void annotate(@NotNull PsiElement element, @NotNull AnnotationHolder holder) {
-        if (!element.isValid() || !(element instanceof Parameter parameter)) {
+        if (!(element instanceof Parameter parameter)) {
             return;
         }
         KeywordStatement keywordStatement = PsiTreeUtil.getParentOfType(parameter, KeywordStatement.class);
