@@ -27,7 +27,8 @@ public class PositionalArgumentImportIndex extends StringStubIndexExtension<Posi
     }
 
     public Collection<PositionalArgument> getPositionalArgumentForImport(@NotNull String value, @NotNull Project project, @NotNull GlobalSearchScope scope) {
+        StubIndexKey<String, PositionalArgument> stubIndexKey = getKey();
         value = value.replace('/', '.').toLowerCase();
-        return StubIndex.getElements(getKey(), value, project, scope, PositionalArgument.class);
+        return StubIndex.getElements(stubIndexKey, value, project, scope, PositionalArgument.class);
     }
 }

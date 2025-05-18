@@ -19,7 +19,6 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.KeywordFile;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.Parameter;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotFile;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
 import java.util.Optional;
@@ -50,7 +49,7 @@ class VariableCompletionProvider extends CompletionProvider<CompletionParameters
         addDefinedVariablesFromKeyword(result, psiElement);
     }
 
-    private void addDefinedVariablesFromImportedFiles(@NotNull CompletionResultSet resultSet, @NotNull PsiFile file, @Nullable PsiElement element) {
+    private void addDefinedVariablesFromImportedFiles(@NotNull CompletionResultSet resultSet, @NotNull PsiFile file, @NotNull PsiElement element) {
         RobotFile robotFile = (RobotFile) file;
         addDefinedVariables(robotFile.getDefinedVariables(),
                             resultSet,
@@ -81,13 +80,13 @@ class VariableCompletionProvider extends CompletionProvider<CompletionParameters
 
     private Collection<LookupElement> addDefinedVariables(@NotNull Collection<DefinedVariable> variables,
                                                           @NotNull CompletionResultSet resultSet,
-                                                          @Nullable PsiElement element) {
+                                                          @NotNull PsiElement element) {
         return addDefinedVariables(variables, resultSet, element, TailTypes.noneType());
     }
 
     private Collection<LookupElement> addDefinedVariables(@NotNull Collection<DefinedVariable> variables,
                                                           @NotNull CompletionResultSet resultSet,
-                                                          @Nullable PsiElement element,
+                                                          @NotNull PsiElement element,
                                                           @NotNull TailType tailType) {
         return variables.stream()
                         .filter(variable -> variable.isInScope(element))

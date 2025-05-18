@@ -1,5 +1,6 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.element;
 
+import com.intellij.psi.stubs.StubIndexKey;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotLanguage;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.KeywordStatement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.KeywordStatementImpl;
@@ -57,8 +58,8 @@ public class KeywordStatementStubElement extends IStubElementType<KeywordStateme
 
     @Override
     public void indexStub(@NotNull KeywordStatementStub stub, @NotNull IndexSink sink) {
-        if (stub.getName() != null) {
-            sink.occurrence(KeywordStatementNameIndex.getInstance().getKey(), stub.getName().toLowerCase());
-        }
+        StubIndexKey<String, KeywordStatement> stubIndexKey = KeywordStatementNameIndex.getInstance().getKey();
+        String keywordNameInLowerCase = stub.getName().toLowerCase();
+        sink.occurrence(stubIndexKey, keywordNameInLowerCase);
     }
 }

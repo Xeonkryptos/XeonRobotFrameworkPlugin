@@ -5,21 +5,11 @@ import com.intellij.psi.PsiNameIdentifierOwner;
 import com.intellij.psi.StubBasedPsiElement;
 import org.jetbrains.annotations.NotNull;
 
-public interface VariableDefinition extends RobotStatement, PsiNameIdentifierOwner, DefinedVariable, StubBasedPsiElement<VariableDefinitionStub> {
+public interface VariableDefinition extends RobotStatement, PsiNameIdentifierOwner, DefinedVariable, StubBasedPsiElement<VariableDefinitionStub>, VariableName {
 
    boolean isNested();
 
-   boolean isEmpty();
-
-   @Override
    @NotNull
+   @Override
    String getName();
-
-   default String getUnwrappedName() {
-      if (isEmpty()) {
-         return "";
-      }
-      String name = getName();
-      return name.substring(2, name.length() - 1);
-   }
 }

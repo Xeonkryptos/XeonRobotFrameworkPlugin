@@ -26,7 +26,9 @@ public class KeywordStatementNameIndex extends StringStubIndexExtension<KeywordS
         return KEYWORD_STATEMENT_NAME;
     }
 
-    public Collection<KeywordStatement> getKeywordStatement(@NotNull String name, @NotNull Project project, @NotNull GlobalSearchScope scope) {
-        return StubIndex.getElements(getKey(), name.toLowerCase(), project, scope, KeywordStatement.class);
+    public Collection<KeywordStatement> getKeywordStatements(@NotNull String keywordName, @NotNull Project project, @NotNull GlobalSearchScope scope) {
+        StubIndexKey<String, KeywordStatement> stubIndexKey = getKey();
+        String keywordNameInLowerCase = keywordName.toLowerCase();
+        return StubIndex.getElements(stubIndexKey, keywordNameInLowerCase, project, scope, KeywordStatement.class);
     }
 }

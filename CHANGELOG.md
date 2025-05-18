@@ -4,6 +4,10 @@
 
 ## Unreleased
 
+### Added
+
+- Support for Find Usages of defined variables implemented
+
 ### Fixed
 
 - Restrict stub creation to only the corresponding elements

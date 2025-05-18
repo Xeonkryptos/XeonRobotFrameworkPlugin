@@ -28,13 +28,12 @@ public class RobotKeywordGroupingRuleProvider implements FileStructureGroupRuleP
         @Nullable
         @Override
         protected UsageGroup getParentGroupFor(@NotNull Usage usage, UsageTarget @NotNull [] targets) {
-            if (!(usage instanceof PsiElementUsage)) {
-                return null;
-            } else {
-                PsiElement psiElement = ((PsiElementUsage) usage).getElement();
+            if (usage instanceof PsiElementUsage psiElementUsage) {
+                PsiElement psiElement = psiElementUsage.getElement();
                 KeywordDefinition definition = PsiTreeUtil.getParentOfType(psiElement, KeywordDefinition.class, false);
                 return definition == null ? null : new PsiNamedElementUsageGroupBase<>(definition);
             }
+            return null;
         }
     }
 }

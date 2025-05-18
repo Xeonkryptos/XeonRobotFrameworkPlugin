@@ -28,7 +28,7 @@ public class RobotVariableAnnotator implements Annotator, DumbAware {
             return;
         }
         PsiReference reference = element.getReference();
-        if (reference != null && reference.resolve() != null) {
+        if (reference.resolve() != null) {
             return;
         }
 

@@ -26,6 +26,7 @@
         <findUsagesHandlerFactory implementation="dev.xeonkryptos.xeonrobotframeworkplugin.ide.usage.RobotPythonFindUsagesHandlerFactory"/>
         <usageTypeProvider implementation="dev.xeonkryptos.xeonrobotframeworkplugin.ide.usage.RobotUsageTypeProvider"/>
         <referencesSearch implementation="dev.xeonkryptos.xeonrobotframeworkplugin.ide.search.RobotKeywordReferenceSearch"/>
+        <referencesSearch implementation="dev.xeonkryptos.xeonrobotframeworkplugin.ide.search.RobotVariableReferenceSearch"/>
         <referencesSearch implementation="dev.xeonkryptos.xeonrobotframeworkplugin.ide.search.RobotImportArgumentReferenceSearch"/>
 
         <fileStructureGroupRuleProvider implementation="dev.xeonkryptos.xeonrobotframeworkplugin.ide.usage.RobotKeywordGroupingRuleProvider"/>
@@ -38,9 +39,12 @@
         <lang.commenter language="Robot" implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.ide.RobotCommenter"/>
         <lang.foldingBuilder language="Robot" implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.ide.RobotFoldingBuilder"/>
         <lang.parserDefinition language="Robot" implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotParserDefinition"/>
+
         <stubElementTypeHolder class="dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotStubTokenTypes" externalIdPrefix="robot."/>
         <stubIndex implementation="dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.index.KeywordStatementNameIndex"/>
         <stubIndex implementation="dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.index.PositionalArgumentImportIndex"/>
+        <stubIndex implementation="dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.index.VariableNameIndex"/>
+
         <codeInsight.parameterInfo language="Robot"
                                    implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.ide.parameterinfo.RobotParameterInfoHandler"/>
         <codeInsight.parameterInfo language="Robot"

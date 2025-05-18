@@ -212,14 +212,14 @@ public class RobotLexer extends LexerBase {
             goToVariableEnd();
             if (isSuperSpaceOrNewline(this.position) || isVariableDefinition(this.position)) {
                 if ((this.isTestTemplate || this.isBracketTemplate) && state == TEST_CASES_HEADING) {
-                    setCurrentToken(RobotTokenTypes.VARIABLE);
+                    setCurrentToken(RobotStubTokenTypes.VARIABLE);
                     this.level.push(KEYWORD);
                 } else {
                     setCurrentToken(RobotStubTokenTypes.VARIABLE_DEFINITION);
                     this.level.push(VARIABLE_DEFINITION);
                 }
             } else {
-                setCurrentToken(RobotTokenTypes.VARIABLE);
+                setCurrentToken(RobotStubTokenTypes.VARIABLE);
                 this.level.push(KEYWORD);
                 if (!isSuperSpaceOrNewline(this.position)) {
                     this.level.push(KEYWORD);
@@ -323,7 +323,7 @@ public class RobotLexer extends LexerBase {
             if (state == SETTING && isSuperSpacePrevious() || state == VARIABLE_DEFINITION) {
                 setCurrentToken(RobotStubTokenTypes.VARIABLE_DEFINITION);
             } else if (!isWithinForLoop() && !isVarOrAsTokenPresent(this.position)) {
-                setCurrentToken(RobotTokenTypes.VARIABLE);
+                setCurrentToken(RobotStubTokenTypes.VARIABLE);
             } else {
                 setCurrentToken(RobotStubTokenTypes.VARIABLE_DEFINITION);
                 this.level.push(VARIABLE_DEFINITION);

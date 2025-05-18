@@ -38,8 +38,8 @@ public class VariableDto implements DefinedVariable {
     }
 
     @Override
-    public final boolean isInScope(@Nullable PsiElement position) {
-        return this.scope == null || position == null || this.scope.isInScope(position);
+    public final boolean isInScope(@NotNull PsiElement position) {
+        return this.scope == null || this.scope.isInScope(reference, position);
     }
 
     @Nullable

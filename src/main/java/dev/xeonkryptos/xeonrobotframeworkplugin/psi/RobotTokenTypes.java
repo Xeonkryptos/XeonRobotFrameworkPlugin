@@ -12,7 +12,6 @@ public interface RobotTokenTypes {
    RobotElementType PARAMETER_ID = new RobotElementType("PARAMETER_ID");
    RobotElementType VARIABLE_DEFINITION_GROUP = new RobotElementType("VARIABLE_DEFINITION_GROUP");
    RobotElementType VARIABLE_DEFINITION_ID = new RobotElementType("VARIABLE_DEFINITION_ID");
-   RobotElementType VARIABLE = new RobotElementType("VARIABLE");
    RobotElementType COMMENT = new RobotElementType("COMMENT");
    RobotElementType GHERKIN = new RobotElementType("GHERKIN");
    RobotElementType SYNTAX_MARKER = new RobotElementType("SYNTAX_MARKER");

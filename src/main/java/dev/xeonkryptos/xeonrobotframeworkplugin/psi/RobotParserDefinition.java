@@ -95,7 +95,7 @@ public class RobotParserDefinition implements ParserDefinition {
          return new ParameterIdImpl(node);
       } else if (node.getElementType() == RobotStubTokenTypes.ARGUMENT) {
          return new PositionalArgumentImpl(node);
-      } else if (node.getElementType() == RobotTokenTypes.VARIABLE) {
+      } else if (node.getElementType() == RobotStubTokenTypes.VARIABLE) {
          return new VariableImpl(node);
       } else if (node.getElementType() == RobotTokenTypes.IMPORT) {
          return new ImportImpl(node);

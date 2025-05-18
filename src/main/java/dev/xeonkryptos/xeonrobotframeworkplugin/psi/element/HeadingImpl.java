@@ -51,7 +51,8 @@ public class HeadingImpl extends RobotPsiElementBase implements Heading {
         return getPresentableText().startsWith("*** Setting");
     }
 
-    private boolean containsVariables() {
+    @Override
+    public boolean containsVariables() {
         return getPresentableText().startsWith("*** Variable");
     }
 
@@ -176,7 +177,8 @@ public class HeadingImpl extends RobotPsiElementBase implements Heading {
 
             Collection<Variable> variables = getUsedVariables();
             for (Variable variable : variables) {
-                Optional.ofNullable(variable.getReference()).map(PsiReference::resolve).map(PsiElement::getContainingFile).ifPresent(results::add);
+                PsiElement resolvedElement = variable.getReference().resolve();
+                Optional.ofNullable(resolvedElement).map(PsiElement::getContainingFile).ifPresent(results::add);
             }
             referencedFiles = results;
         }

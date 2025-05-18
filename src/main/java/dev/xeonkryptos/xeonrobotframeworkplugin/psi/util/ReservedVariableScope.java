@@ -1,53 +1,54 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.psi.util;
 
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.PositionalArgument;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.BracketSetting;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.Heading;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.KeywordStatement;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.Setting;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.Variable;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.ref.PythonResolver;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiWhiteSpace;
 import com.intellij.psi.util.PsiTreeUtil;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.BracketSetting;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.Heading;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.KeywordDefinition;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.KeywordStatement;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.PositionalArgument;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.Setting;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.Variable;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.ref.PythonResolver;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public enum ReservedVariableScope {
     Global {
         @Override
-        public boolean isInScope(@NotNull PsiElement element) {
+        public boolean isInScope(@NotNull PsiElement sourceElement, @NotNull PsiElement element) {
             // everywhere
             return true;
         }
     }, TestCase {
         @Override
-        public final boolean isInScope(@NotNull PsiElement element) {
+        public final boolean isInScope(@NotNull PsiElement sourceElement, @NotNull PsiElement element) {
             // only in test cases
-            return (isArgument(element) || isVariable(element)) && isInTestCase(element) || TestTeardown.isInScope(element);
+            return (isArgument(element) || isVariable(element)) && isInSameTestCase(sourceElement, element) || TestTeardown.isInScope(sourceElement, element);
         }
     }, KeywordTeardown {
         @Override
-        public final boolean isInScope(@NotNull PsiElement element) {
+        public final boolean isInScope(@NotNull PsiElement sourceElement, @NotNull PsiElement element) {
             // only in teardown for keywords
             return (isArgument(element) || isVariable(element)) && isInKeywordTeardown(element);
         }
     }, TestTeardown {
         @Override
-        public boolean isInScope(@NotNull PsiElement element) {
+        public boolean isInScope(@NotNull PsiElement sourceElement, @NotNull PsiElement element) {
             // only in teardown for test cases
             return (isArgument(element) || isVariable(element)) && isInTestTeardown(element);
         }
     }, SuiteTeardown {
         @Override
-        public boolean isInScope(@NotNull PsiElement element) {
+        public boolean isInScope(@NotNull PsiElement sourceElement, @NotNull PsiElement element) {
             // only in teardown for suites
             return (isArgument(element) || isVariable(element)) && isInSuiteTeardown(element);
         }
     }, KeywordStatement {
         @Override
-        public boolean isInScope(@NotNull PsiElement element) {
+        public boolean isInScope(@NotNull PsiElement sourceElement, @NotNull PsiElement element) {
             return isArgument(element) && isInKeywordStatement(element);
         }
     };
@@ -75,6 +76,19 @@ public enum ReservedVariableScope {
         // and that keyword is in the test cases heading
         Heading heading = PsiTreeUtil.getParentOfType(keyword, Heading.class);
         return heading != null && heading.isSettings();
+    }
+
+    /**
+     * Determines if the given element is a part of the Test Cases header.
+     *
+     * @param position the element in question.
+     *
+     * @return true if this or one of its parents is the Test Cases header.
+     */
+    private static boolean isInSameTestCase(@NotNull PsiElement sourceElement, @NotNull PsiElement position) {
+        KeywordDefinition sourceKeywordDefinition = getKeywordDefinition(sourceElement);
+        KeywordDefinition targetKeywordDefinition = getKeywordDefinition(position);
+        return sourceKeywordDefinition == targetKeywordDefinition;
     }
 
     /**
@@ -209,7 +223,19 @@ public enum ReservedVariableScope {
     @Nullable
     private static KeywordStatement getKeyword(@NotNull PsiElement position) {
         // either we are a keyword or we have a parent that is
-        return position instanceof KeywordStatement ? (KeywordStatement) position : PsiTreeUtil.getParentOfType(position, KeywordStatement.class);
+        return position instanceof KeywordStatement keywordStatement ? keywordStatement : PsiTreeUtil.getParentOfType(position, KeywordStatement.class);
+    }
+
+    /**
+     * Gets the keyword definition element associated with this element.
+     *
+     * @param position the element in question.
+     *
+     * @return either this element or one of its parents that is a keyword definition; else null.
+     */
+    @Nullable
+    private static KeywordDefinition getKeywordDefinition(@NotNull PsiElement position) {
+        return position instanceof KeywordDefinition keywordDefinition ? keywordDefinition : PsiTreeUtil.getParentOfType(position, KeywordDefinition.class);
     }
 
     @Nullable
@@ -223,5 +249,5 @@ public enum ReservedVariableScope {
         return element;
     }
 
-    public abstract boolean isInScope(@NotNull PsiElement element);
+    public abstract boolean isInScope(@NotNull PsiElement sourceElement, @NotNull PsiElement element);
 }

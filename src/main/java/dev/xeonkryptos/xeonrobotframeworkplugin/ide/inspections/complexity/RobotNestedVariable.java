@@ -1,10 +1,10 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.ide.inspections.complexity;
 
+import com.intellij.psi.PsiElement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.RobotBundle;
 import dev.xeonkryptos.xeonrobotframeworkplugin.ide.inspections.SimpleRobotInspection;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTokenTypes;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotStubTokenTypes;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.Variable;
-import com.intellij.psi.PsiElement;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NotNull;
 
@@ -18,7 +18,7 @@ public class RobotNestedVariable extends SimpleRobotInspection {
     @Override
     public final boolean skip(PsiElement element) {
         PsiElement parentElement = element.getParent();
-        return element.getNode().getElementType() != RobotTokenTypes.VARIABLE || !(parentElement instanceof Variable) || !((Variable) parentElement).isNested();
+        return element.getNode().getElementType() != RobotStubTokenTypes.VARIABLE || !(parentElement instanceof Variable) || !((Variable) parentElement).isNested();
     }
 
     @Override

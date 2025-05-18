@@ -1,6 +1,7 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.psi.element;
 
 import com.intellij.psi.PsiFile;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotResourceFileType;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
@@ -8,6 +9,12 @@ import java.util.Collection;
 public interface Heading extends RobotStatement {
 
    boolean isSettings();
+
+   default boolean isGlobalVariablesProvider() {
+      return containsVariables() && getContainingFile().getVirtualFile().getFileType() == RobotResourceFileType.getInstance();
+   }
+
+   boolean containsVariables();
 
    boolean containsTestCases();
 

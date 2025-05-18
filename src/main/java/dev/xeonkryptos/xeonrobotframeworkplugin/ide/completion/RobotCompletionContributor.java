@@ -80,7 +80,7 @@ public class RobotCompletionContributor extends CompletionContributor {
         extend(CompletionType.BASIC,
                PlatformPatterns.psiElement()
                                .andNot(withTagsWithoutCodeCompletionSupport())
-                               .andOr(PlatformPatterns.psiElement(RobotTokenTypes.VARIABLE), PlatformPatterns.psiElement(RobotStubTokenTypes.ARGUMENT))
+                               .andOr(PlatformPatterns.psiElement(RobotStubTokenTypes.VARIABLE), PlatformPatterns.psiElement(RobotStubTokenTypes.ARGUMENT))
                                .inFile(PlatformPatterns.psiElement(RobotFile.class)),
                new VariableCompletionProvider());
     }

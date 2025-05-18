@@ -16,8 +16,9 @@ public class VariableDefinitionStubImpl extends StubBase<VariableDefinition> imp
         myName = name;
     }
 
+    @NotNull
     @Override
-    public @NotNull String getName() {
+    public String getName() {
         return myName;
     }
 }

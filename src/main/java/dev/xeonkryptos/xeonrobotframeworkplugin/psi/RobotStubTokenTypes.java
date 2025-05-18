@@ -4,6 +4,7 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.element.KeywordDefiniti
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.element.KeywordStatementStubElement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.element.PositionalArgumentStubElement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.element.VariableDefinitionStubElement;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.element.VariableStubElement;
 
 public interface RobotStubTokenTypes {
 
@@ -13,4 +14,5 @@ public interface RobotStubTokenTypes {
     VariableDefinitionStubElement VARIABLE_DEFINITION = new VariableDefinitionStubElement("VARIABLE_DEFINITION");
     KeywordStatementStubElement KEYWORD_STATEMENT = new KeywordStatementStubElement("KEYWORD_STATEMENT");
     PositionalArgumentStubElement ARGUMENT = new PositionalArgumentStubElement("ARGUMENT");
+    VariableStubElement VARIABLE = new VariableStubElement("VARIABLE");
 }

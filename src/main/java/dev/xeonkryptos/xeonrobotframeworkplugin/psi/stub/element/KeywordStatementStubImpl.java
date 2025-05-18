@@ -4,8 +4,7 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotStubTokenTypes;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.KeywordStatement;
 import com.intellij.psi.stubs.StubBase;
 import com.intellij.psi.stubs.StubElement;
-import org.jetbrains.annotations.NonNls;
-import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.NotNull;
 
 public class KeywordStatementStubImpl extends StubBase<KeywordStatement> implements KeywordStatementStub {
 
@@ -17,8 +16,7 @@ public class KeywordStatementStubImpl extends StubBase<KeywordStatement> impleme
         myKeyword = keyword;
     }
 
-    @NonNls
-    @Nullable
+    @NotNull
     @Override
     public String getName() {
         return myKeyword;

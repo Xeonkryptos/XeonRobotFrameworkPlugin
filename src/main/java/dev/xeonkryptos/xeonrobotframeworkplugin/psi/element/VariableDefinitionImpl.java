@@ -1,8 +1,5 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.psi.element;
 
-import dev.xeonkryptos.xeonrobotframeworkplugin.ide.icons.RobotIcons;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.element.VariableDefinitionStub;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.PatternUtil;
 import com.intellij.lang.ASTNode;
 import com.intellij.lang.injection.InjectedLanguageManager;
 import com.intellij.openapi.util.text.StringUtil;
@@ -10,6 +7,10 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.search.SearchScope;
 import com.intellij.psi.stubs.IStubElementType;
 import com.intellij.psi.util.PsiTreeUtil;
+import dev.xeonkryptos.xeonrobotframeworkplugin.ide.icons.RobotIcons;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.element.VariableDefinitionStub;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.PatternUtil;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.ReservedVariableScope;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -40,6 +41,16 @@ public class VariableDefinitionImpl extends RobotStubPsiElementBase<VariableDefi
         InjectedLanguageManager injectedLanguageManager = InjectedLanguageManager.getInstance(getProject());
         PsiElement sourceElement = Objects.requireNonNullElse(variableId, this);
         return injectedLanguageManager.getUnescapedText(sourceElement);
+    }
+
+    @NotNull
+    @Override
+    public String getUnwrappedName() {
+        VariableDefinitionStub stub = getStub();
+        if (stub != null) {
+            return stub.getUnwrappedName();
+        }
+        return VariableDefinition.super.getUnwrappedName();
     }
 
     @NotNull
@@ -80,7 +91,15 @@ public class VariableDefinitionImpl extends RobotStubPsiElementBase<VariableDefi
     }
 
     @Override
-    public final boolean isInScope(@Nullable PsiElement position) {
+    public final boolean isInScope(@NotNull PsiElement position) {
+        KeywordDefinition keywordDefinition = PsiTreeUtil.getParentOfType(this, KeywordDefinition.class);
+        if (keywordDefinition != null) {
+            return ReservedVariableScope.TestCase.isInScope(this, position);
+        }
+        Heading heading = PsiTreeUtil.getParentOfType(this, Heading.class);
+        if (heading == null || !heading.isGlobalVariablesProvider()) {
+            return getContainingFile() == position.getContainingFile();
+        }
         return true;
     }
 
@@ -98,8 +117,8 @@ public class VariableDefinitionImpl extends RobotStubPsiElementBase<VariableDefi
     @Override
     public final boolean isNested() {
         String text = getName();
-        return StringUtil.getOccurrenceCount(text, "}") > 1 &&
-               StringUtil.getOccurrenceCount(text, "${") + StringUtil.getOccurrenceCount(text, "@{") + StringUtil.getOccurrenceCount(text, "%{") > 1;
+        return StringUtil.getOccurrenceCount(text, "}") > 1
+               && StringUtil.getOccurrenceCount(text, "${") + StringUtil.getOccurrenceCount(text, "@{") + StringUtil.getOccurrenceCount(text, "%{") > 1;
     }
 
     @NotNull
