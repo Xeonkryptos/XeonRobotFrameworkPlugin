@@ -38,12 +38,12 @@ public class RobotParameterAnnotator implements Annotator {
             }
         }
 
+        ParameterId parameterId = PsiTreeUtil.getRequiredChildOfType(parameter, ParameterId.class);
         RobotStatement argument = PsiTreeUtil.findChildOfAnyType(parameter, PositionalArgument.class, Variable.class);
         if (argument == null) {
-            holder.newAnnotation(HighlightSeverity.WARNING, RobotBundle.getMessage("annotation.keyword.parameter.value.not-found")).range(parameter).create();
+            holder.newAnnotation(HighlightSeverity.WARNING, RobotBundle.getMessage("annotation.keyword.parameter.value.not-found")).range(parameterId).create();
         }
 
-        ParameterId parameterId = PsiTreeUtil.getRequiredChildOfType(parameter, ParameterId.class);
         holder.newSilentAnnotation(HighlightSeverity.INFORMATION).range(parameterId).textAttributes(DefaultLanguageHighlighterColors.PARAMETER).create();
     }
 }

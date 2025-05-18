@@ -15,6 +15,10 @@
 - Fixed reason for too many started read actions with the same stacktrace
 - Fixed multiline support detection for documentation settings when cursor is placed at a comment
 
+### Changed
+
+- Restrict error marking on unresolved parameter to the parameter name only
+
 ## 0.2.8
 
 ### Added
