@@ -244,7 +244,7 @@ public class HeadingImpl extends RobotPsiElementBase implements Heading {
             return List.of();
         }
         Collection<KeywordFile> files = keywordFiles;
-        if (keywordFiles == null || files.stream().map(KeywordFile::getPsiFile).anyMatch(element -> !element.isValid())) {
+        if (keywordFiles == null || files.stream().anyMatch(keywordFile -> !keywordFile.isValid())) {
             files = new LinkedHashSet<>();
             addBuiltInImports(files);
             if (isSettings()) {

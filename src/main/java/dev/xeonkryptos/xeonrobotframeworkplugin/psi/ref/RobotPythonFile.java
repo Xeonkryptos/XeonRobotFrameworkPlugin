@@ -112,8 +112,9 @@ public class RobotPythonFile extends RobotPythonWrapper implements KeywordFile {
         return importType;
     }
 
+    @NotNull
     @Override
-    public final @NotNull Collection<KeywordFile> getImportedFiles(boolean includeTransitive) {
+    public final Collection<KeywordFile> getImportedFiles(boolean includeTransitive) {
         return Collections.emptyList();
     }
 
@@ -158,5 +159,10 @@ public class RobotPythonFile extends RobotPythonWrapper implements KeywordFile {
     @Override
     public final boolean isDifferentNamespace() {
         return isDifferentNamespace;
+    }
+
+    @Override
+    public boolean isValid() {
+        return pythonFile.isValid();
     }
 }
