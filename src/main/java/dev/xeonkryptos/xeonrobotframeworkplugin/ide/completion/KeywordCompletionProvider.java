@@ -41,7 +41,9 @@ class KeywordCompletionProvider extends CompletionProvider<CompletionParameters>
             if (heading != null && (heading.containsTestCases() || heading.containsKeywordDefinitions() || heading.containsTasks())) {
                 PsiElement positionContext = position.getContext();
                 KeywordStatement keywordStatement = PsiTreeUtil.getParentOfType(positionContext, KeywordStatement.class);
-                assert keywordStatement != null;
+                if (keywordStatement == null) {
+                    return;
+                }
 
                 String name = keywordStatement.getName();
                 KeywordCompletionModification keywordCompletionModification = KeywordCompletionModification.NONE;
