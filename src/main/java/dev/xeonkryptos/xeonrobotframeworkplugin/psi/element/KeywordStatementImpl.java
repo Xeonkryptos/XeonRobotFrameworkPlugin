@@ -25,6 +25,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class KeywordStatementImpl extends RobotStubPsiElementBase<KeywordStatementStub, KeywordStatement> implements KeywordStatement {
 
@@ -173,6 +174,16 @@ public class KeywordStatementImpl extends RobotStubPsiElementBase<KeywordStateme
                 results.add(new ParameterDto(parameter, parameterName.getRepr(false), null, true));
             }
         }
+    }
+
+    @Override
+    public boolean allRequiredParametersArePresent() {
+        Set<String> definedParameters = getParameters().stream().map(Parameter::getParameterName).collect(Collectors.toSet());
+        Collection<String> requiredParameterNames = getAvailableParameters().stream()
+                                                                            .filter(param -> !param.hasDefaultValue())
+                                                                            .map(DefinedParameter::getLookup)
+                                                                            .collect(Collectors.toSet());
+        return definedParameters.containsAll(requiredParameterNames);
     }
 
     @Override

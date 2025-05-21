@@ -29,6 +29,8 @@ public interface KeywordStatement extends RobotStatement, PsiNamedElement, StubB
    @Nullable
    DefinedVariable getGlobalVariable();
 
+   boolean allRequiredParametersArePresent();
+
    void reset();
 
    @NotNull

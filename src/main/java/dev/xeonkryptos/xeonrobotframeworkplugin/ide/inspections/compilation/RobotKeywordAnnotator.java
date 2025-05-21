@@ -1,27 +1,33 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.ide.inspections.compilation;
 
-import com.intellij.psi.util.PsiTreeUtil;
-import dev.xeonkryptos.xeonrobotframeworkplugin.RobotBundle;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTokenTypes;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.KeywordInvokable;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.VariableDefinitionGroup;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.ref.PyElementDeprecatedVisitor;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.ref.PyElementParentTraversalVisitor;
 import com.intellij.codeInspection.ProblemHighlightType;
 import com.intellij.lang.annotation.AnnotationHolder;
 import com.intellij.lang.annotation.Annotator;
 import com.intellij.lang.annotation.HighlightSeverity;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiReference;
+import com.intellij.psi.util.PsiTreeUtil;
 import com.jetbrains.python.psi.PyElement;
 import com.jetbrains.python.psi.PyElementVisitor;
+import dev.xeonkryptos.xeonrobotframeworkplugin.RobotBundle;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTokenTypes;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.DefinedParameter;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.KeywordInvokable;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.KeywordStatement;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.Parameter;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.VariableDefinitionGroup;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.ref.PyElementDeprecatedVisitor;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.ref.PyElementParentTraversalVisitor;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public class RobotKeywordAnnotator implements Annotator {
 
     @Override
     public void annotate(@NotNull PsiElement element, @NotNull AnnotationHolder holder) {
-        if (!(element instanceof KeywordInvokable)) {
+        if (!(element instanceof KeywordInvokable keywordInvokable)) {
             return;
         }
 
@@ -44,6 +50,20 @@ public class RobotKeywordAnnotator implements Annotator {
             if (pyElementDeprecatedVisitor.isDeprecated()) {
                 holder.newSilentAnnotation(HighlightSeverity.WARNING).range(element).highlightType(ProblemHighlightType.LIKE_DEPRECATED).create();
             }
+        }
+
+        KeywordStatement keywordStatement = PsiTreeUtil.getParentOfType(keywordInvokable, KeywordStatement.class);
+        if (keywordStatement != null && !keywordStatement.allRequiredParametersArePresent()) {
+            Set<String> definedParameterNames = keywordStatement.getParameters().stream().map(Parameter::getName).collect(Collectors.toSet());
+            long expectedCount = keywordStatement.getAvailableParameters()
+                                                 .stream()
+                                                 .filter(parameter -> !parameter.hasDefaultValue())
+                                                 .map(DefinedParameter::getLookup)
+                                                 .filter(paramNames -> !definedParameterNames.contains(paramNames))
+                                                 .count();
+            holder.newAnnotation(HighlightSeverity.ERROR, RobotBundle.getMessage("annotation.keyword.parameters.missing", expectedCount))
+                  .range(keywordInvokable)
+                  .create();
         }
     }
 }

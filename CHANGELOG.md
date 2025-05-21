@@ -8,6 +8,7 @@
 
 - Support for Find Usages of defined variables
 - Annotate/Highlight unused variables as such and provide a quick-fix to remove them
+- Show an error marking when a keyword is missing mandatory parameters
 
 ### Fixed
 
