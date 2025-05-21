@@ -109,6 +109,7 @@ public class RobotListenerMgr {
     }
 
     private void updateRobotFiles(Project project, boolean importUpdate) {
+        ProgressManager.checkCanceled();
         modificationTracker.incModificationCount();
         final long currentModificationCount = modificationTracker.getModificationCount();
         ReadAction.nonBlocking(() -> {
@@ -131,6 +132,7 @@ public class RobotListenerMgr {
                           }
                       }
                       if (importUpdate) {
+                          ProgressManager.checkCanceled();
                           DaemonCodeAnalyzer.getInstance(project).restart();
                       }
 
@@ -138,7 +140,6 @@ public class RobotListenerMgr {
                       return null;
                   })
                   .inSmartMode(project)
-                  .withDocumentsCommitted(project)
                   .coalesceBy(modificationTracker)
                   .expireWhen(() -> currentModificationCount != modificationTracker.getModificationCount())
                   .submit(AppExecutorUtil.getAppExecutorService());

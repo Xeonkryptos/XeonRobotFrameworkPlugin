@@ -128,9 +128,11 @@ public class RobotKeywordReferenceUpdater extends PsiTreeChangeAdapter {
     }
 
     private void restartAnnotatorForReferencingKeywords(PyFunction pythonFunction) {
+        ProgressManager.checkCanceled();
         simpleModificationTracker.incModificationCount();
         final long currentModificationCount = simpleModificationTracker.getModificationCount();
         ReadAction.nonBlocking(() -> {
+                      ProgressManager.checkCanceled();
                       if (pythonFunction.isValid()) {
                           Set<PsiFile> processedFiles = new HashSet<>();
                           ProgressManager.checkCanceled();
@@ -143,7 +145,10 @@ public class RobotKeywordReferenceUpdater extends PsiTreeChangeAdapter {
                               }
                               return true;
                           });
-                          processedFiles.forEach(robotFile -> DaemonCodeAnalyzer.getInstance(robotFile.getProject()).restart(robotFile));
+                          processedFiles.forEach(robotFile -> {
+                              ProgressManager.checkCanceled();
+                              DaemonCodeAnalyzer.getInstance(robotFile.getProject()).restart(robotFile);
+                          });
                       }
                       return null;
                   })
@@ -154,6 +159,8 @@ public class RobotKeywordReferenceUpdater extends PsiTreeChangeAdapter {
     }
 
     private void restartAnnotatorForAllRobotFiles(@NotNull Project project) {
+        ProgressManager.checkCanceled();
+        simpleModificationTracker.incModificationCount();
         long currentModificationCount = simpleModificationTracker.getModificationCount();
         ReadAction.nonBlocking(() -> {
                       ProgressManager.checkCanceled();
@@ -163,6 +170,7 @@ public class RobotKeywordReferenceUpdater extends PsiTreeChangeAdapter {
                       Collection<VirtualFile> files = FileTypeIndex.getFiles(RobotResourceFileType.getInstance(), projectScope);
                       Set<VirtualFile> robotFiles = new HashSet<>(files);
 
+                      ProgressManager.checkCanceled();
                       files = FileTypeIndex.getFiles(RobotFeatureFileType.getInstance(), projectScope);
                       robotFiles.addAll(files);
 
@@ -170,6 +178,7 @@ public class RobotKeywordReferenceUpdater extends PsiTreeChangeAdapter {
                           ProgressManager.checkCanceled();
                           PsiFile psiFile = PsiManager.getInstance(project).findFile(file);
                           if (psiFile != null) {
+                              ProgressManager.checkCanceled();
                               DaemonCodeAnalyzer.getInstance(project).restart(psiFile);
                           }
                       }
