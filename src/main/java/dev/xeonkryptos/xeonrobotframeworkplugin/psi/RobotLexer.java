@@ -31,7 +31,6 @@ public class RobotLexer extends LexerBase {
     private int startOffset;
     private int endOffset;
     private int position;
-    private IElementType previousToken;
     private IElementType currentToken;
     private final Stack<Integer> level = new Stack<>();
     private boolean isTestTemplate = false;
@@ -54,7 +53,6 @@ public class RobotLexer extends LexerBase {
     @Override
     public void advance() {
         if (position >= endOffset) {
-            previousToken = null;
             currentToken = null;
         } else {
             startOffset = position;
@@ -404,7 +402,7 @@ public class RobotLexer extends LexerBase {
     }
 
     private boolean isParameter(int position) {
-        return isAssignment(position) && previousToken != RobotTokenTypes.PARAMETER && !isSuperSpaceOrNewline(position + 1) && !isTab(position + 1);
+        return isAssignment(position) && !isSuperSpaceOrNewline(position + 1) && !isTab(position + 1);
     }
 
     private boolean isVariable(int position) {
@@ -646,10 +644,6 @@ public class RobotLexer extends LexerBase {
     }
 
     private void setCurrentToken(IElementType token) {
-        if (token == RobotStubTokenTypes.ARGUMENT && isAssignment(position)) {
-            goToNextNewLineOrSuperSpaceOrVariable();
-        }
-        previousToken = currentToken;
         currentToken = token;
     }
 

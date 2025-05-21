@@ -1,5 +1,6 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.ide;
 
+import com.intellij.openapi.fileTypes.FileType;
 import dev.xeonkryptos.xeonrobotframeworkplugin.MyLogger;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotFeatureFileType;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotKeywordReferenceUpdater;
@@ -151,8 +152,8 @@ public class RobotListenerMgr {
         }
 
         if (!file.isDirectory() || !(file instanceof VirtualDirectoryImpl)) {
-            String extension = file.getExtension();
-            return "robot".equals(extension) || "resource".equals(extension) || "py".equals(extension);
+            FileType fileType = file.getFileType();
+            return fileType == RobotFeatureFileType.getInstance() || fileType == RobotResourceFileType.getInstance() || fileType == PythonFileType.INSTANCE;
         }
 
         List<VirtualFile> children;

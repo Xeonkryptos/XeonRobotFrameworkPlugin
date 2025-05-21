@@ -1,6 +1,8 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.ide.inspections.compilation;
 
+import com.intellij.openapi.util.TextRange;
 import dev.xeonkryptos.xeonrobotframeworkplugin.RobotBundle;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotHighlighter;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.DefinedParameter;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.KeywordStatement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.Parameter;
@@ -29,16 +31,26 @@ public class RobotParameterAnnotator implements Annotator {
         }
         KeywordStatement keywordStatement = PsiTreeUtil.getParentOfType(parameter, KeywordStatement.class);
         if (keywordStatement != null) {
-            keywordStatement.reset();
             Collection<DefinedParameter> availableParameters = keywordStatement.getAvailableParameters();
             Set<String> parameterNames = availableParameters.stream().map(DefinedParameter::getLookup).collect(Collectors.toSet());
             String parameterName = parameter.getParameterName();
             if (!parameterNames.contains(parameterName) && availableParameters.stream().noneMatch(DefinedParameter::isKeywordContainer)) {
-                holder.newAnnotation(HighlightSeverity.ERROR, RobotBundle.getMessage("annotation.keyword.parameter.not-found")).range(parameter).create();
+                TextRange parameterTextAttributeRange = parameter.getTextRange();
+                Variable variable = PsiTreeUtil.findChildOfType(parameter, Variable.class);
+                if (variable != null) {
+                    PsiElement nameIdentifier = parameter.getNameIdentifier();
+                    parameterTextAttributeRange = nameIdentifier.getTextRange();
+                    int textOffset = variable.getTextOffset();
+                    parameterTextAttributeRange = new TextRange(parameterTextAttributeRange.getStartOffset(), textOffset);
+                }
+                holder.newSilentAnnotation(HighlightSeverity.TEXT_ATTRIBUTES)
+                      .range(parameterTextAttributeRange)
+                      .textAttributes(RobotHighlighter.ARGUMENT)
+                      .create();
             }
         }
 
-        ParameterId parameterId = PsiTreeUtil.getRequiredChildOfType(parameter, ParameterId.class);
+        ParameterId parameterId = parameter.getNameIdentifier();
         RobotStatement argument = PsiTreeUtil.findChildOfAnyType(parameter, PositionalArgument.class, Variable.class);
         if (argument == null) {
             holder.newAnnotation(HighlightSeverity.WARNING, RobotBundle.getMessage("annotation.keyword.parameter.value.not-found")).range(parameterId).create();
