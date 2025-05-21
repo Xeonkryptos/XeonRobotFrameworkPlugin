@@ -1,5 +1,6 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.ide.debugger;
 
+import com.intellij.openapi.application.ApplicationManager;
 import dev.xeonkryptos.xeonrobotframeworkplugin.ide.debugger.dap.RobotDebugAdapterProtocolCommunicator;
 import dev.xeonkryptos.xeonrobotframeworkplugin.ide.execution.RobotPythonCommandLineState;
 import com.intellij.execution.ExecutionResult;
@@ -59,7 +60,8 @@ class RobotPyDebugProcess extends PyDebugProcess {
         if (processHandler.isStartNotified()) {
             // Usually, startNotified would be called by the ProcessHandler itself and in reality, it is called by it. Sadly, when we're reaching this point,
             // the process is already running and the method called. Therefore, we have to emulate the call ourselves to connect to our debug server
-            robotDebugAdapterProtocolCommunicator.startNotified(new ProcessEvent(processHandler));
+            ApplicationManager.getApplication()
+                              .executeOnPooledThread(() -> robotDebugAdapterProtocolCommunicator.startNotified(new ProcessEvent(processHandler)));
         }
         return robotDebugProcess;
     }
