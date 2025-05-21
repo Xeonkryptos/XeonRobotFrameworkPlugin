@@ -4,6 +4,7 @@ import com.intellij.execution.process.ProcessEvent;
 import com.intellij.execution.process.ProcessListener;
 import com.intellij.openapi.progress.ProcessCanceledException;
 import com.jetbrains.rd.util.reactive.Signal;
+import dev.xeonkryptos.xeonrobotframeworkplugin.MyLogger;
 import kotlinx.coroutines.TimeoutCancellationException;
 import org.eclipse.lsp4j.debug.Capabilities;
 import org.eclipse.lsp4j.debug.ConfigurationDoneArguments;
@@ -25,6 +26,8 @@ import java.util.concurrent.TimeoutException;
 import static com.intellij.openapi.progress.util.ProgressIndicatorUtils.withTimeout;
 
 public class RobotDebugAdapterProtocolCommunicator implements ProcessListener {
+
+    private static final int MAX_CONNECTION_ATTEMPTS = 10;
 
     private final int robotDebugPort;
 
@@ -126,9 +129,11 @@ public class RobotDebugAdapterProtocolCommunicator implements ProcessListener {
     private Socket tryConnectToServerWithTimeout(int port) {
         try {
             return withTimeout(10000L, () -> {
+                int attempt = 0;
                 Socket socket = null;
-                while (socket == null || !socket.isConnected()) {
+                while (socket == null || !socket.isConnected() && attempt < MAX_CONNECTION_ATTEMPTS) {
                     socket = null;
+                    ++attempt;
                     try {
                         socket = new Socket("localhost", port);
                     } catch (Exception ignored) {
@@ -139,9 +144,13 @@ public class RobotDebugAdapterProtocolCommunicator implements ProcessListener {
                         throw new ProcessCanceledException(e);
                     }
                 }
+                if (attempt >= MAX_CONNECTION_ATTEMPTS) {
+                    MyLogger.logger.error("Unable to connect to debug server at port " + port);
+                }
                 return socket;
             });
-        } catch (TimeoutCancellationException ignored) {
+        } catch (TimeoutCancellationException e) {
+            MyLogger.logger.warn("Couldn't connect to debug process in the expected time", e);
         }
         return null;
     }
