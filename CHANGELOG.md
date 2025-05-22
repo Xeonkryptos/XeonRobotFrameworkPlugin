@@ -18,6 +18,7 @@
 - Fixed multiline support detection for documentation settings when cursor is placed at a comment
 - Fixed invalid code completion for keywords using meta characters like `*` or `/` with a variable definition before the keyword
 - Freeze of UI when starting debug mode
+- Fixed detection of locations a breakpoint in robot file is settable or not
 
 ### Changed
 
