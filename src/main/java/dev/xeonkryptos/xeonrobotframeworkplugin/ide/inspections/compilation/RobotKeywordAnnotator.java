@@ -61,6 +61,8 @@ public class RobotKeywordAnnotator implements Annotator {
                                                  .map(DefinedParameter::getLookup)
                                                  .filter(paramNames -> !definedParameterNames.contains(paramNames))
                                                  .count();
+            int argumentCount = keywordStatement.getArguments().size();
+            expectedCount -= argumentCount;
             holder.newAnnotation(HighlightSeverity.ERROR, RobotBundle.getMessage("annotation.keyword.parameters.missing", expectedCount))
                   .range(keywordInvokable)
                   .create();

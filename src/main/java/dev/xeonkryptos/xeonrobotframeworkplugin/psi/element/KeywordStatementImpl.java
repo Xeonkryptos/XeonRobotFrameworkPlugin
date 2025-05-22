@@ -183,7 +183,9 @@ public class KeywordStatementImpl extends RobotStubPsiElementBase<KeywordStateme
                                                                             .filter(param -> !param.hasDefaultValue())
                                                                             .map(DefinedParameter::getLookup)
                                                                             .collect(Collectors.toSet());
-        return definedParameters.containsAll(requiredParameterNames);
+        definedParameters.retainAll(requiredParameterNames);
+        int missingParameterCount = requiredParameterNames.size() - definedParameters.size() - getArguments().size();
+        return missingParameterCount <= 0;
     }
 
     @Override

@@ -1,8 +1,6 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.ide;
 
 import com.intellij.codeInsight.daemon.DaemonCodeAnalyzer;
-import com.intellij.openapi.application.Application;
-import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.ReadAction;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.editor.EditorFactory;
@@ -185,9 +183,6 @@ public class RobotListenerMgr {
     }
 
     private void refreshIndicesIfNeeded(Collection<VirtualFile> virtualFiles, Project project) {
-        // Force reindexing for this file
-        Application application = ApplicationManager.getApplication();
-        DumbService dumbService = DumbService.getInstance(project);
-        application.invokeLater(() -> dumbService.smartInvokeLater(() -> FileContentUtilCore.reparseFiles(virtualFiles)));
+        DumbService.getInstance(project).smartInvokeLater(() -> FileContentUtilCore.reparseFiles(virtualFiles));
     }
 }
