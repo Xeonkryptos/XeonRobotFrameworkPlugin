@@ -24,7 +24,6 @@ import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiManager;
 import com.intellij.psi.search.FileTypeIndex;
 import com.intellij.psi.search.GlobalSearchScope;
-import com.intellij.util.FileContentUtilCore;
 import com.intellij.util.concurrency.AppExecutorUtil;
 import com.jetbrains.python.PythonFileType;
 import com.jetbrains.python.PythonPluginDisposable;
@@ -61,7 +60,6 @@ public class RobotListenerMgr {
             public void after(@NotNull List<? extends VFileEvent> events) {
                 boolean updateRobotFiles = false;
                 boolean robotResourceFileFound = false;
-                List<VirtualFile> filesToRefreshIndexFor = new ArrayList<>(events.size());
                 for (VFileEvent event : events) {
                     VirtualFile file = event.getFile();
                     if (isRobotFile(file)) {
@@ -71,19 +69,12 @@ public class RobotListenerMgr {
                             MyLogger.logger.debug("Received event: " + file.getName() + " - " + project);
                             updateRobotFiles = true;
                             robotResourceFileFound = file.getFileType() == RobotResourceFileType.getInstance();
-
-                            // Force reindexing for this changed python project file to always have an updated Stub element at hand
-                            if (file.getFileType() == PythonFileType.INSTANCE) {
-                                filesToRefreshIndexFor.add(file);
-                            }
+                            break;
                         }
                     }
                 }
                 if (updateRobotFiles) {
                     updateRobotFiles(project, robotResourceFileFound);
-                }
-                if (!filesToRefreshIndexFor.isEmpty()) {
-                    refreshIndicesIfNeeded(filesToRefreshIndexFor, project);
                 }
             }
         });
@@ -180,9 +171,5 @@ public class RobotListenerMgr {
             }
         }
         return false;
-    }
-
-    private void refreshIndicesIfNeeded(Collection<VirtualFile> virtualFiles, Project project) {
-        DumbService.getInstance(project).smartInvokeLater(() -> FileContentUtilCore.reparseFiles(virtualFiles));
     }
 }
