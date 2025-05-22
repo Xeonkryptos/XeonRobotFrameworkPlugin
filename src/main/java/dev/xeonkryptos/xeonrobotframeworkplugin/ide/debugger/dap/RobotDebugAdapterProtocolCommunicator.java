@@ -48,12 +48,14 @@ public class RobotDebugAdapterProtocolCommunicator implements ProcessListener {
     @Override
     public void startNotified(@NotNull ProcessEvent event) {
         try {
-            if (socket != null) {
-                return;
-            }
-            socket = tryConnectToServerWithTimeout(robotDebugPort);
-            if (socket == null) {
-                throw new RuntimeException("Failed to connect to debug server");
+            synchronized (this) {
+                if (socket != null) {
+                    return;
+                }
+                socket = tryConnectToServerWithTimeout(robotDebugPort);
+                if (socket == null) {
+                    throw new RuntimeException("Failed to connect to debug server");
+                }
             }
             Launcher<IDebugProtocolServer> clientLauncher = DSPLauncher.createClientLauncher(robotDebugClient,
                                                                                              socket.getInputStream(),
