@@ -27,8 +27,6 @@ import static com.intellij.openapi.progress.util.ProgressIndicatorUtils.withTime
 
 public class RobotDebugAdapterProtocolCommunicator implements ProcessListener {
 
-    private static final int MAX_CONNECTION_ATTEMPTS = 100;
-
     private final int robotDebugPort;
 
     private final RobotDebugAdapterProtocolClient robotDebugClient;
@@ -48,14 +46,12 @@ public class RobotDebugAdapterProtocolCommunicator implements ProcessListener {
     @Override
     public void startNotified(@NotNull ProcessEvent event) {
         try {
-            synchronized (this) {
-                if (socket != null) {
-                    return;
-                }
-                socket = tryConnectToServerWithTimeout(robotDebugPort);
-                if (socket == null) {
-                    throw new RuntimeException("Failed to connect to debug server");
-                }
+            if (socket != null) {
+                return;
+            }
+            socket = tryConnectToServerWithTimeout(robotDebugPort);
+            if (socket == null) {
+                throw new RuntimeException("Failed to connect to debug server");
             }
             Launcher<IDebugProtocolServer> clientLauncher = DSPLauncher.createClientLauncher(robotDebugClient,
                                                                                              socket.getInputStream(),
@@ -131,11 +127,9 @@ public class RobotDebugAdapterProtocolCommunicator implements ProcessListener {
     private Socket tryConnectToServerWithTimeout(int port) {
         try {
             return withTimeout(10000L, () -> {
-                int attempt = 0;
                 Socket socket = null;
-                while (socket == null || !socket.isConnected() && attempt < MAX_CONNECTION_ATTEMPTS) {
+                while (socket == null || !socket.isConnected()) {
                     socket = null;
-                    ++attempt;
                     try {
                         socket = new Socket("localhost", port);
                     } catch (Exception ignored) {
@@ -145,9 +139,6 @@ public class RobotDebugAdapterProtocolCommunicator implements ProcessListener {
                     } catch (InterruptedException e) {
                         throw new ProcessCanceledException(e);
                     }
-                }
-                if (attempt >= MAX_CONNECTION_ATTEMPTS) {
-                    MyLogger.logger.error("Unable to connect to debug server at port " + port);
                 }
                 return socket;
             });
