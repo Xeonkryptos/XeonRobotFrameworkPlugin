@@ -1,13 +1,8 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.ide;
 
-import com.intellij.openapi.fileTypes.FileType;
-import dev.xeonkryptos.xeonrobotframeworkplugin.MyLogger;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotFeatureFileType;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotKeywordReferenceUpdater;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotResourceFileType;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotFile;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.ref.ProjectFileCache;
 import com.intellij.codeInsight.daemon.DaemonCodeAnalyzer;
+import com.intellij.openapi.application.Application;
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.ReadAction;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.editor.EditorFactory;
@@ -16,6 +11,7 @@ import com.intellij.openapi.editor.event.DocumentListener;
 import com.intellij.openapi.fileEditor.FileDocumentManager;
 import com.intellij.openapi.fileEditor.FileEditorManagerEvent;
 import com.intellij.openapi.fileEditor.FileEditorManagerListener;
+import com.intellij.openapi.fileTypes.FileType;
 import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.project.DumbService;
 import com.intellij.openapi.project.DumbService.DumbModeListener;
@@ -24,16 +20,22 @@ import com.intellij.openapi.util.SimpleModificationTracker;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.vfs.VirtualFileManager;
 import com.intellij.openapi.vfs.newvfs.BulkFileListener;
-import com.intellij.openapi.vfs.newvfs.events.VFileContentChangeEvent;
 import com.intellij.openapi.vfs.newvfs.events.VFileEvent;
 import com.intellij.openapi.vfs.newvfs.impl.VirtualDirectoryImpl;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiManager;
 import com.intellij.psi.search.FileTypeIndex;
 import com.intellij.psi.search.GlobalSearchScope;
+import com.intellij.util.FileContentUtilCore;
 import com.intellij.util.concurrency.AppExecutorUtil;
 import com.jetbrains.python.PythonFileType;
 import com.jetbrains.python.PythonPluginDisposable;
+import dev.xeonkryptos.xeonrobotframeworkplugin.MyLogger;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotFeatureFileType;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotKeywordReferenceUpdater;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotResourceFileType;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotFile;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.ref.ProjectFileCache;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -59,19 +61,31 @@ public class RobotListenerMgr {
         project.getMessageBus().connect().subscribe(VirtualFileManager.VFS_CHANGES, new BulkFileListener() {
             @Override
             public void after(@NotNull List<? extends VFileEvent> events) {
+                boolean updateRobotFiles = false;
+                boolean robotResourceFileFound = false;
+                List<VirtualFile> filesToRefreshIndexFor = new ArrayList<>(events.size());
                 for (VFileEvent event : events) {
-                    if (!(event instanceof VFileContentChangeEvent)) {
-                        VirtualFile file = event.getFile();
-                        if (isRobotFile(file)) {
-                            String projectBasePath = project.getBasePath();
-                            String filePath = file.getPath();
-                            if (projectBasePath != null && filePath.startsWith(projectBasePath)) {
-                                MyLogger.logger.debug("Received event: " + file.getName() + " - " + project);
-                                updateRobotFiles(project, file.getFileType() == RobotResourceFileType.getInstance());
-                                break;
+                    VirtualFile file = event.getFile();
+                    if (isRobotFile(file)) {
+                        String projectBasePath = project.getBasePath();
+                        String filePath = file.getPath();
+                        if (projectBasePath != null && filePath.startsWith(projectBasePath)) {
+                            MyLogger.logger.debug("Received event: " + file.getName() + " - " + project);
+                            updateRobotFiles = true;
+                            robotResourceFileFound = file.getFileType() == RobotResourceFileType.getInstance();
+
+                            // Force reindexing for this changed python project file to always have an updated Stub element at hand
+                            if (file.getFileType() == PythonFileType.INSTANCE) {
+                                filesToRefreshIndexFor.add(file);
                             }
                         }
                     }
+                }
+                if (updateRobotFiles) {
+                    updateRobotFiles(project, robotResourceFileFound);
+                }
+                if (!filesToRefreshIndexFor.isEmpty()) {
+                    refreshIndicesIfNeeded(filesToRefreshIndexFor, project);
                 }
             }
         });
@@ -110,7 +124,6 @@ public class RobotListenerMgr {
     }
 
     private void updateRobotFiles(Project project, boolean importUpdate) {
-        ProgressManager.checkCanceled();
         modificationTracker.incModificationCount();
         final long currentModificationCount = modificationTracker.getModificationCount();
         ReadAction.nonBlocking(() -> {
@@ -169,5 +182,12 @@ public class RobotListenerMgr {
             }
         }
         return false;
+    }
+
+    private void refreshIndicesIfNeeded(Collection<VirtualFile> virtualFiles, Project project) {
+        // Force reindexing for this file
+        Application application = ApplicationManager.getApplication();
+        DumbService dumbService = DumbService.getInstance(project);
+        application.invokeLater(() -> dumbService.smartInvokeLater(() -> FileContentUtilCore.reparseFiles(virtualFiles)));
     }
 }
