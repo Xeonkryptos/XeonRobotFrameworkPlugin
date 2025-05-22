@@ -27,7 +27,7 @@ import static com.intellij.openapi.progress.util.ProgressIndicatorUtils.withTime
 
 public class RobotDebugAdapterProtocolCommunicator implements ProcessListener {
 
-    private static final int MAX_CONNECTION_ATTEMPTS = 10;
+    private static final int MAX_CONNECTION_ATTEMPTS = 100;
 
     private final int robotDebugPort;
 
