@@ -40,7 +40,10 @@ public class RobotKeywordAnnotator implements Annotator {
             // While lexing and parsing it isn't possible to differentiate between a keyword statement and an argument. Better say it as a keyword statement
             // and change the highlighting and suppress every message than to try to modify the tree after lexing/parsing
             if (variableDefinitionGroup == null) {
-                holder.newAnnotation(HighlightSeverity.ERROR, RobotBundle.getMessage("annotation.keyword.not-found")).range(element).create();
+                holder.newAnnotation(HighlightSeverity.ERROR, RobotBundle.getMessage("annotation.keyword.not-found"))
+                      .highlightType(ProblemHighlightType.ERROR)
+                      .range(element)
+                      .create();
             }
         } else if (resolvedElement instanceof PyElement pyElement) {
             PyElementDeprecatedVisitor pyElementDeprecatedVisitor = new PyElementDeprecatedVisitor();
@@ -64,6 +67,7 @@ public class RobotKeywordAnnotator implements Annotator {
             int argumentCount = keywordStatement.getArguments().size();
             expectedCount -= argumentCount;
             holder.newAnnotation(HighlightSeverity.ERROR, RobotBundle.getMessage("annotation.keyword.parameters.missing", expectedCount))
+                  .highlightType(ProblemHighlightType.ERROR)
                   .range(keywordInvokable)
                   .create();
         }
