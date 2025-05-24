@@ -79,7 +79,7 @@ jobs:
           PROPERTIES="$(./gradlew properties --console=plain -q)"
           VERSION="$(echo "$PROPERTIES" | grep "^version:" | cut -f2- -d ' ')"
           NAME="$(echo "$PROPERTIES" | grep "^name:" | cut -f2- -d ' ')"
-          ARTIFACT="$NAME-$VERSION.jar"
+          ARTIFACT="$NAME-$VERSION.zip"
           CHANGELOG="$(./gradlew getChangelog --unreleased --no-header --console=plain -q)"
           
           echo "version=$VERSION" >> $GITHUB_OUTPUT
