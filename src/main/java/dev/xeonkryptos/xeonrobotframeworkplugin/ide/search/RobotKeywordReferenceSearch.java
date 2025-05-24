@@ -1,6 +1,7 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.ide.search;
 
 import com.intellij.openapi.application.QueryExecutorBase;
+import com.intellij.openapi.application.ReadAction;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiReference;
@@ -19,6 +20,7 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.index.KeywordStatementN
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.PatternUtil;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Collection;
 import java.util.Optional;
 
 public class RobotKeywordReferenceSearch extends QueryExecutorBase<PsiReference, SearchParameters> {
@@ -59,7 +61,10 @@ public class RobotKeywordReferenceSearch extends QueryExecutorBase<PsiReference,
                                                     GlobalSearchScope globalSearchScope,
                                                     @NotNull Processor<? super PsiReference> consumer) {
         KeywordStatementNameIndex keywordStatementNameIndex = KeywordStatementNameIndex.getInstance();
-        for (KeywordStatement keywordStatement : keywordStatementNameIndex.getKeywordStatements(keywordName, project, globalSearchScope)) {
+        Collection<KeywordStatement> keywordStatements = ReadAction.compute(() -> keywordStatementNameIndex.getKeywordStatements(keywordName,
+                                                                                                                                 project,
+                                                                                                                                 globalSearchScope));
+        for (KeywordStatement keywordStatement : keywordStatements) {
             if (keywordStatement.isValid()) {
                 KeywordInvokable invokable = keywordStatement.getInvokable();
                 if (!consumer.process(invokable.getReference())) {
