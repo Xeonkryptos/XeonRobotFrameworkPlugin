@@ -14,19 +14,19 @@ jobs:
     name: Gradle Validation
     uses: ./.github/workflows/reusable-gradleValidation.yml
 
-#  unitTests:
-#    name: Unit Tests
-#    needs: gradleValidation
-#    uses: ./.github/workflows/reusable-unitTests.yml
-#    secrets: inherit
-#    permissions:
-#      checks: write
-#
-#  integrationTests:
-#    name: Integration Tests
-#    needs: [ gradleValidation, unitTests ]
-#    uses: ./.github/workflows/reusable-integrationTests.yml
-#    secrets: inherit
+  unitTests:
+    name: Unit Tests
+    needs: gradleValidation
+    uses: ./.github/workflows/reusable-unitTests.yml
+    secrets: inherit
+    permissions:
+      checks: write
+
+  integrationTests:
+    name: Integration Tests
+    needs: [ gradleValidation, unitTests ]
+    uses: ./.github/workflows/reusable-integrationTests.yml
+    secrets: inherit
 
   #  integrationTestsEAP:
   #    name: Integration Tests EAP
