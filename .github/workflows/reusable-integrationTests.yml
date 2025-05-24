@@ -46,6 +46,9 @@ jobs:
         with:
           cache-read-only: true
 
+      - name: Make gradlew executable
+        run: chmod +x ./gradlew
+
       - name: Run Tests
         env:
           TEST_NAME: ${{ inputs.testName }}
