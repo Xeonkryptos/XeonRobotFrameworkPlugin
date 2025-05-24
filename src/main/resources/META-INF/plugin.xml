@@ -126,6 +126,7 @@
                  order="first"/>
 
         <statementUpDownMover implementation="dev.xeonkryptos.xeonrobotframeworkplugin.ide.RobotStatementUpDownMover"/>
+        <breadcrumbsInfoProvider implementation="dev.xeonkryptos.xeonrobotframeworkplugin.ide.RobotBreadcrumbsInfoProvider"/>
     </extensions>
     <actions>
         <action id="XeonRobotFrameworkPlugin.CreateNew" class="dev.xeonkryptos.xeonrobotframeworkplugin.ide.RobotCreateAction">

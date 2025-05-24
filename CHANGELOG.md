@@ -10,6 +10,7 @@
 - Annotate/Highlight unused variables as such and provide a quick-fix to remove them
 - Show an error marking when a keyword is missing mandatory parameters
 - Added Up/Down mover with support for moving of keywords, variable definitions, parameter/argument and test cases
+- Added support for breadcrumbs
 
 ### Fixed
 
