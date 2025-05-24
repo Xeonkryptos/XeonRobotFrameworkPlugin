@@ -124,6 +124,8 @@
 
         <weigher key="completion" implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.ide.completion.RobotContextLevelWeigher" id="context"
                  order="first"/>
+
+        <statementUpDownMover implementation="dev.xeonkryptos.xeonrobotframeworkplugin.ide.RobotStatementUpDownMover"/>
     </extensions>
     <actions>
         <action id="XeonRobotFrameworkPlugin.CreateNew" class="dev.xeonkryptos.xeonrobotframeworkplugin.ide.RobotCreateAction">
