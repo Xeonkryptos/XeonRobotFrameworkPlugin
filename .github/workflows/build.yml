@@ -98,7 +98,7 @@ jobs:
           rm -rf robotcode/robot && rm -rf robotcode/robotframework*
 
       - name: Build Plugin
-        run: ./gradlew build -x test
+        run: ./gradlew buildPlugin -x test
 
       # Store an already-built plugin as an artifact for downloading
       - name: Upload artifact
