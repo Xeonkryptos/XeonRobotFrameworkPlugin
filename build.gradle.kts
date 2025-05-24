@@ -86,8 +86,8 @@ intellijPlatform {
     }
 
     signing {
-        certificateChainFile.set(file(providers.environmentVariable("CERTIFICATE_CHAIN_FILE")))
-        privateKeyFile.set(file(providers.environmentVariable("PRIVATE_KEY_FILE")))
+        certificateChain.set(providers.environmentVariable("CERTIFICATE_CHAIN"))
+        privateKey.set(providers.environmentVariable("PRIVATE_KEY"))
         password.set(providers.environmentVariable("PRIVATE_KEY_PASSWORD"))
     }
 
