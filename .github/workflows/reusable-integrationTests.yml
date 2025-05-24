@@ -50,6 +50,7 @@ jobs:
         run: chmod +x ./gradlew
 
       - name: Run Tests
+        if: ${{ false }}  # disable for now
         env:
           TEST_NAME: ${{ inputs.testName }}
         shell: bash

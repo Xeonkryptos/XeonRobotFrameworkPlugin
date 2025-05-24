@@ -23,7 +23,6 @@ jobs:
       checks: write
 
   integrationTests:
-    if: ${{ false }}  # disable for now
     name: Integration Tests
     needs: [ gradleValidation, unitTests ]
     uses: ./.github/workflows/reusable-integrationTests.yml
