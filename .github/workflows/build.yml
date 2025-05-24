@@ -3,10 +3,10 @@ on:
   # Trigger the workflow on pushes to only the 'master' branch (this avoids duplicate checks being run, e.g., for dependabot pull requests)
   push:
     branches: [ 'main' ]
-    paths-ignore: [ '**.md', '.teamcity/**' ]
+    paths-ignore: [ '**.md' ]
   # Trigger the workflow on any pull request
   pull_request:
-    paths-ignore: [ '**.md', '.teamcity/**' ]
+    paths-ignore: [ '**.md' ]
 
 jobs:
 
@@ -38,17 +38,16 @@ jobs:
 
   codeInspection:
     name: Code Inspection
-    needs: gradleValidation
-#    needs: integrationTests
+    needs: integrationTests
     uses: ./.github/workflows/reusable-codeInspection.yml
 
   build:
     name: Build
-#    needs:
-#      - unitTests
-    # - integrationTests
+    needs:
+      - unitTests
+      - integrationTests
     # - integrationTestsEAP
-    # - codeInspection
+      - codeInspection
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -90,6 +89,13 @@ jobs:
           echo "changelog<<EOF" >> $GITHUB_OUTPUT
           echo "$CHANGELOG" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Download RobotCode Debugger
+        shell: bash
+        run: |
+          mkdir -p robotcode
+          pip install --upgrade -t robotcode robotcode[debugger]
+          rm -rf robotcode/robot && rm -rf robotcode/robotframework*
 
       - name: Build Plugin
         run: ./gradlew build -x test
