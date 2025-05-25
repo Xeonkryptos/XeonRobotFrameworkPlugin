@@ -2,7 +2,7 @@
 <!-- Plugin description -->
 Robot Framework plugin for PyCharm.
 
-❤️ If you like this plugin, please leave your [review](https://plugins.jetbrains.com/plugin/27395-xeon-robotframework-support/reviews/new) with five ⭐ stars, also, please ⭐ star my github [project](https://github.com/xeonkryptos/XeonRobotFrameworkPlugin) 🙏.
+If you like this plugin, please leave your [review](https://plugins.jetbrains.com/plugin/27395-xeon-robotframework-support/reviews/new) with five stars, also, please star my Github [project](https://github.com/xeonkryptos/XeonRobotFrameworkPlugin).
 
 ## Features
 ### Syntax Highlighting
