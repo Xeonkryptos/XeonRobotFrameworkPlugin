@@ -1,4 +1,4 @@
-package dev.xeonkryptos.xeonrobotframeworkplugin.ide;
+package dev.xeonkryptos.xeonrobotframeworkplugin.ide.misc;
 
 import com.intellij.codeInsight.editorActions.moveUpDown.LineRange;
 import com.intellij.codeInsight.editorActions.moveUpDown.StatementUpDownMover;

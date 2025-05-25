@@ -1,5 +1,6 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.psi.element;
 
+import com.intellij.navigation.NavigationItem;
 import com.intellij.psi.PsiNamedElement;
 import com.intellij.psi.StubBasedPsiElement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.element.KeywordStatementStub;
@@ -9,7 +10,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Collection;
 import java.util.List;
 
-public interface KeywordStatement extends RobotStatement, PsiNamedElement, StubBasedPsiElement<KeywordStatementStub> {
+public interface KeywordStatement extends RobotStatement, PsiNamedElement, NavigationItem, StubBasedPsiElement<KeywordStatementStub>, RobotQualifiedNameOwner {
 
    @NotNull
    KeywordInvokable getInvokable();

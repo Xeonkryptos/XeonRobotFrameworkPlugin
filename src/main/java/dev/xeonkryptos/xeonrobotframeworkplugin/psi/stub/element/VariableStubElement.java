@@ -5,7 +5,6 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.stubs.IStubElementType;
 import com.intellij.psi.stubs.IndexSink;
 import com.intellij.psi.stubs.StubElement;
-import com.intellij.psi.stubs.StubIndexKey;
 import com.intellij.psi.stubs.StubInputStream;
 import com.intellij.psi.stubs.StubOutputStream;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotLanguage;
@@ -64,16 +63,15 @@ public class VariableStubElement extends IStubElementType<VariableStub, Variable
     @Override
     public void indexStub(@NotNull VariableStub stub, @NotNull IndexSink sink) {
         if (!stub.isEmpty() && !stub.isEnvironmentVariable()) {
-            StubIndexKey<String, Variable> stubIndexKey = VariableNameIndex.getInstance().getKey();
             String unwrappedVariableNameInLowerCase = stub.getUnwrappedName().toLowerCase();
             Matcher matcher = VARIABLE_NAME_IN_EXTENDED_PATTERN.matcher(unwrappedVariableNameInLowerCase);
             if (matcher.find()) {
                 String simplifiedVariableName = matcher.group();
                 if (!simplifiedVariableName.equals(unwrappedVariableNameInLowerCase)) {
-                    sink.occurrence(stubIndexKey, simplifiedVariableName);
+                    sink.occurrence(VariableNameIndex.KEY, simplifiedVariableName);
                 }
             }
-            sink.occurrence(stubIndexKey, unwrappedVariableNameInLowerCase);
+            sink.occurrence(VariableNameIndex.KEY, unwrappedVariableNameInLowerCase);
         }
     }
 }

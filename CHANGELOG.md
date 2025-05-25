@@ -11,6 +11,7 @@
 - Show an error marking when a keyword is missing mandatory parameters
 - Added Up/Down mover with support for moving of keywords, variable definitions, parameter/argument and test cases
 - Added support for breadcrumbs
+- Added search capability of test case names and symbols into PyCharm's searches
 
 ### Fixed
 
@@ -29,6 +30,7 @@
 - Don't expect a keyword statement for every variable definition. When the argument of a variable definition is unresolvable, interpret it as a simple argument
 - Add only parameters in code completion for keywords with meta characters that aren't defined yet
 - Mark unresolvable parameter as arguments in highlighting with annotators
+- Every kind of bracket setting supports now multi-line-mode
 
 ## 0.2.8
 

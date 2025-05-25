@@ -1,6 +1,5 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.psi.element;
 
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.PatternUtil;
 import com.intellij.extapi.psi.StubBasedPsiElementBase;
 import com.intellij.lang.ASTNode;
 import com.intellij.lang.injection.InjectedLanguageManager;
@@ -8,6 +7,8 @@ import com.intellij.navigation.ItemPresentation;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.stubs.IStubElementType;
 import com.intellij.psi.stubs.StubElement;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.PatternUtil;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.QualifiedNameBuilder;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.Icon;
@@ -53,11 +54,11 @@ public abstract class RobotStubPsiElementBase<T extends StubElement<P>, P extend
 
             @Override
             public String getLocationString() {
-                return null;
+                return QualifiedNameBuilder.computeQualifiedPath(RobotStubPsiElementBase.this);
             }
 
             @Override
-            public Icon getIcon(boolean var1) {
+            public Icon getIcon(boolean unused) {
                 return RobotStubPsiElementBase.this.getIcon(ICON_FLAG_VISIBILITY);
             }
         };

@@ -40,14 +40,16 @@
 
         <lang.syntaxHighlighterFactory language="Robot"
                                        implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotSyntaxHighlightingFactory"/>
-        <lang.commenter language="Robot" implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.ide.RobotCommenter"/>
-        <lang.foldingBuilder language="Robot" implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.ide.RobotFoldingBuilder"/>
+        <lang.commenter language="Robot" implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.ide.misc.RobotCommenter"/>
+        <lang.foldingBuilder language="Robot" implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.ide.misc.RobotFoldingBuilder"/>
         <lang.parserDefinition language="Robot" implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotParserDefinition"/>
 
         <stubElementTypeHolder class="dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotStubTokenTypes" externalIdPrefix="robot."/>
+        <stubIndex implementation="dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.index.KeywordDefinitionNameIndex"/>
         <stubIndex implementation="dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.index.KeywordStatementNameIndex"/>
         <stubIndex implementation="dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.index.PositionalArgumentImportIndex"/>
         <stubIndex implementation="dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.index.VariableNameIndex"/>
+        <stubIndex implementation="dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.index.VariableDefinitionNameIndex"/>
 
         <codeInsight.parameterInfo language="Robot"
                                    implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.ide.parameterinfo.RobotParameterInfoHandler"/>
@@ -106,12 +108,12 @@
         <internalFileTemplate name="Robot Feature File"/>
         <internalFileTemplate name="Robot Resource File"/>
         <enterHandlerDelegate implementation="dev.xeonkryptos.xeonrobotframeworkplugin.ide.actionhandler.RobotEnterActionHandler"/>
-        <enterHandlerDelegate implementation="dev.xeonkryptos.xeonrobotframeworkplugin.ide.actionhandler.RobotDocumentationEnterActionHandler"/>
+        <enterHandlerDelegate implementation="dev.xeonkryptos.xeonrobotframeworkplugin.ide.actionhandler.RobotBracketSettingEnterActionHandler"/>
         <enterHandlerDelegate implementation="dev.xeonkryptos.xeonrobotframeworkplugin.ide.actionhandler.RobotKeywordEnterActionHandler"/>
         <typedHandler implementation="dev.xeonkryptos.xeonrobotframeworkplugin.ide.actionhandler.RobotTypedActionHandler"/>
         <editorActionHandler action="EditorTab" implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.ide.actionhandler.RobotTabActionHandler"/>
         <configurationType implementation="dev.xeonkryptos.xeonrobotframeworkplugin.ide.execution.config.RobotRunConfigurationType"/>
-        <spellchecker.support language="Robot" implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.ide.RobotSpellcheckingStrategy"/>
+        <spellchecker.support language="Robot" implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.ide.misc.RobotSpellcheckingStrategy"/>
 
         <xdebugger.breakpointType implementation="dev.xeonkryptos.xeonrobotframeworkplugin.ide.debugger.breakpoint.RobotLineBreakpointType"/>
         <xdebugger.breakpointType implementation="dev.xeonkryptos.xeonrobotframeworkplugin.ide.debugger.breakpoint.RobotExceptionBreakpointType"/>
@@ -125,8 +127,11 @@
         <weigher key="completion" implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.ide.completion.RobotContextLevelWeigher" id="context"
                  order="first"/>
 
-        <statementUpDownMover implementation="dev.xeonkryptos.xeonrobotframeworkplugin.ide.RobotStatementUpDownMover"/>
-        <breadcrumbsInfoProvider implementation="dev.xeonkryptos.xeonrobotframeworkplugin.ide.RobotBreadcrumbsInfoProvider"/>
+        <statementUpDownMover implementation="dev.xeonkryptos.xeonrobotframeworkplugin.ide.misc.RobotStatementUpDownMover"/>
+        <breadcrumbsInfoProvider implementation="dev.xeonkryptos.xeonrobotframeworkplugin.ide.misc.RobotBreadcrumbsInfoProvider"/>
+
+        <gotoClassContributor implementation="dev.xeonkryptos.xeonrobotframeworkplugin.ide.gotocontributor.RobotGotoClassContributor"/>
+        <gotoSymbolContributor implementation="dev.xeonkryptos.xeonrobotframeworkplugin.ide.gotocontributor.RobotGotoSymbolContributor"/>
     </extensions>
     <actions>
         <action id="XeonRobotFrameworkPlugin.CreateNew" class="dev.xeonkryptos.xeonrobotframeworkplugin.ide.RobotCreateAction">

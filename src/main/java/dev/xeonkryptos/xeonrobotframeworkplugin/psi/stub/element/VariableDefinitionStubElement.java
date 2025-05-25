@@ -1,8 +1,5 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.element;
 
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotLanguage;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.VariableDefinition;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.VariableDefinitionImpl;
 import com.intellij.lang.ASTNode;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.stubs.IStubElementType;
@@ -10,6 +7,10 @@ import com.intellij.psi.stubs.IndexSink;
 import com.intellij.psi.stubs.StubElement;
 import com.intellij.psi.stubs.StubInputStream;
 import com.intellij.psi.stubs.StubOutputStream;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotLanguage;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.VariableDefinition;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.VariableDefinitionImpl;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.index.VariableDefinitionNameIndex;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
 
@@ -55,5 +56,10 @@ public class VariableDefinitionStubElement extends IStubElementType<VariableDefi
     }
 
     @Override
-    public void indexStub(@NotNull VariableDefinitionStub stub, @NotNull IndexSink sink) {}
+    public void indexStub(@NotNull VariableDefinitionStub stub, @NotNull IndexSink sink) {
+        if (!stub.isEmpty()) {
+            String unwrappedVariableNameInLowerCase = stub.getUnwrappedName().toLowerCase();
+            sink.occurrence(VariableDefinitionNameIndex.KEY, unwrappedVariableNameInLowerCase);
+        }
+    }
 }

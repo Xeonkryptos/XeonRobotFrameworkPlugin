@@ -8,7 +8,7 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.BracketSetting;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class RobotDocumentationEnterActionHandler extends AbstractRobotSmartMultilineEnterActionHandler<BracketSetting> {
+public class RobotBracketSettingEnterActionHandler extends AbstractRobotSmartMultilineEnterActionHandler<BracketSetting> {
 
     @Nullable
     @Override
@@ -35,6 +35,6 @@ public class RobotDocumentationEnterActionHandler extends AbstractRobotSmartMult
 
     @Override
     protected boolean isMultilineSupportedFor(@NotNull BracketSetting element) {
-        return element.isDocumentation();
+        return true;
     }
 }

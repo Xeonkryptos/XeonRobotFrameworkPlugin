@@ -1,5 +1,6 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.psi;
 
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotStubFileElementType;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.element.KeywordDefinitionStubElement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.element.KeywordStatementStubElement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.element.PositionalArgumentStubElement;

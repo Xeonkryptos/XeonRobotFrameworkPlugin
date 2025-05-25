@@ -1,7 +1,8 @@
-package dev.xeonkryptos.xeonrobotframeworkplugin.psi;
+package dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub;
 
 import com.intellij.psi.stubs.PsiFileStub;
 import com.intellij.psi.tree.IStubFileElementType;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotLanguage;
 
 public class RobotStubFileElementType extends IStubFileElementType<PsiFileStub<?>> {
 
@@ -11,6 +12,6 @@ public class RobotStubFileElementType extends IStubFileElementType<PsiFileStub<?
 
     @Override
     public int getStubVersion() {
-        return 4;
+        return 5;
     }
 }

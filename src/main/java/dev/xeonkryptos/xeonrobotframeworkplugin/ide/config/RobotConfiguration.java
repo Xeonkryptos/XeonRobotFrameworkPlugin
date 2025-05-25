@@ -19,7 +19,6 @@ import org.jetbrains.annotations.Nullable;
 
 import javax.swing.BoxLayout;
 import javax.swing.JComponent;
-import java.awt.GridBagConstraints;
 import java.awt.event.ItemEvent;
 import java.util.Arrays;
 import java.util.List;

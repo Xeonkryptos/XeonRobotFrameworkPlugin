@@ -1,4 +1,4 @@
-package dev.xeonkryptos.xeonrobotframeworkplugin.ide;
+package dev.xeonkryptos.xeonrobotframeworkplugin.ide.misc;
 
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTokenTypes;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.Heading;

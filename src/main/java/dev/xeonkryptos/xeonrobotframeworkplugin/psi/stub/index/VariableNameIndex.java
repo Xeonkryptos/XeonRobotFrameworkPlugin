@@ -13,7 +13,7 @@ import java.util.Collection;
 
 public class VariableNameIndex extends StringStubIndexExtension<Variable> {
 
-    private static final StubIndexKey<String, Variable> VARIABLE_NAME = StubIndexKey.createIndexKey("robot.variable");
+    public static final StubIndexKey<String, Variable> KEY = StubIndexKey.createIndexKey("robot.variable");
 
     private static final VariableNameIndex ourInstance = new VariableNameIndex();
 
@@ -24,7 +24,7 @@ public class VariableNameIndex extends StringStubIndexExtension<Variable> {
     @NotNull
     @Override
     public StubIndexKey<String, Variable> getKey() {
-        return VARIABLE_NAME;
+        return KEY;
     }
 
     public Collection<Variable> getVariables(@NotNull String unwrappedVariableName, @NotNull Project project, @Nullable GlobalSearchScope scope) {

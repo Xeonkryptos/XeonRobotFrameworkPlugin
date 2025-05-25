@@ -12,7 +12,7 @@ import java.util.Collection;
 
 public class PositionalArgumentImportIndex extends StringStubIndexExtension<PositionalArgument> {
 
-    private static final StubIndexKey<String, PositionalArgument> POSITIONAL_ARGUMENT_IMPORT = StubIndexKey.createIndexKey("robot.positionalArgument.import");
+    public static final StubIndexKey<String, PositionalArgument> KEY = StubIndexKey.createIndexKey("robot.positionalArgument.import");
 
     private static final PositionalArgumentImportIndex ourInstance = new PositionalArgumentImportIndex();
 
@@ -23,7 +23,7 @@ public class PositionalArgumentImportIndex extends StringStubIndexExtension<Posi
     @NotNull
     @Override
     public StubIndexKey<String, PositionalArgument> getKey() {
-        return POSITIONAL_ARGUMENT_IMPORT;
+        return KEY;
     }
 
     public Collection<PositionalArgument> getPositionalArgumentForImport(@NotNull String value, @NotNull Project project, @NotNull GlobalSearchScope scope) {

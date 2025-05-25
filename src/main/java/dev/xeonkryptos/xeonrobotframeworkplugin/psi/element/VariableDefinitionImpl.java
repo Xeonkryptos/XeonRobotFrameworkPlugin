@@ -10,6 +10,7 @@ import com.intellij.psi.util.PsiTreeUtil;
 import dev.xeonkryptos.xeonrobotframeworkplugin.ide.icons.RobotIcons;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.element.VariableDefinitionStub;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.PatternUtil;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.QualifiedNameBuilder;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.ReservedVariableScope;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -119,6 +120,11 @@ public class VariableDefinitionImpl extends RobotStubPsiElementBase<VariableDefi
         String text = getName();
         return StringUtil.getOccurrenceCount(text, "}") > 1
                && StringUtil.getOccurrenceCount(text, "${") + StringUtil.getOccurrenceCount(text, "@{") + StringUtil.getOccurrenceCount(text, "%{") > 1;
+    }
+
+    @Override
+    public @NotNull String getQualifiedName() {
+        return QualifiedNameBuilder.computeQualifiedName(this);
     }
 
     @NotNull

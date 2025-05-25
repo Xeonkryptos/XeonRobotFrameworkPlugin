@@ -61,7 +61,9 @@ public class PositionalArgumentStubElement extends IStubElementType<PositionalAr
     @Override
     public void indexStub(@NotNull PositionalArgumentStub stub, @NotNull IndexSink sink) {
         if (stub.isImportArgument()) {
-            sink.occurrence(PositionalArgumentImportIndex.getInstance().getKey(), stub.getValue().replace('/', '.').toLowerCase());
+            String value = stub.getValue();
+            value = value.replace('/', '.').toLowerCase();
+            sink.occurrence(PositionalArgumentImportIndex.KEY, value);
         }
     }
 }

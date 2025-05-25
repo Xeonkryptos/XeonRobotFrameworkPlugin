@@ -1,14 +1,15 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.psi.element;
 
-import dev.xeonkryptos.xeonrobotframeworkplugin.ide.icons.RobotIcons;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.dto.VariableDto;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.element.KeywordDefinitionStub;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.ReservedVariableScope;
 import com.intellij.lang.ASTNode;
 import com.intellij.lang.injection.InjectedLanguageManager;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.stubs.IStubElementType;
 import com.intellij.psi.util.PsiTreeUtil;
+import dev.xeonkryptos.xeonrobotframeworkplugin.ide.icons.RobotIcons;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.dto.VariableDto;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.element.KeywordDefinitionStub;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.QualifiedNameBuilder;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.ReservedVariableScope;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -152,6 +153,11 @@ public class KeywordDefinitionImpl extends RobotStubPsiElementBase<KeywordDefini
             results.addAll(definedVariables);
         }
         return results;
+    }
+
+    @Override
+    public @NotNull String getQualifiedName() {
+        return QualifiedNameBuilder.computeQualifiedName(this);
     }
 
     @Override

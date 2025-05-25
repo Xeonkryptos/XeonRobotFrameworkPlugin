@@ -58,4 +58,4 @@ jobs:
       - name: Upload Release Asset
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh release upload ${{ github.event.release.tag_name }} ./build/libs/*
+        run: gh release upload ${{ github.event.release.tag_name }} ./build/distribution/*

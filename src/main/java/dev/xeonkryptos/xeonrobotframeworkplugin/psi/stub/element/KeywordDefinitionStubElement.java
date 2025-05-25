@@ -10,6 +10,7 @@ import com.intellij.psi.stubs.IndexSink;
 import com.intellij.psi.stubs.StubElement;
 import com.intellij.psi.stubs.StubInputStream;
 import com.intellij.psi.stubs.StubOutputStream;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.index.KeywordDefinitionNameIndex;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
 
@@ -55,5 +56,9 @@ public class KeywordDefinitionStubElement extends IStubElementType<KeywordDefini
     }
 
     @Override
-    public void indexStub(@NotNull KeywordDefinitionStub stub, @NotNull IndexSink sink) {}
+    public void indexStub(@NotNull KeywordDefinitionStub stub, @NotNull IndexSink sink) {
+        String name = stub.getName();
+        sink.occurrence(KeywordDefinitionNameIndex.KEY, name.toLowerCase());
+        sink.occurrence(KeywordDefinitionNameIndex.KEY, name);
+    }
 }

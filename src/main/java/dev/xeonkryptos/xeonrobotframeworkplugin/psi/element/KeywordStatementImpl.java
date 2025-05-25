@@ -11,14 +11,17 @@ import com.jetbrains.python.psi.PyNamedParameter;
 import com.jetbrains.python.psi.PyParameter;
 import dev.xeonkryptos.xeonrobotframeworkplugin.MyLogger;
 import dev.xeonkryptos.xeonrobotframeworkplugin.ide.config.RobotOptionsProvider;
+import dev.xeonkryptos.xeonrobotframeworkplugin.ide.icons.RobotIcons;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.dto.ParameterDto;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.dto.VariableDto;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.element.KeywordStatementStub;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.PatternUtil;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.QualifiedNameBuilder;
 import dev.xeonkryptos.xeonrobotframeworkplugin.util.PythonInspector;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import javax.swing.Icon;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashSet;
@@ -189,10 +192,21 @@ public class KeywordStatementImpl extends RobotStubPsiElementBase<KeywordStateme
     }
 
     @Override
+    public @NotNull String getQualifiedName() {
+        return QualifiedNameBuilder.computeQualifiedName(this);
+    }
+
+    @Override
     public void subtreeChanged() {
         super.subtreeChanged();
 
         reset();
+    }
+
+    @Nullable
+    @Override
+    public Icon getIcon(int flags) {
+        return RobotIcons.FUNCTION;
     }
 
     @Override
