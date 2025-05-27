@@ -4,6 +4,12 @@
 
 ## Unreleased
 
+## 0.3.1
+
+### Fixed
+
+- Fixed issues creating new run configurations
+
 ## 0.3.0
 
 ### Added
