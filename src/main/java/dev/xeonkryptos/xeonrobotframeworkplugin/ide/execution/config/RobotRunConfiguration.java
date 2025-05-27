@@ -58,16 +58,8 @@ public class RobotRunConfiguration extends AbstractRunConfiguration implements E
     public void readExternal(@NotNull Element element) throws InvalidDataException {
         super.readExternal(element);
 
-        Element pythonElement = new Element("python-config");
-        pythonRunConfiguration.writeExternal(pythonElement);
-
-        for (Element child : pythonElement.getChildren()) {
-            if (!"module".equals(child.getName())) {
-                element.addContent(child.clone());
-            }
-        }
-
-        pythonRunConfiguration.readExternal(element);
+        Element pythonElement = element.getChild("python-config");
+        pythonRunConfiguration.readExternal(pythonElement);
     }
 
     @Override
@@ -76,12 +68,6 @@ public class RobotRunConfiguration extends AbstractRunConfiguration implements E
 
         Element pythonElement = new Element("python-config");
         pythonRunConfiguration.writeExternal(pythonElement);
-
-        for (Element child : pythonElement.getChildren()) {
-            if (!"module".equals(child.getName())) {
-                element.addContent(child.clone());
-            }
-        }
     }
 
     @NotNull
