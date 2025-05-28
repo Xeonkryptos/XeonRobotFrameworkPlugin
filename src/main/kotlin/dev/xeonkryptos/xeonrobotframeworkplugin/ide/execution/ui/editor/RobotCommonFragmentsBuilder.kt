@@ -60,16 +60,16 @@ abstract class RobotCommonFragmentsBuilder {
             ExecutionBundle.message("group.operating.system"),
             env,
             { config: RobotRunConfiguration, _: JComponent? ->
-                env.envs = config.envs
-                env.isPassParentEnvs = config.isPassParentEnvs
+                env.envs = config.pythonRunConfiguration.envs
+                env.isPassParentEnvs = config.pythonRunConfiguration.isPassParentEnvs
             },
             { config: RobotRunConfiguration, _: JComponent? ->
                 if (!env.isVisible) {
-                    config.envs = emptyMap()
-                    config.isPassParentEnvs = true
+                    config.pythonRunConfiguration.envs = emptyMap()
+                    config.pythonRunConfiguration.isPassParentEnvs = true
                 } else {
-                    config.envs = env.envs
-                    config.isPassParentEnvs = env.isPassParentEnvs
+                    config.pythonRunConfiguration.envs = env.envs
+                    config.pythonRunConfiguration.isPassParentEnvs = env.isPassParentEnvs
                 }
             },
             { true })
@@ -79,7 +79,7 @@ abstract class RobotCommonFragmentsBuilder {
         // 1. Consistency: Aligns with other fields in SettingsEditorFragmentType.EDITOR group which don't use a placeholder text.
         // 2. Redundancy: Fields in this group are already labeled, making additional placeholder text unnecessary.
         // This decision supports a cleaner, more uniform UI in PyCharm.
-        env.myEnvVars.textField.emptyText.setText("")
+        env.myEnvVars.textField.emptyText.text = ""
 
         fragment.isCanBeHidden = true
         fragment.setHint(ExecutionBundle.message("environment.variables.fragment.hint"))

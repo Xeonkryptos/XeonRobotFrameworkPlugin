@@ -4,6 +4,10 @@
 
 ## Unreleased
 
+### Fixed
+
+- Fixed multiple serialization of module configuration of run configurations
+
 ## 0.3.1
 
 ### Fixed
