@@ -35,7 +35,7 @@ public class RobotParserDefinition implements ParserDefinition {
    @NotNull
    @Override
    public Lexer createLexer(Project project) {
-      return new RobotLexer();
+      return new RobotLexerAdapter();
    }
 
    @NotNull

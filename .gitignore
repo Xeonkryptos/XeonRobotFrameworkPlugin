@@ -4,3 +4,5 @@ build
 .intellijPlatform
 bundled/libs
 *.iml
+*.jar
+*.skeleton

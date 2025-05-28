@@ -1,10 +1,10 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.ide.usage;
 
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotLexer;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotStubTokenTypes;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTokenTypes;
 import com.intellij.lang.cacheBuilder.DefaultWordsScanner;
 import com.intellij.psi.tree.TokenSet;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotLexerAdapter;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotStubTokenTypes;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTokenTypes;
 
 public class RobotWordScanner extends DefaultWordsScanner {
 
@@ -16,7 +16,7 @@ public class RobotWordScanner extends DefaultWordsScanner {
     private static final TokenSet LITERALS = TokenSet.create(RobotStubTokenTypes.ARGUMENT);
 
     public RobotWordScanner() {
-        super(new RobotLexer(), IDENTIFIERS, COMMENTS, LITERALS);
+        super(new RobotLexerAdapter(), IDENTIFIERS, COMMENTS, LITERALS);
 
         setMayHaveFileRefsInLiterals(true);
     }

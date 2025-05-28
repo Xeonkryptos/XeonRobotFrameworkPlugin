@@ -1,0 +1,196 @@
+{
+  parserClass="dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotParser"
+  parserUtilClass="dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotParserUtil"
+  extends="com.intellij.extapi.psi.ASTWrapperPsiElement"
+
+  psiClassPrefix="Robot"
+  psiImplClassSuffix="Impl"
+  psiPackage="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element"
+  psiImplPackage="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl"
+
+  elementTypeHolderClass="dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes"
+  elementTypeClass="dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotElementType"
+  tokenTypeClass="dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTokenType"
+
+  tokens = [
+    SPACE='regexp:[ ]'
+    TAB='regexp:\t'
+    EOL='regexp:\r?\n'
+    HASH='regexp:#'
+    PIPE='regexp:\|'
+    STAR='regexp:\*'
+    STARS='regexp:\*{3}'
+    DOT='regexp:\.'
+    LBRACKET='regexp:\['
+    RBRACKET='regexp:\]'
+    LBRACE='regexp:\{'
+    RBRACE='regexp:\}'
+    EQUALS='regexp:='
+
+    SCALAR_VARIABLE_START='regexp:\$\{'
+    LIST_VARIABLE_START='regexp:@\{'
+    DICT_VARIABLE_START='regexp:&\{'
+    ENV_VARIABLE_START='regexp:%\{'
+
+    IF='regexp:(?i)IF'
+    ELSE='regexp:(?i)ELSE'
+    ELSE_IF='regexp:(?i)ELSE[ ]IF'
+    END='regexp:(?i)END'
+    FOR='regexp:(?i)FOR'
+    IN='regexp:(?i)IN'
+    TRY='regexp:(?i)TRY'
+    EXCEPT='regexp:(?i)EXCEPT'
+    FINALLY='regexp:(?i)FINALLY'
+    WHILE='regexp:(?i)WHILE'
+    RETURN='regexp:(?i)RETURN'
+    BREAK='regexp:(?i)BREAK'
+    CONTINUE='regexp:(?i)CONTINUE'
+    VAR='regexp:(?i)VAR'
+    ARG='regexp:(?i)arg'
+
+    SETTINGS_WORDS='regexp:(?i)(Settings|Setting|Einstellungen|Configuración|Asetukset|Nastavení)'
+    VARIABLES_WORDS='regexp:(?i)(Variables|Variable|Variablen|Muuttujat|Proměnné)'
+    TESTCASES_WORDS='regexp:(?i)(Test[ ]Cases|Test[ ]Case|Testfälle|Casos[ ]de[ ]prueba|Testitapaukset|Testovací[ ]případy)'
+    TASKS_WORDS='regexp:(?i)(Tasks|Task|Aufgaben|Tareas|Tehtävät|Úkoly)'
+    KEYWORDS_WORDS='regexp:(?i)(Keywords|Keyword|User[ ]Keywords|Schlüsselwörter|Palabras[ ]clave|Avainsanat|Klíčová[ ]slova)'
+    COMMENTS_WORDS='regexp:(?i)(Comments|Comment|Kommentare|Comentarios|Kommentit|Komentáře)'
+
+    LIBRARY_WORDS='regexp:(?i)(Library|Bibliothek|Biblioteca|Kirjasto)'
+    WITH_NAME_WORDS='regexp:(?i)(WITH[ ]NAME|MIT[ ]NAME|CON[ ]NOMBRE|NIMELLÄ)'
+
+    QUOTED_STRING="regexp:\"([^\\\"]|\\.)*\"|'([^\\']|\\.)*'"
+    SIMPLE_NAME="regexp:[A-Za-z0-9 ]+"
+    SETTING_NAME_CONTENT="regexp:[A-Za-z0-9 ]+"
+    NAME="regexp:[^$@&#\t\n\r][^\t\n\r]*"
+    CELL_CONTENT="regexp:[^$@&#|#\t\n\r][^|#\t\n\r]*"
+    UNQUOTED_STRING="regexp:[^$@&#{}| \t\n\r][^{}| \t\n\r]*"
+    NON_EOL="regexp:[^\n\r]*"
+  ]
+}
+
+file ::= (comment_line | section | empty_line | header_statement)*
+
+header_statement ::= space_or_tab* line_comment
+
+empty_line ::= space_or_tab* EOL
+whitespace ::= space_or_tab+
+space_or_tab ::= SPACE | TAB
+
+line_comment ::= HASH NON_EOL* EOL
+comment_line ::= space_or_tab* HASH NON_EOL* EOL
+
+section ::= settings_section | variables_section | test_cases_section
+          | tasks_section | keywords_section | comments_section
+
+settings_section ::= settings_header
+                    (setting_statement | comment_line | empty_line)*
+variables_section ::= variables_header
+                    (variable_statement | comment_line | empty_line)*
+test_cases_section ::= test_cases_header
+                    (test_case_statement | comment_line | empty_line)*
+tasks_section ::= tasks_header
+                (test_case_statement | comment_line | empty_line)*
+keywords_section ::= keywords_header
+                    (keyword_statement | comment_line | empty_line)*
+comments_section ::= comments_header
+                    (comment_line | empty_line)*
+
+settings_header ::= STAR+ space_or_tab* SETTINGS_WORDS space_or_tab* STAR*
+variables_header ::= STAR+ space_or_tab* VARIABLES_WORDS space_or_tab* STAR*
+test_cases_header ::= STAR+ space_or_tab* TESTCASES_WORDS space_or_tab* STAR*
+tasks_header ::= STAR+ space_or_tab* TASKS_WORDS space_or_tab* STAR*
+keywords_header ::= STAR+ space_or_tab* KEYWORDS_WORDS space_or_tab* STAR*
+comments_header ::= STAR+ space_or_tab* COMMENTS_WORDS space_or_tab* STAR*
+
+pipe_statement ::= pipe_separated_statement | space_separated_statement
+
+pipe_separated_statement ::= PIPE cell (PIPE cell)* PIPE? EOL
+space_separated_statement ::= cell (whitespace+ cell)* EOL
+
+cell ::= CELL_CONTENT | quoted_cell
+quoted_cell ::= QUOTED_STRING
+
+setting_statement ::= simple_setting_statement | bracket_setting_statement | library_import
+simple_setting_statement ::= simple_setting_name whitespace+ setting_value
+bracket_setting_statement ::= bracket_setting_name whitespace+ setting_value
+
+simple_setting_name ::= SIMPLE_NAME
+bracket_setting_name ::= LBRACKET SETTING_NAME_CONTENT RBRACKET
+
+setting_value ::= value (whitespace+ value)*
+
+variable_statement ::= variable_definition (whitespace+ variable_value)*
+variable_definition ::= scalar_variable | list_variable | dict_variable
+scalar_variable ::= SCALAR_VARIABLE_START variable_name RBRACE
+list_variable ::= LIST_VARIABLE_START variable_name RBRACE
+dict_variable ::= DICT_VARIABLE_START variable_name RBRACE
+environment_variable ::= ENV_VARIABLE_START variable_name RBRACE
+
+variable_name ::= SIMPLE_NAME (DOT SIMPLE_NAME)*
+
+variable_value ::= value (whitespace+ value)*
+
+test_case_statement ::= test_case_name EOL
+                        (test_case_step | empty_line | comment_line)*
+keyword_statement ::= keyword_statement_name EOL
+                      (keyword_step | empty_line | comment_line)*
+
+test_case_name ::= NAME
+keyword_statement_name ::= NAME
+
+test_case_step ::= whitespace+ step
+keyword_step ::= whitespace+ step
+
+step ::= extended_if_syntax
+       | extended_for_syntax
+       | extended_try_syntax
+       | extended_while_syntax
+       | return_statement
+       | break_statement
+       | continue_statement
+       | var_statement
+       | value (whitespace+ value)*
+
+extended_if_syntax ::= IF whitespace+ condition EOL
+                      (pipe_statement | empty_line | comment_line)*
+                      (ELSE_IF whitespace+ condition EOL
+                      (pipe_statement | empty_line | comment_line)*)*
+                      (ELSE EOL
+                      (pipe_statement | empty_line | comment_line)*)?
+                      END EOL
+
+extended_for_syntax ::= FOR whitespace+ variable_definition whitespace+ IN whitespace+ value (whitespace+ value)* EOL
+                       (pipe_statement | empty_line | comment_line)*
+                       END EOL
+
+extended_try_syntax ::= TRY EOL
+                       (pipe_statement | empty_line | comment_line)*
+                       (EXCEPT (whitespace+ value (whitespace+ value)*)? EOL
+                       (pipe_statement | empty_line | comment_line)*)*
+                       (FINALLY EOL
+                       (pipe_statement | empty_line | comment_line)*)?
+                       END EOL
+
+extended_while_syntax ::= WHILE whitespace+ condition EOL
+                         (pipe_statement | empty_line | comment_line)*
+                         END EOL
+
+condition ::= value (whitespace+ value)*
+
+return_statement ::= RETURN (whitespace+ value (whitespace+ value)*)?
+break_statement ::= BREAK (whitespace+ value)?
+continue_statement ::= CONTINUE
+
+var_statement ::= VAR whitespace+ variable_name whitespace+ value (whitespace+ value)*
+
+value ::= scalar_variable
+        | list_variable
+        | dict_variable
+        | environment_variable
+        | literal_value
+
+literal_value ::= UNQUOTED_STRING | QUOTED_STRING
+
+library_import ::= LIBRARY_WORDS whitespace+ value
+                  (whitespace+ WITH_NAME_WORDS whitespace+ value)?
+                  (whitespace+ ARG whitespace* EQUALS whitespace* value)* EOL

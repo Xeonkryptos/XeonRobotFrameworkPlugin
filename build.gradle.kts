@@ -22,6 +22,14 @@ kotlin {
     jvmToolchain(21)
 }
 
+sourceSets {
+    main {
+        java {
+            srcDirs("src/main/gen")
+        }
+    }
+}
+
 // Configure project's dependencies
 repositories {
     mavenCentral()

@@ -48,7 +48,7 @@ public class RobotHighlighter extends SyntaxHighlighterBase {
     @NotNull
     @Override
     public Lexer getHighlightingLexer() {
-        return new RobotLexer();
+        return new RobotLexerAdapter();
     }
 
     static {
