@@ -7,6 +7,7 @@
 ### Fixed
 
 - Fixed multiple serialization of module configuration of run configurations
+- Fixed invalid access to index when base PSI elements are invalid
 
 ## 0.3.1
 
