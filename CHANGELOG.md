@@ -6,8 +6,8 @@
 
 ### Fixed
 
-- Fixed multiple serialization of module configuration of run configurations
-- Fixed invalid access to index when base PSI elements are invalid
+- Fixed reason for log warning about multiple module serialization when creating and updating run configurations
+- Fixed invalid access to index when base PSI elements are invalid in reverse lookup search
 
 ## 0.3.1
 
