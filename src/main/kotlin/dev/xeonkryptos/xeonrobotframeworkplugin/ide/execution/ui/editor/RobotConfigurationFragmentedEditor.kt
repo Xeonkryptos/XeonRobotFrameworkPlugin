@@ -57,7 +57,7 @@ class RobotConfigurationFragmentedEditor(private val runConfiguration: RobotRunC
                 { config: RobotRunConfiguration, field: RawCommandLineEditor -> config.pythonRunConfiguration.scriptParameters = field.text.trim() },
                 { true })
         MacrosDialog.addMacroSupport(parametersEditor.editorField, MacrosDialog.Filters.ALL) { false }
-        parametersEditor.editorField.emptyText.setText(PyBundle.message("python.run.configuration.fragments.script.parameters.hint"))
+        parametersEditor.editorField.emptyText.text = PyBundle.message("python.run.configuration.fragments.script.parameters.hint")
         TextComponentEmptyText.setupPlaceholderVisibility(parametersEditor.editorField)
         scriptParametersFragment.setHint(PyBundle.message("python.run.configuration.fragments.script.parameters.hint"))
         scriptParametersFragment.actionHint = PyBundle.message("python.run.configuration.fragments.script.parameters.hint")

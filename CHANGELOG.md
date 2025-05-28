@@ -2,6 +2,21 @@
 
 # XeonRobotFrameworkPlugin Changelog
 
+## Unreleased
+
+## 0.3.2
+
+### Fixed
+
+- Fixed reason for log warning about multiple module serialization when creating and updating run configurations
+- Fixed invalid access to index when base PSI elements are invalid in reverse lookup search
+
+## 0.3.1
+
+### Fixed
+
+- Fixed issues creating new run configurations
+
 ## 0.3.0
 
 ### Added

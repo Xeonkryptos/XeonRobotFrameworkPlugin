@@ -1,7 +1,6 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.ide.search;
 
 import com.intellij.openapi.application.QueryExecutorBase;
-import com.intellij.openapi.application.ReadAction;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiReference;
@@ -36,7 +35,7 @@ public class RobotKeywordReferenceSearch extends QueryExecutorBase<PsiReference,
         Project project = queryParameters.getProject();
 
         GlobalSearchScope globalSearchScope = QueryExecutorUtil.convertToGlobalSearchScope(queryParameters.getEffectiveSearchScope(), project);
-        if (element instanceof PyFunction pyFunction) {
+        if (element instanceof PyFunction pyFunction && pyFunction.isValid()) {
             String possibleKeywordName = PatternUtil.functionToKeyword(pyFunction.getName());
             if (possibleKeywordName != null && searchForKeywordsInIndex(possibleKeywordName, project, globalSearchScope, consumer)) {
                 return;
@@ -48,7 +47,7 @@ public class RobotKeywordReferenceSearch extends QueryExecutorBase<PsiReference,
                                                             .map(keywordNameExp -> (PyStringLiteralExpression) keywordNameExp)
                                                             .map(StringLiteralExpression::getStringValue);
             customKeywordNameOpt.ifPresent(customKeywordName -> searchForKeywordsInIndex(customKeywordName, project, globalSearchScope, consumer));
-        } else if (element instanceof KeywordDefinition keywordDefinition) {
+        } else if (element instanceof KeywordDefinition keywordDefinition && keywordDefinition.isValid()) {
             String keywordName = keywordDefinition.getName();
             if (keywordName != null) {
                 searchForKeywordsInIndex(keywordName, project, globalSearchScope, consumer);
@@ -61,9 +60,7 @@ public class RobotKeywordReferenceSearch extends QueryExecutorBase<PsiReference,
                                                     GlobalSearchScope globalSearchScope,
                                                     @NotNull Processor<? super PsiReference> consumer) {
         KeywordStatementNameIndex keywordStatementNameIndex = KeywordStatementNameIndex.getInstance();
-        Collection<KeywordStatement> keywordStatements = ReadAction.compute(() -> keywordStatementNameIndex.getKeywordStatements(keywordName,
-                                                                                                                                 project,
-                                                                                                                                 globalSearchScope));
+        Collection<KeywordStatement> keywordStatements = keywordStatementNameIndex.getKeywordStatements(keywordName, project, globalSearchScope);
         for (KeywordStatement keywordStatement : keywordStatements) {
             if (keywordStatement.isValid()) {
                 KeywordInvokable invokable = keywordStatement.getInvokable();

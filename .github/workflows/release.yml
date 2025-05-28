@@ -48,9 +48,19 @@ jobs:
           echo "$CHANGELOG" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
 
+      - name: Download RobotCode Debugger
+        shell: bash
+        run: |
+          mkdir -p bundled/libs
+          pip install --upgrade -t bundled/libs robotcode[debugger]
+          rm -rf bundled/libs/robot && rm -rf bundled/libs/robotframework*
+
       # Publish the plugin to the Marketplace
       - name: Publish Plugin
         env:
+          CERTIFICATE_CHAIN: ${{ secrets.CERTIFICATE_CHAIN }}
+          PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
+          PRIVATE_KEY_PASSWORD: ${{ secrets.PRIVATE_KEY_PASSWORD }}
           PUBLISH_TOKEN: ${{ secrets.PUBLISH_TOKEN }}
         run: ./gradlew publishPlugin
 
@@ -58,4 +68,4 @@ jobs:
       - name: Upload Release Asset
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh release upload ${{ github.event.release.tag_name }} ./build/distribution/*
+        run: gh release upload ${{ github.event.release.tag_name }} ./build/distributions/*

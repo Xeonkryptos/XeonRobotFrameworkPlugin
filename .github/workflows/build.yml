@@ -93,9 +93,9 @@ jobs:
       - name: Download RobotCode Debugger
         shell: bash
         run: |
-          mkdir -p robotcode
-          pip install --upgrade -t robotcode robotcode[debugger]
-          rm -rf robotcode/robot && rm -rf robotcode/robotframework*
+          mkdir -p bundled/libs
+          pip install --upgrade -t bundled/libs robotcode[debugger]
+          rm -rf bundled/libs/robot && rm -rf bundled/libs/robotframework*
 
       - name: Build Plugin
         run: ./gradlew buildPlugin -x test

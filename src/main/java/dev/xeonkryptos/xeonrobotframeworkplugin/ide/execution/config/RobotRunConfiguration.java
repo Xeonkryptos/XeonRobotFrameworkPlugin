@@ -1,33 +1,29 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.ide.execution.config;
 
-import dev.xeonkryptos.xeonrobotframeworkplugin.ide.execution.RobotCommandLineState;
-import dev.xeonkryptos.xeonrobotframeworkplugin.ide.execution.ui.editor.RobotConfigurationFragmentedEditor;
 import com.intellij.execution.EnvFilesOptions;
 import com.intellij.execution.Executor;
-import com.intellij.execution.configuration.AbstractRunConfiguration;
 import com.intellij.execution.configurations.ConfigurationFactory;
+import com.intellij.execution.configurations.LocatableConfigurationBase;
+import com.intellij.execution.configurations.LocatableRunConfigurationOptions;
 import com.intellij.execution.configurations.RunConfiguration;
 import com.intellij.execution.configurations.RunProfileState;
+import com.intellij.execution.configurations.RuntimeConfigurationException;
 import com.intellij.execution.runners.ExecutionEnvironment;
-import com.intellij.openapi.module.Module;
 import com.intellij.openapi.options.SettingsEditor;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.InvalidDataException;
 import com.intellij.openapi.util.WriteExternalException;
-import com.jetbrains.python.run.AbstractPythonRunConfiguration;
-import com.jetbrains.python.run.PythonConfigurationType;
 import com.jetbrains.python.run.PythonRunConfiguration;
+import dev.xeonkryptos.xeonrobotframeworkplugin.ide.execution.RobotCommandLineState;
+import dev.xeonkryptos.xeonrobotframeworkplugin.ide.execution.ui.editor.RobotConfigurationFragmentedEditor;
 import org.jdom.Element;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Collection;
 import java.util.List;
 
-public class RobotRunConfiguration extends AbstractRunConfiguration implements EnvFilesOptions {
+public class RobotRunConfiguration extends LocatableConfigurationBase<Element> implements EnvFilesOptions {
 
-    private final PythonRunConfiguration pythonRunConfiguration = (PythonRunConfiguration) PythonConfigurationType.getInstance()
-                                                                                                                  .getFactory()
-                                                                                                                  .createTemplateConfiguration(getProject());
+    private PythonRunConfigurationExt pythonRunConfiguration = new PythonRunConfigurationExt(getProject());
 
     public RobotRunConfiguration(Project project, ConfigurationFactory configurationFactory) {
         super(project, configurationFactory);
@@ -36,11 +32,6 @@ public class RobotRunConfiguration extends AbstractRunConfiguration implements E
         pythonRunConfiguration.setModuleMode(true);
         pythonRunConfiguration.setScriptName("robotcode");
         pythonRunConfiguration.setEmulateTerminal(false);
-    }
-
-    @Override
-    public Collection<Module> getValidModules() {
-        return AbstractPythonRunConfiguration.getValidModules(getProject());
     }
 
     @NotNull
@@ -58,15 +49,6 @@ public class RobotRunConfiguration extends AbstractRunConfiguration implements E
     public void readExternal(@NotNull Element element) throws InvalidDataException {
         super.readExternal(element);
 
-        Element pythonElement = new Element("python-config");
-        pythonRunConfiguration.writeExternal(pythonElement);
-
-        for (Element child : pythonElement.getChildren()) {
-            if (!"module".equals(child.getName())) {
-                element.addContent(child.clone());
-            }
-        }
-
         pythonRunConfiguration.readExternal(element);
     }
 
@@ -74,14 +56,7 @@ public class RobotRunConfiguration extends AbstractRunConfiguration implements E
     public void writeExternal(@NotNull Element element) throws WriteExternalException {
         super.writeExternal(element);
 
-        Element pythonElement = new Element("python-config");
-        pythonRunConfiguration.writeExternal(pythonElement);
-
-        for (Element child : pythonElement.getChildren()) {
-            if (!"module".equals(child.getName())) {
-                element.addContent(child.clone());
-            }
-        }
+        pythonRunConfiguration.writeExternal(element);
     }
 
     @NotNull
@@ -97,5 +72,24 @@ public class RobotRunConfiguration extends AbstractRunConfiguration implements E
 
     public PythonRunConfiguration getPythonRunConfiguration() {
         return pythonRunConfiguration;
+    }
+
+    @Override
+    public void checkConfiguration() throws RuntimeConfigurationException {
+        super.checkConfiguration();
+        pythonRunConfiguration.checkConfiguration();
+    }
+
+    @Override
+    public RobotRunConfiguration clone() {
+        RobotRunConfiguration config = (RobotRunConfiguration) super.clone();
+        config.pythonRunConfiguration = (PythonRunConfigurationExt) pythonRunConfiguration.clone();
+        return config;
+    }
+
+    @NotNull
+    @Override
+    protected LocatableRunConfigurationOptions getOptions() {
+        return pythonRunConfiguration.getOptions();
     }
 }

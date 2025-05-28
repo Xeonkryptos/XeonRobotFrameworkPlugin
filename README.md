@@ -2,17 +2,26 @@
 <!-- Plugin description -->
 Robot Framework plugin for PyCharm.
 
-❤️ If you like this plugin, please leave your [review](https://plugins.jetbrains.com/plugin/27395-xeon-robotframework-support/reviews/new) with five ⭐ stars, also, please ⭐ star my github [project](https://github.com/xeonkryptos/XeonRobotFrameworkPlugin) 🙏.
+If you like this plugin, please leave your [review](https://plugins.jetbrains.com/plugin/27395-xeon-robotframework-support/reviews/new) with five stars, also, please star my Github [project](https://github.com/xeonkryptos/XeonRobotFrameworkPlugin).
 
 ## Features
+
 ### Syntax Highlighting
+
 ### Code Completion
+
 ### Easy Test Execution
+
 ### Debugging In Python And Robot Code
+
 ### Code Navigation
-### Find Keyword Usages
+
+### Find Usages For Keywords and Variables
+
 ### Robot File Structure And Folding
+
 ### Code Inspection
+
 ### Code Completion
 
 Besides the normal suggestion of keywords, imports, variables and whatever can be code completed, for keywords you can prefix them with
