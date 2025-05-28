@@ -4,14 +4,15 @@ import com.intellij.execution.EnvFilesOptions;
 import com.intellij.execution.Executor;
 import com.intellij.execution.configurations.ConfigurationFactory;
 import com.intellij.execution.configurations.LocatableConfigurationBase;
+import com.intellij.execution.configurations.LocatableRunConfigurationOptions;
 import com.intellij.execution.configurations.RunConfiguration;
 import com.intellij.execution.configurations.RunProfileState;
+import com.intellij.execution.configurations.RuntimeConfigurationException;
 import com.intellij.execution.runners.ExecutionEnvironment;
 import com.intellij.openapi.options.SettingsEditor;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.InvalidDataException;
 import com.intellij.openapi.util.WriteExternalException;
-import com.jetbrains.python.run.PythonConfigurationType;
 import com.jetbrains.python.run.PythonRunConfiguration;
 import dev.xeonkryptos.xeonrobotframeworkplugin.ide.execution.RobotCommandLineState;
 import dev.xeonkryptos.xeonrobotframeworkplugin.ide.execution.ui.editor.RobotConfigurationFragmentedEditor;
@@ -22,9 +23,7 @@ import java.util.List;
 
 public class RobotRunConfiguration extends LocatableConfigurationBase<Element> implements EnvFilesOptions {
 
-    private final PythonRunConfiguration pythonRunConfiguration = (PythonRunConfiguration) PythonConfigurationType.getInstance()
-                                                                                                                  .getFactory()
-                                                                                                                  .createTemplateConfiguration(getProject());
+    private PythonRunConfigurationExt pythonRunConfiguration = new PythonRunConfigurationExt(getProject());
 
     public RobotRunConfiguration(Project project, ConfigurationFactory configurationFactory) {
         super(project, configurationFactory);
@@ -73,5 +72,24 @@ public class RobotRunConfiguration extends LocatableConfigurationBase<Element> i
 
     public PythonRunConfiguration getPythonRunConfiguration() {
         return pythonRunConfiguration;
+    }
+
+    @Override
+    public void checkConfiguration() throws RuntimeConfigurationException {
+        super.checkConfiguration();
+        pythonRunConfiguration.checkConfiguration();
+    }
+
+    @Override
+    public RobotRunConfiguration clone() {
+        RobotRunConfiguration config = (RobotRunConfiguration) super.clone();
+        config.pythonRunConfiguration = (PythonRunConfigurationExt) pythonRunConfiguration.clone();
+        return config;
+    }
+
+    @NotNull
+    @Override
+    protected LocatableRunConfigurationOptions getOptions() {
+        return pythonRunConfiguration.getOptions();
     }
 }
