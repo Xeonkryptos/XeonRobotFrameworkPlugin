@@ -2,9 +2,6 @@
     <id>dev.xeonkryptos.xeonrobotframeworkplugin</id>
     <name>Xeon RobotFramework Support</name>
     <vendor email="info@xeonkryptos.dev" url="https://github.com/Xeonkryptos/XeonRobotFrameworkPlugin">Xeonkryptos</vendor>
-    <description>
-        Provides Provides syntax highlighting, code completion, debugging, easy test execution and many more features for the Robot Framework
-    </description>
 
     <depends>com.intellij.modules.python</depends>
     <depends>com.intellij.modules.platform</depends>

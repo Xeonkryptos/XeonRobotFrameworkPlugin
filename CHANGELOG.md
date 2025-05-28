@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+## 0.3.2
+
 ### Fixed
 
 - Fixed reason for log warning about multiple module serialization when creating and updating run configurations
