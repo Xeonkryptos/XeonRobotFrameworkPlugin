@@ -7,6 +7,8 @@
     <depends>com.intellij.modules.platform</depends>
     <depends>com.intellij.modules.xdebugger</depends>
 
+    <depends>PythonCore</depends>
+
     <extensions defaultExtensionNs="com.intellij">
         <projectConfigurable groupId="language" instance="dev.xeonkryptos.xeonrobotframeworkplugin.ide.config.RobotConfiguration" key="options.entrypoint"
                              bundle="messages.RobotBundle"/>
