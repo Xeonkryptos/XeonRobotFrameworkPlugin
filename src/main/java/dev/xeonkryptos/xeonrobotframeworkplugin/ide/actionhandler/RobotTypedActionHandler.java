@@ -1,7 +1,6 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.ide.actionhandler;
 
 import dev.xeonkryptos.xeonrobotframeworkplugin.ide.config.RobotOptionsProvider;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotFile;
 import com.intellij.codeInsight.editorActions.TypedHandlerDelegate;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.editor.Editor;
@@ -9,6 +8,7 @@ import com.intellij.openapi.fileTypes.FileType;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.TextRange;
 import com.intellij.psi.PsiFile;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotFile;
 import org.jetbrains.annotations.NotNull;
 
 public class RobotTypedActionHandler extends TypedHandlerDelegate {

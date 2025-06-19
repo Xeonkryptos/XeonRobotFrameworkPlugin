@@ -3,15 +3,61 @@ package dev.xeonkryptos.xeonrobotframeworkplugin.psi;
 import com.intellij.lexer.FlexLexer;
 import com.intellij.psi.tree.IElementType;
 
-import static com.intellij.psi.TokenType.BAD_CHARACTER;
-import static com.intellij.psi.TokenType.WHITE_SPACE;
+import java.util.Stack;
+
+import static com.intellij.psi.TokenType.*;
 import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.*;
 
 %%
 
 %{
+  private boolean templatedTestcase = false;
+
+  private final Stack<Integer> previousStates = new Stack<>();
+
   public RobotLexer() {
-    this((java.io.Reader)null);
+      this((java.io.Reader)null);
+  }
+
+  private void enterNewState(int newState) {
+      int previousState = yystate();
+      previousStates.push(previousState);
+      yybegin(newState);
+  }
+
+  private void leaveState() {
+      if (!previousStates.empty()) {
+          Integer previousState = previousStates.pop();
+          yybegin(previousState);
+      } else {
+          yybegin(YYINITIAL);
+      }
+  }
+
+  private void reset() {
+      previousStates.clear();
+      templatedTestcase = false;
+  }
+
+  private void pushBackTrailingWhitespace() {
+      CharSequence text = yytext();
+      int trailingWhitespaceLength = computeTrailingWhitespaceLength(text);
+      if (trailingWhitespaceLength > 0) {
+          yypushback(trailingWhitespaceLength);
+      }
+  }
+
+  private int computeTrailingWhitespaceLength(CharSequence text) {
+      int length = 0;
+      for (int i = text.length() - 1; i >= 0; i--) {
+          char c = text.charAt(i);
+          if (Character.isWhitespace(c)) {
+              length++;
+          } else {
+              break;
+          }
+      }
+      return length;
   }
 %}
 
@@ -21,113 +67,220 @@ import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.*;
 %function advance
 %type IElementType
 %unicode
+%caseless
 
-EOL=\R
-WHITE_SPACE=\s+
+Space = " "
+Tab = \t
+Star = "*"
+EqualSign = "="
 
-SPACE=[ ]
-TAB=\t
-EOL=\r?\n
-HASH=#
-PIPE=\|
-STAR=\*
-STARS=\*{3}
-DOT=\.
-LBRACKET=\[
-RBRACKET=\]
-LBRACE=\{
-RBRACE=\}
-EQUALS==
-SCALAR_VARIABLE_START=\$\{
-LIST_VARIABLE_START=@\{
-DICT_VARIABLE_START=&\{
-ENV_VARIABLE_START=%\{
-IF=IF
-ELSE=ELSE
-ELSE_IF=ELSE[ ]IF
-END=END
-FOR=FOR
-IN=IN
-TRY=TRY
-EXCEPT=EXCEPT
-FINALLY=FINALLY
-WHILE=WHILE
-RETURN=RETURN
-BREAK=BREAK
-CONTINUE=CONTINUE
-VAR=VAR
-ARG=arg
-SETTINGS_WORDS=(Settings|Setting|Einstellungen|Configuración|Asetukset|Nastavení)
-VARIABLES_WORDS=(Variables|Variable|Variablen|Muuttujat|Proměnné)
-TESTCASES_WORDS=(Test[ ]Cases|Test[ ]Case|Testfälle|Casos[ ]de[ ]prueba|Testitapaukset|Testovací[ ]případy)
-TASKS_WORDS=(Tasks|Task|Aufgaben|Tareas|Tehtävät|Úkoly)
-KEYWORDS_WORDS=(Keywords|Keyword|User[ ]Keywords|Schlüsselwörter|Palabras[ ]clave|Avainsanat|Klíčová[ ]slova)
-COMMENTS_WORDS=(Comments|Comment|Kommentare|Comentarios|Kommentit|Komentáře)
-LIBRARY_WORDS=(Library|Bibliothek|Biblioteca|Kirjasto)
-WITH_NAME_WORDS=(WITH[ ]NAME|MIT[ ]NAME|CON[ ]NOMBRE|NIMELLÄ)
-QUOTED_STRING=\"([^\\\"]|\\.)*\"|'([^\']|\\.)*'
-VARIABLE_NAME=[A-Za-z0-9_]+
-SIMPLE_SETTING_NAME=[A-Za-z0-9 ]+
-SETTING_NAME_CONTENT=[A-Za-z0-9 ]+
-NAME=[^$@&#\t\n\r][^\t\n\r]*
-CELL_CONTENT=[^$@&#|#\t\n\r][^|#\t\n\r]*
-UNQUOTED_STRING=[^$@&#{}| \t\n\r][^{}| \t\n\r]*
-NON_EOL=[^\n\r]*
+Ellipsis = "..."
+LineCommentSign = "#"
+
+EmptyValue = \\ {Space}
+
+Whitespace = {Space} | {Tab}
+
+IF="IF"
+ELSE="ELSE"
+ELSE_IF="ELSE IF"
+END="END"
+FOR="FOR"
+IN="IN"
+TRY="TRY"
+EXCEPT="EXCEPT"
+FINALLY="FINALLY"
+WHILE="WHILE"
+RETURN="RETURN"
+BREAK="BREAK"
+CONTINUE="CONTINUE"
+VAR="VAR"
+ARG="ARG"
+WithNameKeyword = "WITH NAME" | "AS"
+
+SectionSettingsWords = "Settings" | "Setting"
+SectionVariablesWords = "Variables" | "Variable"
+SectionTestcasesWords = "Test Cases" | "Test Case"
+SectionTasksWords = "Tasks" | "Task"
+SectionKeywordsWords = "Keywords" | "Keyword"
+SectionCommentsWords = "Comments" | "Comment"
+
+//SIMPLE_NAME=[A-Za-z0-9 ]+
+//NAME=[^$@&#\t\n\r][^\t\n\r]*
+//CELL_CONTENT=[^$@&#|#\t\n\r][^|#\t\n\r]*
+EOL = (\r) | (\n) | (\r\n)
+NON_EOL = [^\r\n]
+
+SectionIdentifierParts = ({Star} | {Space})*
+CommentSectionIdentifier = {Star} {SectionIdentifierParts} {SectionCommentsWords} {NON_EOL}*
+SettingsSectionIdentifier = {Star} {SectionIdentifierParts} {SectionSettingsWords} {NON_EOL}*
+TestcaseSectionIdentifier = {Star} {SectionIdentifierParts} {SectionTestcasesWords} {NON_EOL}*
+TasksSectionIdentifier = {Star} {SectionIdentifierParts} {SectionTasksWords} {NON_EOL}*
+KeywordsSectionIdentifier = {Star} {SectionIdentifierParts} {SectionKeywordsWords} {NON_EOL}*
+VariablesSectionIdentifier = {Star} {SectionIdentifierParts} {SectionVariablesWords} {NON_EOL}*
+
+OpeningVariable = "{"
+ClosingVariable = "}"
+
+ScalarVariableStart = "$" {OpeningVariable}
+ListVariableStart = "@" {OpeningVariable}
+DictVariableStart = "&" {OpeningVariable}
+EnvVariableStart = "%" {OpeningVariable}
+
+LibraryImportKeyword = "Library"
+ResourceImportKeyword = "Resource"
+VariablesImportKeyword = "Variables"
+NameKeyword = "Name"
+DocumentationKeyword = "Documentation"
+MetadataKeyword = "Metadata"
+SetupTeardownKeywords = ("Suite Setup" | "Suite Teardown" | "Test Setup" | "Test Teardown" | "Task Setup" | "Task Teardown")
+TagsKeywords = ("Test Tags" | "Force Tags" | "Default Tags" | "Keyword Tags")
+TemplateKeywords = ("Test Template" | "Task Template")
+TimeoutKeywords = ("Test Timeout" | "Task Timeout")
+GenericSettingsKeyword = [\p{L}\p{N}_]+([ ][\p{L}\p{N}_])*
+
+LiteralValue = [^\s]+([ ][^\s]+)*[ ]?
+RestrictedLiteralValue = [^\s${}@%&=]+([ ][^\s${}@%&]+)*[ ]?
+
+LocalSettingKeyword = "[" {GenericSettingsKeyword} "]"
+
+ParameterName = [\p{L}_][\p{L}\p{N}_]*
+
+VariableSliceAccess = "[" \s* (-?\d+)? \s* : \s* (-?\d+)? (\s* : \s* (-?\d+))? \s* "]"
+VariableIndexAccess = "[" \s* \d+ \s* "]"
+VariableKeyAccess = "[" \s* ([^$@%&] | [$@%&][^{])[^\]]* \s* "]"
+
+MultiLine = {EOL}+ \s* {Ellipsis} \s*
+
+LineComment = {LineCommentSign} {NON_EOL}*
+
+%state LANGUAGE_SETTING
+%state SETTINGS_SECTION, VARIABLES_SECTION, KEYWORDS_SECTION
+%state TESTCASE_NAME, TESTCASE_DEFINITION, TASK_NAME, TASK_DEFINITION, LOCAL_SETTING, KEYWORD_CALL
+%state VARIABLE_DEFINITION, VARIABLE_USAGE, EXTENDED_VARIABLE_ACCESS
+%xstate COMMENTS_SECTION
 
 %%
-<YYINITIAL> {
-  {WHITE_SPACE}                 { return WHITE_SPACE; }
 
+{EmptyValue}                          { return LITERAL_VALUE; }
+{Ellipsis} \s*                        { return WHITE_SPACE; }
+{LineComment}                         { return COMMENT; }
 
-  {SPACE}                       { return SPACE; }
-  {TAB}                         { return TAB; }
-  {EOL}                         { return EOL; }
-  {HASH}                        { return HASH; }
-  {PIPE}                        { return PIPE; }
-  {STAR}                        { return STAR; }
-  {STARS}                       { return STARS; }
-  {DOT}                         { return DOT; }
-  {LBRACKET}                    { return LBRACKET; }
-  {RBRACKET}                    { return RBRACKET; }
-  {LBRACE}                      { return LBRACE; }
-  {RBRACE}                      { return RBRACE; }
-  {EQUALS}                      { return EQUALS; }
-  {SCALAR_VARIABLE_START}       { return SCALAR_VARIABLE_START; }
-  {LIST_VARIABLE_START}         { return LIST_VARIABLE_START; }
-  {DICT_VARIABLE_START}         { return DICT_VARIABLE_START; }
-  {ENV_VARIABLE_START}          { return ENV_VARIABLE_START; }
-  {IF}                          { return IF; }
-  {ELSE}                        { return ELSE; }
-  {ELSE_IF}                     { return ELSE_IF; }
-  {END}                         { return END; }
-  {FOR}                         { return FOR; }
-  {IN}                          { return IN; }
-  {TRY}                         { return TRY; }
-  {EXCEPT}                      { return EXCEPT; }
-  {FINALLY}                     { return FINALLY; }
-  {WHILE}                       { return WHILE; }
-  {RETURN}                      { return RETURN; }
-  {BREAK}                       { return BREAK; }
-  {CONTINUE}                    { return CONTINUE; }
-  {VAR}                         { return VAR; }
-  {ARG}                         { return ARG; }
-  {SETTINGS_WORDS}              { return SETTINGS_WORDS; }
-  {VARIABLES_WORDS}             { return VARIABLES_WORDS; }
-  {TESTCASES_WORDS}             { return TESTCASES_WORDS; }
-  {TASKS_WORDS}                 { return TASKS_WORDS; }
-  {KEYWORDS_WORDS}              { return KEYWORDS_WORDS; }
-  {COMMENTS_WORDS}              { return COMMENTS_WORDS; }
-  {LIBRARY_WORDS}               { return LIBRARY_WORDS; }
-  {WITH_NAME_WORDS}             { return WITH_NAME_WORDS; }
-  {QUOTED_STRING}               { return QUOTED_STRING; }
-  {VARIABLE_NAME}               { return VARIABLE_NAME; }
-  {SIMPLE_SETTING_NAME}         { return SIMPLE_SETTING_NAME; }
-  {SETTING_NAME_CONTENT}        { return SETTING_NAME_CONTENT; }
-  {NAME}                        { return NAME; }
-  {CELL_CONTENT}                { return CELL_CONTENT; }
-  {UNQUOTED_STRING}             { return UNQUOTED_STRING; }
-  {NON_EOL}                     { return NON_EOL; }
+<YYINITIAL, LANGUAGE_SETTING>        "Language:"   {
+          yybegin(LANGUAGE_SETTING);
+          return LANGUAGE_KEYWORD;
+      }
 
+{SettingsSectionIdentifier}   { reset(); yybegin(SETTINGS_SECTION); return SETTINGS_HEADER; }
+{VariablesSectionIdentifier}  { reset(); yybegin(VARIABLES_SECTION); return VARIABLES_HEADER; }
+{KeywordsSectionIdentifier}   { reset(); yybegin(KEYWORDS_SECTION); return KEYWORDS_HEADER; }
+{TestcaseSectionIdentifier}   { reset(); yybegin(TESTCASE_NAME); return TEST_CASES_HEADER; }
+{TasksSectionIdentifier}      { reset(); yybegin(TASK_NAME); return TASKS_HEADER; }
+{CommentSectionIdentifier}    { reset(); yybegin(COMMENTS_SECTION); return COMMENTS_HEADER; }
+
+<VARIABLES_SECTION> {
+    {ScalarVariableStart}                    { enterNewState(VARIABLE_DEFINITION); return SCALAR_VARIABLE_START; }
+    {ListVariableStart}                      { enterNewState(VARIABLE_DEFINITION); return LIST_VARIABLE_START; }
+    {DictVariableStart}                      { enterNewState(VARIABLE_DEFINITION); return DICT_VARIABLE_START; }
+    {EnvVariableStart}                       { enterNewState(VARIABLE_DEFINITION); return ENV_VARIABLE_START; }
 }
+
+{ScalarVariableStart}  { enterNewState(VARIABLE_USAGE); return SCALAR_VARIABLE_START; }
+{ListVariableStart}    { enterNewState(VARIABLE_USAGE); return LIST_VARIABLE_START; }
+{DictVariableStart}    { enterNewState(VARIABLE_USAGE); return DICT_VARIABLE_START; }
+{EnvVariableStart}     { enterNewState(VARIABLE_USAGE); return ENV_VARIABLE_START; }
+
+<LANGUAGE_SETTING> {RestrictedLiteralValue}  { return LANGUAGE_NAME; }
+
+<VARIABLE_DEFINITION> {
+    {ClosingVariable}                    { return VARIABLE_END; }
+    {ClosingVariable} "["                { enterNewState(EXTENDED_VARIABLE_ACCESS); yypushback(1); return VARIABLE_END; }
+    {ClosingVariable} "]"                { yypushback(1); return VARIABLE_END; }
+    {EqualSign} \s*                      { pushBackTrailingWhitespace(); return ASSIGNMENT; }
+    {RestrictedLiteralValue}             { pushBackTrailingWhitespace(); return LITERAL_VALUE; }
+
+    {EOL}+                               { leaveState(); return EOL; }
+}
+
+<VARIABLE_USAGE> {
+    {ClosingVariable} "["         { leaveState(); enterNewState(EXTENDED_VARIABLE_ACCESS); yypushback(1); return VARIABLE_END; }
+    {ClosingVariable} "]"         { leaveState(); yypushback(1); return VARIABLE_END; }
+    {ClosingVariable}             { leaveState(); return VARIABLE_END; }
+    {RestrictedLiteralValue}      { return LITERAL_VALUE; }
+}
+
+<EXTENDED_VARIABLE_ACCESS> {
+    {VariableSliceAccess}        { return VARIABLE_SLICE_ACCESS; }
+    {VariableIndexAccess}        { return VARIABLE_INDEX_ACCESS; }
+    {VariableKeyAccess}          { return VARIABLE_KEY_ACCESS; }
+
+    // Workaround for nested variable usage in the extended variable access syntax
+    "["                          { return VARIABLE_ACCESS_START; }
+    "]"                          { return VARIABLE_ACCESS_END; }
+
+    {VariableSliceAccess} \s+    { leaveState(); pushBackTrailingWhitespace(); return VARIABLE_SLICE_ACCESS; }
+    {VariableIndexAccess} \s+    { leaveState(); pushBackTrailingWhitespace(); return VARIABLE_INDEX_ACCESS; }
+    {VariableKeyAccess}   \s+    { leaveState(); pushBackTrailingWhitespace(); return VARIABLE_KEY_ACCESS; }
+    "]" \s+                      { leaveState(); pushBackTrailingWhitespace(); return VARIABLE_ACCESS_END; }
+
+    //{EOL}+                       { leaveState(); return EOL; }
+}
+
+<SETTINGS_SECTION> {
+    {LibraryImportKeyword} \s+             { pushBackTrailingWhitespace(); return LIBRARY_IMPORT_KEYWORD; }
+    {WithNameKeyword} \s+                  { pushBackTrailingWhitespace(); return WITH_NAME_KEYWORD; }
+    {ResourceImportKeyword} \s+            { pushBackTrailingWhitespace(); return RESOURCE_IMPORT_KEYWORD; }
+    {VariablesImportKeyword} \s+           { pushBackTrailingWhitespace(); return VARIABLES_IMPORT_KEYWORD; }
+    {NameKeyword} \s+                      { pushBackTrailingWhitespace(); return SUITE_NAME_KEYWORD; }
+    {DocumentationKeyword} \s+             { pushBackTrailingWhitespace(); return DOCUMENTATION_KEYWORD; }
+    {MetadataKeyword} \s+                  { pushBackTrailingWhitespace(); return METADATA_KEYWORD; }
+    {SetupTeardownKeywords} \s+            { pushBackTrailingWhitespace(); return SETUP_TEARDOWN_STATEMENT_KEYWORDS; }
+    {TagsKeywords} \s+                     { pushBackTrailingWhitespace(); return TAGS_KEYWORDS; }
+    {TemplateKeywords} \s+                 { pushBackTrailingWhitespace(); return TEMPLATE_KEYWORDS; }
+    {TimeoutKeywords} \s+                  { pushBackTrailingWhitespace(); return TIMEOUT_KEYWORDS; }
+
+    {GenericSettingsKeyword} \s+           { pushBackTrailingWhitespace(); return UNKNOWN_SETTING_KEYWORD; }
+}
+
+<TESTCASE_NAME> {
+    {LiteralValue}                   { yybegin(TESTCASE_DEFINITION); pushBackTrailingWhitespace(); return LITERAL_VALUE; }
+}
+
+<TASK_NAME> {
+    {LiteralValue}                   { yybegin(TASK_DEFINITION); pushBackTrailingWhitespace(); return LITERAL_VALUE; }
+}
+
+<TESTCASE_DEFINITION, TASK_DEFINITION> {
+    {LocalSettingKeyword} \s*              { enterNewState(LOCAL_SETTING); pushBackTrailingWhitespace(); return BRACKET_SETTING_NAME; }
+
+    {RestrictedLiteralValue}               { enterNewState(KEYWORD_CALL); pushBackTrailingWhitespace(); return LITERAL_VALUE; }
+}
+
+// Multiline handling (don't return EOL on detected multiline). If there is a multiline without the Ellipsis (...) marker,
+// then return EOL to mark the end of the statement.
+<LOCAL_SETTING, KEYWORD_CALL> {
+    {MultiLine}             { return WHITE_SPACE; }
+    {EOL}+                  { leaveState(); return EOL; }
+}
+
+<SETTINGS_SECTION, TESTCASE_DEFINITION, TASK_DEFINITION, KEYWORDS_SECTION, LOCAL_SETTING, KEYWORD_CALL> {
+    {ParameterName} / {Whitespace}* {EqualSign} (!(\s{2}) | !\R)   { return PARAMETER_NAME; }
+    {EqualSign}                                                    { return ASSIGNMENT; }
+    {RestrictedLiteralValue}                                       {  pushBackTrailingWhitespace(); return LITERAL_VALUE; }
+}
+
+<COMMENTS_SECTION> {
+    {SettingsSectionIdentifier}            { reset(); yybegin(SETTINGS_SECTION); pushBackTrailingWhitespace(); return SETTINGS_HEADER; }
+    {TestcaseSectionIdentifier}            { reset(); yybegin(TESTCASE_NAME); pushBackTrailingWhitespace(); return TEST_CASES_HEADER; }
+    {TasksSectionIdentifier}               { reset(); yybegin(TASK_NAME); pushBackTrailingWhitespace(); return TASKS_HEADER; }
+    {KeywordsSectionIdentifier}            { reset(); yybegin(KEYWORDS_SECTION); pushBackTrailingWhitespace(); return KEYWORDS_HEADER; }
+    {VariablesSectionIdentifier}           { reset(); yybegin(VARIABLES_SECTION); pushBackTrailingWhitespace(); return VARIABLES_HEADER; }
+
+    ({Whitespace} | {Ellipsis} | {EOL})+   { return WHITE_SPACE; }
+    {NON_EOL}+                             { return COMMENT; }
+}
+
+{Whitespace}+        { return WHITE_SPACE; }
+{EOL}+               { return WHITE_SPACE; }
 
 [^] { return BAD_CHARACTER; }

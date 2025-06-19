@@ -1,6 +1,7 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.psi.ref;
 
 import dev.xeonkryptos.xeonrobotframeworkplugin.ide.completion.KeywordCompletionModification;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotFile;
 import dev.xeonkryptos.xeonrobotframeworkplugin.util.LookupElementUtil;
 import dev.xeonkryptos.xeonrobotframeworkplugin.ide.RobotTailTypes;
 import dev.xeonkryptos.xeonrobotframeworkplugin.ide.config.RobotOptionsProvider;
@@ -8,7 +9,6 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.dto.ImportType;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.DefinedKeyword;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.KeywordFile;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.KeywordInvokable;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotFile;
 import com.intellij.codeInsight.TailTypes;
 import com.intellij.codeInsight.lookup.LookupElementBuilder;
 import com.intellij.codeInsight.lookup.TailTypeDecorator;

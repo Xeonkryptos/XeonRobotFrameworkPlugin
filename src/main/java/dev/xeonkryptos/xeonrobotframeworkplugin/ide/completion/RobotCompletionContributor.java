@@ -2,7 +2,6 @@ package dev.xeonkryptos.xeonrobotframeworkplugin.ide.completion;
 
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotStubTokenTypes;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTokenTypes;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotFile;
 import com.intellij.codeInsight.completion.CompletionContributor;
 import com.intellij.codeInsight.completion.CompletionParameters;
 import com.intellij.codeInsight.completion.CompletionResultSet;
@@ -10,6 +9,7 @@ import com.intellij.codeInsight.completion.CompletionType;
 import com.intellij.patterns.PlatformPatterns;
 import com.intellij.patterns.PsiElementPattern;
 import com.intellij.psi.PsiElement;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotFile;
 import org.jetbrains.annotations.NotNull;
 
 public class RobotCompletionContributor extends CompletionContributor {

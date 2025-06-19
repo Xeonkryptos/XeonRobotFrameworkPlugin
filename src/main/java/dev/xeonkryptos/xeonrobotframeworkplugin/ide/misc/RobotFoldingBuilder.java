@@ -2,7 +2,6 @@ package dev.xeonkryptos.xeonrobotframeworkplugin.ide.misc;
 
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTokenTypes;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.Heading;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotStatement;
 import com.intellij.lang.ASTNode;
 import com.intellij.lang.folding.FoldingBuilder;
 import com.intellij.lang.folding.FoldingDescriptor;
@@ -15,6 +14,7 @@ import com.intellij.openapi.util.TextRange;
 import com.intellij.psi.PsiComment;
 import com.intellij.psi.PsiDocumentManager;
 import com.intellij.psi.PsiFile;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotStatement;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
