@@ -27,9 +27,9 @@ public class RobotDocumentationStatementImpl extends RobotPsiElementBase impleme
   }
 
   @Override
-  @Nullable
-  public RobotArgument getArgument() {
-    return findChildByClass(RobotArgument.class);
+  @NotNull
+  public List<RobotArgument> getArgumentList() {
+    return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotArgument.class);
   }
 
 }

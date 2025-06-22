@@ -7,7 +7,7 @@ import com.intellij.psi.PsiElement;
 
 public interface RobotMetadataStatement extends PsiElement {
 
-  @Nullable
-  RobotArgument getArgument();
+  @NotNull
+  List<RobotArgument> getArgumentList();
 
 }

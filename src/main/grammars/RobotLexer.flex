@@ -156,7 +156,7 @@ LineComment = {LineCommentSign} {NON_EOL}*
 
 %state LANGUAGE_SETTING
 %state SETTINGS_SECTION, VARIABLES_SECTION, KEYWORDS_SECTION
-%state TESTCASE_NAME, TESTCASE_DEFINITION, TASK_NAME, TASK_DEFINITION, LOCAL_SETTING, KEYWORD_CALL
+%state TESTCASE_NAME, TESTCASE_DEFINITION, TASK_NAME, TASK_DEFINITION, SETTING, KEYWORD_CALL
 %state VARIABLE_DEFINITION, VARIABLE_USAGE, EXTENDED_VARIABLE_ACCESS
 %xstate COMMENTS_SECTION
 
@@ -227,19 +227,19 @@ LineComment = {LineCommentSign} {NON_EOL}*
 }
 
 <SETTINGS_SECTION> {
-    {LibraryImportKeyword} \s+             { pushBackTrailingWhitespace(); return LIBRARY_IMPORT_KEYWORD; }
-    {WithNameKeyword} \s+                  { pushBackTrailingWhitespace(); return WITH_NAME_KEYWORD; }
-    {ResourceImportKeyword} \s+            { pushBackTrailingWhitespace(); return RESOURCE_IMPORT_KEYWORD; }
-    {VariablesImportKeyword} \s+           { pushBackTrailingWhitespace(); return VARIABLES_IMPORT_KEYWORD; }
-    {NameKeyword} \s+                      { pushBackTrailingWhitespace(); return SUITE_NAME_KEYWORD; }
-    {DocumentationKeyword} \s+             { pushBackTrailingWhitespace(); return DOCUMENTATION_KEYWORD; }
-    {MetadataKeyword} \s+                  { pushBackTrailingWhitespace(); return METADATA_KEYWORD; }
-    {SetupTeardownKeywords} \s+            { pushBackTrailingWhitespace(); return SETUP_TEARDOWN_STATEMENT_KEYWORDS; }
-    {TagsKeywords} \s+                     { pushBackTrailingWhitespace(); return TAGS_KEYWORDS; }
-    {TemplateKeywords} \s+                 { pushBackTrailingWhitespace(); return TEMPLATE_KEYWORDS; }
-    {TimeoutKeywords} \s+                  { pushBackTrailingWhitespace(); return TIMEOUT_KEYWORDS; }
+    {LibraryImportKeyword} \s+             { enterNewState(SETTING); pushBackTrailingWhitespace(); return LIBRARY_IMPORT_KEYWORD; }
+    {WithNameKeyword} \s+                  { enterNewState(SETTING); pushBackTrailingWhitespace(); return WITH_NAME_KEYWORD; }
+    {ResourceImportKeyword} \s+            { enterNewState(SETTING); pushBackTrailingWhitespace(); return RESOURCE_IMPORT_KEYWORD; }
+    {VariablesImportKeyword} \s+           { enterNewState(SETTING); pushBackTrailingWhitespace(); return VARIABLES_IMPORT_KEYWORD; }
+    {NameKeyword} \s+                      { enterNewState(SETTING); pushBackTrailingWhitespace(); return SUITE_NAME_KEYWORD; }
+    {DocumentationKeyword} \s+             { enterNewState(SETTING); pushBackTrailingWhitespace(); return DOCUMENTATION_KEYWORD; }
+    {MetadataKeyword} \s+                  { enterNewState(SETTING); pushBackTrailingWhitespace(); return METADATA_KEYWORD; }
+    {SetupTeardownKeywords} \s+            { enterNewState(SETTING); pushBackTrailingWhitespace(); return SETUP_TEARDOWN_STATEMENT_KEYWORDS; }
+    {TagsKeywords} \s+                     { enterNewState(SETTING); pushBackTrailingWhitespace(); return TAGS_KEYWORDS; }
+    {TemplateKeywords} \s+                 { enterNewState(SETTING); pushBackTrailingWhitespace(); return TEMPLATE_KEYWORDS; }
+    {TimeoutKeywords} \s+                  { enterNewState(SETTING); pushBackTrailingWhitespace(); return TIMEOUT_KEYWORDS; }
 
-    {GenericSettingsKeyword} \s+           { pushBackTrailingWhitespace(); return UNKNOWN_SETTING_KEYWORD; }
+    {GenericSettingsKeyword} \s+           { enterNewState(SETTING); pushBackTrailingWhitespace(); return UNKNOWN_SETTING_KEYWORD; }
 }
 
 <TESTCASE_NAME> {
@@ -251,19 +251,19 @@ LineComment = {LineCommentSign} {NON_EOL}*
 }
 
 <TESTCASE_DEFINITION, TASK_DEFINITION> {
-    {LocalSettingKeyword} \s*              { enterNewState(LOCAL_SETTING); pushBackTrailingWhitespace(); return BRACKET_SETTING_NAME; }
+    {LocalSettingKeyword} \s*              { enterNewState(SETTING); pushBackTrailingWhitespace(); return BRACKET_SETTING_NAME; }
 
     {RestrictedLiteralValue}               { enterNewState(KEYWORD_CALL); pushBackTrailingWhitespace(); return LITERAL_VALUE; }
 }
 
 // Multiline handling (don't return EOL on detected multiline). If there is a multiline without the Ellipsis (...) marker,
 // then return EOL to mark the end of the statement.
-<LOCAL_SETTING, KEYWORD_CALL> {
+<SETTING, KEYWORD_CALL> {
     {MultiLine}             { return WHITE_SPACE; }
     {EOL}+                  { leaveState(); return EOL; }
 }
 
-<SETTINGS_SECTION, TESTCASE_DEFINITION, TASK_DEFINITION, KEYWORDS_SECTION, LOCAL_SETTING, KEYWORD_CALL> {
+<SETTINGS_SECTION, TESTCASE_DEFINITION, TASK_DEFINITION, KEYWORDS_SECTION, SETTING, KEYWORD_CALL> {
     {ParameterName} / {Whitespace}* {EqualSign} (!(\s{2}) | !\R)   { return PARAMETER_NAME; }
     {EqualSign}                                                    { return ASSIGNMENT; }
     {RestrictedLiteralValue}                                       {  pushBackTrailingWhitespace(); return LITERAL_VALUE; }

@@ -33,7 +33,7 @@ public class RobotLexer implements FlexLexer {
   public static final int TESTCASE_DEFINITION = 12;
   public static final int TASK_NAME = 14;
   public static final int TASK_DEFINITION = 16;
-  public static final int LOCAL_SETTING = 18;
+  public static final int SETTING = 18;
   public static final int KEYWORD_CALL = 20;
   public static final int VARIABLE_DEFINITION = 22;
   public static final int VARIABLE_USAGE = 24;
@@ -1925,7 +1925,7 @@ public class RobotLexer implements FlexLexer {
           // fall through
           case 81: break;
           case 21:
-            { pushBackTrailingWhitespace(); return UNKNOWN_SETTING_KEYWORD;
+            { enterNewState(SETTING); pushBackTrailingWhitespace(); return UNKNOWN_SETTING_KEYWORD;
             }
           // fall through
           case 82: break;
@@ -2009,12 +2009,12 @@ public class RobotLexer implements FlexLexer {
           // fall through
           case 92: break;
           case 32:
-            { pushBackTrailingWhitespace(); return WITH_NAME_KEYWORD;
+            { enterNewState(SETTING); pushBackTrailingWhitespace(); return WITH_NAME_KEYWORD;
             }
           // fall through
           case 93: break;
           case 33:
-            { enterNewState(LOCAL_SETTING); pushBackTrailingWhitespace(); return BRACKET_SETTING_NAME;
+            { enterNewState(SETTING); pushBackTrailingWhitespace(); return BRACKET_SETTING_NAME;
             }
           // fall through
           case 94: break;
@@ -2054,7 +2054,7 @@ public class RobotLexer implements FlexLexer {
           // fall through
           case 101: break;
           case 41:
-            { pushBackTrailingWhitespace(); return SUITE_NAME_KEYWORD;
+            { enterNewState(SETTING); pushBackTrailingWhitespace(); return SUITE_NAME_KEYWORD;
             }
           // fall through
           case 102: break;
@@ -2079,7 +2079,7 @@ public class RobotLexer implements FlexLexer {
           // fall through
           case 106: break;
           case 46:
-            { pushBackTrailingWhitespace(); return LIBRARY_IMPORT_KEYWORD;
+            { enterNewState(SETTING); pushBackTrailingWhitespace(); return LIBRARY_IMPORT_KEYWORD;
             }
           // fall through
           case 107: break;
@@ -2105,12 +2105,12 @@ public class RobotLexer implements FlexLexer {
           // fall through
           case 111: break;
           case 51:
-            { pushBackTrailingWhitespace(); return METADATA_KEYWORD;
+            { enterNewState(SETTING); pushBackTrailingWhitespace(); return METADATA_KEYWORD;
             }
           // fall through
           case 112: break;
           case 52:
-            { pushBackTrailingWhitespace(); return RESOURCE_IMPORT_KEYWORD;
+            { enterNewState(SETTING); pushBackTrailingWhitespace(); return RESOURCE_IMPORT_KEYWORD;
             }
           // fall through
           case 113: break;
@@ -2125,12 +2125,12 @@ public class RobotLexer implements FlexLexer {
           // fall through
           case 115: break;
           case 55:
-            { pushBackTrailingWhitespace(); return TAGS_KEYWORDS;
+            { enterNewState(SETTING); pushBackTrailingWhitespace(); return TAGS_KEYWORDS;
             }
           // fall through
           case 116: break;
           case 56:
-            { pushBackTrailingWhitespace(); return VARIABLES_IMPORT_KEYWORD;
+            { enterNewState(SETTING); pushBackTrailingWhitespace(); return VARIABLES_IMPORT_KEYWORD;
             }
           // fall through
           case 117: break;
@@ -2140,22 +2140,22 @@ public class RobotLexer implements FlexLexer {
           // fall through
           case 118: break;
           case 58:
-            { pushBackTrailingWhitespace(); return SETUP_TEARDOWN_STATEMENT_KEYWORDS;
+            { enterNewState(SETTING); pushBackTrailingWhitespace(); return SETUP_TEARDOWN_STATEMENT_KEYWORDS;
             }
           // fall through
           case 119: break;
           case 59:
-            { pushBackTrailingWhitespace(); return TIMEOUT_KEYWORDS;
+            { enterNewState(SETTING); pushBackTrailingWhitespace(); return TIMEOUT_KEYWORDS;
             }
           // fall through
           case 120: break;
           case 60:
-            { pushBackTrailingWhitespace(); return DOCUMENTATION_KEYWORD;
+            { enterNewState(SETTING); pushBackTrailingWhitespace(); return DOCUMENTATION_KEYWORD;
             }
           // fall through
           case 121: break;
           case 61:
-            { pushBackTrailingWhitespace(); return TEMPLATE_KEYWORDS;
+            { enterNewState(SETTING); pushBackTrailingWhitespace(); return TEMPLATE_KEYWORDS;
             }
           // fall through
           case 122: break;

@@ -62,28 +62,28 @@ private setting_statements ::= library_import
     | timeout_statements
     | unknown_setting_statements
 
-library_import ::= LIBRARY_IMPORT_KEYWORD line_comment* argument (parameter | argument)* (WITH_NAME_KEYWORD new_library_name)? line_comment* {pin=1}
+library_import ::= LIBRARY_IMPORT_KEYWORD line_comment* argument (parameter | argument)* (WITH_NAME_KEYWORD new_library_name)? line_comment* EOL {pin=1}
 new_library_name ::= LITERAL_VALUE
 
-resource_import ::= RESOURCE_IMPORT_KEYWORD line_comment* argument line_comment* {pin=1}
+resource_import ::= RESOURCE_IMPORT_KEYWORD line_comment* argument line_comment* EOL {pin=1}
 
-variables_import ::= VARIABLES_IMPORT_KEYWORD line_comment* argument (parameter | argument)* line_comment* {pin=1}
+variables_import ::= VARIABLES_IMPORT_KEYWORD line_comment* argument (parameter | argument)* line_comment* EOL {pin=1}
 
-suite_name_statement ::= SUITE_NAME_KEYWORD line_comment* argument line_comment* {pin=1}
+suite_name_statement ::= SUITE_NAME_KEYWORD line_comment* argument line_comment* EOL {pin=1}
 
-documentation_statement ::= DOCUMENTATION_KEYWORD line_comment* argument line_comment* {pin=1}
+documentation_statement ::= DOCUMENTATION_KEYWORD line_comment* argument+ line_comment* EOL {pin=1}
 
-metadata_statement ::= METADATA_KEYWORD line_comment* argument line_comment* {pin=1}
+metadata_statement ::= METADATA_KEYWORD line_comment* argument+ line_comment* EOL {pin=1}
 
-setup_teardown_statements ::= SETUP_TEARDOWN_STATEMENT_KEYWORDS line_comment* keyword_call line_comment* {pin=1}
+setup_teardown_statements ::= SETUP_TEARDOWN_STATEMENT_KEYWORDS line_comment* keyword_call line_comment* EOL {pin=1}
 
-tags_statement ::= TAGS_KEYWORDS line_comment* argument line_comment* {pin=1}
+tags_statement ::= TAGS_KEYWORDS line_comment* argument+ line_comment* EOL {pin=1}
 
-template_statements ::= TEMPLATE_KEYWORDS line_comment* keyword_call_id line_comment* {pin=1}
+template_statements ::= TEMPLATE_KEYWORDS line_comment* keyword_call_id line_comment* EOL {pin=1}
 
-timeout_statements ::= TIMEOUT_KEYWORDS line_comment* argument line_comment* {pin=1}
+timeout_statements ::= TIMEOUT_KEYWORDS line_comment* argument line_comment* EOL {pin=1}
 
-unknown_setting_statements ::= unknown_setting_statement_id (parameter | argument | line_comment)* {
+unknown_setting_statements ::= unknown_setting_statement_id (parameter | argument | line_comment)* EOL {
     pin=1
     implements = "com.intellij.psi.PsiNameIdentifierOwner"
     extends = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotUnknownSettingStatementExtension"
