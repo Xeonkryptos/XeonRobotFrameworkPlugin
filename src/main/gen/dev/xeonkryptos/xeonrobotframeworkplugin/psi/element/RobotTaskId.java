@@ -4,10 +4,8 @@ package dev.xeonkryptos.xeonrobotframeworkplugin.psi.element;
 import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiNamedElement;
 
-public interface RobotTasksSection extends RobotSection {
-
-  @NotNull
-  List<RobotTaskStatement> getTaskStatementList();
+public interface RobotTaskId extends PsiNamedElement {
 
 }

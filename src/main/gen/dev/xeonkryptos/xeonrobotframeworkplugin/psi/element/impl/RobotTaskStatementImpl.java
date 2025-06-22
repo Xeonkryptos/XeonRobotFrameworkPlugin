@@ -10,14 +10,14 @@ import com.intellij.psi.util.PsiTreeUtil;
 import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.*;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.*;
 
-public class RobotTestCaseStatementImpl extends RobotTestCaseExtension implements RobotTestCaseStatement {
+public class RobotTaskStatementImpl extends RobotTaskExtension implements RobotTaskStatement {
 
-  public RobotTestCaseStatementImpl(@NotNull ASTNode node) {
+  public RobotTaskStatementImpl(@NotNull ASTNode node) {
     super(node);
   }
 
   public void accept(@NotNull RobotVisitor visitor) {
-    visitor.visitTestCaseStatement(this);
+    visitor.visitTaskStatement(this);
   }
 
   @Override
@@ -58,8 +58,8 @@ public class RobotTestCaseStatementImpl extends RobotTestCaseExtension implement
 
   @Override
   @NotNull
-  public RobotTestCaseId getTestCaseId() {
-    return findNotNullChildByClass(RobotTestCaseId.class);
+  public RobotTaskId getTaskId() {
+    return findNotNullChildByClass(RobotTaskId.class);
   }
 
 }

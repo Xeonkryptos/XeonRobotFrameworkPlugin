@@ -10,27 +10,20 @@ import com.intellij.psi.util.PsiTreeUtil;
 import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.*;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.*;
 
-public class RobotTasksSectionImpl extends RobotSectionImpl implements RobotTasksSection {
+public class RobotTaskIdImpl extends RobotPsiElementBase implements RobotTaskId {
 
-  public RobotTasksSectionImpl(@NotNull ASTNode node) {
+  public RobotTaskIdImpl(@NotNull ASTNode node) {
     super(node);
   }
 
-  @Override
   public void accept(@NotNull RobotVisitor visitor) {
-    visitor.visitTasksSection(this);
+    visitor.visitTaskId(this);
   }
 
   @Override
   public void accept(@NotNull PsiElementVisitor visitor) {
     if (visitor instanceof RobotVisitor) accept((RobotVisitor)visitor);
     else super.accept(visitor);
-  }
-
-  @Override
-  @NotNull
-  public List<RobotTaskStatement> getTaskStatementList() {
-    return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotTaskStatement.class);
   }
 
 }

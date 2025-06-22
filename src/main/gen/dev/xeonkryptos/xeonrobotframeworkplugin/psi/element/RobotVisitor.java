@@ -149,6 +149,14 @@ public class RobotVisitor extends PsiElementVisitor {
     visitPsiElement(o);
   }
 
+  public void visitTaskId(@NotNull RobotTaskId o) {
+    visitPsiNamedElement(o);
+  }
+
+  public void visitTaskStatement(@NotNull RobotTaskStatement o) {
+    visitPsiNameIdentifierOwner(o);
+  }
+
   public void visitTasksSection(@NotNull RobotTasksSection o) {
     visitSection(o);
   }

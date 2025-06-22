@@ -6,7 +6,7 @@ import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiNameIdentifierOwner;
 
-public interface RobotTestCaseStatement extends PsiNameIdentifierOwner {
+public interface RobotTaskStatement extends PsiNameIdentifierOwner {
 
   @NotNull
   List<RobotArgument> getArgumentList();
@@ -24,6 +24,6 @@ public interface RobotTestCaseStatement extends PsiNameIdentifierOwner {
   List<RobotParameter> getParameterList();
 
   @NotNull
-  RobotTestCaseId getTestCaseId();
+  RobotTaskId getTaskId();
 
 }

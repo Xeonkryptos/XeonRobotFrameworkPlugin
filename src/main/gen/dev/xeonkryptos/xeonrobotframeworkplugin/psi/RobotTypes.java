@@ -44,6 +44,8 @@ public interface RobotTypes {
   IElementType SUITE_NAME_STATEMENT = new RobotElementType("SUITE_NAME_STATEMENT");
   IElementType TAGS_STATEMENT = new RobotElementType("TAGS_STATEMENT");
   IElementType TASKS_SECTION = new RobotElementType("TASKS_SECTION");
+  IElementType TASK_ID = new RobotElementType("TASK_ID");
+  IElementType TASK_STATEMENT = new RobotElementType("TASK_STATEMENT");
   IElementType TEMPLATE_STATEMENTS = new RobotElementType("TEMPLATE_STATEMENTS");
   IElementType TEST_CASES_SECTION = new RobotElementType("TEST_CASES_SECTION");
   IElementType TEST_CASE_ID = new RobotElementType("TEST_CASE_ID");
@@ -57,6 +59,7 @@ public interface RobotTypes {
   IElementType VARIABLE_ID = new RobotElementType("VARIABLE_ID");
   IElementType VARIABLE_VALUE = new RobotElementType("VARIABLE_VALUE");
 
+  IElementType ARGUMENT_VALUE = new RobotTokenType("ARGUMENT_VALUE");
   IElementType ASSIGNMENT = new RobotTokenType("ASSIGNMENT");
   IElementType BRACKET_SETTING_NAME = new RobotTokenType("BRACKET_SETTING_NAME");
   IElementType COMMENT = new RobotTokenType("COMMENT");
@@ -66,11 +69,12 @@ public interface RobotTypes {
   IElementType ENV_VARIABLE_START = new RobotTokenType("ENV_VARIABLE_START");
   IElementType EOL = new RobotTokenType("EOL");
   IElementType KEYWORDS_HEADER = new RobotTokenType("KEYWORDS_HEADER");
+  IElementType KEYWORD_NAME = new RobotTokenType("KEYWORD_NAME");
+  IElementType KEYWORD_STATEMENT_NAME = new RobotTokenType("KEYWORD_STATEMENT_NAME");
   IElementType LANGUAGE_KEYWORD = new RobotTokenType("LANGUAGE_KEYWORD");
   IElementType LANGUAGE_NAME = new RobotTokenType("LANGUAGE_NAME");
   IElementType LIBRARY_IMPORT_KEYWORD = new RobotTokenType("LIBRARY_IMPORT_KEYWORD");
   IElementType LIST_VARIABLE_START = new RobotTokenType("LIST_VARIABLE_START");
-  IElementType LITERAL_VALUE = new RobotTokenType("LITERAL_VALUE");
   IElementType METADATA_KEYWORD = new RobotTokenType("METADATA_KEYWORD");
   IElementType PARAMETER_NAME = new RobotTokenType("PARAMETER_NAME");
   IElementType RESOURCE_IMPORT_KEYWORD = new RobotTokenType("RESOURCE_IMPORT_KEYWORD");
@@ -80,8 +84,10 @@ public interface RobotTypes {
   IElementType SUITE_NAME_KEYWORD = new RobotTokenType("SUITE_NAME_KEYWORD");
   IElementType TAGS_KEYWORDS = new RobotTokenType("TAGS_KEYWORDS");
   IElementType TASKS_HEADER = new RobotTokenType("TASKS_HEADER");
+  IElementType TASK_NAME = new RobotTokenType("TASK_NAME");
   IElementType TEMPLATE_KEYWORDS = new RobotTokenType("TEMPLATE_KEYWORDS");
   IElementType TEST_CASES_HEADER = new RobotTokenType("TEST_CASES_HEADER");
+  IElementType TEST_CASE_NAME = new RobotTokenType("TEST_CASE_NAME");
   IElementType TIMEOUT_KEYWORDS = new RobotTokenType("TIMEOUT_KEYWORDS");
   IElementType UNKNOWN_SETTING_KEYWORD = new RobotTokenType("UNKNOWN_SETTING_KEYWORD");
   IElementType VARIABLES_HEADER = new RobotTokenType("VARIABLES_HEADER");
@@ -201,6 +207,12 @@ public interface RobotTypes {
       }
       else if (type == TASKS_SECTION) {
         return new RobotTasksSectionImpl(node);
+      }
+      else if (type == TASK_ID) {
+        return new RobotTaskIdImpl(node);
+      }
+      else if (type == TASK_STATEMENT) {
+        return new RobotTaskStatementImpl(node);
       }
       else if (type == TEMPLATE_STATEMENTS) {
         return new RobotTemplateStatementsImpl(node);
