@@ -68,6 +68,10 @@ public class RobotLexer extends LexerBase {
             } else {
                 handleState(state, parentState);
             }
+            if (startOffset == position) {
+                currentToken = RobotTokenTypes.ERROR;
+                position = endOffset;
+            }
         }
     }
 
