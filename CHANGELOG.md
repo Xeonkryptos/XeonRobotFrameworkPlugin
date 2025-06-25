@@ -4,6 +4,10 @@
 
 ## Unreleased
 
+### Changed
+
+- Updated build.gradle and gradle.properties to make plugin compatible with IntelliJ IDEA and all other JetBrains IDEs 
+
 ## 0.3.3
 
 ### Fixed
