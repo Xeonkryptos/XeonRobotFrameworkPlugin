@@ -62,4 +62,10 @@ public class RobotTaskStatementImpl extends RobotTaskExtension implements RobotT
     return findNotNullChildByClass(RobotTaskId.class);
   }
 
+  @Override
+  @NotNull
+  public List<RobotTemplateArguments> getTemplateArgumentsList() {
+    return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotTemplateArguments.class);
+  }
+
 }

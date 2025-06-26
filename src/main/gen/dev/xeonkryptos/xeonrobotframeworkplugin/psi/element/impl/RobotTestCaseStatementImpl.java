@@ -58,6 +58,12 @@ public class RobotTestCaseStatementImpl extends RobotTestCaseExtension implement
 
   @Override
   @NotNull
+  public List<RobotTemplateArguments> getTemplateArgumentsList() {
+    return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotTemplateArguments.class);
+  }
+
+  @Override
+  @NotNull
   public RobotTestCaseId getTestCaseId() {
     return findNotNullChildByClass(RobotTestCaseId.class);
   }

@@ -46,6 +46,11 @@ public interface RobotTypes {
   IElementType TASKS_SECTION = new RobotElementType("TASKS_SECTION");
   IElementType TASK_ID = new RobotElementType("TASK_ID");
   IElementType TASK_STATEMENT = new RobotElementType("TASK_STATEMENT");
+  IElementType TEMPLATE_ARGUMENT = new RobotElementType("TEMPLATE_ARGUMENT");
+  IElementType TEMPLATE_ARGUMENTS = new RobotElementType("TEMPLATE_ARGUMENTS");
+  IElementType TEMPLATE_PARAMETER = new RobotElementType("TEMPLATE_PARAMETER");
+  IElementType TEMPLATE_PARAMETER_ARGUMENT = new RobotElementType("TEMPLATE_PARAMETER_ARGUMENT");
+  IElementType TEMPLATE_PARAMETER_ID = new RobotElementType("TEMPLATE_PARAMETER_ID");
   IElementType TEMPLATE_STATEMENTS = new RobotElementType("TEMPLATE_STATEMENTS");
   IElementType TEST_CASES_SECTION = new RobotElementType("TEST_CASES_SECTION");
   IElementType TEST_CASE_ID = new RobotElementType("TEST_CASE_ID");
@@ -85,7 +90,9 @@ public interface RobotTypes {
   IElementType TAGS_KEYWORDS = new RobotTokenType("TAGS_KEYWORDS");
   IElementType TASKS_HEADER = new RobotTokenType("TASKS_HEADER");
   IElementType TASK_NAME = new RobotTokenType("TASK_NAME");
+  IElementType TEMPLATE_ARGUMENT_VALUE = new RobotTokenType("TEMPLATE_ARGUMENT_VALUE");
   IElementType TEMPLATE_KEYWORDS = new RobotTokenType("TEMPLATE_KEYWORDS");
+  IElementType TEMPLATE_PARAMETER_NAME = new RobotTokenType("TEMPLATE_PARAMETER_NAME");
   IElementType TEST_CASES_HEADER = new RobotTokenType("TEST_CASES_HEADER");
   IElementType TEST_CASE_NAME = new RobotTokenType("TEST_CASE_NAME");
   IElementType TIMEOUT_KEYWORDS = new RobotTokenType("TIMEOUT_KEYWORDS");
@@ -213,6 +220,21 @@ public interface RobotTypes {
       }
       else if (type == TASK_STATEMENT) {
         return new RobotTaskStatementImpl(node);
+      }
+      else if (type == TEMPLATE_ARGUMENT) {
+        return new RobotTemplateArgumentImpl(node);
+      }
+      else if (type == TEMPLATE_ARGUMENTS) {
+        return new RobotTemplateArgumentsImpl(node);
+      }
+      else if (type == TEMPLATE_PARAMETER) {
+        return new RobotTemplateParameterImpl(node);
+      }
+      else if (type == TEMPLATE_PARAMETER_ARGUMENT) {
+        return new RobotTemplateParameterArgumentImpl(node);
+      }
+      else if (type == TEMPLATE_PARAMETER_ID) {
+        return new RobotTemplateParameterIdImpl(node);
       }
       else if (type == TEMPLATE_STATEMENTS) {
         return new RobotTemplateStatementsImpl(node);

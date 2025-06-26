@@ -161,6 +161,26 @@ public class RobotVisitor extends PsiElementVisitor {
     visitSection(o);
   }
 
+  public void visitTemplateArgument(@NotNull RobotTemplateArgument o) {
+    visitPsiElement(o);
+  }
+
+  public void visitTemplateArguments(@NotNull RobotTemplateArguments o) {
+    visitPsiElement(o);
+  }
+
+  public void visitTemplateParameter(@NotNull RobotTemplateParameter o) {
+    visitPsiNameIdentifierOwner(o);
+  }
+
+  public void visitTemplateParameterArgument(@NotNull RobotTemplateParameterArgument o) {
+    visitPsiElement(o);
+  }
+
+  public void visitTemplateParameterId(@NotNull RobotTemplateParameterId o) {
+    visitPsiNamedElement(o);
+  }
+
   public void visitTemplateStatements(@NotNull RobotTemplateStatements o) {
     visitPsiElement(o);
   }

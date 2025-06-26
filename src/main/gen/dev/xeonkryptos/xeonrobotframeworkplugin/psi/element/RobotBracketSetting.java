@@ -15,6 +15,9 @@ public interface RobotBracketSetting extends PsiNameIdentifierOwner {
   RobotBracketSettingId getBracketSettingId();
 
   @NotNull
+  List<RobotKeywordCallId> getKeywordCallIdList();
+
+  @NotNull
   List<RobotParameter> getParameterList();
 
 }

@@ -24,6 +24,9 @@ public interface RobotTestCaseStatement extends PsiNameIdentifierOwner {
   List<RobotParameter> getParameterList();
 
   @NotNull
+  List<RobotTemplateArguments> getTemplateArgumentsList();
+
+  @NotNull
   RobotTestCaseId getTestCaseId();
 
 }

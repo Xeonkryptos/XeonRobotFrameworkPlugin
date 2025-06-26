@@ -90,20 +90,34 @@ unknown_setting_statements ::= unknown_setting_statement_id (parameter | argumen
 }
 unknown_setting_statement_id ::= UNKNOWN_SETTING_KEYWORD
 
-test_case_statement ::= test_case_id (bracket_setting | line_comment)* (keyword_variable_statement | keyword_call | argument | parameter | line_comment)* {
+test_case_statement ::= test_case_id (bracket_setting | keyword_variable_statement | keyword_call | template_arguments | argument | parameter | line_comment)* {
     pin=1
     implements = "com.intellij.psi.PsiNameIdentifierOwner"
     extends = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotTestCaseExtension"
+    recoverWhile=test_case_statement_recover
 }
 test_case_id ::= TEST_CASE_NAME
-task_statement ::= task_id (bracket_setting | line_comment)* (keyword_variable_statement | keyword_call | argument | parameter | line_comment)* {
+private test_case_statement_recover ::= !test_case_id & section_recover
+task_statement ::= task_id (bracket_setting | keyword_variable_statement | keyword_call | template_arguments | argument | parameter | line_comment)* {
     pin=1
     implements = "com.intellij.psi.PsiNameIdentifierOwner"
     extends = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotTaskExtension"
+    recoverWhile=task_statement_recover
 }
 task_id ::= TASK_NAME
+private task_statement_recover ::= !task_id & section_recover
 
-bracket_setting ::= bracket_setting_id line_comment* (parameter | argument)+ line_comment* EOL {
+template_arguments ::= (template_argument | template_parameter)+ EOL
+template_argument ::= TEMPLATE_ARGUMENT_VALUE
+template_parameter ::= template_parameter_id ASSIGNMENT template_parameter_argument {
+    pin=2
+    implements = "com.intellij.psi.PsiNameIdentifierOwner"
+    extends = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotTemplateParameterExtension"
+}
+template_parameter_id ::= TEMPLATE_PARAMETER_NAME
+template_parameter_argument ::= TEMPLATE_ARGUMENT_VALUE
+
+bracket_setting ::= bracket_setting_id line_comment* (parameter | argument | keyword_call_id)* line_comment* EOL {
     pin=1
     implements = "com.intellij.psi.PsiNameIdentifierOwner"
     extends = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotBracketSettingExtension"
@@ -117,12 +131,11 @@ keyword_call ::= keyword_call_id (parameter | argument | line_comment)* EOL {
 }
 keyword_call_id ::= KEYWORD_NAME
 
-parameter ::= parameter_start argument {
-    pin=1
+parameter ::= parameter_id ASSIGNMENT argument {
+    pin=2
     implements = "com.intellij.psi.PsiNameIdentifierOwner"
     extends = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotParameterExtension"
 }
-private parameter_start ::= parameter_id ASSIGNMENT {pin=2}
 parameter_id ::= PARAMETER_NAME
 
 fake variable_statement ::= single_variable_statement | keyword_variable_statement

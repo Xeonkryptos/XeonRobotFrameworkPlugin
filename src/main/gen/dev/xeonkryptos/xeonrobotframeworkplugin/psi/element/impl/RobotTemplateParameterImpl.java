@@ -10,14 +10,14 @@ import com.intellij.psi.util.PsiTreeUtil;
 import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.*;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.*;
 
-public class RobotBracketSettingImpl extends RobotBracketSettingExtension implements RobotBracketSetting {
+public class RobotTemplateParameterImpl extends RobotTemplateParameterExtension implements RobotTemplateParameter {
 
-  public RobotBracketSettingImpl(@NotNull ASTNode node) {
+  public RobotTemplateParameterImpl(@NotNull ASTNode node) {
     super(node);
   }
 
   public void accept(@NotNull RobotVisitor visitor) {
-    visitor.visitBracketSetting(this);
+    visitor.visitTemplateParameter(this);
   }
 
   @Override
@@ -27,27 +27,15 @@ public class RobotBracketSettingImpl extends RobotBracketSettingExtension implem
   }
 
   @Override
-  @NotNull
-  public List<RobotArgument> getArgumentList() {
-    return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotArgument.class);
+  @Nullable
+  public RobotTemplateParameterArgument getTemplateParameterArgument() {
+    return findChildByClass(RobotTemplateParameterArgument.class);
   }
 
   @Override
   @NotNull
-  public RobotBracketSettingId getBracketSettingId() {
-    return findNotNullChildByClass(RobotBracketSettingId.class);
-  }
-
-  @Override
-  @NotNull
-  public List<RobotKeywordCallId> getKeywordCallIdList() {
-    return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotKeywordCallId.class);
-  }
-
-  @Override
-  @NotNull
-  public List<RobotParameter> getParameterList() {
-    return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotParameter.class);
+  public RobotTemplateParameterId getTemplateParameterId() {
+    return findNotNullChildByClass(RobotTemplateParameterId.class);
   }
 
 }

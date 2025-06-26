@@ -55,7 +55,7 @@ public class RobotParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // bracket_setting_id line_comment* (parameter | argument)+ line_comment* EOL
+  // bracket_setting_id line_comment* (parameter | argument | keyword_call_id)* line_comment* EOL
   public static boolean bracket_setting(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "bracket_setting")) return false;
     if (!nextTokenIs(b, BRACKET_SETTING_NAME)) return false;
@@ -82,27 +82,24 @@ public class RobotParser implements PsiParser, LightPsiParser {
     return true;
   }
 
-  // (parameter | argument)+
+  // (parameter | argument | keyword_call_id)*
   private static boolean bracket_setting_2(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "bracket_setting_2")) return false;
-    boolean r;
-    Marker m = enter_section_(b);
-    r = bracket_setting_2_0(b, l + 1);
-    while (r) {
+    while (true) {
       int c = current_position_(b);
       if (!bracket_setting_2_0(b, l + 1)) break;
       if (!empty_element_parsed_guard_(b, "bracket_setting_2", c)) break;
     }
-    exit_section_(b, m, null, r);
-    return r;
+    return true;
   }
 
-  // parameter | argument
+  // parameter | argument | keyword_call_id
   private static boolean bracket_setting_2_0(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "bracket_setting_2_0")) return false;
     boolean r;
     r = parameter(b, l + 1);
     if (!r) r = argument(b, l + 1);
+    if (!r) r = keyword_call_id(b, l + 1);
     return r;
   }
 
@@ -721,14 +718,15 @@ public class RobotParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // parameter_start argument
+  // parameter_id ASSIGNMENT argument
   public static boolean parameter(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "parameter")) return false;
     if (!nextTokenIs(b, PARAMETER_NAME)) return false;
     boolean r, p;
     Marker m = enter_section_(b, l, _NONE_, PARAMETER, null);
-    r = parameter_start(b, l + 1);
-    p = r; // pin = 1
+    r = parameter_id(b, l + 1);
+    r = r && consumeToken(b, ASSIGNMENT);
+    p = r; // pin = 2
     r = r && argument(b, l + 1);
     exit_section_(b, l, m, r, p, null);
     return r || p;
@@ -743,19 +741,6 @@ public class RobotParser implements PsiParser, LightPsiParser {
     Marker m = enter_section_(b);
     r = consumeToken(b, PARAMETER_NAME);
     exit_section_(b, m, PARAMETER_ID, r);
-    return r;
-  }
-
-  /* ********************************************************** */
-  // parameter_id ASSIGNMENT
-  static boolean parameter_start(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "parameter_start")) return false;
-    if (!nextTokenIs(b, PARAMETER_NAME)) return false;
-    boolean r;
-    Marker m = enter_section_(b);
-    r = parameter_id(b, l + 1);
-    r = r && consumeToken(b, ASSIGNMENT);
-    exit_section_(b, m, null, r);
     return r;
   }
 
@@ -1131,21 +1116,19 @@ public class RobotParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // task_id (bracket_setting | line_comment)* (keyword_variable_statement | keyword_call | argument | parameter | line_comment)*
+  // task_id (bracket_setting | keyword_variable_statement | keyword_call | template_arguments | argument | parameter | line_comment)*
   public static boolean task_statement(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "task_statement")) return false;
-    if (!nextTokenIs(b, TASK_NAME)) return false;
     boolean r, p;
-    Marker m = enter_section_(b, l, _NONE_, TASK_STATEMENT, null);
+    Marker m = enter_section_(b, l, _NONE_, TASK_STATEMENT, "<task statement>");
     r = task_id(b, l + 1);
     p = r; // pin = 1
-    r = r && report_error_(b, task_statement_1(b, l + 1));
-    r = p && task_statement_2(b, l + 1) && r;
-    exit_section_(b, l, m, r, p, null);
+    r = r && task_statement_1(b, l + 1);
+    exit_section_(b, l, m, r, p, RobotParser::task_statement_recover);
     return r || p;
   }
 
-  // (bracket_setting | line_comment)*
+  // (bracket_setting | keyword_variable_statement | keyword_call | template_arguments | argument | parameter | line_comment)*
   private static boolean task_statement_1(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "task_statement_1")) return false;
     while (true) {
@@ -1156,35 +1139,49 @@ public class RobotParser implements PsiParser, LightPsiParser {
     return true;
   }
 
-  // bracket_setting | line_comment
+  // bracket_setting | keyword_variable_statement | keyword_call | template_arguments | argument | parameter | line_comment
   private static boolean task_statement_1_0(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "task_statement_1_0")) return false;
     boolean r;
     r = bracket_setting(b, l + 1);
+    if (!r) r = keyword_variable_statement(b, l + 1);
+    if (!r) r = keyword_call(b, l + 1);
+    if (!r) r = template_arguments(b, l + 1);
+    if (!r) r = argument(b, l + 1);
+    if (!r) r = parameter(b, l + 1);
     if (!r) r = line_comment(b, l + 1);
     return r;
   }
 
-  // (keyword_variable_statement | keyword_call | argument | parameter | line_comment)*
-  private static boolean task_statement_2(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "task_statement_2")) return false;
-    while (true) {
-      int c = current_position_(b);
-      if (!task_statement_2_0(b, l + 1)) break;
-      if (!empty_element_parsed_guard_(b, "task_statement_2", c)) break;
-    }
-    return true;
+  /* ********************************************************** */
+  // !task_id & section_recover
+  static boolean task_statement_recover(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "task_statement_recover")) return false;
+    boolean r;
+    Marker m = enter_section_(b);
+    r = task_statement_recover_0(b, l + 1);
+    r = r && task_statement_recover_1(b, l + 1);
+    exit_section_(b, m, null, r);
+    return r;
   }
 
-  // keyword_variable_statement | keyword_call | argument | parameter | line_comment
-  private static boolean task_statement_2_0(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "task_statement_2_0")) return false;
+  // !task_id
+  private static boolean task_statement_recover_0(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "task_statement_recover_0")) return false;
     boolean r;
-    r = keyword_variable_statement(b, l + 1);
-    if (!r) r = keyword_call(b, l + 1);
-    if (!r) r = argument(b, l + 1);
-    if (!r) r = parameter(b, l + 1);
-    if (!r) r = line_comment(b, l + 1);
+    Marker m = enter_section_(b, l, _NOT_);
+    r = !task_id(b, l + 1);
+    exit_section_(b, l, m, r, false, null);
+    return r;
+  }
+
+  // & section_recover
+  private static boolean task_statement_recover_1(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "task_statement_recover_1")) return false;
+    boolean r;
+    Marker m = enter_section_(b, l, _AND_);
+    r = section_recover(b, l + 1);
+    exit_section_(b, l, m, r, false, null);
     return r;
   }
 
@@ -1210,6 +1207,94 @@ public class RobotParser implements PsiParser, LightPsiParser {
       if (!empty_element_parsed_guard_(b, "tasks_section_1", c)) break;
     }
     return true;
+  }
+
+  /* ********************************************************** */
+  // TEMPLATE_ARGUMENT_VALUE
+  public static boolean template_argument(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "template_argument")) return false;
+    if (!nextTokenIs(b, TEMPLATE_ARGUMENT_VALUE)) return false;
+    boolean r;
+    Marker m = enter_section_(b);
+    r = consumeToken(b, TEMPLATE_ARGUMENT_VALUE);
+    exit_section_(b, m, TEMPLATE_ARGUMENT, r);
+    return r;
+  }
+
+  /* ********************************************************** */
+  // (template_argument | template_parameter)+ EOL
+  public static boolean template_arguments(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "template_arguments")) return false;
+    if (!nextTokenIs(b, "<template arguments>", TEMPLATE_ARGUMENT_VALUE, TEMPLATE_PARAMETER_NAME)) return false;
+    boolean r;
+    Marker m = enter_section_(b, l, _NONE_, TEMPLATE_ARGUMENTS, "<template arguments>");
+    r = template_arguments_0(b, l + 1);
+    r = r && consumeToken(b, EOL);
+    exit_section_(b, l, m, r, false, null);
+    return r;
+  }
+
+  // (template_argument | template_parameter)+
+  private static boolean template_arguments_0(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "template_arguments_0")) return false;
+    boolean r;
+    Marker m = enter_section_(b);
+    r = template_arguments_0_0(b, l + 1);
+    while (r) {
+      int c = current_position_(b);
+      if (!template_arguments_0_0(b, l + 1)) break;
+      if (!empty_element_parsed_guard_(b, "template_arguments_0", c)) break;
+    }
+    exit_section_(b, m, null, r);
+    return r;
+  }
+
+  // template_argument | template_parameter
+  private static boolean template_arguments_0_0(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "template_arguments_0_0")) return false;
+    boolean r;
+    r = template_argument(b, l + 1);
+    if (!r) r = template_parameter(b, l + 1);
+    return r;
+  }
+
+  /* ********************************************************** */
+  // template_parameter_id ASSIGNMENT template_parameter_argument
+  public static boolean template_parameter(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "template_parameter")) return false;
+    if (!nextTokenIs(b, TEMPLATE_PARAMETER_NAME)) return false;
+    boolean r, p;
+    Marker m = enter_section_(b, l, _NONE_, TEMPLATE_PARAMETER, null);
+    r = template_parameter_id(b, l + 1);
+    r = r && consumeToken(b, ASSIGNMENT);
+    p = r; // pin = 2
+    r = r && template_parameter_argument(b, l + 1);
+    exit_section_(b, l, m, r, p, null);
+    return r || p;
+  }
+
+  /* ********************************************************** */
+  // TEMPLATE_ARGUMENT_VALUE
+  public static boolean template_parameter_argument(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "template_parameter_argument")) return false;
+    if (!nextTokenIs(b, TEMPLATE_ARGUMENT_VALUE)) return false;
+    boolean r;
+    Marker m = enter_section_(b);
+    r = consumeToken(b, TEMPLATE_ARGUMENT_VALUE);
+    exit_section_(b, m, TEMPLATE_PARAMETER_ARGUMENT, r);
+    return r;
+  }
+
+  /* ********************************************************** */
+  // TEMPLATE_PARAMETER_NAME
+  public static boolean template_parameter_id(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "template_parameter_id")) return false;
+    if (!nextTokenIs(b, TEMPLATE_PARAMETER_NAME)) return false;
+    boolean r;
+    Marker m = enter_section_(b);
+    r = consumeToken(b, TEMPLATE_PARAMETER_NAME);
+    exit_section_(b, m, TEMPLATE_PARAMETER_ID, r);
+    return r;
   }
 
   /* ********************************************************** */
@@ -1264,21 +1349,19 @@ public class RobotParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // test_case_id (bracket_setting | line_comment)* (keyword_variable_statement | keyword_call | argument | parameter | line_comment)*
+  // test_case_id (bracket_setting | keyword_variable_statement | keyword_call | template_arguments | argument | parameter | line_comment)*
   public static boolean test_case_statement(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "test_case_statement")) return false;
-    if (!nextTokenIs(b, TEST_CASE_NAME)) return false;
     boolean r, p;
-    Marker m = enter_section_(b, l, _NONE_, TEST_CASE_STATEMENT, null);
+    Marker m = enter_section_(b, l, _NONE_, TEST_CASE_STATEMENT, "<test case statement>");
     r = test_case_id(b, l + 1);
     p = r; // pin = 1
-    r = r && report_error_(b, test_case_statement_1(b, l + 1));
-    r = p && test_case_statement_2(b, l + 1) && r;
-    exit_section_(b, l, m, r, p, null);
+    r = r && test_case_statement_1(b, l + 1);
+    exit_section_(b, l, m, r, p, RobotParser::test_case_statement_recover);
     return r || p;
   }
 
-  // (bracket_setting | line_comment)*
+  // (bracket_setting | keyword_variable_statement | keyword_call | template_arguments | argument | parameter | line_comment)*
   private static boolean test_case_statement_1(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "test_case_statement_1")) return false;
     while (true) {
@@ -1289,35 +1372,49 @@ public class RobotParser implements PsiParser, LightPsiParser {
     return true;
   }
 
-  // bracket_setting | line_comment
+  // bracket_setting | keyword_variable_statement | keyword_call | template_arguments | argument | parameter | line_comment
   private static boolean test_case_statement_1_0(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "test_case_statement_1_0")) return false;
     boolean r;
     r = bracket_setting(b, l + 1);
+    if (!r) r = keyword_variable_statement(b, l + 1);
+    if (!r) r = keyword_call(b, l + 1);
+    if (!r) r = template_arguments(b, l + 1);
+    if (!r) r = argument(b, l + 1);
+    if (!r) r = parameter(b, l + 1);
     if (!r) r = line_comment(b, l + 1);
     return r;
   }
 
-  // (keyword_variable_statement | keyword_call | argument | parameter | line_comment)*
-  private static boolean test_case_statement_2(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "test_case_statement_2")) return false;
-    while (true) {
-      int c = current_position_(b);
-      if (!test_case_statement_2_0(b, l + 1)) break;
-      if (!empty_element_parsed_guard_(b, "test_case_statement_2", c)) break;
-    }
-    return true;
+  /* ********************************************************** */
+  // !test_case_id & section_recover
+  static boolean test_case_statement_recover(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "test_case_statement_recover")) return false;
+    boolean r;
+    Marker m = enter_section_(b);
+    r = test_case_statement_recover_0(b, l + 1);
+    r = r && test_case_statement_recover_1(b, l + 1);
+    exit_section_(b, m, null, r);
+    return r;
   }
 
-  // keyword_variable_statement | keyword_call | argument | parameter | line_comment
-  private static boolean test_case_statement_2_0(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "test_case_statement_2_0")) return false;
+  // !test_case_id
+  private static boolean test_case_statement_recover_0(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "test_case_statement_recover_0")) return false;
     boolean r;
-    r = keyword_variable_statement(b, l + 1);
-    if (!r) r = keyword_call(b, l + 1);
-    if (!r) r = argument(b, l + 1);
-    if (!r) r = parameter(b, l + 1);
-    if (!r) r = line_comment(b, l + 1);
+    Marker m = enter_section_(b, l, _NOT_);
+    r = !test_case_id(b, l + 1);
+    exit_section_(b, l, m, r, false, null);
+    return r;
+  }
+
+  // & section_recover
+  private static boolean test_case_statement_recover_1(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "test_case_statement_recover_1")) return false;
+    boolean r;
+    Marker m = enter_section_(b, l, _AND_);
+    r = section_recover(b, l + 1);
+    exit_section_(b, l, m, r, false, null);
     return r;
   }
 

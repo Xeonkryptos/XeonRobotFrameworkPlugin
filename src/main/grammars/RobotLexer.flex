@@ -13,6 +13,7 @@ import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.*;
 %{
   private boolean globalTemplateEnabled = false;
   private boolean localTemplateEnabled = false;
+  private boolean templateKeywordFound = false;
 
   private final Stack<Integer> previousStates = new Stack<>();
 
@@ -142,6 +143,7 @@ GenericSettingsKeyword = [\p{L}\p{N}_]+([ ][\p{L}\p{N}_])*
 
 LiteralValue = [^\s]+([ ][^\s]+)*[ ]?
 RestrictedLiteralValue = [^\s${}@%&=]+([ ][^\s${}@%&]+)*[ ]?
+ParamLiteralValue = [^\s${}@%&]+([ ][^\s${}@%&]+)*[ ]?
 
 LocalTemplateKeyword = "[" "Template" "]"
 LocalSettingKeyword = "[" {GenericSettingsKeyword} "]"
@@ -158,9 +160,11 @@ LineComment = {LineCommentSign} {NON_EOL}*
 
 %state LANGUAGE_SETTING
 %state SETTINGS_SECTION, VARIABLES_SECTION, KEYWORDS_SECTION
-%state TESTCASE_NAME_DEFINITION, TESTCASE_DEFINITION, TASK_NAME_DEFINITION, TASK_DEFINITION, SETTING, TEMPLATE_DEFINITION
+%state TESTCASE_NAME_DEFINITION, TESTCASE_DEFINITION, TASK_NAME_DEFINITION, TASK_DEFINITION
+%state SETTING, SETTING_TEMPLATE_START, TEMPLATE_DEFINITION
 %state KEYWORD_CALL, KEYWORD_ARGUMENTS
 %state VARIABLE_DEFINITION, VARIABLE_USAGE, EXTENDED_VARIABLE_ACCESS
+%state PARAMETER_ASSIGNMENT, PARAMETER_VALUE, TEMPLATE_PARAMETER_ASSIGNMENT, TEMPLATE_PARAMETER_VALUE
 
 %xstate COMMENTS_SECTION
 
@@ -250,27 +254,51 @@ LineComment = {LineCommentSign} {NON_EOL}*
 <TESTCASE_DEFINITION> ^ {LiteralValue}    { pushBackTrailingWhitespace(); return TEST_CASE_NAME; }
 <TASK_DEFINITION>     ^ {LiteralValue}    { pushBackTrailingWhitespace(); return TASK_NAME; }
 
+<TEMPLATE_DEFINITION>     ^ {LiteralValue}    {
+          templateKeywordFound = false;
+          pushBackTrailingWhitespace();
+          leaveState();
+          return previousStates.peek() == TESTCASE_DEFINITION ? TEST_CASE_NAME : TASK_NAME;
+      }
+
 <TESTCASE_DEFINITION, TASK_DEFINITION> {
-    {LocalTemplateKeyword} \s*             { enterNewState(SETTING); pushBackTrailingWhitespace(); localTemplateEnabled = true; return BRACKET_SETTING_NAME; }
+    {LocalTemplateKeyword} \s*             { enterNewState(SETTING_TEMPLATE_START); pushBackTrailingWhitespace(); localTemplateEnabled = true; return BRACKET_SETTING_NAME; }
     {LocalSettingKeyword} \s*              { enterNewState(SETTING); pushBackTrailingWhitespace(); return BRACKET_SETTING_NAME; }
     {RestrictedLiteralValue}               {
-              int nextState = localTemplateEnabled || globalTemplateEnabled ? TEMPLATE_DEFINITION : KEYWORD_CALL;
+              int nextState = (localTemplateEnabled || globalTemplateEnabled) && templateKeywordFound ? TEMPLATE_DEFINITION : KEYWORD_CALL;
               enterNewState(nextState);
               yypushback(yylength());
           }
 }
 
-<KEYWORD_ARGUMENTS, TEMPLATE_DEFINITION, SETTINGS_SECTION, TESTCASE_DEFINITION, TASK_DEFINITION, KEYWORDS_SECTION> {
-    {ParameterName} / {Whitespace}* {EqualSign} (!(\s{2}) | !\R)   { return PARAMETER_NAME; }
-    {EqualSign}                                                    { return ASSIGNMENT; }
+<KEYWORD_ARGUMENTS, SETTINGS_SECTION, TESTCASE_DEFINITION, TASK_DEFINITION, KEYWORDS_SECTION> {
+    {ParameterName} / {EqualSign} (!(\s{2}) | !\R)   { enterNewState(PARAMETER_ASSIGNMENT); return PARAMETER_NAME; }
+    {EqualSign}                                      { return ASSIGNMENT; }
 }
+<PARAMETER_ASSIGNMENT>  {EqualSign}                  { yybegin(PARAMETER_VALUE); return ASSIGNMENT; }
+<PARAMETER_VALUE>       {ParamLiteralValue}          { leaveState(); pushBackTrailingWhitespace(); return ARGUMENT_VALUE; }
+
+<TEMPLATE_DEFINITION> {
+    {ParameterName} / {EqualSign} (!(\s{2}) | !\R)   { enterNewState(TEMPLATE_PARAMETER_ASSIGNMENT); return TEMPLATE_PARAMETER_NAME; }
+    {EqualSign}                                      { return ASSIGNMENT; }
+    {RestrictedLiteralValue}                         { pushBackTrailingWhitespace(); return TEMPLATE_ARGUMENT_VALUE; }
+    {EOL}+                                           { return EOL; }
+}
+<TEMPLATE_PARAMETER_ASSIGNMENT> {EqualSign}          { yybegin(TEMPLATE_PARAMETER_VALUE); return ASSIGNMENT; }
+<TEMPLATE_PARAMETER_VALUE>      {ParamLiteralValue}  { leaveState(); pushBackTrailingWhitespace(); return TEMPLATE_ARGUMENT_VALUE; }
 
 // Multiline handling (don't return EOL on detected multiline). If there is a multiline without the Ellipsis (...) marker,
 // then return EOL to mark the end of the statement.
-<SETTING, KEYWORD_CALL, KEYWORD_ARGUMENTS> {
+<SETTING, SETTING_TEMPLATE_START, KEYWORD_CALL, KEYWORD_ARGUMENTS> {
     {MultiLine}             { return WHITE_SPACE; }
     {EOL}+                  { leaveState(); return EOL; }
 }
+
+<SETTING_TEMPLATE_START>  {RestrictedLiteralValue}        {
+          templateKeywordFound = true;
+          pushBackTrailingWhitespace();
+          return KEYWORD_NAME;
+      }
 
 // Consciously used yybegin instead of enterNewState to avoid pushing the state onto the stack. We're technically still in the KEYWORD_CALL state
 // and when we're, even in KEYWORD_ARGUMENTS, leave the state, it should return to whatever was before KEYWORD_CALL.
@@ -278,7 +306,7 @@ LineComment = {LineCommentSign} {NON_EOL}*
 <KEYWORD_CALL>      {RestrictedLiteralValue}  { yybegin(KEYWORD_ARGUMENTS); pushBackTrailingWhitespace(); return KEYWORD_NAME; }
 <KEYWORD_ARGUMENTS> {RestrictedLiteralValue}  { pushBackTrailingWhitespace(); return ARGUMENT_VALUE; }
 
-<SETTINGS_SECTION, SETTING, TEMPLATE_DEFINITION> {RestrictedLiteralValue}        { pushBackTrailingWhitespace(); return ARGUMENT_VALUE; }
+<SETTINGS_SECTION, SETTING> {RestrictedLiteralValue}        { pushBackTrailingWhitespace(); return ARGUMENT_VALUE; }
 
 <COMMENTS_SECTION> {
     {SettingsSectionIdentifier}            { reset(); yybegin(SETTINGS_SECTION); pushBackTrailingWhitespace(); return SETTINGS_HEADER; }

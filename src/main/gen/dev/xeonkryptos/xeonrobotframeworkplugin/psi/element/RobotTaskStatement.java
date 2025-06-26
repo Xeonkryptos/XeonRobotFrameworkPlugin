@@ -26,4 +26,7 @@ public interface RobotTaskStatement extends PsiNameIdentifierOwner {
   @NotNull
   RobotTaskId getTaskId();
 
+  @NotNull
+  List<RobotTemplateArguments> getTemplateArgumentsList();
+
 }
