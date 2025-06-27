@@ -276,7 +276,7 @@ LineComment = {LineCommentSign} {NON_EOL}*
           return BRACKET_SETTING_NAME;
       }
     {LocalTemplateKeyword} / \s* (\R \s* !{Ellipsis} | {MultiLine} \R)      { pushBackTrailingWhitespace(); localTemplateEnabled = false; return BRACKET_SETTING_NAME; }
-    {LocalTemplateKeyword}             {
+    {LocalTemplateKeyword} \s*            {
           enterNewState(SETTING_TEMPLATE_START);
           pushBackTrailingWhitespace();
           localTemplateEnabled = true;
