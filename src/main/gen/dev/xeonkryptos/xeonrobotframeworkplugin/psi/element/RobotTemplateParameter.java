@@ -14,4 +14,7 @@ public interface RobotTemplateParameter extends PsiNameIdentifierOwner {
   @NotNull
   RobotTemplateParameterId getTemplateParameterId();
 
+  @Nullable
+  RobotVariable getVariable();
+
 }

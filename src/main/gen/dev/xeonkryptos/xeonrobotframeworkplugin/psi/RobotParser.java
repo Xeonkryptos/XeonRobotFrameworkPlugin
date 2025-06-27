@@ -940,7 +940,7 @@ public class RobotParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // SETUP_TEARDOWN_STATEMENT_KEYWORDS line_comment* keyword_call line_comment* EOL
+  // SETUP_TEARDOWN_STATEMENT_KEYWORDS line_comment* (keyword_call | variable) line_comment*
   public static boolean setup_teardown_statements(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "setup_teardown_statements")) return false;
     if (!nextTokenIs(b, SETUP_TEARDOWN_STATEMENT_KEYWORDS)) return false;
@@ -949,9 +949,8 @@ public class RobotParser implements PsiParser, LightPsiParser {
     r = consumeToken(b, SETUP_TEARDOWN_STATEMENT_KEYWORDS);
     p = r; // pin = 1
     r = r && report_error_(b, setup_teardown_statements_1(b, l + 1));
-    r = p && report_error_(b, keyword_call(b, l + 1)) && r;
-    r = p && report_error_(b, setup_teardown_statements_3(b, l + 1)) && r;
-    r = p && consumeToken(b, EOL) && r;
+    r = p && report_error_(b, setup_teardown_statements_2(b, l + 1)) && r;
+    r = p && setup_teardown_statements_3(b, l + 1) && r;
     exit_section_(b, l, m, r, p, null);
     return r || p;
   }
@@ -965,6 +964,15 @@ public class RobotParser implements PsiParser, LightPsiParser {
       if (!empty_element_parsed_guard_(b, "setup_teardown_statements_1", c)) break;
     }
     return true;
+  }
+
+  // keyword_call | variable
+  private static boolean setup_teardown_statements_2(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "setup_teardown_statements_2")) return false;
+    boolean r;
+    r = keyword_call(b, l + 1);
+    if (!r) r = variable(b, l + 1);
+    return r;
   }
 
   // line_comment*
@@ -1222,10 +1230,9 @@ public class RobotParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // (template_argument | template_parameter)+ EOL
+  // (template_argument | template_parameter | variable)+ EOL
   public static boolean template_arguments(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "template_arguments")) return false;
-    if (!nextTokenIs(b, "<template arguments>", TEMPLATE_ARGUMENT_VALUE, TEMPLATE_PARAMETER_NAME)) return false;
     boolean r;
     Marker m = enter_section_(b, l, _NONE_, TEMPLATE_ARGUMENTS, "<template arguments>");
     r = template_arguments_0(b, l + 1);
@@ -1234,7 +1241,7 @@ public class RobotParser implements PsiParser, LightPsiParser {
     return r;
   }
 
-  // (template_argument | template_parameter)+
+  // (template_argument | template_parameter | variable)+
   private static boolean template_arguments_0(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "template_arguments_0")) return false;
     boolean r;
@@ -1249,17 +1256,18 @@ public class RobotParser implements PsiParser, LightPsiParser {
     return r;
   }
 
-  // template_argument | template_parameter
+  // template_argument | template_parameter | variable
   private static boolean template_arguments_0_0(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "template_arguments_0_0")) return false;
     boolean r;
     r = template_argument(b, l + 1);
     if (!r) r = template_parameter(b, l + 1);
+    if (!r) r = variable(b, l + 1);
     return r;
   }
 
   /* ********************************************************** */
-  // template_parameter_id ASSIGNMENT template_parameter_argument
+  // template_parameter_id ASSIGNMENT (template_parameter_argument | variable)
   public static boolean template_parameter(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "template_parameter")) return false;
     if (!nextTokenIs(b, TEMPLATE_PARAMETER_NAME)) return false;
@@ -1268,9 +1276,18 @@ public class RobotParser implements PsiParser, LightPsiParser {
     r = template_parameter_id(b, l + 1);
     r = r && consumeToken(b, ASSIGNMENT);
     p = r; // pin = 2
-    r = r && template_parameter_argument(b, l + 1);
+    r = r && template_parameter_2(b, l + 1);
     exit_section_(b, l, m, r, p, null);
     return r || p;
+  }
+
+  // template_parameter_argument | variable
+  private static boolean template_parameter_2(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "template_parameter_2")) return false;
+    boolean r;
+    r = template_parameter_argument(b, l + 1);
+    if (!r) r = variable(b, l + 1);
+    return r;
   }
 
   /* ********************************************************** */
@@ -1298,7 +1315,7 @@ public class RobotParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // TEMPLATE_KEYWORDS line_comment* keyword_call_id line_comment* EOL
+  // TEMPLATE_KEYWORDS line_comment* keyword_call line_comment*
   public static boolean template_statements(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "template_statements")) return false;
     if (!nextTokenIs(b, TEMPLATE_KEYWORDS)) return false;
@@ -1307,9 +1324,8 @@ public class RobotParser implements PsiParser, LightPsiParser {
     r = consumeToken(b, TEMPLATE_KEYWORDS);
     p = r; // pin = 1
     r = r && report_error_(b, template_statements_1(b, l + 1));
-    r = p && report_error_(b, keyword_call_id(b, l + 1)) && r;
-    r = p && report_error_(b, template_statements_3(b, l + 1)) && r;
-    r = p && consumeToken(b, EOL) && r;
+    r = p && report_error_(b, keyword_call(b, l + 1)) && r;
+    r = p && template_statements_3(b, l + 1) && r;
     exit_section_(b, l, m, r, p, null);
     return r || p;
   }

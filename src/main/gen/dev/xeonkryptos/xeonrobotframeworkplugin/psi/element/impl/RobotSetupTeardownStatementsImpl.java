@@ -32,4 +32,10 @@ public class RobotSetupTeardownStatementsImpl extends RobotPsiElementBase implem
     return findChildByClass(RobotKeywordCall.class);
   }
 
+  @Override
+  @Nullable
+  public RobotVariable getVariable() {
+    return findChildByClass(RobotVariable.class);
+  }
+
 }

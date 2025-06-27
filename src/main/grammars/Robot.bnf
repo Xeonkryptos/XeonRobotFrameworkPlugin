@@ -75,11 +75,11 @@ documentation_statement ::= DOCUMENTATION_KEYWORD line_comment* argument+ line_c
 
 metadata_statement ::= METADATA_KEYWORD line_comment* argument+ line_comment* EOL {pin=1}
 
-setup_teardown_statements ::= SETUP_TEARDOWN_STATEMENT_KEYWORDS line_comment* keyword_call line_comment* EOL {pin=1}
+setup_teardown_statements ::= SETUP_TEARDOWN_STATEMENT_KEYWORDS line_comment* (keyword_call | variable) line_comment* {pin=1}
 
 tags_statement ::= TAGS_KEYWORDS line_comment* argument+ line_comment* EOL {pin=1}
 
-template_statements ::= TEMPLATE_KEYWORDS line_comment* keyword_call_id line_comment* EOL {pin=1}
+template_statements ::= TEMPLATE_KEYWORDS line_comment* keyword_call line_comment* {pin=1}
 
 timeout_statements ::= TIMEOUT_KEYWORDS line_comment* argument line_comment* EOL {pin=1}
 
@@ -107,9 +107,9 @@ task_statement ::= task_id (bracket_setting | keyword_variable_statement | keywo
 task_id ::= TASK_NAME
 private task_statement_recover ::= !task_id & section_recover
 
-template_arguments ::= (template_argument | template_parameter)+ EOL
+template_arguments ::= (template_argument | template_parameter | variable)+ EOL
 template_argument ::= TEMPLATE_ARGUMENT_VALUE
-template_parameter ::= template_parameter_id ASSIGNMENT template_parameter_argument {
+template_parameter ::= template_parameter_id ASSIGNMENT (template_parameter_argument | variable) {
     pin=2
     implements = "com.intellij.psi.PsiNameIdentifierOwner"
     extends = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotTemplateParameterExtension"

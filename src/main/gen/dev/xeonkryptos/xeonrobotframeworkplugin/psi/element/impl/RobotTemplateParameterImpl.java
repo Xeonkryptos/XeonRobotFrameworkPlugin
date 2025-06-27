@@ -38,4 +38,10 @@ public class RobotTemplateParameterImpl extends RobotTemplateParameterExtension 
     return findNotNullChildByClass(RobotTemplateParameterId.class);
   }
 
+  @Override
+  @Nullable
+  public RobotVariable getVariable() {
+    return findChildByClass(RobotVariable.class);
+  }
+
 }

@@ -10,4 +10,7 @@ public interface RobotSetupTeardownStatements extends PsiElement {
   @Nullable
   RobotKeywordCall getKeywordCall();
 
+  @Nullable
+  RobotVariable getVariable();
+
 }

@@ -38,4 +38,10 @@ public class RobotTemplateArgumentsImpl extends RobotPsiElementBase implements R
     return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotTemplateParameter.class);
   }
 
+  @Override
+  @NotNull
+  public List<RobotVariable> getVariableList() {
+    return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotVariable.class);
+  }
+
 }

@@ -13,4 +13,7 @@ public interface RobotTemplateArguments extends PsiElement {
   @NotNull
   List<RobotTemplateParameter> getTemplateParameterList();
 
+  @NotNull
+  List<RobotVariable> getVariableList();
+
 }

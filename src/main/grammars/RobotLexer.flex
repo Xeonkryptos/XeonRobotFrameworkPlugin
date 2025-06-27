@@ -38,7 +38,7 @@ import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.*;
 
   private void reset() {
       previousStates.clear();
-      localTemplateEnabled = false;
+      localTemplateEnabled = globalTemplateEnabled;
   }
 
   private void pushBackTrailingWhitespace() {
@@ -240,9 +240,15 @@ LineComment = {LineCommentSign} {NON_EOL}*
     {NameKeyword} \s+                      { enterNewState(SETTING); pushBackTrailingWhitespace(); return SUITE_NAME_KEYWORD; }
     {DocumentationKeyword} \s+             { enterNewState(SETTING); pushBackTrailingWhitespace(); return DOCUMENTATION_KEYWORD; }
     {MetadataKeyword} \s+                  { enterNewState(SETTING); pushBackTrailingWhitespace(); return METADATA_KEYWORD; }
-    {SetupTeardownKeywords} \s+            { enterNewState(SETTING); pushBackTrailingWhitespace(); return SETUP_TEARDOWN_STATEMENT_KEYWORDS; }
+    {SetupTeardownKeywords} \s+            { enterNewState(KEYWORD_CALL); pushBackTrailingWhitespace(); return SETUP_TEARDOWN_STATEMENT_KEYWORDS; }
     {TagsKeywords} \s+                     { enterNewState(SETTING); pushBackTrailingWhitespace(); return TAGS_KEYWORDS; }
-    {TemplateKeywords} \s+                 { enterNewState(SETTING); pushBackTrailingWhitespace(); globalTemplateEnabled = true; return TEMPLATE_KEYWORDS; }
+    {TemplateKeywords} \s+                 {
+          enterNewState(KEYWORD_CALL);
+          pushBackTrailingWhitespace();
+          globalTemplateEnabled = true;
+          localTemplateEnabled = true;
+          return TEMPLATE_KEYWORDS;
+      }
     {TimeoutKeywords} \s+                  { enterNewState(SETTING); pushBackTrailingWhitespace(); return TIMEOUT_KEYWORDS; }
 
     {GenericSettingsKeyword} \s+           { enterNewState(SETTING); pushBackTrailingWhitespace(); return UNKNOWN_SETTING_KEYWORD; }
@@ -251,8 +257,8 @@ LineComment = {LineCommentSign} {NON_EOL}*
 <TESTCASE_NAME_DEFINITION> {LiteralValue}  { enterNewState(TESTCASE_DEFINITION); pushBackTrailingWhitespace(); return TEST_CASE_NAME; }
 <TASK_NAME_DEFINITION>     {LiteralValue}  { enterNewState(TASK_DEFINITION); pushBackTrailingWhitespace(); return TASK_NAME; }
 
-<TESTCASE_DEFINITION> ^ {LiteralValue}    { pushBackTrailingWhitespace(); return TEST_CASE_NAME; }
-<TASK_DEFINITION>     ^ {LiteralValue}    { pushBackTrailingWhitespace(); return TASK_NAME; }
+<TESTCASE_DEFINITION> ^ {LiteralValue}     { localTemplateEnabled = globalTemplateEnabled; pushBackTrailingWhitespace(); return TEST_CASE_NAME; }
+<TASK_DEFINITION>     ^ {LiteralValue}     { localTemplateEnabled = globalTemplateEnabled; pushBackTrailingWhitespace(); return TASK_NAME; }
 
 <TEMPLATE_DEFINITION>     ^ {LiteralValue}    {
           templateKeywordFound = false;
@@ -262,10 +268,25 @@ LineComment = {LineCommentSign} {NON_EOL}*
       }
 
 <TESTCASE_DEFINITION, TASK_DEFINITION> {
-    {LocalTemplateKeyword} \s*             { enterNewState(SETTING_TEMPLATE_START); pushBackTrailingWhitespace(); localTemplateEnabled = true; return BRACKET_SETTING_NAME; }
-    {LocalSettingKeyword} \s*              { enterNewState(SETTING); pushBackTrailingWhitespace(); return BRACKET_SETTING_NAME; }
-    {RestrictedLiteralValue}               {
-              int nextState = (localTemplateEnabled || globalTemplateEnabled) && templateKeywordFound ? TEMPLATE_DEFINITION : KEYWORD_CALL;
+    {LocalTemplateKeyword} (\s{2} \s* | \s* {MultiLine}) "NONE"   {
+          yypushback("NONE".length());
+          pushBackTrailingWhitespace();
+          enterNewState(SETTING);
+          localTemplateEnabled = false;
+          return BRACKET_SETTING_NAME;
+      }
+    {LocalTemplateKeyword} / \s* (\R \s* !{Ellipsis} | {MultiLine} \R)      { pushBackTrailingWhitespace(); localTemplateEnabled = false; return BRACKET_SETTING_NAME; }
+    {LocalTemplateKeyword}             {
+          enterNewState(SETTING_TEMPLATE_START);
+          pushBackTrailingWhitespace();
+          localTemplateEnabled = true;
+          return BRACKET_SETTING_NAME;
+      }
+
+    {LocalSettingKeyword} \s*          { enterNewState(SETTING); pushBackTrailingWhitespace(); return BRACKET_SETTING_NAME; }
+
+    {RestrictedLiteralValue}           {
+              int nextState = localTemplateEnabled && templateKeywordFound ? TEMPLATE_DEFINITION : KEYWORD_CALL;
               enterNewState(nextState);
               yypushback(yylength());
           }

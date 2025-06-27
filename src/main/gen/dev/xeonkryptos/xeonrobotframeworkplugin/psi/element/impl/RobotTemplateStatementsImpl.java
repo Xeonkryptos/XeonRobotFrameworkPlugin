@@ -28,8 +28,8 @@ public class RobotTemplateStatementsImpl extends RobotPsiElementBase implements 
 
   @Override
   @Nullable
-  public RobotKeywordCallId getKeywordCallId() {
-    return findChildByClass(RobotKeywordCallId.class);
+  public RobotKeywordCall getKeywordCall() {
+    return findChildByClass(RobotKeywordCall.class);
   }
 
 }
