@@ -7,7 +7,7 @@ import com.intellij.psi.PsiElement;
 
 public interface RobotVariableStatement extends PsiElement {
 
-  @NotNull
+  @Nullable
   RobotVariableStatement getVariableStatement();
 
 }

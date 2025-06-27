@@ -138,9 +138,9 @@ parameter ::= parameter_id ASSIGNMENT argument {
 }
 parameter_id ::= PARAMETER_NAME
 
-fake variable_statement ::= single_variable_statement | keyword_variable_statement
-single_variable_statement ::= variable ASSIGNMENT? variable_value* EOL
-keyword_variable_statement ::= variable+ ASSIGNMENT? keyword_call // Without EOL as it is handled at a higher level
+fake variable_statement ::= single_variable_statement | keyword_variable_statement?
+single_variable_statement ::= variable ASSIGNMENT? variable_value*  line_comment* EOL
+keyword_variable_statement ::= variable+ ASSIGNMENT? keyword_call line_comment* // Without EOL as it is handled at a higher level
 variable ::= scalar_variable | list_variable | dict_variable | environment_variable
 variable_value ::= value+
 

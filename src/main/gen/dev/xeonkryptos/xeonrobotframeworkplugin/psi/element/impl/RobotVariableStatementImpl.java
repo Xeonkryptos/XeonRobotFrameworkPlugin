@@ -27,9 +27,9 @@ public class RobotVariableStatementImpl extends RobotPsiElementBase implements R
   }
 
   @Override
-  @NotNull
+  @Nullable
   public RobotVariableStatement getVariableStatement() {
-    return findNotNullChildByClass(RobotVariableStatement.class);
+    return findChildByClass(RobotVariableStatement.class);
   }
 
 }

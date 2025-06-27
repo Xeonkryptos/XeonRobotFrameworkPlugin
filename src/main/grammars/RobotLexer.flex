@@ -206,8 +206,6 @@ LineComment = {LineCommentSign} {NON_EOL}*
     {ClosingVariable} "]"                { yypushback(1); return VARIABLE_END; }
     {EqualSign} \s*                      { pushBackTrailingWhitespace(); return ASSIGNMENT; }
     {RestrictedLiteralValue}             { pushBackTrailingWhitespace(); return ARGUMENT_VALUE; }
-
-    {EOL}+                               { leaveState(); return EOL; }
 }
 
 <VARIABLE_USAGE> {
@@ -310,9 +308,10 @@ LineComment = {LineCommentSign} {NON_EOL}*
 
 // Multiline handling (don't return EOL on detected multiline). If there is a multiline without the Ellipsis (...) marker,
 // then return EOL to mark the end of the statement.
-<SETTING, SETTING_TEMPLATE_START, KEYWORD_CALL, KEYWORD_ARGUMENTS> {
-    {MultiLine}             { return WHITE_SPACE; }
-    {EOL}+                  { leaveState(); return EOL; }
+<SETTING, SETTING_TEMPLATE_START, KEYWORD_CALL, KEYWORD_ARGUMENTS, VARIABLE_DEFINITION> {
+    {MultiLine}                { return WHITE_SPACE; }
+    {EOL} \s* {LineComment}    { yypushback(yylength() - 1); return WHITE_SPACE; }
+    {EOL}+                     { leaveState(); return EOL; }
 }
 
 <SETTING_TEMPLATE_START>  {RestrictedLiteralValue}        {
