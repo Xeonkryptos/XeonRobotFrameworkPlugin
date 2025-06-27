@@ -35,6 +35,8 @@ public interface RobotTypes {
   IElementType NEW_LIBRARY_NAME = new RobotElementType("NEW_LIBRARY_NAME");
   IElementType PARAMETER = new RobotElementType("PARAMETER");
   IElementType PARAMETER_ID = new RobotElementType("PARAMETER_ID");
+  IElementType PYTHON_EXPRESSION = new RobotElementType("PYTHON_EXPRESSION");
+  IElementType PYTHON_EXPRESSION_BODY = new RobotElementType("PYTHON_EXPRESSION_BODY");
   IElementType RESOURCE_IMPORT = new RobotElementType("RESOURCE_IMPORT");
   IElementType SCALAR_VARIABLE = new RobotElementType("SCALAR_VARIABLE");
   IElementType SECTION = new RobotElementType("SECTION");
@@ -82,6 +84,9 @@ public interface RobotTypes {
   IElementType LIST_VARIABLE_START = new RobotTokenType("LIST_VARIABLE_START");
   IElementType METADATA_KEYWORD = new RobotTokenType("METADATA_KEYWORD");
   IElementType PARAMETER_NAME = new RobotTokenType("PARAMETER_NAME");
+  IElementType PYTHON_EXPRESSION_CONTENT = new RobotTokenType("PYTHON_EXPRESSION_CONTENT");
+  IElementType PYTHON_EXPRESSION_END = new RobotTokenType("PYTHON_EXPRESSION_END");
+  IElementType PYTHON_EXPRESSION_START = new RobotTokenType("PYTHON_EXPRESSION_START");
   IElementType RESOURCE_IMPORT_KEYWORD = new RobotTokenType("RESOURCE_IMPORT_KEYWORD");
   IElementType SCALAR_VARIABLE_START = new RobotTokenType("SCALAR_VARIABLE_START");
   IElementType SETTINGS_HEADER = new RobotTokenType("SETTINGS_HEADER");
@@ -190,6 +195,12 @@ public interface RobotTypes {
       }
       else if (type == PARAMETER_ID) {
         return new RobotParameterIdImpl(node);
+      }
+      else if (type == PYTHON_EXPRESSION) {
+        return new RobotPythonExpressionImpl(node);
+      }
+      else if (type == PYTHON_EXPRESSION_BODY) {
+        return new RobotPythonExpressionBodyImpl(node);
       }
       else if (type == RESOURCE_IMPORT) {
         return new RobotResourceImportImpl(node);

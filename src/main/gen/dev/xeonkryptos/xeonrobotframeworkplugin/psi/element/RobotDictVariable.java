@@ -13,7 +13,10 @@ public interface RobotDictVariable extends RobotVariable {
   @NotNull
   List<RobotExtendedVariableNestedAccess> getExtendedVariableNestedAccessList();
 
-  @NotNull
+  @Nullable
+  RobotPythonExpression getPythonExpression();
+
+  @Nullable
   RobotVariableId getVariableId();
 
 }

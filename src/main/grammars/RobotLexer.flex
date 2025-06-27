@@ -163,7 +163,7 @@ LineComment = {LineCommentSign} {NON_EOL}*
 %state TESTCASE_NAME_DEFINITION, TESTCASE_DEFINITION, TASK_NAME_DEFINITION, TASK_DEFINITION
 %state SETTING, SETTING_TEMPLATE_START, TEMPLATE_DEFINITION
 %state KEYWORD_CALL, KEYWORD_ARGUMENTS
-%state VARIABLE_DEFINITION, VARIABLE_USAGE, EXTENDED_VARIABLE_ACCESS
+%state VARIABLE_DEFINITION, VARIABLE_USAGE, EXTENDED_VARIABLE_ACCESS, PYTHON_EXPRESSION
 %state PARAMETER_ASSIGNMENT, PARAMETER_VALUE, TEMPLATE_PARAMETER_ASSIGNMENT, TEMPLATE_PARAMETER_VALUE
 
 %xstate COMMENTS_SECTION
@@ -212,6 +212,7 @@ LineComment = {LineCommentSign} {NON_EOL}*
     {ClosingVariable} "["         { leaveState(); enterNewState(EXTENDED_VARIABLE_ACCESS); yypushback(1); return VARIABLE_END; }
     {ClosingVariable} "]"         { leaveState(); yypushback(1); return VARIABLE_END; }
     {ClosingVariable}             { leaveState(); return VARIABLE_END; }
+    "{" \s*                       { enterNewState(PYTHON_EXPRESSION); pushBackTrailingWhitespace(); return PYTHON_EXPRESSION_START; }
     {RestrictedLiteralValue}      { return ARGUMENT_VALUE; }
 }
 
@@ -228,6 +229,11 @@ LineComment = {LineCommentSign} {NON_EOL}*
     {VariableIndexAccess} \s+    { leaveState(); pushBackTrailingWhitespace(); return VARIABLE_INDEX_ACCESS; }
     {VariableKeyAccess}   \s+    { leaveState(); pushBackTrailingWhitespace(); return VARIABLE_KEY_ACCESS; }
     "]" \s+                      { leaveState(); pushBackTrailingWhitespace(); return VARIABLE_ACCESS_END; }
+}
+
+<PYTHON_EXPRESSION> {
+    {ClosingVariable}{2}         { leaveState(); yypushback(1); return PYTHON_EXPRESSION_END; }
+    ( [^}] | }[^}] )+            { return PYTHON_EXPRESSION_CONTENT; }
 }
 
 <SETTINGS_SECTION> {

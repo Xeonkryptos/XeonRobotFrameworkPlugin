@@ -117,6 +117,14 @@ public class RobotVisitor extends PsiElementVisitor {
     visitPsiNamedElement(o);
   }
 
+  public void visitPythonExpression(@NotNull RobotPythonExpression o) {
+    visitPsiElement(o);
+  }
+
+  public void visitPythonExpressionBody(@NotNull RobotPythonExpressionBody o) {
+    visitPsiElement(o);
+  }
+
   public void visitResourceImport(@NotNull RobotResourceImport o) {
     visitPsiElement(o);
   }

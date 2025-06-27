@@ -40,9 +40,15 @@ public class RobotDictVariableImpl extends RobotVariableImpl implements RobotDic
   }
 
   @Override
-  @NotNull
+  @Nullable
+  public RobotPythonExpression getPythonExpression() {
+    return findChildByClass(RobotPythonExpression.class);
+  }
+
+  @Override
+  @Nullable
   public RobotVariableId getVariableId() {
-    return findNotNullChildByClass(RobotVariableId.class);
+    return findChildByClass(RobotVariableId.class);
   }
 
 }

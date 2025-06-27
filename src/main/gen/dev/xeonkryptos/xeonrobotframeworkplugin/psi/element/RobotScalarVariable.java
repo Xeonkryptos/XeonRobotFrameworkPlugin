@@ -16,7 +16,10 @@ public interface RobotScalarVariable extends RobotVariable {
   @NotNull
   List<RobotExtendedVariableSliceAccess> getExtendedVariableSliceAccessList();
 
-  @NotNull
+  @Nullable
+  RobotPythonExpression getPythonExpression();
+
+  @Nullable
   RobotVariableId getVariableId();
 
 }
