@@ -289,6 +289,32 @@ LineComment = {LineCommentSign} {NON_EOL}*
 
     {LocalSettingKeyword} \s*          { enterNewState(SETTING); pushBackTrailingWhitespace(); return BRACKET_SETTING_NAME; }
 
+    "GIVEN" \s+ {RestrictedLiteralValue}    {
+          yypushback(yylength() - "GIVEN".length());
+          enterNewState(KEYWORD_CALL);
+          return GIVEN;
+      }
+    "WHEN" \s+  {RestrictedLiteralValue}    {
+         yypushback(yylength() - "WHEN".length());
+         enterNewState(KEYWORD_CALL);
+         return WHEN;
+     }
+    "THEN" \s+  {RestrictedLiteralValue}    {
+         yypushback(yylength() - "THEN".length());
+         enterNewState(KEYWORD_CALL);
+         return THEN;
+     }
+    "AND" \s+  {RestrictedLiteralValue}     {
+         yypushback(yylength() - "AND".length());
+         enterNewState(KEYWORD_CALL);
+         return AND;
+     }
+    "BUT" \s+  {RestrictedLiteralValue}     {
+         yypushback(yylength() - "BUT".length());
+         enterNewState(KEYWORD_CALL);
+         return BUT;
+     }
+
     {RestrictedLiteralValue}           {
               int nextState = localTemplateEnabled && templateKeywordFound ? TEMPLATE_DEFINITION : KEYWORD_CALL;
               enterNewState(nextState);

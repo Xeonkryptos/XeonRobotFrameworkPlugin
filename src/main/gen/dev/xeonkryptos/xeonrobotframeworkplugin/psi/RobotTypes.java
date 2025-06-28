@@ -9,6 +9,7 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.*;
 public interface RobotTypes {
 
   IElementType ARGUMENT = new RobotElementType("ARGUMENT");
+  IElementType BDD_STATEMENT = new RobotElementType("BDD_STATEMENT");
   IElementType BRACKET_SETTING = new RobotElementType("BRACKET_SETTING");
   IElementType BRACKET_SETTING_ID = new RobotElementType("BRACKET_SETTING_ID");
   IElementType COMMENTS_SECTION = new RobotElementType("COMMENTS_SECTION");
@@ -66,15 +67,18 @@ public interface RobotTypes {
   IElementType VARIABLE_ID = new RobotElementType("VARIABLE_ID");
   IElementType VARIABLE_VALUE = new RobotElementType("VARIABLE_VALUE");
 
+  IElementType AND = new RobotTokenType("AND");
   IElementType ARGUMENT_VALUE = new RobotTokenType("ARGUMENT_VALUE");
   IElementType ASSIGNMENT = new RobotTokenType("ASSIGNMENT");
   IElementType BRACKET_SETTING_NAME = new RobotTokenType("BRACKET_SETTING_NAME");
+  IElementType BUT = new RobotTokenType("BUT");
   IElementType COMMENT = new RobotTokenType("COMMENT");
   IElementType COMMENTS_HEADER = new RobotTokenType("COMMENTS_HEADER");
   IElementType DICT_VARIABLE_START = new RobotTokenType("DICT_VARIABLE_START");
   IElementType DOCUMENTATION_KEYWORD = new RobotTokenType("DOCUMENTATION_KEYWORD");
   IElementType ENV_VARIABLE_START = new RobotTokenType("ENV_VARIABLE_START");
   IElementType EOL = new RobotTokenType("EOL");
+  IElementType GIVEN = new RobotTokenType("GIVEN");
   IElementType KEYWORDS_HEADER = new RobotTokenType("KEYWORDS_HEADER");
   IElementType KEYWORD_NAME = new RobotTokenType("KEYWORD_NAME");
   IElementType KEYWORD_STATEMENT_NAME = new RobotTokenType("KEYWORD_STATEMENT_NAME");
@@ -100,6 +104,7 @@ public interface RobotTypes {
   IElementType TEMPLATE_PARAMETER_NAME = new RobotTokenType("TEMPLATE_PARAMETER_NAME");
   IElementType TEST_CASES_HEADER = new RobotTokenType("TEST_CASES_HEADER");
   IElementType TEST_CASE_NAME = new RobotTokenType("TEST_CASE_NAME");
+  IElementType THEN = new RobotTokenType("THEN");
   IElementType TIMEOUT_KEYWORDS = new RobotTokenType("TIMEOUT_KEYWORDS");
   IElementType UNKNOWN_SETTING_KEYWORD = new RobotTokenType("UNKNOWN_SETTING_KEYWORD");
   IElementType VARIABLES_HEADER = new RobotTokenType("VARIABLES_HEADER");
@@ -110,6 +115,7 @@ public interface RobotTypes {
   IElementType VARIABLE_INDEX_ACCESS = new RobotTokenType("VARIABLE_INDEX_ACCESS");
   IElementType VARIABLE_KEY_ACCESS = new RobotTokenType("VARIABLE_KEY_ACCESS");
   IElementType VARIABLE_SLICE_ACCESS = new RobotTokenType("VARIABLE_SLICE_ACCESS");
+  IElementType WHEN = new RobotTokenType("WHEN");
   IElementType WITH_NAME_KEYWORD = new RobotTokenType("WITH_NAME_KEYWORD");
 
   class Factory {
@@ -117,6 +123,9 @@ public interface RobotTypes {
       IElementType type = node.getElementType();
       if (type == ARGUMENT) {
         return new RobotArgumentImpl(node);
+      }
+      else if (type == BDD_STATEMENT) {
+        return new RobotBddStatementImpl(node);
       }
       else if (type == BRACKET_SETTING) {
         return new RobotBracketSettingImpl(node);

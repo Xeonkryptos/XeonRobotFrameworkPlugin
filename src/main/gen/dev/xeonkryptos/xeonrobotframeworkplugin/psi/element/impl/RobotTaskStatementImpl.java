@@ -34,6 +34,12 @@ public class RobotTaskStatementImpl extends RobotTaskExtension implements RobotT
 
   @Override
   @NotNull
+  public List<RobotBddStatement> getBddStatementList() {
+    return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotBddStatement.class);
+  }
+
+  @Override
+  @NotNull
   public List<RobotBracketSetting> getBracketSettingList() {
     return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotBracketSetting.class);
   }

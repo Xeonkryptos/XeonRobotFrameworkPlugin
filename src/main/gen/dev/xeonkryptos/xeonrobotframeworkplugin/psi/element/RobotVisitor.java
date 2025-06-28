@@ -13,6 +13,10 @@ public class RobotVisitor extends PsiElementVisitor {
     visitPsiElement(o);
   }
 
+  public void visitBddStatement(@NotNull RobotBddStatement o) {
+    visitPsiElement(o);
+  }
+
   public void visitBracketSetting(@NotNull RobotBracketSetting o) {
     visitPsiNameIdentifierOwner(o);
   }

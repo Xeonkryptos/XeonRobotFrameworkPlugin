@@ -55,6 +55,113 @@ public class RobotParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
+  // (GIVEN keyword_call WHEN keyword_call | GIVEN keyword_call | WHEN keyword_call) THEN keyword_call (AND keyword_call)* (BUT keyword_call)*
+  public static boolean bdd_statement(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "bdd_statement")) return false;
+    if (!nextTokenIs(b, "<bdd statement>", GIVEN, WHEN)) return false;
+    boolean r;
+    Marker m = enter_section_(b, l, _NONE_, BDD_STATEMENT, "<bdd statement>");
+    r = bdd_statement_0(b, l + 1);
+    r = r && consumeToken(b, THEN);
+    r = r && keyword_call(b, l + 1);
+    r = r && bdd_statement_3(b, l + 1);
+    r = r && bdd_statement_4(b, l + 1);
+    exit_section_(b, l, m, r, false, null);
+    return r;
+  }
+
+  // GIVEN keyword_call WHEN keyword_call | GIVEN keyword_call | WHEN keyword_call
+  private static boolean bdd_statement_0(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "bdd_statement_0")) return false;
+    boolean r;
+    Marker m = enter_section_(b);
+    r = bdd_statement_0_0(b, l + 1);
+    if (!r) r = bdd_statement_0_1(b, l + 1);
+    if (!r) r = bdd_statement_0_2(b, l + 1);
+    exit_section_(b, m, null, r);
+    return r;
+  }
+
+  // GIVEN keyword_call WHEN keyword_call
+  private static boolean bdd_statement_0_0(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "bdd_statement_0_0")) return false;
+    boolean r;
+    Marker m = enter_section_(b);
+    r = consumeToken(b, GIVEN);
+    r = r && keyword_call(b, l + 1);
+    r = r && consumeToken(b, WHEN);
+    r = r && keyword_call(b, l + 1);
+    exit_section_(b, m, null, r);
+    return r;
+  }
+
+  // GIVEN keyword_call
+  private static boolean bdd_statement_0_1(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "bdd_statement_0_1")) return false;
+    boolean r;
+    Marker m = enter_section_(b);
+    r = consumeToken(b, GIVEN);
+    r = r && keyword_call(b, l + 1);
+    exit_section_(b, m, null, r);
+    return r;
+  }
+
+  // WHEN keyword_call
+  private static boolean bdd_statement_0_2(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "bdd_statement_0_2")) return false;
+    boolean r;
+    Marker m = enter_section_(b);
+    r = consumeToken(b, WHEN);
+    r = r && keyword_call(b, l + 1);
+    exit_section_(b, m, null, r);
+    return r;
+  }
+
+  // (AND keyword_call)*
+  private static boolean bdd_statement_3(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "bdd_statement_3")) return false;
+    while (true) {
+      int c = current_position_(b);
+      if (!bdd_statement_3_0(b, l + 1)) break;
+      if (!empty_element_parsed_guard_(b, "bdd_statement_3", c)) break;
+    }
+    return true;
+  }
+
+  // AND keyword_call
+  private static boolean bdd_statement_3_0(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "bdd_statement_3_0")) return false;
+    boolean r;
+    Marker m = enter_section_(b);
+    r = consumeToken(b, AND);
+    r = r && keyword_call(b, l + 1);
+    exit_section_(b, m, null, r);
+    return r;
+  }
+
+  // (BUT keyword_call)*
+  private static boolean bdd_statement_4(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "bdd_statement_4")) return false;
+    while (true) {
+      int c = current_position_(b);
+      if (!bdd_statement_4_0(b, l + 1)) break;
+      if (!empty_element_parsed_guard_(b, "bdd_statement_4", c)) break;
+    }
+    return true;
+  }
+
+  // BUT keyword_call
+  private static boolean bdd_statement_4_0(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "bdd_statement_4_0")) return false;
+    boolean r;
+    Marker m = enter_section_(b);
+    r = consumeToken(b, BUT);
+    r = r && keyword_call(b, l + 1);
+    exit_section_(b, m, null, r);
+    return r;
+  }
+
+  /* ********************************************************** */
   // bracket_setting_id line_comment* (parameter | argument | keyword_call_id)* line_comment* EOL
   public static boolean bracket_setting(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "bracket_setting")) return false;
@@ -1201,7 +1308,7 @@ public class RobotParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // task_id (bracket_setting | keyword_variable_statement | keyword_call | template_arguments | argument | parameter | line_comment)*
+  // task_id (testcase_task_statement)*
   public static boolean task_statement(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "task_statement")) return false;
     boolean r, p;
@@ -1213,7 +1320,7 @@ public class RobotParser implements PsiParser, LightPsiParser {
     return r || p;
   }
 
-  // (bracket_setting | keyword_variable_statement | keyword_call | template_arguments | argument | parameter | line_comment)*
+  // (testcase_task_statement)*
   private static boolean task_statement_1(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "task_statement_1")) return false;
     while (true) {
@@ -1224,17 +1331,13 @@ public class RobotParser implements PsiParser, LightPsiParser {
     return true;
   }
 
-  // bracket_setting | keyword_variable_statement | keyword_call | template_arguments | argument | parameter | line_comment
+  // (testcase_task_statement)
   private static boolean task_statement_1_0(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "task_statement_1_0")) return false;
     boolean r;
-    r = bracket_setting(b, l + 1);
-    if (!r) r = keyword_variable_statement(b, l + 1);
-    if (!r) r = keyword_call(b, l + 1);
-    if (!r) r = template_arguments(b, l + 1);
-    if (!r) r = argument(b, l + 1);
-    if (!r) r = parameter(b, l + 1);
-    if (!r) r = line_comment(b, l + 1);
+    Marker m = enter_section_(b);
+    r = testcase_task_statement(b, l + 1);
+    exit_section_(b, m, null, r);
     return r;
   }
 
@@ -1442,7 +1545,7 @@ public class RobotParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // test_case_id (bracket_setting | keyword_variable_statement | keyword_call | template_arguments | argument | parameter | line_comment)*
+  // test_case_id (testcase_task_statement)*
   public static boolean test_case_statement(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "test_case_statement")) return false;
     boolean r, p;
@@ -1454,7 +1557,7 @@ public class RobotParser implements PsiParser, LightPsiParser {
     return r || p;
   }
 
-  // (bracket_setting | keyword_variable_statement | keyword_call | template_arguments | argument | parameter | line_comment)*
+  // (testcase_task_statement)*
   private static boolean test_case_statement_1(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "test_case_statement_1")) return false;
     while (true) {
@@ -1465,17 +1568,13 @@ public class RobotParser implements PsiParser, LightPsiParser {
     return true;
   }
 
-  // bracket_setting | keyword_variable_statement | keyword_call | template_arguments | argument | parameter | line_comment
+  // (testcase_task_statement)
   private static boolean test_case_statement_1_0(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "test_case_statement_1_0")) return false;
     boolean r;
-    r = bracket_setting(b, l + 1);
-    if (!r) r = keyword_variable_statement(b, l + 1);
-    if (!r) r = keyword_call(b, l + 1);
-    if (!r) r = template_arguments(b, l + 1);
-    if (!r) r = argument(b, l + 1);
-    if (!r) r = parameter(b, l + 1);
-    if (!r) r = line_comment(b, l + 1);
+    Marker m = enter_section_(b);
+    r = testcase_task_statement(b, l + 1);
+    exit_section_(b, m, null, r);
     return r;
   }
 
@@ -1533,6 +1632,29 @@ public class RobotParser implements PsiParser, LightPsiParser {
       if (!empty_element_parsed_guard_(b, "test_cases_section_1", c)) break;
     }
     return true;
+  }
+
+  /* ********************************************************** */
+  // bracket_setting
+  //      | keyword_variable_statement
+  //      | bdd_statement
+  //      | keyword_call
+  //      | template_arguments
+  //      | argument
+  //      | parameter
+  //      | line_comment
+  static boolean testcase_task_statement(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "testcase_task_statement")) return false;
+    boolean r;
+    r = bracket_setting(b, l + 1);
+    if (!r) r = keyword_variable_statement(b, l + 1);
+    if (!r) r = bdd_statement(b, l + 1);
+    if (!r) r = keyword_call(b, l + 1);
+    if (!r) r = template_arguments(b, l + 1);
+    if (!r) r = argument(b, l + 1);
+    if (!r) r = parameter(b, l + 1);
+    if (!r) r = line_comment(b, l + 1);
+    return r;
   }
 
   /* ********************************************************** */

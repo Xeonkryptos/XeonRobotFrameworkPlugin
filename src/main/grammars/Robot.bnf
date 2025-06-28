@@ -90,7 +90,7 @@ unknown_setting_statements ::= unknown_setting_statement_id (parameter | argumen
 }
 unknown_setting_statement_id ::= UNKNOWN_SETTING_KEYWORD
 
-test_case_statement ::= test_case_id (bracket_setting | keyword_variable_statement | keyword_call | template_arguments | argument | parameter | line_comment)* {
+test_case_statement ::= test_case_id (testcase_task_statement)* {
     pin=1
     implements = "com.intellij.psi.PsiNameIdentifierOwner"
     extends = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotTestCaseExtension"
@@ -98,7 +98,7 @@ test_case_statement ::= test_case_id (bracket_setting | keyword_variable_stateme
 }
 test_case_id ::= TEST_CASE_NAME
 private test_case_statement_recover ::= !test_case_id & section_recover
-task_statement ::= task_id (bracket_setting | keyword_variable_statement | keyword_call | template_arguments | argument | parameter | line_comment)* {
+task_statement ::= task_id (testcase_task_statement)* {
     pin=1
     implements = "com.intellij.psi.PsiNameIdentifierOwner"
     extends = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotTaskExtension"
@@ -106,6 +106,15 @@ task_statement ::= task_id (bracket_setting | keyword_variable_statement | keywo
 }
 task_id ::= TASK_NAME
 private task_statement_recover ::= !task_id & section_recover
+
+private testcase_task_statement ::= bracket_setting
+     | keyword_variable_statement
+     | bdd_statement
+     | keyword_call
+     | template_arguments
+     | argument
+     | parameter
+     | line_comment
 
 template_arguments ::= (template_argument | template_parameter | variable)+ EOL
 template_argument ::= TEMPLATE_ARGUMENT_VALUE
@@ -123,6 +132,8 @@ bracket_setting ::= bracket_setting_id line_comment* (parameter | argument | key
     extends = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotBracketSettingExtension"
 }
 bracket_setting_id ::= BRACKET_SETTING_NAME
+
+bdd_statement ::= (GIVEN keyword_call WHEN keyword_call | GIVEN keyword_call | WHEN keyword_call) THEN keyword_call (AND keyword_call)* (BUT keyword_call)*
 
 keyword_call ::= keyword_call_id (parameter | argument | line_comment)* EOL {
     pin=1

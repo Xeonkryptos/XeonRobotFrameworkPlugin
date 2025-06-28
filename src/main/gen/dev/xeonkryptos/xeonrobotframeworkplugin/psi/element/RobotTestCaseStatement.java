@@ -12,6 +12,9 @@ public interface RobotTestCaseStatement extends PsiNameIdentifierOwner {
   List<RobotArgument> getArgumentList();
 
   @NotNull
+  List<RobotBddStatement> getBddStatementList();
+
+  @NotNull
   List<RobotBracketSetting> getBracketSettingList();
 
   @NotNull
