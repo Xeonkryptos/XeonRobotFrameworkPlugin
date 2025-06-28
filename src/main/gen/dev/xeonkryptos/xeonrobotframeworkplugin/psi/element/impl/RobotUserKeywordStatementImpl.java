@@ -28,14 +28,8 @@ public class RobotUserKeywordStatementImpl extends RobotUserKeywordExtension imp
 
   @Override
   @NotNull
-  public List<RobotConstantValue> getConstantValueList() {
-    return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotConstantValue.class);
-  }
-
-  @Override
-  @NotNull
-  public List<RobotEolBasedKeywordCall> getEolBasedKeywordCallList() {
-    return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotEolBasedKeywordCall.class);
+  public List<RobotExecutableStatement> getExecutableStatementList() {
+    return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotExecutableStatement.class);
   }
 
   @Override
@@ -48,12 +42,6 @@ public class RobotUserKeywordStatementImpl extends RobotUserKeywordExtension imp
   @NotNull
   public RobotUserKeywordStatementId getUserKeywordStatementId() {
     return findNotNullChildByClass(RobotUserKeywordStatementId.class);
-  }
-
-  @Override
-  @NotNull
-  public List<RobotVariable> getVariableList() {
-    return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotVariable.class);
   }
 
 }

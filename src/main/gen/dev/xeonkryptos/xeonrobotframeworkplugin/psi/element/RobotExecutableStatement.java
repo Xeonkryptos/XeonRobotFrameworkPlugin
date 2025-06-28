@@ -5,9 +5,18 @@ import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 
-public interface RobotTemplateStatements extends PsiElement {
+public interface RobotExecutableStatement extends PsiElement {
+
+  @NotNull
+  List<RobotConstantValue> getConstantValueList();
 
   @Nullable
   RobotKeywordCall getKeywordCall();
+
+  @NotNull
+  List<RobotVariable> getVariableList();
+
+  @Nullable
+  RobotVariableStatement getVariableStatement();
 
 }

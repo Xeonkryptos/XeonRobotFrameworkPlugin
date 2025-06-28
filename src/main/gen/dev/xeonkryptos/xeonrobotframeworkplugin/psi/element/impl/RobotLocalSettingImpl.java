@@ -34,8 +34,8 @@ public class RobotLocalSettingImpl extends RobotLocalSettingExtension implements
 
   @Override
   @NotNull
-  public List<RobotEolFreeKeywordCall> getEolFreeKeywordCallList() {
-    return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotEolFreeKeywordCall.class);
+  public List<RobotKeywordCall> getKeywordCallList() {
+    return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotKeywordCall.class);
   }
 
   @Override

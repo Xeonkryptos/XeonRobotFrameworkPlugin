@@ -15,15 +15,18 @@ public interface RobotTypes {
   IElementType DICT_VARIABLE = new RobotElementType("DICT_VARIABLE");
   IElementType DOCUMENTATION_STATEMENT = new RobotElementType("DOCUMENTATION_STATEMENT");
   IElementType ENVIRONMENT_VARIABLE = new RobotElementType("ENVIRONMENT_VARIABLE");
-  IElementType EOL_BASED_KEYWORD_CALL = new RobotElementType("EOL_BASED_KEYWORD_CALL");
-  IElementType EOL_FREE_KEYWORD_CALL = new RobotElementType("EOL_FREE_KEYWORD_CALL");
+  IElementType EXECUTABLE_STATEMENT = new RobotElementType("EXECUTABLE_STATEMENT");
   IElementType EXTENDED_VARIABLE_INDEX_ACCESS = new RobotElementType("EXTENDED_VARIABLE_INDEX_ACCESS");
   IElementType EXTENDED_VARIABLE_KEY_ACCESS = new RobotElementType("EXTENDED_VARIABLE_KEY_ACCESS");
   IElementType EXTENDED_VARIABLE_NESTED_ACCESS = new RobotElementType("EXTENDED_VARIABLE_NESTED_ACCESS");
   IElementType EXTENDED_VARIABLE_SLICE_ACCESS = new RobotElementType("EXTENDED_VARIABLE_SLICE_ACCESS");
   IElementType FILE_2 = new RobotElementType("FILE_2");
+  IElementType FOR_LOOP_STRUCTURE = new RobotElementType("FOR_LOOP_STRUCTURE");
+  IElementType GROUP_STRUCTURE = new RobotElementType("GROUP_STRUCTURE");
+  IElementType IF_STRUCTURE = new RobotElementType("IF_STRUCTURE");
   IElementType INLINE_VARIABLE_STATEMENT = new RobotElementType("INLINE_VARIABLE_STATEMENT");
   IElementType KEYWORDS_SECTION = new RobotElementType("KEYWORDS_SECTION");
+  IElementType KEYWORD_CALL = new RobotElementType("KEYWORD_CALL");
   IElementType KEYWORD_CALL_ID = new RobotElementType("KEYWORD_CALL_ID");
   IElementType KEYWORD_VARIABLE_STATEMENT = new RobotElementType("KEYWORD_VARIABLE_STATEMENT");
   IElementType LANGUAGE = new RobotElementType("LANGUAGE");
@@ -59,6 +62,7 @@ public interface RobotTypes {
   IElementType TEST_CASE_ID = new RobotElementType("TEST_CASE_ID");
   IElementType TEST_CASE_STATEMENT = new RobotElementType("TEST_CASE_STATEMENT");
   IElementType TIMEOUT_STATEMENTS = new RobotElementType("TIMEOUT_STATEMENTS");
+  IElementType TRY_STRUCTURE = new RobotElementType("TRY_STRUCTURE");
   IElementType UNKNOWN_SETTING_STATEMENTS = new RobotElementType("UNKNOWN_SETTING_STATEMENTS");
   IElementType UNKNOWN_SETTING_STATEMENT_ID = new RobotElementType("UNKNOWN_SETTING_STATEMENT_ID");
   IElementType USER_KEYWORD_STATEMENT = new RobotElementType("USER_KEYWORD_STATEMENT");
@@ -68,18 +72,30 @@ public interface RobotTypes {
   IElementType VARIABLES_SECTION = new RobotElementType("VARIABLES_SECTION");
   IElementType VARIABLE_ID = new RobotElementType("VARIABLE_ID");
   IElementType VARIABLE_VALUE = new RobotElementType("VARIABLE_VALUE");
+  IElementType WHILE_LOOP_STRUCTURE = new RobotElementType("WHILE_LOOP_STRUCTURE");
 
   IElementType AND = new RobotTokenType("AND");
   IElementType ARGUMENT_VALUE = new RobotTokenType("ARGUMENT_VALUE");
   IElementType ASSIGNMENT = new RobotTokenType("ASSIGNMENT");
+  IElementType BREAK = new RobotTokenType("BREAK");
   IElementType BUT = new RobotTokenType("BUT");
   IElementType COMMENT = new RobotTokenType("COMMENT");
   IElementType COMMENTS_HEADER = new RobotTokenType("COMMENTS_HEADER");
+  IElementType CONTINUE = new RobotTokenType("CONTINUE");
   IElementType DICT_VARIABLE_START = new RobotTokenType("DICT_VARIABLE_START");
   IElementType DOCUMENTATION_KEYWORD = new RobotTokenType("DOCUMENTATION_KEYWORD");
+  IElementType ELSE = new RobotTokenType("ELSE");
+  IElementType ELSE_IF = new RobotTokenType("ELSE_IF");
+  IElementType END = new RobotTokenType("END");
   IElementType ENV_VARIABLE_START = new RobotTokenType("ENV_VARIABLE_START");
   IElementType EOL = new RobotTokenType("EOL");
+  IElementType EXCEPT = new RobotTokenType("EXCEPT");
+  IElementType FINALLY = new RobotTokenType("FINALLY");
+  IElementType FOR = new RobotTokenType("FOR");
+  IElementType FOR_IN = new RobotTokenType("FOR_IN");
   IElementType GIVEN = new RobotTokenType("GIVEN");
+  IElementType GROUP = new RobotTokenType("GROUP");
+  IElementType IF = new RobotTokenType("IF");
   IElementType KEYWORD_NAME = new RobotTokenType("KEYWORD_NAME");
   IElementType LANGUAGE_KEYWORD = new RobotTokenType("LANGUAGE_KEYWORD");
   IElementType LANGUAGE_NAME = new RobotTokenType("LANGUAGE_NAME");
@@ -107,6 +123,7 @@ public interface RobotTypes {
   IElementType TEST_CASE_NAME = new RobotTokenType("TEST_CASE_NAME");
   IElementType THEN = new RobotTokenType("THEN");
   IElementType TIMEOUT_KEYWORDS = new RobotTokenType("TIMEOUT_KEYWORDS");
+  IElementType TRY = new RobotTokenType("TRY");
   IElementType UNKNOWN_SETTING_KEYWORD = new RobotTokenType("UNKNOWN_SETTING_KEYWORD");
   IElementType USER_KEYWORDS_HEADER = new RobotTokenType("USER_KEYWORDS_HEADER");
   IElementType USER_KEYWORD_NAME = new RobotTokenType("USER_KEYWORD_NAME");
@@ -120,6 +137,7 @@ public interface RobotTypes {
   IElementType VARIABLE_KEY_ACCESS = new RobotTokenType("VARIABLE_KEY_ACCESS");
   IElementType VARIABLE_SLICE_ACCESS = new RobotTokenType("VARIABLE_SLICE_ACCESS");
   IElementType WHEN = new RobotTokenType("WHEN");
+  IElementType WHILE = new RobotTokenType("WHILE");
   IElementType WITH_NAME_KEYWORD = new RobotTokenType("WITH_NAME_KEYWORD");
 
   class Factory {
@@ -146,11 +164,8 @@ public interface RobotTypes {
       else if (type == ENVIRONMENT_VARIABLE) {
         return new RobotEnvironmentVariableImpl(node);
       }
-      else if (type == EOL_BASED_KEYWORD_CALL) {
-        return new RobotEolBasedKeywordCallImpl(node);
-      }
-      else if (type == EOL_FREE_KEYWORD_CALL) {
-        return new RobotEolFreeKeywordCallImpl(node);
+      else if (type == EXECUTABLE_STATEMENT) {
+        return new RobotExecutableStatementImpl(node);
       }
       else if (type == EXTENDED_VARIABLE_INDEX_ACCESS) {
         return new RobotExtendedVariableIndexAccessImpl(node);
@@ -167,11 +182,23 @@ public interface RobotTypes {
       else if (type == FILE_2) {
         return new RobotFile2Impl(node);
       }
+      else if (type == FOR_LOOP_STRUCTURE) {
+        return new RobotForLoopStructureImpl(node);
+      }
+      else if (type == GROUP_STRUCTURE) {
+        return new RobotGroupStructureImpl(node);
+      }
+      else if (type == IF_STRUCTURE) {
+        return new RobotIfStructureImpl(node);
+      }
       else if (type == INLINE_VARIABLE_STATEMENT) {
         return new RobotInlineVariableStatementImpl(node);
       }
       else if (type == KEYWORDS_SECTION) {
         return new RobotKeywordsSectionImpl(node);
+      }
+      else if (type == KEYWORD_CALL) {
+        return new RobotKeywordCallImpl(node);
       }
       else if (type == KEYWORD_CALL_ID) {
         return new RobotKeywordCallIdImpl(node);
@@ -275,6 +302,9 @@ public interface RobotTypes {
       else if (type == TIMEOUT_STATEMENTS) {
         return new RobotTimeoutStatementsImpl(node);
       }
+      else if (type == TRY_STRUCTURE) {
+        return new RobotTryStructureImpl(node);
+      }
       else if (type == UNKNOWN_SETTING_STATEMENTS) {
         return new RobotUnknownSettingStatementsImpl(node);
       }
@@ -298,6 +328,9 @@ public interface RobotTypes {
       }
       else if (type == VARIABLE_VALUE) {
         return new RobotVariableValueImpl(node);
+      }
+      else if (type == WHILE_LOOP_STRUCTURE) {
+        return new RobotWhileLoopStructureImpl(node);
       }
       throw new AssertionError("Unknown element type: " + type);
     }

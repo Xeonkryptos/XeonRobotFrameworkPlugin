@@ -5,6 +5,12 @@ import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 
-public interface RobotEolFreeKeywordCall extends RobotKeywordCall {
+public interface RobotGroupStructure extends RobotExecutableStatement {
+
+  @Nullable
+  RobotArgument getArgument();
+
+  @NotNull
+  List<RobotExecutableStatement> getExecutableStatementList();
 
 }

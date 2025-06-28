@@ -4,18 +4,14 @@ package dev.xeonkryptos.xeonrobotframeworkplugin.psi.element;
 import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
-import com.intellij.psi.PsiNameIdentifierOwner;
 
-public interface RobotLocalSetting extends PsiNameIdentifierOwner {
+public interface RobotWhileLoopStructure extends RobotExecutableStatement {
 
   @NotNull
   List<RobotArgument> getArgumentList();
 
   @NotNull
-  List<RobotKeywordCall> getKeywordCallList();
-
-  @NotNull
-  RobotLocalSettingId getLocalSettingId();
+  List<RobotExecutableStatement> getExecutableStatementList();
 
   @NotNull
   List<RobotParameter> getParameterList();

@@ -10,21 +10,33 @@ import com.intellij.psi.util.PsiTreeUtil;
 import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.*;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.*;
 
-public class RobotEolFreeKeywordCallImpl extends RobotKeywordCallImpl implements RobotEolFreeKeywordCall {
+public class RobotGroupStructureImpl extends RobotExecutableStatementImpl implements RobotGroupStructure {
 
-  public RobotEolFreeKeywordCallImpl(@NotNull ASTNode node) {
+  public RobotGroupStructureImpl(@NotNull ASTNode node) {
     super(node);
   }
 
   @Override
   public void accept(@NotNull RobotVisitor visitor) {
-    visitor.visitEolFreeKeywordCall(this);
+    visitor.visitGroupStructure(this);
   }
 
   @Override
   public void accept(@NotNull PsiElementVisitor visitor) {
     if (visitor instanceof RobotVisitor) accept((RobotVisitor)visitor);
     else super.accept(visitor);
+  }
+
+  @Override
+  @Nullable
+  public RobotArgument getArgument() {
+    return findChildByClass(RobotArgument.class);
+  }
+
+  @Override
+  @NotNull
+  public List<RobotExecutableStatement> getExecutableStatementList() {
+    return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotExecutableStatement.class);
   }
 
 }

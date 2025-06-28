@@ -9,18 +9,12 @@ import com.intellij.psi.PsiNameIdentifierOwner;
 public interface RobotUserKeywordStatement extends PsiNameIdentifierOwner {
 
   @NotNull
-  List<RobotConstantValue> getConstantValueList();
-
-  @NotNull
-  List<RobotEolBasedKeywordCall> getEolBasedKeywordCallList();
+  List<RobotExecutableStatement> getExecutableStatementList();
 
   @NotNull
   List<RobotLocalSetting> getLocalSettingList();
 
   @NotNull
   RobotUserKeywordStatementId getUserKeywordStatementId();
-
-  @NotNull
-  List<RobotVariable> getVariableList();
 
 }

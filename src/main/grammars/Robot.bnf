@@ -24,6 +24,8 @@
   implements(".*_keyword_call")="com.intellij.psi.PsiNameIdentifierOwner"
   extends(".*_keyword_call")="keyword_call"
 
+  extends(".*_structure")="executable_statement"
+
   extends(".*")="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotPsiElementBase"
 }
 
@@ -50,7 +52,7 @@ variables_section ::= VARIABLES_HEADER single_variable_statement* {pin=1 recover
 test_cases_section ::= TEST_CASES_HEADER test_case_statement* {pin=1 recoverWhile=section_recover}
 tasks_section ::= TASKS_HEADER task_statement* {pin=1 recoverWhile=section_recover}
 keywords_section ::= USER_KEYWORDS_HEADER user_keyword_statement* {pin=1 recoverWhile=section_recover}
-comments_section ::= COMMENTS_HEADER COMMENT* {pin=1 recoverWhile=section_recover}
+comments_section ::= COMMENTS_HEADER line_comment* {pin=1 recoverWhile=section_recover}
 private section_recover ::= !(SETTINGS_HEADER | VARIABLES_HEADER | TEST_CASES_HEADER | TASKS_HEADER | USER_KEYWORDS_HEADER | COMMENTS_HEADER)
 
 private setting_statements ::= library_import
@@ -115,7 +117,7 @@ private testcase_task_statement ::= local_setting
     | testcase_task_statement_free_style
     | testcase_task_statement_template_style
     | line_comment
-private testcase_task_statement_free_style ::= inline_variable_statement | keyword_variable_statement | eol_based_keyword_call
+private testcase_task_statement_free_style ::= executable_statement
 private testcase_task_statement_template_style ::= template_arguments
 
 template_arguments ::= (template_argument | template_parameter | variable)+ EOL
@@ -135,7 +137,7 @@ bdd_statement ::= (
     )
     THEN eol_based_keyword_call (AND eol_based_keyword_call)* (BUT eol_based_keyword_call)*
 
-user_keyword_statement ::= user_keyword_statement_id line_comment* (local_setting | eol_based_keyword_call | line_comment)* user_keyword_return_statement? line_comment? {
+user_keyword_statement ::= user_keyword_statement_id line_comment* (local_setting | executable_statement | line_comment)* line_comment? {
     pin=1
     implements = "com.intellij.psi.PsiNameIdentifierOwner"
     extends = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotUserKeywordExtension"
@@ -144,8 +146,6 @@ user_keyword_statement ::= user_keyword_statement_id line_comment* (local_settin
 user_keyword_statement_id ::= USER_KEYWORD_NAME
 private user_keyword_statement_recover ::= !user_keyword_statement_id & section_recover
 
-private user_keyword_return_statement ::= RETURN value* EOL {pin=1}
-
 local_setting ::= local_setting_id line_comment* (parameter | argument | eol_free_keyword_call)* line_comment* EOL {
     pin=1
     implements = "com.intellij.psi.PsiNameIdentifierOwner"
@@ -153,12 +153,38 @@ local_setting ::= local_setting_id line_comment* (parameter | argument | eol_fre
 }
 local_setting_id ::= LOCAL_SETTING_NAME
 
+executable_statement ::= loop_structure | loop_control_structure | control_structure | call_structure | return_structure
+
+private control_structure ::= if_structure
+    | try_structure
+    | group_structure
+private loop_structure ::= for_loop_structure
+    | while_loop_structure
+private call_structure ::= eol_based_keyword_call
+    | keyword_variable_statement
+    | inline_variable_statement
+private loop_control_structure ::= BREAK | CONTINUE
+private return_structure ::= RETURN value* EOL {pin=1}
+
+for_loop_structure ::= FOR variable FOR_IN (parameter | argument)+ line_comment* executable_statement* line_comment* END line_comment* {pin=3}
+while_loop_structure ::= WHILE (argument | parameter)* line_comment* executable_statement* line_comment* END line_comment*
+if_structure ::= IF argument line_comment* executable_statement*
+    (ELSE_IF argument line_comment* executable_statement*)*
+    (ELSE line_comment* executable_statement*)?
+    END? line_comment*
+try_structure ::= TRY line_comment* executable_statement* line_comment*
+    (EXCEPT (parameter | argument)* executable_statement* line_comment*)*
+    (ELSE line_comment* executable_statement* line_comment*)?
+    (FINALLY line_comment* executable_statement* line_comment*)?
+    END line_comment*
+group_structure ::= GROUP argument? line_comment* executable_statement* END line_comment*
+
 fake keyword_call ::= base_keyword_call {
     implements = "com.intellij.psi.PsiNameIdentifierOwner"
     extends = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotKeywordCallExtension"
 }
-eol_based_keyword_call ::= base_keyword_call EOL
-eol_free_keyword_call ::= base_keyword_call
+eol_based_keyword_call ::= base_keyword_call EOL {elementType=keyword_call}
+eol_free_keyword_call ::= base_keyword_call {elementType=keyword_call}
 private base_keyword_call ::= keyword_call_id (parameter | argument | line_comment)* {pin=1}
 keyword_call_id ::= KEYWORD_NAME
 

@@ -37,12 +37,8 @@ public class RobotVisitor extends PsiElementVisitor {
     visitVariable(o);
   }
 
-  public void visitEolBasedKeywordCall(@NotNull RobotEolBasedKeywordCall o) {
-    visitKeywordCall(o);
-  }
-
-  public void visitEolFreeKeywordCall(@NotNull RobotEolFreeKeywordCall o) {
-    visitKeywordCall(o);
+  public void visitExecutableStatement(@NotNull RobotExecutableStatement o) {
+    visitPsiElement(o);
   }
 
   public void visitExtendedVariableIndexAccess(@NotNull RobotExtendedVariableIndexAccess o) {
@@ -63,6 +59,18 @@ public class RobotVisitor extends PsiElementVisitor {
 
   public void visitFile2(@NotNull RobotFile2 o) {
     visitPsiElement(o);
+  }
+
+  public void visitForLoopStructure(@NotNull RobotForLoopStructure o) {
+    visitExecutableStatement(o);
+  }
+
+  public void visitGroupStructure(@NotNull RobotGroupStructure o) {
+    visitExecutableStatement(o);
+  }
+
+  public void visitIfStructure(@NotNull RobotIfStructure o) {
+    visitExecutableStatement(o);
   }
 
   public void visitInlineVariableStatement(@NotNull RobotInlineVariableStatement o) {
@@ -217,6 +225,10 @@ public class RobotVisitor extends PsiElementVisitor {
     visitPsiElement(o);
   }
 
+  public void visitTryStructure(@NotNull RobotTryStructure o) {
+    visitExecutableStatement(o);
+  }
+
   public void visitUnknownSettingStatementId(@NotNull RobotUnknownSettingStatementId o) {
     visitPsiNamedElement(o);
   }
@@ -255,6 +267,10 @@ public class RobotVisitor extends PsiElementVisitor {
 
   public void visitVariablesSection(@NotNull RobotVariablesSection o) {
     visitSection(o);
+  }
+
+  public void visitWhileLoopStructure(@NotNull RobotWhileLoopStructure o) {
+    visitExecutableStatement(o);
   }
 
   public void visitPsiNameIdentifierOwner(@NotNull PsiNameIdentifierOwner o) {

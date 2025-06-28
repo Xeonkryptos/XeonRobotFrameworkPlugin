@@ -165,7 +165,7 @@ LineComment = {LineCommentSign} {NON_EOL}*
 %state LANGUAGE_SETTING
 %state SETTINGS_SECTION, VARIABLES_SECTION
 %state TESTCASE_NAME_DEFINITION, TESTCASE_DEFINITION, TASK_NAME_DEFINITION, TASK_DEFINITION
-%state USER_KEYWORD_NAME_DEFINITION, USER_KEYWORD_DEFINITION, USER_KEYWORD_RETURN_STATEMENT, USER_KEYWORD_ARGUMENTS_SETTING
+%state USER_KEYWORD_NAME_DEFINITION, USER_KEYWORD_DEFINITION, USER_KEYWORD_RETURN_STATEMENT
 %state SETTING, SETTING_TEMPLATE_START, TEMPLATE_DEFINITION
 %state KEYWORD_CALL, KEYWORD_ARGUMENTS
 %state INLINE_VARIABLE_DEFINITION, VARIABLE_DEFINITION, VARIABLE_USAGE, EXTENDED_VARIABLE_ACCESS, PYTHON_EXPRESSION
@@ -285,8 +285,6 @@ LineComment = {LineCommentSign} {NON_EOL}*
       }
 
 <USER_KEYWORD_DEFINITION> {
-    {LocalArgumentsKeyword} \s*    { pushBackTrailingWhitespace(); enterNewState(USER_KEYWORD_ARGUMENTS_SETTING); return LOCAL_SETTING_NAME; }
-
     "RETURN" \s* [^\R]+            {
           yypushback(yylength() - "RETURN".length());
           pushBackTrailingWhitespace();
@@ -313,9 +311,27 @@ LineComment = {LineCommentSign} {NON_EOL}*
       }
 
     <USER_KEYWORD_DEFINITION> {
-        {LocalSetupTeardownKeywords} \s+       { enterNewState(KEYWORD_CALL); pushBackTrailingWhitespace(); return LOCAL_SETTING_NAME; }
-        {LocalSettingKeyword} \s*              { enterNewState(SETTING); pushBackTrailingWhitespace(); return LOCAL_SETTING_NAME; }
+        {LocalSetupTeardownKeywords} \s+          { enterNewState(KEYWORD_CALL); pushBackTrailingWhitespace(); return LOCAL_SETTING_NAME; }
+        {LocalSettingKeyword} \s*                 { enterNewState(SETTING); pushBackTrailingWhitespace(); return LOCAL_SETTING_NAME; }
+
+        "FOR" \s{2}\s* {LiteralValue}             { yypushback(yylength() - "FOR".length()); return FOR; }
+        "IN" \s{2}\s* {LiteralValue}              { yypushback(yylength() - "IN".length()); return FOR_IN; }
+        "IN ENUMERATE" \s{2}\s* {LiteralValue}    { yypushback(yylength() - "IN".length()); return FOR_IN; }
+        "IN RANGE" \s{2}\s* {LiteralValue}        { yypushback(yylength() - "IN".length()); return FOR_IN; }
+        "IN ZIP" \s{2}\s* {LiteralValue}          { yypushback(yylength() - "IN".length()); return FOR_IN; }
+        "WHILE" \s{2}\s* {LiteralValue}?          { yypushback(yylength() - "WHILE".length()); return WHILE; }
+        "IF" \s{2}\s* {LiteralValue}              { yypushback(yylength() - "IF".length()); return IF; }
+        "ELSE IF" \s{2}\s* {LiteralValue}         { yypushback(yylength() - "ELSE IF".length()); return ELSE_IF; }
+        "ELSE" \s*                                { pushBackTrailingWhitespace(); return ELSE; }
+        "TRY" \s* \R                              { pushBackTrailingWhitespace(); return TRY; }
+        "EXCEPT" \s{2}\s* {LiteralValue}          { yypushback(yylength() - "EXCEPT".length()); return EXCEPT; }
+        "FINALLY" \s* \R                          { pushBackTrailingWhitespace(); return FINALLY; }
+        "BREAK" \s* \R                            { pushBackTrailingWhitespace(); return BREAK; }
+        "CONTINUE" \s* \R                         { pushBackTrailingWhitespace(); return CONTINUE; }
+        "GROUP" (\s{2}\s* {LiteralValue})?        { yypushback(yylength() - "GROUP".length()); return GROUP; }
+        "END" \s* \R                              { pushBackTrailingWhitespace(); return END; }
     }
+    "RETURN" \s*  { pushBackTrailingWhitespace(); return RETURN; }
 
     "GIVEN" \s+ {RestrictedLiteralValue}    {
           yypushback(yylength() - "GIVEN".length());
@@ -377,7 +393,7 @@ LineComment = {LineCommentSign} {NON_EOL}*
 
 // Multiline handling (don't return EOL on detected multiline). If there is a multiline without the Ellipsis (...) marker,
 // then return EOL to mark the end of the statement.
-<SETTING, SETTING_TEMPLATE_START, KEYWORD_CALL, KEYWORD_ARGUMENTS, VARIABLE_DEFINITION, USER_KEYWORD_ARGUMENTS_SETTING> {
+<SETTING, SETTING_TEMPLATE_START, KEYWORD_CALL, KEYWORD_ARGUMENTS, VARIABLE_DEFINITION> {
     {MultiLine}                                { return WHITE_SPACE; }
     {EOL} \s* {LineComment}                    { yypushback(yylength() - 1); return WHITE_SPACE; }
     <USER_KEYWORD_RETURN_STATEMENT> {EOL}+     { leaveState(); return EOL; }

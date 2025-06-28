@@ -10,14 +10,15 @@ import com.intellij.psi.util.PsiTreeUtil;
 import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.*;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.*;
 
-public class RobotSetupTeardownStatementsImpl extends RobotPsiElementBase implements RobotSetupTeardownStatements {
+public class RobotIfStructureImpl extends RobotExecutableStatementImpl implements RobotIfStructure {
 
-  public RobotSetupTeardownStatementsImpl(@NotNull ASTNode node) {
+  public RobotIfStructureImpl(@NotNull ASTNode node) {
     super(node);
   }
 
+  @Override
   public void accept(@NotNull RobotVisitor visitor) {
-    visitor.visitSetupTeardownStatements(this);
+    visitor.visitIfStructure(this);
   }
 
   @Override
@@ -27,15 +28,15 @@ public class RobotSetupTeardownStatementsImpl extends RobotPsiElementBase implem
   }
 
   @Override
-  @Nullable
-  public RobotKeywordCall getKeywordCall() {
-    return findChildByClass(RobotKeywordCall.class);
+  @NotNull
+  public List<RobotArgument> getArgumentList() {
+    return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotArgument.class);
   }
 
   @Override
-  @Nullable
-  public RobotVariable getVariable() {
-    return findChildByClass(RobotVariable.class);
+  @NotNull
+  public List<RobotExecutableStatement> getExecutableStatementList() {
+    return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotExecutableStatement.class);
   }
 
 }

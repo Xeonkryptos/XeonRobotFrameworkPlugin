@@ -12,7 +12,7 @@ public interface RobotTestCaseStatement extends PsiNameIdentifierOwner {
   List<RobotBddStatement> getBddStatementList();
 
   @NotNull
-  List<RobotEolBasedKeywordCall> getEolBasedKeywordCallList();
+  List<RobotExecutableStatement> getExecutableStatementList();
 
   @NotNull
   List<RobotLocalSetting> getLocalSettingList();
@@ -22,8 +22,5 @@ public interface RobotTestCaseStatement extends PsiNameIdentifierOwner {
 
   @NotNull
   RobotTestCaseId getTestCaseId();
-
-  @NotNull
-  List<RobotVariableStatement> getVariableStatementList();
 
 }

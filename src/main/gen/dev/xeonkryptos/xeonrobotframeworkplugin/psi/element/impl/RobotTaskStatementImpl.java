@@ -34,8 +34,8 @@ public class RobotTaskStatementImpl extends RobotTaskExtension implements RobotT
 
   @Override
   @NotNull
-  public List<RobotEolBasedKeywordCall> getEolBasedKeywordCallList() {
-    return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotEolBasedKeywordCall.class);
+  public List<RobotExecutableStatement> getExecutableStatementList() {
+    return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotExecutableStatement.class);
   }
 
   @Override
@@ -54,12 +54,6 @@ public class RobotTaskStatementImpl extends RobotTaskExtension implements RobotT
   @NotNull
   public List<RobotTemplateArguments> getTemplateArgumentsList() {
     return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotTemplateArguments.class);
-  }
-
-  @Override
-  @NotNull
-  public List<RobotVariableStatement> getVariableStatementList() {
-    return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotVariableStatement.class);
   }
 
 }

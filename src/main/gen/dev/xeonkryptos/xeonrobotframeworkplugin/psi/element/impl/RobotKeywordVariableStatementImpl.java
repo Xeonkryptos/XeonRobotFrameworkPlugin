@@ -29,8 +29,8 @@ public class RobotKeywordVariableStatementImpl extends RobotVariableStatementImp
 
   @Override
   @NotNull
-  public RobotEolBasedKeywordCall getEolBasedKeywordCall() {
-    return findNotNullChildByClass(RobotEolBasedKeywordCall.class);
+  public RobotKeywordCall getKeywordCall() {
+    return findNotNullChildByClass(RobotKeywordCall.class);
   }
 
   @Override

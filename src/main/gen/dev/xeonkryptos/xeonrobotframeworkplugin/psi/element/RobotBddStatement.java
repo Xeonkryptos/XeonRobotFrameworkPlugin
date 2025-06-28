@@ -8,6 +8,6 @@ import com.intellij.psi.PsiElement;
 public interface RobotBddStatement extends PsiElement {
 
   @NotNull
-  List<RobotEolBasedKeywordCall> getEolBasedKeywordCallList();
+  List<RobotKeywordCall> getKeywordCallList();
 
 }

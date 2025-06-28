@@ -8,7 +8,7 @@ import com.intellij.psi.PsiElement;
 public interface RobotSetupTeardownStatements extends PsiElement {
 
   @Nullable
-  RobotEolBasedKeywordCall getEolBasedKeywordCall();
+  RobotKeywordCall getKeywordCall();
 
   @Nullable
   RobotVariable getVariable();

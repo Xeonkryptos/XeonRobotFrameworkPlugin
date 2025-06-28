@@ -8,7 +8,7 @@ import com.intellij.psi.PsiElement;
 public interface RobotKeywordVariableStatement extends RobotVariableStatement {
 
   @NotNull
-  RobotEolBasedKeywordCall getEolBasedKeywordCall();
+  RobotKeywordCall getKeywordCall();
 
   @NotNull
   List<RobotVariable> getVariableList();
