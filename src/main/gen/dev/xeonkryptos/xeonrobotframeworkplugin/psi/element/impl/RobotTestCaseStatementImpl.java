@@ -34,14 +34,14 @@ public class RobotTestCaseStatementImpl extends RobotTestCaseExtension implement
 
   @Override
   @NotNull
-  public List<RobotBracketSetting> getBracketSettingList() {
-    return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotBracketSetting.class);
+  public List<RobotEolBasedKeywordCall> getEolBasedKeywordCallList() {
+    return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotEolBasedKeywordCall.class);
   }
 
   @Override
   @NotNull
-  public List<RobotKeywordCall> getKeywordCallList() {
-    return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotKeywordCall.class);
+  public List<RobotLocalSetting> getLocalSettingList() {
+    return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotLocalSetting.class);
   }
 
   @Override

@@ -6,16 +6,16 @@ import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiNameIdentifierOwner;
 
-public interface RobotBracketSetting extends PsiNameIdentifierOwner {
+public interface RobotLocalSetting extends PsiNameIdentifierOwner {
 
   @NotNull
   List<RobotArgument> getArgumentList();
 
   @NotNull
-  RobotBracketSettingId getBracketSettingId();
+  List<RobotEolFreeKeywordCall> getEolFreeKeywordCallList();
 
   @NotNull
-  List<RobotKeywordCallId> getKeywordCallIdList();
+  RobotLocalSettingId getLocalSettingId();
 
   @NotNull
   List<RobotParameter> getParameterList();

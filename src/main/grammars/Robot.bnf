@@ -21,6 +21,9 @@
 
   extends(".*_variable_statement")="variable_statement"
 
+  implements(".*_keyword_call")="com.intellij.psi.PsiNameIdentifierOwner"
+  extends(".*_keyword_call")="keyword_call"
+
   extends(".*")="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotPsiElementBase"
 }
 
@@ -46,9 +49,9 @@ settings_section ::= SETTINGS_HEADER setting_statements* {pin=1 recoverWhile=sec
 variables_section ::= VARIABLES_HEADER single_variable_statement* {pin=1 recoverWhile=section_recover}
 test_cases_section ::= TEST_CASES_HEADER test_case_statement* {pin=1 recoverWhile=section_recover}
 tasks_section ::= TASKS_HEADER task_statement* {pin=1 recoverWhile=section_recover}
-keywords_section ::= KEYWORDS_HEADER keyword_statement* {pin=1 recoverWhile=section_recover}
+keywords_section ::= USER_KEYWORDS_HEADER user_keyword_statement* {pin=1 recoverWhile=section_recover}
 comments_section ::= COMMENTS_HEADER COMMENT* {pin=1 recoverWhile=section_recover}
-private section_recover ::= !(SETTINGS_HEADER | VARIABLES_HEADER | TEST_CASES_HEADER | TASKS_HEADER | KEYWORDS_HEADER | COMMENTS_HEADER)
+private section_recover ::= !(SETTINGS_HEADER | VARIABLES_HEADER | TEST_CASES_HEADER | TASKS_HEADER | USER_KEYWORDS_HEADER | COMMENTS_HEADER)
 
 private setting_statements ::= library_import
     | resource_import
@@ -75,11 +78,11 @@ documentation_statement ::= DOCUMENTATION_KEYWORD line_comment* argument+ line_c
 
 metadata_statement ::= METADATA_KEYWORD line_comment* argument+ line_comment* EOL {pin=1}
 
-setup_teardown_statements ::= SETUP_TEARDOWN_STATEMENT_KEYWORDS line_comment* (keyword_call | variable) line_comment* {pin=1}
+setup_teardown_statements ::= SETUP_TEARDOWN_STATEMENT_KEYWORDS line_comment* (eol_based_keyword_call | variable) line_comment* {pin=1}
 
 tags_statement ::= TAGS_KEYWORDS line_comment* argument+ line_comment* EOL {pin=1}
 
-template_statements ::= TEMPLATE_KEYWORDS line_comment* keyword_call line_comment* {pin=1}
+template_statements ::= TEMPLATE_KEYWORDS line_comment* eol_based_keyword_call line_comment* {pin=1}
 
 timeout_statements ::= TIMEOUT_KEYWORDS line_comment* argument line_comment* EOL {pin=1}
 
@@ -107,12 +110,12 @@ task_statement ::= task_id (testcase_task_statement)* {
 task_id ::= TASK_NAME
 private task_statement_recover ::= !task_id & section_recover
 
-private testcase_task_statement ::= bracket_setting
+private testcase_task_statement ::= local_setting
     | bdd_statement
     | testcase_task_statement_free_style
     | testcase_task_statement_template_style
     | line_comment
-private testcase_task_statement_free_style ::= inline_variable_statement | keyword_variable_statement | keyword_call
+private testcase_task_statement_free_style ::= inline_variable_statement | keyword_variable_statement | eol_based_keyword_call
 private testcase_task_statement_template_style ::= template_arguments
 
 template_arguments ::= (template_argument | template_parameter | variable)+ EOL
@@ -125,20 +128,38 @@ template_parameter ::= template_parameter_id ASSIGNMENT (template_parameter_argu
 template_parameter_id ::= TEMPLATE_PARAMETER_NAME
 template_parameter_argument ::= TEMPLATE_ARGUMENT_VALUE
 
-bracket_setting ::= bracket_setting_id line_comment* (parameter | argument | keyword_call_id)* line_comment* EOL {
+bdd_statement ::= (
+        GIVEN eol_based_keyword_call WHEN eol_based_keyword_call
+        | GIVEN eol_based_keyword_call
+        | WHEN eol_based_keyword_call
+    )
+    THEN eol_based_keyword_call (AND eol_based_keyword_call)* (BUT eol_based_keyword_call)*
+
+user_keyword_statement ::= user_keyword_statement_id line_comment* (local_setting | eol_based_keyword_call | line_comment)* user_keyword_return_statement? line_comment? {
     pin=1
     implements = "com.intellij.psi.PsiNameIdentifierOwner"
-    extends = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotBracketSettingExtension"
+    extends = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotUserKeywordExtension"
+    recoverWhile=user_keyword_statement_recover
 }
-bracket_setting_id ::= BRACKET_SETTING_NAME
+user_keyword_statement_id ::= USER_KEYWORD_NAME
+private user_keyword_statement_recover ::= !user_keyword_statement_id & section_recover
 
-bdd_statement ::= (GIVEN keyword_call WHEN keyword_call | GIVEN keyword_call | WHEN keyword_call) THEN keyword_call (AND keyword_call)* (BUT keyword_call)*
+private user_keyword_return_statement ::= RETURN value* EOL {pin=1}
 
-keyword_call ::= keyword_call_id (parameter | argument | line_comment)* EOL {
+local_setting ::= local_setting_id line_comment* (parameter | argument | eol_free_keyword_call)* line_comment* EOL {
     pin=1
+    implements = "com.intellij.psi.PsiNameIdentifierOwner"
+    extends = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotLocalSettingExtension"
+}
+local_setting_id ::= LOCAL_SETTING_NAME
+
+fake keyword_call ::= base_keyword_call {
     implements = "com.intellij.psi.PsiNameIdentifierOwner"
     extends = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotKeywordCallExtension"
 }
+eol_based_keyword_call ::= base_keyword_call EOL
+eol_free_keyword_call ::= base_keyword_call
+private base_keyword_call ::= keyword_call_id (parameter | argument | line_comment)* {pin=1}
 keyword_call_id ::= KEYWORD_NAME
 
 parameter ::= parameter_id ASSIGNMENT argument {
@@ -151,14 +172,11 @@ parameter_id ::= PARAMETER_NAME
 fake variable_statement ::= inline_variable_statement | single_variable_statement | keyword_variable_statement?
 inline_variable_statement ::= VAR single_variable_statement {pin=1}
 single_variable_statement ::= variable ASSIGNMENT? variable_value* line_comment* EOL
-keyword_variable_statement ::= variable+ ASSIGNMENT? keyword_call line_comment* // Without EOL as it is handled at a higher level
+keyword_variable_statement ::= variable+ ASSIGNMENT? eol_based_keyword_call line_comment* // Without EOL as it is handled at a higher level
 variable ::= scalar_variable | list_variable | dict_variable | environment_variable
 variable_value ::= value+
 
 argument ::= value
-
-keyword_statement ::= keyword_statement_id
-keyword_statement_id ::= KEYWORD_STATEMENT_NAME
 
 scalar_variable ::= SCALAR_VARIABLE_START (variable_id | python_expression) VARIABLE_END (extended_variable_slice_access | extended_variable_index_access | extended_variable_nested_access)*
 list_variable ::= LIST_VARIABLE_START (variable_id | python_expression) VARIABLE_END (extended_variable_slice_access | extended_variable_index_access | extended_variable_nested_access)*

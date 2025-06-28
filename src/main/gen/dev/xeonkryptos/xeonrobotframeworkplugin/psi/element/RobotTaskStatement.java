@@ -12,10 +12,10 @@ public interface RobotTaskStatement extends PsiNameIdentifierOwner {
   List<RobotBddStatement> getBddStatementList();
 
   @NotNull
-  List<RobotBracketSetting> getBracketSettingList();
+  List<RobotEolBasedKeywordCall> getEolBasedKeywordCallList();
 
   @NotNull
-  List<RobotKeywordCall> getKeywordCallList();
+  List<RobotLocalSetting> getLocalSettingList();
 
   @NotNull
   RobotTaskId getTaskId();

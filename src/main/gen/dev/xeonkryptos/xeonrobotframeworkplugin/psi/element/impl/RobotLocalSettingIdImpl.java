@@ -10,14 +10,14 @@ import com.intellij.psi.util.PsiTreeUtil;
 import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.*;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.*;
 
-public class RobotKeywordStatementIdImpl extends RobotPsiElementBase implements RobotKeywordStatementId {
+public class RobotLocalSettingIdImpl extends RobotPsiElementBase implements RobotLocalSettingId {
 
-  public RobotKeywordStatementIdImpl(@NotNull ASTNode node) {
+  public RobotLocalSettingIdImpl(@NotNull ASTNode node) {
     super(node);
   }
 
   public void accept(@NotNull RobotVisitor visitor) {
-    visitor.visitKeywordStatementId(this);
+    visitor.visitLocalSettingId(this);
   }
 
   @Override

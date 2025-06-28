@@ -10,26 +10,20 @@ import com.intellij.psi.util.PsiTreeUtil;
 import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.*;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.*;
 
-public class RobotKeywordStatementImpl extends RobotPsiElementBase implements RobotKeywordStatement {
+public class RobotUserKeywordStatementIdImpl extends RobotPsiElementBase implements RobotUserKeywordStatementId {
 
-  public RobotKeywordStatementImpl(@NotNull ASTNode node) {
+  public RobotUserKeywordStatementIdImpl(@NotNull ASTNode node) {
     super(node);
   }
 
   public void accept(@NotNull RobotVisitor visitor) {
-    visitor.visitKeywordStatement(this);
+    visitor.visitUserKeywordStatementId(this);
   }
 
   @Override
   public void accept(@NotNull PsiElementVisitor visitor) {
     if (visitor instanceof RobotVisitor) accept((RobotVisitor)visitor);
     else super.accept(visitor);
-  }
-
-  @Override
-  @NotNull
-  public RobotKeywordStatementId getKeywordStatementId() {
-    return findNotNullChildByClass(RobotKeywordStatementId.class);
   }
 
 }

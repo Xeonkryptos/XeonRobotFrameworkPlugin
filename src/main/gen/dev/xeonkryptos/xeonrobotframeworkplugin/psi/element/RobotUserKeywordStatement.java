@@ -6,10 +6,10 @@ import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiNameIdentifierOwner;
 
-public interface RobotTestCaseStatement extends PsiNameIdentifierOwner {
+public interface RobotUserKeywordStatement extends PsiNameIdentifierOwner {
 
   @NotNull
-  List<RobotBddStatement> getBddStatementList();
+  List<RobotConstantValue> getConstantValueList();
 
   @NotNull
   List<RobotEolBasedKeywordCall> getEolBasedKeywordCallList();
@@ -18,12 +18,9 @@ public interface RobotTestCaseStatement extends PsiNameIdentifierOwner {
   List<RobotLocalSetting> getLocalSettingList();
 
   @NotNull
-  List<RobotTemplateArguments> getTemplateArgumentsList();
+  RobotUserKeywordStatementId getUserKeywordStatementId();
 
   @NotNull
-  RobotTestCaseId getTestCaseId();
-
-  @NotNull
-  List<RobotVariableStatement> getVariableStatementList();
+  List<RobotVariable> getVariableList();
 
 }

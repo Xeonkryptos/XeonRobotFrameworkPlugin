@@ -28,8 +28,8 @@ public class RobotBddStatementImpl extends RobotPsiElementBase implements RobotB
 
   @Override
   @NotNull
-  public List<RobotKeywordCall> getKeywordCallList() {
-    return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotKeywordCall.class);
+  public List<RobotEolBasedKeywordCall> getEolBasedKeywordCallList() {
+    return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotEolBasedKeywordCall.class);
   }
 
 }

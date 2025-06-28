@@ -10,14 +10,14 @@ import com.intellij.psi.util.PsiTreeUtil;
 import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.*;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.*;
 
-public class RobotBracketSettingImpl extends RobotBracketSettingExtension implements RobotBracketSetting {
+public class RobotLocalSettingImpl extends RobotLocalSettingExtension implements RobotLocalSetting {
 
-  public RobotBracketSettingImpl(@NotNull ASTNode node) {
+  public RobotLocalSettingImpl(@NotNull ASTNode node) {
     super(node);
   }
 
   public void accept(@NotNull RobotVisitor visitor) {
-    visitor.visitBracketSetting(this);
+    visitor.visitLocalSetting(this);
   }
 
   @Override
@@ -34,14 +34,14 @@ public class RobotBracketSettingImpl extends RobotBracketSettingExtension implem
 
   @Override
   @NotNull
-  public RobotBracketSettingId getBracketSettingId() {
-    return findNotNullChildByClass(RobotBracketSettingId.class);
+  public List<RobotEolFreeKeywordCall> getEolFreeKeywordCallList() {
+    return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotEolFreeKeywordCall.class);
   }
 
   @Override
   @NotNull
-  public List<RobotKeywordCallId> getKeywordCallIdList() {
-    return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotKeywordCallId.class);
+  public RobotLocalSettingId getLocalSettingId() {
+    return findNotNullChildByClass(RobotLocalSettingId.class);
   }
 
   @Override

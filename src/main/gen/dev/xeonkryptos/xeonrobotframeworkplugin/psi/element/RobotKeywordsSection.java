@@ -8,6 +8,6 @@ import com.intellij.psi.PsiElement;
 public interface RobotKeywordsSection extends RobotSection {
 
   @NotNull
-  List<RobotKeywordStatement> getKeywordStatementList();
+  List<RobotUserKeywordStatement> getUserKeywordStatementList();
 
 }

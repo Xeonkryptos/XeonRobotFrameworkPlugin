@@ -29,8 +29,8 @@ public class RobotKeywordsSectionImpl extends RobotSectionImpl implements RobotK
 
   @Override
   @NotNull
-  public List<RobotKeywordStatement> getKeywordStatementList() {
-    return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotKeywordStatement.class);
+  public List<RobotUserKeywordStatement> getUserKeywordStatementList() {
+    return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotUserKeywordStatement.class);
   }
 
 }

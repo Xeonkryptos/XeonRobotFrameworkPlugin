@@ -28,8 +28,8 @@ public class RobotSetupTeardownStatementsImpl extends RobotPsiElementBase implem
 
   @Override
   @Nullable
-  public RobotKeywordCall getKeywordCall() {
-    return findChildByClass(RobotKeywordCall.class);
+  public RobotEolBasedKeywordCall getEolBasedKeywordCall() {
+    return findChildByClass(RobotEolBasedKeywordCall.class);
   }
 
   @Override

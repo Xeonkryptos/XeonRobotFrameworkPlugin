@@ -10,14 +10,14 @@ import com.intellij.psi.util.PsiTreeUtil;
 import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.*;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.*;
 
-public class RobotTaskStatementImpl extends RobotTaskExtension implements RobotTaskStatement {
+public class RobotUserKeywordStatementImpl extends RobotUserKeywordExtension implements RobotUserKeywordStatement {
 
-  public RobotTaskStatementImpl(@NotNull ASTNode node) {
+  public RobotUserKeywordStatementImpl(@NotNull ASTNode node) {
     super(node);
   }
 
   public void accept(@NotNull RobotVisitor visitor) {
-    visitor.visitTaskStatement(this);
+    visitor.visitUserKeywordStatement(this);
   }
 
   @Override
@@ -28,8 +28,8 @@ public class RobotTaskStatementImpl extends RobotTaskExtension implements RobotT
 
   @Override
   @NotNull
-  public List<RobotBddStatement> getBddStatementList() {
-    return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotBddStatement.class);
+  public List<RobotConstantValue> getConstantValueList() {
+    return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotConstantValue.class);
   }
 
   @Override
@@ -46,20 +46,14 @@ public class RobotTaskStatementImpl extends RobotTaskExtension implements RobotT
 
   @Override
   @NotNull
-  public RobotTaskId getTaskId() {
-    return findNotNullChildByClass(RobotTaskId.class);
+  public RobotUserKeywordStatementId getUserKeywordStatementId() {
+    return findNotNullChildByClass(RobotUserKeywordStatementId.class);
   }
 
   @Override
   @NotNull
-  public List<RobotTemplateArguments> getTemplateArgumentsList() {
-    return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotTemplateArguments.class);
-  }
-
-  @Override
-  @NotNull
-  public List<RobotVariableStatement> getVariableStatementList() {
-    return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotVariableStatement.class);
+  public List<RobotVariable> getVariableList() {
+    return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotVariable.class);
   }
 
 }

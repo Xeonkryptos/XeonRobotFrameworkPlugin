@@ -8,6 +8,6 @@ import com.intellij.psi.PsiElement;
 public interface RobotTemplateStatements extends PsiElement {
 
   @Nullable
-  RobotKeywordCall getKeywordCall();
+  RobotEolBasedKeywordCall getEolBasedKeywordCall();
 
 }

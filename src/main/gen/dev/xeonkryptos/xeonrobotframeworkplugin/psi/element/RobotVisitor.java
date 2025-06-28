@@ -17,14 +17,6 @@ public class RobotVisitor extends PsiElementVisitor {
     visitPsiElement(o);
   }
 
-  public void visitBracketSetting(@NotNull RobotBracketSetting o) {
-    visitPsiNameIdentifierOwner(o);
-  }
-
-  public void visitBracketSettingId(@NotNull RobotBracketSettingId o) {
-    visitPsiNamedElement(o);
-  }
-
   public void visitCommentsSection(@NotNull RobotCommentsSection o) {
     visitSection(o);
   }
@@ -43,6 +35,14 @@ public class RobotVisitor extends PsiElementVisitor {
 
   public void visitEnvironmentVariable(@NotNull RobotEnvironmentVariable o) {
     visitVariable(o);
+  }
+
+  public void visitEolBasedKeywordCall(@NotNull RobotEolBasedKeywordCall o) {
+    visitKeywordCall(o);
+  }
+
+  public void visitEolFreeKeywordCall(@NotNull RobotEolFreeKeywordCall o) {
+    visitKeywordCall(o);
   }
 
   public void visitExtendedVariableIndexAccess(@NotNull RobotExtendedVariableIndexAccess o) {
@@ -77,14 +77,6 @@ public class RobotVisitor extends PsiElementVisitor {
     visitPsiNamedElement(o);
   }
 
-  public void visitKeywordStatement(@NotNull RobotKeywordStatement o) {
-    visitPsiElement(o);
-  }
-
-  public void visitKeywordStatementId(@NotNull RobotKeywordStatementId o) {
-    visitPsiNamedElement(o);
-  }
-
   public void visitKeywordVariableStatement(@NotNull RobotKeywordVariableStatement o) {
     visitVariableStatement(o);
   }
@@ -107,6 +99,14 @@ public class RobotVisitor extends PsiElementVisitor {
 
   public void visitListVariable(@NotNull RobotListVariable o) {
     visitVariable(o);
+  }
+
+  public void visitLocalSetting(@NotNull RobotLocalSetting o) {
+    visitPsiNameIdentifierOwner(o);
+  }
+
+  public void visitLocalSettingId(@NotNull RobotLocalSettingId o) {
+    visitPsiNamedElement(o);
   }
 
   public void visitMetadataStatement(@NotNull RobotMetadataStatement o) {
@@ -223,6 +223,14 @@ public class RobotVisitor extends PsiElementVisitor {
 
   public void visitUnknownSettingStatements(@NotNull RobotUnknownSettingStatements o) {
     visitPsiNameIdentifierOwner(o);
+  }
+
+  public void visitUserKeywordStatement(@NotNull RobotUserKeywordStatement o) {
+    visitPsiNameIdentifierOwner(o);
+  }
+
+  public void visitUserKeywordStatementId(@NotNull RobotUserKeywordStatementId o) {
+    visitPsiNamedElement(o);
   }
 
   public void visitVariable(@NotNull RobotVariable o) {
