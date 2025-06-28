@@ -163,7 +163,7 @@ LineComment = {LineCommentSign} {NON_EOL}*
 %state TESTCASE_NAME_DEFINITION, TESTCASE_DEFINITION, TASK_NAME_DEFINITION, TASK_DEFINITION
 %state SETTING, SETTING_TEMPLATE_START, TEMPLATE_DEFINITION
 %state KEYWORD_CALL, KEYWORD_ARGUMENTS
-%state VARIABLE_DEFINITION, VARIABLE_USAGE, EXTENDED_VARIABLE_ACCESS, PYTHON_EXPRESSION
+%state INLINE_VARIABLE_DEFINITION, VARIABLE_DEFINITION, VARIABLE_USAGE, EXTENDED_VARIABLE_ACCESS, PYTHON_EXPRESSION
 %state PARAMETER_ASSIGNMENT, PARAMETER_VALUE, TEMPLATE_PARAMETER_ASSIGNMENT, TEMPLATE_PARAMETER_VALUE
 
 %xstate COMMENTS_SECTION
@@ -191,6 +191,12 @@ LineComment = {LineCommentSign} {NON_EOL}*
     {ListVariableStart}                      { enterNewState(VARIABLE_DEFINITION); return LIST_VARIABLE_START; }
     {DictVariableStart}                      { enterNewState(VARIABLE_DEFINITION); return DICT_VARIABLE_START; }
     {EnvVariableStart}                       { enterNewState(VARIABLE_DEFINITION); return ENV_VARIABLE_START; }
+}
+<INLINE_VARIABLE_DEFINITION> {
+    {ScalarVariableStart}                    { yybegin(VARIABLE_DEFINITION); return SCALAR_VARIABLE_START; }
+    {ListVariableStart}                      { yybegin(VARIABLE_DEFINITION); return LIST_VARIABLE_START; }
+    {DictVariableStart}                      { yybegin(VARIABLE_DEFINITION); return DICT_VARIABLE_START; }
+    {EnvVariableStart}                       { yybegin(VARIABLE_DEFINITION); return ENV_VARIABLE_START; }
 }
 
 {ScalarVariableStart}  { enterNewState(VARIABLE_USAGE); return SCALAR_VARIABLE_START; }
@@ -280,14 +286,14 @@ LineComment = {LineCommentSign} {NON_EOL}*
           return BRACKET_SETTING_NAME;
       }
     {LocalTemplateKeyword} / \s* (\R \s* !{Ellipsis} | {MultiLine} \R)      { pushBackTrailingWhitespace(); localTemplateEnabled = false; return BRACKET_SETTING_NAME; }
-    {LocalTemplateKeyword} \s*            {
+    {LocalTemplateKeyword} \s*              {
           enterNewState(SETTING_TEMPLATE_START);
           pushBackTrailingWhitespace();
           localTemplateEnabled = true;
           return BRACKET_SETTING_NAME;
       }
 
-    {LocalSettingKeyword} \s*          { enterNewState(SETTING); pushBackTrailingWhitespace(); return BRACKET_SETTING_NAME; }
+    {LocalSettingKeyword} \s*               { enterNewState(SETTING); pushBackTrailingWhitespace(); return BRACKET_SETTING_NAME; }
 
     "GIVEN" \s+ {RestrictedLiteralValue}    {
           yypushback(yylength() - "GIVEN".length());
@@ -315,7 +321,11 @@ LineComment = {LineCommentSign} {NON_EOL}*
          return BUT;
      }
 
-    {RestrictedLiteralValue}           {
+    // Using yybegin instead of enterNewState to avoid pushing the state onto the stack. Don't switch the state on the stack to something else than
+    // the current one. This way, after variable definition via VAR is done, we will reach this state again.
+    "VAR" \s+ [^\R]                         { yypushback(yylength() - "VAR".length()); yybegin(INLINE_VARIABLE_DEFINITION); return VAR; }
+
+    {RestrictedLiteralValue}                {
               int nextState = localTemplateEnabled && templateKeywordFound ? TEMPLATE_DEFINITION : KEYWORD_CALL;
               enterNewState(nextState);
               yypushback(yylength());

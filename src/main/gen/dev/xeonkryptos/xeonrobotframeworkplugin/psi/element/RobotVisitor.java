@@ -65,6 +65,10 @@ public class RobotVisitor extends PsiElementVisitor {
     visitPsiElement(o);
   }
 
+  public void visitInlineVariableStatement(@NotNull RobotInlineVariableStatement o) {
+    visitVariableStatement(o);
+  }
+
   public void visitKeywordCall(@NotNull RobotKeywordCall o) {
     visitPsiNameIdentifierOwner(o);
   }

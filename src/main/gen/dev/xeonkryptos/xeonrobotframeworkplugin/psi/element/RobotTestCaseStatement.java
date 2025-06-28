@@ -9,9 +9,6 @@ import com.intellij.psi.PsiNameIdentifierOwner;
 public interface RobotTestCaseStatement extends PsiNameIdentifierOwner {
 
   @NotNull
-  List<RobotArgument> getArgumentList();
-
-  @NotNull
   List<RobotBddStatement> getBddStatementList();
 
   @NotNull
@@ -21,15 +18,12 @@ public interface RobotTestCaseStatement extends PsiNameIdentifierOwner {
   List<RobotKeywordCall> getKeywordCallList();
 
   @NotNull
-  List<RobotKeywordVariableStatement> getKeywordVariableStatementList();
-
-  @NotNull
-  List<RobotParameter> getParameterList();
-
-  @NotNull
   List<RobotTemplateArguments> getTemplateArgumentsList();
 
   @NotNull
   RobotTestCaseId getTestCaseId();
+
+  @NotNull
+  List<RobotVariableStatement> getVariableStatementList();
 
 }

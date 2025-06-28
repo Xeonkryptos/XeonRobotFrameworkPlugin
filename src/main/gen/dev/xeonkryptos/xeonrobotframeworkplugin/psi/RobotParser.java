@@ -36,7 +36,7 @@ public class RobotParser implements PsiParser, LightPsiParser {
   }
 
   public static final TokenSet[] EXTENDS_SETS_ = new TokenSet[] {
-    create_token_set_(KEYWORD_VARIABLE_STATEMENT, SINGLE_VARIABLE_STATEMENT),
+    create_token_set_(INLINE_VARIABLE_STATEMENT, KEYWORD_VARIABLE_STATEMENT, SINGLE_VARIABLE_STATEMENT),
     create_token_set_(DICT_VARIABLE, ENVIRONMENT_VARIABLE, LIST_VARIABLE, SCALAR_VARIABLE,
       VARIABLE),
     create_token_set_(COMMENTS_SECTION, KEYWORDS_SECTION, SECTION, SETTINGS_SECTION,
@@ -463,6 +463,20 @@ public class RobotParser implements PsiParser, LightPsiParser {
       if (!empty_element_parsed_guard_(b, "file2_1", c)) break;
     }
     return true;
+  }
+
+  /* ********************************************************** */
+  // VAR single_variable_statement
+  public static boolean inline_variable_statement(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "inline_variable_statement")) return false;
+    if (!nextTokenIs(b, VAR)) return false;
+    boolean r, p;
+    Marker m = enter_section_(b, l, _NONE_, INLINE_VARIABLE_STATEMENT, null);
+    r = consumeToken(b, VAR);
+    p = r; // pin = 1
+    r = r && single_variable_statement(b, l + 1);
+    exit_section_(b, l, m, r, p, null);
+    return r || p;
   }
 
   /* ********************************************************** */
@@ -1159,7 +1173,7 @@ public class RobotParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // variable ASSIGNMENT? variable_value*  line_comment* EOL
+  // variable ASSIGNMENT? variable_value* line_comment* EOL
   public static boolean single_variable_statement(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "single_variable_statement")) return false;
     boolean r;
@@ -1635,24 +1649,45 @@ public class RobotParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // bracket_setting
-  //      | keyword_variable_statement
-  //      | bdd_statement
-  //      | keyword_call
-  //      | template_arguments
-  //      | argument
-  //      | parameter
-  //      | line_comment
+  // testcase_task_statement_bdd_style | testcase_task_statement_free_style | testcase_task_statement_template_style
   static boolean testcase_task_statement(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "testcase_task_statement")) return false;
     boolean r;
+    r = testcase_task_statement_bdd_style(b, l + 1);
+    if (!r) r = testcase_task_statement_free_style(b, l + 1);
+    if (!r) r = testcase_task_statement_template_style(b, l + 1);
+    return r;
+  }
+
+  /* ********************************************************** */
+  // bracket_setting | bdd_statement | line_comment
+  static boolean testcase_task_statement_bdd_style(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "testcase_task_statement_bdd_style")) return false;
+    boolean r;
     r = bracket_setting(b, l + 1);
-    if (!r) r = keyword_variable_statement(b, l + 1);
     if (!r) r = bdd_statement(b, l + 1);
+    if (!r) r = line_comment(b, l + 1);
+    return r;
+  }
+
+  /* ********************************************************** */
+  // inline_variable_statement | keyword_variable_statement | keyword_call | line_comment
+  static boolean testcase_task_statement_free_style(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "testcase_task_statement_free_style")) return false;
+    boolean r;
+    r = inline_variable_statement(b, l + 1);
+    if (!r) r = keyword_variable_statement(b, l + 1);
     if (!r) r = keyword_call(b, l + 1);
-    if (!r) r = template_arguments(b, l + 1);
-    if (!r) r = argument(b, l + 1);
-    if (!r) r = parameter(b, l + 1);
+    if (!r) r = line_comment(b, l + 1);
+    return r;
+  }
+
+  /* ********************************************************** */
+  // template_arguments | line_comment
+  static boolean testcase_task_statement_template_style(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "testcase_task_statement_template_style")) return false;
+    boolean r;
+    r = template_arguments(b, l + 1);
     if (!r) r = line_comment(b, l + 1);
     return r;
   }

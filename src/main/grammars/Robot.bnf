@@ -107,14 +107,10 @@ task_statement ::= task_id (testcase_task_statement)* {
 task_id ::= TASK_NAME
 private task_statement_recover ::= !task_id & section_recover
 
-private testcase_task_statement ::= bracket_setting
-     | keyword_variable_statement
-     | bdd_statement
-     | keyword_call
-     | template_arguments
-     | argument
-     | parameter
-     | line_comment
+private testcase_task_statement ::= testcase_task_statement_bdd_style | testcase_task_statement_free_style | testcase_task_statement_template_style
+private testcase_task_statement_bdd_style ::= bracket_setting | bdd_statement | line_comment
+private testcase_task_statement_free_style ::= inline_variable_statement | keyword_variable_statement | keyword_call | line_comment
+private testcase_task_statement_template_style ::= template_arguments | line_comment
 
 template_arguments ::= (template_argument | template_parameter | variable)+ EOL
 template_argument ::= TEMPLATE_ARGUMENT_VALUE
@@ -149,8 +145,9 @@ parameter ::= parameter_id ASSIGNMENT argument {
 }
 parameter_id ::= PARAMETER_NAME
 
-fake variable_statement ::= single_variable_statement | keyword_variable_statement?
-single_variable_statement ::= variable ASSIGNMENT? variable_value*  line_comment* EOL
+fake variable_statement ::= inline_variable_statement | single_variable_statement | keyword_variable_statement?
+inline_variable_statement ::= VAR single_variable_statement {pin=1}
+single_variable_statement ::= variable ASSIGNMENT? variable_value* line_comment* EOL
 keyword_variable_statement ::= variable+ ASSIGNMENT? keyword_call line_comment* // Without EOL as it is handled at a higher level
 variable ::= scalar_variable | list_variable | dict_variable | environment_variable
 variable_value ::= value+

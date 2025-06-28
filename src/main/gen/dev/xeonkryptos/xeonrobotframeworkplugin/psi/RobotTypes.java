@@ -22,6 +22,7 @@ public interface RobotTypes {
   IElementType EXTENDED_VARIABLE_NESTED_ACCESS = new RobotElementType("EXTENDED_VARIABLE_NESTED_ACCESS");
   IElementType EXTENDED_VARIABLE_SLICE_ACCESS = new RobotElementType("EXTENDED_VARIABLE_SLICE_ACCESS");
   IElementType FILE_2 = new RobotElementType("FILE_2");
+  IElementType INLINE_VARIABLE_STATEMENT = new RobotElementType("INLINE_VARIABLE_STATEMENT");
   IElementType KEYWORDS_SECTION = new RobotElementType("KEYWORDS_SECTION");
   IElementType KEYWORD_CALL = new RobotElementType("KEYWORD_CALL");
   IElementType KEYWORD_CALL_ID = new RobotElementType("KEYWORD_CALL_ID");
@@ -107,6 +108,7 @@ public interface RobotTypes {
   IElementType THEN = new RobotTokenType("THEN");
   IElementType TIMEOUT_KEYWORDS = new RobotTokenType("TIMEOUT_KEYWORDS");
   IElementType UNKNOWN_SETTING_KEYWORD = new RobotTokenType("UNKNOWN_SETTING_KEYWORD");
+  IElementType VAR = new RobotTokenType("VAR");
   IElementType VARIABLES_HEADER = new RobotTokenType("VARIABLES_HEADER");
   IElementType VARIABLES_IMPORT_KEYWORD = new RobotTokenType("VARIABLES_IMPORT_KEYWORD");
   IElementType VARIABLE_ACCESS_END = new RobotTokenType("VARIABLE_ACCESS_END");
@@ -162,6 +164,9 @@ public interface RobotTypes {
       }
       else if (type == FILE_2) {
         return new RobotFile2Impl(node);
+      }
+      else if (type == INLINE_VARIABLE_STATEMENT) {
+        return new RobotInlineVariableStatementImpl(node);
       }
       else if (type == KEYWORDS_SECTION) {
         return new RobotKeywordsSectionImpl(node);

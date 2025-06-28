@@ -28,12 +28,6 @@ public class RobotTestCaseStatementImpl extends RobotTestCaseExtension implement
 
   @Override
   @NotNull
-  public List<RobotArgument> getArgumentList() {
-    return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotArgument.class);
-  }
-
-  @Override
-  @NotNull
   public List<RobotBddStatement> getBddStatementList() {
     return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotBddStatement.class);
   }
@@ -52,18 +46,6 @@ public class RobotTestCaseStatementImpl extends RobotTestCaseExtension implement
 
   @Override
   @NotNull
-  public List<RobotKeywordVariableStatement> getKeywordVariableStatementList() {
-    return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotKeywordVariableStatement.class);
-  }
-
-  @Override
-  @NotNull
-  public List<RobotParameter> getParameterList() {
-    return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotParameter.class);
-  }
-
-  @Override
-  @NotNull
   public List<RobotTemplateArguments> getTemplateArgumentsList() {
     return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotTemplateArguments.class);
   }
@@ -72,6 +54,12 @@ public class RobotTestCaseStatementImpl extends RobotTestCaseExtension implement
   @NotNull
   public RobotTestCaseId getTestCaseId() {
     return findNotNullChildByClass(RobotTestCaseId.class);
+  }
+
+  @Override
+  @NotNull
+  public List<RobotVariableStatement> getVariableStatementList() {
+    return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotVariableStatement.class);
   }
 
 }
