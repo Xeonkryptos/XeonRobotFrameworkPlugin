@@ -107,10 +107,13 @@ task_statement ::= task_id (testcase_task_statement)* {
 task_id ::= TASK_NAME
 private task_statement_recover ::= !task_id & section_recover
 
-private testcase_task_statement ::= testcase_task_statement_bdd_style | testcase_task_statement_free_style | testcase_task_statement_template_style
-private testcase_task_statement_bdd_style ::= bracket_setting | bdd_statement | line_comment
-private testcase_task_statement_free_style ::= inline_variable_statement | keyword_variable_statement | keyword_call | line_comment
-private testcase_task_statement_template_style ::= template_arguments | line_comment
+private testcase_task_statement ::= bracket_setting
+    | bdd_statement
+    | testcase_task_statement_free_style
+    | testcase_task_statement_template_style
+    | line_comment
+private testcase_task_statement_free_style ::= inline_variable_statement | keyword_variable_statement | keyword_call
+private testcase_task_statement_template_style ::= template_arguments
 
 template_arguments ::= (template_argument | template_parameter | variable)+ EOL
 template_argument ::= TEMPLATE_ARGUMENT_VALUE

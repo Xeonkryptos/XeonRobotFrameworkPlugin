@@ -1649,47 +1649,37 @@ public class RobotParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // testcase_task_statement_bdd_style | testcase_task_statement_free_style | testcase_task_statement_template_style
+  // bracket_setting
+  //     | bdd_statement
+  //     | testcase_task_statement_free_style
+  //     | testcase_task_statement_template_style
+  //     | line_comment
   static boolean testcase_task_statement(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "testcase_task_statement")) return false;
     boolean r;
-    r = testcase_task_statement_bdd_style(b, l + 1);
-    if (!r) r = testcase_task_statement_free_style(b, l + 1);
-    if (!r) r = testcase_task_statement_template_style(b, l + 1);
-    return r;
-  }
-
-  /* ********************************************************** */
-  // bracket_setting | bdd_statement | line_comment
-  static boolean testcase_task_statement_bdd_style(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "testcase_task_statement_bdd_style")) return false;
-    boolean r;
     r = bracket_setting(b, l + 1);
     if (!r) r = bdd_statement(b, l + 1);
+    if (!r) r = testcase_task_statement_free_style(b, l + 1);
+    if (!r) r = testcase_task_statement_template_style(b, l + 1);
     if (!r) r = line_comment(b, l + 1);
     return r;
   }
 
   /* ********************************************************** */
-  // inline_variable_statement | keyword_variable_statement | keyword_call | line_comment
+  // inline_variable_statement | keyword_variable_statement | keyword_call
   static boolean testcase_task_statement_free_style(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "testcase_task_statement_free_style")) return false;
     boolean r;
     r = inline_variable_statement(b, l + 1);
     if (!r) r = keyword_variable_statement(b, l + 1);
     if (!r) r = keyword_call(b, l + 1);
-    if (!r) r = line_comment(b, l + 1);
     return r;
   }
 
   /* ********************************************************** */
-  // template_arguments | line_comment
+  // template_arguments
   static boolean testcase_task_statement_template_style(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "testcase_task_statement_template_style")) return false;
-    boolean r;
-    r = template_arguments(b, l + 1);
-    if (!r) r = line_comment(b, l + 1);
-    return r;
+    return template_arguments(b, l + 1);
   }
 
   /* ********************************************************** */
