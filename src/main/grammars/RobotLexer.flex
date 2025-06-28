@@ -83,21 +83,6 @@ EmptyValue = \\ {Space}
 
 Whitespace = {Space} | {Tab}
 
-IF="IF"
-ELSE="ELSE"
-ELSE_IF="ELSE IF"
-END="END"
-FOR="FOR"
-IN="IN"
-TRY="TRY"
-EXCEPT="EXCEPT"
-FINALLY="FINALLY"
-WHILE="WHILE"
-RETURN="RETURN"
-BREAK="BREAK"
-CONTINUE="CONTINUE"
-VAR="VAR"
-ARG="ARG"
 WithNameKeyword = "WITH NAME" | "AS"
 
 SectionSettingsWords = "Settings" | "Setting"
@@ -107,9 +92,6 @@ SectionTasksWords = "Tasks" | "Task"
 SectionKeywordsWords = "Keywords" | "Keyword"
 SectionCommentsWords = "Comments" | "Comment"
 
-//SIMPLE_NAME=[A-Za-z0-9 ]+
-//NAME=[^$@&#\t\n\r][^\t\n\r]*
-//CELL_CONTENT=[^$@&#|#\t\n\r][^|#\t\n\r]*
 EOL = (\r) | (\n) | (\r\n)
 NON_EOL = [^\r\n]
 
@@ -143,7 +125,7 @@ GenericSettingsKeyword = [\p{L}\p{N}_]+([ ][\p{L}\p{N}_])*
 
 LiteralValue = [^\s]+([ ][^\s]+)*[ ]?
 RestrictedLiteralValue = [^\s${}@%&=]+([ ][^\s${}@%&]+)*[ ]?
-ParamLiteralValue = [^\s${}@%&]+([ ][^\s${}@%&]+)*[ ]?
+ParamLiteralValue =      [^\s${}@%&]+([ ][^\s${}@%&]+)*[ ]?
 
 LocalSettingKeywordStart = "[" \s*
 LocalSettingKeywordEnd = \s* "]"
@@ -170,6 +152,7 @@ LineComment = {LineCommentSign} {NON_EOL}*
 %state KEYWORD_CALL, KEYWORD_ARGUMENTS
 %state INLINE_VARIABLE_DEFINITION, VARIABLE_DEFINITION, VARIABLE_USAGE, EXTENDED_VARIABLE_ACCESS, PYTHON_EXPRESSION
 %state PARAMETER_ASSIGNMENT, PARAMETER_VALUE, TEMPLATE_PARAMETER_ASSIGNMENT, TEMPLATE_PARAMETER_VALUE
+%state FOR_STRUCTURE, CONTROL_STRUCTURE_START, CONTROL_STRUCTURE
 
 %xstate COMMENTS_SECTION
 
@@ -197,6 +180,7 @@ LineComment = {LineCommentSign} {NON_EOL}*
     {DictVariableStart}                      { enterNewState(VARIABLE_DEFINITION); return DICT_VARIABLE_START; }
     {EnvVariableStart}                       { enterNewState(VARIABLE_DEFINITION); return ENV_VARIABLE_START; }
 }
+
 <INLINE_VARIABLE_DEFINITION> {
     {ScalarVariableStart}                    { yybegin(VARIABLE_DEFINITION); return SCALAR_VARIABLE_START; }
     {ListVariableStart}                      { yybegin(VARIABLE_DEFINITION); return LIST_VARIABLE_START; }
@@ -212,19 +196,19 @@ LineComment = {LineCommentSign} {NON_EOL}*
 <LANGUAGE_SETTING> {RestrictedLiteralValue}  { return LANGUAGE_NAME; }
 
 <VARIABLE_DEFINITION> {
-    {ClosingVariable}                    { return VARIABLE_END; }
-    {ClosingVariable} "["                { enterNewState(EXTENDED_VARIABLE_ACCESS); yypushback(1); return VARIABLE_END; }
-    {ClosingVariable} "]"                { yypushback(1); return VARIABLE_END; }
-    {EqualSign} \s*                      { pushBackTrailingWhitespace(); return ASSIGNMENT; }
-    {RestrictedLiteralValue}             { pushBackTrailingWhitespace(); return ARGUMENT_VALUE; }
+    {ClosingVariable}            { return VARIABLE_END; }
+    {ClosingVariable} "["        { enterNewState(EXTENDED_VARIABLE_ACCESS); yypushback(1); return VARIABLE_END; }
+    {ClosingVariable} "]"        { yypushback(1); return VARIABLE_END; }
+    {EqualSign} \s*              { pushBackTrailingWhitespace(); return ASSIGNMENT; }
+    {RestrictedLiteralValue}     { pushBackTrailingWhitespace(); return ARGUMENT_VALUE; }
 }
 
 <VARIABLE_USAGE> {
-    {ClosingVariable} "["         { leaveState(); enterNewState(EXTENDED_VARIABLE_ACCESS); yypushback(1); return VARIABLE_END; }
-    {ClosingVariable} "]"         { leaveState(); yypushback(1); return VARIABLE_END; }
-    {ClosingVariable}             { leaveState(); return VARIABLE_END; }
-    "{" \s*                       { enterNewState(PYTHON_EXPRESSION); pushBackTrailingWhitespace(); return PYTHON_EXPRESSION_START; }
-    {RestrictedLiteralValue}      { return ARGUMENT_VALUE; }
+    {ClosingVariable} "["        { leaveState(); enterNewState(EXTENDED_VARIABLE_ACCESS); yypushback(1); return VARIABLE_END; }
+    {ClosingVariable} "]"        { leaveState(); yypushback(1); return VARIABLE_END; }
+    {ClosingVariable}            { leaveState(); return VARIABLE_END; }
+    "{" \s*                      { enterNewState(PYTHON_EXPRESSION); pushBackTrailingWhitespace(); return PYTHON_EXPRESSION_START; }
+    {RestrictedLiteralValue}     { return ARGUMENT_VALUE; }
 }
 
 <EXTENDED_VARIABLE_ACCESS> {
@@ -315,23 +299,22 @@ LineComment = {LineCommentSign} {NON_EOL}*
         {LocalSettingKeyword} \s*                 { enterNewState(SETTING); pushBackTrailingWhitespace(); return LOCAL_SETTING_NAME; }
 
         "FOR" \s{2}\s* {LiteralValue}             { yypushback(yylength() - "FOR".length()); return FOR; }
-        "IN" \s{2}\s* {LiteralValue}              { yypushback(yylength() - "IN".length()); return FOR_IN; }
-        "IN ENUMERATE" \s{2}\s* {LiteralValue}    { yypushback(yylength() - "IN".length()); return FOR_IN; }
-        "IN RANGE" \s{2}\s* {LiteralValue}        { yypushback(yylength() - "IN".length()); return FOR_IN; }
-        "IN ZIP" \s{2}\s* {LiteralValue}          { yypushback(yylength() - "IN".length()); return FOR_IN; }
-        "WHILE" \s{2}\s* {LiteralValue}?          { yypushback(yylength() - "WHILE".length()); return WHILE; }
-        "IF" \s{2}\s* {LiteralValue}              { yypushback(yylength() - "IF".length()); return IF; }
-        "ELSE IF" \s{2}\s* {LiteralValue}         { yypushback(yylength() - "ELSE IF".length()); return ELSE_IF; }
+        "IN" \s{2}\s* {LiteralValue}              { yypushback(yylength() - "IN".length()); enterNewState(CONTROL_STRUCTURE_START); return FOR_IN; }
+        "IN ENUMERATE" \s{2}\s* {LiteralValue}    { yypushback(yylength() - "IN ENUMERATE".length()); enterNewState(CONTROL_STRUCTURE_START); return FOR_IN; }
+        "IN RANGE" \s{2}\s* {LiteralValue}        { yypushback(yylength() - "IN RANGE".length()); enterNewState(CONTROL_STRUCTURE_START); return FOR_IN; }
+        "IN ZIP" \s{2}\s* {LiteralValue}          { yypushback(yylength() - "IN ZIP".length()); enterNewState(CONTROL_STRUCTURE_START); return FOR_IN; }
+        "WHILE" \s{2}\s* {LiteralValue}?          { yypushback(yylength() - "WHILE".length()); enterNewState(CONTROL_STRUCTURE_START); return WHILE; }
+        "IF" \s{2}\s* {LiteralValue}              { yypushback(yylength() - "IF".length()); enterNewState(CONTROL_STRUCTURE_START); return IF; }
+        "ELSE IF" \s{2}\s* {LiteralValue}         { yypushback(yylength() - "ELSE IF".length()); enterNewState(CONTROL_STRUCTURE_START); return ELSE_IF; }
         "ELSE" \s*                                { pushBackTrailingWhitespace(); return ELSE; }
-        "TRY" \s* \R                              { pushBackTrailingWhitespace(); return TRY; }
-        "EXCEPT" \s{2}\s* {LiteralValue}          { yypushback(yylength() - "EXCEPT".length()); return EXCEPT; }
-        "FINALLY" \s* \R                          { pushBackTrailingWhitespace(); return FINALLY; }
-        "BREAK" \s* \R                            { pushBackTrailingWhitespace(); return BREAK; }
-        "CONTINUE" \s* \R                         { pushBackTrailingWhitespace(); return CONTINUE; }
-        "GROUP" (\s{2}\s* {LiteralValue})?        { yypushback(yylength() - "GROUP".length()); return GROUP; }
-        "END" \s* \R                              { pushBackTrailingWhitespace(); return END; }
+        "TRY" \s*                                 { pushBackTrailingWhitespace(); return TRY; }
+        "EXCEPT" \s{2}\s* {LiteralValue}          { yypushback(yylength() - "EXCEPT".length()); enterNewState(CONTROL_STRUCTURE_START); return EXCEPT; }
+        "FINALLY" \s*                             { pushBackTrailingWhitespace(); return FINALLY; }
+        "BREAK" \s*                               { pushBackTrailingWhitespace(); return BREAK; }
+        "CONTINUE" \s*                            { pushBackTrailingWhitespace(); return CONTINUE; }
+        "GROUP" (\s{2}\s* {LiteralValue})?        { yypushback(yylength() - "GROUP".length()); enterNewState(CONTROL_STRUCTURE_START); return GROUP; }
+        "END" \s*                                 { pushBackTrailingWhitespace(); return END; }
     }
-    "RETURN" \s*  { pushBackTrailingWhitespace(); return RETURN; }
 
     "GIVEN" \s+ {RestrictedLiteralValue}    {
           yypushback(yylength() - "GIVEN".length());
@@ -364,7 +347,7 @@ LineComment = {LineCommentSign} {NON_EOL}*
     "VAR" \s+ [^\R]+                        {
           yypushback(yylength() - "VAR".length());
           pushBackTrailingWhitespace();
-          yybegin(INLINE_VARIABLE_DEFINITION);
+          enterNewState(INLINE_VARIABLE_DEFINITION);
           return VAR;
       }
 
@@ -372,7 +355,13 @@ LineComment = {LineCommentSign} {NON_EOL}*
               int nextState = localTemplateEnabled && templateKeywordFound ? TEMPLATE_DEFINITION : KEYWORD_CALL;
               enterNewState(nextState);
               yypushback(yylength());
-          }
+      }
+}
+
+<CONTROL_STRUCTURE_START>  ({Space}{2}{Space}* | {Tab}+) | {EOL}+     { yybegin(CONTROL_STRUCTURE); return WHITE_SPACE; }
+<CONTROL_STRUCTURE> {
+    {RestrictedLiteralValue}                         { pushBackTrailingWhitespace(); return ARGUMENT_VALUE; }
+    ({Space}{2}{Space}* | {Tab}+) | {EOL}+           { leaveState(); return EOL; }
 }
 
 <KEYWORD_ARGUMENTS, SETTINGS_SECTION, TESTCASE_DEFINITION, TASK_DEFINITION, USER_KEYWORD_DEFINITION, VARIABLE_DEFINITION> {

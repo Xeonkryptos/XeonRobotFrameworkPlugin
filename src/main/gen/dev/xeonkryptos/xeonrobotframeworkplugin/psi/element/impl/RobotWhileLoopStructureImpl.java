@@ -29,8 +29,8 @@ public class RobotWhileLoopStructureImpl extends RobotExecutableStatementImpl im
 
   @Override
   @NotNull
-  public List<RobotArgument> getArgumentList() {
-    return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotArgument.class);
+  public RobotCondition getCondition() {
+    return findNotNullChildByClass(RobotCondition.class);
   }
 
   @Override

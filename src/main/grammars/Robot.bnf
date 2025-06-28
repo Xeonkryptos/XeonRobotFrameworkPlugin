@@ -166,18 +166,20 @@ private call_structure ::= eol_based_keyword_call
 private loop_control_structure ::= BREAK | CONTINUE
 private return_structure ::= RETURN value* EOL {pin=1}
 
-for_loop_structure ::= FOR variable FOR_IN (parameter | argument)+ line_comment* executable_statement* line_comment* END line_comment* {pin=3}
-while_loop_structure ::= WHILE (argument | parameter)* line_comment* executable_statement* line_comment* END line_comment*
-if_structure ::= IF argument line_comment* executable_statement*
-    (ELSE_IF argument line_comment* executable_statement*)*
+for_loop_structure ::= FOR variable FOR_IN argument+ parameter* line_comment* EOL executable_statement* line_comment* END line_comment* {pin=3}
+while_loop_structure ::= WHILE condition parameter* line_comment* EOL executable_statement* line_comment* END line_comment*
+if_structure ::= IF condition EOL line_comment* executable_statement*
+    (ELSE_IF condition EOL line_comment* executable_statement*)*
     (ELSE line_comment* executable_statement*)?
     END? line_comment*
 try_structure ::= TRY line_comment* executable_statement* line_comment*
-    (EXCEPT (parameter | argument)* executable_statement* line_comment*)*
+    (EXCEPT condition? parameter* EOL executable_statement* line_comment*)*
     (ELSE line_comment* executable_statement* line_comment*)?
     (FINALLY line_comment* executable_statement* line_comment*)?
     END line_comment*
-group_structure ::= GROUP argument? line_comment* executable_statement* END line_comment*
+group_structure ::= GROUP argument? EOL line_comment* executable_statement* END line_comment*
+
+condition ::= value+
 
 fake keyword_call ::= base_keyword_call {
     implements = "com.intellij.psi.PsiNameIdentifierOwner"

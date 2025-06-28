@@ -21,6 +21,10 @@ public class RobotVisitor extends PsiElementVisitor {
     visitSection(o);
   }
 
+  public void visitCondition(@NotNull RobotCondition o) {
+    visitPsiElement(o);
+  }
+
   public void visitConstantValue(@NotNull RobotConstantValue o) {
     visitPsiElement(o);
   }

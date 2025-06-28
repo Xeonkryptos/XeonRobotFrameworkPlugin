@@ -11,6 +11,7 @@ public interface RobotTypes {
   IElementType ARGUMENT = new RobotElementType("ARGUMENT");
   IElementType BDD_STATEMENT = new RobotElementType("BDD_STATEMENT");
   IElementType COMMENTS_SECTION = new RobotElementType("COMMENTS_SECTION");
+  IElementType CONDITION = new RobotElementType("CONDITION");
   IElementType CONSTANT_VALUE = new RobotElementType("CONSTANT_VALUE");
   IElementType DICT_VARIABLE = new RobotElementType("DICT_VARIABLE");
   IElementType DOCUMENTATION_STATEMENT = new RobotElementType("DOCUMENTATION_STATEMENT");
@@ -151,6 +152,9 @@ public interface RobotTypes {
       }
       else if (type == COMMENTS_SECTION) {
         return new RobotCommentsSectionImpl(node);
+      }
+      else if (type == CONDITION) {
+        return new RobotConditionImpl(node);
       }
       else if (type == CONSTANT_VALUE) {
         return new RobotConstantValueImpl(node);
