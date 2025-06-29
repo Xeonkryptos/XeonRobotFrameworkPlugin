@@ -28,8 +28,8 @@ public class RobotTimeoutStatementsImpl extends RobotPsiElementBase implements R
 
   @Override
   @Nullable
-  public RobotArgument getArgument() {
-    return findChildByClass(RobotArgument.class);
+  public RobotPositionalArgument getPositionalArgument() {
+    return findChildByClass(RobotPositionalArgument.class);
   }
 
 }

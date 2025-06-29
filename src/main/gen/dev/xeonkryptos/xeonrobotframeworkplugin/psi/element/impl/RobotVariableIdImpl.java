@@ -28,14 +28,14 @@ public class RobotVariableIdImpl extends RobotPsiElementBase implements RobotVar
 
   @Override
   @Nullable
-  public RobotConstantValue getConstantValue() {
-    return findChildByClass(RobotConstantValue.class);
+  public RobotVariable getVariable() {
+    return findChildByClass(RobotVariable.class);
   }
 
   @Override
   @Nullable
-  public RobotVariable getVariable() {
-    return findChildByClass(RobotVariable.class);
+  public RobotVariableBodyContent getVariableBodyContent() {
+    return findChildByClass(RobotVariableBodyContent.class);
   }
 
 }

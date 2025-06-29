@@ -28,14 +28,14 @@ public class RobotArgumentImpl extends RobotPsiElementBase implements RobotArgum
 
   @Override
   @Nullable
-  public RobotConstantValue getConstantValue() {
-    return findChildByClass(RobotConstantValue.class);
+  public RobotParameter getParameter() {
+    return findChildByClass(RobotParameter.class);
   }
 
   @Override
   @Nullable
-  public RobotVariable getVariable() {
-    return findChildByClass(RobotVariable.class);
+  public RobotPositionalArgument getPositionalArgument() {
+    return findChildByClass(RobotPositionalArgument.class);
   }
 
 }

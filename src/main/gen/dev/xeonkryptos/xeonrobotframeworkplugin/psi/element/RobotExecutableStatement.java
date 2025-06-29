@@ -7,14 +7,11 @@ import com.intellij.psi.PsiElement;
 
 public interface RobotExecutableStatement extends PsiElement {
 
-  @NotNull
-  List<RobotConstantValue> getConstantValueList();
-
   @Nullable
   RobotKeywordCall getKeywordCall();
 
   @NotNull
-  List<RobotVariable> getVariableList();
+  List<RobotPositionalArgument> getPositionalArgumentList();
 
   @Nullable
   RobotVariableStatement getVariableStatement();

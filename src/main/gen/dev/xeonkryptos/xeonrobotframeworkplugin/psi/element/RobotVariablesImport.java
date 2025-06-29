@@ -8,9 +8,9 @@ import com.intellij.psi.PsiElement;
 public interface RobotVariablesImport extends PsiElement {
 
   @NotNull
-  List<RobotArgument> getArgumentList();
+  List<RobotParameter> getParameterList();
 
   @NotNull
-  List<RobotParameter> getParameterList();
+  List<RobotPositionalArgument> getPositionalArgumentList();
 
 }

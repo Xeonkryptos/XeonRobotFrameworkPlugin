@@ -28,12 +28,6 @@ public class RobotKeywordCallImpl extends RobotKeywordCallExtension implements R
 
   @Override
   @NotNull
-  public List<RobotArgument> getArgumentList() {
-    return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotArgument.class);
-  }
-
-  @Override
-  @NotNull
   public RobotKeywordCallId getKeywordCallId() {
     return findNotNullChildByClass(RobotKeywordCallId.class);
   }
@@ -42,6 +36,12 @@ public class RobotKeywordCallImpl extends RobotKeywordCallExtension implements R
   @NotNull
   public List<RobotParameter> getParameterList() {
     return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotParameter.class);
+  }
+
+  @Override
+  @NotNull
+  public List<RobotPositionalArgument> getPositionalArgumentList() {
+    return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotPositionalArgument.class);
   }
 
 }

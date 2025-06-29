@@ -8,6 +8,6 @@ import com.intellij.psi.PsiElement;
 public interface RobotSuiteNameStatement extends PsiElement {
 
   @Nullable
-  RobotArgument getArgument();
+  RobotPositionalArgument getPositionalArgument();
 
 }

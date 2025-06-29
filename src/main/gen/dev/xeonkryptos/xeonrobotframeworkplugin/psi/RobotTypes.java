@@ -8,11 +8,8 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.*;
 
 public interface RobotTypes {
 
-  IElementType ARGUMENT = new RobotElementType("ARGUMENT");
   IElementType BDD_STATEMENT = new RobotElementType("BDD_STATEMENT");
   IElementType COMMENTS_SECTION = new RobotElementType("COMMENTS_SECTION");
-  IElementType CONDITION = new RobotElementType("CONDITION");
-  IElementType CONSTANT_VALUE = new RobotElementType("CONSTANT_VALUE");
   IElementType DICT_VARIABLE = new RobotElementType("DICT_VARIABLE");
   IElementType DOCUMENTATION_STATEMENT = new RobotElementType("DOCUMENTATION_STATEMENT");
   IElementType ENVIRONMENT_VARIABLE = new RobotElementType("ENVIRONMENT_VARIABLE");
@@ -34,12 +31,14 @@ public interface RobotTypes {
   IElementType LANGUAGE_ID = new RobotElementType("LANGUAGE_ID");
   IElementType LIBRARY_IMPORT = new RobotElementType("LIBRARY_IMPORT");
   IElementType LIST_VARIABLE = new RobotElementType("LIST_VARIABLE");
+  IElementType LITERAL_CONSTANT_VALUE = new RobotElementType("LITERAL_CONSTANT_VALUE");
   IElementType LOCAL_SETTING = new RobotElementType("LOCAL_SETTING");
   IElementType LOCAL_SETTING_ID = new RobotElementType("LOCAL_SETTING_ID");
   IElementType METADATA_STATEMENT = new RobotElementType("METADATA_STATEMENT");
   IElementType NEW_LIBRARY_NAME = new RobotElementType("NEW_LIBRARY_NAME");
   IElementType PARAMETER = new RobotElementType("PARAMETER");
   IElementType PARAMETER_ID = new RobotElementType("PARAMETER_ID");
+  IElementType POSITIONAL_ARGUMENT = new RobotElementType("POSITIONAL_ARGUMENT");
   IElementType PYTHON_EXPRESSION = new RobotElementType("PYTHON_EXPRESSION");
   IElementType PYTHON_EXPRESSION_BODY = new RobotElementType("PYTHON_EXPRESSION_BODY");
   IElementType RESOURCE_IMPORT = new RobotElementType("RESOURCE_IMPORT");
@@ -71,6 +70,7 @@ public interface RobotTypes {
   IElementType VARIABLE = new RobotElementType("VARIABLE");
   IElementType VARIABLES_IMPORT = new RobotElementType("VARIABLES_IMPORT");
   IElementType VARIABLES_SECTION = new RobotElementType("VARIABLES_SECTION");
+  IElementType VARIABLE_BODY_CONTENT = new RobotElementType("VARIABLE_BODY_CONTENT");
   IElementType VARIABLE_ID = new RobotElementType("VARIABLE_ID");
   IElementType VARIABLE_VALUE = new RobotElementType("VARIABLE_VALUE");
   IElementType WHILE_LOOP_STRUCTURE = new RobotElementType("WHILE_LOOP_STRUCTURE");
@@ -102,6 +102,7 @@ public interface RobotTypes {
   IElementType LANGUAGE_NAME = new RobotTokenType("LANGUAGE_NAME");
   IElementType LIBRARY_IMPORT_KEYWORD = new RobotTokenType("LIBRARY_IMPORT_KEYWORD");
   IElementType LIST_VARIABLE_START = new RobotTokenType("LIST_VARIABLE_START");
+  IElementType LITERAL_CONSTANT = new RobotTokenType("LITERAL_CONSTANT");
   IElementType LOCAL_SETTING_NAME = new RobotTokenType("LOCAL_SETTING_NAME");
   IElementType METADATA_KEYWORD = new RobotTokenType("METADATA_KEYWORD");
   IElementType PARAMETER_NAME = new RobotTokenType("PARAMETER_NAME");
@@ -133,6 +134,7 @@ public interface RobotTypes {
   IElementType VARIABLES_IMPORT_KEYWORD = new RobotTokenType("VARIABLES_IMPORT_KEYWORD");
   IElementType VARIABLE_ACCESS_END = new RobotTokenType("VARIABLE_ACCESS_END");
   IElementType VARIABLE_ACCESS_START = new RobotTokenType("VARIABLE_ACCESS_START");
+  IElementType VARIABLE_BODY = new RobotTokenType("VARIABLE_BODY");
   IElementType VARIABLE_END = new RobotTokenType("VARIABLE_END");
   IElementType VARIABLE_INDEX_ACCESS = new RobotTokenType("VARIABLE_INDEX_ACCESS");
   IElementType VARIABLE_KEY_ACCESS = new RobotTokenType("VARIABLE_KEY_ACCESS");
@@ -144,20 +146,11 @@ public interface RobotTypes {
   class Factory {
     public static PsiElement createElement(ASTNode node) {
       IElementType type = node.getElementType();
-      if (type == ARGUMENT) {
-        return new RobotArgumentImpl(node);
-      }
-      else if (type == BDD_STATEMENT) {
+      if (type == BDD_STATEMENT) {
         return new RobotBddStatementImpl(node);
       }
       else if (type == COMMENTS_SECTION) {
         return new RobotCommentsSectionImpl(node);
-      }
-      else if (type == CONDITION) {
-        return new RobotConditionImpl(node);
-      }
-      else if (type == CONSTANT_VALUE) {
-        return new RobotConstantValueImpl(node);
       }
       else if (type == DICT_VARIABLE) {
         return new RobotDictVariableImpl(node);
@@ -222,6 +215,9 @@ public interface RobotTypes {
       else if (type == LIST_VARIABLE) {
         return new RobotListVariableImpl(node);
       }
+      else if (type == LITERAL_CONSTANT_VALUE) {
+        return new RobotLiteralConstantValueImpl(node);
+      }
       else if (type == LOCAL_SETTING) {
         return new RobotLocalSettingImpl(node);
       }
@@ -239,6 +235,9 @@ public interface RobotTypes {
       }
       else if (type == PARAMETER_ID) {
         return new RobotParameterIdImpl(node);
+      }
+      else if (type == POSITIONAL_ARGUMENT) {
+        return new RobotPositionalArgumentImpl(node);
       }
       else if (type == PYTHON_EXPRESSION) {
         return new RobotPythonExpressionImpl(node);
@@ -326,6 +325,9 @@ public interface RobotTypes {
       }
       else if (type == VARIABLES_SECTION) {
         return new RobotVariablesSectionImpl(node);
+      }
+      else if (type == VARIABLE_BODY_CONTENT) {
+        return new RobotVariableBodyContentImpl(node);
       }
       else if (type == VARIABLE_ID) {
         return new RobotVariableIdImpl(node);

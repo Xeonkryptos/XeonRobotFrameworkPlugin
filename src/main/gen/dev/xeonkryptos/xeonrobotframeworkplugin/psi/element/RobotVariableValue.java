@@ -7,10 +7,10 @@ import com.intellij.psi.PsiElement;
 
 public interface RobotVariableValue extends PsiElement {
 
-  @NotNull
-  List<RobotConstantValue> getConstantValueList();
+  @Nullable
+  RobotParameter getParameter();
 
-  @NotNull
-  List<RobotVariable> getVariableList();
+  @Nullable
+  RobotPositionalArgument getPositionalArgument();
 
 }

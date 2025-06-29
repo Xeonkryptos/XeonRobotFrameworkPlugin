@@ -28,8 +28,8 @@ public class RobotSuiteNameStatementImpl extends RobotPsiElementBase implements 
 
   @Override
   @Nullable
-  public RobotArgument getArgument() {
-    return findChildByClass(RobotArgument.class);
+  public RobotPositionalArgument getPositionalArgument() {
+    return findChildByClass(RobotPositionalArgument.class);
   }
 
 }

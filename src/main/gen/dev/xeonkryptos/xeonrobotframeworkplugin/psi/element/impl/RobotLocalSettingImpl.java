@@ -28,12 +28,6 @@ public class RobotLocalSettingImpl extends RobotLocalSettingExtension implements
 
   @Override
   @NotNull
-  public List<RobotArgument> getArgumentList() {
-    return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotArgument.class);
-  }
-
-  @Override
-  @NotNull
   public List<RobotKeywordCall> getKeywordCallList() {
     return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotKeywordCall.class);
   }
@@ -48,6 +42,12 @@ public class RobotLocalSettingImpl extends RobotLocalSettingExtension implements
   @NotNull
   public List<RobotParameter> getParameterList() {
     return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotParameter.class);
+  }
+
+  @Override
+  @NotNull
+  public List<RobotPositionalArgument> getPositionalArgumentList() {
+    return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotPositionalArgument.class);
   }
 
 }

@@ -29,14 +29,14 @@ public class RobotIfStructureImpl extends RobotExecutableStatementImpl implement
 
   @Override
   @NotNull
-  public List<RobotCondition> getConditionList() {
-    return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotCondition.class);
+  public List<RobotExecutableStatement> getExecutableStatementList() {
+    return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotExecutableStatement.class);
   }
 
   @Override
   @NotNull
-  public List<RobotExecutableStatement> getExecutableStatementList() {
-    return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotExecutableStatement.class);
+  public List<RobotPositionalArgument> getPositionalArgumentList() {
+    return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotPositionalArgument.class);
   }
 
 }

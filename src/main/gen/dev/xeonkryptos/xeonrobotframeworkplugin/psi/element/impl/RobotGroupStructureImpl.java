@@ -28,15 +28,15 @@ public class RobotGroupStructureImpl extends RobotExecutableStatementImpl implem
   }
 
   @Override
-  @Nullable
-  public RobotArgument getArgument() {
-    return findChildByClass(RobotArgument.class);
-  }
-
-  @Override
   @NotNull
   public List<RobotExecutableStatement> getExecutableStatementList() {
     return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotExecutableStatement.class);
+  }
+
+  @Override
+  @Nullable
+  public RobotPositionalArgument getPositionalArgument() {
+    return findChildByClass(RobotPositionalArgument.class);
   }
 
 }

@@ -8,7 +8,7 @@ import com.intellij.psi.PsiElement;
 public interface RobotExtendedVariableNestedAccess extends PsiElement {
 
   @Nullable
-  RobotConstantValue getConstantValue();
+  RobotLiteralConstantValue getLiteralConstantValue();
 
   @Nullable
   RobotVariable getVariable();

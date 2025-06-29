@@ -27,15 +27,15 @@ public class RobotParameterImpl extends RobotParameterExtension implements Robot
   }
 
   @Override
-  @Nullable
-  public RobotArgument getArgument() {
-    return findChildByClass(RobotArgument.class);
-  }
-
-  @Override
   @NotNull
   public RobotParameterId getParameterId() {
     return findNotNullChildByClass(RobotParameterId.class);
+  }
+
+  @Override
+  @Nullable
+  public RobotPositionalArgument getPositionalArgument() {
+    return findChildByClass(RobotPositionalArgument.class);
   }
 
 }

@@ -9,9 +9,6 @@ import com.intellij.psi.PsiNameIdentifierOwner;
 public interface RobotLocalSetting extends PsiNameIdentifierOwner {
 
   @NotNull
-  List<RobotArgument> getArgumentList();
-
-  @NotNull
   List<RobotKeywordCall> getKeywordCallList();
 
   @NotNull
@@ -19,5 +16,8 @@ public interface RobotLocalSetting extends PsiNameIdentifierOwner {
 
   @NotNull
   List<RobotParameter> getParameterList();
+
+  @NotNull
+  List<RobotPositionalArgument> getPositionalArgumentList();
 
 }

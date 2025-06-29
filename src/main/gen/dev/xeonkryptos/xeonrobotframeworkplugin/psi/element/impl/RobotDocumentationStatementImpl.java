@@ -28,8 +28,8 @@ public class RobotDocumentationStatementImpl extends RobotPsiElementBase impleme
 
   @Override
   @NotNull
-  public List<RobotArgument> getArgumentList() {
-    return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotArgument.class);
+  public List<RobotPositionalArgument> getPositionalArgumentList() {
+    return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotPositionalArgument.class);
   }
 
 }

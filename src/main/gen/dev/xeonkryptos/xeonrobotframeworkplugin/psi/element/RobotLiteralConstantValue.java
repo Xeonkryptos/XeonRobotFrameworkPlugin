@@ -5,9 +5,6 @@ import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 
-public interface RobotTagsStatement extends PsiElement {
-
-  @NotNull
-  List<RobotPositionalArgument> getPositionalArgumentList();
+public interface RobotLiteralConstantValue extends PsiElement {
 
 }

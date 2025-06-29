@@ -28,8 +28,8 @@ public class RobotExtendedVariableNestedAccessImpl extends RobotPsiElementBase i
 
   @Override
   @Nullable
-  public RobotConstantValue getConstantValue() {
-    return findChildByClass(RobotConstantValue.class);
+  public RobotLiteralConstantValue getLiteralConstantValue() {
+    return findChildByClass(RobotLiteralConstantValue.class);
   }
 
   @Override

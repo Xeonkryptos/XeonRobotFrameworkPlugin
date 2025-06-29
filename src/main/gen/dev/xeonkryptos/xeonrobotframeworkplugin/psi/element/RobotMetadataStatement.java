@@ -8,6 +8,6 @@ import com.intellij.psi.PsiElement;
 public interface RobotMetadataStatement extends PsiElement {
 
   @NotNull
-  List<RobotArgument> getArgumentList();
+  List<RobotPositionalArgument> getPositionalArgumentList();
 
 }

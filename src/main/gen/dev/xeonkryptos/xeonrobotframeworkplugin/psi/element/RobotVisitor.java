@@ -21,14 +21,6 @@ public class RobotVisitor extends PsiElementVisitor {
     visitSection(o);
   }
 
-  public void visitCondition(@NotNull RobotCondition o) {
-    visitPsiElement(o);
-  }
-
-  public void visitConstantValue(@NotNull RobotConstantValue o) {
-    visitPsiElement(o);
-  }
-
   public void visitDictVariable(@NotNull RobotDictVariable o) {
     visitVariable(o);
   }
@@ -113,6 +105,10 @@ public class RobotVisitor extends PsiElementVisitor {
     visitVariable(o);
   }
 
+  public void visitLiteralConstantValue(@NotNull RobotLiteralConstantValue o) {
+    visitPsiElement(o);
+  }
+
   public void visitLocalSetting(@NotNull RobotLocalSetting o) {
     visitPsiNameIdentifierOwner(o);
   }
@@ -135,6 +131,10 @@ public class RobotVisitor extends PsiElementVisitor {
 
   public void visitParameterId(@NotNull RobotParameterId o) {
     visitPsiNamedElement(o);
+  }
+
+  public void visitPositionalArgument(@NotNull RobotPositionalArgument o) {
+    visitArgument(o);
   }
 
   public void visitPythonExpression(@NotNull RobotPythonExpression o) {
@@ -250,6 +250,10 @@ public class RobotVisitor extends PsiElementVisitor {
   }
 
   public void visitVariable(@NotNull RobotVariable o) {
+    visitPsiElement(o);
+  }
+
+  public void visitVariableBodyContent(@NotNull RobotVariableBodyContent o) {
     visitPsiElement(o);
   }
 

@@ -8,9 +8,6 @@ import com.intellij.psi.PsiElement;
 public interface RobotTryStructure extends RobotExecutableStatement {
 
   @NotNull
-  List<RobotCondition> getConditionList();
-
-  @NotNull
   List<RobotExecutableStatement> getExecutableStatementList();
 
   @NotNull

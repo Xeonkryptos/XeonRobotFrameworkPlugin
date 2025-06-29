@@ -26,6 +26,8 @@
 
   extends(".*_structure")="executable_statement"
 
+  extends("positional_argument|parameter")="argument"
+
   extends(".*")="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotPsiElementBase"
 }
 
@@ -67,28 +69,28 @@ private setting_statements ::= library_import
     | timeout_statements
     | unknown_setting_statements
 
-library_import ::= LIBRARY_IMPORT_KEYWORD line_comment* argument (parameter | argument)* (WITH_NAME_KEYWORD new_library_name)? line_comment* EOL {pin=1}
+library_import ::= LIBRARY_IMPORT_KEYWORD line_comment* positional_argument (parameter | positional_argument)* (WITH_NAME_KEYWORD new_library_name)? line_comment* EOL {pin=1}
 new_library_name ::= ARGUMENT_VALUE
 
-resource_import ::= RESOURCE_IMPORT_KEYWORD line_comment* argument line_comment* EOL {pin=1}
+resource_import ::= RESOURCE_IMPORT_KEYWORD line_comment* positional_argument line_comment* EOL {pin=1}
 
-variables_import ::= VARIABLES_IMPORT_KEYWORD line_comment* argument (parameter | argument)* line_comment* EOL {pin=1}
+variables_import ::= VARIABLES_IMPORT_KEYWORD line_comment* positional_argument (parameter | positional_argument)* line_comment* EOL {pin=1}
 
-suite_name_statement ::= SUITE_NAME_KEYWORD line_comment* argument line_comment* EOL {pin=1}
+suite_name_statement ::= SUITE_NAME_KEYWORD line_comment* positional_argument line_comment* EOL {pin=1}
 
-documentation_statement ::= DOCUMENTATION_KEYWORD line_comment* argument+ line_comment* EOL {pin=1}
+documentation_statement ::= DOCUMENTATION_KEYWORD line_comment* positional_argument+ line_comment* EOL {pin=1}
 
-metadata_statement ::= METADATA_KEYWORD line_comment* argument+ line_comment* EOL {pin=1}
+metadata_statement ::= METADATA_KEYWORD line_comment* positional_argument+ line_comment* EOL {pin=1}
 
 setup_teardown_statements ::= SETUP_TEARDOWN_STATEMENT_KEYWORDS line_comment* (eol_based_keyword_call | variable) line_comment* {pin=1}
 
-tags_statement ::= TAGS_KEYWORDS line_comment* argument+ line_comment* EOL {pin=1}
+tags_statement ::= TAGS_KEYWORDS line_comment* positional_argument+ line_comment* EOL {pin=1}
 
 template_statements ::= TEMPLATE_KEYWORDS line_comment* eol_based_keyword_call line_comment* {pin=1}
 
-timeout_statements ::= TIMEOUT_KEYWORDS line_comment* argument line_comment* EOL {pin=1}
+timeout_statements ::= TIMEOUT_KEYWORDS line_comment* positional_argument line_comment* EOL {pin=1}
 
-unknown_setting_statements ::= unknown_setting_statement_id (parameter | argument | line_comment)* EOL {
+unknown_setting_statements ::= unknown_setting_statement_id (parameter | positional_argument | line_comment)* EOL {
     pin=1
     implements = "com.intellij.psi.PsiNameIdentifierOwner"
     extends = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotUnknownSettingStatementExtension"
@@ -146,7 +148,7 @@ user_keyword_statement ::= user_keyword_statement_id line_comment* (local_settin
 user_keyword_statement_id ::= USER_KEYWORD_NAME
 private user_keyword_statement_recover ::= !user_keyword_statement_id & section_recover
 
-local_setting ::= local_setting_id line_comment* (parameter | argument | eol_free_keyword_call)* line_comment* EOL {
+local_setting ::= local_setting_id line_comment* (parameter | positional_argument | eol_free_keyword_call)* line_comment* EOL {
     pin=1
     implements = "com.intellij.psi.PsiNameIdentifierOwner"
     extends = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotLocalSettingExtension"
@@ -164,22 +166,20 @@ private call_structure ::= eol_based_keyword_call
     | keyword_variable_statement
     | inline_variable_statement
 private loop_control_structure ::= BREAK | CONTINUE
-private return_structure ::= RETURN value* EOL {pin=1}
+private return_structure ::= RETURN positional_argument* EOL {pin=1}
 
-for_loop_structure ::= FOR variable FOR_IN argument+ parameter* line_comment* EOL executable_statement* line_comment* END line_comment* {pin=3}
-while_loop_structure ::= WHILE condition parameter* line_comment* EOL executable_statement* line_comment* END line_comment*
-if_structure ::= IF condition EOL line_comment* executable_statement*
-    (ELSE_IF condition EOL line_comment* executable_statement*)*
+for_loop_structure ::= FOR variable FOR_IN positional_argument+ parameter* line_comment* EOL executable_statement* line_comment* END line_comment* {pin=3}
+while_loop_structure ::= WHILE positional_argument parameter* line_comment* EOL executable_statement* line_comment* END line_comment*
+if_structure ::= IF positional_argument EOL line_comment* executable_statement*
+    (ELSE_IF positional_argument EOL line_comment* executable_statement*)*
     (ELSE line_comment* executable_statement*)?
     END? line_comment*
 try_structure ::= TRY line_comment* executable_statement* line_comment*
-    (EXCEPT condition? parameter* EOL executable_statement* line_comment*)*
+    (EXCEPT positional_argument? parameter* EOL executable_statement* line_comment*)*
     (ELSE line_comment* executable_statement* line_comment*)?
     (FINALLY line_comment* executable_statement* line_comment*)?
     END line_comment*
-group_structure ::= GROUP argument? EOL line_comment* executable_statement* END line_comment*
-
-condition ::= value+
+group_structure ::= GROUP positional_argument? EOL line_comment* executable_statement* END line_comment*
 
 fake keyword_call ::= base_keyword_call {
     implements = "com.intellij.psi.PsiNameIdentifierOwner"
@@ -187,10 +187,12 @@ fake keyword_call ::= base_keyword_call {
 }
 eol_based_keyword_call ::= base_keyword_call EOL {elementType=keyword_call}
 eol_free_keyword_call ::= base_keyword_call {elementType=keyword_call}
-private base_keyword_call ::= keyword_call_id (parameter | argument | line_comment)* {pin=1}
+private base_keyword_call ::= keyword_call_id (parameter | positional_argument | line_comment)* {pin=1}
 keyword_call_id ::= KEYWORD_NAME
 
-parameter ::= parameter_id ASSIGNMENT argument {
+fake argument ::= positional_argument | parameter?
+
+parameter ::= parameter_id ASSIGNMENT positional_argument {
     pin=2
     implements = "com.intellij.psi.PsiNameIdentifierOwner"
     extends = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotParameterExtension"
@@ -199,32 +201,30 @@ parameter_id ::= PARAMETER_NAME
 
 fake variable_statement ::= inline_variable_statement | single_variable_statement | keyword_variable_statement?
 inline_variable_statement ::= VAR single_variable_statement {pin=1}
-single_variable_statement ::= variable ASSIGNMENT? variable_value* line_comment* EOL
+single_variable_statement ::= variable ASSIGNMENT? variable_value+ line_comment* EOL
 keyword_variable_statement ::= variable+ ASSIGNMENT? eol_based_keyword_call line_comment* // Without EOL as it is handled at a higher level
+variable_value ::= positional_argument | parameter
+
+positional_argument ::= external_positional_argument
+external external_positional_argument ::= parsePositionalArgument positional_argument_content
+private positional_argument_content ::= literal_constant_value | variable
+
 variable ::= scalar_variable | list_variable | dict_variable | environment_variable
-variable_value ::= value+
-
-argument ::= value
-
 scalar_variable ::= SCALAR_VARIABLE_START (variable_id | python_expression) VARIABLE_END (extended_variable_slice_access | extended_variable_index_access | extended_variable_nested_access)*
 list_variable ::= LIST_VARIABLE_START (variable_id | python_expression) VARIABLE_END (extended_variable_slice_access | extended_variable_index_access | extended_variable_nested_access)*
 dict_variable ::= DICT_VARIABLE_START (variable_id | python_expression) VARIABLE_END (extended_variable_key_access | extended_variable_nested_access)*
 environment_variable ::= ENV_VARIABLE_START variable_id VARIABLE_END
 
-variable_id ::= value
+variable_id ::= variable | variable_body_content
+variable_body_content ::= VARIABLE_BODY
 python_expression ::= PYTHON_EXPRESSION_START python_expression_body PYTHON_EXPRESSION_END
 python_expression_body ::= PYTHON_EXPRESSION_CONTENT
 
 extended_variable_slice_access ::= VARIABLE_SLICE_ACCESS
 extended_variable_index_access ::= VARIABLE_INDEX_ACCESS
 extended_variable_key_access ::= VARIABLE_KEY_ACCESS
-extended_variable_nested_access ::= VARIABLE_ACCESS_START value VARIABLE_ACCESS_END
+extended_variable_nested_access ::= VARIABLE_ACCESS_START (variable | literal_constant_value) VARIABLE_ACCESS_END
 
-private value ::= scalar_variable
-        | list_variable
-        | dict_variable
-        | environment_variable
-        | constant_value
-constant_value ::= ARGUMENT_VALUE
+literal_constant_value ::= LITERAL_CONSTANT
 
 private line_comment ::= COMMENT

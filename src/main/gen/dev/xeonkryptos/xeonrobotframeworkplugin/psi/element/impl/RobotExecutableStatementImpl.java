@@ -27,12 +27,6 @@ public class RobotExecutableStatementImpl extends RobotPsiElementBase implements
   }
 
   @Override
-  @NotNull
-  public List<RobotConstantValue> getConstantValueList() {
-    return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotConstantValue.class);
-  }
-
-  @Override
   @Nullable
   public RobotKeywordCall getKeywordCall() {
     return findChildByClass(RobotKeywordCall.class);
@@ -40,8 +34,8 @@ public class RobotExecutableStatementImpl extends RobotPsiElementBase implements
 
   @Override
   @NotNull
-  public List<RobotVariable> getVariableList() {
-    return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotVariable.class);
+  public List<RobotPositionalArgument> getPositionalArgumentList() {
+    return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotPositionalArgument.class);
   }
 
   @Override

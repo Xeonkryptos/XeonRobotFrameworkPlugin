@@ -27,12 +27,6 @@ public class RobotLibraryImportImpl extends RobotPsiElementBase implements Robot
   }
 
   @Override
-  @NotNull
-  public List<RobotArgument> getArgumentList() {
-    return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotArgument.class);
-  }
-
-  @Override
   @Nullable
   public RobotNewLibraryName getNewLibraryName() {
     return findChildByClass(RobotNewLibraryName.class);
@@ -42,6 +36,12 @@ public class RobotLibraryImportImpl extends RobotPsiElementBase implements Robot
   @NotNull
   public List<RobotParameter> getParameterList() {
     return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotParameter.class);
+  }
+
+  @Override
+  @NotNull
+  public List<RobotPositionalArgument> getPositionalArgumentList() {
+    return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotPositionalArgument.class);
   }
 
 }

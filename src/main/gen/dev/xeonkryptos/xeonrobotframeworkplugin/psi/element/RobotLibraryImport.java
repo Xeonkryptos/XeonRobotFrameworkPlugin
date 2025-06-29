@@ -7,13 +7,13 @@ import com.intellij.psi.PsiElement;
 
 public interface RobotLibraryImport extends PsiElement {
 
-  @NotNull
-  List<RobotArgument> getArgumentList();
-
   @Nullable
   RobotNewLibraryName getNewLibraryName();
 
   @NotNull
   List<RobotParameter> getParameterList();
+
+  @NotNull
+  List<RobotPositionalArgument> getPositionalArgumentList();
 
 }

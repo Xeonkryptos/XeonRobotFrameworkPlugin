@@ -27,15 +27,15 @@ public class RobotVariableValueImpl extends RobotPsiElementBase implements Robot
   }
 
   @Override
-  @NotNull
-  public List<RobotConstantValue> getConstantValueList() {
-    return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotConstantValue.class);
+  @Nullable
+  public RobotParameter getParameter() {
+    return findChildByClass(RobotParameter.class);
   }
 
   @Override
-  @NotNull
-  public List<RobotVariable> getVariableList() {
-    return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotVariable.class);
+  @Nullable
+  public RobotPositionalArgument getPositionalArgument() {
+    return findChildByClass(RobotPositionalArgument.class);
   }
 
 }

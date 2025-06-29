@@ -29,12 +29,6 @@ public class RobotWhileLoopStructureImpl extends RobotExecutableStatementImpl im
 
   @Override
   @NotNull
-  public RobotCondition getCondition() {
-    return findNotNullChildByClass(RobotCondition.class);
-  }
-
-  @Override
-  @NotNull
   public List<RobotExecutableStatement> getExecutableStatementList() {
     return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotExecutableStatement.class);
   }
@@ -43,6 +37,12 @@ public class RobotWhileLoopStructureImpl extends RobotExecutableStatementImpl im
   @NotNull
   public List<RobotParameter> getParameterList() {
     return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotParameter.class);
+  }
+
+  @Override
+  @NotNull
+  public RobotPositionalArgument getPositionalArgument() {
+    return findNotNullChildByClass(RobotPositionalArgument.class);
   }
 
 }

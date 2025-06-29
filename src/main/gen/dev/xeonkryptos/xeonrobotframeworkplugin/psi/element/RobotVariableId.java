@@ -9,9 +9,9 @@ import com.intellij.psi.PsiNamedElement;
 public interface RobotVariableId extends PsiNamedElement {
 
   @Nullable
-  RobotConstantValue getConstantValue();
+  RobotVariable getVariable();
 
   @Nullable
-  RobotVariable getVariable();
+  RobotVariableBodyContent getVariableBodyContent();
 
 }

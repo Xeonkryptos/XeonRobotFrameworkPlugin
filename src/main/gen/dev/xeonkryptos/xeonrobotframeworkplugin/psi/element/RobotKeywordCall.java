@@ -9,12 +9,12 @@ import com.intellij.psi.PsiNameIdentifierOwner;
 public interface RobotKeywordCall extends PsiNameIdentifierOwner {
 
   @NotNull
-  List<RobotArgument> getArgumentList();
-
-  @NotNull
   RobotKeywordCallId getKeywordCallId();
 
   @NotNull
   List<RobotParameter> getParameterList();
+
+  @NotNull
+  List<RobotPositionalArgument> getPositionalArgumentList();
 
 }

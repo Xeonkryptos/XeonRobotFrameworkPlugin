@@ -9,10 +9,10 @@ import com.intellij.psi.PsiNameIdentifierOwner;
 public interface RobotUnknownSettingStatements extends PsiNameIdentifierOwner {
 
   @NotNull
-  List<RobotArgument> getArgumentList();
+  List<RobotParameter> getParameterList();
 
   @NotNull
-  List<RobotParameter> getParameterList();
+  List<RobotPositionalArgument> getPositionalArgumentList();
 
   @NotNull
   RobotUnknownSettingStatementId getUnknownSettingStatementId();

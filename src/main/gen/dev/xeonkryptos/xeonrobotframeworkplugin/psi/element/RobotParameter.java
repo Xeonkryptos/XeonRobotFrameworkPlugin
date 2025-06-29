@@ -8,10 +8,10 @@ import com.intellij.psi.PsiNameIdentifierOwner;
 
 public interface RobotParameter extends PsiNameIdentifierOwner {
 
-  @Nullable
-  RobotArgument getArgument();
-
   @NotNull
   RobotParameterId getParameterId();
+
+  @Nullable
+  RobotPositionalArgument getPositionalArgument();
 
 }

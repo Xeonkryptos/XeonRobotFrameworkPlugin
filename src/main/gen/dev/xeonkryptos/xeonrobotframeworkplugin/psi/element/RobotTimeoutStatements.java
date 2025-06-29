@@ -8,6 +8,6 @@ import com.intellij.psi.PsiElement;
 public interface RobotTimeoutStatements extends PsiElement {
 
   @Nullable
-  RobotArgument getArgument();
+  RobotPositionalArgument getPositionalArgument();
 
 }

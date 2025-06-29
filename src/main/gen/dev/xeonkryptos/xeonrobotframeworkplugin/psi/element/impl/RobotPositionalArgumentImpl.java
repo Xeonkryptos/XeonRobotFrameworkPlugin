@@ -10,14 +10,15 @@ import com.intellij.psi.util.PsiTreeUtil;
 import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.*;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.*;
 
-public class RobotConstantValueImpl extends RobotPsiElementBase implements RobotConstantValue {
+public class RobotPositionalArgumentImpl extends RobotArgumentImpl implements RobotPositionalArgument {
 
-  public RobotConstantValueImpl(@NotNull ASTNode node) {
+  public RobotPositionalArgumentImpl(@NotNull ASTNode node) {
     super(node);
   }
 
+  @Override
   public void accept(@NotNull RobotVisitor visitor) {
-    visitor.visitConstantValue(this);
+    visitor.visitPositionalArgument(this);
   }
 
   @Override

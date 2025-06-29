@@ -46,18 +46,7 @@ public class RobotParser implements PsiParser, LightPsiParser {
   };
 
   /* ********************************************************** */
-  // value
-  public static boolean argument(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "argument")) return false;
-    boolean r;
-    Marker m = enter_section_(b, l, _NONE_, ARGUMENT, "<argument>");
-    r = value(b, l + 1);
-    exit_section_(b, l, m, r, false, null);
-    return r;
-  }
-
-  /* ********************************************************** */
-  // keyword_call_id (parameter | argument | line_comment)*
+  // keyword_call_id (parameter | positional_argument | line_comment)*
   static boolean base_keyword_call(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "base_keyword_call")) return false;
     if (!nextTokenIs(b, KEYWORD_NAME)) return false;
@@ -70,7 +59,7 @@ public class RobotParser implements PsiParser, LightPsiParser {
     return r || p;
   }
 
-  // (parameter | argument | line_comment)*
+  // (parameter | positional_argument | line_comment)*
   private static boolean base_keyword_call_1(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "base_keyword_call_1")) return false;
     while (true) {
@@ -81,12 +70,12 @@ public class RobotParser implements PsiParser, LightPsiParser {
     return true;
   }
 
-  // parameter | argument | line_comment
+  // parameter | positional_argument | line_comment
   private static boolean base_keyword_call_1_0(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "base_keyword_call_1_0")) return false;
     boolean r;
     r = parameter(b, l + 1);
-    if (!r) r = argument(b, l + 1);
+    if (!r) r = positional_argument(b, l + 1);
     if (!r) r = line_comment(b, l + 1);
     return r;
   }
@@ -243,34 +232,6 @@ public class RobotParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // value+
-  public static boolean condition(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "condition")) return false;
-    boolean r;
-    Marker m = enter_section_(b, l, _NONE_, CONDITION, "<condition>");
-    r = value(b, l + 1);
-    while (r) {
-      int c = current_position_(b);
-      if (!value(b, l + 1)) break;
-      if (!empty_element_parsed_guard_(b, "condition", c)) break;
-    }
-    exit_section_(b, l, m, r, false, null);
-    return r;
-  }
-
-  /* ********************************************************** */
-  // ARGUMENT_VALUE
-  public static boolean constant_value(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "constant_value")) return false;
-    if (!nextTokenIs(b, ARGUMENT_VALUE)) return false;
-    boolean r;
-    Marker m = enter_section_(b);
-    r = consumeToken(b, ARGUMENT_VALUE);
-    exit_section_(b, m, CONSTANT_VALUE, r);
-    return r;
-  }
-
-  /* ********************************************************** */
   // if_structure
   //     | try_structure
   //     | group_structure
@@ -328,7 +289,7 @@ public class RobotParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // DOCUMENTATION_KEYWORD line_comment* argument+ line_comment* EOL
+  // DOCUMENTATION_KEYWORD line_comment* positional_argument+ line_comment* EOL
   public static boolean documentation_statement(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "documentation_statement")) return false;
     if (!nextTokenIs(b, DOCUMENTATION_KEYWORD)) return false;
@@ -355,15 +316,15 @@ public class RobotParser implements PsiParser, LightPsiParser {
     return true;
   }
 
-  // argument+
+  // positional_argument+
   private static boolean documentation_statement_2(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "documentation_statement_2")) return false;
     boolean r;
     Marker m = enter_section_(b);
-    r = argument(b, l + 1);
+    r = positional_argument(b, l + 1);
     while (r) {
       int c = current_position_(b);
-      if (!argument(b, l + 1)) break;
+      if (!positional_argument(b, l + 1)) break;
       if (!empty_element_parsed_guard_(b, "documentation_statement_2", c)) break;
     }
     exit_section_(b, m, null, r);
@@ -460,16 +421,25 @@ public class RobotParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // VARIABLE_ACCESS_START value VARIABLE_ACCESS_END
+  // VARIABLE_ACCESS_START (variable | literal_constant_value) VARIABLE_ACCESS_END
   public static boolean extended_variable_nested_access(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "extended_variable_nested_access")) return false;
     if (!nextTokenIs(b, VARIABLE_ACCESS_START)) return false;
     boolean r;
     Marker m = enter_section_(b);
     r = consumeToken(b, VARIABLE_ACCESS_START);
-    r = r && value(b, l + 1);
+    r = r && extended_variable_nested_access_1(b, l + 1);
     r = r && consumeToken(b, VARIABLE_ACCESS_END);
     exit_section_(b, m, EXTENDED_VARIABLE_NESTED_ACCESS, r);
+    return r;
+  }
+
+  // variable | literal_constant_value
+  private static boolean extended_variable_nested_access_1(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "extended_variable_nested_access_1")) return false;
+    boolean r;
+    r = variable(b, l + 1);
+    if (!r) r = literal_constant_value(b, l + 1);
     return r;
   }
 
@@ -520,7 +490,7 @@ public class RobotParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // FOR variable FOR_IN argument+ parameter* line_comment* EOL executable_statement* line_comment* END line_comment*
+  // FOR variable FOR_IN positional_argument+ parameter* line_comment* EOL executable_statement* line_comment* END line_comment*
   public static boolean for_loop_structure(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "for_loop_structure")) return false;
     if (!nextTokenIs(b, FOR)) return false;
@@ -542,15 +512,15 @@ public class RobotParser implements PsiParser, LightPsiParser {
     return r || p;
   }
 
-  // argument+
+  // positional_argument+
   private static boolean for_loop_structure_3(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "for_loop_structure_3")) return false;
     boolean r;
     Marker m = enter_section_(b);
-    r = argument(b, l + 1);
+    r = positional_argument(b, l + 1);
     while (r) {
       int c = current_position_(b);
-      if (!argument(b, l + 1)) break;
+      if (!positional_argument(b, l + 1)) break;
       if (!empty_element_parsed_guard_(b, "for_loop_structure_3", c)) break;
     }
     exit_section_(b, m, null, r);
@@ -613,7 +583,7 @@ public class RobotParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // GROUP argument? EOL line_comment* executable_statement* END line_comment*
+  // GROUP positional_argument? EOL line_comment* executable_statement* END line_comment*
   public static boolean group_structure(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "group_structure")) return false;
     if (!nextTokenIs(b, GROUP)) return false;
@@ -630,10 +600,10 @@ public class RobotParser implements PsiParser, LightPsiParser {
     return r;
   }
 
-  // argument?
+  // positional_argument?
   private static boolean group_structure_1(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "group_structure_1")) return false;
-    argument(b, l + 1);
+    positional_argument(b, l + 1);
     return true;
   }
 
@@ -671,8 +641,8 @@ public class RobotParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // IF condition EOL line_comment* executable_statement*
-  //     (ELSE_IF condition EOL line_comment* executable_statement*)*
+  // IF positional_argument EOL line_comment* executable_statement*
+  //     (ELSE_IF positional_argument EOL line_comment* executable_statement*)*
   //     (ELSE line_comment* executable_statement*)?
   //     END? line_comment*
   public static boolean if_structure(PsiBuilder b, int l) {
@@ -681,7 +651,7 @@ public class RobotParser implements PsiParser, LightPsiParser {
     boolean r;
     Marker m = enter_section_(b);
     r = consumeToken(b, IF);
-    r = r && condition(b, l + 1);
+    r = r && positional_argument(b, l + 1);
     r = r && consumeToken(b, EOL);
     r = r && if_structure_3(b, l + 1);
     r = r && if_structure_4(b, l + 1);
@@ -715,7 +685,7 @@ public class RobotParser implements PsiParser, LightPsiParser {
     return true;
   }
 
-  // (ELSE_IF condition EOL line_comment* executable_statement*)*
+  // (ELSE_IF positional_argument EOL line_comment* executable_statement*)*
   private static boolean if_structure_5(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "if_structure_5")) return false;
     while (true) {
@@ -726,13 +696,13 @@ public class RobotParser implements PsiParser, LightPsiParser {
     return true;
   }
 
-  // ELSE_IF condition EOL line_comment* executable_statement*
+  // ELSE_IF positional_argument EOL line_comment* executable_statement*
   private static boolean if_structure_5_0(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "if_structure_5_0")) return false;
     boolean r;
     Marker m = enter_section_(b);
     r = consumeToken(b, ELSE_IF);
-    r = r && condition(b, l + 1);
+    r = r && positional_argument(b, l + 1);
     r = r && consumeToken(b, EOL);
     r = r && if_structure_5_0_3(b, l + 1);
     r = r && if_structure_5_0_4(b, l + 1);
@@ -969,7 +939,7 @@ public class RobotParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // LIBRARY_IMPORT_KEYWORD line_comment* argument (parameter | argument)* (WITH_NAME_KEYWORD new_library_name)? line_comment* EOL
+  // LIBRARY_IMPORT_KEYWORD line_comment* positional_argument (parameter | positional_argument)* (WITH_NAME_KEYWORD new_library_name)? line_comment* EOL
   public static boolean library_import(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "library_import")) return false;
     if (!nextTokenIs(b, LIBRARY_IMPORT_KEYWORD)) return false;
@@ -978,7 +948,7 @@ public class RobotParser implements PsiParser, LightPsiParser {
     r = consumeToken(b, LIBRARY_IMPORT_KEYWORD);
     p = r; // pin = 1
     r = r && report_error_(b, library_import_1(b, l + 1));
-    r = p && report_error_(b, argument(b, l + 1)) && r;
+    r = p && report_error_(b, positional_argument(b, l + 1)) && r;
     r = p && report_error_(b, library_import_3(b, l + 1)) && r;
     r = p && report_error_(b, library_import_4(b, l + 1)) && r;
     r = p && report_error_(b, library_import_5(b, l + 1)) && r;
@@ -998,7 +968,7 @@ public class RobotParser implements PsiParser, LightPsiParser {
     return true;
   }
 
-  // (parameter | argument)*
+  // (parameter | positional_argument)*
   private static boolean library_import_3(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "library_import_3")) return false;
     while (true) {
@@ -1009,12 +979,12 @@ public class RobotParser implements PsiParser, LightPsiParser {
     return true;
   }
 
-  // parameter | argument
+  // parameter | positional_argument
   private static boolean library_import_3_0(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "library_import_3_0")) return false;
     boolean r;
     r = parameter(b, l + 1);
-    if (!r) r = argument(b, l + 1);
+    if (!r) r = positional_argument(b, l + 1);
     return r;
   }
 
@@ -1099,7 +1069,19 @@ public class RobotParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // local_setting_id line_comment* (parameter | argument | eol_free_keyword_call)* line_comment* EOL
+  // LITERAL_CONSTANT
+  public static boolean literal_constant_value(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "literal_constant_value")) return false;
+    if (!nextTokenIs(b, LITERAL_CONSTANT)) return false;
+    boolean r;
+    Marker m = enter_section_(b);
+    r = consumeToken(b, LITERAL_CONSTANT);
+    exit_section_(b, m, LITERAL_CONSTANT_VALUE, r);
+    return r;
+  }
+
+  /* ********************************************************** */
+  // local_setting_id line_comment* (parameter | positional_argument | eol_free_keyword_call)* line_comment* EOL
   public static boolean local_setting(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "local_setting")) return false;
     if (!nextTokenIs(b, LOCAL_SETTING_NAME)) return false;
@@ -1126,7 +1108,7 @@ public class RobotParser implements PsiParser, LightPsiParser {
     return true;
   }
 
-  // (parameter | argument | eol_free_keyword_call)*
+  // (parameter | positional_argument | eol_free_keyword_call)*
   private static boolean local_setting_2(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "local_setting_2")) return false;
     while (true) {
@@ -1137,12 +1119,12 @@ public class RobotParser implements PsiParser, LightPsiParser {
     return true;
   }
 
-  // parameter | argument | eol_free_keyword_call
+  // parameter | positional_argument | eol_free_keyword_call
   private static boolean local_setting_2_0(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "local_setting_2_0")) return false;
     boolean r;
     r = parameter(b, l + 1);
-    if (!r) r = argument(b, l + 1);
+    if (!r) r = positional_argument(b, l + 1);
     if (!r) r = eol_free_keyword_call(b, l + 1);
     return r;
   }
@@ -1194,7 +1176,7 @@ public class RobotParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // METADATA_KEYWORD line_comment* argument+ line_comment* EOL
+  // METADATA_KEYWORD line_comment* positional_argument+ line_comment* EOL
   public static boolean metadata_statement(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "metadata_statement")) return false;
     if (!nextTokenIs(b, METADATA_KEYWORD)) return false;
@@ -1221,15 +1203,15 @@ public class RobotParser implements PsiParser, LightPsiParser {
     return true;
   }
 
-  // argument+
+  // positional_argument+
   private static boolean metadata_statement_2(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "metadata_statement_2")) return false;
     boolean r;
     Marker m = enter_section_(b);
-    r = argument(b, l + 1);
+    r = positional_argument(b, l + 1);
     while (r) {
       int c = current_position_(b);
-      if (!argument(b, l + 1)) break;
+      if (!positional_argument(b, l + 1)) break;
       if (!empty_element_parsed_guard_(b, "metadata_statement_2", c)) break;
     }
     exit_section_(b, m, null, r);
@@ -1260,7 +1242,7 @@ public class RobotParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // parameter_id ASSIGNMENT argument
+  // parameter_id ASSIGNMENT positional_argument
   public static boolean parameter(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "parameter")) return false;
     if (!nextTokenIs(b, PARAMETER_NAME)) return false;
@@ -1269,7 +1251,7 @@ public class RobotParser implements PsiParser, LightPsiParser {
     r = parameter_id(b, l + 1);
     r = r && consumeToken(b, ASSIGNMENT);
     p = r; // pin = 2
-    r = r && argument(b, l + 1);
+    r = r && positional_argument(b, l + 1);
     exit_section_(b, l, m, r, p, null);
     return r || p;
   }
@@ -1283,6 +1265,27 @@ public class RobotParser implements PsiParser, LightPsiParser {
     Marker m = enter_section_(b);
     r = consumeToken(b, PARAMETER_NAME);
     exit_section_(b, m, PARAMETER_ID, r);
+    return r;
+  }
+
+  /* ********************************************************** */
+  // external_positional_argument
+  public static boolean positional_argument(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "positional_argument")) return false;
+    boolean r;
+    Marker m = enter_section_(b, l, _COLLAPSE_, POSITIONAL_ARGUMENT, "<positional argument>");
+    r = parsePositionalArgument(b, l + 1, RobotParser::positional_argument_content);
+    exit_section_(b, l, m, r, false, null);
+    return r;
+  }
+
+  /* ********************************************************** */
+  // literal_constant_value | variable
+  static boolean positional_argument_content(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "positional_argument_content")) return false;
+    boolean r;
+    r = literal_constant_value(b, l + 1);
+    if (!r) r = variable(b, l + 1);
     return r;
   }
 
@@ -1313,7 +1316,7 @@ public class RobotParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // RESOURCE_IMPORT_KEYWORD line_comment* argument line_comment* EOL
+  // RESOURCE_IMPORT_KEYWORD line_comment* positional_argument line_comment* EOL
   public static boolean resource_import(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "resource_import")) return false;
     if (!nextTokenIs(b, RESOURCE_IMPORT_KEYWORD)) return false;
@@ -1322,7 +1325,7 @@ public class RobotParser implements PsiParser, LightPsiParser {
     r = consumeToken(b, RESOURCE_IMPORT_KEYWORD);
     p = r; // pin = 1
     r = r && report_error_(b, resource_import_1(b, l + 1));
-    r = p && report_error_(b, argument(b, l + 1)) && r;
+    r = p && report_error_(b, positional_argument(b, l + 1)) && r;
     r = p && report_error_(b, resource_import_3(b, l + 1)) && r;
     r = p && consumeToken(b, EOL) && r;
     exit_section_(b, l, m, r, p, null);
@@ -1352,7 +1355,7 @@ public class RobotParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // RETURN value* EOL
+  // RETURN positional_argument* EOL
   static boolean return_structure(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "return_structure")) return false;
     if (!nextTokenIs(b, RETURN)) return false;
@@ -1366,12 +1369,12 @@ public class RobotParser implements PsiParser, LightPsiParser {
     return r || p;
   }
 
-  // value*
+  // positional_argument*
   private static boolean return_structure_1(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "return_structure_1")) return false;
     while (true) {
       int c = current_position_(b);
-      if (!value(b, l + 1)) break;
+      if (!positional_argument(b, l + 1)) break;
       if (!empty_element_parsed_guard_(b, "return_structure_1", c)) break;
     }
     return true;
@@ -1590,7 +1593,7 @@ public class RobotParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // variable ASSIGNMENT? variable_value* line_comment* EOL
+  // variable ASSIGNMENT? variable_value+ line_comment* EOL
   public static boolean single_variable_statement(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "single_variable_statement")) return false;
     boolean r;
@@ -1611,15 +1614,19 @@ public class RobotParser implements PsiParser, LightPsiParser {
     return true;
   }
 
-  // variable_value*
+  // variable_value+
   private static boolean single_variable_statement_2(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "single_variable_statement_2")) return false;
-    while (true) {
+    boolean r;
+    Marker m = enter_section_(b);
+    r = variable_value(b, l + 1);
+    while (r) {
       int c = current_position_(b);
       if (!variable_value(b, l + 1)) break;
       if (!empty_element_parsed_guard_(b, "single_variable_statement_2", c)) break;
     }
-    return true;
+    exit_section_(b, m, null, r);
+    return r;
   }
 
   // line_comment*
@@ -1634,7 +1641,7 @@ public class RobotParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // SUITE_NAME_KEYWORD line_comment* argument line_comment* EOL
+  // SUITE_NAME_KEYWORD line_comment* positional_argument line_comment* EOL
   public static boolean suite_name_statement(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "suite_name_statement")) return false;
     if (!nextTokenIs(b, SUITE_NAME_KEYWORD)) return false;
@@ -1643,7 +1650,7 @@ public class RobotParser implements PsiParser, LightPsiParser {
     r = consumeToken(b, SUITE_NAME_KEYWORD);
     p = r; // pin = 1
     r = r && report_error_(b, suite_name_statement_1(b, l + 1));
-    r = p && report_error_(b, argument(b, l + 1)) && r;
+    r = p && report_error_(b, positional_argument(b, l + 1)) && r;
     r = p && report_error_(b, suite_name_statement_3(b, l + 1)) && r;
     r = p && consumeToken(b, EOL) && r;
     exit_section_(b, l, m, r, p, null);
@@ -1673,7 +1680,7 @@ public class RobotParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // TAGS_KEYWORDS line_comment* argument+ line_comment* EOL
+  // TAGS_KEYWORDS line_comment* positional_argument+ line_comment* EOL
   public static boolean tags_statement(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "tags_statement")) return false;
     if (!nextTokenIs(b, TAGS_KEYWORDS)) return false;
@@ -1700,15 +1707,15 @@ public class RobotParser implements PsiParser, LightPsiParser {
     return true;
   }
 
-  // argument+
+  // positional_argument+
   private static boolean tags_statement_2(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "tags_statement_2")) return false;
     boolean r;
     Marker m = enter_section_(b);
-    r = argument(b, l + 1);
+    r = positional_argument(b, l + 1);
     while (r) {
       int c = current_position_(b);
-      if (!argument(b, l + 1)) break;
+      if (!positional_argument(b, l + 1)) break;
       if (!empty_element_parsed_guard_(b, "tags_statement_2", c)) break;
     }
     exit_section_(b, m, null, r);
@@ -2095,7 +2102,7 @@ public class RobotParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // TIMEOUT_KEYWORDS line_comment* argument line_comment* EOL
+  // TIMEOUT_KEYWORDS line_comment* positional_argument line_comment* EOL
   public static boolean timeout_statements(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "timeout_statements")) return false;
     if (!nextTokenIs(b, TIMEOUT_KEYWORDS)) return false;
@@ -2104,7 +2111,7 @@ public class RobotParser implements PsiParser, LightPsiParser {
     r = consumeToken(b, TIMEOUT_KEYWORDS);
     p = r; // pin = 1
     r = r && report_error_(b, timeout_statements_1(b, l + 1));
-    r = p && report_error_(b, argument(b, l + 1)) && r;
+    r = p && report_error_(b, positional_argument(b, l + 1)) && r;
     r = p && report_error_(b, timeout_statements_3(b, l + 1)) && r;
     r = p && consumeToken(b, EOL) && r;
     exit_section_(b, l, m, r, p, null);
@@ -2135,7 +2142,7 @@ public class RobotParser implements PsiParser, LightPsiParser {
 
   /* ********************************************************** */
   // TRY line_comment* executable_statement* line_comment*
-  //     (EXCEPT condition? parameter* EOL executable_statement* line_comment*)*
+  //     (EXCEPT positional_argument? parameter* EOL executable_statement* line_comment*)*
   //     (ELSE line_comment* executable_statement* line_comment*)?
   //     (FINALLY line_comment* executable_statement* line_comment*)?
   //     END line_comment*
@@ -2190,7 +2197,7 @@ public class RobotParser implements PsiParser, LightPsiParser {
     return true;
   }
 
-  // (EXCEPT condition? parameter* EOL executable_statement* line_comment*)*
+  // (EXCEPT positional_argument? parameter* EOL executable_statement* line_comment*)*
   private static boolean try_structure_4(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "try_structure_4")) return false;
     while (true) {
@@ -2201,7 +2208,7 @@ public class RobotParser implements PsiParser, LightPsiParser {
     return true;
   }
 
-  // EXCEPT condition? parameter* EOL executable_statement* line_comment*
+  // EXCEPT positional_argument? parameter* EOL executable_statement* line_comment*
   private static boolean try_structure_4_0(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "try_structure_4_0")) return false;
     boolean r;
@@ -2216,10 +2223,10 @@ public class RobotParser implements PsiParser, LightPsiParser {
     return r;
   }
 
-  // condition?
+  // positional_argument?
   private static boolean try_structure_4_0_1(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "try_structure_4_0_1")) return false;
-    condition(b, l + 1);
+    positional_argument(b, l + 1);
     return true;
   }
 
@@ -2386,7 +2393,7 @@ public class RobotParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // unknown_setting_statement_id (parameter | argument | line_comment)* EOL
+  // unknown_setting_statement_id (parameter | positional_argument | line_comment)* EOL
   public static boolean unknown_setting_statements(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "unknown_setting_statements")) return false;
     if (!nextTokenIs(b, UNKNOWN_SETTING_KEYWORD)) return false;
@@ -2400,7 +2407,7 @@ public class RobotParser implements PsiParser, LightPsiParser {
     return r || p;
   }
 
-  // (parameter | argument | line_comment)*
+  // (parameter | positional_argument | line_comment)*
   private static boolean unknown_setting_statements_1(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "unknown_setting_statements_1")) return false;
     while (true) {
@@ -2411,12 +2418,12 @@ public class RobotParser implements PsiParser, LightPsiParser {
     return true;
   }
 
-  // parameter | argument | line_comment
+  // parameter | positional_argument | line_comment
   private static boolean unknown_setting_statements_1_0(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "unknown_setting_statements_1_0")) return false;
     boolean r;
     r = parameter(b, l + 1);
-    if (!r) r = argument(b, l + 1);
+    if (!r) r = positional_argument(b, l + 1);
     if (!r) r = line_comment(b, l + 1);
     return r;
   }
@@ -2520,23 +2527,6 @@ public class RobotParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // scalar_variable
-  //         | list_variable
-  //         | dict_variable
-  //         | environment_variable
-  //         | constant_value
-  static boolean value(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "value")) return false;
-    boolean r;
-    r = scalar_variable(b, l + 1);
-    if (!r) r = list_variable(b, l + 1);
-    if (!r) r = dict_variable(b, l + 1);
-    if (!r) r = environment_variable(b, l + 1);
-    if (!r) r = constant_value(b, l + 1);
-    return r;
-  }
-
-  /* ********************************************************** */
   // scalar_variable | list_variable | dict_variable | environment_variable
   public static boolean variable(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "variable")) return false;
@@ -2551,34 +2541,43 @@ public class RobotParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // value
+  // VARIABLE_BODY
+  public static boolean variable_body_content(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "variable_body_content")) return false;
+    if (!nextTokenIs(b, VARIABLE_BODY)) return false;
+    boolean r;
+    Marker m = enter_section_(b);
+    r = consumeToken(b, VARIABLE_BODY);
+    exit_section_(b, m, VARIABLE_BODY_CONTENT, r);
+    return r;
+  }
+
+  /* ********************************************************** */
+  // variable | variable_body_content
   public static boolean variable_id(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "variable_id")) return false;
     boolean r;
     Marker m = enter_section_(b, l, _NONE_, VARIABLE_ID, "<variable id>");
-    r = value(b, l + 1);
+    r = variable(b, l + 1);
+    if (!r) r = variable_body_content(b, l + 1);
     exit_section_(b, l, m, r, false, null);
     return r;
   }
 
   /* ********************************************************** */
-  // value+
+  // positional_argument | parameter
   public static boolean variable_value(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "variable_value")) return false;
     boolean r;
     Marker m = enter_section_(b, l, _NONE_, VARIABLE_VALUE, "<variable value>");
-    r = value(b, l + 1);
-    while (r) {
-      int c = current_position_(b);
-      if (!value(b, l + 1)) break;
-      if (!empty_element_parsed_guard_(b, "variable_value", c)) break;
-    }
+    r = positional_argument(b, l + 1);
+    if (!r) r = parameter(b, l + 1);
     exit_section_(b, l, m, r, false, null);
     return r;
   }
 
   /* ********************************************************** */
-  // VARIABLES_IMPORT_KEYWORD line_comment* argument (parameter | argument)* line_comment* EOL
+  // VARIABLES_IMPORT_KEYWORD line_comment* positional_argument (parameter | positional_argument)* line_comment* EOL
   public static boolean variables_import(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "variables_import")) return false;
     if (!nextTokenIs(b, VARIABLES_IMPORT_KEYWORD)) return false;
@@ -2587,7 +2586,7 @@ public class RobotParser implements PsiParser, LightPsiParser {
     r = consumeToken(b, VARIABLES_IMPORT_KEYWORD);
     p = r; // pin = 1
     r = r && report_error_(b, variables_import_1(b, l + 1));
-    r = p && report_error_(b, argument(b, l + 1)) && r;
+    r = p && report_error_(b, positional_argument(b, l + 1)) && r;
     r = p && report_error_(b, variables_import_3(b, l + 1)) && r;
     r = p && report_error_(b, variables_import_4(b, l + 1)) && r;
     r = p && consumeToken(b, EOL) && r;
@@ -2606,7 +2605,7 @@ public class RobotParser implements PsiParser, LightPsiParser {
     return true;
   }
 
-  // (parameter | argument)*
+  // (parameter | positional_argument)*
   private static boolean variables_import_3(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "variables_import_3")) return false;
     while (true) {
@@ -2617,12 +2616,12 @@ public class RobotParser implements PsiParser, LightPsiParser {
     return true;
   }
 
-  // parameter | argument
+  // parameter | positional_argument
   private static boolean variables_import_3_0(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "variables_import_3_0")) return false;
     boolean r;
     r = parameter(b, l + 1);
-    if (!r) r = argument(b, l + 1);
+    if (!r) r = positional_argument(b, l + 1);
     return r;
   }
 
@@ -2662,14 +2661,14 @@ public class RobotParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // WHILE condition parameter* line_comment* EOL executable_statement* line_comment* END line_comment*
+  // WHILE positional_argument parameter* line_comment* EOL executable_statement* line_comment* END line_comment*
   public static boolean while_loop_structure(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "while_loop_structure")) return false;
     if (!nextTokenIs(b, WHILE)) return false;
     boolean r;
     Marker m = enter_section_(b);
     r = consumeToken(b, WHILE);
-    r = r && condition(b, l + 1);
+    r = r && positional_argument(b, l + 1);
     r = r && while_loop_structure_2(b, l + 1);
     r = r && while_loop_structure_3(b, l + 1);
     r = r && consumeToken(b, EOL);

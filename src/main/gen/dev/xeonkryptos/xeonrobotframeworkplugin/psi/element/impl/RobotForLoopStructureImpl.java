@@ -29,12 +29,6 @@ public class RobotForLoopStructureImpl extends RobotExecutableStatementImpl impl
 
   @Override
   @NotNull
-  public List<RobotArgument> getArgumentList() {
-    return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotArgument.class);
-  }
-
-  @Override
-  @NotNull
   public List<RobotExecutableStatement> getExecutableStatementList() {
     return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotExecutableStatement.class);
   }

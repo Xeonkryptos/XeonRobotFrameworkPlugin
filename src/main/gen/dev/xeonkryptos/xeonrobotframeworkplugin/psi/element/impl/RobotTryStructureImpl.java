@@ -29,12 +29,6 @@ public class RobotTryStructureImpl extends RobotExecutableStatementImpl implemen
 
   @Override
   @NotNull
-  public List<RobotCondition> getConditionList() {
-    return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotCondition.class);
-  }
-
-  @Override
-  @NotNull
   public List<RobotExecutableStatement> getExecutableStatementList() {
     return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotExecutableStatement.class);
   }
