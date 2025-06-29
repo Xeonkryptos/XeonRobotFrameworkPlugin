@@ -1309,7 +1309,7 @@ public class RobotParser implements PsiParser, LightPsiParser {
   public static boolean positional_argument(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "positional_argument")) return false;
     boolean r;
-    Marker m = enter_section_(b, l, _COLLAPSE_, POSITIONAL_ARGUMENT, "<positional argument>");
+    Marker m = enter_section_(b, l, _NONE_, POSITIONAL_ARGUMENT, "<positional argument>");
     r = parsePositionalArgument(b, l + 1, RobotParser::positional_argument_content);
     exit_section_(b, l, m, r, false, null);
     return r;

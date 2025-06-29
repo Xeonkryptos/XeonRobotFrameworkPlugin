@@ -134,7 +134,7 @@ public class RobotVisitor extends PsiElementVisitor {
   }
 
   public void visitPositionalArgument(@NotNull RobotPositionalArgument o) {
-    visitArgument(o);
+    visitPsiElement(o);
   }
 
   public void visitPythonExpression(@NotNull RobotPythonExpression o) {

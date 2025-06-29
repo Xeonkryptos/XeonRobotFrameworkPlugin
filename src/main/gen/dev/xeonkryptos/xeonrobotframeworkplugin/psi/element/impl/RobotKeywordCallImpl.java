@@ -47,7 +47,7 @@ public class RobotKeywordCallImpl extends RobotKeywordCallExtension implements R
   @Override
   @NotNull
   public List<RobotPositionalArgument> getPositionalArgumentList() {
-    return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotPositionalArgument.class);
+    return PsiTreeUtil.getStubChildrenOfTypeAsList(this, RobotPositionalArgument.class);
   }
 
 }

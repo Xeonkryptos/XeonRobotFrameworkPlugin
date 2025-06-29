@@ -224,7 +224,11 @@ keyword_variable_statement ::= variable+ ASSIGNMENT? eol_based_keyword_call line
 }
 variable_value ::= positional_argument | parameter
 
-positional_argument ::= external_positional_argument
+positional_argument ::= external_positional_argument {
+    extends = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotPositionalArgumentExtension"
+    stubClass = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotPositionalArgumentStub"
+    elementTypeFactory = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotPositionalArgumentStubElement.create"
+}
 external external_positional_argument ::= parsePositionalArgument positional_argument_content
 private positional_argument_content ::= literal_constant_value | variable
 
