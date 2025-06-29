@@ -4,8 +4,11 @@ package dev.xeonkryptos.xeonrobotframeworkplugin.psi.element;
 import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiNameIdentifierOwner;
+import com.intellij.psi.StubBasedPsiElement;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotSingleVariableStatementStub;
 
-public interface RobotSingleVariableStatement extends RobotVariableStatement {
+public interface RobotSingleVariableStatement extends PsiNameIdentifierOwner, StubBasedPsiElement<RobotSingleVariableStatementStub> {
 
   @NotNull
   RobotVariable getVariable();

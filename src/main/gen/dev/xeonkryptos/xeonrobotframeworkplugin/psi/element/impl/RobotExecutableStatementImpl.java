@@ -28,20 +28,26 @@ public class RobotExecutableStatementImpl extends RobotPsiElementBase implements
 
   @Override
   @Nullable
+  public RobotInlineVariableStatement getInlineVariableStatement() {
+    return PsiTreeUtil.getChildOfType(this, RobotInlineVariableStatement.class);
+  }
+
+  @Override
+  @Nullable
   public RobotKeywordCall getKeywordCall() {
-    return findChildByClass(RobotKeywordCall.class);
+    return PsiTreeUtil.getChildOfType(this, RobotKeywordCall.class);
+  }
+
+  @Override
+  @Nullable
+  public RobotKeywordVariableStatement getKeywordVariableStatement() {
+    return PsiTreeUtil.getChildOfType(this, RobotKeywordVariableStatement.class);
   }
 
   @Override
   @NotNull
   public List<RobotPositionalArgument> getPositionalArgumentList() {
     return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotPositionalArgument.class);
-  }
-
-  @Override
-  @Nullable
-  public RobotVariableStatement getVariableStatement() {
-    return findChildByClass(RobotVariableStatement.class);
   }
 
 }

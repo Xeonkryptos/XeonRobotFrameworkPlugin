@@ -1,4 +1,4 @@
-package dev.xeonkryptos.xeonrobotframeworkplugin.psi.element;
+package dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub;
 
 import com.intellij.extapi.psi.StubBasedPsiElementBase;
 import com.intellij.lang.ASTNode;
@@ -7,6 +7,8 @@ import com.intellij.navigation.ItemPresentation;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.stubs.IStubElementType;
 import com.intellij.psi.stubs.StubElement;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotPsiElementBase;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotStatement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.PatternUtil;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.QualifiedNameBuilder;
 import org.jetbrains.annotations.NotNull;

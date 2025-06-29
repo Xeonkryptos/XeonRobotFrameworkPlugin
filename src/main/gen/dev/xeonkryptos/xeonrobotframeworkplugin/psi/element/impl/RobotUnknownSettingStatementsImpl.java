@@ -41,7 +41,7 @@ public class RobotUnknownSettingStatementsImpl extends RobotUnknownSettingStatem
   @Override
   @NotNull
   public RobotUnknownSettingStatementId getUnknownSettingStatementId() {
-    return findNotNullChildByClass(RobotUnknownSettingStatementId.class);
+    return notNullChild(PsiTreeUtil.getChildOfType(this, RobotUnknownSettingStatementId.class));
   }
 
 }

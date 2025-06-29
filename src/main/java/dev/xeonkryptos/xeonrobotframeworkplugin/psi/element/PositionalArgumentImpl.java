@@ -1,6 +1,7 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.psi.element;
 
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.ref.RobotArgumentReference;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotStubPsiElementBase;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.element.PositionalArgumentStub;
 import com.intellij.lang.ASTNode;
 import com.intellij.psi.PsiReference;

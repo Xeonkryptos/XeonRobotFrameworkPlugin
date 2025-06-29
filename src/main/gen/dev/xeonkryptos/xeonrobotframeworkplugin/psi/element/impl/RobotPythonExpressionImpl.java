@@ -29,7 +29,7 @@ public class RobotPythonExpressionImpl extends RobotPsiElementBase implements Ro
   @Override
   @NotNull
   public RobotPythonExpressionBody getPythonExpressionBody() {
-    return findNotNullChildByClass(RobotPythonExpressionBody.class);
+    return notNullChild(PsiTreeUtil.getChildOfType(this, RobotPythonExpressionBody.class));
   }
 
 }

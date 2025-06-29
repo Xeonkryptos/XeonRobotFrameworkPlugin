@@ -70,7 +70,7 @@ public class RobotVisitor extends PsiElementVisitor {
   }
 
   public void visitInlineVariableStatement(@NotNull RobotInlineVariableStatement o) {
-    visitVariableStatement(o);
+    visitPsiNameIdentifierOwner(o);
   }
 
   public void visitKeywordCall(@NotNull RobotKeywordCall o) {
@@ -82,7 +82,7 @@ public class RobotVisitor extends PsiElementVisitor {
   }
 
   public void visitKeywordVariableStatement(@NotNull RobotKeywordVariableStatement o) {
-    visitVariableStatement(o);
+    visitPsiElement(o);
   }
 
   public void visitKeywordsSection(@NotNull RobotKeywordsSection o) {
@@ -166,7 +166,7 @@ public class RobotVisitor extends PsiElementVisitor {
   }
 
   public void visitSingleVariableStatement(@NotNull RobotSingleVariableStatement o) {
-    visitVariableStatement(o);
+    visitPsiNameIdentifierOwner(o);
   }
 
   public void visitSuiteNameStatement(@NotNull RobotSuiteNameStatement o) {

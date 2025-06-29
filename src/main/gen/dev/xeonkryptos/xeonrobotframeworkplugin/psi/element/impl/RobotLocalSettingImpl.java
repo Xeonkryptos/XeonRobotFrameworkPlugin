@@ -35,7 +35,7 @@ public class RobotLocalSettingImpl extends RobotLocalSettingExtension implements
   @Override
   @NotNull
   public RobotLocalSettingId getLocalSettingId() {
-    return findNotNullChildByClass(RobotLocalSettingId.class);
+    return notNullChild(PsiTreeUtil.getChildOfType(this, RobotLocalSettingId.class));
   }
 
   @Override

@@ -29,19 +29,19 @@ public class RobotTemplateParameterImpl extends RobotTemplateParameterExtension 
   @Override
   @Nullable
   public RobotTemplateParameterArgument getTemplateParameterArgument() {
-    return findChildByClass(RobotTemplateParameterArgument.class);
+    return PsiTreeUtil.getChildOfType(this, RobotTemplateParameterArgument.class);
   }
 
   @Override
   @NotNull
   public RobotTemplateParameterId getTemplateParameterId() {
-    return findNotNullChildByClass(RobotTemplateParameterId.class);
+    return notNullChild(PsiTreeUtil.getChildOfType(this, RobotTemplateParameterId.class));
   }
 
   @Override
   @Nullable
   public RobotVariable getVariable() {
-    return findChildByClass(RobotVariable.class);
+    return PsiTreeUtil.getChildOfType(this, RobotVariable.class);
   }
 
 }

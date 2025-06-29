@@ -6,6 +6,7 @@ import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.psi.PsiReference;
 import com.intellij.psi.stubs.IStubElementType;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.ref.RobotVariableReference;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotStubPsiElementBase;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.element.VariableStub;
 import org.jetbrains.annotations.NotNull;
 

@@ -9,14 +9,19 @@ import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.*;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.*;
+import com.intellij.psi.stubs.IStubElementType;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotKeywordVariableStatementStub;
 
-public class RobotKeywordVariableStatementImpl extends RobotVariableStatementImpl implements RobotKeywordVariableStatement {
+public class RobotKeywordVariableStatementImpl extends RobotKeywordVariableStatementExtension implements RobotKeywordVariableStatement {
 
   public RobotKeywordVariableStatementImpl(@NotNull ASTNode node) {
     super(node);
   }
 
-  @Override
+  public RobotKeywordVariableStatementImpl(RobotKeywordVariableStatementStub stub, IStubElementType<RobotKeywordVariableStatementStub, RobotKeywordVariableStatement> type) {
+    super(stub, type);
+  }
+
   public void accept(@NotNull RobotVisitor visitor) {
     visitor.visitKeywordVariableStatement(this);
   }
@@ -30,7 +35,7 @@ public class RobotKeywordVariableStatementImpl extends RobotVariableStatementImp
   @Override
   @NotNull
   public RobotKeywordCall getKeywordCall() {
-    return findNotNullChildByClass(RobotKeywordCall.class);
+    return notNullChild(PsiTreeUtil.getStubChildOfType(this, RobotKeywordCall.class));
   }
 
   @Override

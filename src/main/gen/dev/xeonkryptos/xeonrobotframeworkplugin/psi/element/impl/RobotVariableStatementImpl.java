@@ -28,8 +28,20 @@ public class RobotVariableStatementImpl extends RobotPsiElementBase implements R
 
   @Override
   @Nullable
-  public RobotVariableStatement getVariableStatement() {
-    return findChildByClass(RobotVariableStatement.class);
+  public RobotInlineVariableStatement getInlineVariableStatement() {
+    return PsiTreeUtil.getChildOfType(this, RobotInlineVariableStatement.class);
+  }
+
+  @Override
+  @Nullable
+  public RobotKeywordVariableStatement getKeywordVariableStatement() {
+    return PsiTreeUtil.getChildOfType(this, RobotKeywordVariableStatement.class);
+  }
+
+  @Override
+  @Nullable
+  public RobotSingleVariableStatement getSingleVariableStatement() {
+    return PsiTreeUtil.getChildOfType(this, RobotSingleVariableStatement.class);
   }
 
 }

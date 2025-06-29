@@ -9,14 +9,19 @@ import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.*;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.*;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotSingleVariableStatementStub;
+import com.intellij.psi.stubs.IStubElementType;
 
-public class RobotSingleVariableStatementImpl extends RobotVariableStatementImpl implements RobotSingleVariableStatement {
+public class RobotSingleVariableStatementImpl extends RobotSingleVariableStatementExtension implements RobotSingleVariableStatement {
 
   public RobotSingleVariableStatementImpl(@NotNull ASTNode node) {
     super(node);
   }
 
-  @Override
+  public RobotSingleVariableStatementImpl(RobotSingleVariableStatementStub stub, IStubElementType<RobotSingleVariableStatementStub, RobotSingleVariableStatement> type) {
+    super(stub, type);
+  }
+
   public void accept(@NotNull RobotVisitor visitor) {
     visitor.visitSingleVariableStatement(this);
   }
@@ -30,7 +35,7 @@ public class RobotSingleVariableStatementImpl extends RobotVariableStatementImpl
   @Override
   @NotNull
   public RobotVariable getVariable() {
-    return findNotNullChildByClass(RobotVariable.class);
+    return notNullChild(PsiTreeUtil.getChildOfType(this, RobotVariable.class));
   }
 
   @Override

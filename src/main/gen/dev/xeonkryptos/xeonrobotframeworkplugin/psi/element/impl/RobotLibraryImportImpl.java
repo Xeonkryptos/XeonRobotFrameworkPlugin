@@ -29,7 +29,7 @@ public class RobotLibraryImportImpl extends RobotPsiElementBase implements Robot
   @Override
   @Nullable
   public RobotNewLibraryName getNewLibraryName() {
-    return findChildByClass(RobotNewLibraryName.class);
+    return PsiTreeUtil.getChildOfType(this, RobotNewLibraryName.class);
   }
 
   @Override

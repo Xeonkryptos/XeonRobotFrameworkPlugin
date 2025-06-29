@@ -36,7 +36,6 @@ public class RobotParser implements PsiParser, LightPsiParser {
   }
 
   public static final TokenSet[] EXTENDS_SETS_ = new TokenSet[] {
-    create_token_set_(INLINE_VARIABLE_STATEMENT, KEYWORD_VARIABLE_STATEMENT, SINGLE_VARIABLE_STATEMENT),
     create_token_set_(DICT_VARIABLE, ENVIRONMENT_VARIABLE, LIST_VARIABLE, SCALAR_VARIABLE,
       VARIABLE),
     create_token_set_(EXECUTABLE_STATEMENT, FOR_LOOP_STRUCTURE, GROUP_STRUCTURE, IF_STRUCTURE,
@@ -792,7 +791,7 @@ public class RobotParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // VAR single_variable_statement
+  // VAR variable ASSIGNMENT? variable_value+ line_comment* EOL
   public static boolean inline_variable_statement(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "inline_variable_statement")) return false;
     if (!nextTokenIs(b, VAR)) return false;
@@ -800,9 +799,46 @@ public class RobotParser implements PsiParser, LightPsiParser {
     Marker m = enter_section_(b, l, _NONE_, INLINE_VARIABLE_STATEMENT, null);
     r = consumeToken(b, VAR);
     p = r; // pin = 1
-    r = r && single_variable_statement(b, l + 1);
+    r = r && report_error_(b, variable(b, l + 1));
+    r = p && report_error_(b, inline_variable_statement_2(b, l + 1)) && r;
+    r = p && report_error_(b, inline_variable_statement_3(b, l + 1)) && r;
+    r = p && report_error_(b, inline_variable_statement_4(b, l + 1)) && r;
+    r = p && consumeToken(b, EOL) && r;
     exit_section_(b, l, m, r, p, null);
     return r || p;
+  }
+
+  // ASSIGNMENT?
+  private static boolean inline_variable_statement_2(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "inline_variable_statement_2")) return false;
+    consumeToken(b, ASSIGNMENT);
+    return true;
+  }
+
+  // variable_value+
+  private static boolean inline_variable_statement_3(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "inline_variable_statement_3")) return false;
+    boolean r;
+    Marker m = enter_section_(b);
+    r = variable_value(b, l + 1);
+    while (r) {
+      int c = current_position_(b);
+      if (!variable_value(b, l + 1)) break;
+      if (!empty_element_parsed_guard_(b, "inline_variable_statement_3", c)) break;
+    }
+    exit_section_(b, m, null, r);
+    return r;
+  }
+
+  // line_comment*
+  private static boolean inline_variable_statement_4(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "inline_variable_statement_4")) return false;
+    while (true) {
+      int c = current_position_(b);
+      if (!line_comment(b, l + 1)) break;
+      if (!empty_element_parsed_guard_(b, "inline_variable_statement_4", c)) break;
+    }
+    return true;
   }
 
   /* ********************************************************** */

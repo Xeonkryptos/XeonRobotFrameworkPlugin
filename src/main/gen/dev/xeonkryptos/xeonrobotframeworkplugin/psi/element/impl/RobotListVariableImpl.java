@@ -48,13 +48,13 @@ public class RobotListVariableImpl extends RobotVariableImpl implements RobotLis
   @Override
   @Nullable
   public RobotPythonExpression getPythonExpression() {
-    return findChildByClass(RobotPythonExpression.class);
+    return PsiTreeUtil.getChildOfType(this, RobotPythonExpression.class);
   }
 
   @Override
   @Nullable
   public RobotVariableId getVariableId() {
-    return findChildByClass(RobotVariableId.class);
+    return PsiTreeUtil.getChildOfType(this, RobotVariableId.class);
   }
 
 }

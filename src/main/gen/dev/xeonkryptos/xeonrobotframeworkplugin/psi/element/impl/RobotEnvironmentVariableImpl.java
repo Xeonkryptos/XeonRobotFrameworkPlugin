@@ -30,7 +30,7 @@ public class RobotEnvironmentVariableImpl extends RobotVariableImpl implements R
   @Override
   @NotNull
   public RobotVariableId getVariableId() {
-    return findNotNullChildByClass(RobotVariableId.class);
+    return notNullChild(PsiTreeUtil.getChildOfType(this, RobotVariableId.class));
   }
 
 }

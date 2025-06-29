@@ -53,7 +53,7 @@ public class RobotTestCaseStatementImpl extends RobotTestCaseExtension implement
   @Override
   @NotNull
   public RobotTestCaseId getTestCaseId() {
-    return findNotNullChildByClass(RobotTestCaseId.class);
+    return notNullChild(PsiTreeUtil.getChildOfType(this, RobotTestCaseId.class));
   }
 
 }

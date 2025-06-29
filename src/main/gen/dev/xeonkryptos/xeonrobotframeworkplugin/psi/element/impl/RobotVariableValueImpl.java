@@ -29,13 +29,13 @@ public class RobotVariableValueImpl extends RobotPsiElementBase implements Robot
   @Override
   @Nullable
   public RobotParameter getParameter() {
-    return findChildByClass(RobotParameter.class);
+    return PsiTreeUtil.getChildOfType(this, RobotParameter.class);
   }
 
   @Override
   @Nullable
   public RobotPositionalArgument getPositionalArgument() {
-    return findChildByClass(RobotPositionalArgument.class);
+    return PsiTreeUtil.getChildOfType(this, RobotPositionalArgument.class);
   }
 
 }

@@ -29,7 +29,7 @@ public class RobotResourceImportImpl extends RobotPsiElementBase implements Robo
   @Override
   @Nullable
   public RobotPositionalArgument getPositionalArgument() {
-    return findChildByClass(RobotPositionalArgument.class);
+    return PsiTreeUtil.getChildOfType(this, RobotPositionalArgument.class);
   }
 
 }

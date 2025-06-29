@@ -42,7 +42,7 @@ public class RobotWhileLoopStructureImpl extends RobotExecutableStatementImpl im
   @Override
   @NotNull
   public RobotPositionalArgument getPositionalArgument() {
-    return findNotNullChildByClass(RobotPositionalArgument.class);
+    return notNullChild(PsiTreeUtil.getChildOfType(this, RobotPositionalArgument.class));
   }
 
 }

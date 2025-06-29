@@ -42,7 +42,7 @@ public class RobotForLoopStructureImpl extends RobotExecutableStatementImpl impl
   @Override
   @NotNull
   public RobotVariable getVariable() {
-    return findNotNullChildByClass(RobotVariable.class);
+    return notNullChild(PsiTreeUtil.getChildOfType(this, RobotVariable.class));
   }
 
 }

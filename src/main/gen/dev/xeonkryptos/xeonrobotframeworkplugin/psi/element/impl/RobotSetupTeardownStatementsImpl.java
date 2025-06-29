@@ -29,13 +29,13 @@ public class RobotSetupTeardownStatementsImpl extends RobotPsiElementBase implem
   @Override
   @Nullable
   public RobotKeywordCall getKeywordCall() {
-    return findChildByClass(RobotKeywordCall.class);
+    return PsiTreeUtil.getChildOfType(this, RobotKeywordCall.class);
   }
 
   @Override
   @Nullable
   public RobotVariable getVariable() {
-    return findChildByClass(RobotVariable.class);
+    return PsiTreeUtil.getChildOfType(this, RobotVariable.class);
   }
 
 }

@@ -47,7 +47,7 @@ public class RobotTaskStatementImpl extends RobotTaskExtension implements RobotT
   @Override
   @NotNull
   public RobotTaskId getTaskId() {
-    return findNotNullChildByClass(RobotTaskId.class);
+    return notNullChild(PsiTreeUtil.getChildOfType(this, RobotTaskId.class));
   }
 
   @Override

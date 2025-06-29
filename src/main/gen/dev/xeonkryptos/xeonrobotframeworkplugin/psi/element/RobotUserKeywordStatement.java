@@ -5,8 +5,10 @@ import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiNameIdentifierOwner;
+import com.intellij.psi.StubBasedPsiElement;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotUserKeywordStub;
 
-public interface RobotUserKeywordStatement extends PsiNameIdentifierOwner {
+public interface RobotUserKeywordStatement extends PsiNameIdentifierOwner, StubBasedPsiElement<RobotUserKeywordStub> {
 
   @NotNull
   List<RobotExecutableStatement> getExecutableStatementList();

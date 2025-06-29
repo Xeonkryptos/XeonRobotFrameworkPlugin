@@ -143,6 +143,8 @@ user_keyword_statement ::= user_keyword_statement_id line_comment* (local_settin
     pin=1
     implements = "com.intellij.psi.PsiNameIdentifierOwner"
     extends = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotUserKeywordExtension"
+    stubClass = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotUserKeywordStub"
+    elementTypeFactory = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotUserKeywordStubElement.create"
     recoverWhile=user_keyword_statement_recover
 }
 user_keyword_statement_id ::= USER_KEYWORD_NAME
@@ -184,6 +186,8 @@ group_structure ::= GROUP positional_argument? EOL line_comment* executable_stat
 fake keyword_call ::= base_keyword_call {
     implements = "com.intellij.psi.PsiNameIdentifierOwner"
     extends = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotKeywordCallExtension"
+    stubClass = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotKeywordCallStub"
+    elementTypeFactory = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotKeywordCallStubElement.create"
 }
 eol_based_keyword_call ::= base_keyword_call EOL {elementType=keyword_call}
 eol_free_keyword_call ::= base_keyword_call {elementType=keyword_call}
@@ -200,9 +204,24 @@ parameter ::= parameter_id ASSIGNMENT positional_argument {
 parameter_id ::= PARAMETER_NAME
 
 fake variable_statement ::= inline_variable_statement | single_variable_statement | keyword_variable_statement?
-inline_variable_statement ::= VAR single_variable_statement {pin=1}
-single_variable_statement ::= variable ASSIGNMENT? variable_value+ line_comment* EOL
-keyword_variable_statement ::= variable+ ASSIGNMENT? eol_based_keyword_call line_comment* // Without EOL as it is handled at a higher level
+inline_variable_statement ::= VAR variable ASSIGNMENT? variable_value+ line_comment* EOL {
+    pin=1
+    implements = "com.intellij.psi.PsiNameIdentifierOwner"
+    extends = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotInlineVariableStatementExtension"
+    stubClass = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotInlineVariableStatementStub"
+    elementTypeFactory = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotInlineVariableStatementStubElement.create"
+}
+single_variable_statement ::= variable ASSIGNMENT? variable_value+ line_comment* EOL {
+    implements = "com.intellij.psi.PsiNameIdentifierOwner"
+    extends = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotSingleVariableStatementExtension"
+    stubClass = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotSingleVariableStatementStub"
+    elementTypeFactory = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotSingleVariableStatementStubElement.create"
+}
+keyword_variable_statement ::= variable+ ASSIGNMENT? eol_based_keyword_call line_comment* { // Without EOL as it is handled at a higher level
+    extends = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotKeywordVariableStatementExtension"
+    stubClass = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotKeywordVariableStatementStub"
+    elementTypeFactory = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotKeywordVariableStatementStubElement.create"
+}
 variable_value ::= positional_argument | parameter
 
 positional_argument ::= external_positional_argument

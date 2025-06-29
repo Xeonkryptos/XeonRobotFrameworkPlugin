@@ -4,6 +4,11 @@ package dev.xeonkryptos.xeonrobotframeworkplugin.psi;
 import com.intellij.psi.tree.IElementType;
 import com.intellij.psi.PsiElement;
 import com.intellij.lang.ASTNode;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotInlineVariableStatementStubElement;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotKeywordCallStubElement;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotKeywordVariableStatementStubElement;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotSingleVariableStatementStubElement;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotUserKeywordStubElement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.*;
 
 public interface RobotTypes {
@@ -22,11 +27,11 @@ public interface RobotTypes {
   IElementType FOR_LOOP_STRUCTURE = new RobotElementType("FOR_LOOP_STRUCTURE");
   IElementType GROUP_STRUCTURE = new RobotElementType("GROUP_STRUCTURE");
   IElementType IF_STRUCTURE = new RobotElementType("IF_STRUCTURE");
-  IElementType INLINE_VARIABLE_STATEMENT = new RobotElementType("INLINE_VARIABLE_STATEMENT");
+  IElementType INLINE_VARIABLE_STATEMENT = RobotInlineVariableStatementStubElement.create("INLINE_VARIABLE_STATEMENT");
   IElementType KEYWORDS_SECTION = new RobotElementType("KEYWORDS_SECTION");
-  IElementType KEYWORD_CALL = new RobotElementType("KEYWORD_CALL");
+  IElementType KEYWORD_CALL = RobotKeywordCallStubElement.create("KEYWORD_CALL");
   IElementType KEYWORD_CALL_ID = new RobotElementType("KEYWORD_CALL_ID");
-  IElementType KEYWORD_VARIABLE_STATEMENT = new RobotElementType("KEYWORD_VARIABLE_STATEMENT");
+  IElementType KEYWORD_VARIABLE_STATEMENT = RobotKeywordVariableStatementStubElement.create("KEYWORD_VARIABLE_STATEMENT");
   IElementType LANGUAGE = new RobotElementType("LANGUAGE");
   IElementType LANGUAGE_ID = new RobotElementType("LANGUAGE_ID");
   IElementType LIBRARY_IMPORT = new RobotElementType("LIBRARY_IMPORT");
@@ -46,7 +51,7 @@ public interface RobotTypes {
   IElementType SECTION = new RobotElementType("SECTION");
   IElementType SETTINGS_SECTION = new RobotElementType("SETTINGS_SECTION");
   IElementType SETUP_TEARDOWN_STATEMENTS = new RobotElementType("SETUP_TEARDOWN_STATEMENTS");
-  IElementType SINGLE_VARIABLE_STATEMENT = new RobotElementType("SINGLE_VARIABLE_STATEMENT");
+  IElementType SINGLE_VARIABLE_STATEMENT = RobotSingleVariableStatementStubElement.create("SINGLE_VARIABLE_STATEMENT");
   IElementType SUITE_NAME_STATEMENT = new RobotElementType("SUITE_NAME_STATEMENT");
   IElementType TAGS_STATEMENT = new RobotElementType("TAGS_STATEMENT");
   IElementType TASKS_SECTION = new RobotElementType("TASKS_SECTION");
@@ -65,7 +70,7 @@ public interface RobotTypes {
   IElementType TRY_STRUCTURE = new RobotElementType("TRY_STRUCTURE");
   IElementType UNKNOWN_SETTING_STATEMENTS = new RobotElementType("UNKNOWN_SETTING_STATEMENTS");
   IElementType UNKNOWN_SETTING_STATEMENT_ID = new RobotElementType("UNKNOWN_SETTING_STATEMENT_ID");
-  IElementType USER_KEYWORD_STATEMENT = new RobotElementType("USER_KEYWORD_STATEMENT");
+  IElementType USER_KEYWORD_STATEMENT = RobotUserKeywordStubElement.create("USER_KEYWORD_STATEMENT");
   IElementType USER_KEYWORD_STATEMENT_ID = new RobotElementType("USER_KEYWORD_STATEMENT_ID");
   IElementType VARIABLE = new RobotElementType("VARIABLE");
   IElementType VARIABLES_IMPORT = new RobotElementType("VARIABLES_IMPORT");
