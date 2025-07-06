@@ -1,12 +1,17 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.psi.element;
 
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.dto.KeywordFileWithDependentsWrapper;
 import com.intellij.psi.PsiFile;
+import com.intellij.psi.tree.IFileElementType;
+import com.intellij.psi.tree.IStubFileElementType;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotLanguage;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.dto.KeywordFileWithDependentsWrapper;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
 
 public interface RobotFile extends PsiFile {
+
+    IFileElementType ROBOT_FILE = new IStubFileElementType<>("ROBOT_FILE", RobotLanguage.INSTANCE);
 
     /**
      * @return locally defined keywords.
@@ -41,6 +46,4 @@ public interface RobotFile extends PsiFile {
 
     @NotNull
     Collection<DefinedVariable> getDefinedVariables();
-
-    void importsChanged();
 }

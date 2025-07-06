@@ -6,7 +6,7 @@ import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiNameIdentifierOwner;
 
-public interface RobotLanguage extends PsiNameIdentifierOwner {
+public interface RobotLanguage extends PsiNameIdentifierOwner, RobotStatement {
 
   @Nullable
   RobotLanguageId getLanguageId();

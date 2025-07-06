@@ -17,10 +17,11 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.dto.ImportType;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.dto.ParameterDto;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.DefinedKeyword;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.DefinedParameter;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.Heading;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.KeywordFile;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.KeywordStatement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotFile;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCall;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotSection;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.visitor.RobotKeywordCallHolderSection;
 import dev.xeonkryptos.xeonrobotframeworkplugin.util.LookupElementUtil;
 import org.apache.commons.text.WordUtils;
 import org.jetbrains.annotations.NotNull;
@@ -37,10 +38,16 @@ class KeywordCompletionProvider extends CompletionProvider<CompletionParameters>
     protected void addCompletions(@NotNull CompletionParameters parameters, @NotNull ProcessingContext context, @NotNull CompletionResultSet result) {
         if (CompletionProviderUtils.isIndexPositionAWhitespaceCharacter(parameters)) {
             PsiElement position = parameters.getPosition();
-            Heading heading = CompletionProviderUtils.getHeading(position);
-            if (heading != null && (heading.containsTestCases() || heading.containsKeywordDefinitions() || heading.containsTasks())) {
+            RobotSection section = CompletionProviderUtils.getSection(position);
+            if (section == null) {
+                return;
+            }
+
+            RobotKeywordCallHolderSection keywordCallHolderSection = new RobotKeywordCallHolderSection();
+            section.accept(keywordCallHolderSection);
+            if (keywordCallHolderSection.isKeywordCallHolderSection()) {
                 PsiElement positionContext = position.getContext();
-                KeywordStatement keywordStatement = PsiTreeUtil.getParentOfType(positionContext, KeywordStatement.class);
+                RobotKeywordCall keywordStatement = PsiTreeUtil.getParentOfType(positionContext, RobotKeywordCall.class);
                 if (keywordStatement == null) {
                     return;
                 }
@@ -55,9 +62,9 @@ class KeywordCompletionProvider extends CompletionProvider<CompletionParameters>
                                                           .findFirst()
                                                           .orElse(KeywordCompletionModification.NONE);
                 }
-                Collection<DefinedParameter> alreadyAddedParameters = keywordStatement.getParameters()
+                Collection<DefinedParameter> alreadyAddedParameters = keywordStatement.getParameterList()
                                                                                       .stream()
-                                                                                      .map(param -> new ParameterDto(param, param.getParameterName(), null))
+                                                                                      .map(param -> new ParameterDto(param, param.getName(), null))
                                                                                       .collect(Collectors.toSet());
 
                 addDefinedKeywordsFromFile(result, parameters.getOriginalFile(), keywordCompletionModification, alreadyAddedParameters);

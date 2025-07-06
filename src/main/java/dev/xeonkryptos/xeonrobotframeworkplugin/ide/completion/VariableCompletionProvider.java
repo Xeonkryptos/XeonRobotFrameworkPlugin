@@ -14,10 +14,11 @@ import com.intellij.util.ProcessingContext;
 import dev.xeonkryptos.xeonrobotframeworkplugin.ide.config.RobotOptionsProvider;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.dto.ImportType;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.DefinedVariable;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.KeywordDefinition;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.KeywordFile;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.Parameter;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotFile;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotParameter;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotUserKeywordStatement;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.visitor.RobotSectionVariablesCollector;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
@@ -28,7 +29,7 @@ class VariableCompletionProvider extends CompletionProvider<CompletionParameters
     @Override
     protected void addCompletions(@NotNull CompletionParameters parameters, @NotNull ProcessingContext context, @NotNull CompletionResultSet result) {
         PsiElement psiElement = parameters.getPosition();
-        Parameter parameter = PsiTreeUtil.getParentOfType(psiElement, Parameter.class);
+        RobotParameter parameter = PsiTreeUtil.getParentOfType(psiElement, RobotParameter.class);
         if (parameter != null) {
             // In parameter context, the prefix usually contains the parameter name, too. For finding and filtering variable names, we need to
             // remove the parameter name from the prefix.
@@ -36,8 +37,8 @@ class VariableCompletionProvider extends CompletionProvider<CompletionParameters
             String newPrefix;
             if (prefix.startsWith("=")) {
                 newPrefix = prefix.substring(1);
-            } else if (prefix.startsWith(parameter.getParameterName() + "=")) {
-                int parameterDefinitionLength = (parameter.getParameterName() + "=").length();
+            } else if (prefix.startsWith(parameter.getName() + "=")) {
+                int parameterDefinitionLength = (parameter.getName() + "=").length();
                 newPrefix = prefix.substring(parameterDefinitionLength);
             } else {
                 newPrefix = prefix;
@@ -67,9 +68,12 @@ class VariableCompletionProvider extends CompletionProvider<CompletionParameters
     }
 
     private void addDefinedVariablesFromKeyword(@NotNull CompletionResultSet resultSet, @NotNull PsiElement element) {
-        KeywordDefinition keywordDefinition = PsiTreeUtil.getParentOfType(element, KeywordDefinition.class);
-        if (keywordDefinition != null) {
-            for (DefinedVariable variable : keywordDefinition.getDeclaredVariables()) {
+        RobotUserKeywordStatement userKeywordStatement = PsiTreeUtil.getParentOfType(element, RobotUserKeywordStatement.class);
+        if (userKeywordStatement != null) {
+            RobotSectionVariablesCollector variablesCollector = new RobotSectionVariablesCollector();
+            userKeywordStatement.accept(variablesCollector);
+            Collection<DefinedVariable> definedVariables = variablesCollector.getVariables();
+            for (DefinedVariable variable : definedVariables) {
                 CompletionProviderUtils.addLookupElement(variable, Nodes.Variable, false, TailTypes.noneType(), resultSet).ifPresent(lookupElement -> {
                     lookupElement.putUserData(CompletionKeys.ROBOT_LOOKUP_CONTEXT, RobotLookupContext.WITHIN_KEYWORD_STATEMENT);
                     lookupElement.putUserData(CompletionKeys.ROBOT_LOOKUP_ELEMENT_TYPE, RobotLookupElementType.VARIABLE);

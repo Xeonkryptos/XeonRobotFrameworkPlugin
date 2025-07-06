@@ -4,12 +4,11 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
+import java.util.Set;
 import java.util.TreeSet;
 import java.util.regex.Pattern;
 
 public class PatternUtil {
-
-    private static final Collection<String> VARIABLE_SETTERS;
 
     private static final String EMPTY = "";
     private static final String SPACE = " ";
@@ -26,13 +25,6 @@ public class PatternUtil {
     private static final String VARIABLE_START_PATTERN = "[\\$\\@\\%\\&]\\{";
     private static final String VARIABLE_END_PATTERN = "((\\..*?)*?(\\[.*?\\])*?)*?\\}(\\[\\d+\\])?";
     private static final String VARIABLE_SEPARATOR = "[ _]*?";
-
-    static {
-        VARIABLE_SETTERS = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
-        VARIABLE_SETTERS.add("set test variable");
-        VARIABLE_SETTERS.add("set suite variable");
-        VARIABLE_SETTERS.add("set global variable");
-    }
 
     private PatternUtil() {
     }
@@ -77,10 +69,6 @@ public class PatternUtil {
 
             return pattern.toString();
         }
-    }
-
-    public static boolean isVariableSettingKeyword(String keyword) {
-        return VARIABLE_SETTERS.contains(functionToKeyword(keyword));
     }
 
     @Nullable

@@ -9,6 +9,7 @@ import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.*;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.*;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotPsiImplUtil;
 
 public class RobotVariableStatementImpl extends RobotPsiElementBase implements RobotVariableStatement {
 
@@ -24,24 +25,6 @@ public class RobotVariableStatementImpl extends RobotPsiElementBase implements R
   public void accept(@NotNull PsiElementVisitor visitor) {
     if (visitor instanceof RobotVisitor) accept((RobotVisitor)visitor);
     else super.accept(visitor);
-  }
-
-  @Override
-  @Nullable
-  public RobotInlineVariableStatement getInlineVariableStatement() {
-    return PsiTreeUtil.getChildOfType(this, RobotInlineVariableStatement.class);
-  }
-
-  @Override
-  @Nullable
-  public RobotKeywordVariableStatement getKeywordVariableStatement() {
-    return PsiTreeUtil.getChildOfType(this, RobotKeywordVariableStatement.class);
-  }
-
-  @Override
-  @Nullable
-  public RobotSingleVariableStatement getSingleVariableStatement() {
-    return PsiTreeUtil.getChildOfType(this, RobotSingleVariableStatement.class);
   }
 
 }

@@ -1,12 +1,5 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.ide.completion;
 
-import dev.xeonkryptos.xeonrobotframeworkplugin.util.LookupElementUtil;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RecommendationWord;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotElementType;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotKeywordProvider;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTokenTypes;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.Heading;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.LookupElementMarker;
 import com.intellij.codeInsight.TailType;
 import com.intellij.codeInsight.completion.CompletionParameters;
 import com.intellij.codeInsight.completion.CompletionResultSet;
@@ -19,7 +12,14 @@ import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.util.Key;
 import com.intellij.openapi.util.TextRange;
 import com.intellij.psi.PsiElement;
+import com.intellij.psi.tree.IElementType;
 import com.intellij.psi.util.PsiTreeUtil;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RecommendationWord;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotKeywordProvider;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.LookupElementMarker;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotSection;
+import dev.xeonkryptos.xeonrobotframeworkplugin.util.LookupElementUtil;
 import org.apache.commons.text.WordUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -37,14 +37,14 @@ final class CompletionProviderUtils {
         throw new UnsupportedOperationException("Utility class");
     }
 
-    static Heading getHeading(PsiElement current) {
+    static RobotSection getSection(PsiElement current) {
         if (current == null) {
             return null;
         }
-        if (current instanceof Heading heading) {
+        if (current instanceof RobotSection heading) {
             return heading;
         }
-        return PsiTreeUtil.getParentOfType(current, Heading.class);
+        return PsiTreeUtil.getParentOfType(current, RobotSection.class);
     }
 
     static boolean isIndexPositionAWhitespaceCharacter(@NotNull CompletionParameters parameters) {
@@ -68,12 +68,12 @@ final class CompletionProviderUtils {
         return lineStartOffset == offset;
     }
 
-    static void addSyntaxLookup(@NotNull RobotElementType elementType, @NotNull CompletionResultSet resultSet) {
+    static void addSyntaxLookup(@NotNull IElementType elementType, @NotNull CompletionResultSet resultSet) {
         List<LookupElement> lookupElements = computeAdditionalSyntaxLookups(elementType);
         resultSet.addAllElements(lookupElements);
     }
 
-    static List<LookupElement> computeAdditionalSyntaxLookups(@NotNull RobotElementType type) {
+    static List<LookupElement> computeAdditionalSyntaxLookups(@NotNull IElementType type) {
         List<LookupElement> results = new ArrayList<>();
         Collection<RecommendationWord> words = RobotKeywordProvider.getRecommendationsForType(type);
         for (RecommendationWord word : words) {
@@ -84,7 +84,7 @@ final class CompletionProviderUtils {
                                                                                    .withLookupStrings(Arrays.asList(lookupStrings))
                                                                                    .withPresentableText(lookupString)
                                                                                    .withInsertHandler((context, item) -> {
-                                                                                       if (type == RobotTokenTypes.HEADING) {
+                                                                                       if (type == RobotTypes.SECTION) {
                                                                                            Editor editor = context.getEditor();
                                                                                            Document document = context.getDocument();
                                                                                            int startOffset = context.getStartOffset();

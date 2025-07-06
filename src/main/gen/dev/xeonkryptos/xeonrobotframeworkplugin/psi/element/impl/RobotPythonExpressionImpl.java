@@ -9,6 +9,7 @@ import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.*;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.*;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotPsiImplUtil;
 
 public class RobotPythonExpressionImpl extends RobotPsiElementBase implements RobotPythonExpression {
 
@@ -28,8 +29,8 @@ public class RobotPythonExpressionImpl extends RobotPsiElementBase implements Ro
 
   @Override
   @NotNull
-  public RobotPythonExpressionBody getPythonExpressionBody() {
-    return notNullChild(PsiTreeUtil.getChildOfType(this, RobotPythonExpressionBody.class));
+  public PsiElement getExpressionContent() {
+    return notNullChild(findChildByType(PYTHON_EXPRESSION_CONTENT));
   }
 
 }

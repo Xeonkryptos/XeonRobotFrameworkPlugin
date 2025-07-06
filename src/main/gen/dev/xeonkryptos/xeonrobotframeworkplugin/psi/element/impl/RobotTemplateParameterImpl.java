@@ -9,6 +9,7 @@ import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.*;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.*;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotPsiImplUtil;
 
 public class RobotTemplateParameterImpl extends RobotTemplateParameterExtension implements RobotTemplateParameter {
 
@@ -33,15 +34,15 @@ public class RobotTemplateParameterImpl extends RobotTemplateParameterExtension 
   }
 
   @Override
-  @NotNull
-  public RobotTemplateParameterId getTemplateParameterId() {
-    return notNullChild(PsiTreeUtil.getChildOfType(this, RobotTemplateParameterId.class));
-  }
-
-  @Override
   @Nullable
   public RobotVariable getVariable() {
     return PsiTreeUtil.getChildOfType(this, RobotVariable.class);
+  }
+
+  @Override
+  @NotNull
+  public RobotTemplateParameterId getNameIdentifier() {
+    return notNullChild(PsiTreeUtil.getChildOfType(this, RobotTemplateParameterId.class));
   }
 
 }

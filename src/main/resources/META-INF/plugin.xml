@@ -53,23 +53,12 @@
         <codeInsight.parameterInfo language="Robot"
                                    implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.ide.parameterinfo.RobotParameterInfoHandler"/>
 
-        <!-- Manipulators -->
-        <lang.elementManipulator forClass="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.KeywordInvokable"
-                                 implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.psi.manip.KeywordInvokableManipulator"/>
-        <lang.elementManipulator forClass="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.PositionalArgument"
-                                 implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.psi.manip.PositionalArgumentManipulator"/>
-        <lang.elementManipulator forClass="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.Variable"
-                                 implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.psi.manip.VariableManipulator"/>
-        <lang.elementManipulator forClass="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.ParameterId"
-                                 implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.psi.manip.ParameterIdManipulator"/>
-
         <!-- Annotations -->
         <annotator language="Robot" implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.ide.inspections.compilation.RobotParameterAnnotator"/>
         <annotator language="Robot" implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.ide.inspections.compilation.RobotKeywordAnnotator"/>
         <annotator language="Robot" implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.ide.inspections.compilation.RobotImportAnnotator"/>
         <annotator language="Robot" implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.ide.inspections.compilation.RobotVariableAnnotator"/>
         <annotator language="Robot" implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.ide.inspections.cleanup.RobotUnusedVariableAnnotator"/>
-        <annotator language="Robot" implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.ide.inspections.compilation.RobotVariableArgumentAnnotator"/>
 
         <!-- Inspections -->
         <!-- TODO: inspection: error?: resource import is not a robot file -->
@@ -79,13 +68,6 @@
                          groupKey="INSP.GROUP.cleanup" enabledByDefault="true" level="WARNING"
                          implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.ide.inspections.cleanup.RobotImportNotUsed"/>
         <!-- Inspections: Readability -->
-        <localInspection language="Robot" shortName="RobotGherkinInspection" bundle="messages.RobotBundle" key="INSP.NAME.gherkin.format" groupPath="Robot"
-                         groupKey="INSP.GROUP.readability" enabledByDefault="true" level="WARNING"
-                         implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.ide.inspections.readability.RobotGherkinInspection"/>
-        <localInspection language="Robot" shortName="RobotKeywordDefinitionStartingWithGherkin" bundle="messages.RobotBundle"
-                         key="INSP.NAME.define.keyword.gherkin.start" groupPath="Robot" groupKey="INSP.GROUP.readability" enabledByDefault="true"
-                         level="WARNING"
-                         implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.ide.inspections.readability.RobotKeywordDefinitionStartingWithGherkin"/>
         <!-- TODO: inspection: warn: use of I in keyword; decreased readability -->
         <!-- TODO: inspection: warn: scenario step does not start with gherkin; decreased readability -->
         <!-- TODO: inspection: warn: scenario step is not a keyword (ie variable); decreased readability -->
@@ -95,9 +77,6 @@
         <localInspection language="Robot" shortName="RobotNestedVariable" bundle="messages.RobotBundle" key="INSP.NAME.variable.nested" groupPath="Robot"
                          groupKey="INSP.GROUP.complexity" enabledByDefault="true" level="WARNING"
                          implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.ide.inspections.complexity.RobotNestedVariable"/>
-        <localInspection language="Robot" shortName="RobotNestedVariableDefinition" bundle="messages.RobotBundle" key="INSP.NAME.variableDefinition.nested"
-                         groupPath="Robot" groupKey="INSP.GROUP.complexity" enabledByDefault="true" level="WARNING"
-                         implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.ide.inspections.complexity.RobotNestedVariableDefinition"/>
         <!-- Inspections: Deprecated -->
         <!-- TODO: inspection: warn: deprecated settings; '*** user keywords ***', timeout, etc -->
         <runConfigurationProducer implementation="dev.xeonkryptos.xeonrobotframeworkplugin.ide.execution.config.RobotRunConfigurationProducer"/>
@@ -106,9 +85,8 @@
         <postStartupActivity implementation="dev.xeonkryptos.xeonrobotframeworkplugin.ide.PostStartupActivity"/>
         <internalFileTemplate name="Robot Feature File"/>
         <internalFileTemplate name="Robot Resource File"/>
-        <enterHandlerDelegate implementation="dev.xeonkryptos.xeonrobotframeworkplugin.ide.actionhandler.RobotEnterActionHandler"/>
-        <enterHandlerDelegate implementation="dev.xeonkryptos.xeonrobotframeworkplugin.ide.actionhandler.RobotBracketSettingEnterActionHandler"/>
-        <enterHandlerDelegate implementation="dev.xeonkryptos.xeonrobotframeworkplugin.ide.actionhandler.RobotKeywordEnterActionHandler"/>
+        <enterHandlerDelegate implementation="dev.xeonkryptos.xeonrobotframeworkplugin.ide.actionhandler.RobotLocalSettingEnterActionHandler"/>
+        <enterHandlerDelegate implementation="dev.xeonkryptos.xeonrobotframeworkplugin.ide.actionhandler.RobotKeywordCallEnterActionHandler"/>
         <typedHandler implementation="dev.xeonkryptos.xeonrobotframeworkplugin.ide.actionhandler.RobotTypedActionHandler"/>
         <editorActionHandler action="EditorTab" implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.ide.actionhandler.RobotTabActionHandler"/>
         <configurationType implementation="dev.xeonkryptos.xeonrobotframeworkplugin.ide.execution.config.RobotRunConfigurationType"/>

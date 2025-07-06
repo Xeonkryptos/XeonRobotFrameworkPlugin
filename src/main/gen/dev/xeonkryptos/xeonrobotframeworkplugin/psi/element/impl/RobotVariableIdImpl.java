@@ -9,6 +9,7 @@ import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.*;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.*;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotPsiImplUtil;
 
 public class RobotVariableIdImpl extends RobotPsiElementBase implements RobotVariableId {
 
@@ -34,8 +35,8 @@ public class RobotVariableIdImpl extends RobotPsiElementBase implements RobotVar
 
   @Override
   @Nullable
-  public RobotVariableBodyContent getVariableBodyContent() {
-    return PsiTreeUtil.getChildOfType(this, RobotVariableBodyContent.class);
+  public PsiElement getContent() {
+    return findChildByType(VARIABLE_BODY);
   }
 
 }

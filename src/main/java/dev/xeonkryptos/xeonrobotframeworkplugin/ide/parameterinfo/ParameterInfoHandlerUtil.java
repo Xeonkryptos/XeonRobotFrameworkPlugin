@@ -1,10 +1,5 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.ide.parameterinfo;
 
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.Argument;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.DefinedParameter;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.KeywordDefinition;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.KeywordStatement;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.Parameter;
 import com.intellij.lang.parameterInfo.ParameterInfoUIContext;
 import com.intellij.lang.parameterInfo.ParameterInfoUIContextEx;
 import com.intellij.openapi.util.Pair;
@@ -22,6 +17,11 @@ import com.jetbrains.python.psi.types.PyCallableParameterImpl;
 import com.jetbrains.python.psi.types.PyCallableType;
 import com.jetbrains.python.psi.types.PyStructuralType;
 import com.jetbrains.python.psi.types.TypeEvalContext;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.DefinedParameter;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotArgument;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCall;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotParameter;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotUserKeywordStatement;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -69,8 +69,8 @@ public class ParameterInfoHandlerUtil {
                                                                                    @NotNull ParameterInfoUIContext context,
                                                                                    int currentParamIndex,
                                                                                    Map<Integer, EnumSet<ParameterInfoUIContextEx.Flag>> hintFlags) {
-        KeywordStatement keywordStatement = (KeywordStatement) context.getParameterOwner();
-        Argument[] arguments = keywordStatement.getArguments().toArray(Argument[]::new);
+        RobotKeywordCall keywordStatement = (RobotKeywordCall) context.getParameterOwner();
+        RobotArgument[] arguments = keywordStatement.getAllCallArguments().toArray(RobotArgument[]::new);
 
         final Pair<List<String>, List<String>> hintsAndAnnotations;
         if (callingFunction instanceof PyFunction pyFunction) {
@@ -102,8 +102,8 @@ public class ParameterInfoHandlerUtil {
             // param -> hint index. indexes are not contiguous, because some hints are parentheses.
             final Map<DefinedParameter, Integer> parameterToHintIndex = new HashMap<>();
 
-            KeywordDefinition keyword = (KeywordDefinition) callingFunction;
-            Collection<DefinedParameter> parameters = keyword.getParameters();
+            RobotUserKeywordStatement keyword = (RobotUserKeywordStatement) callingFunction;
+            Collection<DefinedParameter> parameters = keyword.getInputParameters();
             List<String> hints = new ArrayList<>();
             List<String> annotations = new ArrayList<>();
             for (DefinedParameter parameter : parameters) {
@@ -212,7 +212,7 @@ public class ParameterInfoHandlerUtil {
         return new Pair<>(hintsList, annotations);
     }
 
-    static void highlightParameters(List<Argument> arguments,
+    static void highlightParameters(List<RobotArgument> arguments,
                                     PyCallableType callableType,
                                     List<PyCallableParameter> parameters,
                                     Map<Integer, PyCallableParameter> indexToNamedParameter,
@@ -237,7 +237,7 @@ public class ParameterInfoHandlerUtil {
                                   @NotNull final List<PyCallableParameter> parameterList,
                                   @NotNull final Map<PyCallableParameter, Integer> parameterHintToIndex,
                                   @NotNull final Map<Integer, EnumSet<ParameterInfoUIContextEx.Flag>> hintFlags,
-                                  @NotNull final List<Argument> args,
+                                  @NotNull final List<RobotArgument> args,
                                   int currentParamIndex) {
         Map<String, PyCallableParameter> nameToCallableParameterIndex = parameterList.stream()
                                                                                      .filter(param -> param.getName() != null)
@@ -247,12 +247,12 @@ public class ParameterInfoHandlerUtil {
         int positionalContainerIndex = findPositionalContainerIndex(parameterList);
         boolean parameterFound = false;
         for (int i = 0; i < args.size(); i++) {
-            Argument arg = args.get(i);
+            RobotArgument arg = args.get(i);
             boolean mustHighlight = currentParamIndex == i;
-            if (arg instanceof Parameter parameter) {
+            if (arg instanceof RobotParameter parameter) {
                 parameterFound = true;
 
-                String parameterName = parameter.getParameterName();
+                String parameterName = parameter.getName();
                 if (nameToCallableParameterIndex.containsKey(parameterName)) {
                     PyCallableParameter pyCallableParameter = nameToCallableParameterIndex.get(parameterName);
                     highlightParameter(pyCallableParameter, parameterHintToIndex, hintFlags, mustHighlight);
@@ -279,7 +279,7 @@ public class ParameterInfoHandlerUtil {
     static void highlightParameters(@NotNull final List<DefinedParameter> parameterList,
                                     @NotNull final Map<DefinedParameter, Integer> parameterHintToIndex,
                                     @NotNull final Map<Integer, EnumSet<ParameterInfoUIContextEx.Flag>> hintFlags,
-                                    @NotNull final List<Argument> args,
+                                    @NotNull final List<RobotArgument> args,
                                     int currentParamIndex) {
         Map<String, DefinedParameter> nameToCallableParameterIndex = parameterList.stream()
                                                                                   .filter(param -> param.getLookup() != null)
@@ -287,12 +287,12 @@ public class ParameterInfoHandlerUtil {
 
         boolean parameterFound = false;
         for (int i = 0; i < args.size(); i++) {
-            Argument arg = args.get(i);
+            RobotArgument arg = args.get(i);
             boolean mustHighlight = currentParamIndex == i;
-            if (arg instanceof Parameter parameter) {
+            if (arg instanceof RobotParameter parameter) {
                 parameterFound = true;
 
-                String parameterName = parameter.getParameterName();
+                String parameterName = parameter.getName();
                 if (nameToCallableParameterIndex.containsKey(parameterName)) {
                     DefinedParameter pyCallableParameter = nameToCallableParameterIndex.get(parameterName);
                     highlightParameter(pyCallableParameter, parameterHintToIndex, hintFlags, mustHighlight);

@@ -1,11 +1,5 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.ide.structure;
 
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.DefinedKeyword;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.Heading;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.KeywordDefinition;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotFile;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotStatement;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.VariableDefinition;
 import com.intellij.ide.structureView.StructureViewTreeElement;
 import com.intellij.ide.util.treeView.smartTree.TreeElement;
 import com.intellij.navigation.ColoredItemPresentation;
@@ -14,6 +8,12 @@ import com.intellij.openapi.editor.colors.TextAttributesKey;
 import com.intellij.pom.Navigatable;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.util.PsiTreeUtil;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotFile;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotSection;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotStatement;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTestCaseStatement;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotUserKeywordStatement;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableStatement;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -83,27 +83,30 @@ public class RobotStructureViewElement implements StructureViewTreeElement {
     public TreeElement @NotNull [] getChildren() {
         List<StructureViewTreeElement> elements = new ArrayList<>();
         if (element instanceof RobotFile) {
-            Heading[] headings = PsiTreeUtil.getChildrenOfType(element, Heading.class);
+            RobotSection[] headings = PsiTreeUtil.getChildrenOfType(element, RobotSection.class);
             if (headings != null) {
-                for (Heading heading : headings) {
+                for (RobotSection heading : headings) {
                     elements.add(createChild(heading, RobotViewElementType.Heading));
                 }
             }
-        } else if (element instanceof Heading heading) {
-            Collection<RobotStatement> statements = heading.getMetadataStatements();
-            for (RobotStatement statement : statements) {
+        } else if (element instanceof RobotSection heading) {
+            RobotSectionElementsCollector collector = new RobotSectionElementsCollector();
+            heading.acceptChildren(collector);
+
+            Collection<PsiElement> statements = collector.getMetadataStatements();
+            for (PsiElement statement : statements) {
                 elements.add(createChild(statement, RobotViewElementType.Settings));
             }
 
-            for (DefinedKeyword definedKeyword : heading.collectDefinedKeywords()) {
-                elements.add(createChild(definedKeyword.reference(), RobotViewElementType.Keyword));
+            for (RobotUserKeywordStatement userKeywordStatement : collector.getUserKeywordStatements()) {
+                elements.add(createChild(userKeywordStatement, RobotViewElementType.Keyword));
             }
 
-            for (KeywordDefinition testCase : heading.getTestCases()) {
+            for (RobotTestCaseStatement testCase : collector.getTestCases()) {
                 elements.add(createChild(testCase, RobotViewElementType.TestCase));
             }
 
-            for (VariableDefinition variableDefinition : heading.getVariableDefinitions()) {
+            for (RobotVariableStatement variableDefinition : collector.getVariableStatements()) {
                 elements.add(createChild(variableDefinition, RobotViewElementType.Variable));
             }
         }
@@ -116,9 +119,8 @@ public class RobotStructureViewElement implements StructureViewTreeElement {
             return robotFile.getName();
         } else if (element instanceof RobotStatement robotStatement) {
             return robotStatement.getPresentableText();
-        } else {
-            return UNKNOWN;
         }
+        return UNKNOWN;
     }
 
     @NotNull
@@ -155,7 +157,7 @@ public class RobotStructureViewElement implements StructureViewTreeElement {
 
             @Nullable
             @Override
-            public Icon getIcon(boolean var1) {
+            public Icon getIcon(boolean unused) {
                 return getDisplayIcon();
             }
         };

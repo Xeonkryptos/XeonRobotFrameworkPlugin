@@ -9,6 +9,8 @@ import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.*;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.*;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotPsiImplUtil;
+import com.intellij.psi.PsiReference;
 
 public class RobotKeywordCallIdImpl extends RobotPsiElementBase implements RobotKeywordCallId {
 
@@ -24,6 +26,11 @@ public class RobotKeywordCallIdImpl extends RobotPsiElementBase implements Robot
   public void accept(@NotNull PsiElementVisitor visitor) {
     if (visitor instanceof RobotVisitor) accept((RobotVisitor)visitor);
     else super.accept(visitor);
+  }
+
+  @Override
+  public @NotNull PsiReference getReference() {
+    return RobotPsiImplUtil.getReference(this);
   }
 
 }

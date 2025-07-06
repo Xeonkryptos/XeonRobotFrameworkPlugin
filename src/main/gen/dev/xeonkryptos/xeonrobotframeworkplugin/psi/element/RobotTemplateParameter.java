@@ -6,15 +6,15 @@ import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiNameIdentifierOwner;
 
-public interface RobotTemplateParameter extends PsiNameIdentifierOwner {
+public interface RobotTemplateParameter extends PsiNameIdentifierOwner, RobotStatement {
 
   @Nullable
   RobotTemplateParameterArgument getTemplateParameterArgument();
 
-  @NotNull
-  RobotTemplateParameterId getTemplateParameterId();
-
   @Nullable
   RobotVariable getVariable();
+
+  @NotNull
+  RobotTemplateParameterId getNameIdentifier();
 
 }

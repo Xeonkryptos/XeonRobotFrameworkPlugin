@@ -9,17 +9,18 @@ import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.*;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.*;
-import com.intellij.psi.stubs.IStubElementType;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotPsiImplUtil;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotPositionalArgumentStub;
+import com.intellij.psi.stubs.IStubElementType;
 
 public class RobotPositionalArgumentImpl extends RobotPositionalArgumentExtension implements RobotPositionalArgument {
 
-  public RobotPositionalArgumentImpl(ASTNode node) {
+  public RobotPositionalArgumentImpl(@NotNull ASTNode node) {
     super(node);
   }
 
-  public RobotPositionalArgumentImpl(RobotPositionalArgumentStub stub, IStubElementType stubType) {
-    super(stub, stubType);
+  public RobotPositionalArgumentImpl(RobotPositionalArgumentStub stub, IStubElementType<RobotPositionalArgumentStub, RobotPositionalArgument> type) {
+    super(stub, type);
   }
 
   public void accept(@NotNull RobotVisitor visitor) {

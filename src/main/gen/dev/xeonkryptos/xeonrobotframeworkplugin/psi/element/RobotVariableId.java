@@ -6,12 +6,12 @@ import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiNamedElement;
 
-public interface RobotVariableId extends PsiNamedElement {
+public interface RobotVariableId extends PsiNamedElement, RobotNamedElementExpression, RobotReferenceElementExpression, RobotStatement {
 
   @Nullable
   RobotVariable getVariable();
 
   @Nullable
-  RobotVariableBodyContent getVariableBodyContent();
+  PsiElement getContent();
 
 }

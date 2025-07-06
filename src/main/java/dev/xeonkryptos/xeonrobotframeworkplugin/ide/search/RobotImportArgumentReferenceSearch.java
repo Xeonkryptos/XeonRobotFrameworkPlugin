@@ -11,8 +11,8 @@ import com.intellij.psi.PsiReference;
 import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.psi.search.searches.ReferencesSearch.SearchParameters;
 import com.intellij.util.Processor;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.PositionalArgument;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotFile;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotPositionalArgument;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.index.PositionalArgumentImportIndex;
 import org.jetbrains.annotations.NotNull;
 
@@ -51,10 +51,10 @@ public class RobotImportArgumentReferenceSearch extends QueryExecutorBase<PsiRef
 
                 if (relativePath != null) {
                     PositionalArgumentImportIndex positionalArgumentImportIndex = PositionalArgumentImportIndex.getInstance();
-                    Collection<PositionalArgument> matchingArguments = positionalArgumentImportIndex.getPositionalArgumentForImport(relativePath,
-                                                                                                                                    project,
-                                                                                                                                    globalSearchScope);
-                    for (PositionalArgument argument : matchingArguments) {
+                    Collection<RobotPositionalArgument> matchingArguments = positionalArgumentImportIndex.getPositionalArgumentForImport(relativePath,
+                                                                                                                                         project,
+                                                                                                                                         globalSearchScope);
+                    for (RobotPositionalArgument argument : matchingArguments) {
                         if (argument != null && !consumer.process(argument.getReference())) {
                             return;
                         }

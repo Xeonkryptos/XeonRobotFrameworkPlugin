@@ -131,7 +131,6 @@ public class RobotListenerMgr {
                           PsiFile psiFile = PsiManager.getInstance(project).findFile(file);
                           if (psiFile instanceof RobotFile robotFile) {
                               robotFile.reset();
-                              robotFile.importsChanged();
                           }
                       }
                       if (importUpdate) {

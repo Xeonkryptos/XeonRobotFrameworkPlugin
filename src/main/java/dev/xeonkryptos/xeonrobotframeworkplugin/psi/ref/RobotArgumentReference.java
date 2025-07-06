@@ -9,7 +9,6 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiElementResolveResult;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiPolyVariantReferenceBase;
-import com.intellij.psi.PsiReference;
 import com.intellij.psi.ResolveResult;
 import com.intellij.psi.impl.source.resolve.ResolveCache;
 import com.intellij.psi.util.PsiTreeUtil;
@@ -31,9 +30,11 @@ import com.jetbrains.python.psi.PyTupleExpression;
 import dev.xeonkryptos.xeonrobotframeworkplugin.ide.completion.CompletionKeys;
 import dev.xeonkryptos.xeonrobotframeworkplugin.ide.completion.RobotLookupContext;
 import dev.xeonkryptos.xeonrobotframeworkplugin.ide.completion.RobotLookupElementType;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.Import;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.Parameter;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.PositionalArgument;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLibraryImportGlobalSetting;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotParameter;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotPositionalArgument;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotResourceImportGlobalSetting;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariablesImportGlobalSetting;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -44,9 +45,9 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
 
-public class RobotArgumentReference extends PsiPolyVariantReferenceBase<PositionalArgument> {
+public class RobotArgumentReference extends PsiPolyVariantReferenceBase<RobotPositionalArgument> {
 
-    public RobotArgumentReference(@NotNull PositionalArgument positionalArgument) {
+    public RobotArgumentReference(@NotNull RobotPositionalArgument positionalArgument) {
         super(positionalArgument);
     }
 
@@ -56,34 +57,32 @@ public class RobotArgumentReference extends PsiPolyVariantReferenceBase<Position
                            .resolveWithCaching(this, (resolver, incompCode) -> multiResolve(resolver.getElement()), false, incompleteCode);
     }
 
-    private static ResolveResult @NotNull [] multiResolve(PositionalArgument positionalArgument) {
+    private static ResolveResult @NotNull [] multiResolve(RobotPositionalArgument positionalArgument) {
         Project project = positionalArgument.getProject();
         PsiElement parent = positionalArgument.getParent();
-        String argumentValue = positionalArgument.getContent();
+        String argumentValue = positionalArgument.getText();
 
         Set<ResolveResult> results = new LinkedHashSet<>();
-        if (parent instanceof Import importElement) {
-            if (importElement.isResource()) {
-                PsiElement result = RobotFileManager.findElement(argumentValue, project, importElement);
-                if (result != null) {
-                    results.add(new PsiElementResolveResult(result));
-                }
-                VirtualFile virtualFile = importElement.getContainingFile().getVirtualFile();
+        if (parent instanceof RobotResourceImportGlobalSetting resourceImport) {
+            PsiElement result = RobotFileManager.findElement(argumentValue, project, resourceImport);
+            if (result != null) {
+                results.add(new PsiElementResolveResult(result));
+            }
+            VirtualFile virtualFile = resourceImport.getContainingFile().getVirtualFile();
+            PsiFile file = RobotFileManager.findPsiFiles(argumentValue, virtualFile, project);
+            if (file != null) {
+                results.add(new PsiElementResolveResult(file));
+            }
+        } else if (parent instanceof RobotLibraryImportGlobalSetting || parent instanceof RobotVariablesImportGlobalSetting) {
+            PsiElement result = RobotFileManager.findElementInContext(argumentValue, project, parent);
+            if (result != null) {
+                results.add(new PsiElementResolveResult(result));
+            }
+            if (argumentValue.endsWith(".py")) {
+                VirtualFile virtualFile = parent.getContainingFile().getVirtualFile();
                 PsiFile file = RobotFileManager.findPsiFiles(argumentValue, virtualFile, project);
                 if (file != null) {
                     results.add(new PsiElementResolveResult(file));
-                }
-            } else if ((importElement.isLibrary() || importElement.isVariables())) {
-                PsiElement result = RobotFileManager.findElementInContext(argumentValue, project, importElement);
-                if (result != null) {
-                    results.add(new PsiElementResolveResult(result));
-                }
-                if (argumentValue.endsWith(".py")) {
-                    VirtualFile virtualFile = importElement.getContainingFile().getVirtualFile();
-                    PsiFile file = RobotFileManager.findPsiFiles(argumentValue, virtualFile, project);
-                    if (file != null) {
-                        results.add(new PsiElementResolveResult(file));
-                    }
                 }
             }
         }
@@ -92,12 +91,11 @@ public class RobotArgumentReference extends PsiPolyVariantReferenceBase<Position
 
     @Override
     public Object @NotNull [] getVariants() {
-        PositionalArgument currentPositionalArgument = getElement();
-        PsiElement parent = currentPositionalArgument.getParent();
-        if (parent instanceof Parameter parameter) {
-            Optional<PyExpression> pyExpressionOpt = Optional.ofNullable(parameter.getNameIdentifier())
-                                                             .map(PsiElement::getReference)
-                                                             .map(PsiReference::resolve)
+        RobotPositionalArgument currentPositionalArgument = getElement();
+        RobotParameter parameter = PsiTreeUtil.getParentOfType(currentPositionalArgument, RobotParameter.class);
+        if (parameter != null) {
+            PsiElement resolvedElement = parameter.getNameIdentifier().getReference().resolve();
+            Optional<PyExpression> pyExpressionOpt = Optional.ofNullable(resolvedElement)
                                                              .filter(element -> element instanceof PyParameter)
                                                              .map(element -> PsiTreeUtil.findChildOfType(element, PyAnnotation.class))
                                                              .map(PyAnnotation::getValue);

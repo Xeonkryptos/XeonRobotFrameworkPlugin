@@ -25,8 +25,6 @@ public class RobotColorsPage implements ColorSettingsPage {
                                                                                                   "color.settings.parameter"), RobotHighlighter.PARAMETER),
                                                                                           new AttributesDescriptor(RobotBundle.getMessage(
                                                                                                   "color.settings.argument"), RobotHighlighter.ARGUMENT),
-                                                                                          new AttributesDescriptor(RobotBundle.getMessage("color.settings.error"),
-                                                                                                                   RobotHighlighter.ERROR),
                                                                                           new AttributesDescriptor(RobotBundle.getMessage(
                                                                                                   "color.settings.gherkin"), RobotHighlighter.GHERKIN),
                                                                                           new AttributesDescriptor(RobotBundle.getMessage(
@@ -44,7 +42,7 @@ public class RobotColorsPage implements ColorSettingsPage {
                                                                                                                    RobotHighlighter.KEYWORD_DEFINITION),
                                                                                           new AttributesDescriptor(RobotBundle.getMessage(
                                                                                                   "color.settings.bracketSetting"),
-                                                                                                                   RobotHighlighter.BRACKET_SETTING),
+                                                                                                                   RobotHighlighter.LOCAL_SETTING),
                                                                                           new AttributesDescriptor(RobotBundle.getMessage(
                                                                                                   "color.settings.setting"), RobotHighlighter.SETTING),
                                                                                           new AttributesDescriptor(RobotBundle.getMessage(

@@ -1,14 +1,17 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.ide.completion;
 
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTokenTypes;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.Heading;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.PositionalArgument;
 import com.intellij.codeInsight.completion.CompletionParameters;
 import com.intellij.codeInsight.completion.CompletionProvider;
 import com.intellij.codeInsight.completion.CompletionResultSet;
 import com.intellij.codeInsight.lookup.LookupElement;
 import com.intellij.psi.PsiElement;
 import com.intellij.util.ProcessingContext;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotKeywordProvider;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordsSection;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotPositionalArgument;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotSection;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTestCasesSection;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -18,10 +21,10 @@ class ControlStructureCompletionProvider extends CompletionProvider<CompletionPa
 
     @Override
     protected void addCompletions(@NotNull CompletionParameters parameters, @NotNull ProcessingContext context, @NotNull CompletionResultSet result) {
-        Heading heading = CompletionProviderUtils.getHeading(parameters.getOriginalPosition());
-        if (CompletionProviderUtils.isIndexPositionAWhitespaceCharacter(parameters) && heading != null && (heading.containsTestCases()
-                                                                                                           || heading.containsKeywordDefinitions())) {
-            List<LookupElement> lookupElements = CompletionProviderUtils.computeAdditionalSyntaxLookups(RobotTokenTypes.SYNTAX_MARKER);
+        RobotSection section = CompletionProviderUtils.getSection(parameters.getOriginalPosition());
+        if (CompletionProviderUtils.isIndexPositionAWhitespaceCharacter(parameters) && (section instanceof RobotTestCasesSection
+                                                                                        || section instanceof RobotKeywordsSection)) {
+            List<LookupElement> lookupElements = CompletionProviderUtils.computeAdditionalSyntaxLookups(RobotKeywordProvider.SYNTAX_MARKER);
             List<LookupElement> nonSpecialElements = new ArrayList<>();
             List<LookupElement> specialElements = new ArrayList<>();
 
@@ -46,6 +49,6 @@ class ControlStructureCompletionProvider extends CompletionProvider<CompletionPa
         if (current == null) {
             return false;
         }
-        return current.getParent() instanceof PositionalArgument;
+        return current.getParent() instanceof RobotPositionalArgument;
     }
 }

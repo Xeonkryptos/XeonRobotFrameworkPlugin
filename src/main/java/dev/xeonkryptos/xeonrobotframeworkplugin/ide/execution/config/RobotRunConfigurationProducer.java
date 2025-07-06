@@ -1,8 +1,7 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.ide.execution.config;
 
+import com.intellij.psi.PsiNamedElement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotFeatureFileType;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.Heading;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.KeywordDefinition;
 import com.intellij.execution.Location;
 import com.intellij.execution.actions.ConfigurationContext;
 import com.intellij.execution.actions.ConfigurationFromContext;
@@ -17,6 +16,7 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.util.PsiTreeUtil;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotFile;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCall;
 import org.jetbrains.annotations.NotNull;
 
 import java.nio.file.Path;
@@ -74,22 +74,6 @@ public class RobotRunConfigurationProducer extends LazyRunConfigurationProducer<
         return workingDirectory;
     }
 
-    private static boolean containsTasksOnly(ConfigurationContext context) {
-        PsiElement element = context.getPsiLocation();
-        Heading heading;
-        while (true) {
-            if (element == null) {
-                return false;
-            }
-            if (element instanceof Heading) {
-                heading = (Heading) element;
-                break;
-            }
-            element = element.getParent();
-        }
-        return heading.containsTasks() && !heading.containsTestCases();
-    }
-
     @NotNull
     private String getRunParametersForMultiSelection(@NotNull ConfigurationContext context, String basePath) {
         PsiElement[] selectedElements = getSelectedPsiElements(context);
@@ -109,17 +93,7 @@ public class RobotRunConfigurationProducer extends LazyRunConfigurationProducer<
                 }
                 parameters.append("--test \"").append(testName.replace("\"", "\\\"")).append("\"");
             }
-
-            PsiElement current = element;
-            while (current != null) {
-                if (current instanceof Heading) {
-                    if (((Heading) current).containsTasks() && !((Heading) current).containsTestCases()) {
-                        containsRpa = true;
-                    }
-                    break;
-                }
-                current = current.getParent();
-            }
+            containsRpa = containsTasksOnly(element);
         }
 
         if (parameters.isEmpty()) {
@@ -140,6 +114,15 @@ public class RobotRunConfigurationProducer extends LazyRunConfigurationProducer<
         }
 
         return parameters.toString();
+    }
+
+    private static boolean containsTasksOnly(PsiElement element) {
+        if (element == null) {
+            return false;
+        }
+        RobotExecutableSectionSectionVerifier verifier = new RobotExecutableSectionSectionVerifier();
+        element.accept(verifier);
+        return verifier.hasOnlyTasksSection();
     }
 
     @NotNull
@@ -165,7 +148,8 @@ public class RobotRunConfigurationProducer extends LazyRunConfigurationProducer<
         basePath = relativizePath(basePath, filePath);
         runParameters += " \"" + basePath.replace("\"", "\\\"") + "\"";
 
-        if (containsTasksOnly(context)) {
+        PsiElement element = context.getPsiLocation();
+        if (containsTasksOnly(element)) {
             runParameters = "--rpa " + runParameters;
         }
         return runParameters;
@@ -198,13 +182,10 @@ public class RobotRunConfigurationProducer extends LazyRunConfigurationProducer<
         Location<PsiElement> location = context.getLocation();
         if (location != null) {
             PsiElement element = location.getPsiElement();
-            PsiElement executableParent = PsiTreeUtil.getParentOfType(element, KeywordDefinition.class, Heading.class);
-            if (executableParent != null) {
-                if (executableParent instanceof Heading heading) {
-                    return heading.containsTestCases() || heading.containsTasks();
-                } else if (executableParent instanceof KeywordDefinition) {
-                    return true;
-                }
+            RobotExecutableSectionSectionVerifier verifier = new RobotExecutableSectionSectionVerifier();
+            element.accept(verifier);
+            if (verifier.isExecutable()) {
+                return true;
             }
 
             VirtualFile virtualFile = location.getVirtualFile();
@@ -223,17 +204,13 @@ public class RobotRunConfigurationProducer extends LazyRunConfigurationProducer<
                     });
                     return containsRobotFiles.get();
                 } else if (location.getPsiElement() instanceof RobotFile robotFile) {
-                    return containsExecutableElements(robotFile);
+                    verifier.reset();
+                    robotFile.acceptChildren(verifier); // TODO: Does the robot file has the tree under it?
+                    return verifier.isExecutable();
                 }
             }
         }
         return false;
-    }
-
-    private static boolean containsExecutableElements(PsiElement psiElement) {
-        return PsiTreeUtil.getChildrenOfTypeAsList(psiElement, Heading.class)
-                          .stream()
-                          .anyMatch(heading -> heading.containsTestCases() || heading.containsTasks());
     }
 
     @NotNull
@@ -247,13 +224,14 @@ public class RobotRunConfigurationProducer extends LazyRunConfigurationProducer<
 
     @NotNull
     private static String getKeywordNameFromAnyElement(PsiElement element) {
-        while (!(element instanceof KeywordDefinition)) {
+        while (!(element instanceof RobotKeywordCall namedElement)) {
             element = element.getParent();
             if (element == null) {
                 return "";
             }
         }
-        return ((KeywordDefinition) element).getKeywordName();
+        String name = namedElement.getName();
+        return name != null ? name : "";
     }
 
     private PsiElement[] getSelectedPsiElements(@NotNull ConfigurationContext context) {

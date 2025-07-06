@@ -46,7 +46,6 @@ public abstract class RobotPsiElementBase extends ASTWrapperPsiElement implement
         };
     }
 
-    @NotNull
     @Override
     public String getName() {
         if (name == null) {
@@ -56,7 +55,6 @@ public abstract class RobotPsiElementBase extends ASTWrapperPsiElement implement
     }
 
     @NotNull
-    @Override
     public String getPresentableText() {
         String unescapedText = InjectedLanguageManager.getInstance(getProject()).getUnescapedText(this);
         return getPresentableText(unescapedText);

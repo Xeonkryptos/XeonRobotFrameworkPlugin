@@ -9,14 +9,10 @@ import com.intellij.psi.stubs.StubElement;
 import com.intellij.psi.stubs.StubInputStream;
 import com.intellij.psi.stubs.StubOutputStream;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotLanguage;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.PositionalArgument;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.PositionalArgumentImpl;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLibraryImport;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotPositionalArgument;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotResourceImport;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVisitor;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotPositionalArgumentImpl;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.index.PositionalArgumentImportIndex;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.visitor.RobotImportArgumentIdentifier;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
 
@@ -43,7 +39,7 @@ public class RobotPositionalArgumentStubElement extends IStubElementType<RobotPo
         String argumentText = InjectedLanguageManager.getInstance(psi.getProject()).getUnescapedText(psi);
         RobotImportArgumentIdentifier robotImportArgumentIdentifier = new RobotImportArgumentIdentifier();
         psi.accept(robotImportArgumentIdentifier);
-        return new RobotPositionalArgumentStubImpl(parentStub, argumentText, robotImportArgumentIdentifier.isImportArgument);
+        return new RobotPositionalArgumentStubImpl(parentStub, argumentText, robotImportArgumentIdentifier.isImportArgument());
     }
 
     @Override
@@ -77,29 +73,6 @@ public class RobotPositionalArgumentStubElement extends IStubElementType<RobotPo
             String value = stub.getValue();
             value = value.replace('/', '.').toLowerCase();
             sink.occurrence(PositionalArgumentImportIndex.KEY, value);
-        }
-    }
-
-    private static class RobotImportArgumentIdentifier extends RobotVisitor {
-
-        boolean isImportArgument = false;
-
-        @Override
-        public void visitPositionalArgument(@NotNull RobotPositionalArgument o) {
-            PsiElement parent = o.getParent();
-            if (parent != null) {
-                parent.accept(this);
-            }
-        }
-
-        @Override
-        public void visitLibraryImport(@NotNull RobotLibraryImport o) {
-            isImportArgument = true;
-        }
-
-        @Override
-        public void visitResourceImport(@NotNull RobotResourceImport o) {
-            isImportArgument = true;
         }
     }
 }

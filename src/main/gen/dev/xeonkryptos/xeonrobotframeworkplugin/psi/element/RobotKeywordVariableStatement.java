@@ -4,15 +4,13 @@ package dev.xeonkryptos.xeonrobotframeworkplugin.psi.element;
 import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
-import com.intellij.psi.StubBasedPsiElement;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotKeywordVariableStatementStub;
 
-public interface RobotKeywordVariableStatement extends PsiElement, StubBasedPsiElement<RobotKeywordVariableStatementStub> {
+public interface RobotKeywordVariableStatement extends RobotVariableStatement {
 
   @NotNull
   RobotKeywordCall getKeywordCall();
 
   @NotNull
-  List<RobotVariable> getVariableList();
+  List<RobotVariableDefinition> getVariableDefinitionList();
 
 }

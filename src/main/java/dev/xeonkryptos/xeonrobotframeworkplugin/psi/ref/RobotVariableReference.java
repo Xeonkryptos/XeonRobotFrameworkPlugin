@@ -1,36 +1,39 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.psi.ref;
 
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.Variable;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiReferenceBase;
 import com.intellij.psi.impl.source.resolve.ResolveCache;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariable;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.visitor.RobotVariableReferenceSearcher;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class RobotVariableReference extends PsiReferenceBase<Variable> {
+public class RobotVariableReference extends PsiReferenceBase<RobotVariable> {
 
-    public RobotVariableReference(@NotNull Variable element) {
+    public RobotVariableReference(@NotNull RobotVariable element) {
         super(element, false);
     }
 
     @Nullable
     @Override
     public PsiElement resolve() {
-        Variable variable = getElement();
+        RobotVariable variable = getElement();
         ResolveCache resolveCache = ResolveCache.getInstance(variable.getProject());
         return resolveCache.resolveWithCaching(this, (robotVariableReference, incompleteCode) -> {
-            if (variable.isEmpty()) { // e.g. ${}, thus empty representation of a variable. There can be no reference.
+            String variableName = variable.getName();
+            if (variableName == null || variableName.isBlank()) { // e.g. ${}, thus empty representation of a variable. There can be no reference.
                 return null;
             }
-            String variableName = variable.getPresentableText();
-            PsiElement parentElement = variable.getParent();
-            PsiElement resolvedElement = ResolverUtils.findVariableInKeyword(variableName, parentElement);
-            if (resolvedElement == null) {
+
+            RobotVariableReferenceSearcher variableReferenceSearcher = new RobotVariableReferenceSearcher(variable);
+            variable.accept(variableReferenceSearcher);
+            PsiElement foundElement = variableReferenceSearcher.getFoundElement();
+            if (foundElement == null) {
                 PsiFile containingFile = variable.getContainingFile();
-                resolvedElement = ResolverUtils.findVariableElement(variableName, containingFile);
+                foundElement = ResolverUtils.findVariableElement(variableName, containingFile);
             }
-            return resolvedElement;
-        }, false, false);
+            return foundElement;
+        }, true, false);
     }
 }

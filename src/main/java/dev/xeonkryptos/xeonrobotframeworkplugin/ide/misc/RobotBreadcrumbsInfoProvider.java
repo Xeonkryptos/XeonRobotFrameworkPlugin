@@ -5,15 +5,8 @@ import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.psi.PsiElement;
 import com.intellij.ui.breadcrumbs.BreadcrumbsProvider;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotLanguage;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.Heading;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.KeywordDefinition;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.KeywordDefinitionId;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.KeywordInvokable;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.KeywordStatement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotStatement;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.VariableDefinition;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.VariableDefinitionGroup;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.VariableDefinitionId;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.visitor.RobotBreadcrumbsInfoElementCollector;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -30,9 +23,9 @@ public class RobotBreadcrumbsInfoProvider implements BreadcrumbsProvider {
 
     @Override
     public boolean acceptElement(@NotNull PsiElement element) {
-        return element instanceof Heading || element instanceof KeywordDefinition || element instanceof VariableDefinitionGroup
-               || element instanceof KeywordStatement || (element instanceof KeywordInvokable keywordInvokable
-                                                          && !(keywordInvokable.getParent() instanceof KeywordStatement));
+        RobotBreadcrumbsInfoElementCollector breadcrumbsInfoCollector = new RobotBreadcrumbsInfoElementCollector();
+        element.accept(breadcrumbsInfoCollector);
+        return breadcrumbsInfoCollector.isIncludeInBreadcrumbs();
     }
 
     @Override
@@ -51,8 +44,9 @@ public class RobotBreadcrumbsInfoProvider implements BreadcrumbsProvider {
     @SuppressWarnings("UnstableApiUsage")
     @Override
     public boolean acceptStickyElement(@NotNull PsiElement element) {
-        return element instanceof Heading || element instanceof KeywordDefinition || element instanceof KeywordDefinitionId
-               || element instanceof VariableDefinitionGroup || element instanceof VariableDefinition || element instanceof VariableDefinitionId
-               || element instanceof KeywordStatement || element instanceof KeywordInvokable;
+        RobotBreadcrumbsInfoElementCollector breadcrumbsInfoCollector = new RobotBreadcrumbsInfoElementCollector();
+        element.accept(breadcrumbsInfoCollector);
+        return breadcrumbsInfoCollector.isSticky();
     }
+
 }

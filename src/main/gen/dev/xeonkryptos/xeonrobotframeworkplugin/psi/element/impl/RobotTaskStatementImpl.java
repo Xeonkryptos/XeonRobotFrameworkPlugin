@@ -9,6 +9,7 @@ import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.*;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.*;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotPsiImplUtil;
 
 public class RobotTaskStatementImpl extends RobotTaskExtension implements RobotTaskStatement {
 
@@ -46,14 +47,14 @@ public class RobotTaskStatementImpl extends RobotTaskExtension implements RobotT
 
   @Override
   @NotNull
-  public RobotTaskId getTaskId() {
-    return notNullChild(PsiTreeUtil.getChildOfType(this, RobotTaskId.class));
+  public List<RobotTemplateArguments> getTemplateArgumentsList() {
+    return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotTemplateArguments.class);
   }
 
   @Override
   @NotNull
-  public List<RobotTemplateArguments> getTemplateArgumentsList() {
-    return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotTemplateArguments.class);
+  public RobotTaskId getNameIdentifier() {
+    return notNullChild(PsiTreeUtil.getChildOfType(this, RobotTaskId.class));
   }
 
 }

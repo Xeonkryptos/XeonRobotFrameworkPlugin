@@ -30,7 +30,7 @@ public class PythonRunConfigurationExt extends PythonRunConfiguration {
     }
 
     @Override
-    @SuppressWarnings({ "rawtypes", "MethodDoesntCallSuperMethod" })
+    @SuppressWarnings("rawtypes")
     public PythonRunConfigurationExt clone() {
         PythonRunConfigurationExt configuration = new PythonRunConfigurationExt(getProject());
         configuration.setName(getName());

@@ -9,6 +9,7 @@ import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.*;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.*;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotPsiImplUtil;
 
 public class RobotTestCaseStatementImpl extends RobotTestCaseExtension implements RobotTestCaseStatement {
 
@@ -52,7 +53,7 @@ public class RobotTestCaseStatementImpl extends RobotTestCaseExtension implement
 
   @Override
   @NotNull
-  public RobotTestCaseId getTestCaseId() {
+  public RobotTestCaseId getNameIdentifier() {
     return notNullChild(PsiTreeUtil.getChildOfType(this, RobotTestCaseId.class));
   }
 

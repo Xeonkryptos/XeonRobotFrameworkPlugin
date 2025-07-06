@@ -9,6 +9,7 @@ import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.*;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.*;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotPsiImplUtil;
 
 public class RobotLocalSettingImpl extends RobotLocalSettingExtension implements RobotLocalSetting {
 
@@ -34,20 +35,20 @@ public class RobotLocalSettingImpl extends RobotLocalSettingExtension implements
 
   @Override
   @NotNull
-  public RobotLocalSettingId getLocalSettingId() {
-    return notNullChild(PsiTreeUtil.getChildOfType(this, RobotLocalSettingId.class));
-  }
-
-  @Override
-  @NotNull
-  public List<RobotParameter> getParameterList() {
-    return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotParameter.class);
+  public List<RobotLocalSettingArgument> getLocalSettingArgumentList() {
+    return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotLocalSettingArgument.class);
   }
 
   @Override
   @NotNull
   public List<RobotPositionalArgument> getPositionalArgumentList() {
     return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotPositionalArgument.class);
+  }
+
+  @Override
+  @NotNull
+  public RobotLocalSettingId getNameIdentifier() {
+    return notNullChild(PsiTreeUtil.getChildOfType(this, RobotLocalSettingId.class));
   }
 
 }

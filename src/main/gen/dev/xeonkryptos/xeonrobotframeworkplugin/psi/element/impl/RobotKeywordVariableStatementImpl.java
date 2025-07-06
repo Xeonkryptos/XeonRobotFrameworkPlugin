@@ -9,19 +9,15 @@ import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.*;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.*;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotKeywordVariableStatementStub;
-import com.intellij.psi.stubs.IStubElementType;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotPsiImplUtil;
 
-public class RobotKeywordVariableStatementImpl extends RobotKeywordVariableStatementExtension implements RobotKeywordVariableStatement {
+public class RobotKeywordVariableStatementImpl extends RobotVariableStatementImpl implements RobotKeywordVariableStatement {
 
   public RobotKeywordVariableStatementImpl(@NotNull ASTNode node) {
     super(node);
   }
 
-  public RobotKeywordVariableStatementImpl(RobotKeywordVariableStatementStub stub, IStubElementType<RobotKeywordVariableStatementStub, RobotKeywordVariableStatement> type) {
-    super(stub, type);
-  }
-
+  @Override
   public void accept(@NotNull RobotVisitor visitor) {
     visitor.visitKeywordVariableStatement(this);
   }
@@ -35,13 +31,13 @@ public class RobotKeywordVariableStatementImpl extends RobotKeywordVariableState
   @Override
   @NotNull
   public RobotKeywordCall getKeywordCall() {
-    return notNullChild(PsiTreeUtil.getStubChildOfType(this, RobotKeywordCall.class));
+    return notNullChild(PsiTreeUtil.getChildOfType(this, RobotKeywordCall.class));
   }
 
   @Override
   @NotNull
-  public List<RobotVariable> getVariableList() {
-    return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotVariable.class);
+  public List<RobotVariableDefinition> getVariableDefinitionList() {
+    return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotVariableDefinition.class);
   }
 
 }

@@ -5,7 +5,10 @@ import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiNamedElement;
+import com.intellij.psi.PsiReference;
 
-public interface RobotKeywordCallId extends PsiNamedElement {
+public interface RobotKeywordCallId extends PsiNamedElement, RobotNamedElementExpression, RobotReferenceElementExpression, RobotStatement {
+
+  @NotNull PsiReference getReference();
 
 }

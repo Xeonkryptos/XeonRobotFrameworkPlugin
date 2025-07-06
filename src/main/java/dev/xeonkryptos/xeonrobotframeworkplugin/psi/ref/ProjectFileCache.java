@@ -1,8 +1,8 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.psi.ref;
 
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.DefinedVariable;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiFile;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.DefinedVariable;
 
 import java.util.Collection;
 import java.util.HashMap;

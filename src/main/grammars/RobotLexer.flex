@@ -233,7 +233,7 @@ LineComment = {LineCommentSign} {NON_EOL}*
 
 <SETTINGS_SECTION> {
     {LibraryImportKeyword} \s+             { enterNewState(SETTING); pushBackTrailingWhitespace(); return LIBRARY_IMPORT_KEYWORD; }
-    {WithNameKeyword} \s+                  { enterNewState(SETTING); pushBackTrailingWhitespace(); return WITH_NAME_KEYWORD; }
+    {WithNameKeyword} \s+                  { enterNewState(SETTING); pushBackTrailingWhitespace(); return WITH_NAME; }
     {ResourceImportKeyword} \s+            { enterNewState(SETTING); pushBackTrailingWhitespace(); return RESOURCE_IMPORT_KEYWORD; }
     {VariablesImportKeyword} \s+           { enterNewState(SETTING); pushBackTrailingWhitespace(); return VARIABLES_IMPORT_KEYWORD; }
     {NameKeyword} \s+                      { enterNewState(SETTING); pushBackTrailingWhitespace(); return SUITE_NAME_KEYWORD; }
@@ -395,6 +395,7 @@ LineComment = {LineCommentSign} {NON_EOL}*
 // Just switched into another state to provide keyword arguments as such instead of interpreting them incorrectly as KEYWORD_NAME.
 <KEYWORD_CALL>      {RestrictedLiteralValue}  { yybegin(KEYWORD_ARGUMENTS); pushBackTrailingWhitespace(); return KEYWORD_NAME; }
 
+<SETTING> {EqualSign}  { return ASSIGNMENT; }
 <SETTINGS_SECTION, SETTING, KEYWORD_ARGUMENTS, USER_KEYWORD_RETURN_STATEMENT> {RestrictedLiteralValue}        { pushBackTrailingWhitespace(); return LITERAL_CONSTANT; }
 
 <COMMENTS_SECTION> {

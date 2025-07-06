@@ -4,7 +4,15 @@ package dev.xeonkryptos.xeonrobotframeworkplugin.psi.element;
 import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiNameIdentifierOwner;
+import com.intellij.psi.PsiReference;
 
-public interface RobotVariable extends PsiElement {
+public interface RobotVariable extends PsiNameIdentifierOwner, RobotStatement {
+
+  @Nullable PsiElement getNameIdentifier();
+
+  @Nullable String getName();
+
+  @NotNull PsiReference getReference();
 
 }

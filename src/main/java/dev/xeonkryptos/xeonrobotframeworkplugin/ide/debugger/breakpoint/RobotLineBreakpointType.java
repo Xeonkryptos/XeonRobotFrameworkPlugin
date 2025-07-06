@@ -6,6 +6,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Ref;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiElement;
+import com.intellij.psi.TokenType;
 import com.intellij.xdebugger.XDebuggerUtil;
 import com.intellij.xdebugger.breakpoints.SuspendPolicy;
 import com.intellij.xdebugger.breakpoints.XLineBreakpointType;
@@ -13,16 +14,9 @@ import com.jetbrains.python.debugger.PyDebugSupportUtils;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotFeatureFileType;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotLanguage;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotResourceFileType;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTokenTypes;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.Heading;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.KeywordDefinition;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.KeywordDefinitionId;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.KeywordStatement;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.VariableDefinition;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.visitor.RobotStoppablePsiElement;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.Set;
 
 /**
  * Class that configures a breakpoint for robot framework.
@@ -61,10 +55,9 @@ public class RobotLineBreakpointType extends XLineBreakpointType<RobotLineBreakp
         return stoppable.get();
     }
 
-    @SuppressWarnings("SuspiciousMethodCalls")
     protected void lineHasStoppablePsi(@NotNull Project project, int line, Document document, Ref<? super Boolean> stoppable) {
         XDebuggerUtil.getInstance().iterateLine(project, document, line, psiElement -> {
-            if (psiElement.getNode() != null && Set.of(RobotTokenTypes.WHITESPACE, RobotTokenTypes.ERROR).contains(psiElement.getNode().getElementType())) {
+            if (psiElement.getNode() != null && TokenType.WHITE_SPACE == psiElement.getNode().getElementType()) {
                 return true;
             } else {
                 if (isPsiElementStoppable(psiElement)) {
@@ -81,9 +74,12 @@ public class RobotLineBreakpointType extends XLineBreakpointType<RobotLineBreakp
     protected boolean isPsiElementStoppable(PsiElement psiElement) {
         if (psiElement.getLanguage() == RobotLanguage.INSTANCE) {
             PsiElement context = psiElement.getContext();
-            // TODO: Not optimal solution. Better use visitor pattern here, but the visitor needs to be implemented first
-            return context instanceof KeywordStatement || context instanceof VariableDefinition || context instanceof KeywordDefinition
-                   || context instanceof KeywordDefinitionId || context instanceof Heading heading && heading.isSettings();
+            if (context == null) {
+                return false;
+            }
+            RobotStoppablePsiElement stoppablePsiElement = new RobotStoppablePsiElement();
+            context.accept(stoppablePsiElement);
+            return stoppablePsiElement.isStoppable();
         }
         return false;
     }

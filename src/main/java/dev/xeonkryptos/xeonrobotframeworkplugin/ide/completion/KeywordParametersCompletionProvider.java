@@ -1,17 +1,15 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.ide.completion;
 
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.DefinedParameter;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.KeywordStatement;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.Parameter;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.ParameterId;
 import com.intellij.codeInsight.TailType;
 import com.intellij.codeInsight.completion.CompletionParameters;
 import com.intellij.codeInsight.completion.CompletionProvider;
 import com.intellij.codeInsight.completion.CompletionResultSet;
 import com.intellij.icons.AllIcons.Nodes;
-import com.intellij.psi.PsiElement;
 import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.util.ProcessingContext;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.DefinedParameter;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCall;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotParameter;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
@@ -22,28 +20,25 @@ class KeywordParametersCompletionProvider extends CompletionProvider<CompletionP
 
     @Override
     protected void addCompletions(@NotNull CompletionParameters parameters, @NotNull ProcessingContext context, @NotNull CompletionResultSet result) {
-        KeywordStatement keyword = PsiTreeUtil.getParentOfType(parameters.getPosition(), KeywordStatement.class);
+        RobotKeywordCall keyword = PsiTreeUtil.getParentOfType(parameters.getPosition(), RobotKeywordCall.class);
         if (keyword != null) {
-            PsiElement psiParent = parameters.getPosition().getParent();
-            PsiElement superParent = psiParent.getParent();
-            if (superParent instanceof Parameter) {
-                PsiElement prevSibling = psiParent.getPrevSibling();
-                if (prevSibling != null && "=".equals(prevSibling.getText())) {
-                    return;
-                }
-                result = result.withPrefixMatcher("");
-            }
+            // TODO: Needed?
+            //            PsiElement psiParent = parameters.getPosition().getParent();
+            //            PsiElement superParent = psiParent.getParent();
+            //            if (superParent instanceof RobotParameter) {
+            //                PsiElement prevSibling = psiParent.getPrevSibling();
+            //                if (prevSibling != null && "=".equals(prevSibling.getText())) {
+            //                    return;
+            //                }
+            //                result = result.withPrefixMatcher("");
+            //            }
             addKeywordParameters(keyword, result);
         }
     }
 
-    private void addKeywordParameters(@NotNull KeywordStatement keywordStatement, @NotNull CompletionResultSet resultSet) {
+    private void addKeywordParameters(@NotNull RobotKeywordCall keywordStatement, @NotNull CompletionResultSet resultSet) {
         Collection<DefinedParameter> availableParameters = keywordStatement.getAvailableParameters();
-        Set<String> arguments = keywordStatement.getParameters()
-                                                .stream()
-                                                .flatMap(parameter -> PsiTreeUtil.getChildrenOfTypeAsList(parameter, ParameterId.class).stream())
-                                                .map(ParameterId::getName)
-                                                .collect(Collectors.toSet());
+        Set<String> arguments = keywordStatement.getParameterList().stream().map(RobotParameter::getName).collect(Collectors.toSet());
         availableParameters.removeIf(parameter -> arguments.contains(parameter.getLookup()) || parameter.isKeywordContainer());
 
         TailType assignmentTailType = TailType.createSimpleTailType('=');

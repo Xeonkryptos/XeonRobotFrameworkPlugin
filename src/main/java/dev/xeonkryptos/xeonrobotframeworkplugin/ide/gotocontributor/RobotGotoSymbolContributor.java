@@ -14,10 +14,10 @@ import com.intellij.util.indexing.DumbModeAccessType;
 import com.intellij.util.indexing.FindSymbolParameters;
 import com.intellij.util.indexing.IdFilter;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotLanguage;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.KeywordDefinition;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.KeywordStatement;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCall;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotQualifiedNameOwner;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.VariableDefinition;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotUserKeywordStatement;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableDefinition;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.index.KeywordDefinitionNameIndex;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.index.KeywordStatementNameIndex;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.index.VariableDefinitionNameIndex;
@@ -47,13 +47,13 @@ public class RobotGotoSymbolContributor implements GotoClassContributor, ChooseB
         IdFilter filter = parameters.getIdFilter();
         StubIndex stubIndex = StubIndex.getInstance();
         DumbModeAccessType.RELIABLE_DATA_ONLY.ignoreDumbMode(() -> {
-            if (!stubIndex.processElements(KeywordDefinitionNameIndex.KEY, name, project, scope, filter, KeywordDefinition.class, processor)) {
+            if (!stubIndex.processElements(KeywordDefinitionNameIndex.KEY, name, project, scope, filter, RobotUserKeywordStatement.class, processor)) {
                 return;
             }
-            if (!stubIndex.processElements(KeywordStatementNameIndex.KEY, name, project, scope, filter, KeywordStatement.class, processor)) {
+            if (!stubIndex.processElements(KeywordStatementNameIndex.KEY, name, project, scope, filter, RobotKeywordCall.class, processor)) {
                 return;
             }
-            stubIndex.processElements(VariableDefinitionNameIndex.KEY, name, project, scope, filter, VariableDefinition.class, processor);
+            stubIndex.processElements(VariableDefinitionNameIndex.KEY, name, project, scope, filter, RobotVariableDefinition.class, processor);
         });
     }
 

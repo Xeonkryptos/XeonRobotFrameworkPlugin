@@ -19,7 +19,7 @@ public class ParameterDto implements DefinedParameter {
     public ParameterDto(@NotNull PsiElement reference, String name, String defaultValue, boolean keywordContainer) {
         this.reference = reference;
         this.name = name.trim();
-        this.defaultValue = defaultValue;
+        this.defaultValue = defaultValue != null && !defaultValue.trim().isEmpty() ? defaultValue : null;
         this.keywordContainer = keywordContainer;
     }
 

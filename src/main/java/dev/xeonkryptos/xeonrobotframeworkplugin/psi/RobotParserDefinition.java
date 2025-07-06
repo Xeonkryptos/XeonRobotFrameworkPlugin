@@ -1,22 +1,5 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.psi;
 
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.PositionalArgumentImpl;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.BracketSettingImpl;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.HeadingImpl;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.ImportImpl;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.KeywordDefinitionIdImpl;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.KeywordDefinitionImpl;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.KeywordInvokableImpl;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.KeywordPartImpl;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.KeywordStatementImpl;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.ParameterImpl;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.ParameterIdImpl;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotFileImpl;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.SettingImpl;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.VariableDefinitionGroupImpl;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.VariableDefinitionIdImpl;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.VariableDefinitionImpl;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.VariableImpl;
 import com.intellij.lang.ASTNode;
 import com.intellij.lang.ParserDefinition;
 import com.intellij.lang.PsiParser;
@@ -27,7 +10,8 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.tree.IFileElementType;
 import com.intellij.psi.tree.TokenSet;
-import com.intellij.psi.util.PsiUtilCore;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotFile;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotFileImpl;
 import org.jetbrains.annotations.NotNull;
 
 public class RobotParserDefinition implements ParserDefinition {
@@ -47,7 +31,7 @@ public class RobotParserDefinition implements ParserDefinition {
    @NotNull
    @Override
    public IFileElementType getFileNodeType() {
-      return RobotStubTokenTypes.ROBOT_FILE;
+      return RobotFile.ROBOT_FILE;
    }
 
    @NotNull

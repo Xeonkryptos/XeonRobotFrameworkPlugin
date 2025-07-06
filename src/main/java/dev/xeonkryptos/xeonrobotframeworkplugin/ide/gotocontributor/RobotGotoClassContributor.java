@@ -14,8 +14,8 @@ import com.intellij.util.indexing.DumbModeAccessType;
 import com.intellij.util.indexing.FindSymbolParameters;
 import com.intellij.util.indexing.IdFilter;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotLanguage;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.KeywordDefinition;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotQualifiedNameOwner;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotUserKeywordStatement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.index.KeywordDefinitionNameIndex;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -39,7 +39,7 @@ public class RobotGotoClassContributor implements GotoClassContributor, ChooseBy
                                                                                              project,
                                                                                              scope,
                                                                                              filter,
-                                                                                             KeywordDefinition.class,
+                                                                                             RobotUserKeywordStatement.class,
                                                                                              processor));
     }
 

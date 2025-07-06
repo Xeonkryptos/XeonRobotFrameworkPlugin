@@ -4,8 +4,11 @@ package dev.xeonkryptos.xeonrobotframeworkplugin.psi.element;
 import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
+import com.intellij.psi.StubBasedPsiElement;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotScalarVariableStub;
+import com.intellij.psi.PsiReference;
 
-public interface RobotScalarVariable extends RobotVariable {
+public interface RobotScalarVariable extends RobotVariable, StubBasedPsiElement<RobotScalarVariableStub> {
 
   @NotNull
   List<RobotExtendedVariableIndexAccess> getExtendedVariableIndexAccessList();
@@ -21,5 +24,11 @@ public interface RobotScalarVariable extends RobotVariable {
 
   @Nullable
   RobotVariableId getVariableId();
+
+  @Nullable PsiElement getNameIdentifier();
+
+  @Nullable String getName();
+
+  @NotNull PsiReference getReference();
 
 }

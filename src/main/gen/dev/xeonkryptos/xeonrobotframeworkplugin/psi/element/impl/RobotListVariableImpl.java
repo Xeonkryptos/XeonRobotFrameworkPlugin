@@ -9,14 +9,21 @@ import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.*;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.*;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotPsiImplUtil;
+import com.intellij.psi.PsiReference;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotListVariableStub;
+import com.intellij.psi.stubs.IStubElementType;
 
-public class RobotListVariableImpl extends RobotVariableImpl implements RobotListVariable {
+public class RobotListVariableImpl extends RobotListVariableExtension implements RobotListVariable {
 
   public RobotListVariableImpl(@NotNull ASTNode node) {
     super(node);
   }
 
-  @Override
+  public RobotListVariableImpl(RobotListVariableStub stub, IStubElementType<RobotListVariableStub, RobotListVariable> type) {
+    super(stub, type);
+  }
+
   public void accept(@NotNull RobotVisitor visitor) {
     visitor.visitListVariable(this);
   }
@@ -55,6 +62,21 @@ public class RobotListVariableImpl extends RobotVariableImpl implements RobotLis
   @Nullable
   public RobotVariableId getVariableId() {
     return PsiTreeUtil.getChildOfType(this, RobotVariableId.class);
+  }
+
+  @Override
+  public @Nullable PsiElement getNameIdentifier() {
+    return RobotPsiImplUtil.getNameIdentifier(this);
+  }
+
+  @Override
+  public @Nullable String getName() {
+    return RobotPsiImplUtil.getName(this);
+  }
+
+  @Override
+  public @NotNull PsiReference getReference() {
+    return RobotPsiImplUtil.getReference(this);
   }
 
 }

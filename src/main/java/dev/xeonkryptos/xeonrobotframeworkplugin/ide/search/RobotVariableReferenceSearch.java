@@ -9,11 +9,12 @@ import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.psi.search.searches.ReferencesSearch.SearchParameters;
 import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.util.Processor;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.Heading;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.KeywordDefinition;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.Variable;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.VariableDefinition;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.VariableDefinitionId;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotResourceFileType;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotUserKeywordStatement;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariable;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableDefinition;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableId;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariablesSection;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.index.VariableNameIndex;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -29,35 +30,39 @@ public class RobotVariableReferenceSearch extends QueryExecutorBase<PsiReference
     @Override
     public void processQuery(@NotNull SearchParameters queryParameters, @NotNull Processor<? super PsiReference> consumer) {
         PsiElement element = queryParameters.getElementToSearch();
+        if (!element.isValid()) {
+            return;
+        }
         Project project = queryParameters.getProject();
 
         GlobalSearchScope globalSearchScope = QueryExecutorUtil.convertToGlobalSearchScope(queryParameters.getEffectiveSearchScope(), project);
-        if (element instanceof VariableDefinitionId variableDefinitionId) {
-            String unwrappedName = variableDefinitionId.getUnwrappedName();
-            if (unwrappedName.isBlank()) { // Cannot search with an empty variable name
+        if (element instanceof RobotVariableId variableId) {
+            String variableName = variableId.getName();
+            if (variableName.isBlank()) { // Cannot search with an empty variable name
                 return;
             }
 
-            KeywordDefinition keywordDefinition = PsiTreeUtil.getParentOfType(variableDefinitionId, KeywordDefinition.class);
-            Heading heading = PsiTreeUtil.getParentOfType(variableDefinitionId, Heading.class);
-            if (keywordDefinition != null || heading == null || !heading.isGlobalVariablesProvider()) {
-                globalSearchScope = GlobalSearchScope.fileScope(variableDefinitionId.getContainingFile());
+            RobotUserKeywordStatement keywordDefinition = PsiTreeUtil.getParentOfType(variableId, RobotUserKeywordStatement.class);
+            RobotVariablesSection variablesSection = PsiTreeUtil.getParentOfType(variableId, RobotVariablesSection.class);
+            if (keywordDefinition != null || variablesSection == null || variablesSection.getContainingFile().getFileType() != RobotResourceFileType.getInstance()) {
+                globalSearchScope = GlobalSearchScope.fileScope(variableId.getContainingFile());
             }
 
-            VariableDefinition variableDefinition = PsiTreeUtil.getParentOfType(variableDefinitionId, VariableDefinition.class);
-            assert variableDefinition != null;
-            searchForVariablesInIndex(variableDefinition, unwrappedName, project, globalSearchScope, consumer);
+            RobotVariableDefinition variableDefinition = PsiTreeUtil.getParentOfType(variableId, RobotVariableDefinition.class);
+            if (variableDefinition != null) {
+                searchForVariablesInIndex(variableDefinition, variableName, project, globalSearchScope, consumer);
+            }
         }
     }
 
-    private static void searchForVariablesInIndex(VariableDefinition variableDefinition,
-                                                  String unwrappedVariableName,
+    private static void searchForVariablesInIndex(RobotVariableDefinition variableDefinition,
+                                                  String variableName,
                                                   Project project,
                                                   @Nullable GlobalSearchScope globalSearchScope,
                                                   @NotNull Processor<? super PsiReference> consumer) {
         VariableNameIndex variableNameIndex = VariableNameIndex.getInstance();
-        Collection<Variable> variables = ReadAction.compute(() -> variableNameIndex.getVariables(unwrappedVariableName, project, globalSearchScope));
-        for (Variable variable : variables) {
+        Collection<RobotVariable> variables = ReadAction.compute(() -> variableNameIndex.getVariables(variableName, project, globalSearchScope));
+        for (RobotVariable variable : variables) {
             if (variableDefinition.isInScope(variable)) {
                 PsiReference reference = variable.getReference();
                 if (!consumer.process(reference)) {

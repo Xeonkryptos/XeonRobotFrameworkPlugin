@@ -9,6 +9,7 @@ import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.*;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.*;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotPsiImplUtil;
 
 public class RobotExecutableStatementImpl extends RobotPsiElementBase implements RobotExecutableStatement {
 
@@ -28,26 +29,20 @@ public class RobotExecutableStatementImpl extends RobotPsiElementBase implements
 
   @Override
   @Nullable
-  public RobotInlineVariableStatement getInlineVariableStatement() {
-    return PsiTreeUtil.getChildOfType(this, RobotInlineVariableStatement.class);
-  }
-
-  @Override
-  @Nullable
   public RobotKeywordCall getKeywordCall() {
     return PsiTreeUtil.getChildOfType(this, RobotKeywordCall.class);
-  }
-
-  @Override
-  @Nullable
-  public RobotKeywordVariableStatement getKeywordVariableStatement() {
-    return PsiTreeUtil.getChildOfType(this, RobotKeywordVariableStatement.class);
   }
 
   @Override
   @NotNull
   public List<RobotPositionalArgument> getPositionalArgumentList() {
     return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotPositionalArgument.class);
+  }
+
+  @Override
+  @Nullable
+  public RobotVariableStatement getVariableStatement() {
+    return PsiTreeUtil.getChildOfType(this, RobotVariableStatement.class);
   }
 
 }

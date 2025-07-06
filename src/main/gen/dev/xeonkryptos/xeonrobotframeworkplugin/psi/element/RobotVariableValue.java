@@ -5,7 +5,7 @@ import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 
-public interface RobotVariableValue extends PsiElement {
+public interface RobotVariableValue extends RobotStatement {
 
   @Nullable
   RobotParameter getParameter();

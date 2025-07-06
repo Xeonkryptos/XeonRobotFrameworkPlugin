@@ -7,6 +7,6 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.StubBasedPsiElement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotPositionalArgumentStub;
 
-public interface RobotPositionalArgument extends PsiElement, StubBasedPsiElement<RobotPositionalArgumentStub> {
+public interface RobotPositionalArgument extends RobotReferenceElementExpression, RobotArgument, RobotStatement, StubBasedPsiElement<RobotPositionalArgumentStub> {
 
 }

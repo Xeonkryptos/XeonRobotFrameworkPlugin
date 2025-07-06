@@ -10,12 +10,12 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiWhiteSpace;
 import com.intellij.psi.impl.source.tree.LeafPsiElement;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.Argument;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.KeywordDefinition;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.KeywordDefinitionId;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.KeywordStatement;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotArgument;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotFile;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.VariableDefinitionGroup;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCall;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotUserKeywordStatement;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotUserKeywordStatementId;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableStatement;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -64,11 +64,11 @@ public class RobotStatementUpDownMover extends StatementUpDownMover {
     @Nullable
     private PsiElement findCompleteBlock(@NotNull PsiElement element) {
         return switch (element) {
-            case Argument argument -> argument;
-            case KeywordStatement keywordStatement -> keywordStatement;
-            case VariableDefinitionGroup variableDefinitionGroup -> variableDefinitionGroup;
-            case KeywordDefinitionId keywordDefinitionId -> keywordDefinitionId.getParent();
-            case KeywordDefinition keywordDefinition -> keywordDefinition;
+            case RobotArgument argument -> argument;
+            case RobotKeywordCall keywordStatement -> keywordStatement;
+            case RobotVariableStatement variableStatement -> variableStatement;
+            case RobotUserKeywordStatementId keywordStatementId -> keywordStatementId.getParent();
+            case RobotUserKeywordStatement keywordStatement -> keywordStatement;
             default -> null;
         };
     }
@@ -112,8 +112,8 @@ public class RobotStatementUpDownMover extends StatementUpDownMover {
         if (element.getParent() != reference.getParent()) {
             return false;
         }
-        if (element instanceof KeywordStatement || element instanceof VariableDefinitionGroup) {
-            return reference instanceof KeywordStatement || reference instanceof VariableDefinitionGroup;
+        if (element instanceof RobotKeywordCall || element instanceof RobotVariableStatement) {
+            return reference instanceof RobotKeywordCall || reference instanceof RobotVariableStatement;
         }
         return element.getClass() == reference.getClass();
     }

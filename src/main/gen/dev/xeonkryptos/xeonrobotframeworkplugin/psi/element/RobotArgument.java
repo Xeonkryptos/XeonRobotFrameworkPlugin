@@ -5,12 +5,6 @@ import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 
-public interface RobotArgument extends PsiElement {
-
-  @Nullable
-  RobotParameter getParameter();
-
-  @Nullable
-  RobotPositionalArgument getPositionalArgument();
+public interface RobotArgument extends RobotStatement {
 
 }

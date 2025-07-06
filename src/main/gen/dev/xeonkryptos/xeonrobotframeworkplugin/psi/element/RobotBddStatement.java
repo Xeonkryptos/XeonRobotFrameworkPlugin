@@ -5,7 +5,7 @@ import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 
-public interface RobotBddStatement extends PsiElement {
+public interface RobotBddStatement extends RobotStatement {
 
   @NotNull
   List<RobotKeywordCall> getKeywordCallList();
