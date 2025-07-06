@@ -10,8 +10,8 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTaskStatement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTasksSection;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTestCaseStatement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTestCasesSection;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariable;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableDefinition;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableId;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableStatement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariablesSection;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVisitor;
@@ -31,14 +31,14 @@ public class RobotVariableReferenceSearcher extends RobotVisitor {
 
     private boolean rootReached = false;
 
-    public RobotVariableReferenceSearcher(RobotVariable variable) {
-        this.variableName = variable.getName();
-        this.parents = collectParentsOf(variable);
+    public RobotVariableReferenceSearcher(RobotVariableId variableId) {
+        this.variableName = variableId.getName();
+        this.parents = collectParentsOf(variableId);
     }
 
-    private static Set<PsiElement> collectParentsOf(@NotNull RobotVariable variable) {
+    private static Set<PsiElement> collectParentsOf(@NotNull PsiElement element) {
         Set<PsiElement> parents = new HashSet<>();
-        PsiElement parent = variable.getParent();
+        PsiElement parent = element.getParent();
         while (parent != null && !(parent instanceof RobotRoot)) {
             parents.add(parent);
             parent = parent.getParent();
@@ -47,8 +47,7 @@ public class RobotVariableReferenceSearcher extends RobotVisitor {
     }
 
     @Override
-    public void visitPsiElement(@NotNull PsiElement o) {
-        super.visitPsiElement(o);
+    public void visitElement(@NotNull PsiElement o) {
         if (canVisitNextElements(o) && !rootReached) {
             PsiElement parent = o.getParent();
             if (parent != null) {
@@ -59,9 +58,9 @@ public class RobotVariableReferenceSearcher extends RobotVisitor {
 
     @Override
     public void visitRoot(@NotNull RobotRoot o) {
-        visitElement(o);
         rootReached = true;
         o.acceptChildren(this);
+        visitedElements.add(o);
     }
 
     @Override
@@ -70,22 +69,25 @@ public class RobotVariableReferenceSearcher extends RobotVisitor {
         if (canVisitNextElements(o)) {
             o.acceptChildren(this);
         }
+        visitedElements.add(o);
     }
 
     @Override
     public void visitKeywordsSection(@NotNull RobotKeywordsSection o) {
         visitElement(o);
-        if (canVisitNextElements(o)) {
+        if (parents.contains(o) && canVisitNextElements(o)) {
             o.acceptChildren(this);
         }
+        visitedElements.add(o);
     }
 
     @Override
     public void visitTestCasesSection(@NotNull RobotTestCasesSection o) {
         visitElement(o);
-        if (canVisitNextElements(o)) {
+        if (parents.contains(o) && canVisitNextElements(o)) {
             o.acceptChildren(this);
         }
+        visitedElements.add(o);
     }
 
     @Override
@@ -94,14 +96,16 @@ public class RobotVariableReferenceSearcher extends RobotVisitor {
         if (canVisitNextElements(o)) {
             o.acceptChildren(this);
         }
+        visitedElements.add(o);
     }
 
     @Override
     public void visitTasksSection(@NotNull RobotTasksSection o) {
         visitElement(o);
-        if (canVisitNextElements(o)) {
+        if (parents.contains(o) && canVisitNextElements(o)) {
             o.acceptChildren(this);
         }
+        visitedElements.add(o);
     }
 
     @Override
@@ -110,6 +114,7 @@ public class RobotVariableReferenceSearcher extends RobotVisitor {
         if (canVisitNextElements(o)) {
             o.acceptChildren(this);
         }
+        visitedElements.add(o);
     }
 
     @Override
@@ -118,14 +123,16 @@ public class RobotVariableReferenceSearcher extends RobotVisitor {
         if (canVisitNextElements(o)) {
             o.acceptChildren(this);
         }
+        visitedElements.add(o);
     }
 
     @Override
     public void visitExecutableStatement(@NotNull RobotExecutableStatement o) {
         visitElement(o);
-        if (!rootReached && canVisitNextElements(o)) {
+        if (canVisitNextElements(o)) {
             o.acceptChildren(this);
         }
+        visitedElements.add(o);
     }
 
     @Override
@@ -137,6 +144,7 @@ public class RobotVariableReferenceSearcher extends RobotVisitor {
         if (parents.contains(o) && canVisitNextElements(o)) {
             o.acceptChildren(this);
         }
+        visitedElements.add(o);
     }
 
     @Override
@@ -148,6 +156,7 @@ public class RobotVariableReferenceSearcher extends RobotVisitor {
                 foundElement = o;
             }
         }
+        visitedElements.add(o);
     }
 
     @Override
@@ -156,12 +165,7 @@ public class RobotVariableReferenceSearcher extends RobotVisitor {
     }
 
     private boolean canVisitNextElements(@NotNull PsiElement sourceElement) {
-        return isPartOfWalkingTree(sourceElement) && visitedElements.add(sourceElement) && foundElement == null;
-    }
-
-    private boolean isPartOfWalkingTree(@NotNull PsiElement element) {
-        PsiElement parent = element.getParent();
-        return parents.contains(element) || (parent != null && parents.contains(parent));
+        return !visitedElements.contains(sourceElement) && foundElement == null;
     }
 
     public PsiElement getFoundElement() {

@@ -5,8 +5,9 @@ import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiNameIdentifierOwner;
+import com.intellij.navigation.NavigationItem;
 
-public interface RobotParameter extends PsiNameIdentifierOwner, RobotArgument, RobotStatement {
+public interface RobotParameter extends PsiNameIdentifierOwner, NavigationItem, RobotArgument, RobotStatement {
 
   @NotNull
   RobotPositionalArgument getPositionalArgument();

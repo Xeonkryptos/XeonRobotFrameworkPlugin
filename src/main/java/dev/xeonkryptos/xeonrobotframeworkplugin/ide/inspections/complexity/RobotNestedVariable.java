@@ -22,7 +22,7 @@ public class RobotNestedVariable extends SimpleRobotInspection {
             PsiElement nameIdentifier = variable.getNameIdentifier();
             return nameIdentifier == null || ((RobotVariableId) nameIdentifier).getVariable() == null;
         }
-        return false;
+        return true;
     }
 
     @Override

@@ -33,9 +33,6 @@ public class RobotColorsPage implements ColorSettingsPage {
                                                                                           new AttributesDescriptor(RobotBundle.getMessage(
                                                                                                   "color.settings.variable"), RobotHighlighter.VARIABLE),
                                                                                           new AttributesDescriptor(RobotBundle.getMessage(
-                                                                                                  "color.settings.variableDefinition"),
-                                                                                                                   RobotHighlighter.VARIABLE_DEFINITION),
-                                                                                          new AttributesDescriptor(RobotBundle.getMessage(
                                                                                                   "color.settings.keyword"), RobotHighlighter.KEYWORD),
                                                                                           new AttributesDescriptor(RobotBundle.getMessage(
                                                                                                   "color.settings.keywordDefinition"),

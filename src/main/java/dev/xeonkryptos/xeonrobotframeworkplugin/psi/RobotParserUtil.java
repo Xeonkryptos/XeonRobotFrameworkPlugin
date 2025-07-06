@@ -50,7 +50,7 @@ public class RobotParserUtil extends GeneratedParserUtilBase {
         }
 
         builder.setWhitespaceSkippedCallback(null);
-        exit_section_(builder, m, RobotTypes.POSITIONAL_ARGUMENT, r);
+        exit_section_(builder, m, RobotTypes.LITERAL_CONSTANT_VALUE, r);
         return r;
     }
 

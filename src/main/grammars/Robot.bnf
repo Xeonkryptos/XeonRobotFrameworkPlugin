@@ -237,7 +237,7 @@ keyword_call_id ::= KEYWORD_NAME { methods = [getReference] }
 
 fake argument ::= DUMMY // This is a placeholder for the argument type, which is used to represent both parameters and positional arguments in the grammar.
 parameter ::= parameter_id ASSIGNMENT positional_argument {
-    implements = ["com.intellij.psi.PsiNameIdentifierOwner"]
+    implements = ["com.intellij.psi.PsiNameIdentifierOwner" "com.intellij.navigation.NavigationItem"]
     mixin = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotParameterExtension"
     methods = [nameIdentifier="parameter_id"]
 }
@@ -261,7 +261,7 @@ keyword_variable_statement ::= variable_definition+ ASSIGNMENT? eol_based_keywor
 variable_value ::= positional_argument | parameter
 
 positional_argument ::= external_positional_argument {
-    implements = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotReferenceElementExpression"
+    implements = ["dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotReferenceElementExpression" "com.intellij.navigation.NavigationItem"]
     mixin = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotPositionalArgumentExtension"
     stubClass = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotPositionalArgumentStub"
     elementTypeFactory = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotPositionalArgumentStubElement.create"
@@ -282,29 +282,29 @@ variable_definition ::= variable {
 
 variable ::= scalar_variable | list_variable | dict_variable | environment_variable {
     implements = ["com.intellij.psi.PsiNameIdentifierOwner"]
-    methods=[getNameIdentifier getName getReference]
+    methods=[getNameIdentifier getName]
 }
 scalar_variable ::= SCALAR_VARIABLE_START (variable_id | python_expression) VARIABLE_END (extended_variable_slice_access | extended_variable_index_access | extended_variable_nested_access)* {
     mixin = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotScalarVariableExtension"
     stubClass = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotScalarVariableStub"
     elementTypeFactory = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotScalarVariableStubElement.create"
-    methods=[getNameIdentifier getName getReference]
+    methods=[getNameIdentifier getName]
 }
 list_variable ::= LIST_VARIABLE_START (variable_id | python_expression) VARIABLE_END (extended_variable_slice_access | extended_variable_index_access | extended_variable_nested_access)* {
     mixin = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotListVariableExtension"
     stubClass = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotListVariableStub"
     elementTypeFactory = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotListVariableStubElement.create"
-    methods=[getNameIdentifier getName getReference]
+    methods=[getNameIdentifier getName]
 }
 dict_variable ::= DICT_VARIABLE_START (variable_id | python_expression) VARIABLE_END (extended_variable_key_access | extended_variable_nested_access)* {
     mixin = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotDictVariableExtension"
     stubClass = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotDictVariableStub"
     elementTypeFactory = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotDictVariableStubElement.create"
-    methods=[getNameIdentifier getName getReference]
+    methods=[getNameIdentifier getName]
 }
 environment_variable ::= ENV_VARIABLE_START variable_id VARIABLE_END
 
-variable_id ::= variable | VARIABLE_BODY { methods=[content="VARIABLE_BODY"] }
+variable_id ::= variable | VARIABLE_BODY { methods=[content="VARIABLE_BODY" getReference] }
 python_expression ::= PYTHON_EXPRESSION_START PYTHON_EXPRESSION_CONTENT PYTHON_EXPRESSION_END { methods = [expressionContent="PYTHON_EXPRESSION_CONTENT"] }
 
 extended_variable_slice_access ::= VARIABLE_SLICE_ACCESS

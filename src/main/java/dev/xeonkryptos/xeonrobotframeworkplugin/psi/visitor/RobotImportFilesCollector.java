@@ -10,6 +10,7 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLiteralConstant
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotNewLibraryName;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotPositionalArgument;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotResourceImportGlobalSetting;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotRoot;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotSettingsSection;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariablesImportGlobalSetting;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVisitor;
@@ -26,6 +27,11 @@ public final class RobotImportFilesCollector extends RobotVisitor {
     private final Set<KeywordFile> files = new LinkedHashSet<>();
 
     private String namespace;
+
+    @Override
+    public void visitRoot(@NotNull RobotRoot o) {
+        o.acceptChildren(this);
+    }
 
     @Override
     public void visitSettingsSection(@NotNull RobotSettingsSection o) {

@@ -31,8 +31,6 @@ public class RobotHighlighter extends SyntaxHighlighterBase {
     public static final TextAttributesKey PARAMETER = TextAttributesKey.createTextAttributesKey("Parameter", DefaultLanguageHighlighterColors.PARAMETER);
     public static final TextAttributesKey ARGUMENT = TextAttributesKey.createTextAttributesKey("Positional Argument",
                                                                                                DefaultLanguageHighlighterColors.STATIC_FIELD);
-    public static final TextAttributesKey VARIABLE_DEFINITION = TextAttributesKey.createTextAttributesKey("Variable Definition",
-                                                                                                          DefaultLanguageHighlighterColors.MARKUP_ATTRIBUTE);
     public static final TextAttributesKey VARIABLE = TextAttributesKey.createTextAttributesKey("Variable Usage",
                                                                                                DefaultLanguageHighlighterColors.DOC_COMMENT_MARKUP);
     public static final TextAttributesKey COMMENT = TextAttributesKey.createTextAttributesKey("Comment", DefaultLanguageHighlighterColors.LINE_COMMENT);
@@ -55,9 +53,13 @@ public class RobotHighlighter extends SyntaxHighlighterBase {
         keys1.put(RobotTypes.TEST_CASES_HEADER, HEADING);
         keys1.put(RobotTypes.TASKS_HEADER, HEADING);
 
+        keys1.put(RobotTypes.USER_KEYWORD_NAME, KEYWORD_DEFINITION);
+        keys1.put(RobotTypes.TEST_CASE_NAME, KEYWORD_DEFINITION);
+        keys1.put(RobotTypes.TASK_NAME, KEYWORD_DEFINITION);
+
         keys1.put(RobotTypes.COMMENT, COMMENT);
-        keys1.put(RobotTypes.PARAMETER, PARAMETER);
-        keys1.put(RobotTypes.POSITIONAL_ARGUMENT, ARGUMENT);
+        keys1.put(RobotTypes.PARAMETER_NAME, PARAMETER);
+        keys1.put(RobotTypes.LITERAL_CONSTANT, ARGUMENT);
 
         keys1.put(RobotTypes.GIVEN, GHERKIN);
         keys1.put(RobotTypes.WHEN, GHERKIN);
@@ -79,25 +81,30 @@ public class RobotHighlighter extends SyntaxHighlighterBase {
         keys1.put(RobotTypes.END, SYNTAX_MARKER);
         keys1.put(RobotTypes.BREAK, SYNTAX_MARKER);
         keys1.put(RobotTypes.CONTINUE, SYNTAX_MARKER);
+        keys1.put(RobotTypes.WITH_NAME, SYNTAX_MARKER);
 
-        keys1.put(RobotTypes.SINGLE_VARIABLE_STATEMENT, VARIABLE_DEFINITION);
-        keys1.put(RobotTypes.VARIABLE, VARIABLE);
+        keys1.put(RobotTypes.SCALAR_VARIABLE_START, VARIABLE);
+        keys1.put(RobotTypes.LIST_VARIABLE_START, VARIABLE);
+        keys1.put(RobotTypes.DICT_VARIABLE_START, VARIABLE);
+        keys1.put(RobotTypes.ENV_VARIABLE_START, VARIABLE);
+        keys1.put(RobotTypes.VARIABLE_BODY, VARIABLE);
+        keys1.put(RobotTypes.VARIABLE_END, VARIABLE);
         keys1.put(RobotTypes.USER_KEYWORD_STATEMENT, KEYWORD_DEFINITION);
-        keys1.put(RobotTypes.KEYWORD_CALL, KEYWORD);
+        keys1.put(RobotTypes.KEYWORD_NAME, KEYWORD);
 
-        keys1.put(RobotTypes.METADATA_STATEMENT_GLOBAL_SETTING, SETTING);
-        keys1.put(RobotTypes.DOCUMENTATION_STATEMENT_GLOBAL_SETTING, SETTING);
-        keys1.put(RobotTypes.SUITE_NAME_STATEMENT_GLOBAL_SETTING, SETTING);
-        keys1.put(RobotTypes.SETUP_TEARDOWN_STATEMENTS_GLOBAL_SETTING, SETTING);
-        keys1.put(RobotTypes.TEMPLATE_STATEMENTS_GLOBAL_SETTING, SETTING);
-        keys1.put(RobotTypes.TIMEOUT_STATEMENTS_GLOBAL_SETTING, SETTING);
-        keys1.put(RobotTypes.TAGS_STATEMENT_GLOBAL_SETTING, SETTING);
-        keys1.put(RobotTypes.UNKNOWN_SETTING_STATEMENTS_GLOBAL_SETTING, SETTING);
+        keys1.put(RobotTypes.SUITE_NAME_KEYWORD, SETTING);
+        keys1.put(RobotTypes.DOCUMENTATION_KEYWORD, SETTING);
+        keys1.put(RobotTypes.METADATA_KEYWORD, SETTING);
+        keys1.put(RobotTypes.SETUP_TEARDOWN_STATEMENT_KEYWORDS, SETTING);
+        keys1.put(RobotTypes.TAGS_KEYWORDS, SETTING);
+        keys1.put(RobotTypes.TEMPLATE_KEYWORDS, SETTING);
+        keys1.put(RobotTypes.TIMEOUT_KEYWORDS, SETTING);
+        keys1.put(RobotTypes.UNKNOWN_SETTING_KEYWORD, SETTING);
 
-        keys1.put(RobotTypes.LOCAL_SETTING, LOCAL_SETTING);
+        keys1.put(RobotTypes.LOCAL_SETTING_NAME, LOCAL_SETTING);
 
-        keys1.put(RobotTypes.LIBRARY_IMPORT_GLOBAL_SETTING, IMPORT);
-        keys1.put(RobotTypes.RESOURCE_IMPORT_GLOBAL_SETTING, IMPORT);
+        keys1.put(RobotTypes.LIBRARY_IMPORT_KEYWORD, IMPORT);
+        keys1.put(RobotTypes.RESOURCE_IMPORT_KEYWORD, IMPORT);
         keys1.put(RobotTypes.VARIABLES_IMPORT_KEYWORD, IMPORT);
 
         keys1.put(TokenType.BAD_CHARACTER, ERROR);

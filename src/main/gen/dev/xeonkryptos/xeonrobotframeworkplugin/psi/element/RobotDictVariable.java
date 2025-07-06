@@ -6,7 +6,6 @@ import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.StubBasedPsiElement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotDictVariableStub;
-import com.intellij.psi.PsiReference;
 
 public interface RobotDictVariable extends RobotVariable, StubBasedPsiElement<RobotDictVariableStub> {
 
@@ -25,7 +24,5 @@ public interface RobotDictVariable extends RobotVariable, StubBasedPsiElement<Ro
   @Nullable PsiElement getNameIdentifier();
 
   @Nullable String getName();
-
-  @NotNull PsiReference getReference();
 
 }

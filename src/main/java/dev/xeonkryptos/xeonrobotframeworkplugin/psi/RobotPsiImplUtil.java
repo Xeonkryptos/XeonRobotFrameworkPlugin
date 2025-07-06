@@ -3,12 +3,7 @@ package dev.xeonkryptos.xeonrobotframeworkplugin.psi;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiReference;
 import com.intellij.psi.util.PsiTreeUtil;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotDictVariable;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotEnvironmentVariable;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCall;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCallId;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotListVariable;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotScalarVariable;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariable;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableId;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.ref.RobotKeywordReference;
@@ -30,8 +25,8 @@ public class RobotPsiImplUtil {
     }
 
     @NotNull
-    public static PsiReference getReference(RobotVariable variable) {
-        return new RobotVariableReference(variable);
+    public static PsiReference getReference(RobotVariableId variableId) {
+        return new RobotVariableReference(variableId);
     }
 
     @NotNull

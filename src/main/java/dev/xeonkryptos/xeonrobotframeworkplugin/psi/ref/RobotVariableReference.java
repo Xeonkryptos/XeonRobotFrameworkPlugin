@@ -4,33 +4,33 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiReferenceBase;
 import com.intellij.psi.impl.source.resolve.ResolveCache;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariable;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableId;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.visitor.RobotVariableReferenceSearcher;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class RobotVariableReference extends PsiReferenceBase<RobotVariable> {
+public class RobotVariableReference extends PsiReferenceBase<RobotVariableId> {
 
-    public RobotVariableReference(@NotNull RobotVariable element) {
+    public RobotVariableReference(@NotNull RobotVariableId element) {
         super(element, false);
     }
 
     @Nullable
     @Override
     public PsiElement resolve() {
-        RobotVariable variable = getElement();
-        ResolveCache resolveCache = ResolveCache.getInstance(variable.getProject());
+        RobotVariableId variableId = getElement();
+        ResolveCache resolveCache = ResolveCache.getInstance(variableId.getProject());
         return resolveCache.resolveWithCaching(this, (robotVariableReference, incompleteCode) -> {
-            String variableName = variable.getName();
-            if (variableName == null || variableName.isBlank()) { // e.g. ${}, thus empty representation of a variable. There can be no reference.
+            String variableName = variableId.getName();
+            if (variableName.isBlank()) { // e.g. ${}, thus empty representation of a variable. There can be no reference.
                 return null;
             }
 
-            RobotVariableReferenceSearcher variableReferenceSearcher = new RobotVariableReferenceSearcher(variable);
-            variable.accept(variableReferenceSearcher);
+            RobotVariableReferenceSearcher variableReferenceSearcher = new RobotVariableReferenceSearcher(variableId);
+            variableId.accept(variableReferenceSearcher);
             PsiElement foundElement = variableReferenceSearcher.getFoundElement();
             if (foundElement == null) {
-                PsiFile containingFile = variable.getContainingFile();
+                PsiFile containingFile = variableId.getContainingFile();
                 foundElement = ResolverUtils.findVariableElement(variableName, containingFile);
             }
             return foundElement;

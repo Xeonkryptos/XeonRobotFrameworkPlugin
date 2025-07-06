@@ -125,9 +125,19 @@ TemplateKeywords = ("Test Template" | "Task Template")
 TimeoutKeywords = ("Test Timeout" | "Task Timeout")
 GenericSettingsKeyword = [\p{L}\p{N}_]+([ ][\p{L}\p{N}_])*
 
+AllowedChar = [^\s$@%&=] | [$@%&] [^{]
+AllowedSeq = {AllowedChar}+
+
+AllowedVarChar = [^\s$@%&}=] | [$@%&] [^{]
+AllowedVarSeq = {AllowedVarChar}+
+
+AllowedParamChar = [^\s$@%&] | [$@%&] [^{]
+AllowedParamSeq = {AllowedParamChar}+
+
+RestrictedLiteralValue = {AllowedSeq} ({Space} {AllowedSeq})*
+VariableLiteralValue =   {AllowedVarSeq} ({Space} {AllowedVarSeq})*
+ParamLiteralValue =      {AllowedParamSeq} ({Space} {AllowedParamSeq})*
 LiteralValue = [^\s]+([ ][^\s]+)*[ ]?
-RestrictedLiteralValue = [^\s${}@%&=]+([ ][^\s${}@%&]+)*[ ]?
-ParamLiteralValue =      [^\s${}@%&]+([ ][^\s${}@%&]+)*[ ]?
 
 LocalSettingKeywordStart = "[" \s*
 LocalSettingKeywordEnd = \s* "]"
@@ -196,7 +206,7 @@ LineComment = {LineCommentSign} {NON_EOL}*
     {ClosingVariable} "["                    { enterNewState(EXTENDED_VARIABLE_ACCESS); yypushback(1); return VARIABLE_END; }
     {ClosingVariable} "]"                    { yybegin(VARIABLE_DEFINITION_ARGUMENTS); yypushback(1); return VARIABLE_END; }
     {EqualSign} \s*                          { yybegin(VARIABLE_DEFINITION_ARGUMENTS); pushBackTrailingWhitespace(); return ASSIGNMENT; }
-    {RestrictedLiteralValue}                 { pushBackTrailingWhitespace(); return VARIABLE_BODY; }
+    {VariableLiteralValue}                   { pushBackTrailingWhitespace(); return VARIABLE_BODY; }
 }
 
 <VARIABLE_DEFINITION_ARGUMENTS> {
@@ -208,7 +218,7 @@ LineComment = {LineCommentSign} {NON_EOL}*
     {ClosingVariable} "]"        { leaveState(); yypushback(1); return VARIABLE_END; }
     {ClosingVariable}            { leaveState(); return VARIABLE_END; }
     "{" \s*                      { enterNewState(PYTHON_EXPRESSION); pushBackTrailingWhitespace(); return PYTHON_EXPRESSION_START; }
-    {RestrictedLiteralValue}     { return VARIABLE_BODY; }
+    {VariableLiteralValue}       { return VARIABLE_BODY; }
 }
 
 <EXTENDED_VARIABLE_ACCESS> {
@@ -369,7 +379,13 @@ LineComment = {LineCommentSign} {NON_EOL}*
     {EqualSign}                                      { return ASSIGNMENT; }
 }
 <PARAMETER_ASSIGNMENT>  {EqualSign}                  { yybegin(PARAMETER_VALUE); return ASSIGNMENT; }
-<PARAMETER_VALUE>       {ParamLiteralValue}          { leaveState(); pushBackTrailingWhitespace(); return LITERAL_CONSTANT; }
+<PARAMETER_VALUE>       {
+    {ScalarVariableStart}                            { leaveState(); enterNewState(VARIABLE_USAGE); return SCALAR_VARIABLE_START; }
+    {ListVariableStart}                              { leaveState(); enterNewState(VARIABLE_USAGE); return LIST_VARIABLE_START; }
+    {DictVariableStart}                              { leaveState(); enterNewState(VARIABLE_USAGE); return DICT_VARIABLE_START; }
+    {EnvVariableStart}                               { leaveState(); enterNewState(VARIABLE_USAGE); return ENV_VARIABLE_START; }
+    {ParamLiteralValue}                              { leaveState(); pushBackTrailingWhitespace(); return LITERAL_CONSTANT; }
+}
 
 <TEMPLATE_DEFINITION> {
     {ParameterName} / {EqualSign} (!\s{2} | !\R)     { enterNewState(TEMPLATE_PARAMETER_ASSIGNMENT); return TEMPLATE_PARAMETER_NAME; }

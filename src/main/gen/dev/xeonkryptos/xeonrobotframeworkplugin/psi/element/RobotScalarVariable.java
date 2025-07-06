@@ -6,7 +6,6 @@ import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.StubBasedPsiElement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotScalarVariableStub;
-import com.intellij.psi.PsiReference;
 
 public interface RobotScalarVariable extends RobotVariable, StubBasedPsiElement<RobotScalarVariableStub> {
 
@@ -28,7 +27,5 @@ public interface RobotScalarVariable extends RobotVariable, StubBasedPsiElement<
   @Nullable PsiElement getNameIdentifier();
 
   @Nullable String getName();
-
-  @NotNull PsiReference getReference();
 
 }

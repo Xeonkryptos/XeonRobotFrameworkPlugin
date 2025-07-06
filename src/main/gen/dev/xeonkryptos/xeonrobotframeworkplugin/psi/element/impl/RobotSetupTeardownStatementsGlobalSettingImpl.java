@@ -17,6 +17,7 @@ public class RobotSetupTeardownStatementsGlobalSettingImpl extends RobotSetupTea
     super(node);
   }
 
+  @Override
   public void accept(@NotNull RobotVisitor visitor) {
     visitor.visitSetupTeardownStatementsGlobalSetting(this);
   }

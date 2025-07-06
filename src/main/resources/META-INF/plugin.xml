@@ -43,7 +43,7 @@
         <lang.foldingBuilder language="Robot" implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.ide.misc.RobotFoldingBuilder"/>
         <lang.parserDefinition language="Robot" implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotParserDefinition"/>
 
-        <stubElementTypeHolder class="dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotStubTokenTypes" externalIdPrefix="robot."/>
+        <stubElementTypeHolder class="dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes" externalIdPrefix="robot."/>
         <stubIndex implementation="dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.index.KeywordDefinitionNameIndex"/>
         <stubIndex implementation="dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.index.KeywordStatementNameIndex"/>
         <stubIndex implementation="dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.index.PositionalArgumentImportIndex"/>
@@ -52,6 +52,16 @@
 
         <codeInsight.parameterInfo language="Robot"
                                    implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.ide.parameterinfo.RobotParameterInfoHandler"/>
+
+        <!-- Manipulators -->
+        <lang.elementManipulator forClass="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotPositionalArgument"
+                                 implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.manipulator.RobotPositionalArgumentManipulator"/>
+        <lang.elementManipulator forClass="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCallId"
+                                 implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.manipulator.RobotKeywordCallIdElementManipulator"/>
+        <lang.elementManipulator forClass="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableId"
+                                 implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.manipulator.RobotVariableIdManipulator"/>
+
+        <vetoRenameCondition implementation="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.manipulator.veto.RobotRenameVeto"/>
 
         <!-- Annotations -->
         <annotator language="Robot" implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.ide.inspections.compilation.RobotParameterAnnotator"/>

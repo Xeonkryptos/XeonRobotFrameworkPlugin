@@ -161,6 +161,7 @@ public class RobotVisitor extends PsiElementVisitor {
 
   public void visitParameter(@NotNull RobotParameter o) {
     visitPsiNameIdentifierOwner(o);
+    // visitNavigationItem(o);
     // visitArgument(o);
     // visitStatement(o);
   }
@@ -174,6 +175,7 @@ public class RobotVisitor extends PsiElementVisitor {
 
   public void visitPositionalArgument(@NotNull RobotPositionalArgument o) {
     visitReferenceElementExpression(o);
+    // visitNavigationItem(o);
     // visitArgument(o);
     // visitStatement(o);
   }

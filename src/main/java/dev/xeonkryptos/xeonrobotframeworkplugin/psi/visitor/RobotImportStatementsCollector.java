@@ -4,6 +4,8 @@ import com.intellij.psi.PsiElement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLibraryImportGlobalSetting;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotPositionalArgument;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotResourceImportGlobalSetting;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotRoot;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotSection;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariablesImportGlobalSetting;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVisitor;
 import org.jetbrains.annotations.NotNull;
@@ -15,6 +17,16 @@ public class RobotImportStatementsCollector extends RobotVisitor {
 
     private final List<String> importedFiles = new ArrayList<>();
     private final List<PsiElement> importElements = new ArrayList<>();
+
+    @Override
+    public void visitRoot(@NotNull RobotRoot o) {
+        o.acceptChildren(this);
+    }
+
+    @Override
+    public void visitSection(@NotNull RobotSection o) {
+        o.acceptChildren(this);
+    }
 
     @Override
     public void visitResourceImportGlobalSetting(@NotNull RobotResourceImportGlobalSetting o) {
