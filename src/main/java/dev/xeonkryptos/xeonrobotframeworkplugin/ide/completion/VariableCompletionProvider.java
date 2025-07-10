@@ -57,7 +57,7 @@ class VariableCompletionProvider extends CompletionProvider<CompletionParameters
                             element).forEach(lookupElement -> lookupElement.putUserData(CompletionKeys.ROBOT_LOOKUP_ELEMENT_TYPE,
                                                                                         RobotLookupElementType.VARIABLE));
         boolean allowTransitiveImports = RobotOptionsProvider.getInstance(file.getProject()).allowTransitiveImports();
-        for (KeywordFile importedFile : robotFile.getImportedFiles(allowTransitiveImports)) {
+        for (KeywordFile importedFile : robotFile.collectImportedFiles(allowTransitiveImports)) {
             if (importedFile.getImportType() == ImportType.VARIABLES || importedFile.getImportType() == ImportType.RESOURCE) {
                 addDefinedVariables(importedFile.getDefinedVariables(),
                                     resultSet,

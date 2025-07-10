@@ -2,12 +2,18 @@ package dev.xeonkryptos.xeonrobotframeworkplugin.psi.visitor;
 
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
+import com.intellij.psi.PsiReference;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotBddStatement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotExecutableStatement;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotGlobalSettingStatement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotImportGlobalSetting;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCall;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCallId;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLibraryImportGlobalSetting;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotParameter;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotPositionalArgument;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotResourceImportGlobalSetting;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotRoot;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotSection;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotSetupTeardownStatementsGlobalSetting;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTaskStatement;
@@ -19,20 +25,38 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotUserKeywordStat
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariable;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableStatement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableValue;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariablesImportGlobalSetting;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVisitor;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
+import java.util.Map;
 import java.util.Set;
 
 public final class RobotUsedFilesCollector extends RobotVisitor {
 
-    private final Set<PsiFile> usedFiles = new LinkedHashSet<>();
+    private final Map<String, PsiReference> references = new HashMap<>();
+
+    private final Set<PsiElement> visitedGlobalSettingStatement = new HashSet<>();
+
+    @Override
+    public void visitRoot(@NotNull RobotRoot o) {
+        o.acceptChildren(this);
+    }
 
     @Override
     public void visitSection(@NotNull RobotSection o) {
         o.acceptChildren(this);
+    }
+
+    @Override
+    public void visitGlobalSettingStatement(@NotNull RobotGlobalSettingStatement o) {
+        if (visitedGlobalSettingStatement.add(o)) {
+            o.accept(this);
+        }
     }
 
     @Override
@@ -49,12 +73,25 @@ public final class RobotUsedFilesCollector extends RobotVisitor {
     }
 
     @Override
+    public void visitLibraryImportGlobalSetting(@NotNull RobotLibraryImportGlobalSetting o) {
+        visitImportGlobalSetting(o);
+    }
+
+    @Override
+    public void visitResourceImportGlobalSetting(@NotNull RobotResourceImportGlobalSetting o) {
+        visitImportGlobalSetting(o);
+    }
+
+    @Override
+    public void visitVariablesImportGlobalSetting(@NotNull RobotVariablesImportGlobalSetting o) {
+        visitImportGlobalSetting(o);
+    }
+
+    @Override
     public void visitImportGlobalSetting(@NotNull RobotImportGlobalSetting o) {
-        PsiElement resolvedElement = o.getImportedFile().getReference().resolve();
-        if (resolvedElement != null) {
-            PsiFile containingFile = resolvedElement.getContainingFile();
-            usedFiles.add(containingFile);
-        }
+        RobotPositionalArgument positionalArgument = o.getImportedFile();
+        String fileName = positionalArgument.getText();
+        references.put(fileName, positionalArgument.getReference());
     }
 
     @Override
@@ -104,11 +141,8 @@ public final class RobotUsedFilesCollector extends RobotVisitor {
 
     @Override
     public void visitKeywordCall(@NotNull RobotKeywordCall o) {
-        PsiElement resolvedElement = o.getKeywordCallId().getReference().resolve();
-        if (resolvedElement != null) {
-            PsiFile containingFile = resolvedElement.getContainingFile();
-            usedFiles.add(containingFile);
-        }
+        RobotKeywordCallId keywordCallId = o.getKeywordCallId();
+        references.put(keywordCallId.getName(), keywordCallId.getReference());
         o.getAllCallArguments().forEach(argument -> argument.accept(this));
     }
 
@@ -124,14 +158,15 @@ public final class RobotUsedFilesCollector extends RobotVisitor {
 
     @Override
     public void visitVariable(@NotNull RobotVariable o) {
-        PsiElement resolvedElement = o.getReference().resolve();
-        if (resolvedElement != null) {
-            PsiFile containingFile = resolvedElement.getContainingFile();
-            usedFiles.add(containingFile);
+        PsiElement nameIdentifier = o.getNameIdentifier();
+        if (nameIdentifier != null) {
+            String variableName = nameIdentifier.getText();
+            PsiReference reference = o.getReference();
+            references.put(variableName, reference);
         }
     }
 
-    public Collection<PsiFile> getUsedFiles() {
-        return usedFiles;
+    public Collection<PsiReference> getReferences() {
+        return references.values();
     }
 }

@@ -16,8 +16,11 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCallId;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotParameter;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.ref.PyElementDeprecatedVisitor;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.ref.PyElementParentTraversalVisitor;
+import org.apache.commons.text.similarity.LevenshteinDistance;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -50,18 +53,43 @@ public class RobotKeywordAnnotator implements Annotator {
         RobotKeywordCall keywordCall = PsiTreeUtil.getParentOfType(robotKeywordCallId, RobotKeywordCall.class);
         if (keywordCall != null && !keywordCall.allRequiredParametersArePresent()) {
             Set<String> definedParameterNames = keywordCall.getParameterList().stream().map(RobotParameter::getName).collect(Collectors.toSet());
-            long expectedCount = keywordCall.getAvailableParameters()
-                                            .stream()
-                                            .filter(parameter -> !parameter.hasDefaultValue())
-                                            .map(DefinedParameter::getLookup)
-                                            .filter(paramNames -> !definedParameterNames.contains(paramNames))
-                                            .count();
-            int argumentCount = keywordCall.getPositionalArgumentList().size();
-            expectedCount -= argumentCount;
+            Set<String> mandatoryParameters = keywordCall.getAvailableParameters()
+                                                         .stream()
+                                                         .filter(parameter -> !parameter.hasDefaultValue())
+                                                         .map(DefinedParameter::getLookup)
+                                                         .collect(Collectors.toCollection(HashSet::new));
+            Set<String> copy = new HashSet<>(definedParameterNames);
+            definedParameterNames.removeAll(mandatoryParameters);
+            mandatoryParameters.removeAll(copy);
+
+            filterOutSimilarParametersByFuzzyLookup(mandatoryParameters, definedParameterNames);
+            if (mandatoryParameters.isEmpty()) {
+                return;
+            }
+
+            int expectedCount = mandatoryParameters.size() - keywordCall.getPositionalArgumentList().size();
             holder.newAnnotation(HighlightSeverity.ERROR, RobotBundle.getMessage("annotation.keyword.parameters.missing", expectedCount))
                   .highlightType(ProblemHighlightType.ERROR)
                   .range(robotKeywordCallId)
                   .create();
+        }
+    }
+
+    private static void filterOutSimilarParametersByFuzzyLookup(Set<String> mandatoryParameters, Set<String> definedParameterNames) {
+        LevenshteinDistance levenshteinDistance = LevenshteinDistance.getDefaultInstance();
+        Iterator<String> mandatoryParametersIterator = mandatoryParameters.iterator();
+        while (mandatoryParametersIterator.hasNext()) {
+            String mandatoryParameter = mandatoryParametersIterator.next();
+            Iterator<String> definedParametersIterator = definedParameterNames.iterator();
+            while (definedParametersIterator.hasNext()) {
+                String definedParameterName = definedParametersIterator.next();
+                int distance = levenshteinDistance.apply(definedParameterName, mandatoryParameter);
+                if (distance != -1 && distance <= 5) {
+                    definedParametersIterator.remove();
+                    mandatoryParametersIterator.remove();
+                    break;
+                }
+            }
         }
     }
 }

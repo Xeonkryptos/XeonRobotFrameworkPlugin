@@ -43,7 +43,7 @@ public class ResolverUtils {
         }
 
         boolean includeTransitive = RobotOptionsProvider.getInstance(psiFile.getProject()).allowTransitiveImports();
-        Collection<KeywordFile> importedFiles = robotFile.getImportedFiles(includeTransitive);
+        Collection<KeywordFile> importedFiles = robotFile.collectImportedFiles(includeTransitive);
         for (KeywordFile keywordFile : importedFiles) {
             for (DefinedKeyword definedKeyword : keywordFile.getDefinedKeywords()) {
                 if (definedKeyword.matches(keyword)) {
@@ -66,7 +66,7 @@ public class ResolverUtils {
         }
 
         boolean includeTransitive = RobotOptionsProvider.getInstance(psiFile.getProject()).allowTransitiveImports();
-        for (KeywordFile keywordFile : robotFile.getImportedFiles(includeTransitive)) {
+        for (KeywordFile keywordFile : robotFile.collectImportedFiles(includeTransitive)) {
             if (keywordFile.getImportType() != ImportType.LIBRARY) {
                 for (DefinedVariable definedVariable : keywordFile.getDefinedVariables()) {
                     if (definedVariable.matches(variableName)) {

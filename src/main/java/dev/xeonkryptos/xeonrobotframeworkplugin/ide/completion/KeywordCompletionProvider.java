@@ -87,7 +87,7 @@ class KeywordCompletionProvider extends CompletionProvider<CompletionParameters>
                         lookupElement.putUserData(CompletionKeys.ROBOT_LOOKUP_CONTEXT, RobotLookupContext.KEYWORDS);
                         lookupElement.putUserData(CompletionKeys.ROBOT_LOOKUP_ELEMENT_TYPE, RobotLookupElementType.KEYWORD);
                     });
-            for (KeywordFile importedFile : robotFile.getImportedFiles(allowTransitiveImports)) {
+            for (KeywordFile importedFile : robotFile.collectImportedFiles(allowTransitiveImports)) {
                 if (importedFile.getImportType() != ImportType.VARIABLES) {
                     Collection<DefinedKeyword> definedKeywordsFromImportedFile = importedFile.getDefinedKeywords();
                     addDefinedKeywords(definedKeywordsFromImportedFile,

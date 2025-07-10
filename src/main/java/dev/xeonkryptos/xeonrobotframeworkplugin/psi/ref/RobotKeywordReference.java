@@ -55,7 +55,7 @@ public class RobotKeywordReference extends PsiReferenceBase<RobotKeywordCallId> 
 
         if (containingFile instanceof RobotFile robotFile) {
             boolean capitalizeKeywords = RobotOptionsProvider.getInstance(containingFile.getProject()).capitalizeKeywords();
-            for (KeywordFile keywordFile : robotFile.getImportedFiles(true)) {
+            for (KeywordFile keywordFile : robotFile.collectImportedFiles(true)) {
                 if (keywordFile.getImportType() == ImportType.LIBRARY && keywordFile.isDifferentNamespace()) {
                     String libraryName = keywordFile.toString();
                     if (keywordPrefix.equalsIgnoreCase(libraryName)) {

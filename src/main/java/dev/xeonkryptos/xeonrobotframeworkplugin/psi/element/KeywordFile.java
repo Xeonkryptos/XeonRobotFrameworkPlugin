@@ -1,10 +1,11 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.psi.element;
 
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.dto.ImportType;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiFile;
-import java.util.Collection;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.dto.ImportType;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.Collection;
 
 public interface KeywordFile {
 

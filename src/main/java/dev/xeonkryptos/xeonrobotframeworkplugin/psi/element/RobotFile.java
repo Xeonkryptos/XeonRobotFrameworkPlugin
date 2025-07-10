@@ -32,7 +32,7 @@ public interface RobotFile extends PsiFile {
      * @return a collection of keyword files that this files knows about.
      */
     @NotNull
-    Collection<KeywordFile> getImportedFiles(boolean includeTransitive);
+    Collection<KeywordFile> collectImportedFiles(boolean includeTransitive);
 
     /**
      * Gets all the imported keyword files that are considered in scope for this file. The result consists of a pair of files. The first parameter is the

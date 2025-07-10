@@ -8,6 +8,7 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordsSection
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLocalSetting;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLocalSettingArgument;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotPositionalArgument;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotRoot;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotUserKeywordStatement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariable;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVisitor;
@@ -22,6 +23,11 @@ public final class RobotUserKeywordsCollector extends RobotVisitor {
     private final Set<DefinedKeyword> keywords = new LinkedHashSet<>();
 
     private final Collection<DefinedParameter> keywordArguments = new LinkedHashSet<>();
+
+    @Override
+    public void visitRoot(@NotNull RobotRoot o) {
+        o.acceptChildren(this);
+    }
 
     @Override
     public void visitKeywordsSection(@NotNull RobotKeywordsSection o) {

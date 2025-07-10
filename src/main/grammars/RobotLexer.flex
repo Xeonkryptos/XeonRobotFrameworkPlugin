@@ -214,11 +214,11 @@ LineComment = {LineCommentSign} {NON_EOL}*
 }
 
 <VARIABLE_USAGE> {
-    {ClosingVariable} "["        { leaveState(); enterNewState(EXTENDED_VARIABLE_ACCESS); yypushback(1); return VARIABLE_END; }
-    {ClosingVariable} "]"        { leaveState(); yypushback(1); return VARIABLE_END; }
-    {ClosingVariable}            { leaveState(); return VARIABLE_END; }
-    "{" \s*                      { enterNewState(PYTHON_EXPRESSION); pushBackTrailingWhitespace(); return PYTHON_EXPRESSION_START; }
-    {VariableLiteralValue}       { return VARIABLE_BODY; }
+    {ClosingVariable} "["                             { leaveState(); enterNewState(EXTENDED_VARIABLE_ACCESS); yypushback(1); return VARIABLE_END; }
+    {ClosingVariable} "]"                             { leaveState(); yypushback(1); return VARIABLE_END; }
+    {ClosingVariable}                                 { leaveState(); return VARIABLE_END; }
+    {OpeningVariable} ( ! {ClosingVariable}{2} )+     { enterNewState(PYTHON_EXPRESSION); yypushback(yylength() - 1); return PYTHON_EXPRESSION_START; }
+    {VariableLiteralValue}                            { return VARIABLE_BODY; }
 }
 
 <EXTENDED_VARIABLE_ACCESS> {

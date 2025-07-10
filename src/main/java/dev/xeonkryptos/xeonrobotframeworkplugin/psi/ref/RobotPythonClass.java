@@ -65,9 +65,8 @@ public class RobotPythonClass extends RobotPythonWrapper implements KeywordFile 
         return importType;
     }
 
-    @NotNull
     @Override
-    public final Collection<KeywordFile> getImportedFiles(boolean includeTransitive) {
+    public final @NotNull Collection<KeywordFile> getImportedFiles(boolean includeTransitive) {
         return Collections.emptyList();
     }
 

@@ -5,11 +5,13 @@ import com.intellij.lang.annotation.Annotator;
 import com.intellij.lang.annotation.HighlightSeverity;
 import com.intellij.openapi.project.DumbAware;
 import com.intellij.psi.PsiElement;
-import com.intellij.psi.PsiReference;
 import dev.xeonkryptos.xeonrobotframeworkplugin.RobotBundle;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotEnvironmentVariable;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotPythonExpression;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariable;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableDefinition;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableId;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVisitor;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.regex.Pattern;
@@ -28,12 +30,39 @@ public class RobotVariableAnnotator implements Annotator, DumbAware {
             return;
         }
 
-        PsiReference reference = variable.getReference();
-        if (reference.resolve() != null) {
+        PsiElement nameIdentifier = variable.getNameIdentifier();
+        if (nameIdentifier != null && ((RobotVariableId) nameIdentifier).getReference().resolve() != null) {
             return;
         }
-        if (!(variable.getParent() instanceof RobotVariableDefinition)) {
+        RobotVariableAnalyser robotVariableAnalyser = new RobotVariableAnalyser();
+        variable.accept(robotVariableAnalyser);
+        if (!robotVariableAnalyser.variableDefinitionAsParent && !robotVariableAnalyser.pythonExpressionVariableBodyFound) {
             holder.newAnnotation(HighlightSeverity.WEAK_WARNING, RobotBundle.getMessage("annotation.variable.not-found")).range(element).create();
+        }
+    }
+
+    private static final class RobotVariableAnalyser extends RobotVisitor {
+
+        private boolean variableDefinitionAsParent = false;
+        private boolean pythonExpressionVariableBodyFound = false;
+
+        @Override
+        public void visitVariableDefinition(@NotNull RobotVariableDefinition o) {
+            variableDefinitionAsParent = true;
+        }
+
+        @Override
+        public void visitVariable(@NotNull RobotVariable o) {
+            PsiElement parent = o.getParent();
+            if (parent != null) {
+                parent.accept(this);
+            }
+            o.acceptChildren(this);
+        }
+
+        @Override
+        public void visitPythonExpression(@NotNull RobotPythonExpression o) {
+            pythonExpressionVariableBodyFound = true;
         }
     }
 }
