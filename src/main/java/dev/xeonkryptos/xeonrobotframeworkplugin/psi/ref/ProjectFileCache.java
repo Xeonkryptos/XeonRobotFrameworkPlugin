@@ -34,7 +34,9 @@ public class ProjectFileCache {
         Cache cache = CACHE.get(project);
         if (cache != null) {
             cache.ROBOT_SYSTEM_FILE_CACHE.clear();
-            cache.GLOBAL_VARIABLES_CACHE.clear();
+            synchronized (cache.GLOBAL_VARIABLES_CACHE) {
+                cache.GLOBAL_VARIABLES_CACHE.clear();
+            }
         }
     }
 

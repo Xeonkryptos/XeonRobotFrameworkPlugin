@@ -67,7 +67,7 @@ public enum ReservedVariable {
     private final ReservedVariableScope scope;
 
     ReservedVariable(@NotNull String variable, @NotNull ReservedVariableScope scope) {
-        this.variable = variable;
+        this.variable = variable.substring(2, variable.length() - 1); // Remove ${ and }
         this.scope = scope;
     }
 

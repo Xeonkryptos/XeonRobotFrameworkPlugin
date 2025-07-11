@@ -64,7 +64,9 @@ public class RobotFileImpl extends PsiFileBase implements KeywordFile, RobotFile
     @Override
     public final Collection<DefinedVariable> getDefinedVariables() {
         Collection<DefinedVariable> headingVariables = getSectionVariables();
-        Set<DefinedVariable> results = new LinkedHashSet<>(headingVariables);
+        Collection<DefinedVariable> globalVariables = RobotFileManager.getGlobalVariables(getProject());
+        Set<DefinedVariable> results = new LinkedHashSet<>(globalVariables);
+        results.addAll(headingVariables);
         Collection<DefinedVariable> definedVariables = collectRobotInitVariables();
         results.addAll(definedVariables);
         return results;

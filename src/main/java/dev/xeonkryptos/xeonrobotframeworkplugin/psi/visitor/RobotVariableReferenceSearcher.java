@@ -39,7 +39,7 @@ public class RobotVariableReferenceSearcher extends RobotVisitor {
     private static Set<PsiElement> collectParentsOf(@NotNull PsiElement element) {
         Set<PsiElement> parents = new HashSet<>();
         PsiElement parent = element.getParent();
-        while (parent != null && !(parent instanceof RobotRoot)) {
+        while (parent != null && !(parent instanceof RobotTestCasesSection)) {
             parents.add(parent);
             parent = parent.getParent();
         }

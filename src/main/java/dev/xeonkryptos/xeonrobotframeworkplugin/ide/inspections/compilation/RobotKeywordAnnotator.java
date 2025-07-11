@@ -69,7 +69,7 @@ public class RobotKeywordAnnotator implements Annotator {
 
             int expectedCount = mandatoryParameters.size() - keywordCall.getPositionalArgumentList().size();
             holder.newAnnotation(HighlightSeverity.ERROR, RobotBundle.getMessage("annotation.keyword.parameters.missing", expectedCount))
-                  .highlightType(ProblemHighlightType.ERROR)
+                  .highlightType(ProblemHighlightType.GENERIC_ERROR)
                   .range(robotKeywordCallId)
                   .create();
         }

@@ -4,9 +4,11 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiReference;
 import com.intellij.psi.util.PsiTreeUtil;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCallId;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotParameterId;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariable;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableId;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.ref.RobotKeywordReference;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.ref.RobotParameterReference;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.ref.RobotVariableReference;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -32,5 +34,10 @@ public class RobotPsiImplUtil {
     @NotNull
     public static PsiReference getReference(RobotKeywordCallId keywordCallId) {
         return new RobotKeywordReference(keywordCallId);
+    }
+
+    @NotNull
+    public static PsiReference getReference(RobotParameterId parameterId) {
+        return new RobotParameterReference(parameterId);
     }
 }

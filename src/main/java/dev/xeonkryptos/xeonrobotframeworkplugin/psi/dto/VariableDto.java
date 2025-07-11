@@ -1,21 +1,16 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.psi.dto;
 
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.DefinedVariable;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.PatternUtil;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.ReservedVariableScope;
 import com.intellij.psi.PsiElement;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.DefinedVariable;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.ReservedVariableScope;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.regex.Pattern;
 
 public class VariableDto implements DefinedVariable {
 
     private final PsiElement reference;
     private final String name;
     private final ReservedVariableScope scope;
-
-    private Pattern pattern;
 
     public VariableDto(@NotNull PsiElement reference, @NotNull String name, @Nullable ReservedVariableScope scope) {
         this.reference = reference;
@@ -28,12 +23,7 @@ public class VariableDto implements DefinedVariable {
         if (text == null) {
             return false;
         } else {
-            Pattern pattern = this.pattern;
-            if (this.pattern == null && this.name.length() > 3) {
-                pattern = Pattern.compile(PatternUtil.getVariablePattern(this.name), Pattern.CASE_INSENSITIVE);
-                this.pattern = pattern;
-            }
-            return pattern != null && pattern.matcher(text).matches();
+            return name.equals(text);
         }
     }
 

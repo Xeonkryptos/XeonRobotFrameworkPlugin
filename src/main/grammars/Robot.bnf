@@ -241,7 +241,9 @@ parameter ::= parameter_id ASSIGNMENT positional_argument {
     mixin = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotParameterExtension"
     methods = [nameIdentifier="parameter_id"]
 }
-parameter_id ::= PARAMETER_NAME
+parameter_id ::= PARAMETER_NAME {
+    methods = [getReference]
+}
 
 fake variable_statement ::= DUMMY {
     implements = "com.intellij.psi.PsiNamedElement"
