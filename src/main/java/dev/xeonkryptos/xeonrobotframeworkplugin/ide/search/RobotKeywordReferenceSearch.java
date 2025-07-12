@@ -40,7 +40,7 @@ public class RobotKeywordReferenceSearch extends QueryExecutorBase<PsiReference,
         GlobalSearchScope globalSearchScope = QueryExecutorUtil.convertToGlobalSearchScope(queryParameters.getEffectiveSearchScope(), project);
         if (element instanceof PyFunction pyFunction) {
             String possibleKeywordName = PatternUtil.functionToKeyword(pyFunction.getName());
-            if (possibleKeywordName != null && searchForKeywordsInIndex(possibleKeywordName, project, globalSearchScope, consumer)) {
+            if (possibleKeywordName != null && pyFunction.isValid() && searchForKeywordsInIndex(possibleKeywordName, project, globalSearchScope, consumer)) {
                 return;
             }
             PyDecoratorList decoratorList = pyFunction.getDecoratorList();
@@ -48,11 +48,12 @@ public class RobotKeywordReferenceSearch extends QueryExecutorBase<PsiReference,
                                                             .map(decorators -> decorators.findDecorator("keyword"))
                                                             .map(decorator -> decorator.getArgument(0, "name", PyExpression.class))
                                                             .map(keywordNameExp -> (PyStringLiteralExpression) keywordNameExp)
+                                                            .filter(PsiElement::isValid)
                                                             .map(StringLiteralExpression::getStringValue);
             customKeywordNameOpt.ifPresent(customKeywordName -> searchForKeywordsInIndex(customKeywordName, project, globalSearchScope, consumer));
         } else if (element instanceof RobotUserKeywordStatement userKeywordStatement) {
-            String keywordName = userKeywordStatement.getName();
-            if (keywordName != null) {
+            if (userKeywordStatement.isValid()) {
+                String keywordName = userKeywordStatement.getName();
                 searchForKeywordsInIndex(keywordName, project, globalSearchScope, consumer);
             }
         }

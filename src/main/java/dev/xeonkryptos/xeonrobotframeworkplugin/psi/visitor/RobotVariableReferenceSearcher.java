@@ -1,7 +1,6 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.psi.visitor;
 
 import com.intellij.psi.PsiElement;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotBlockOpeningStructure;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotEnvironmentVariable;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotExecutableStatement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordsSection;
@@ -130,18 +129,6 @@ public class RobotVariableReferenceSearcher extends RobotVisitor {
     public void visitExecutableStatement(@NotNull RobotExecutableStatement o) {
         visitElement(o);
         if (canVisitNextElements(o)) {
-            o.acceptChildren(this);
-        }
-        visitedElements.add(o);
-    }
-
-    @Override
-    public void visitBlockOpeningStructure(@NotNull RobotBlockOpeningStructure o) {
-        visitElement(o);
-        // canVisitNextElements contains the check for if this element is part of the walking tree (being in a direct heritage of the variable), but it also
-        // allows its parent to be part of it to still visit children. This doesn't work for block opening structures. They are opening a new scope block
-        // we don't have any access to
-        if (parents.contains(o) && canVisitNextElements(o)) {
             o.acceptChildren(this);
         }
         visitedElements.add(o);

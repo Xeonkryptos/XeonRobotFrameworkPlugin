@@ -158,7 +158,10 @@ public class RobotFileManager {
                 for (ReservedVariable reservedVariable : reservedVariables) {
                     PsiElement element = reservedVariable.getReferencedPsiElement(project);
                     if (element != null) {
-                        globalVariables.add(new VariableDto(element, reservedVariable.getVariable(), reservedVariable.getScope()));
+                        globalVariables.add(new VariableDto(element,
+                                                            reservedVariable.getVariable(),
+                                                            reservedVariable.getUnwrappedVariable(),
+                                                            reservedVariable.getScope()));
                     }
                 }
             }

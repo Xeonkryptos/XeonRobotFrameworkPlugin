@@ -21,9 +21,7 @@ class ControlStructureCompletionProvider extends CompletionProvider<CompletionPa
 
     @Override
     protected void addCompletions(@NotNull CompletionParameters parameters, @NotNull ProcessingContext context, @NotNull CompletionResultSet result) {
-        RobotSection section = CompletionProviderUtils.getSection(parameters.getOriginalPosition());
-        if (CompletionProviderUtils.isIndexPositionAWhitespaceCharacter(parameters) && (section instanceof RobotTestCasesSection
-                                                                                        || section instanceof RobotKeywordsSection)) {
+        if (CompletionProviderUtils.isIndexPositionAWhitespaceCharacter(parameters)) {
             List<LookupElement> lookupElements = CompletionProviderUtils.computeAdditionalSyntaxLookups(RobotKeywordProvider.SYNTAX_MARKER);
             List<LookupElement> nonSpecialElements = new ArrayList<>();
             List<LookupElement> specialElements = new ArrayList<>();

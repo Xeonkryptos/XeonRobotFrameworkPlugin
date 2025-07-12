@@ -4,6 +4,7 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.DefinedVariable;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotExecutableStatement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotGlobalSettingStatement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCall;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotRoot;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotSettingsSection;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotSetupTeardownStatementsGlobalSetting;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotSingleVariableStatement;
@@ -23,6 +24,11 @@ import java.util.Set;
 public final class RobotSectionVariablesCollector extends RobotVisitor {
 
     private final Set<DefinedVariable> variables = new LinkedHashSet<>();
+
+    @Override
+    public void visitRoot(@NotNull RobotRoot o) {
+        o.acceptChildren(this);
+    }
 
     @Override
     public void visitVariablesSection(@NotNull RobotVariablesSection o) {

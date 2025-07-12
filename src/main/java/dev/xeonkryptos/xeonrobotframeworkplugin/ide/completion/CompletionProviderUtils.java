@@ -115,27 +115,7 @@ final class CompletionProviderUtils {
             LookupElementBuilder builder = LookupElementBuilder.create(lookup)
                                                                .withLookupStrings(lookupStrings)
                                                                .withIcon(icon)
-                                                               .withPsiElement(lookupElementMarker.reference())
-                                                               .withInsertHandler((context, item) -> {
-                                                                   if (item.getUserData(CompletionKeys.ROBOT_LOOKUP_ELEMENT_TYPE)
-                                                                       == RobotLookupElementType.VARIABLE) {
-                                                                       String lookupString = item.getLookupString();
-
-                                                                       Editor editor = context.getEditor();
-                                                                       Document document = context.getDocument();
-                                                                       int startOffset = context.getStartOffset();
-                                                                       int selectionEndOffset = context.getSelectionEndOffset();
-                                                                       String text = document.getText(new TextRange(selectionEndOffset,
-                                                                                                                    selectionEndOffset + 1));
-                                                                       if (text.endsWith("}")) {
-                                                                           selectionEndOffset += 1;
-                                                                       }
-                                                                       int newEndOffset = startOffset + lookupString.length();
-                                                                       document.replaceString(startOffset, selectionEndOffset, lookupString);
-                                                                       editor.getCaretModel().moveToOffset(newEndOffset);
-                                                                       context.setTailOffset(newEndOffset);
-                                                                   }
-                                                               });
+                                                               .withPsiElement(lookupElementMarker.reference());
             if (bold) {
                 builder = builder.bold();
             }

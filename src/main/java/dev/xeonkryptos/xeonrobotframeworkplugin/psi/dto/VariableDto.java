@@ -10,11 +10,17 @@ public class VariableDto implements DefinedVariable {
 
     private final PsiElement reference;
     private final String name;
+    private final String matchingVariableName;
     private final ReservedVariableScope scope;
 
     public VariableDto(@NotNull PsiElement reference, @NotNull String name, @Nullable ReservedVariableScope scope) {
+        this(reference, name, name, scope);
+    }
+
+    public VariableDto(@NotNull PsiElement reference, @NotNull String name, @NotNull String matchingVariableName, @Nullable ReservedVariableScope scope) {
         this.reference = reference;
         this.name = name.trim();
+        this.matchingVariableName = matchingVariableName.trim();
         this.scope = scope;
     }
 
@@ -23,7 +29,7 @@ public class VariableDto implements DefinedVariable {
         if (text == null) {
             return false;
         }
-        return name.trim().equals(text.trim());
+        return matchingVariableName.equals(text.trim());
     }
 
     @Override

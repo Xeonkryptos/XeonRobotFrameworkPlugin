@@ -13,4 +13,5 @@ public final class RobotTailTypes {
          return moveCaret(editor, tailOffset, 4);
       }
    };
+   public static final TailType ASSIGNMENT_TAIL_TYPE = TailType.createSimpleTailType('=');
 }

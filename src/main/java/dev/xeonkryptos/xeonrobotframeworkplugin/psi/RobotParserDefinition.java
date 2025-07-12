@@ -10,11 +10,13 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.tree.IFileElementType;
 import com.intellij.psi.tree.TokenSet;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotFile;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotFileImpl;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotStubFileElementType;
 import org.jetbrains.annotations.NotNull;
 
 public class RobotParserDefinition implements ParserDefinition {
+
+   private static final IFileElementType ROBOT_FILE = new RobotStubFileElementType();
 
    @NotNull
    @Override
@@ -31,7 +33,7 @@ public class RobotParserDefinition implements ParserDefinition {
    @NotNull
    @Override
    public IFileElementType getFileNodeType() {
-      return RobotFile.ROBOT_FILE;
+      return ROBOT_FILE;
    }
 
    @NotNull
