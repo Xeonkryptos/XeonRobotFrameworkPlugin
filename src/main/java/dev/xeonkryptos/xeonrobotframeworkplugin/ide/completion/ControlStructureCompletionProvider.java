@@ -7,11 +7,7 @@ import com.intellij.codeInsight.lookup.LookupElement;
 import com.intellij.psi.PsiElement;
 import com.intellij.util.ProcessingContext;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotKeywordProvider;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordsSection;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotPositionalArgument;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotSection;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTestCasesSection;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;

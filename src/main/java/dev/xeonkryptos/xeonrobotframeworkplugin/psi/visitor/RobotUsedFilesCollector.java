@@ -1,7 +1,6 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.psi.visitor;
 
 import com.intellij.psi.PsiElement;
-import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiReference;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotBddStatement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotExecutableStatement;
@@ -32,7 +31,6 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -160,8 +158,8 @@ public final class RobotUsedFilesCollector extends RobotVisitor {
     public void visitVariable(@NotNull RobotVariable o) {
         PsiElement nameIdentifier = o.getNameIdentifier();
         if (nameIdentifier != null) {
-            String variableName = nameIdentifier.getText();
-            PsiReference reference = o.getReference();
+            String variableName = o.getName();
+            PsiReference reference = nameIdentifier.getReference();
             references.put(variableName, reference);
         }
     }

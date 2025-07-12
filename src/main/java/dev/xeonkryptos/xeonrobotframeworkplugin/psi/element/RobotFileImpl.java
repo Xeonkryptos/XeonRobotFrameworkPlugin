@@ -3,12 +3,14 @@ package dev.xeonkryptos.xeonrobotframeworkplugin.psi.element;
 import com.intellij.extapi.psi.PsiFileBase;
 import com.intellij.openapi.fileTypes.FileType;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.util.Key;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.FileViewProvider;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiManager;
 import com.intellij.psi.PsiReference;
+import com.intellij.psi.util.CachedValue;
 import com.intellij.psi.util.CachedValueProvider.Result;
 import com.intellij.psi.util.CachedValuesManager;
 import com.jetbrains.python.psi.PyClass;
@@ -39,6 +41,9 @@ public class RobotFileImpl extends PsiFileBase implements KeywordFile, RobotFile
     private static final String ROBOT_BUILT_IN = "robot.libraries.BuiltIn";
 
     private final FileType fileType;
+
+    private static final Key<CachedValue<Collection<KeywordFile>>> TRANSITIVELY_IMPORTED_FILES_CACHE_KEY = Key.create("Transitively imported files");
+    private static final Key<CachedValue<Collection<KeywordFile>>> NON_TRANSITIVELY_IMPORTED_FILES_CACHE_KEY = Key.create("Non-Transitively imported files");
 
     private Collection<DefinedVariable> robotInitVariables;
 
@@ -175,7 +180,8 @@ public class RobotFileImpl extends PsiFileBase implements KeywordFile, RobotFile
     @NotNull
     @Override
     public Collection<KeywordFile> getImportedFiles(boolean includeTransitive) {
-        return CachedValuesManager.getCachedValue(this, () -> {
+        Key<CachedValue<Collection<KeywordFile>>> key = includeTransitive ? TRANSITIVELY_IMPORTED_FILES_CACHE_KEY : NON_TRANSITIVELY_IMPORTED_FILES_CACHE_KEY;
+        return CachedValuesManager.getCachedValue(this, key, () -> {
             Set<KeywordFile> results = new LinkedHashSet<>();
             for (KeywordFile keywordFile : collectImportFiles()) {
                 collectTransitiveKeywordFiles(results, keywordFile, includeTransitive);

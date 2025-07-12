@@ -125,10 +125,10 @@ TemplateKeywords = ("Test Template" | "Task Template")
 TimeoutKeywords = ("Test Timeout" | "Task Timeout")
 GenericSettingsKeyword = [\p{L}\p{N}_]+([ ][\p{L}\p{N}_])*
 
-AllowedChar = [^\s$@%&=] | [$@%&] [^{]
+AllowedChar = [^\s$@%&=] | [<>!=] = | [$@%&] [^{]
 AllowedSeq = {AllowedChar}+
 
-AllowedVarChar = [^\s$@%&}=] | [$@%&] [^{]
+AllowedVarChar = [^\s$@%&}=] | [<>!=] = | [$@%&] [^{]
 AllowedVarSeq = {AllowedVarChar}+
 
 AllowedParamChar = [^\s$@%&] | [$@%&] [^{]
@@ -279,7 +279,7 @@ LineComment = {LineCommentSign} {NON_EOL}*
       }
 
 <USER_KEYWORD_DEFINITION> {
-    "RETURN" \s* [^\R]+            {
+    "RETURN" (\s{2}\s* | \R+)     {
           yypushback(yylength() - "RETURN".length());
           pushBackTrailingWhitespace();
           enterNewState(USER_KEYWORD_RETURN_STATEMENT);
@@ -352,7 +352,7 @@ LineComment = {LineCommentSign} {NON_EOL}*
          return BUT;
      }
 
-    "VAR" \s+ [^\R]+                        {
+    "VAR" \s{2}\s* [^\R]+                        {
           yypushback(yylength() - "VAR".length());
           pushBackTrailingWhitespace();
           enterNewState(INLINE_VARIABLE_DEFINITION);
@@ -373,26 +373,26 @@ LineComment = {LineCommentSign} {NON_EOL}*
 }
 
 <KEYWORD_ARGUMENTS, SETTINGS_SECTION, TESTCASE_DEFINITION, TASK_DEFINITION, USER_KEYWORD_DEFINITION, VARIABLE_DEFINITION> {
-    {ParameterName} / {EqualSign} (!\s{2} | !\R)     { enterNewState(PARAMETER_ASSIGNMENT); return PARAMETER_NAME; }
-    {EqualSign}                                      { return ASSIGNMENT; }
+    {ParameterName} / {EqualSign} (!\s{2} | !\R | !=)  { enterNewState(PARAMETER_ASSIGNMENT); return PARAMETER_NAME; }
+    {EqualSign}                                        { return ASSIGNMENT; }
 }
-<PARAMETER_ASSIGNMENT>  {EqualSign}                  { yybegin(PARAMETER_VALUE); return ASSIGNMENT; }
+<PARAMETER_ASSIGNMENT>  {EqualSign}                    { yybegin(PARAMETER_VALUE); return ASSIGNMENT; }
 <PARAMETER_VALUE>       {
-    {ScalarVariableStart}                            { leaveState(); enterNewState(VARIABLE_USAGE); return SCALAR_VARIABLE_START; }
-    {ListVariableStart}                              { leaveState(); enterNewState(VARIABLE_USAGE); return LIST_VARIABLE_START; }
-    {DictVariableStart}                              { leaveState(); enterNewState(VARIABLE_USAGE); return DICT_VARIABLE_START; }
-    {EnvVariableStart}                               { leaveState(); enterNewState(VARIABLE_USAGE); return ENV_VARIABLE_START; }
-    {ParamLiteralValue}                              { leaveState(); pushBackTrailingWhitespace(); return LITERAL_CONSTANT; }
+    {ScalarVariableStart}                              { leaveState(); enterNewState(VARIABLE_USAGE); return SCALAR_VARIABLE_START; }
+    {ListVariableStart}                                { leaveState(); enterNewState(VARIABLE_USAGE); return LIST_VARIABLE_START; }
+    {DictVariableStart}                                { leaveState(); enterNewState(VARIABLE_USAGE); return DICT_VARIABLE_START; }
+    {EnvVariableStart}                                 { leaveState(); enterNewState(VARIABLE_USAGE); return ENV_VARIABLE_START; }
+    {ParamLiteralValue}                                { leaveState(); pushBackTrailingWhitespace(); return LITERAL_CONSTANT; }
 }
 
 <TEMPLATE_DEFINITION> {
-    {ParameterName} / {EqualSign} (!\s{2} | !\R)     { enterNewState(TEMPLATE_PARAMETER_ASSIGNMENT); return TEMPLATE_PARAMETER_NAME; }
-    {EqualSign}                                      { return ASSIGNMENT; }
-    {RestrictedLiteralValue}                         { pushBackTrailingWhitespace(); return TEMPLATE_ARGUMENT_VALUE; }
-    {EOL}+                                           { return EOL; }
+    {ParameterName} / {EqualSign} (!\s{2} | !\R | !=)  { enterNewState(TEMPLATE_PARAMETER_ASSIGNMENT); return TEMPLATE_PARAMETER_NAME; }
+    {EqualSign}                                        { return ASSIGNMENT; }
+    {RestrictedLiteralValue}                           { pushBackTrailingWhitespace(); return TEMPLATE_ARGUMENT_VALUE; }
+    {EOL}+                                             { return EOL; }
 }
-<TEMPLATE_PARAMETER_ASSIGNMENT> {EqualSign}          { yybegin(TEMPLATE_PARAMETER_VALUE); return ASSIGNMENT; }
-<TEMPLATE_PARAMETER_VALUE>      {ParamLiteralValue}  { leaveState(); pushBackTrailingWhitespace(); return TEMPLATE_ARGUMENT_VALUE; }
+<TEMPLATE_PARAMETER_ASSIGNMENT> {EqualSign}            { yybegin(TEMPLATE_PARAMETER_VALUE); return ASSIGNMENT; }
+<TEMPLATE_PARAMETER_VALUE>      {ParamLiteralValue}    { leaveState(); pushBackTrailingWhitespace(); return TEMPLATE_ARGUMENT_VALUE; }
 
 // Multiline handling (don't return EOL on detected multiline). If there is a multiline without the Ellipsis (...) marker,
 // then return EOL to mark the end of the statement.

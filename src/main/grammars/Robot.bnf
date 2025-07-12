@@ -82,35 +82,35 @@ fake import_global_setting ::= positional_argument {
     implements = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotImportGlobalSettingExpression"
     methods=[importedFile="positional_argument"]
 }
-library_import_global_setting ::= LIBRARY_IMPORT_KEYWORD COMMENT* positional_argument (parameter | positional_argument)* (WITH_NAME new_library_name)? COMMENT* EOL {
+library_import_global_setting ::= LIBRARY_IMPORT_KEYWORD COMMENT* positional_argument (parameter | positional_argument)* (WITH_NAME new_library_name)? COMMENT* eol_marker {
     pin=3
     implements = "import_global_setting"
     methods=[importedFile="/positional_argument[0]"]
 }
 new_library_name ::= ARGUMENT_VALUE
-resource_import_global_setting ::= RESOURCE_IMPORT_KEYWORD COMMENT* positional_argument COMMENT* EOL {
+resource_import_global_setting ::= RESOURCE_IMPORT_KEYWORD COMMENT* positional_argument COMMENT* eol_marker {
     pin=3
     implements = "import_global_setting"
     methods=[importedFile="positional_argument"]
 }
-variables_import_global_setting ::= VARIABLES_IMPORT_KEYWORD COMMENT* positional_argument (parameter | positional_argument)* COMMENT* EOL {
+variables_import_global_setting ::= VARIABLES_IMPORT_KEYWORD COMMENT* positional_argument (parameter | positional_argument)* COMMENT* eol_marker {
     pin=3
     implements = "import_global_setting"
     methods=[importedFile="/positional_argument[0]"]
 }
-suite_name_statement_global_setting ::= SUITE_NAME_KEYWORD COMMENT* positional_argument COMMENT* EOL {pin=3}
-documentation_statement_global_setting ::= DOCUMENTATION_KEYWORD COMMENT* positional_argument+ COMMENT* EOL {pin=3}
-metadata_statement_global_setting ::= METADATA_KEYWORD COMMENT* positional_argument+ COMMENT* EOL {pin=3}
+suite_name_statement_global_setting ::= SUITE_NAME_KEYWORD COMMENT* positional_argument COMMENT* eol_marker {pin=3}
+documentation_statement_global_setting ::= DOCUMENTATION_KEYWORD COMMENT* positional_argument+ COMMENT* eol_marker {pin=3}
+metadata_statement_global_setting ::= METADATA_KEYWORD COMMENT* positional_argument+ COMMENT* eol_marker {pin=3}
 setup_teardown_statements_global_setting ::= SETUP_TEARDOWN_STATEMENT_KEYWORDS COMMENT* (eol_based_keyword_call | variable) COMMENT* {
     pin=3
     implements = ["dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotNamedElementExpression" "com.intellij.psi.PsiNameIdentifierOwner"]
     mixin = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotSetupTeardownStatementsGlobalSettingExtension"
     methods = [nameIdentifier="SETUP_TEARDOWN_STATEMENT_KEYWORDS"]
 }
-tags_statement_global_setting ::= TAGS_KEYWORDS COMMENT* positional_argument+ COMMENT* EOL {pin=3}
+tags_statement_global_setting ::= TAGS_KEYWORDS COMMENT* positional_argument+ COMMENT* eol_marker {pin=3}
 template_statements_global_setting ::= TEMPLATE_KEYWORDS COMMENT* eol_based_keyword_call COMMENT* {pin=3}
-timeout_statements_global_setting ::= TIMEOUT_KEYWORDS COMMENT* positional_argument COMMENT* EOL {pin=3}
-unknown_setting_statements_global_setting ::= unknown_setting_statement_id (parameter | positional_argument | COMMENT)* EOL {
+timeout_statements_global_setting ::= TIMEOUT_KEYWORDS COMMENT* positional_argument COMMENT* eol_marker {pin=3}
+unknown_setting_statements_global_setting ::= unknown_setting_statement_id (parameter | positional_argument | COMMENT)* eol_marker {
     pin=1
     implements = "com.intellij.psi.PsiNameIdentifierOwner"
     extends = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotUnknownSettingStatementsGlobalSettingExtension"
@@ -145,7 +145,7 @@ private testcase_task_statement ::= local_setting
 private testcase_task_statement_free_style ::= executable_statement
 private testcase_task_statement_template_style ::= template_arguments
 
-template_arguments ::= (template_argument | template_parameter | variable)+ EOL
+template_arguments ::= (template_argument | template_parameter | variable)+ eol_marker
 template_argument ::= TEMPLATE_ARGUMENT_VALUE
 template_parameter ::= template_parameter_id ASSIGNMENT (template_parameter_argument | variable) {
     pin=2
@@ -181,7 +181,7 @@ user_keyword_statement ::= user_keyword_statement_id COMMENT* (local_setting | e
 user_keyword_statement_id ::= USER_KEYWORD_NAME
 private user_keyword_statement_recover ::= !user_keyword_statement_id & section_recover
 
-local_setting ::= local_setting_id COMMENT* (local_setting_argument | positional_argument | eol_free_keyword_call)* COMMENT* EOL {
+local_setting ::= local_setting_id COMMENT* (local_setting_argument | positional_argument | eol_free_keyword_call)* COMMENT* eol_marker {
     implements = ["dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotNamedElementExpression" "com.intellij.psi.PsiNameIdentifierOwner"]
     mixin = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotLocalSettingExtension"
     methods = [nameIdentifier="local_setting_id"]
@@ -203,12 +203,12 @@ private loop_structure ::= for_loop_structure | while_loop_structure {
 }
 private call_structure ::= eol_based_keyword_call | keyword_variable_statement | inline_variable_statement
 private loop_control_structure ::= BREAK | CONTINUE
-private return_structure ::= RETURN positional_argument* EOL {pin=1}
+private return_structure ::= RETURN positional_argument* eol_marker {pin=1}
 
 for_loop_structure ::= FOR variable FOR_IN positional_argument+ parameter* COMMENT* EOL executable_statement* COMMENT* END COMMENT* {pin=3}
 while_loop_structure ::= WHILE positional_argument parameter* COMMENT* EOL executable_statement* COMMENT* END COMMENT*
-if_structure ::= IF positional_argument EOL COMMENT* executable_statement*
-    (ELSE_IF positional_argument EOL COMMENT* executable_statement*)*
+if_structure ::= IF positional_argument eol_marker COMMENT* executable_statement*
+    (ELSE_IF positional_argument eol_marker COMMENT* executable_statement*)*
     (ELSE COMMENT* executable_statement*)?
     END? COMMENT*
 try_structure ::= TRY COMMENT* executable_statement* COMMENT*
@@ -230,7 +230,7 @@ fake keyword_call ::= base_keyword_call {
     stubClass = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotKeywordCallStub"
     elementTypeFactory = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotKeywordCallStubElement.create"
 }
-eol_based_keyword_call ::= base_keyword_call EOL {elementType=keyword_call}
+eol_based_keyword_call ::= base_keyword_call eol_marker {elementType=keyword_call}
 eol_free_keyword_call ::= base_keyword_call {elementType=keyword_call}
 private base_keyword_call ::= keyword_call_id (parameter | positional_argument | COMMENT)*
 keyword_call_id ::= KEYWORD_NAME { methods = [getReference] }
@@ -248,12 +248,12 @@ parameter_id ::= PARAMETER_NAME {
 fake variable_statement ::= DUMMY {
     implements = "com.intellij.psi.PsiNamedElement"
 }
-inline_variable_statement ::= VAR variable_definition ASSIGNMENT? variable_value+ COMMENT* EOL {
+inline_variable_statement ::= VAR variable_definition ASSIGNMENT? variable_value+ COMMENT* eol_marker {
     pin=3
     implements = "com.intellij.psi.PsiNameIdentifierOwner"
     mixin = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotInlineVariableStatementExtension"
 }
-single_variable_statement ::= variable_definition ASSIGNMENT? variable_value+ COMMENT* EOL {
+single_variable_statement ::= variable_definition ASSIGNMENT? variable_value+ COMMENT* eol_marker {
     implements = "com.intellij.psi.PsiNameIdentifierOwner"
     mixin = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotSingleVariableStatementExtension"
 }
@@ -321,3 +321,5 @@ extended_variable_key_access ::= VARIABLE_KEY_ACCESS
 extended_variable_nested_access ::= VARIABLE_ACCESS_START (variable | literal_constant_value) VARIABLE_ACCESS_END
 
 literal_constant_value ::= LITERAL_CONSTANT
+
+private eol_marker ::= EOL | <<eof>>

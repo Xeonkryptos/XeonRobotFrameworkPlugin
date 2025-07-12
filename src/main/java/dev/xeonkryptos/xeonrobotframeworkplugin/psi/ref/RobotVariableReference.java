@@ -4,6 +4,8 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiReferenceBase;
 import com.intellij.psi.impl.source.resolve.ResolveCache;
+import com.intellij.psi.util.PsiTreeUtil;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotRoot;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableId;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.visitor.RobotVariableReferenceSearcher;
 import org.jetbrains.annotations.NotNull;
@@ -26,9 +28,13 @@ public class RobotVariableReference extends PsiReferenceBase<RobotVariableId> {
                 return null;
             }
 
-            RobotVariableReferenceSearcher variableReferenceSearcher = new RobotVariableReferenceSearcher(variableId);
-            variableId.accept(variableReferenceSearcher);
-            PsiElement foundElement = variableReferenceSearcher.getFoundElement();
+            PsiElement foundElement = null;
+            RobotRoot rootElement = PsiTreeUtil.getParentOfType(variableId, RobotRoot.class);
+            if (rootElement != null) {
+                RobotVariableReferenceSearcher variableReferenceSearcher = new RobotVariableReferenceSearcher(variableId);
+                rootElement.accept(variableReferenceSearcher);
+                foundElement = variableReferenceSearcher.getFoundElement();
+            }
             if (foundElement == null) {
                 PsiFile containingFile = variableId.getContainingFile();
                 foundElement = ResolverUtils.findVariableElement(variableName, containingFile);
