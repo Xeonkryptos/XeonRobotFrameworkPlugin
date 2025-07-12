@@ -8,7 +8,7 @@ import com.intellij.psi.PsiNameIdentifierOwner;
 
 public interface RobotVariable extends PsiNameIdentifierOwner, RobotReferenceElementExpression, RobotStatement {
 
-  @Nullable PsiElement getNameIdentifier();
+  @Nullable RobotVariableId getNameIdentifier();
 
   @Nullable String getName();
 

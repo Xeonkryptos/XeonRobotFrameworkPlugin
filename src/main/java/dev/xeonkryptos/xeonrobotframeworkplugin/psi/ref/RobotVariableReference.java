@@ -22,7 +22,7 @@ public class RobotVariableReference extends PsiReferenceBase<RobotVariableId> {
         ResolveCache resolveCache = ResolveCache.getInstance(variableId.getProject());
         return resolveCache.resolveWithCaching(this, (robotVariableReference, incompleteCode) -> {
             String variableName = variableId.getName();
-            if (variableName.isBlank()) { // e.g. ${}, thus empty representation of a variable. There can be no reference.
+            if (variableName == null || variableName.isBlank()) { // e.g. ${}, thus empty representation of a variable. There can be no reference.
                 return null;
             }
 

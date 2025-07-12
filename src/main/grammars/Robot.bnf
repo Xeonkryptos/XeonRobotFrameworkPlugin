@@ -13,7 +13,7 @@
   elementTypeClass="dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotElementType"
   tokenTypeClass="dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTokenType"
 
-  implements(".*_id")=[
+  implements("(?!variable_id$).*_id")=[
     "com.intellij.psi.PsiNamedElement"
     "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotNamedElementExpression"
     "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotReferenceElementExpression"
@@ -306,7 +306,13 @@ dict_variable ::= DICT_VARIABLE_START (variable_id | python_expression) VARIABLE
 }
 environment_variable ::= ENV_VARIABLE_START variable_id VARIABLE_END
 
-variable_id ::= variable | VARIABLE_BODY { methods=[content="VARIABLE_BODY" getReference] }
+variable_id ::= variable | VARIABLE_BODY {
+    implements = [
+      "com.intellij.psi.PsiNamedElement"
+      "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotReferenceElementExpression"
+    ]
+    methods=[content="VARIABLE_BODY" getReference getName]
+}
 python_expression ::= PYTHON_EXPRESSION_START PYTHON_EXPRESSION_CONTENT PYTHON_EXPRESSION_END { methods = [expressionContent="PYTHON_EXPRESSION_CONTENT"] }
 
 extended_variable_slice_access ::= VARIABLE_SLICE_ACCESS

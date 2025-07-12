@@ -45,4 +45,9 @@ public class RobotVariableIdImpl extends RobotPsiElementBase implements RobotVar
     return RobotPsiImplUtil.getReference(this);
   }
 
+  @Override
+  public @Nullable String getName() {
+    return RobotPsiImplUtil.getName(this);
+  }
+
 }

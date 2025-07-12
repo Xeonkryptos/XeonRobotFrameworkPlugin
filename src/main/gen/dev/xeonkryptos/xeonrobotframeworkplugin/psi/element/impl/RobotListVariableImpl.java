@@ -64,7 +64,7 @@ public class RobotListVariableImpl extends RobotListVariableExtension implements
   }
 
   @Override
-  public @Nullable PsiElement getNameIdentifier() {
+  public @Nullable RobotVariableId getNameIdentifier() {
     return RobotPsiImplUtil.getNameIdentifier(this);
   }
 

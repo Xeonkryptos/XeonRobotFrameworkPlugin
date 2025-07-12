@@ -64,7 +64,7 @@ public class RobotScalarVariableImpl extends RobotScalarVariableExtension implem
   }
 
   @Override
-  public @Nullable PsiElement getNameIdentifier() {
+  public @Nullable RobotVariableId getNameIdentifier() {
     return RobotPsiImplUtil.getNameIdentifier(this);
   }
 

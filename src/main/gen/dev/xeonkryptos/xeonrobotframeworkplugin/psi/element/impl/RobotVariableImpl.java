@@ -28,7 +28,7 @@ public abstract class RobotVariableImpl extends RobotPsiElementBase implements R
   }
 
   @Override
-  public @Nullable PsiElement getNameIdentifier() {
+  public @Nullable RobotVariableId getNameIdentifier() {
     return RobotPsiImplUtil.getNameIdentifier(this);
   }
 

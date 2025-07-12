@@ -22,9 +22,8 @@ public class VariableDto implements DefinedVariable {
     public final boolean matches(@Nullable String text) {
         if (text == null) {
             return false;
-        } else {
-            return name.equals(text);
         }
+        return name.trim().equals(text.trim());
     }
 
     @Override

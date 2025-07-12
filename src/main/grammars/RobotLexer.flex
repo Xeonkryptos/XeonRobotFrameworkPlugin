@@ -352,8 +352,6 @@ LineComment = {LineCommentSign} {NON_EOL}*
          return BUT;
      }
 
-    // Using yybegin instead of enterNewState to avoid pushing the state onto the stack. Don't switch the state on the stack to something else than
-    // the current one. This way, after variable definition via VAR is done, we will reach this state again.
     "VAR" \s+ [^\R]+                        {
           yypushback(yylength() - "VAR".length());
           pushBackTrailingWhitespace();
@@ -400,7 +398,7 @@ LineComment = {LineCommentSign} {NON_EOL}*
 // then return EOL to mark the end of the statement.
 <SETTING, SETTING_TEMPLATE_START, KEYWORD_CALL, KEYWORD_ARGUMENTS, VARIABLE_DEFINITION, VARIABLE_DEFINITION_ARGUMENTS> {
     {MultiLine}                                { return WHITE_SPACE; }
-    {EOL} \s* {LineComment}                    { yypushback(yylength() - 1); return WHITE_SPACE; }
+    {EOL} {Whitespace} {LineComment}           { yypushback(yylength() - 1); return WHITE_SPACE; }
     <USER_KEYWORD_RETURN_STATEMENT> {EOL}+     { leaveState(); return EOL; }
 }
 

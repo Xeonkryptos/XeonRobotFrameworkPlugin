@@ -16,14 +16,30 @@ import org.jetbrains.annotations.Nullable;
 public class RobotPsiImplUtil {
 
     @Nullable
-    public static PsiElement getNameIdentifier(RobotVariable variable) {
+    public static RobotVariableId getNameIdentifier(RobotVariable variable) {
         return PsiTreeUtil.findChildOfType(variable, RobotVariableId.class);
     }
 
     @Nullable
     public static String getName(RobotVariable variable) {
-        PsiElement nameIdentifier = getNameIdentifier(variable);
-        return nameIdentifier != null ? nameIdentifier.getText() : null;
+        RobotVariableId nameIdentifier = getNameIdentifier(variable);
+        return nameIdentifier != null ? nameIdentifier.getName() : null;
+    }
+
+    @Nullable
+    public static String getName(RobotVariableId variableId) {
+        PsiElement contentElement = variableId.getContent();
+        if (contentElement == null) {
+            return null;
+        }
+        String nameContent = contentElement.getText();
+        for (int i = 0; i < nameContent.length(); i++) {
+            char c = nameContent.charAt(i);
+            if (c == '.' || c == '[' || c == ':') {
+                return nameContent.substring(0, i);
+            }
+        }
+        return nameContent;
     }
 
     @NotNull

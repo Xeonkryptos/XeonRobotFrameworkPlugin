@@ -335,7 +335,6 @@ public class RobotVisitor extends PsiElementVisitor {
 
   public void visitVariableId(@NotNull RobotVariableId o) {
     visitPsiNamedElement(o);
-    // visitNamedElementExpression(o);
     // visitReferenceElementExpression(o);
     // visitStatement(o);
   }

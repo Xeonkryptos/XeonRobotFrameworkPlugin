@@ -1,7 +1,7 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.ide.misc;
 
 import com.intellij.lang.ASTNode;
-import com.intellij.lang.folding.FoldingBuilder;
+import com.intellij.lang.folding.FoldingBuilderEx;
 import com.intellij.lang.folding.FoldingDescriptor;
 import com.intellij.navigation.ItemPresentation;
 import com.intellij.navigation.NavigationItem;
@@ -11,6 +11,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.TextRange;
 import com.intellij.psi.PsiComment;
 import com.intellij.psi.PsiDocumentManager;
+import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.tree.IElementType;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes;
@@ -24,7 +25,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-public class RobotFoldingBuilder implements FoldingBuilder, DumbAware {
+public class RobotFoldingBuilder extends FoldingBuilderEx implements DumbAware {
 
     private static final Set<IElementType> CONTROL_STRUCTURE_TOKENS = Set.of(RobotTypes.WHILE,
                                                                              RobotTypes.FOR,
@@ -48,9 +49,9 @@ public class RobotFoldingBuilder implements FoldingBuilder, DumbAware {
                                                                              RobotTypes.CONTINUE);
 
     @Override
-    public FoldingDescriptor @NotNull [] buildFoldRegions(@NotNull ASTNode node, @NotNull Document document) {
+    public FoldingDescriptor @NotNull [] buildFoldRegions(@NotNull PsiElement psiElement, @NotNull Document document, boolean quick) {
         List<FoldingDescriptor> descriptors = new ArrayList<>();
-        appendDescriptors(node, descriptors);
+        appendDescriptors(psiElement, descriptors);
         return processDescriptors(descriptors).toArray(FoldingDescriptor.EMPTY_ARRAY);
     }
 
@@ -60,7 +61,7 @@ public class RobotFoldingBuilder implements FoldingBuilder, DumbAware {
         LinkedList<LinkedList<FoldingDescriptor>> groupedComments = new LinkedList<>();
 
         for (FoldingDescriptor descriptor : descriptors) {
-            if (descriptor.getElement().getPsi() instanceof PsiComment) {
+            if (descriptor.getElement().getElementType() == RobotTypes.COMMENT) {
                 if (count > 0) {
                     groupedComments.getLast().add(descriptor);
                 } else {
@@ -95,7 +96,7 @@ public class RobotFoldingBuilder implements FoldingBuilder, DumbAware {
 
         for (int i = 0; i < finalDescriptors.size(); i++) {
             ASTNode element = finalDescriptors.get(i).getElement();
-            if (CONTROL_STRUCTURE_TOKENS.contains(element.getElementType()) && !element.getText().equals("END")) {
+            if (CONTROL_STRUCTURE_TOKENS.contains(element.getElementType()) && element.getElementType() != RobotTypes.END) {
                 int nextIndex = i + 1;
                 if (nextIndex >= finalDescriptors.size()) {
                     break;
@@ -105,7 +106,7 @@ public class RobotFoldingBuilder implements FoldingBuilder, DumbAware {
                 FoldingDescriptor endDescriptor = null;
                 for (FoldingDescriptor descriptor : finalDescriptors.subList(nextIndex, finalDescriptors.size())) {
                     ASTNode nextElement = descriptor.getElement();
-                    if (CONTROL_STRUCTURE_TOKENS.contains(nextElement.getElementType()) && nextElement.getText().equals("END")
+                    if (CONTROL_STRUCTURE_TOKENS.contains(nextElement.getElementType()) && nextElement.getElementType() == RobotTypes.END
                         && computeOffset(element) == computeOffset(nextElement)) {
                         endDescriptor = descriptor;
                         combinedRange = element.getTextRange().union(nextElement.getTextRange());
@@ -129,27 +130,37 @@ public class RobotFoldingBuilder implements FoldingBuilder, DumbAware {
     }
 
     private static int computeOffset(ASTNode node) {
-        Project project = node.getPsi().getProject();
-        PsiFile containingFile = node.getPsi().getContainingFile();
+        PsiElement element = node.getPsi();
+        Project project = element.getProject();
+        PsiFile containingFile = element.getContainingFile();
         Document document = PsiDocumentManager.getInstance(project).getDocument(containingFile);
         if (document != null) {
-            int lineNumber = document.getLineNumber(node.getTextRange().getStartOffset());
-            return node.getTextRange().getStartOffset() - document.getLineStartOffset(lineNumber);
+            TextRange textRange = node.getTextRange();
+            int startOffset = textRange.getStartOffset();
+            int lineNumber = document.getLineNumber(startOffset);
+            return startOffset - document.getLineStartOffset(lineNumber);
         } else {
             return -1;
         }
     }
 
-    private void appendDescriptors(ASTNode node, Collection<FoldingDescriptor> descriptors) {
-        if (node.getPsi() instanceof RobotStatement || node.getPsi() instanceof PsiComment) {
-            try {
-                descriptors.add(new FoldingDescriptor(node, node.getTextRange()));
-            } catch (Throwable ignored) {
+    private void appendDescriptors(PsiElement element, Collection<FoldingDescriptor> descriptors) {
+        if (element instanceof RobotStatement || element instanceof PsiComment) {
+            TextRange textRange = element.getTextRange();
+            PsiElement lastChild = element.getLastChild();
+            while (lastChild != null) {
+                if (lastChild.getNode().getElementType() == RobotTypes.EOL) {
+                    int eolLength = lastChild.getTextRange().getLength();
+                    textRange = textRange.grown(-eolLength);
+                    break;
+                }
+                lastChild = lastChild.getLastChild();
             }
+            descriptors.add(new FoldingDescriptor(element, textRange));
         }
 
-        for (ASTNode childNode = node.getFirstChildNode(); childNode != null; childNode = childNode.getTreeNext()) {
-            this.appendDescriptors(childNode, descriptors);
+        for (PsiElement child = element.getFirstChild(); child != null; child = child.getNextSibling()) {
+            appendDescriptors(child, descriptors);
         }
     }
 

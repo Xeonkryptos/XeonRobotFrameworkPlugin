@@ -58,7 +58,7 @@ public class RobotDictVariableImpl extends RobotDictVariableExtension implements
   }
 
   @Override
-  public @Nullable PsiElement getNameIdentifier() {
+  public @Nullable RobotVariableId getNameIdentifier() {
     return RobotPsiImplUtil.getNameIdentifier(this);
   }
 
