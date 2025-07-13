@@ -9,10 +9,4 @@ public interface DefinedVariable extends LookupElementMarker {
    boolean matches(@Nullable String text);
 
    boolean isInScope(@NotNull PsiElement position);
-
-   @NotNull
-   PsiElement reference();
-
-   @Nullable
-   String getLookup();
 }

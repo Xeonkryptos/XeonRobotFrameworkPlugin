@@ -1,11 +1,6 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.ide.parameterinfo;
 
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotStubTokenTypes;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTokenTypes;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.KeywordInvokable;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.KeywordStatement;
 import com.intellij.codeInsight.CodeInsightBundle;
-import com.intellij.lang.injection.InjectedLanguageManager;
 import com.intellij.lang.parameterInfo.CreateParameterInfoContext;
 import com.intellij.lang.parameterInfo.ParameterInfoHandler;
 import com.intellij.lang.parameterInfo.ParameterInfoUIContext;
@@ -20,6 +15,10 @@ import com.intellij.psi.PsiReference;
 import com.intellij.psi.PsiWhiteSpace;
 import com.intellij.psi.SyntaxTraverser;
 import com.intellij.util.ArrayUtilRt;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCall;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCallId;
+import dev.xeonkryptos.xeonrobotframeworkplugin.util.GlobalConstants;
 import one.util.streamex.MoreCollectors;
 import one.util.streamex.StreamEx;
 import org.jetbrains.annotations.NotNull;
@@ -30,47 +29,46 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class RobotParameterInfoHandler implements ParameterInfoHandler<KeywordStatement, PsiElement> {
+public class RobotParameterInfoHandler implements ParameterInfoHandler<RobotKeywordCall, PsiElement> {
 
     @Nullable
     @Override
-    public KeywordStatement findElementForParameterInfo(@NotNull CreateParameterInfoContext context) {
+    public RobotKeywordCall findElementForParameterInfo(@NotNull CreateParameterInfoContext context) {
         PsiFile psiFile = context.getFile();
         int offset = context.getOffset();
-        KeywordStatement keywordStatement = findKeywordStatement(psiFile, offset);
-        if (keywordStatement != null) {
-            KeywordInvokable invokable = keywordStatement.getInvokable();
-            PsiReference reference = invokable.getReference();
+        RobotKeywordCall keywordCall = findKeywordCall(psiFile, offset);
+        if (keywordCall != null) {
+            RobotKeywordCallId keywordCallId = keywordCall.getKeywordCallId();
+            PsiReference reference = keywordCallId.getReference();
             PsiElement resolvedElement = reference.resolve();
             context.setItemsToShow(new Object[] { resolvedElement });
         }
-        return keywordStatement;
+        return keywordCall;
     }
 
     @Override
-    public void showParameterInfo(@NotNull KeywordStatement element, @NotNull CreateParameterInfoContext context) {
+    public void showParameterInfo(@NotNull RobotKeywordCall element, @NotNull CreateParameterInfoContext context) {
         context.showHint(element, element.getTextOffset(), this);
     }
 
     @Nullable
     @Override
-    public KeywordStatement findElementForUpdatingParameterInfo(@NotNull UpdateParameterInfoContext context) {
+    public RobotKeywordCall findElementForUpdatingParameterInfo(@NotNull UpdateParameterInfoContext context) {
         PsiFile psiFile = context.getFile();
         int offset = context.getOffset();
-        return findKeywordStatement(psiFile, offset);
+        return findKeywordCall(psiFile, offset);
     }
 
-    private KeywordStatement findKeywordStatement(PsiFile psiFile, int offset) {
-        KeywordStatement keywordStatement = ParameterInfoUtils.findParentOfType(psiFile, offset, KeywordStatement.class);
-        if (keywordStatement == null) {
-            InjectedLanguageManager injectedLanguageManager = InjectedLanguageManager.getInstance(psiFile.getProject());
+    private RobotKeywordCall findKeywordCall(PsiFile psiFile, int offset) {
+        RobotKeywordCall keywordCall = ParameterInfoUtils.findParentOfType(psiFile, offset, RobotKeywordCall.class);
+        if (keywordCall == null) {
             PsiElement element = psiFile.findElementAt(offset);
             if (element instanceof PsiWhiteSpace) {
                 boolean firstElement = true;
                 boolean newLineAssignedToStatement = false;
                 do {
-                    String unescapedWhitespaceText = injectedLanguageManager.getUnescapedText(element);
-                    if ("...".equals(unescapedWhitespaceText)) {
+                    String unescapedWhitespaceText = element.getText();
+                    if (GlobalConstants.ELLIPSIS.equals(unescapedWhitespaceText)) {
                         newLineAssignedToStatement = true;
                     } else if ("\n".equals(unescapedWhitespaceText) && !firstElement) {
                         if (!newLineAssignedToStatement) {
@@ -82,34 +80,31 @@ public class RobotParameterInfoHandler implements ParameterInfoHandler<KeywordSt
                     element = element.getPrevSibling();
                 } while (element instanceof PsiWhiteSpace);
             }
-            if (element instanceof KeywordStatement found) {
-                keywordStatement = found;
+            if (element instanceof RobotKeywordCall found) {
+                keywordCall = found;
             }
         }
-        return keywordStatement;
+        return keywordCall;
     }
 
     @Override
-    public void updateParameterInfo(@NotNull KeywordStatement keywordStatement, @NotNull UpdateParameterInfoContext context) {
+    public void updateParameterInfo(@NotNull RobotKeywordCall keywordCall, @NotNull UpdateParameterInfoContext context) {
         int offset = context.getEditor().getCaretModel().getOffset();
-        if (!keywordStatement.getTextRange().containsOffset(offset)) {
+        if (!keywordCall.getTextRange().containsOffset(offset)) {
             PsiElement element = context.getFile().findElementAt(offset);
             if (element instanceof PsiWhiteSpace) {
                 do {
                     element = element.getPrevSibling();
                 } while (element instanceof PsiWhiteSpace);
             }
-            if (element != keywordStatement) {
+            if (element != keywordCall) {
                 context.removeHint();
                 return;
             }
         }
 
-        SyntaxTraverser<PsiElement> syntaxTraverser = SyntaxTraverser.psiTraverser(keywordStatement).expandAndSkip(Conditions.is(keywordStatement));
-        int parameterIndex = ParameterInfoHandlerUtil.getCurrentParameterIndex(syntaxTraverser,
-                                                                               offset,
-                                                                               RobotTokenTypes.PARAMETER,
-                                                                               RobotStubTokenTypes.ARGUMENT);
+        SyntaxTraverser<PsiElement> syntaxTraverser = SyntaxTraverser.psiTraverser(keywordCall).expandAndSkip(Conditions.is(keywordCall));
+        int parameterIndex = ParameterInfoHandlerUtil.getCurrentParameterIndex(syntaxTraverser, offset, RobotTypes.PARAMETER, RobotTypes.POSITIONAL_ARGUMENT);
         parameterIndex = parameterIndex - 1;
         context.setCurrentParameter(parameterIndex);
     }
@@ -155,7 +150,9 @@ public class RobotParameterInfoHandler implements ParameterInfoHandler<KeywordSt
             if (hints.length == 0) {
                 signatureBuilder.append(getNoParamsMsg());
             } else {
-                for (String s : hints) signatureBuilder.append(s);
+                for (String s : hints) {
+                    signatureBuilder.append(s);
+                }
             }
             context.setupUIComponentPresentation(signatureBuilder.toString(), -1, 0, false, false, false, context.getDefaultParameterColor());
         }

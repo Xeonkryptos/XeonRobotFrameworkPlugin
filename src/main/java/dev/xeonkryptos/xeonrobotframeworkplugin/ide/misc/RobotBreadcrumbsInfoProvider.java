@@ -1,19 +1,13 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.ide.misc;
 
 import com.intellij.lang.Language;
+import com.intellij.navigation.ItemPresentation;
 import com.intellij.openapi.util.text.StringUtil;
+import com.intellij.psi.NavigatablePsiElement;
 import com.intellij.psi.PsiElement;
 import com.intellij.ui.breadcrumbs.BreadcrumbsProvider;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotLanguage;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.Heading;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.KeywordDefinition;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.KeywordDefinitionId;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.KeywordInvokable;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.KeywordStatement;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotStatement;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.VariableDefinition;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.VariableDefinitionGroup;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.VariableDefinitionId;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.visitor.RobotBreadcrumbsInfoElementCollector;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -30,9 +24,9 @@ public class RobotBreadcrumbsInfoProvider implements BreadcrumbsProvider {
 
     @Override
     public boolean acceptElement(@NotNull PsiElement element) {
-        return element instanceof Heading || element instanceof KeywordDefinition || element instanceof VariableDefinitionGroup
-               || element instanceof KeywordStatement || (element instanceof KeywordInvokable keywordInvokable
-                                                          && !(keywordInvokable.getParent() instanceof KeywordStatement));
+        RobotBreadcrumbsInfoElementCollector breadcrumbsInfoCollector = new RobotBreadcrumbsInfoElementCollector();
+        element.accept(breadcrumbsInfoCollector);
+        return breadcrumbsInfoCollector.isIncludeInBreadcrumbs();
     }
 
     @Override
@@ -43,16 +37,20 @@ public class RobotBreadcrumbsInfoProvider implements BreadcrumbsProvider {
     @NotNull
     @Override
     public String getElementInfo(@NotNull PsiElement element) {
-        RobotStatement robotStatement = (RobotStatement) element;
-        String presentableText = robotStatement.getPresentableText();
+        NavigatablePsiElement navigatablePsiElement = (NavigatablePsiElement) element;
+        ItemPresentation presentation = navigatablePsiElement.getPresentation();
+        assert presentation != null;
+        String presentableText = presentation.getPresentableText();
+        assert presentableText != null;
         return StringUtil.shortenTextWithEllipsis(presentableText, 32, 0, true);
     }
 
     @SuppressWarnings("UnstableApiUsage")
     @Override
     public boolean acceptStickyElement(@NotNull PsiElement element) {
-        return element instanceof Heading || element instanceof KeywordDefinition || element instanceof KeywordDefinitionId
-               || element instanceof VariableDefinitionGroup || element instanceof VariableDefinition || element instanceof VariableDefinitionId
-               || element instanceof KeywordStatement || element instanceof KeywordInvokable;
+        RobotBreadcrumbsInfoElementCollector breadcrumbsInfoCollector = new RobotBreadcrumbsInfoElementCollector();
+        element.accept(breadcrumbsInfoCollector);
+        return breadcrumbsInfoCollector.isSticky();
     }
+
 }

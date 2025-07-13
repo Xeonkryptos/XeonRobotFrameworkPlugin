@@ -18,6 +18,8 @@ public interface DefinedParameter extends LookupElementMarker {
 
    boolean isKeywordContainer();
 
+   boolean matches(@NotNull String parameterName);
+
    @NotNull
    PsiElement reference();
 }

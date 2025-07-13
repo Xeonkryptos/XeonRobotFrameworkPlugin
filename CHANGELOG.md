@@ -7,6 +7,7 @@
 ### Changed
 
 - Updated build.gradle and gradle.properties to make plugin compatible with IntelliJ IDEA and all other JetBrains IDEs 
+- Rewrote internal parsing logic to get a more robust, more efficient and easier to maintain codebase
 
 ## 0.3.3
 

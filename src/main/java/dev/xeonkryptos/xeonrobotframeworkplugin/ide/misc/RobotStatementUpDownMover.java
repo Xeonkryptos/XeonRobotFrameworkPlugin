@@ -10,12 +10,20 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiWhiteSpace;
 import com.intellij.psi.impl.source.tree.LeafPsiElement;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.Argument;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.KeywordDefinition;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.KeywordDefinitionId;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.KeywordStatement;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotArgument;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotExecutableStatement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotFile;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.VariableDefinitionGroup;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotGlobalSettingStatement;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCall;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLanguage;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotSection;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTaskId;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTaskStatement;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTestCaseId;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTestCaseStatement;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotUserKeywordStatement;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotUserKeywordStatementId;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableStatement;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -63,12 +71,23 @@ public class RobotStatementUpDownMover extends StatementUpDownMover {
 
     @Nullable
     private PsiElement findCompleteBlock(@NotNull PsiElement element) {
+        if (element instanceof LeafPsiElement leafPsiElement) {
+            element = leafPsiElement.getParent();
+        }
         return switch (element) {
-            case Argument argument -> argument;
-            case KeywordStatement keywordStatement -> keywordStatement;
-            case VariableDefinitionGroup variableDefinitionGroup -> variableDefinitionGroup;
-            case KeywordDefinitionId keywordDefinitionId -> keywordDefinitionId.getParent();
-            case KeywordDefinition keywordDefinition -> keywordDefinition;
+            case RobotArgument argument -> argument;
+            case RobotKeywordCall keywordStatement -> keywordStatement;
+            case RobotVariableStatement variableStatement -> variableStatement;
+            case RobotUserKeywordStatementId keywordStatementId -> keywordStatementId.getParent();
+            case RobotUserKeywordStatement keywordStatement -> keywordStatement;
+            case RobotExecutableStatement executableStatement -> executableStatement;
+            case RobotSection section -> section;
+            case RobotLanguage language -> language;
+            case RobotGlobalSettingStatement globalSettingStatement -> globalSettingStatement;
+            case RobotTestCaseStatement testCaseStatement -> testCaseStatement;
+            case RobotTestCaseId testCaseId -> testCaseId.getParent();
+            case RobotTaskStatement taskStatement -> taskStatement;
+            case RobotTaskId taskId -> taskId.getParent();
             default -> null;
         };
     }
@@ -81,7 +100,10 @@ public class RobotStatementUpDownMover extends StatementUpDownMover {
 
         TextRange textRange = block.getTextRange();
         int startLine = document.getLineNumber(textRange.getStartOffset());
-        int endLine = document.getLineNumber(textRange.getEndOffset()) + 1;
+        int endLine = document.getLineNumber(textRange.getEndOffset());
+        if (startLine == endLine) { // A range of at least 1 is needed, otherwise the IDE is doing weird things
+            endLine++;
+        }
         return new LineRange(startLine, endLine);
     }
 
@@ -104,7 +126,6 @@ public class RobotStatementUpDownMover extends StatementUpDownMover {
                 prev = prev.getPrevSibling();
             }
         }
-
         return block;
     }
 
@@ -112,9 +133,6 @@ public class RobotStatementUpDownMover extends StatementUpDownMover {
         if (element.getParent() != reference.getParent()) {
             return false;
         }
-        if (element instanceof KeywordStatement || element instanceof VariableDefinitionGroup) {
-            return reference instanceof KeywordStatement || reference instanceof VariableDefinitionGroup;
-        }
-        return element.getClass() == reference.getClass();
+        return element.getClass() == reference.getClass() || element instanceof RobotSection && reference instanceof RobotSection;
     }
 }

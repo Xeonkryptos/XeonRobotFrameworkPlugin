@@ -12,9 +12,9 @@ import com.jetbrains.python.psi.PyExpression;
 import com.jetbrains.python.psi.PyFunction;
 import com.jetbrains.python.psi.PyStringLiteralExpression;
 import com.jetbrains.python.psi.StringLiteralExpression;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.KeywordDefinition;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.KeywordInvokable;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.KeywordStatement;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCall;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCallId;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotUserKeywordStatement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.index.KeywordStatementNameIndex;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.PatternUtil;
 import org.jetbrains.annotations.NotNull;
@@ -32,12 +32,15 @@ public class RobotKeywordReferenceSearch extends QueryExecutorBase<PsiReference,
     @SuppressWarnings("UnstableApiUsage")
     public void processQuery(@NotNull SearchParameters queryParameters, @NotNull Processor<? super PsiReference> consumer) {
         PsiElement element = queryParameters.getElementToSearch();
+        if (!element.isValid()) {
+            return;
+        }
         Project project = queryParameters.getProject();
 
         GlobalSearchScope globalSearchScope = QueryExecutorUtil.convertToGlobalSearchScope(queryParameters.getEffectiveSearchScope(), project);
-        if (element instanceof PyFunction pyFunction && pyFunction.isValid()) {
+        if (element instanceof PyFunction pyFunction) {
             String possibleKeywordName = PatternUtil.functionToKeyword(pyFunction.getName());
-            if (possibleKeywordName != null && searchForKeywordsInIndex(possibleKeywordName, project, globalSearchScope, consumer)) {
+            if (possibleKeywordName != null && pyFunction.isValid() && searchForKeywordsInIndex(possibleKeywordName, project, globalSearchScope, consumer)) {
                 return;
             }
             PyDecoratorList decoratorList = pyFunction.getDecoratorList();
@@ -45,11 +48,12 @@ public class RobotKeywordReferenceSearch extends QueryExecutorBase<PsiReference,
                                                             .map(decorators -> decorators.findDecorator("keyword"))
                                                             .map(decorator -> decorator.getArgument(0, "name", PyExpression.class))
                                                             .map(keywordNameExp -> (PyStringLiteralExpression) keywordNameExp)
+                                                            .filter(PsiElement::isValid)
                                                             .map(StringLiteralExpression::getStringValue);
             customKeywordNameOpt.ifPresent(customKeywordName -> searchForKeywordsInIndex(customKeywordName, project, globalSearchScope, consumer));
-        } else if (element instanceof KeywordDefinition keywordDefinition && keywordDefinition.isValid()) {
-            String keywordName = keywordDefinition.getName();
-            if (keywordName != null) {
+        } else if (element instanceof RobotUserKeywordStatement userKeywordStatement) {
+            if (userKeywordStatement.isValid()) {
+                String keywordName = userKeywordStatement.getName();
                 searchForKeywordsInIndex(keywordName, project, globalSearchScope, consumer);
             }
         }
@@ -60,10 +64,10 @@ public class RobotKeywordReferenceSearch extends QueryExecutorBase<PsiReference,
                                                     GlobalSearchScope globalSearchScope,
                                                     @NotNull Processor<? super PsiReference> consumer) {
         KeywordStatementNameIndex keywordStatementNameIndex = KeywordStatementNameIndex.getInstance();
-        Collection<KeywordStatement> keywordStatements = keywordStatementNameIndex.getKeywordStatements(keywordName, project, globalSearchScope);
-        for (KeywordStatement keywordStatement : keywordStatements) {
+        Collection<RobotKeywordCall> keywordStatements = keywordStatementNameIndex.getKeywordCalls(keywordName, project, globalSearchScope);
+        for (RobotKeywordCall keywordStatement : keywordStatements) {
             if (keywordStatement.isValid()) {
-                KeywordInvokable invokable = keywordStatement.getInvokable();
+                RobotKeywordCallId invokable = keywordStatement.getKeywordCallId();
                 if (!consumer.process(invokable.getReference())) {
                     return true;
                 }

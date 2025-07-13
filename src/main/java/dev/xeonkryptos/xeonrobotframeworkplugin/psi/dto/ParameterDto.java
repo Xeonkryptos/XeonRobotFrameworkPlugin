@@ -1,9 +1,12 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.psi.dto;
 
+import dev.xeonkryptos.xeonrobotframeworkplugin.ide.config.RobotOptionsProvider;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.DefinedParameter;
 import com.intellij.psi.PsiElement;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.text.Collator;
 
 public class ParameterDto implements DefinedParameter {
 
@@ -19,7 +22,7 @@ public class ParameterDto implements DefinedParameter {
     public ParameterDto(@NotNull PsiElement reference, String name, String defaultValue, boolean keywordContainer) {
         this.reference = reference;
         this.name = name.trim();
-        this.defaultValue = defaultValue;
+        this.defaultValue = defaultValue != null && !defaultValue.trim().isEmpty() ? defaultValue : null;
         this.keywordContainer = keywordContainer;
     }
 
@@ -38,6 +41,13 @@ public class ParameterDto implements DefinedParameter {
     @Override
     public boolean isKeywordContainer() {
         return keywordContainer;
+    }
+
+    @Override
+    public boolean matches(@NotNull String parameterName) {
+        RobotOptionsProvider robotOptionsProvider = RobotOptionsProvider.getInstance(reference.getProject());
+        Collator parameterNameCollator = robotOptionsProvider.getParameterNameCollator();
+        return parameterNameCollator.equals(this.name, parameterName);
     }
 
     @NotNull

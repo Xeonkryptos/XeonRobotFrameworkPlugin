@@ -1,10 +1,7 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.ide.misc;
 
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTokenTypes;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.Heading;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotStatement;
 import com.intellij.lang.ASTNode;
-import com.intellij.lang.folding.FoldingBuilder;
+import com.intellij.lang.folding.FoldingBuilderEx;
 import com.intellij.lang.folding.FoldingDescriptor;
 import com.intellij.navigation.ItemPresentation;
 import com.intellij.navigation.NavigationItem;
@@ -14,7 +11,12 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.TextRange;
 import com.intellij.psi.PsiComment;
 import com.intellij.psi.PsiDocumentManager;
+import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
+import com.intellij.psi.tree.IElementType;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotStatement;
+import dev.xeonkryptos.xeonrobotframeworkplugin.util.GlobalConstants;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -22,30 +24,36 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
-public class RobotFoldingBuilder implements FoldingBuilder, DumbAware {
+public class RobotFoldingBuilder extends FoldingBuilderEx implements DumbAware {
+
+    private static final Set<IElementType> CONTROL_STRUCTURE_TOKENS = Set.of(RobotTypes.WHILE,
+                                                                             RobotTypes.FOR,
+                                                                             RobotTypes.FOR_IN,
+                                                                             RobotTypes.VAR,
+                                                                             RobotTypes.GIVEN,
+                                                                             RobotTypes.WHEN,
+                                                                             RobotTypes.THEN,
+                                                                             RobotTypes.AND,
+                                                                             RobotTypes.BUT,
+                                                                             RobotTypes.IF,
+                                                                             RobotTypes.ELSE_IF,
+                                                                             RobotTypes.ELSE,
+                                                                             RobotTypes.TRY,
+                                                                             RobotTypes.EXCEPT,
+                                                                             RobotTypes.FINALLY,
+                                                                             RobotTypes.END,
+                                                                             RobotTypes.RETURN,
+                                                                             RobotTypes.GROUP,
+                                                                             RobotTypes.BREAK,
+                                                                             RobotTypes.CONTINUE);
 
     @Override
-    public FoldingDescriptor @NotNull [] buildFoldRegions(@NotNull ASTNode node, @NotNull Document document) {
+    public FoldingDescriptor @NotNull [] buildFoldRegions(@NotNull PsiElement psiElement, @NotNull Document document, boolean quick) {
         List<FoldingDescriptor> descriptors = new ArrayList<>();
-        try {
-            this.appendDescriptors(node, descriptors);
-            return this.processDescriptors(descriptors).toArray(new FoldingDescriptor[0]);
-        } catch (Throwable e) {
-            return descriptors.toArray(new FoldingDescriptor[0]);
-        }
-    }
-
-    private static int computeOffset(ASTNode node) {
-        Project project = node.getPsi().getProject();
-        PsiFile containingFile = node.getPsi().getContainingFile();
-        Document document = PsiDocumentManager.getInstance(project).getDocument(containingFile);
-        if (document != null) {
-            int lineNumber = document.getLineNumber(node.getTextRange().getStartOffset());
-            return node.getTextRange().getStartOffset() - document.getLineStartOffset(lineNumber);
-        } else {
-            return -1;
-        }
+        appendDescriptors(psiElement, descriptors);
+        return processDescriptors(descriptors).toArray(FoldingDescriptor.EMPTY_ARRAY);
     }
 
     private Collection<FoldingDescriptor> processDescriptors(Collection<FoldingDescriptor> descriptors) {
@@ -54,7 +62,7 @@ public class RobotFoldingBuilder implements FoldingBuilder, DumbAware {
         LinkedList<LinkedList<FoldingDescriptor>> groupedComments = new LinkedList<>();
 
         for (FoldingDescriptor descriptor : descriptors) {
-            if (descriptor.getElement().getPsi() instanceof PsiComment) {
+            if (descriptor.getElement().getElementType() == RobotTypes.COMMENT) {
                 if (count > 0) {
                     groupedComments.getLast().add(descriptor);
                 } else {
@@ -80,7 +88,7 @@ public class RobotFoldingBuilder implements FoldingBuilder, DumbAware {
         }
 
         for (FoldingDescriptor descriptor : descriptors) {
-            if (!descriptor.getElement().getText().contains("\n") && !descriptor.getElement().getElementType().equals(RobotTokenTypes.SYNTAX_MARKER)) {
+            if (!descriptor.getElement().getText().contains("\n") && !CONTROL_STRUCTURE_TOKENS.contains(descriptor.getElement().getElementType())) {
                 descriptorsCopy.remove(descriptor);
             }
         }
@@ -89,7 +97,7 @@ public class RobotFoldingBuilder implements FoldingBuilder, DumbAware {
 
         for (int i = 0; i < finalDescriptors.size(); i++) {
             ASTNode element = finalDescriptors.get(i).getElement();
-            if (element.getElementType().equals(RobotTokenTypes.SYNTAX_MARKER) && !element.getText().equals("END")) {
+            if (CONTROL_STRUCTURE_TOKENS.contains(element.getElementType()) && element.getElementType() != RobotTypes.END) {
                 int nextIndex = i + 1;
                 if (nextIndex >= finalDescriptors.size()) {
                     break;
@@ -99,7 +107,8 @@ public class RobotFoldingBuilder implements FoldingBuilder, DumbAware {
                 FoldingDescriptor endDescriptor = null;
                 for (FoldingDescriptor descriptor : finalDescriptors.subList(nextIndex, finalDescriptors.size())) {
                     ASTNode nextElement = descriptor.getElement();
-                    if (nextElement.getElementType().equals(RobotTokenTypes.SYNTAX_MARKER) && nextElement.getText().equals("END") && computeOffset(element) == computeOffset(nextElement)) {
+                    if (CONTROL_STRUCTURE_TOKENS.contains(nextElement.getElementType()) && nextElement.getElementType() == RobotTypes.END
+                        && computeOffset(element) == computeOffset(nextElement)) {
                         endDescriptor = descriptor;
                         combinedRange = element.getTextRange().union(nextElement.getTextRange());
                         break;
@@ -121,16 +130,38 @@ public class RobotFoldingBuilder implements FoldingBuilder, DumbAware {
         return finalDescriptors;
     }
 
-    private void appendDescriptors(ASTNode node, Collection<FoldingDescriptor> descriptors) {
-        if (node.getPsi() instanceof RobotStatement || node.getPsi() instanceof PsiComment) {
-            try {
-                descriptors.add(new FoldingDescriptor(node, node.getTextRange()));
-            } catch (Throwable ignored) {
+    private static int computeOffset(ASTNode node) {
+        PsiElement element = node.getPsi();
+        Project project = element.getProject();
+        PsiFile containingFile = element.getContainingFile();
+        Document document = PsiDocumentManager.getInstance(project).getDocument(containingFile);
+        if (document != null) {
+            TextRange textRange = node.getTextRange();
+            int startOffset = textRange.getStartOffset();
+            int lineNumber = document.getLineNumber(startOffset);
+            return startOffset - document.getLineStartOffset(lineNumber);
+        } else {
+            return -1;
+        }
+    }
+
+    private void appendDescriptors(PsiElement element, Collection<FoldingDescriptor> descriptors) {
+        if (element instanceof RobotStatement || element instanceof PsiComment) {
+            TextRange textRange = element.getTextRange();
+            PsiElement lastChild = element.getLastChild();
+            while (lastChild != null) {
+                if (lastChild.getNode().getElementType() == RobotTypes.EOL) {
+                    int eolLength = lastChild.getTextRange().getLength();
+                    textRange = textRange.grown(-eolLength);
+                    break;
+                }
+                lastChild = lastChild.getLastChild();
             }
+            descriptors.add(new FoldingDescriptor(element, textRange));
         }
 
-        for (ASTNode childNode = node.getFirstChildNode(); childNode != null; childNode = childNode.getTreeNext()) {
-            this.appendDescriptors(childNode, descriptors);
+        for (PsiElement child = element.getFirstChild(); child != null; child = child.getNextSibling()) {
+            appendDescriptors(child, descriptors);
         }
     }
 
@@ -139,14 +170,14 @@ public class RobotFoldingBuilder implements FoldingBuilder, DumbAware {
     public String getPlaceholderText(@NotNull ASTNode node) {
         ItemPresentation presentation;
         if ((presentation = ((NavigationItem) node.getPsi()).getPresentation()) != null) {
-            return RobotTokenTypes.SYNTAX_MARKER.equals(node.getElementType()) ? presentation.getPresentableText() + " ..." : presentation.getPresentableText();
+            return CONTROL_STRUCTURE_TOKENS.contains(node.getElementType()) ? presentation.getPresentableText() + " ..." : presentation.getPresentableText();
         } else {
-            return "...";
+            return GlobalConstants.ELLIPSIS;
         }
     }
 
     @Override
     public boolean isCollapsedByDefault(@NotNull ASTNode node) {
-        return node.getPsi() instanceof Heading && ((Heading) node.getPsi()).isSettings();
+        return node.getElementType() == RobotTypes.SETTINGS_SECTION;
     }
 }

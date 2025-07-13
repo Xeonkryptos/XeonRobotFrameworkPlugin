@@ -120,7 +120,10 @@ public enum KeywordCompletionModification {
         return "\n" + indentationWhitespace + GlobalConstants.ELLIPSIS + GlobalConstants.DEFAULT_INDENTATION;
     }
 
-    public static boolean isKeywordStartsWithModifier(@NotNull String keywordName) {
+    public static boolean isKeywordStartsWithModifier(String keywordName) {
+        if (keywordName == null || keywordName.isEmpty()) {
+            return false;
+        }
         return Arrays.stream(values())
                      .map(KeywordCompletionModification::getIdentifier)
                      .filter(Objects::nonNull)

@@ -14,38 +14,34 @@ import com.intellij.util.ProcessingContext;
 import dev.xeonkryptos.xeonrobotframeworkplugin.ide.config.RobotOptionsProvider;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.dto.ImportType;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.DefinedVariable;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.KeywordDefinition;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.KeywordFile;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.Parameter;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotFile;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLocalSetting;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTaskStatement;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTestCaseStatement;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotUserKeywordStatement;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.visitor.RobotInStatementVariableCollector;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.visitor.RobotSectionVariablesCollector;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
 import java.util.Optional;
+import java.util.Set;
 
 class VariableCompletionProvider extends CompletionProvider<CompletionParameters> {
 
+    private static final Set<String> RESTRICTED_VARIABLE_COMPLETION_LOCAL_SETTING_NAMES = Set.of("[Arguments]", "[Documentation]", "[Tags]");
+
     @Override
     protected void addCompletions(@NotNull CompletionParameters parameters, @NotNull ProcessingContext context, @NotNull CompletionResultSet result) {
-        PsiElement psiElement = parameters.getPosition();
-        Parameter parameter = PsiTreeUtil.getParentOfType(psiElement, Parameter.class);
-        if (parameter != null) {
-            // In parameter context, the prefix usually contains the parameter name, too. For finding and filtering variable names, we need to
-            // remove the parameter name from the prefix.
-            String prefix = result.getPrefixMatcher().getPrefix();
-            String newPrefix;
-            if (prefix.startsWith("=")) {
-                newPrefix = prefix.substring(1);
-            } else if (prefix.startsWith(parameter.getParameterName() + "=")) {
-                int parameterDefinitionLength = (parameter.getParameterName() + "=").length();
-                newPrefix = prefix.substring(parameterDefinitionLength);
-            } else {
-                newPrefix = prefix;
-            }
-            result = result.withPrefixMatcher(newPrefix);
+        RobotLocalSetting localSettingElement = PsiTreeUtil.getParentOfType(parameters.getOriginalPosition(), RobotLocalSetting.class);
+        if (localSettingElement != null && RESTRICTED_VARIABLE_COMPLETION_LOCAL_SETTING_NAMES.contains(localSettingElement.getName())) {
+            return;
         }
 
+        PsiElement psiElement = parameters.getPosition();
         addDefinedVariablesFromImportedFiles(result, parameters.getOriginalFile(), psiElement);
+        addDefinedVariablesFromOwnSection(result, psiElement);
         addDefinedVariablesFromKeyword(result, psiElement);
     }
 
@@ -56,7 +52,7 @@ class VariableCompletionProvider extends CompletionProvider<CompletionParameters
                             element).forEach(lookupElement -> lookupElement.putUserData(CompletionKeys.ROBOT_LOOKUP_ELEMENT_TYPE,
                                                                                         RobotLookupElementType.VARIABLE));
         boolean allowTransitiveImports = RobotOptionsProvider.getInstance(file.getProject()).allowTransitiveImports();
-        for (KeywordFile importedFile : robotFile.getImportedFiles(allowTransitiveImports)) {
+        for (KeywordFile importedFile : robotFile.collectImportedFiles(allowTransitiveImports)) {
             if (importedFile.getImportType() == ImportType.VARIABLES || importedFile.getImportType() == ImportType.RESOURCE) {
                 addDefinedVariables(importedFile.getDefinedVariables(),
                                     resultSet,
@@ -66,10 +62,28 @@ class VariableCompletionProvider extends CompletionProvider<CompletionParameters
         }
     }
 
+    private void addDefinedVariablesFromOwnSection(@NotNull CompletionResultSet resultSet, @NotNull PsiElement element) {
+        PsiElement robotStatement = PsiTreeUtil.getParentOfType(element, RobotTestCaseStatement.class, RobotTaskStatement.class);
+        if (robotStatement == null) {
+            return;
+        }
+
+        RobotInStatementVariableCollector variableCollector = new RobotInStatementVariableCollector(element);
+        robotStatement.accept(variableCollector);
+        Collection<DefinedVariable> definedVariables = variableCollector.getAvailableVariables();
+        if (!definedVariables.isEmpty()) {
+            addDefinedVariables(definedVariables, resultSet, element).forEach(lookupElement -> lookupElement.putUserData(CompletionKeys.ROBOT_LOOKUP_ELEMENT_TYPE,
+                                                                                                                         RobotLookupElementType.VARIABLE));
+        }
+    }
+
     private void addDefinedVariablesFromKeyword(@NotNull CompletionResultSet resultSet, @NotNull PsiElement element) {
-        KeywordDefinition keywordDefinition = PsiTreeUtil.getParentOfType(element, KeywordDefinition.class);
-        if (keywordDefinition != null) {
-            for (DefinedVariable variable : keywordDefinition.getDeclaredVariables()) {
+        RobotUserKeywordStatement userKeywordStatement = PsiTreeUtil.getParentOfType(element, RobotUserKeywordStatement.class);
+        if (userKeywordStatement != null) {
+            RobotSectionVariablesCollector variablesCollector = new RobotSectionVariablesCollector();
+            userKeywordStatement.accept(variablesCollector);
+            Collection<DefinedVariable> definedVariables = variablesCollector.getVariables();
+            for (DefinedVariable variable : definedVariables) {
                 CompletionProviderUtils.addLookupElement(variable, Nodes.Variable, false, TailTypes.noneType(), resultSet).ifPresent(lookupElement -> {
                     lookupElement.putUserData(CompletionKeys.ROBOT_LOOKUP_CONTEXT, RobotLookupContext.WITHIN_KEYWORD_STATEMENT);
                     lookupElement.putUserData(CompletionKeys.ROBOT_LOOKUP_ELEMENT_TYPE, RobotLookupElementType.VARIABLE);

@@ -1,14 +1,15 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.ide.execution.config;
 
-import dev.xeonkryptos.xeonrobotframeworkplugin.ide.icons.RobotIcons;
 import com.intellij.execution.configurations.ConfigurationFactory;
 import com.intellij.execution.configurations.ConfigurationType;
 import com.intellij.execution.configurations.ConfigurationTypeUtil;
+import com.intellij.openapi.project.DumbAware;
+import dev.xeonkryptos.xeonrobotframeworkplugin.ide.icons.RobotIcons;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.Icon;
 
-public class RobotRunConfigurationType implements ConfigurationType {
+public class RobotRunConfigurationType implements ConfigurationType, DumbAware {
 
     private final RobotConfigurationFactory configurationFactory = new RobotConfigurationFactory(this);
 
@@ -45,10 +46,5 @@ public class RobotRunConfigurationType implements ConfigurationType {
 
     public final RobotConfigurationFactory getConfigurationFactory() {
         return this.configurationFactory;
-    }
-
-    @Override
-    public boolean isDumbAware() {
-        return true;
     }
 }

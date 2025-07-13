@@ -3,12 +3,13 @@ package dev.xeonkryptos.xeonrobotframeworkplugin.ide.inspections.complexity;
 import com.intellij.psi.PsiElement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.RobotBundle;
 import dev.xeonkryptos.xeonrobotframeworkplugin.ide.inspections.SimpleRobotInspection;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotStubTokenTypes;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.Variable;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariable;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableId;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NotNull;
 
 public class RobotNestedVariable extends SimpleRobotInspection {
+
     @Nls
     @NotNull
     public String getDisplayName() {
@@ -17,8 +18,11 @@ public class RobotNestedVariable extends SimpleRobotInspection {
 
     @Override
     public final boolean skip(PsiElement element) {
-        PsiElement parentElement = element.getParent();
-        return element.getNode().getElementType() != RobotStubTokenTypes.VARIABLE || !(parentElement instanceof Variable) || !((Variable) parentElement).isNested();
+        if (element instanceof RobotVariable variable) {
+            PsiElement nameIdentifier = variable.getNameIdentifier();
+            return nameIdentifier == null || ((RobotVariableId) nameIdentifier).getVariable() == null;
+        }
+        return true;
     }
 
     @Override

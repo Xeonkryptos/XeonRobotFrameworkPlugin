@@ -3,7 +3,6 @@ package dev.xeonkryptos.xeonrobotframeworkplugin.util;
 import dev.xeonkryptos.xeonrobotframeworkplugin.MyLogger;
 import dev.xeonkryptos.xeonrobotframeworkplugin.ide.config.RobotOptionsProvider;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.dto.ParameterDto;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.DefinedParameter;
 import com.intellij.openapi.application.PathManager;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModuleUtilCore;
@@ -19,6 +18,7 @@ import com.jetbrains.python.psi.PyClass;
 import com.jetbrains.python.psi.PyFunction;
 import com.jetbrains.python.psi.PyParameter;
 import com.jetbrains.python.sdk.PythonSdkUtil;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.DefinedParameter;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

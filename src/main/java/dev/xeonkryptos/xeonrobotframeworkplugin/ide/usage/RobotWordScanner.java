@@ -1,22 +1,23 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.ide.usage;
 
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotLexer;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotStubTokenTypes;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTokenTypes;
 import com.intellij.lang.cacheBuilder.DefaultWordsScanner;
 import com.intellij.psi.tree.TokenSet;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotLexerAdapter;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes;
 
 public class RobotWordScanner extends DefaultWordsScanner {
 
-    private static final TokenSet IDENTIFIERS = TokenSet.create(RobotStubTokenTypes.KEYWORD_DEFINITION,
-                                                                RobotStubTokenTypes.KEYWORD_STATEMENT,
-                                                                RobotTokenTypes.PARAMETER,
-                                                                RobotStubTokenTypes.VARIABLE_DEFINITION);
-    private static final TokenSet COMMENTS = TokenSet.create(RobotTokenTypes.COMMENT);
-    private static final TokenSet LITERALS = TokenSet.create(RobotStubTokenTypes.ARGUMENT);
+    private static final TokenSet IDENTIFIERS = TokenSet.create(RobotTypes.USER_KEYWORD_STATEMENT,
+                                                                RobotTypes.KEYWORD_CALL,
+                                                                RobotTypes.PARAMETER,
+                                                                RobotTypes.INLINE_VARIABLE_STATEMENT,
+                                                                RobotTypes.KEYWORD_VARIABLE_STATEMENT,
+                                                                RobotTypes.SINGLE_VARIABLE_STATEMENT);
+    private static final TokenSet COMMENTS = TokenSet.create(RobotTypes.COMMENT);
+    private static final TokenSet LITERALS = TokenSet.create(RobotTypes.POSITIONAL_ARGUMENT);
 
     public RobotWordScanner() {
-        super(new RobotLexer(), IDENTIFIERS, COMMENTS, LITERALS);
+        super(new RobotLexerAdapter(), IDENTIFIERS, COMMENTS, LITERALS);
 
         setMayHaveFileRefsInLiterals(true);
     }

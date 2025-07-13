@@ -1,12 +1,12 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.ide.usage;
 
 import dev.xeonkryptos.xeonrobotframeworkplugin.RobotBundle;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.KeywordInvokable;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.KeywordStatement;
 import com.intellij.psi.PsiElement;
 import com.intellij.usages.UsageTarget;
 import com.intellij.usages.impl.rules.UsageType;
 import com.intellij.usages.impl.rules.UsageTypeProviderEx;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCall;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCallId;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -23,7 +23,7 @@ public class RobotUsageTypeProvider implements UsageTypeProviderEx {
     @Nullable
     @Override
     public UsageType getUsageType(PsiElement element, UsageTarget @NotNull [] targets) {
-        if (element instanceof KeywordStatement || element instanceof KeywordInvokable) {
+        if (element instanceof RobotKeywordCall || element instanceof RobotKeywordCallId) {
             return KEYWORD_USAGE_TYPE;
         }
         return null;

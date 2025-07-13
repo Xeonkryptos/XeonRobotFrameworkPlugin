@@ -1,38 +1,43 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.psi.ref;
 
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.DefinedParameter;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.KeywordStatement;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.ParameterId;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiReference;
 import com.intellij.psi.PsiReferenceBase;
 import com.intellij.psi.impl.source.resolve.ResolveCache;
 import com.intellij.psi.util.PsiTreeUtil;
+import dev.xeonkryptos.xeonrobotframeworkplugin.ide.config.RobotOptionsProvider;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.DefinedParameter;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCall;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotParameterId;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.text.Collator;
 import java.util.Comparator;
 
-public class RobotParameterReference extends PsiReferenceBase<ParameterId> implements PsiReference {
+public class RobotParameterReference extends PsiReferenceBase<RobotParameterId> implements PsiReference {
 
-    public RobotParameterReference(@NotNull ParameterId parameter) {
+    public RobotParameterReference(@NotNull RobotParameterId parameter) {
         super(parameter, false);
     }
 
     @Nullable
     @Override
     public PsiElement resolve() {
-        ParameterId parameterId = getElement();
+        RobotParameterId parameterId = getElement();
         ResolveCache resolveCache = ResolveCache.getInstance(parameterId.getProject());
         return resolveCache.resolveWithCaching(this, (robotParameterReference, incompleteCode) -> {
+            RobotOptionsProvider robotOptionsProvider = RobotOptionsProvider.getInstance(parameterId.getProject());
+            Collator parameterNameCollator = robotOptionsProvider.getParameterNameCollator();
+
             String parameterName = parameterId.getName();
-            KeywordStatement keywordStatement = PsiTreeUtil.getParentOfType(parameterId, KeywordStatement.class);
+            RobotKeywordCall keywordStatement = PsiTreeUtil.getParentOfType(parameterId, RobotKeywordCall.class);
             PsiElement reference = null;
-            if (keywordStatement != null && parameterName != null) {
+            if (keywordStatement != null) {
                 reference = keywordStatement.getAvailableParameters()
                                             .stream()
-                                            .filter(param -> parameterName.equals(param.getLookup()) || param.isKeywordContainer())
+                                            .filter(param -> parameterNameCollator.equals(parameterName, param.getLookup()) || param.isKeywordContainer())
                                             .min(Comparator.comparing(DefinedParameter::isKeywordContainer, (kc1, kc2) -> kc1 == kc2 ? 0 : kc1 ? 1 : -1))
                                             .map(DefinedParameter::reference)
                                             .orElse(null);

@@ -2,17 +2,16 @@ package dev.xeonkryptos.xeonrobotframeworkplugin.ide.inspections.cleanup;
 
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
-import com.intellij.psi.util.PsiTreeUtil;
 import dev.xeonkryptos.xeonrobotframeworkplugin.RobotBundle;
 import dev.xeonkryptos.xeonrobotframeworkplugin.ide.inspections.SimpleRobotInspection;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotFeatureFileType;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.Import;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.PositionalArgument;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotFile;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotPositionalArgument;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotResourceImportGlobalSetting;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.visitor.RobotImportStatementsCollector;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -28,35 +27,28 @@ public class RobotImportNotUsed extends SimpleRobotInspection {
     @Override
     public final boolean skip(PsiElement element) {
         if (element.getContainingFile().getFileType() != RobotFeatureFileType.getInstance()) {
-            // TODO: Workaround for now. Don't "analyze" imports in Resource files. To be able to do that a more sophisticated usage analysis is needed.
+            // TODO: Workaround for now. Don't "analyze" imports of other robot files. To be able to do that a more sophisticated usage analysis is needed.
             return true;
         }
-        if (element instanceof PositionalArgument positionalArgument) {
-            PsiElement parentElement = positionalArgument.getParent();
-            if (parentElement instanceof Import importElem && importElem.isResource()) {
-                PsiElement resolvedElement = positionalArgument.getReference().resolve();
-                if (resolvedElement instanceof RobotFile) {
-                    Collection<Import> importElements = PsiTreeUtil.findChildrenOfType(positionalArgument.getContainingFile(), Import.class);
-                    List<String> importIdentifiers = new ArrayList<>(importElements.size());
+        if (element instanceof RobotResourceImportGlobalSetting importElem) {
+            RobotPositionalArgument positionalArgument = importElem.getImportedFile();
+            PsiElement resolvedElement = positionalArgument.getReference().resolve();
+            if (resolvedElement instanceof RobotFile) {
+                RobotImportStatementsCollector collector = new RobotImportStatementsCollector();
+                resolvedElement.acceptChildren(collector);
+                List<String> importIdentifiers = collector.getImportedFiles();
 
-                    for (Import importElement : importElements) {
-                        String importText = importElement.getImportText();
-                        importIdentifiers.add(importText);
-                    }
+                String importText = positionalArgument.getText();
+                int firstOccurrenceIndex = importIdentifiers.indexOf(importText);
+                int lastOccurrenceIndex = importIdentifiers.lastIndexOf(importText);
 
-                    String importText = importElem.getImportText();
-                    int firstOccurrenceIndex = importIdentifiers.indexOf(importText);
-                    int lastOccurrenceIndex = importIdentifiers.lastIndexOf(importText);
-
-                    List<Import> importsCopy = new ArrayList<>(importElements);
-                    if (firstOccurrenceIndex != lastOccurrenceIndex && importsCopy.indexOf(parentElement) != firstOccurrenceIndex) {
-                        return false;
-                    }
-
-                    Collection<PsiFile> filesFromInvokedKeywordsAndVariables = ((RobotFile) positionalArgument.getContainingFile()).getFilesFromInvokedKeywordsAndVariables();
-                    PsiFile importedFile = resolvedElement.getContainingFile();
-                    return filesFromInvokedKeywordsAndVariables.contains(importedFile);
+                if (firstOccurrenceIndex != lastOccurrenceIndex && collector.getImportElements().indexOf(importElem) != firstOccurrenceIndex) {
+                    return false;
                 }
+
+                Collection<PsiFile> filesFromInvokedKeywordsAndVariables = ((RobotFile) positionalArgument.getContainingFile()).getFilesFromInvokedKeywordsAndVariables();
+                PsiFile importedFile = resolvedElement.getContainingFile();
+                return filesFromInvokedKeywordsAndVariables.contains(importedFile);
             }
         }
         return true;

@@ -1,100 +1,75 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.ide.completion;
 
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotStubTokenTypes;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTokenTypes;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotFile;
 import com.intellij.codeInsight.completion.CompletionContributor;
 import com.intellij.codeInsight.completion.CompletionParameters;
 import com.intellij.codeInsight.completion.CompletionResultSet;
 import com.intellij.codeInsight.completion.CompletionType;
-import com.intellij.patterns.PlatformPatterns;
-import com.intellij.patterns.PsiElementPattern;
-import com.intellij.psi.PsiElement;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotFile;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotImportGlobalSettingExpression;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLibraryImportGlobalSetting;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotParameter;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotResourceImportGlobalSetting;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotSettingsSection;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTaskStatement;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTestCaseStatement;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotUserKeywordStatement;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariablesSection;
 import org.jetbrains.annotations.NotNull;
+
+import static com.intellij.patterns.PlatformPatterns.psiComment;
+import static com.intellij.patterns.PlatformPatterns.psiElement;
+import static com.intellij.patterns.StandardPatterns.instanceOf;
+import static com.intellij.patterns.StandardPatterns.or;
+import static dev.xeonkryptos.xeonrobotframeworkplugin.ide.completion.RobotPatterns.atFirstPositionOf;
 
 public class RobotCompletionContributor extends CompletionContributor {
 
     public RobotCompletionContributor() {
+        extend(CompletionType.BASIC, psiElement().andNot(psiComment()).inFile(psiElement(RobotFile.class)), new SectionCompletionProvider());
         extend(CompletionType.BASIC,
-               PlatformPatterns.psiElement()
-                               .andNot(PlatformPatterns.psiComment())
-                               .andNot(withTagsWithoutCodeCompletionSupport())
-                               .andNot(withArgumentInKeywordStatement())
-                               .andNot(PlatformPatterns.psiElement(RobotTokenTypes.SYNTAX_MARKER))
-                               .inFile(PlatformPatterns.psiElement(RobotFile.class)),
-               new SectionCompletionProvider());
-        extend(CompletionType.BASIC,
-               PlatformPatterns.psiElement()
-                               .andNot(PlatformPatterns.psiComment())
-                               .andNot(withTagsWithoutCodeCompletionSupport())
-                               .andNot(PlatformPatterns.psiElement(RobotStubTokenTypes.ARGUMENT))
-                               .inFile(PlatformPatterns.psiElement(RobotFile.class)),
+               psiElement().andNot(or(psiComment(), psiElement(RobotTypes.LITERAL_CONSTANT), psiElement(RobotTypes.VARIABLE_BODY)))
+                           .inside(true, instanceOf(RobotSettingsSection.class))
+                           .inFile(psiElement(RobotFile.class)),
                new SettingsKeywordCompletionProvider());
         extend(CompletionType.BASIC,
-               PlatformPatterns.psiElement()
-                               .andNot(PlatformPatterns.psiComment())
-                               .andNot(withTagsWithoutCodeCompletionSupport())
-                               .andNot(PlatformPatterns.psiElement(RobotStubTokenTypes.ARGUMENT))
-                               .andNot(PlatformPatterns.psiElement(RobotTokenTypes.PARAMETER))
-                               .inFile(PlatformPatterns.psiElement(RobotFile.class)),
-               new BracketSettingsCompletionProvider());
+               psiElement().andNot(or(psiComment(), psiElement(RobotTypes.LITERAL_CONSTANT), psiElement(RobotTypes.VARIABLE_BODY)))
+                           .inside(true, or(instanceOf(RobotTestCaseStatement.class), instanceOf(RobotTaskStatement.class)))
+                           .inFile(psiElement(RobotFile.class)),
+               new LocalSettingsCompletionProvider());
         extend(CompletionType.BASIC,
-               PlatformPatterns.psiElement()
-                               .andNot(PlatformPatterns.psiComment())
-                               .andNot(withTagsWithoutCodeCompletionSupport())
-                               .and(PlatformPatterns.psiElement(RobotStubTokenTypes.ARGUMENT)
-                                                    .withSuperParent(2, PlatformPatterns.psiElement(RobotTokenTypes.IMPORT)))
-                               .inFile(PlatformPatterns.psiElement(RobotFile.class)),
+               psiElement().andNot(psiComment())
+                           .inside(true, or(instanceOf(RobotLibraryImportGlobalSetting.class), instanceOf(RobotResourceImportGlobalSetting.class)))
+                           .and(psiElement(RobotTypes.LITERAL_CONSTANT).with(atFirstPositionOf(psiElement(RobotImportGlobalSettingExpression.class))))
+                           .inFile(psiElement(RobotFile.class)),
                new ImportCompletionProvider());
         extend(CompletionType.BASIC,
-               PlatformPatterns.psiElement()
-                               .andNot(PlatformPatterns.psiComment())
-                               .andNot(withTagsWithoutCodeCompletionSupport())
-                               .andNot(PlatformPatterns.psiElement(RobotStubTokenTypes.ARGUMENT))
-                               .andNot(PlatformPatterns.psiElement(RobotTokenTypes.PARAMETER))
-                               .inFile(PlatformPatterns.psiElement(RobotFile.class)),
+               psiElement().andNot(or(psiComment(), psiElement(RobotTypes.LITERAL_CONSTANT), psiElement(RobotTypes.VARIABLE_BODY)))
+                           .inside(true, instanceOf(RobotTestCaseStatement.class))
+                           .inFile(psiElement(RobotFile.class)),
                new GherkinCompletionProvider());
         extend(CompletionType.BASIC,
-               PlatformPatterns.psiElement()
-                               .andNot(withTagsWithoutCodeCompletionSupport())
-                               .andNot(PlatformPatterns.psiComment())
-                               .andNot(withArgumentInKeywordStatement())
-                               .inFile(PlatformPatterns.psiElement(RobotFile.class)),
+               psiElement().andNot(or(psiComment(), psiElement(RobotTypes.LITERAL_CONSTANT), psiElement(RobotTypes.VARIABLE_BODY)))
+                           .inside(true,
+                                   or(instanceOf(RobotTestCaseStatement.class),
+                                      instanceOf(RobotUserKeywordStatement.class),
+                                      instanceOf(RobotTaskStatement.class)))
+                           .inFile(psiElement(RobotFile.class)),
                new ControlStructureCompletionProvider());
         extend(CompletionType.BASIC,
-               PlatformPatterns.psiElement()
-                               .andNot(withTagsWithoutCodeCompletionSupport())
-                               .andNot(PlatformPatterns.psiComment())
-                               .andNot(withArgumentInKeywordStatement())
-                               .inFile(PlatformPatterns.psiElement(RobotFile.class)),
-               new KeywordCompletionProvider());
+               // TODO: There are keywords executing other keywords. Keywords are provided as arguments to those keywords.
+               //  Extend code completion to support those keywords and provide code completion for keywords in argument list.
+               psiElement().andNot(or(psiComment(), psiElement(RobotTypes.LITERAL_CONSTANT), psiElement(RobotTypes.VARIABLE_BODY)))
+                           // Exclude keywords suggestions in variables section. It isn't supported to call keywords in variables section.
+                           .andNot(psiElement().inside(RobotVariablesSection.class)).inFile(psiElement(RobotFile.class)), new KeywordCompletionProvider());
         // Provide parameter completions in context of keyword statements
         extend(CompletionType.BASIC,
-               PlatformPatterns.psiElement()
-                               .andNot(PlatformPatterns.psiComment())
-                               .andNot(withTagsWithoutCodeCompletionSupport())
-                               .and(withArgumentInKeywordStatement())
-                               .inFile(PlatformPatterns.psiElement(RobotFile.class)),
+               psiElement(RobotTypes.LITERAL_CONSTANT).andNot(psiElement().inside(true, instanceOf(RobotParameter.class))).inFile(psiElement(RobotFile.class)),
                new KeywordParametersCompletionProvider());
         // Provide completions in context of variables or arguments
         extend(CompletionType.BASIC,
-               PlatformPatterns.psiElement()
-                               .andNot(withTagsWithoutCodeCompletionSupport())
-                               .andOr(PlatformPatterns.psiElement(RobotStubTokenTypes.VARIABLE), PlatformPatterns.psiElement(RobotStubTokenTypes.ARGUMENT))
-                               .inFile(PlatformPatterns.psiElement(RobotFile.class)),
+               psiElement().andOr(psiElement(RobotTypes.LITERAL_CONSTANT), psiElement(RobotTypes.VARIABLE_BODY)).inFile(psiElement(RobotFile.class)),
                new VariableCompletionProvider());
-    }
-
-    private static PsiElementPattern.Capture<PsiElement> withArgumentInKeywordStatement() {
-        return PlatformPatterns.psiElement()
-                               .andOr(PlatformPatterns.psiElement(RobotTokenTypes.PARAMETER), PlatformPatterns.psiElement(RobotStubTokenTypes.ARGUMENT))
-                               .withAncestor(3, PlatformPatterns.psiElement(RobotStubTokenTypes.KEYWORD_STATEMENT));
-    }
-
-    private static PsiElementPattern.Capture<PsiElement> withTagsWithoutCodeCompletionSupport() {
-        return PlatformPatterns.psiElement(RobotStubTokenTypes.ARGUMENT)
-                               .withAncestor(2,
-                                             PlatformPatterns.psiElement(RobotTokenTypes.BRACKET_SETTING).withName("[Documentation]", "[Tags]", "[Arguments]"));
     }
 
     @Override

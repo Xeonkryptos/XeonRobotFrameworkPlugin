@@ -7,29 +7,26 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiReference;
 import dev.xeonkryptos.xeonrobotframeworkplugin.RobotBundle;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotHighlighter;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.Import;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.Variable;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotPositionalArgument;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.visitor.RobotImportElementIdentifier;
 import org.jetbrains.annotations.NotNull;
 
 public class RobotImportAnnotator implements Annotator {
 
     @Override
     public void annotate(@NotNull PsiElement element, @NotNull AnnotationHolder holder) {
-        if (!(element instanceof Import importElement)) {
+        RobotImportElementIdentifier importElementIdentifier = new RobotImportElementIdentifier();
+        element.accept(importElementIdentifier);
+        if (!importElementIdentifier.isImportElement()) {
             return;
         }
 
-        PsiElement[] children = importElement.getChildren();
-        if (children.length != 0) {
-            PsiElement child = children[0];
-            if (!(child.getFirstChild() instanceof Variable)) {
-                PsiReference reference = child.getReference();
-                if (reference == null || reference.resolve() == null) {
-                    holder.newAnnotation(HighlightSeverity.ERROR, RobotBundle.getMessage("annotation.import.not-found")).range(child).create();
-                } else {
-                    holder.newSilentAnnotation(HighlightSeverity.TEXT_ATTRIBUTES).textAttributes(RobotHighlighter.IMPORT_ARGUMENT).range(child).create();
-                }
-            }
+        RobotPositionalArgument positionalArgument = importElementIdentifier.getPositionalArgument();
+        PsiReference reference = positionalArgument.getReference();
+        if (reference.resolve() == null) {
+            holder.newAnnotation(HighlightSeverity.ERROR, RobotBundle.getMessage("annotation.import.not-found")).range(positionalArgument).create();
+        } else {
+            holder.newSilentAnnotation(HighlightSeverity.TEXT_ATTRIBUTES).textAttributes(RobotHighlighter.IMPORT_ARGUMENT).range(positionalArgument).create();
         }
     }
 }

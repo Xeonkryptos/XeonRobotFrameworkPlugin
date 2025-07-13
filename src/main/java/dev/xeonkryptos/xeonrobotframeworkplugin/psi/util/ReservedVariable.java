@@ -72,13 +72,18 @@ public enum ReservedVariable {
     }
 
     @NotNull
-    public static String wrapToScalar(@NotNull String var0) {
-        return String.format(SCALAR, var0);
+    public static String wrapToScalar(@NotNull String content) {
+        return String.format(SCALAR, content);
     }
 
     @NotNull
     public final String getVariable() {
         return this.variable;
+    }
+
+    @NotNull
+    public final String getUnwrappedVariable() {
+        return this.variable.substring(2, this.variable.length() - 1);
     }
 
     @NotNull

@@ -1,14 +1,5 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.psi.ref;
 
-import dev.xeonkryptos.xeonrobotframeworkplugin.ide.completion.KeywordCompletionModification;
-import dev.xeonkryptos.xeonrobotframeworkplugin.util.LookupElementUtil;
-import dev.xeonkryptos.xeonrobotframeworkplugin.ide.RobotTailTypes;
-import dev.xeonkryptos.xeonrobotframeworkplugin.ide.config.RobotOptionsProvider;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.dto.ImportType;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.DefinedKeyword;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.KeywordFile;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.KeywordInvokable;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotFile;
 import com.intellij.codeInsight.TailTypes;
 import com.intellij.codeInsight.lookup.LookupElementBuilder;
 import com.intellij.codeInsight.lookup.TailTypeDecorator;
@@ -17,6 +8,15 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiReferenceBase;
 import com.intellij.psi.impl.source.resolve.ResolveCache;
+import dev.xeonkryptos.xeonrobotframeworkplugin.ide.RobotTailTypes;
+import dev.xeonkryptos.xeonrobotframeworkplugin.ide.completion.KeywordCompletionModification;
+import dev.xeonkryptos.xeonrobotframeworkplugin.ide.config.RobotOptionsProvider;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.dto.ImportType;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.DefinedKeyword;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.KeywordFile;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotFile;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCallId;
+import dev.xeonkryptos.xeonrobotframeworkplugin.util.LookupElementUtil;
 import org.apache.commons.text.WordUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -26,16 +26,16 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
-public class RobotKeywordReference extends PsiReferenceBase<KeywordInvokable> {
+public class RobotKeywordReference extends PsiReferenceBase<RobotKeywordCallId> {
 
-    public RobotKeywordReference(@NotNull KeywordInvokable keyword) {
+    public RobotKeywordReference(@NotNull RobotKeywordCallId keyword) {
         super(keyword, false);
     }
 
     @Nullable
     @Override
     public PsiElement resolve() {
-        KeywordInvokable keywordInvokable = getElement();
+        RobotKeywordCallId keywordInvokable = getElement();
         ResolveCache resolveCache = ResolveCache.getInstance(keywordInvokable.getProject());
         return resolveCache.resolveWithCaching(this, (robotKeywordReference, incompleteCode) -> {
             String keywordInvokableName = keywordInvokable.getName();
@@ -55,7 +55,7 @@ public class RobotKeywordReference extends PsiReferenceBase<KeywordInvokable> {
 
         if (containingFile instanceof RobotFile robotFile) {
             boolean capitalizeKeywords = RobotOptionsProvider.getInstance(containingFile.getProject()).capitalizeKeywords();
-            for (KeywordFile keywordFile : robotFile.getImportedFiles(true)) {
+            for (KeywordFile keywordFile : robotFile.collectImportedFiles(true)) {
                 if (keywordFile.getImportType() == ImportType.LIBRARY && keywordFile.isDifferentNamespace()) {
                     String libraryName = keywordFile.toString();
                     if (keywordPrefix.equalsIgnoreCase(libraryName)) {

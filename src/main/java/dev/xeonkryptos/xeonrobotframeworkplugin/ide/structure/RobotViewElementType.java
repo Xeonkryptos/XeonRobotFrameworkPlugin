@@ -21,7 +21,7 @@ public enum RobotViewElementType {
         protected String getMessage() {
             return RobotBundle.getMessage("action.structureView.show.files");
         }
-    }, Heading {
+    }, Section {
         @Override
         protected Icon getIcon(@Nullable PsiElement element) {
             return RobotIcons.MODELS;

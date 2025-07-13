@@ -21,6 +21,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -148,18 +149,23 @@ public class RobotFileManager {
         return result;
     }
 
-    public static synchronized Collection<DefinedVariable> getGlobalVariables(Project project) {
+    public static Collection<DefinedVariable> getGlobalVariables(Project project) {
         Collection<DefinedVariable> globalVariables = ProjectFileCache.getGlobalVariables(project);
-        if (globalVariables.isEmpty() || globalVariables.size() != ReservedVariable.values().length) {
-            globalVariables.clear();
-            ReservedVariable[] reservedVariables = ReservedVariable.values();
-            for (ReservedVariable reservedVariable : reservedVariables) {
-                PsiElement element = reservedVariable.getReferencedPsiElement(project);
-                if (element != null) {
-                    globalVariables.add(new VariableDto(element, reservedVariable.getVariable(), reservedVariable.getScope()));
+        synchronized (globalVariables) {
+            if (globalVariables.isEmpty() || globalVariables.size() != ReservedVariable.values().length) {
+                globalVariables.clear();
+                ReservedVariable[] reservedVariables = ReservedVariable.values();
+                for (ReservedVariable reservedVariable : reservedVariables) {
+                    PsiElement element = reservedVariable.getReferencedPsiElement(project);
+                    if (element != null) {
+                        globalVariables.add(new VariableDto(element,
+                                                            reservedVariable.getVariable(),
+                                                            reservedVariable.getUnwrappedVariable(),
+                                                            reservedVariable.getScope()));
+                    }
                 }
             }
+            return new ArrayList<>(globalVariables);
         }
-        return globalVariables;
     }
 }

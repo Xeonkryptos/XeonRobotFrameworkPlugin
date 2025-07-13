@@ -1,8 +1,8 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.psi.ref;
 
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.DefinedVariable;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiFile;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.DefinedVariable;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -34,7 +34,9 @@ public class ProjectFileCache {
         Cache cache = CACHE.get(project);
         if (cache != null) {
             cache.ROBOT_SYSTEM_FILE_CACHE.clear();
-            cache.GLOBAL_VARIABLES_CACHE.clear();
+            synchronized (cache.GLOBAL_VARIABLES_CACHE) {
+                cache.GLOBAL_VARIABLES_CACHE.clear();
+            }
         }
     }
 

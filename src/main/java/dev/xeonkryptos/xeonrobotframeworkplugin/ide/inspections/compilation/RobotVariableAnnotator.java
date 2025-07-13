@@ -3,53 +3,80 @@ package dev.xeonkryptos.xeonrobotframeworkplugin.ide.inspections.compilation;
 import com.intellij.lang.annotation.AnnotationHolder;
 import com.intellij.lang.annotation.Annotator;
 import com.intellij.lang.annotation.HighlightSeverity;
-import com.intellij.lang.injection.InjectedLanguageManager;
 import com.intellij.openapi.project.DumbAware;
 import com.intellij.psi.PsiElement;
-import com.intellij.psi.PsiReference;
+import com.intellij.psi.PsiPolyVariantReference;
 import com.intellij.psi.util.PsiTreeUtil;
 import dev.xeonkryptos.xeonrobotframeworkplugin.RobotBundle;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.KeywordStatement;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.PositionalArgument;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.Variable;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.DefinedVariable;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotEnvironmentVariable;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLocalSetting;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotPythonExpression;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariable;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableDefinition;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableId;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVisitor;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.ref.RobotFileManager;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.List;
-import java.util.regex.Matcher;
+import java.util.Collection;
 import java.util.regex.Pattern;
 
 public class RobotVariableAnnotator implements Annotator, DumbAware {
 
-    private static final Pattern VARIABLE_PATTERN = Pattern.compile("^\\$\\{(.*?)}$");
+    private static final Pattern NUMBERS_PATTERN = Pattern.compile("\\d+");
 
     @Override
     public void annotate(@NotNull PsiElement element, @NotNull AnnotationHolder holder) {
-        if (!(element instanceof Variable variable) || variable.isEmpty() || variable.isNested() || variable.isEnvironmentVariable()) {
+        if (!(element instanceof RobotVariable variable) || element instanceof RobotEnvironmentVariable) {
             return;
         }
-        PsiReference reference = element.getReference();
-        if (reference.resolve() != null) {
+        String variableName = variable.getName();
+        if (variableName == null || variableName.isBlank() || NUMBERS_PATTERN.matcher(variableName).matches()) {
+            return;
+        }
+        Collection<DefinedVariable> globalVariables = RobotFileManager.getGlobalVariables(element.getProject());
+        if (globalVariables.stream().anyMatch(globalVariable -> globalVariable.matches(variableName))) {
+            return;
+        }
+        RobotLocalSetting localSetting = PsiTreeUtil.getParentOfType(element, RobotLocalSetting.class);
+        if (localSetting != null && "[Arguments]".equalsIgnoreCase(localSetting.getName())) {
             return;
         }
 
-        InjectedLanguageManager injectedLanguageManager = InjectedLanguageManager.getInstance(element.getProject());
-        String elementText = injectedLanguageManager.getUnescapedText(element);
-        Matcher matcher = VARIABLE_PATTERN.matcher(elementText);
-        if (matcher.matches()) {
-            try {
-                Double.parseDouble(matcher.group(1));
-                return;
-            } catch (NumberFormatException ignored) {
-            }
+        RobotVariableId nameIdentifier = variable.getNameIdentifier();
+        if (nameIdentifier != null && ((PsiPolyVariantReference) nameIdentifier.getReference()).multiResolve(false).length > 0) {
+            return;
+        }
+        RobotVariableAnalyser robotVariableAnalyser = new RobotVariableAnalyser();
+        variable.accept(robotVariableAnalyser);
+        if (!robotVariableAnalyser.variableDefinitionAsParent && !robotVariableAnalyser.pythonExpressionVariableBodyFound) {
+            holder.newAnnotation(HighlightSeverity.WEAK_WARNING, RobotBundle.getMessage("annotation.variable.not-found")).range(element).create();
+        }
+    }
+
+    private static final class RobotVariableAnalyser extends RobotVisitor {
+
+        private boolean variableDefinitionAsParent = false;
+        private boolean pythonExpressionVariableBodyFound = false;
+
+        @Override
+        public void visitVariableDefinition(@NotNull RobotVariableDefinition o) {
+            variableDefinitionAsParent = true;
         }
 
-        KeywordStatement keywordStatement = PsiTreeUtil.getParentOfType(element, KeywordStatement.class);
-        if (keywordStatement != null) {
-            List<PositionalArgument> positionalArguments = keywordStatement.getPositionalArguments();
-            if (keywordStatement.getGlobalVariable() != null && positionalArguments.size() > 1 && element == positionalArguments.getFirst()) {
-                return;
+        @Override
+        public void visitVariable(@NotNull RobotVariable o) {
+            PsiElement parent = o.getParent();
+            if (parent != null) {
+                parent.accept(this);
             }
+            o.acceptChildren(this);
         }
-        holder.newAnnotation(HighlightSeverity.WEAK_WARNING, RobotBundle.getMessage("annotation.variable.not-found")).range(element).create();
+
+        @Override
+        public void visitPythonExpression(@NotNull RobotPythonExpression o) {
+            pythonExpressionVariableBodyFound = true;
+        }
     }
 }

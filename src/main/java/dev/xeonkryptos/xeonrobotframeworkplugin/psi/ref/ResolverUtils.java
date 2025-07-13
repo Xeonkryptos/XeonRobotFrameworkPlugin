@@ -1,18 +1,20 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.psi.ref;
 
-import dev.xeonkryptos.xeonrobotframeworkplugin.ide.config.RobotOptionsProvider;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.dto.ImportType;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.DefinedKeyword;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.DefinedVariable;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.KeywordDefinition;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.KeywordFile;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.KeywordInvokable;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.KeywordStatement;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotFile;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
-import com.intellij.psi.PsiReference;
 import com.intellij.psi.util.PsiTreeUtil;
+import dev.xeonkryptos.xeonrobotframeworkplugin.ide.config.RobotOptionsProvider;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.dto.ImportType;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.dto.VariableDto;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.DefinedKeyword;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.DefinedVariable;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.KeywordFile;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotFile;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCall;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotPositionalArgument;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotUserKeywordStatement;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariable;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.visitor.RobotSectionVariablesCollector;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -20,8 +22,11 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 public class ResolverUtils {
+
+    private static final Collection<String> VARIABLE_SETTERS = Set.of("set test variable", "set suite variable", "set global variable");
 
     private ResolverUtils() {
     }
@@ -38,7 +43,7 @@ public class ResolverUtils {
         }
 
         boolean includeTransitive = RobotOptionsProvider.getInstance(psiFile.getProject()).allowTransitiveImports();
-        Collection<KeywordFile> importedFiles = robotFile.getImportedFiles(includeTransitive);
+        Collection<KeywordFile> importedFiles = robotFile.collectImportedFiles(includeTransitive);
         for (KeywordFile keywordFile : importedFiles) {
             for (DefinedKeyword definedKeyword : keywordFile.getDefinedKeywords()) {
                 if (definedKeyword.matches(keyword)) {
@@ -61,7 +66,7 @@ public class ResolverUtils {
         }
 
         boolean includeTransitive = RobotOptionsProvider.getInstance(psiFile.getProject()).allowTransitiveImports();
-        for (KeywordFile keywordFile : robotFile.getImportedFiles(includeTransitive)) {
+        for (KeywordFile keywordFile : robotFile.collectImportedFiles(includeTransitive)) {
             if (keywordFile.getImportType() != ImportType.LIBRARY) {
                 for (DefinedVariable definedVariable : keywordFile.getDefinedVariables()) {
                     if (definedVariable.matches(variableName)) {
@@ -73,93 +78,34 @@ public class ResolverUtils {
         return null;
     }
 
-    @Nullable
-    public static PsiElement findVariableInKeyword(@Nullable String variableName, @Nullable PsiElement element) {
-        if (variableName == null || element == null) {
-            return null;
-        }
-        KeywordDefinition keywordDefinition = PsiTreeUtil.getParentOfType(element, KeywordDefinition.class);
-        if (keywordDefinition != null) {
-            PsiElement[] children = keywordDefinition.getChildren();
-            boolean foundElement = false;
-            for (int i = children.length - 1; i >= 0; i--) {
-                PsiElement child = children[i];
-                if (child == element) {
-                    foundElement = true;
-                } else if (foundElement) {
-                    if (child instanceof DefinedVariable definedVariable && definedVariable.matches(variableName)) {
-                        return child;
-                    } else if (child instanceof KeywordStatement keywordStatement) {
-                        PsiElement result = findVariableInStatement(keywordStatement, variableName);
-                        if (result != null) {
-                            return result;
-                        }
-                    }
-                }
-            }
-            for (DefinedVariable definedVariable : keywordDefinition.getDeclaredVariables()) {
-                if (definedVariable.matches(variableName)) {
-                    return definedVariable.reference();
-                }
-            }
-        }
-        return null;
-    }
-
-    @Nullable
-    private static PsiElement findVariableInStatement(@Nullable KeywordStatement keywordStatement, String variableName) {
-        if (keywordStatement == null) {
-            return null;
-        }
-
-        DefinedVariable definedVariable = keywordStatement.getGlobalVariable();
-        if (definedVariable != null && definedVariable.matches(variableName)) {
-            return definedVariable.reference();
-        }
-
-        KeywordInvokable keywordInvokable = keywordStatement.getInvokable();
-        PsiReference reference = keywordInvokable.getReference();
-        PsiElement resolvedElement = reference.resolve();
-        if (resolvedElement instanceof KeywordDefinition) {
-            List<KeywordInvokable> invokedKeywords = ((KeywordDefinition) resolvedElement).getInvokedKeywords();
-            Collections.reverse(invokedKeywords);
-            for (KeywordInvokable invokedKeyword : invokedKeywords) {
-                PsiElement parent = invokedKeyword.getParent();
-                if (parent instanceof KeywordStatement) {
-                    PsiElement result = findVariableInStatement((KeywordStatement) parent, variableName);
-                    if (result != null) {
-                        return result;
-                    }
-                }
-            }
-        }
-        return null;
-    }
-
     @NotNull
-    public static List<DefinedVariable> walkKeyword(@Nullable KeywordStatement keywordStatement) {
-        if (keywordStatement == null) {
+    public static List<DefinedVariable> walkKeyword(@Nullable RobotKeywordCall keywordCall) {
+        if (keywordCall == null) {
             return Collections.emptyList();
         }
 
-        // set test variable  ${x}  ${y}
-        DefinedVariable globalVariable = keywordStatement.getGlobalVariable();
-        if (globalVariable != null) {
-            return Collections.singletonList(globalVariable);
+        String keywordName = keywordCall.getName();
+        if (VARIABLE_SETTERS.contains(keywordName.toLowerCase())) {
+            List<RobotPositionalArgument> positionalArgumentList = keywordCall.getPositionalArgumentList();
+            if (!positionalArgumentList.isEmpty()) {
+                RobotPositionalArgument positionalArgument = positionalArgumentList.getFirst();
+                RobotVariable variable = PsiTreeUtil.getRequiredChildOfType(positionalArgument, RobotVariable.class);
+                String variableName = variable.getName();
+                if (variableName != null) {
+                    DefinedVariable definedVariable = new VariableDto(variable, variableName, null);
+                    return Collections.singletonList(definedVariable);
+                }
+            }
+            return Collections.emptyList();
         }
 
         List<DefinedVariable> variables = new ArrayList<>();
-        KeywordInvokable invokable = keywordStatement.getInvokable();
-        PsiReference reference = invokable.getReference();
-        PsiElement resolvedElement = reference.resolve();
-        if (resolvedElement instanceof KeywordDefinition keywordDefinition) {
-            for (KeywordInvokable invokedKeyword : keywordDefinition.getInvokedKeywords()) {
-                PsiElement parent = invokedKeyword.getParent();
-                if (parent instanceof KeywordStatement) {
-                    List<DefinedVariable> results = walkKeyword((KeywordStatement) parent);
-                    variables.addAll(results);
-                }
-            }
+        PsiElement resolvedElement = keywordCall.getKeywordCallId().getReference().resolve();
+        if (resolvedElement instanceof RobotUserKeywordStatement userKeywordStatement) {
+            RobotSectionVariablesCollector variablesCollector = new RobotSectionVariablesCollector();
+            userKeywordStatement.accept(variablesCollector);
+            Collection<DefinedVariable> collectedVariables = variablesCollector.getVariables();
+            variables.addAll(collectedVariables);
         }
         return variables;
     }

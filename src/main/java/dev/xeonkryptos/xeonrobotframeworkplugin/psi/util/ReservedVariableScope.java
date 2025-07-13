@@ -4,13 +4,15 @@ import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiWhiteSpace;
 import com.intellij.psi.util.PsiTreeUtil;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.BracketSetting;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.Heading;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.KeywordDefinition;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.KeywordStatement;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.PositionalArgument;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.Setting;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.Variable;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCall;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordsSection;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLocalSetting;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotPositionalArgument;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotSettingsSection;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotSetupTeardownStatementsGlobalSetting;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTestCasesSection;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotUserKeywordStatement;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariable;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.ref.PythonResolver;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -54,11 +56,11 @@ public enum ReservedVariableScope {
     };
 
     private static boolean isArgument(@NotNull PsiElement position) {
-        return position instanceof PositionalArgument || PsiTreeUtil.getParentOfType(position, PositionalArgument.class) != null;
+        return position instanceof RobotPositionalArgument || PsiTreeUtil.getParentOfType(position, RobotPositionalArgument.class) != null;
     }
 
     private static boolean isVariable(@NotNull PsiElement position) {
-        return position instanceof Variable || PsiTreeUtil.getParentOfType(position, Variable.class) != null;
+        return position instanceof RobotVariable || PsiTreeUtil.getParentOfType(position, RobotVariable.class) != null;
     }
 
     /**
@@ -69,13 +71,13 @@ public enum ReservedVariableScope {
      * @return true if this or one of its parents is the Settings header.
      */
     private static boolean isInSettings(@NotNull PsiElement position) {
-        KeywordStatement keyword = getKeyword(position);
+        RobotKeywordCall keyword = getKeywordCall(position);
         if (keyword == null) {
             return false;
         }
         // and that keyword is in the test cases heading
-        Heading heading = PsiTreeUtil.getParentOfType(keyword, Heading.class);
-        return heading != null && heading.isSettings();
+        RobotSettingsSection settingsSection = PsiTreeUtil.getParentOfType(keyword, RobotSettingsSection.class);
+        return settingsSection != null;
     }
 
     /**
@@ -86,8 +88,8 @@ public enum ReservedVariableScope {
      * @return true if this or one of its parents is the Test Cases header.
      */
     private static boolean isInSameTestCase(@NotNull PsiElement sourceElement, @NotNull PsiElement position) {
-        KeywordDefinition sourceKeywordDefinition = getKeywordDefinition(sourceElement);
-        KeywordDefinition targetKeywordDefinition = getKeywordDefinition(position);
+        RobotUserKeywordStatement sourceKeywordDefinition = getUserKeywordStatement(sourceElement);
+        RobotUserKeywordStatement targetKeywordDefinition = getUserKeywordStatement(position);
         return sourceKeywordDefinition == targetKeywordDefinition;
     }
 
@@ -99,13 +101,13 @@ public enum ReservedVariableScope {
      * @return true if this or one of its parents is the Test Cases header.
      */
     private static boolean isInTestCase(@NotNull PsiElement position) {
-        KeywordStatement keyword = getKeyword(position);
+        RobotKeywordCall keyword = getKeywordCall(position);
         if (keyword == null) {
             return false;
         }
         // and that keyword is in the test cases heading
-        Heading heading = PsiTreeUtil.getParentOfType(keyword, Heading.class);
-        return heading != null && heading.containsTestCases();
+        RobotTestCasesSection testCasesSection = PsiTreeUtil.getParentOfType(keyword, RobotTestCasesSection.class);
+        return testCasesSection != null;
     }
 
     /**
@@ -118,13 +120,13 @@ public enum ReservedVariableScope {
     private static boolean isInSuiteTeardown(@NotNull PsiElement position) {
         if (isInSettings(position)) {
             // check that we are next to a suite teardown setting
-            KeywordStatement keyword = getKeyword(position);
+            RobotKeywordCall keyword = getKeywordCall(position);
             if (keyword == null) {
                 return false;
             }
             PsiElement sibling = getPreviousStatement(keyword);
-            if (sibling instanceof Setting) {
-                return ((Setting) sibling).isSuiteTeardown();
+            if (sibling instanceof RobotSetupTeardownStatementsGlobalSetting globalSetting) {
+                return globalSetting.getText().equalsIgnoreCase("Suite Teardown");
             }
         }
         return false;
@@ -141,23 +143,23 @@ public enum ReservedVariableScope {
         // this can either be in the settings of the file or the bracket settings of the definition
         if (isInSettings(position)) {
             // check that we are next to a test teardown setting
-            KeywordStatement keyword = getKeyword(position);
+            RobotKeywordCall keyword = getKeywordCall(position);
             if (keyword == null) {
                 return false;
             }
             PsiElement sibling = getPreviousStatement(keyword);
-            if (sibling instanceof Setting) {
-                return ((Setting) sibling).isTestTeardown();
+            if (sibling instanceof RobotSetupTeardownStatementsGlobalSetting) {
+                return sibling.getText().equalsIgnoreCase("Test Teardown");
             }
         } else if (isInTestCase(position)) {
             // check that we are next to a teardown bracket setting
-            KeywordStatement keyword = getKeyword(position);
+            RobotKeywordCall keyword = getKeywordCall(position);
             if (keyword == null) {
                 return false;
             }
             PsiElement sibling = getPreviousStatement(keyword);
-            if (sibling instanceof BracketSetting) {
-                return ((BracketSetting) sibling).isTeardown();
+            if (sibling instanceof RobotLocalSetting localSetting) {
+                return localSetting.getName().equalsIgnoreCase("Teardown");
             }
         }
         return false;
@@ -165,10 +167,10 @@ public enum ReservedVariableScope {
 
     private static boolean isInKeywordStatement(@NotNull PsiElement position) {
         if (isInSettings(position)) {
-            KeywordStatement keyword = getKeyword(position);
+            RobotKeywordCall keyword = getKeywordCall(position);
             return keyword != null;
         } else if (isInTestCase(position)) {
-            KeywordStatement keyword = getKeyword(position);
+            RobotKeywordCall keyword = getKeywordCall(position);
             return keyword != null;
         }
         return false;
@@ -199,15 +201,15 @@ public enum ReservedVariableScope {
      */
     private static boolean isInKeywordTeardown(@NotNull PsiElement position) {
         // check that we are next to a teardown bracket setting
-        KeywordStatement keyword = getKeyword(position);
+        RobotKeywordCall keyword = getKeywordCall(position);
         if (keyword == null) {
             return false;
         }
-        Heading heading = PsiTreeUtil.getParentOfType(keyword, Heading.class);
-        if (heading != null && heading.containsKeywordDefinitions()) {
+        RobotKeywordsSection keywordsSection = PsiTreeUtil.getParentOfType(keyword, RobotKeywordsSection.class);
+        if (keywordsSection != null) {
             PsiElement sibling = getPreviousStatement(keyword);
-            if (sibling instanceof BracketSetting) {
-                return ((BracketSetting) sibling).isTeardown();
+            if (sibling instanceof RobotLocalSetting localSetting) {
+                return localSetting.getName().equalsIgnoreCase("Teardown");
             }
         }
         return false;
@@ -221,9 +223,9 @@ public enum ReservedVariableScope {
      * @return either this element or one of its parents that is a keyword statement; else null.
      */
     @Nullable
-    private static KeywordStatement getKeyword(@NotNull PsiElement position) {
+    private static RobotKeywordCall getKeywordCall(@NotNull PsiElement position) {
         // either we are a keyword or we have a parent that is
-        return position instanceof KeywordStatement keywordStatement ? keywordStatement : PsiTreeUtil.getParentOfType(position, KeywordStatement.class);
+        return position instanceof RobotKeywordCall keywordCall ? keywordCall : PsiTreeUtil.getParentOfType(position, RobotKeywordCall.class);
     }
 
     /**
@@ -234,8 +236,10 @@ public enum ReservedVariableScope {
      * @return either this element or one of its parents that is a keyword definition; else null.
      */
     @Nullable
-    private static KeywordDefinition getKeywordDefinition(@NotNull PsiElement position) {
-        return position instanceof KeywordDefinition keywordDefinition ? keywordDefinition : PsiTreeUtil.getParentOfType(position, KeywordDefinition.class);
+    private static RobotUserKeywordStatement getUserKeywordStatement(@NotNull PsiElement position) {
+        return position instanceof RobotUserKeywordStatement userKeywordStatement ?
+               userKeywordStatement :
+               PsiTreeUtil.getParentOfType(position, RobotUserKeywordStatement.class);
     }
 
     @Nullable
