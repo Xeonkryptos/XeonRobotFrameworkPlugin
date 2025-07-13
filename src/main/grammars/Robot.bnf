@@ -269,6 +269,7 @@ parameter_id ::= PARAMETER_NAME {
 
 fake variable_statement ::= DUMMY {
     implements = "com.intellij.psi.PsiNamedElement"
+    mixin = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotVariableStatementExtension"
 }
 inline_variable_statement ::= VAR variable_definition ASSIGNMENT? variable_value+ COMMENT* eol_marker {
     pin=3

@@ -11,7 +11,7 @@ import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.*;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.*;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotPsiImplUtil;
 
-public class RobotVariableStatementImpl extends RobotPsiElementBase implements RobotVariableStatement {
+public class RobotVariableStatementImpl extends RobotVariableStatementExtension implements RobotVariableStatement {
 
   public RobotVariableStatementImpl(@NotNull ASTNode node) {
     super(node);

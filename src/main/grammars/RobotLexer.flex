@@ -256,6 +256,7 @@ LineComment = {LineCommentSign} {NON_EOL}*
           pushBackTrailingWhitespace();
           globalTemplateEnabled = true;
           localTemplateEnabled = true;
+          templateKeywordFound = true;
           return TEMPLATE_KEYWORDS;
       }
     {TimeoutKeywords} \s+                  { enterNewState(SETTING); pushBackTrailingWhitespace(); return TIMEOUT_KEYWORDS; }
@@ -273,7 +274,7 @@ LineComment = {LineCommentSign} {NON_EOL}*
 
 <TEMPLATE_DEFINITION> {
     ^ {LiteralValue}    {
-        templateKeywordFound = false;
+        templateKeywordFound = globalTemplateEnabled;
         pushBackTrailingWhitespace();
         leaveState();
         yypushback(yylength());

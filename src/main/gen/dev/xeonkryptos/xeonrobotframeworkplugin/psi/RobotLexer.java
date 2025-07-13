@@ -5298,7 +5298,7 @@ public class RobotLexer implements FlexLexer {
           // fall through
           case 135: break;
           case 21:
-            { templateKeywordFound = false;
+            { templateKeywordFound = globalTemplateEnabled;
         pushBackTrailingWhitespace();
         leaveState();
         yypushback(yylength());
@@ -5872,6 +5872,7 @@ public class RobotLexer implements FlexLexer {
           pushBackTrailingWhitespace();
           globalTemplateEnabled = true;
           localTemplateEnabled = true;
+          templateKeywordFound = true;
           return TEMPLATE_KEYWORDS;
             }
           // fall through
