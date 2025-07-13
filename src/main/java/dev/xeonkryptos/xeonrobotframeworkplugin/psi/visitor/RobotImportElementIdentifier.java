@@ -30,7 +30,9 @@ public final class RobotImportElementIdentifier extends RobotVisitor {
 
     @Override
     public void visitPositionalArgument(@NotNull RobotPositionalArgument o) {
-        positionalArgument = o;
+        if (positionalArgument == null) {
+            positionalArgument = o;
+        }
         o.getParent().accept(this);
     }
 

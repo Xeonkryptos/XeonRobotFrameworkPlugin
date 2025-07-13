@@ -4,6 +4,7 @@ import com.intellij.lang.ASTNode;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.stubs.IStubElementType;
 import com.intellij.psi.util.PsiTreeUtil;
+import dev.xeonkryptos.xeonrobotframeworkplugin.ide.icons.RobotIcons;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotResourceFileType;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariable;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableDefinition;
@@ -14,6 +15,8 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotVariableDefinition
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.ReservedVariableScope;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import javax.swing.Icon;
 
 public abstract class RobotVariableDefinitionExtension extends RobotStubPsiElementBase<RobotVariableDefinitionStub, RobotVariableDefinition>
         implements RobotVariableDefinition {
@@ -57,6 +60,12 @@ public abstract class RobotVariableDefinitionExtension extends RobotStubPsiEleme
         }
         String variableName = getName();
         return text.equals(variableName);
+    }
+
+    @NotNull
+    @Override
+    public Icon getIcon(int flags) {
+        return RobotIcons.VARIABLE;
     }
 
     @Override

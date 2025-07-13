@@ -271,12 +271,19 @@ LineComment = {LineCommentSign} {NON_EOL}*
 <TASK_DEFINITION>             ^ {LiteralValue}    { localTemplateEnabled = globalTemplateEnabled; pushBackTrailingWhitespace(); return TASK_NAME; }
 <USER_KEYWORD_DEFINITION>     ^ {LiteralValue}    { pushBackTrailingWhitespace(); return USER_KEYWORD_NAME; }
 
-<TEMPLATE_DEFINITION>         ^ {LiteralValue}    {
-          templateKeywordFound = false;
-          pushBackTrailingWhitespace();
-          leaveState();
-          return previousStates.peek() == TESTCASE_DEFINITION ? TEST_CASE_NAME : TASK_NAME;
-      }
+<TEMPLATE_DEFINITION> {
+    ^ {LiteralValue}    {
+        templateKeywordFound = false;
+        pushBackTrailingWhitespace();
+        leaveState();
+        yypushback(yylength());
+    }
+    {ParameterName} / {EqualSign} (!\s{2} | !\R | !=)  { enterNewState(TEMPLATE_PARAMETER_ASSIGNMENT); return TEMPLATE_PARAMETER_NAME; }
+    <TEMPLATE_PARAMETER_ASSIGNMENT>  {EqualSign}       { yybegin(TEMPLATE_PARAMETER_VALUE); return ASSIGNMENT; }
+    {RestrictedLiteralValue}                           { pushBackTrailingWhitespace(); return TEMPLATE_ARGUMENT_VALUE; }
+    {EOL}+                                             { return EOL; }
+}
+<TEMPLATE_PARAMETER_VALUE>      {ParamLiteralValue}    { pushBackTrailingWhitespace(); return TEMPLATE_ARGUMENT_VALUE; }
 
 <USER_KEYWORD_DEFINITION> {
     "RETURN" (\s{2}\s* | \R+)     {
@@ -372,44 +379,42 @@ LineComment = {LineCommentSign} {NON_EOL}*
     {SpaceBasedEndMarker}                            { leaveState(); return EOL; }
 }
 
-<KEYWORD_ARGUMENTS, SETTINGS_SECTION, TESTCASE_DEFINITION, TASK_DEFINITION, USER_KEYWORD_DEFINITION, VARIABLE_DEFINITION> {
+<KEYWORD_ARGUMENTS, SETTINGS_SECTION, TESTCASE_DEFINITION, TASK_DEFINITION, USER_KEYWORD_DEFINITION, VARIABLE_DEFINITION, SETTING> {
     {ParameterName} / {EqualSign} (!\s{2} | !\R | !=)  { enterNewState(PARAMETER_ASSIGNMENT); return PARAMETER_NAME; }
     {EqualSign}                                        { return ASSIGNMENT; }
 }
 <PARAMETER_ASSIGNMENT>  {EqualSign}                    { yybegin(PARAMETER_VALUE); return ASSIGNMENT; }
 <PARAMETER_VALUE>       {
-    {ScalarVariableStart}                              { leaveState(); enterNewState(VARIABLE_USAGE); return SCALAR_VARIABLE_START; }
-    {ListVariableStart}                                { leaveState(); enterNewState(VARIABLE_USAGE); return LIST_VARIABLE_START; }
-    {DictVariableStart}                                { leaveState(); enterNewState(VARIABLE_USAGE); return DICT_VARIABLE_START; }
-    {EnvVariableStart}                                 { leaveState(); enterNewState(VARIABLE_USAGE); return ENV_VARIABLE_START; }
-    {ParamLiteralValue}                                { leaveState(); pushBackTrailingWhitespace(); return LITERAL_CONSTANT; }
+    {ParamLiteralValue}                                { pushBackTrailingWhitespace(); return LITERAL_CONSTANT; }
+    <TEMPLATE_PARAMETER_VALUE> {
+        {ScalarVariableStart}                          { enterNewState(VARIABLE_USAGE); return SCALAR_VARIABLE_START; }
+        {ListVariableStart}                            { enterNewState(VARIABLE_USAGE); return LIST_VARIABLE_START; }
+        {DictVariableStart}                            { enterNewState(VARIABLE_USAGE); return DICT_VARIABLE_START; }
+        {EnvVariableStart}                             { enterNewState(VARIABLE_USAGE); return ENV_VARIABLE_START; }
+        {Space}{2} \s* | {Tab} \s* | {EOL}+            { leaveState(); yypushback(yylength()); }
+    }
 }
-
-<TEMPLATE_DEFINITION> {
-    {ParameterName} / {EqualSign} (!\s{2} | !\R | !=)  { enterNewState(TEMPLATE_PARAMETER_ASSIGNMENT); return TEMPLATE_PARAMETER_NAME; }
-    {EqualSign}                                        { return ASSIGNMENT; }
-    {RestrictedLiteralValue}                           { pushBackTrailingWhitespace(); return TEMPLATE_ARGUMENT_VALUE; }
-    {EOL}+                                             { return EOL; }
-}
-<TEMPLATE_PARAMETER_ASSIGNMENT> {EqualSign}            { yybegin(TEMPLATE_PARAMETER_VALUE); return ASSIGNMENT; }
-<TEMPLATE_PARAMETER_VALUE>      {ParamLiteralValue}    { leaveState(); pushBackTrailingWhitespace(); return TEMPLATE_ARGUMENT_VALUE; }
 
 // Multiline handling (don't return EOL on detected multiline). If there is a multiline without the Ellipsis (...) marker,
 // then return EOL to mark the end of the statement.
-<SETTING, SETTING_TEMPLATE_START, KEYWORD_CALL, KEYWORD_ARGUMENTS, VARIABLE_DEFINITION, VARIABLE_DEFINITION_ARGUMENTS> {
+<SETTING, KEYWORD_CALL, KEYWORD_ARGUMENTS, VARIABLE_DEFINITION, VARIABLE_DEFINITION_ARGUMENTS> {
     {MultiLine}                                { return WHITE_SPACE; }
     {EOL} {Whitespace} {LineComment}           { yypushback(yylength() - 1); return WHITE_SPACE; }
     <USER_KEYWORD_RETURN_STATEMENT> {EOL}+     { leaveState(); return EOL; }
 }
 
-<SETTING_TEMPLATE_START>  {RestrictedLiteralValue}        { templateKeywordFound = true; pushBackTrailingWhitespace(); return KEYWORD_NAME; }
+<SETTING_TEMPLATE_START>  {
+    {RestrictedLiteralValue}                   { templateKeywordFound = true; pushBackTrailingWhitespace(); return KEYWORD_NAME; }
+    {MultiLine}                                { return WHITE_SPACE; }
+    {EOL} {Whitespace} {LineComment}           { yypushback(yylength() - 1); return WHITE_SPACE; }
+    {EOL}+                                     { leaveState(); enterNewState(TEMPLATE_DEFINITION); return EOL; }
+}
 
 // Consciously used yybegin instead of enterNewState to avoid pushing the state onto the stack. We're technically still in the KEYWORD_CALL state
 // and when we're, even in KEYWORD_ARGUMENTS, leave the state, it should return to whatever was before KEYWORD_CALL.
 // Just switched into another state to provide keyword arguments as such instead of interpreting them incorrectly as KEYWORD_NAME.
 <KEYWORD_CALL>      {RestrictedLiteralValue}  { yybegin(KEYWORD_ARGUMENTS); pushBackTrailingWhitespace(); return KEYWORD_NAME; }
 
-<SETTING> {EqualSign}  { return ASSIGNMENT; }
 <SETTINGS_SECTION, SETTING, KEYWORD_ARGUMENTS, USER_KEYWORD_RETURN_STATEMENT> {RestrictedLiteralValue}        { pushBackTrailingWhitespace(); return LITERAL_CONSTANT; }
 
 <COMMENTS_SECTION> {

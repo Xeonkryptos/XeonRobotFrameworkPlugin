@@ -13,6 +13,9 @@ public interface RobotScalarVariable extends RobotVariable, StubBasedPsiElement<
   List<RobotExtendedVariableIndexAccess> getExtendedVariableIndexAccessList();
 
   @NotNull
+  List<RobotExtendedVariableKeyAccess> getExtendedVariableKeyAccessList();
+
+  @NotNull
   List<RobotExtendedVariableNestedAccess> getExtendedVariableNestedAccessList();
 
   @NotNull

@@ -33,6 +33,8 @@ public class RobotHighlighter extends SyntaxHighlighterBase {
                                                                                                DefaultLanguageHighlighterColors.STATIC_FIELD);
     public static final TextAttributesKey VARIABLE = TextAttributesKey.createTextAttributesKey("Variable Usage",
                                                                                                DefaultLanguageHighlighterColors.DOC_COMMENT_MARKUP);
+    public static final TextAttributesKey EXTENDED_VARIABLE_ACCESS_BRACKETS = TextAttributesKey.createTextAttributesKey("Extended Variable Brackets",
+                                                                                                                        DefaultLanguageHighlighterColors.BRACKETS);
     public static final TextAttributesKey COMMENT = TextAttributesKey.createTextAttributesKey("Comment", DefaultLanguageHighlighterColors.LINE_COMMENT);
     public static final TextAttributesKey GHERKIN = TextAttributesKey.createTextAttributesKey("Gherkin Keywords", DefaultLanguageHighlighterColors.METADATA);
     public static final TextAttributesKey SYNTAX_MARKER = TextAttributesKey.createTextAttributesKey("Robot Keyword", DefaultLanguageHighlighterColors.METADATA);
@@ -59,7 +61,9 @@ public class RobotHighlighter extends SyntaxHighlighterBase {
 
         keys1.put(RobotTypes.COMMENT, COMMENT);
         keys1.put(RobotTypes.PARAMETER_NAME, PARAMETER);
+        keys1.put(RobotTypes.TEMPLATE_PARAMETER_NAME, PARAMETER);
         keys1.put(RobotTypes.LITERAL_CONSTANT, ARGUMENT);
+        keys1.put(RobotTypes.TEMPLATE_ARGUMENT_VALUE, ARGUMENT);
 
         keys1.put(RobotTypes.GIVEN, GHERKIN);
         keys1.put(RobotTypes.WHEN, GHERKIN);
@@ -89,6 +93,11 @@ public class RobotHighlighter extends SyntaxHighlighterBase {
         keys1.put(RobotTypes.ENV_VARIABLE_START, VARIABLE);
         keys1.put(RobotTypes.VARIABLE_BODY, VARIABLE);
         keys1.put(RobotTypes.VARIABLE_END, VARIABLE);
+        keys1.put(RobotTypes.VARIABLE_KEY_ACCESS, VARIABLE);
+        keys1.put(RobotTypes.VARIABLE_SLICE_ACCESS, VARIABLE);
+        keys1.put(RobotTypes.VARIABLE_INDEX_ACCESS, VARIABLE);
+        keys1.put(RobotTypes.VARIABLE_ACCESS_START, EXTENDED_VARIABLE_ACCESS_BRACKETS);
+        keys1.put(RobotTypes.VARIABLE_ACCESS_END, EXTENDED_VARIABLE_ACCESS_BRACKETS);
         keys1.put(RobotTypes.USER_KEYWORD_STATEMENT, KEYWORD_DEFINITION);
         keys1.put(RobotTypes.KEYWORD_NAME, KEYWORD);
 

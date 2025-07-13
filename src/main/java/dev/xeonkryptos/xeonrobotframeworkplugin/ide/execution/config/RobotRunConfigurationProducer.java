@@ -162,11 +162,9 @@ public class RobotRunConfigurationProducer extends LazyRunConfigurationProducer<
         assert virtualFile != null;
 
         testCaseName = testCaseName.replace("\"", "\\\"");
-        String runParameters;
+        String runParameters = "";
         if (!testCaseName.isEmpty()) {
             runParameters = "--test \"" + testCaseName + "\"";
-        } else {
-            runParameters = "--test *";
         }
         String filePath = virtualFile.getPath();
         basePath = relativizePath(basePath, filePath);

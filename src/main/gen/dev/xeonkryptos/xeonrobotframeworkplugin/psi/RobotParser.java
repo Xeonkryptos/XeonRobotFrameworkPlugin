@@ -1471,7 +1471,7 @@ public class RobotParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // SCALAR_VARIABLE_START (variable_id | python_expression) VARIABLE_END (extended_variable_slice_access | extended_variable_index_access | extended_variable_nested_access)*
+  // SCALAR_VARIABLE_START (variable_id | python_expression) VARIABLE_END (extended_variable_key_access | extended_variable_slice_access | extended_variable_index_access | extended_variable_nested_access)*
   public static boolean scalar_variable(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "scalar_variable")) return false;
     if (!nextTokenIs(b, SCALAR_VARIABLE_START)) return false;
@@ -1494,7 +1494,7 @@ public class RobotParser implements PsiParser, LightPsiParser {
     return r;
   }
 
-  // (extended_variable_slice_access | extended_variable_index_access | extended_variable_nested_access)*
+  // (extended_variable_key_access | extended_variable_slice_access | extended_variable_index_access | extended_variable_nested_access)*
   private static boolean scalar_variable_3(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "scalar_variable_3")) return false;
     while (true) {
@@ -1505,11 +1505,12 @@ public class RobotParser implements PsiParser, LightPsiParser {
     return true;
   }
 
-  // extended_variable_slice_access | extended_variable_index_access | extended_variable_nested_access
+  // extended_variable_key_access | extended_variable_slice_access | extended_variable_index_access | extended_variable_nested_access
   private static boolean scalar_variable_3_0(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "scalar_variable_3_0")) return false;
     boolean r;
-    r = extended_variable_slice_access(b, l + 1);
+    r = extended_variable_key_access(b, l + 1);
+    if (!r) r = extended_variable_slice_access(b, l + 1);
     if (!r) r = extended_variable_index_access(b, l + 1);
     if (!r) r = extended_variable_nested_access(b, l + 1);
     return r;

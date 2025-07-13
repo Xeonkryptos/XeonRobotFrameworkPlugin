@@ -41,6 +41,12 @@ public class RobotScalarVariableImpl extends RobotScalarVariableExtension implem
 
   @Override
   @NotNull
+  public List<RobotExtendedVariableKeyAccess> getExtendedVariableKeyAccessList() {
+    return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotExtendedVariableKeyAccess.class);
+  }
+
+  @Override
+  @NotNull
   public List<RobotExtendedVariableNestedAccess> getExtendedVariableNestedAccessList() {
     return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotExtendedVariableNestedAccess.class);
   }

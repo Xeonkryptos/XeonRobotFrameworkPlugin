@@ -308,7 +308,7 @@ variable ::= scalar_variable | list_variable | dict_variable | environment_varia
     implements = ["com.intellij.psi.PsiNameIdentifierOwner" "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotReferenceElementExpression"]
     methods=[getNameIdentifier getName]
 }
-scalar_variable ::= SCALAR_VARIABLE_START (variable_id | python_expression) VARIABLE_END (extended_variable_slice_access | extended_variable_index_access | extended_variable_nested_access)* {
+scalar_variable ::= SCALAR_VARIABLE_START (variable_id | python_expression) VARIABLE_END (extended_variable_key_access | extended_variable_slice_access | extended_variable_index_access | extended_variable_nested_access)* {
     mixin = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotScalarVariableExtension"
     stubClass = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotScalarVariableStub"
     elementTypeFactory = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotScalarVariableStubElement.create"
