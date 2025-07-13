@@ -8,12 +8,13 @@ import com.intellij.openapi.editor.colors.TextAttributesKey;
 import com.intellij.pom.Navigatable;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiNamedElement;
-import com.intellij.psi.util.PsiTreeUtil;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotFile;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotGlobalSettingStatement;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCall;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotSection;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTestCaseStatement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotUserKeywordStatement;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableStatement;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableDefinition;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -82,33 +83,34 @@ public class RobotStructureViewElement implements StructureViewTreeElement {
     @Override
     public TreeElement @NotNull [] getChildren() {
         List<StructureViewTreeElement> elements = new ArrayList<>();
-        if (element instanceof RobotFile) {
-            RobotSection[] headings = PsiTreeUtil.getChildrenOfType(element, RobotSection.class);
-            if (headings != null) {
-                for (RobotSection heading : headings) {
-                    elements.add(createChild(heading, RobotViewElementType.Heading));
-                }
-            }
-        } else if (element instanceof RobotSection heading) {
-            RobotSectionElementsCollector collector = new RobotSectionElementsCollector();
-            heading.acceptChildren(collector);
 
-            Collection<PsiElement> statements = collector.getMetadataStatements();
-            for (PsiElement statement : statements) {
-                elements.add(createChild(statement, RobotViewElementType.Settings));
-            }
+        RobotSectionElementsCollector collector = new RobotSectionElementsCollector();
+        element.acceptChildren(collector);
 
-            for (RobotUserKeywordStatement userKeywordStatement : collector.getUserKeywordStatements()) {
-                elements.add(createChild(userKeywordStatement, RobotViewElementType.Keyword));
-            }
+        Collection<RobotSection> sections = collector.getSections();
+        for (RobotSection section : sections) {
+            elements.add(createChild(section, RobotViewElementType.Section));
+        }
 
-            for (RobotTestCaseStatement testCase : collector.getTestCases()) {
-                elements.add(createChild(testCase, RobotViewElementType.TestCase));
-            }
+        Collection<RobotGlobalSettingStatement> statements = collector.getMetadataStatements();
+        for (PsiElement statement : statements) {
+            elements.add(createChild(statement, RobotViewElementType.Settings));
+        }
 
-            for (RobotVariableStatement variableDefinition : collector.getVariableStatements()) {
-                elements.add(createChild(variableDefinition, RobotViewElementType.Variable));
-            }
+        for (RobotUserKeywordStatement userKeywordStatement : collector.getUserKeywordStatements()) {
+            elements.add(createChild(userKeywordStatement, RobotViewElementType.Keyword));
+        }
+
+        for (RobotTestCaseStatement testCase : collector.getTestCases()) {
+            elements.add(createChild(testCase, RobotViewElementType.TestCase));
+        }
+
+        for (RobotVariableDefinition variableDefinition : collector.getVariableDefinitions()) {
+            elements.add(createChild(variableDefinition, RobotViewElementType.Variable));
+        }
+
+        for (RobotKeywordCall keywordCall : collector.getKeywordCalls()) {
+            elements.add(createChild(keywordCall, RobotViewElementType.Keyword));
         }
         return elements.toArray(StructureViewTreeElement.EMPTY_ARRAY);
     }

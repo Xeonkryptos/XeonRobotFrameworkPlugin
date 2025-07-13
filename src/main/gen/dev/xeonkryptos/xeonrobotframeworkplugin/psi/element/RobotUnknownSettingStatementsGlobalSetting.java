@@ -15,6 +15,8 @@ public interface RobotUnknownSettingStatementsGlobalSetting extends PsiNameIdent
   List<RobotPositionalArgument> getPositionalArgumentList();
 
   @NotNull
-  RobotUnknownSettingStatementId getNameIdentifier();
+  PsiElement getNameIdentifier();
+
+  @NotNull String getName();
 
 }

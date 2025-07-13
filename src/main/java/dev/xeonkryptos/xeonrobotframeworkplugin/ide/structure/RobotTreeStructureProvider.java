@@ -1,7 +1,5 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.ide.structure;
 
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotFeatureFileType;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotResourceFileType;
 import com.intellij.ide.projectView.TreeStructureProvider;
 import com.intellij.ide.projectView.ViewSettings;
 import com.intellij.ide.projectView.impl.nodes.PsiFileNode;
@@ -10,6 +8,8 @@ import com.intellij.openapi.fileTypes.FileType;
 import com.intellij.openapi.project.DumbAware;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiFile;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotFeatureFileType;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotResourceFileType;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
@@ -17,10 +17,11 @@ import java.util.LinkedHashSet;
 
 public class RobotTreeStructureProvider implements TreeStructureProvider, DumbAware {
 
+    @NotNull
     @Override
-    public @NotNull Collection<AbstractTreeNode<?>> modify(@NotNull AbstractTreeNode<?> parent,
-                                                           @NotNull Collection<AbstractTreeNode<?>> children,
-                                                           ViewSettings viewSettings) {
+    public Collection<AbstractTreeNode<?>> modify(@NotNull AbstractTreeNode<?> parent,
+                                                  @NotNull Collection<AbstractTreeNode<?>> children,
+                                                  ViewSettings viewSettings) {
         if (!viewSettings.isShowMembers()) {
             return children;
         }

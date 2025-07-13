@@ -28,4 +28,10 @@ public class RobotCommentsSectionImpl extends RobotSectionImpl implements RobotC
     else super.accept(visitor);
   }
 
+  @Override
+  @NotNull
+  public PsiElement getNameIdentifier() {
+    return notNullChild(findChildByType(COMMENTS_HEADER));
+  }
+
 }

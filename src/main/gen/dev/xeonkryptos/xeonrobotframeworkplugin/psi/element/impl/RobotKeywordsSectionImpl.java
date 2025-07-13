@@ -34,4 +34,10 @@ public class RobotKeywordsSectionImpl extends RobotSectionImpl implements RobotK
     return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotUserKeywordStatement.class);
   }
 
+  @Override
+  @NotNull
+  public PsiElement getNameIdentifier() {
+    return notNullChild(findChildByType(USER_KEYWORDS_HEADER));
+  }
+
 }

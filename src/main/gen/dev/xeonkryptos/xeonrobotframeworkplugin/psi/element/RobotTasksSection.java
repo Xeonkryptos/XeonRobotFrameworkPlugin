@@ -10,4 +10,7 @@ public interface RobotTasksSection extends RobotSection {
   @NotNull
   List<RobotTaskStatement> getTaskStatementList();
 
+  @NotNull
+  PsiElement getNameIdentifier();
+
 }

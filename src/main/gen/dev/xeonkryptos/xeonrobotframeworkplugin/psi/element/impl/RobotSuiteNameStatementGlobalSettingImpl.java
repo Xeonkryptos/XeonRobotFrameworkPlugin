@@ -34,4 +34,15 @@ public class RobotSuiteNameStatementGlobalSettingImpl extends RobotGlobalSetting
     return notNullChild(PsiTreeUtil.getChildOfType(this, RobotPositionalArgument.class));
   }
 
+  @Override
+  @NotNull
+  public PsiElement getNameIdentifier() {
+    return notNullChild(findChildByType(SUITE_NAME_KEYWORD));
+  }
+
+  @Override
+  public @NotNull String getName() {
+    return RobotPsiImplUtil.getName(this);
+  }
+
 }

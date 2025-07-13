@@ -5,6 +5,7 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.stubs.IStubElementType;
 import com.intellij.psi.util.PsiTreeUtil;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotResourceFileType;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariable;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableDefinition;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableStatement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariablesSection;
@@ -27,16 +28,13 @@ public abstract class RobotVariableDefinitionExtension extends RobotStubPsiEleme
 
     @Override
     public String getName() {
-        PsiElement nameIdentifier = getNameIdentifier();
-        if (nameIdentifier != null) {
-            return nameIdentifier.getText();
-        }
-        return null;
+        RobotVariable nameIdentifier = getVariable();
+        return nameIdentifier.getName();
     }
 
     @Override
-    public PsiElement getNameIdentifier() {
-        return getVariable().getNameIdentifier();
+    public RobotVariable getNameIdentifier() {
+        return getVariable();
     }
 
     @Override

@@ -4,7 +4,10 @@ package dev.xeonkryptos.xeonrobotframeworkplugin.psi.element;
 import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiNameIdentifierOwner;
 
-public interface RobotSection extends RobotStatement {
+public interface RobotSection extends RobotNamedElementExpression, PsiNameIdentifierOwner, RobotStatement {
+
+  @NotNull String getName();
 
 }

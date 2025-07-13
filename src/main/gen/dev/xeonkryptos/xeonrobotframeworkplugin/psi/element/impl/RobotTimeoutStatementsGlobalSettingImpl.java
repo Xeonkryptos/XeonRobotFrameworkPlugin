@@ -34,4 +34,15 @@ public class RobotTimeoutStatementsGlobalSettingImpl extends RobotGlobalSettingS
     return notNullChild(PsiTreeUtil.getChildOfType(this, RobotPositionalArgument.class));
   }
 
+  @Override
+  @NotNull
+  public PsiElement getNameIdentifier() {
+    return notNullChild(findChildByType(TIMEOUT_KEYWORDS));
+  }
+
+  @Override
+  public @NotNull String getName() {
+    return RobotPsiImplUtil.getName(this);
+  }
+
 }

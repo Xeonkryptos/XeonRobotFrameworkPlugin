@@ -19,7 +19,7 @@ import com.jetbrains.python.psi.PyClass;
 import com.jetbrains.python.psi.stubs.PyClassNameIndex;
 import dev.xeonkryptos.xeonrobotframeworkplugin.ide.icons.RobotIcons;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotKeywordProvider;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotImportGlobalSetting;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotImportGlobalSettingExpression;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLibraryImportGlobalSetting;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotResourceImportGlobalSetting;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.ref.RobotFileManager;
@@ -35,7 +35,7 @@ class ImportCompletionProvider extends CompletionProvider<CompletionParameters> 
 
     @Override
     protected void addCompletions(@NotNull CompletionParameters parameters, @NotNull ProcessingContext context, @NotNull CompletionResultSet result) {
-        RobotImportGlobalSetting importElement = PsiTreeUtil.getParentOfType(parameters.getPosition(), RobotImportGlobalSetting.class);
+        RobotImportGlobalSettingExpression importElement = PsiTreeUtil.getParentOfType(parameters.getPosition(), RobotImportGlobalSettingExpression.class);
         if (importElement instanceof RobotLibraryImportGlobalSetting) {
             addBuiltinLibraryCompletions(result, parameters.getOriginalFile());
             if (importElement.getChildren().length > 1) {

@@ -94,14 +94,21 @@
         <runConfigurationProducer implementation="dev.xeonkryptos.xeonrobotframeworkplugin.ide.execution.config.RobotRunConfigurationProducer"/>
         <runLineMarkerContributor language="Robot" id="gradleGroovyRunLineMarkerProvider"
                                   implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.ide.execution.RobotRunLineMarkerProvider"/>
+
         <postStartupActivity implementation="dev.xeonkryptos.xeonrobotframeworkplugin.ide.PostStartupActivity"/>
+
         <internalFileTemplate name="Robot Feature File"/>
         <internalFileTemplate name="Robot Resource File"/>
+
         <enterHandlerDelegate implementation="dev.xeonkryptos.xeonrobotframeworkplugin.ide.actionhandler.RobotLocalSettingEnterActionHandler"/>
         <enterHandlerDelegate implementation="dev.xeonkryptos.xeonrobotframeworkplugin.ide.actionhandler.RobotKeywordCallEnterActionHandler"/>
+
         <typedHandler implementation="dev.xeonkryptos.xeonrobotframeworkplugin.ide.actionhandler.RobotTypedActionHandler"/>
+
         <editorActionHandler action="EditorTab" implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.ide.actionhandler.RobotTabActionHandler"/>
+
         <configurationType implementation="dev.xeonkryptos.xeonrobotframeworkplugin.ide.execution.config.RobotRunConfigurationType"/>
+
         <spellchecker.support language="Robot" implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.ide.misc.RobotSpellcheckingStrategy"/>
 
         <xdebugger.breakpointType implementation="dev.xeonkryptos.xeonrobotframeworkplugin.ide.debugger.breakpoint.RobotLineBreakpointType"/>

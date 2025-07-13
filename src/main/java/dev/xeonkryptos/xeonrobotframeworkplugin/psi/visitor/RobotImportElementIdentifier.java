@@ -1,6 +1,5 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.psi.visitor;
 
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotImportGlobalSetting;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLibraryImportGlobalSetting;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLiteralConstantValue;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotPositionalArgument;
@@ -15,23 +14,18 @@ public final class RobotImportElementIdentifier extends RobotVisitor {
     private RobotPositionalArgument positionalArgument;
 
     @Override
-    public void visitImportGlobalSetting(@NotNull RobotImportGlobalSetting o) {
+    public void visitVariablesImportGlobalSetting(@NotNull RobotVariablesImportGlobalSetting o) {
         importElement = true;
     }
 
     @Override
-    public void visitVariablesImportGlobalSetting(@NotNull RobotVariablesImportGlobalSetting o) {
-        visitImportGlobalSetting(o);
-    }
-
-    @Override
     public void visitLibraryImportGlobalSetting(@NotNull RobotLibraryImportGlobalSetting o) {
-        visitImportGlobalSetting(o);
+        importElement = true;
     }
 
     @Override
     public void visitResourceImportGlobalSetting(@NotNull RobotResourceImportGlobalSetting o) {
-        visitImportGlobalSetting(o);
+        importElement = true;
     }
 
     @Override

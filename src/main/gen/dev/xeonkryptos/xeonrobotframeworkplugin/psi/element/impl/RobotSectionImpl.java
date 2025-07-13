@@ -27,4 +27,9 @@ public abstract class RobotSectionImpl extends RobotPsiElementBase implements Ro
     else super.accept(visitor);
   }
 
+  @Override
+  public @NotNull String getName() {
+    return RobotPsiImplUtil.getName(this);
+  }
+
 }

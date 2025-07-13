@@ -6,10 +6,16 @@ import com.intellij.ide.projectView.impl.nodes.BasePsiNode;
 import com.intellij.ide.util.treeView.AbstractTreeNode;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiNamedElement;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotGlobalSettingStatement;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCall;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotSection;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTestCaseStatement;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotUserKeywordStatement;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableDefinition;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 
 public class RobotElementTreeNode extends BasePsiNode<PsiNamedElement> {
 
@@ -33,6 +39,34 @@ public class RobotElementTreeNode extends BasePsiNode<PsiNamedElement> {
 
     @Override
     public Collection<AbstractTreeNode<?>> getChildrenImpl() {
-        return Collections.emptyList();
+        PsiNamedElement element = getValue();
+
+        RobotSectionElementsCollector treeNodeCollector = new RobotSectionElementsCollector();
+        element.acceptChildren(treeNodeCollector);
+
+        Collection<AbstractTreeNode<?>> children = new ArrayList<>();
+        for (RobotSection section : treeNodeCollector.getSections()) {
+            children.add(new RobotElementTreeNode(getProject(), section, getSettings(), RobotViewElementType.Section));
+        }
+        for (RobotGlobalSettingStatement statement : treeNodeCollector.getMetadataStatements()) {
+            children.add(new RobotElementTreeNode(getProject(), (PsiNamedElement) statement, getSettings(), RobotViewElementType.Settings));
+        }
+
+        for (RobotUserKeywordStatement userKeywordStatement : treeNodeCollector.getUserKeywordStatements()) {
+            children.add(new RobotElementTreeNode(getProject(), userKeywordStatement, getSettings(), RobotViewElementType.Keyword));
+        }
+
+        for (RobotTestCaseStatement testCase : treeNodeCollector.getTestCases()) {
+            children.add(new RobotElementTreeNode(getProject(), testCase, getSettings(), RobotViewElementType.TestCase));
+        }
+
+        for (RobotVariableDefinition variableDefinition : treeNodeCollector.getVariableDefinitions()) {
+            children.add(new RobotElementTreeNode(getProject(), variableDefinition, getSettings(), RobotViewElementType.Variable));
+        }
+
+        for (RobotKeywordCall keywordCall : treeNodeCollector.getKeywordCalls()) {
+            children.add(new RobotElementTreeNode(getProject(), keywordCall, getSettings(), RobotViewElementType.Keyword));
+        }
+        return children;
     }
 }

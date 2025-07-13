@@ -53,4 +53,15 @@ public class RobotLibraryImportGlobalSettingImpl extends RobotGlobalSettingState
     return p1.get(0);
   }
 
+  @Override
+  @NotNull
+  public PsiElement getNameIdentifier() {
+    return notNullChild(findChildByType(LIBRARY_IMPORT_KEYWORD));
+  }
+
+  @Override
+  public @NotNull String getName() {
+    return RobotPsiImplUtil.getName(this);
+  }
+
 }

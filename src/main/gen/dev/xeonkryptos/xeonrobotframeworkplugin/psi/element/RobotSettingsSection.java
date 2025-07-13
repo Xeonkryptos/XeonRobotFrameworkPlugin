@@ -10,4 +10,7 @@ public interface RobotSettingsSection extends RobotSection {
   @NotNull
   List<RobotGlobalSettingStatement> getGlobalSettingStatementList();
 
+  @NotNull
+  PsiElement getNameIdentifier();
+
 }

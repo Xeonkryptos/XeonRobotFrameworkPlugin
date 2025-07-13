@@ -21,12 +21,11 @@ class RobotTypeFilter implements Filter {
 
     @Override
     public boolean isVisible(TreeElement element) {
-        if (element instanceof RobotStructureViewElement) {
-            RobotViewElementType type = ((RobotStructureViewElement) element).getType();
+        if (element instanceof RobotStructureViewElement structureViewElement) {
+            RobotViewElementType type = structureViewElement.getType();
             return this.type != type;
-        } else {
-            return false;
         }
+        return false;
     }
 
     @Override

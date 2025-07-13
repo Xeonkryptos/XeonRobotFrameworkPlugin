@@ -34,4 +34,10 @@ public class RobotTestCasesSectionImpl extends RobotSectionImpl implements Robot
     return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotTestCaseStatement.class);
   }
 
+  @Override
+  @NotNull
+  public PsiElement getNameIdentifier() {
+    return notNullChild(findChildByType(TEST_CASES_HEADER));
+  }
+
 }

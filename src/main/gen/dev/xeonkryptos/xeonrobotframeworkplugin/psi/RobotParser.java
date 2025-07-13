@@ -1785,7 +1785,7 @@ public class RobotParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // task_id (testcase_task_statement)*
+  // task_id testcase_task_statement*
   public static boolean task_statement(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "task_statement")) return false;
     boolean r, p;
@@ -1797,25 +1797,15 @@ public class RobotParser implements PsiParser, LightPsiParser {
     return r || p;
   }
 
-  // (testcase_task_statement)*
+  // testcase_task_statement*
   private static boolean task_statement_1(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "task_statement_1")) return false;
     while (true) {
       int c = current_position_(b);
-      if (!task_statement_1_0(b, l + 1)) break;
+      if (!testcase_task_statement(b, l + 1)) break;
       if (!empty_element_parsed_guard_(b, "task_statement_1", c)) break;
     }
     return true;
-  }
-
-  // (testcase_task_statement)
-  private static boolean task_statement_1_0(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "task_statement_1_0")) return false;
-    boolean r;
-    Marker m = enter_section_(b);
-    r = testcase_task_statement(b, l + 1);
-    exit_section_(b, m, null, r);
-    return r;
   }
 
   /* ********************************************************** */
@@ -2022,7 +2012,7 @@ public class RobotParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // test_case_id (testcase_task_statement)*
+  // test_case_id testcase_task_statement*
   public static boolean test_case_statement(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "test_case_statement")) return false;
     boolean r, p;
@@ -2034,25 +2024,15 @@ public class RobotParser implements PsiParser, LightPsiParser {
     return r || p;
   }
 
-  // (testcase_task_statement)*
+  // testcase_task_statement*
   private static boolean test_case_statement_1(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "test_case_statement_1")) return false;
     while (true) {
       int c = current_position_(b);
-      if (!test_case_statement_1_0(b, l + 1)) break;
+      if (!testcase_task_statement(b, l + 1)) break;
       if (!empty_element_parsed_guard_(b, "test_case_statement_1", c)) break;
     }
     return true;
-  }
-
-  // (testcase_task_statement)
-  private static boolean test_case_statement_1_0(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "test_case_statement_1_0")) return false;
-    boolean r;
-    Marker m = enter_section_(b);
-    r = testcase_task_statement(b, l + 1);
-    exit_section_(b, m, null, r);
-    return r;
   }
 
   /* ********************************************************** */
@@ -2420,25 +2400,13 @@ public class RobotParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // UNKNOWN_SETTING_KEYWORD
-  public static boolean unknown_setting_statement_id(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "unknown_setting_statement_id")) return false;
-    if (!nextTokenIs(b, UNKNOWN_SETTING_KEYWORD)) return false;
-    boolean r;
-    Marker m = enter_section_(b);
-    r = consumeToken(b, UNKNOWN_SETTING_KEYWORD);
-    exit_section_(b, m, UNKNOWN_SETTING_STATEMENT_ID, r);
-    return r;
-  }
-
-  /* ********************************************************** */
-  // unknown_setting_statement_id (parameter | positional_argument | COMMENT)* eol_marker
+  // UNKNOWN_SETTING_KEYWORD (parameter | positional_argument | COMMENT)* eol_marker
   public static boolean unknown_setting_statements_global_setting(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "unknown_setting_statements_global_setting")) return false;
     if (!nextTokenIs(b, UNKNOWN_SETTING_KEYWORD)) return false;
     boolean r, p;
     Marker m = enter_section_(b, l, _NONE_, UNKNOWN_SETTING_STATEMENTS_GLOBAL_SETTING, null);
-    r = unknown_setting_statement_id(b, l + 1);
+    r = consumeToken(b, UNKNOWN_SETTING_KEYWORD);
     p = r; // pin = 1
     r = r && report_error_(b, unknown_setting_statements_global_setting_1(b, l + 1));
     r = p && eol_marker(b, l + 1) && r;

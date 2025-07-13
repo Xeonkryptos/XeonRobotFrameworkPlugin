@@ -17,4 +17,6 @@ public interface RobotSetupTeardownStatementsGlobalSetting extends RobotGlobalSe
   @NotNull
   PsiElement getNameIdentifier();
 
+  @NotNull String getName();
+
 }

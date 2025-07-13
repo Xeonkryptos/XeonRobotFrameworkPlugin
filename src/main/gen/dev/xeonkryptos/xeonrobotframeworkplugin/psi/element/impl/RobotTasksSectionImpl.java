@@ -34,4 +34,10 @@ public class RobotTasksSectionImpl extends RobotSectionImpl implements RobotTask
     return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotTaskStatement.class);
   }
 
+  @Override
+  @NotNull
+  public PsiElement getNameIdentifier() {
+    return notNullChild(findChildByType(TASKS_HEADER));
+  }
+
 }

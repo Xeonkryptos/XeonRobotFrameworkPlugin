@@ -34,4 +34,10 @@ public class RobotVariablesSectionImpl extends RobotSectionImpl implements Robot
     return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotSingleVariableStatement.class);
   }
 
+  @Override
+  @NotNull
+  public PsiElement getNameIdentifier() {
+    return notNullChild(findChildByType(VARIABLES_HEADER));
+  }
+
 }

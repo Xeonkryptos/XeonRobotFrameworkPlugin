@@ -34,4 +34,15 @@ public class RobotResourceImportGlobalSettingImpl extends RobotGlobalSettingStat
     return notNullChild(PsiTreeUtil.getChildOfType(this, RobotPositionalArgument.class));
   }
 
+  @Override
+  @NotNull
+  public PsiElement getNameIdentifier() {
+    return notNullChild(findChildByType(RESOURCE_IMPORT_KEYWORD));
+  }
+
+  @Override
+  public @NotNull String getName() {
+    return RobotPsiImplUtil.getName(this);
+  }
+
 }

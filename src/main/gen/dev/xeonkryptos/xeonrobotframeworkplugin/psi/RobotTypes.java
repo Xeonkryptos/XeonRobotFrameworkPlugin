@@ -72,7 +72,6 @@ public interface RobotTypes {
   IElementType TIMEOUT_STATEMENTS_GLOBAL_SETTING = new RobotElementType("TIMEOUT_STATEMENTS_GLOBAL_SETTING");
   IElementType TRY_STRUCTURE = new RobotElementType("TRY_STRUCTURE");
   IElementType UNKNOWN_SETTING_STATEMENTS_GLOBAL_SETTING = new RobotElementType("UNKNOWN_SETTING_STATEMENTS_GLOBAL_SETTING");
-  IElementType UNKNOWN_SETTING_STATEMENT_ID = new RobotElementType("UNKNOWN_SETTING_STATEMENT_ID");
   IElementType USER_KEYWORD_STATEMENT = RobotUserKeywordStubElement.create("USER_KEYWORD_STATEMENT");
   IElementType USER_KEYWORD_STATEMENT_ID = new RobotElementType("USER_KEYWORD_STATEMENT_ID");
   IElementType VARIABLE = new RobotElementType("VARIABLE");
@@ -321,9 +320,6 @@ public interface RobotTypes {
       }
       else if (type == UNKNOWN_SETTING_STATEMENTS_GLOBAL_SETTING) {
         return new RobotUnknownSettingStatementsGlobalSettingImpl(node);
-      }
-      else if (type == UNKNOWN_SETTING_STATEMENT_ID) {
-        return new RobotUnknownSettingStatementIdImpl(node);
       }
       else if (type == USER_KEYWORD_STATEMENT) {
         return new RobotUserKeywordStatementImpl(node);

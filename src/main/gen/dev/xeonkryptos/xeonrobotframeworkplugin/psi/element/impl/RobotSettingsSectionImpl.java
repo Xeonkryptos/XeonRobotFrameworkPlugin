@@ -34,4 +34,10 @@ public class RobotSettingsSectionImpl extends RobotSectionImpl implements RobotS
     return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotGlobalSettingStatement.class);
   }
 
+  @Override
+  @NotNull
+  public PsiElement getNameIdentifier() {
+    return notNullChild(findChildByType(SETTINGS_HEADER));
+  }
+
 }

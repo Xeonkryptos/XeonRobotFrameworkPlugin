@@ -34,4 +34,15 @@ public class RobotDocumentationStatementGlobalSettingImpl extends RobotGlobalSet
     return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotPositionalArgument.class);
   }
 
+  @Override
+  @NotNull
+  public PsiElement getNameIdentifier() {
+    return notNullChild(findChildByType(DOCUMENTATION_KEYWORD));
+  }
+
+  @Override
+  public @NotNull String getName() {
+    return RobotPsiImplUtil.getName(this);
+  }
+
 }

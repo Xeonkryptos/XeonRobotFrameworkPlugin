@@ -20,7 +20,7 @@ public class RobotStructureViewModel extends StructureViewModelBase implements E
                                                            new RobotTypeFilter("SHOW_KEYWORDS", RobotViewElementType.Keyword),
                                                            new RobotTypeFilter("SHOW_VARIABLES", RobotViewElementType.Variable),
                                                            new RobotTypeFilter("SHOW_SETTINGS", RobotViewElementType.Settings),
-                                                           new RobotTypeFilter("SHOW_HEADINGS", RobotViewElementType.Heading) };
+                                                           new RobotTypeFilter("SHOW_HEADINGS", RobotViewElementType.Section) };
 
     public RobotStructureViewModel(@NotNull PsiFile psiFile, @Nullable Editor editor) {
         super(psiFile, editor, new RobotStructureViewElement(psiFile));

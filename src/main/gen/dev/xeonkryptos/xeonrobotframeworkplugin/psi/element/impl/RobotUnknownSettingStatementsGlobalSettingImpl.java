@@ -41,8 +41,13 @@ public class RobotUnknownSettingStatementsGlobalSettingImpl extends RobotUnknown
 
   @Override
   @NotNull
-  public RobotUnknownSettingStatementId getNameIdentifier() {
-    return notNullChild(PsiTreeUtil.getChildOfType(this, RobotUnknownSettingStatementId.class));
+  public PsiElement getNameIdentifier() {
+    return notNullChild(findChildByType(UNKNOWN_SETTING_KEYWORD));
+  }
+
+  @Override
+  public @NotNull String getName() {
+    return RobotPsiImplUtil.getName(this);
   }
 
 }

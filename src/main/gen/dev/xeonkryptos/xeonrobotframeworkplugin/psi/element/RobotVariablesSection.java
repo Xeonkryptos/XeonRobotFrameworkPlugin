@@ -10,4 +10,7 @@ public interface RobotVariablesSection extends RobotSection {
   @NotNull
   List<RobotSingleVariableStatement> getSingleVariableStatementList();
 
+  @NotNull
+  PsiElement getNameIdentifier();
+
 }

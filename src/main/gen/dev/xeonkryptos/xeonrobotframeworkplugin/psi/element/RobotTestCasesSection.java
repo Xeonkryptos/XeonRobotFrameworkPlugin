@@ -10,4 +10,7 @@ public interface RobotTestCasesSection extends RobotSection {
   @NotNull
   List<RobotTestCaseStatement> getTestCaseStatementList();
 
+  @NotNull
+  PsiElement getNameIdentifier();
+
 }

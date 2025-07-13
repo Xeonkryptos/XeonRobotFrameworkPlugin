@@ -47,4 +47,15 @@ public class RobotVariablesImportGlobalSettingImpl extends RobotGlobalSettingSta
     return p1.get(0);
   }
 
+  @Override
+  @NotNull
+  public PsiElement getNameIdentifier() {
+    return notNullChild(findChildByType(VARIABLES_IMPORT_KEYWORD));
+  }
+
+  @Override
+  public @NotNull String getName() {
+    return RobotPsiImplUtil.getName(this);
+  }
+
 }

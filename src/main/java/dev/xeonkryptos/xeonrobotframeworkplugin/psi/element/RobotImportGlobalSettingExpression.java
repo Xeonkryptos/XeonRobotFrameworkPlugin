@@ -1,6 +1,8 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.psi.element;
 
-public interface RobotImportGlobalSettingExpression {
+import com.intellij.psi.PsiElement;
+
+public interface RobotImportGlobalSettingExpression extends PsiElement {
 
     RobotPositionalArgument getImportedFile();
 }

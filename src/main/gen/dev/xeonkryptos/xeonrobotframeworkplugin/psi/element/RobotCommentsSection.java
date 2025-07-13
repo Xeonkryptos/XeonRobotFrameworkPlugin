@@ -7,4 +7,7 @@ import com.intellij.psi.PsiElement;
 
 public interface RobotCommentsSection extends RobotSection {
 
+  @NotNull
+  PsiElement getNameIdentifier();
+
 }

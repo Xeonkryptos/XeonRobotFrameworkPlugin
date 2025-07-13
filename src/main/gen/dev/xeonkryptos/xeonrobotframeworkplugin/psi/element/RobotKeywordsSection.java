@@ -10,4 +10,7 @@ public interface RobotKeywordsSection extends RobotSection {
   @NotNull
   List<RobotUserKeywordStatement> getUserKeywordStatementList();
 
+  @NotNull
+  PsiElement getNameIdentifier();
+
 }

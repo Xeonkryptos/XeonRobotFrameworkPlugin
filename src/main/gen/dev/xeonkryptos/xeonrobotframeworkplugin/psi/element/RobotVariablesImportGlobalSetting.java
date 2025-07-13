@@ -4,8 +4,9 @@ package dev.xeonkryptos.xeonrobotframeworkplugin.psi.element;
 import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiNameIdentifierOwner;
 
-public interface RobotVariablesImportGlobalSetting extends RobotGlobalSettingStatement, RobotImportGlobalSetting {
+public interface RobotVariablesImportGlobalSetting extends RobotGlobalSettingStatement, PsiNameIdentifierOwner, RobotImportGlobalSettingExpression {
 
   @NotNull
   List<RobotParameter> getParameterList();
@@ -15,5 +16,10 @@ public interface RobotVariablesImportGlobalSetting extends RobotGlobalSettingSta
 
   @NotNull
   RobotPositionalArgument getImportedFile();
+
+  @NotNull
+  PsiElement getNameIdentifier();
+
+  @NotNull String getName();
 
 }

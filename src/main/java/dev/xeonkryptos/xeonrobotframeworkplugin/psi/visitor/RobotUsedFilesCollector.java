@@ -5,7 +5,7 @@ import com.intellij.psi.PsiReference;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotBddStatement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotExecutableStatement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotGlobalSettingStatement;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotImportGlobalSetting;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotImportGlobalSettingExpression;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCall;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCallId;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLibraryImportGlobalSetting;
@@ -85,8 +85,7 @@ public final class RobotUsedFilesCollector extends RobotVisitor {
         visitImportGlobalSetting(o);
     }
 
-    @Override
-    public void visitImportGlobalSetting(@NotNull RobotImportGlobalSetting o) {
+    private void visitImportGlobalSetting(@NotNull RobotImportGlobalSettingExpression o) {
         RobotPositionalArgument positionalArgument = o.getImportedFile();
         String fileName = positionalArgument.getText();
         references.put(fileName, positionalArgument.getReference());
