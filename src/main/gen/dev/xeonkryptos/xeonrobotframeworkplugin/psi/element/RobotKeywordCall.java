@@ -20,4 +20,6 @@ public interface RobotKeywordCall extends RobotNamedElementExpression, RobotKeyw
   @NotNull
   List<RobotPositionalArgument> getPositionalArgumentList();
 
+  @NotNull String getName();
+
 }

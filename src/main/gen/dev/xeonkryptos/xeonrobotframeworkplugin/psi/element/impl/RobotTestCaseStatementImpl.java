@@ -57,4 +57,9 @@ public class RobotTestCaseStatementImpl extends RobotTestCaseExtension implement
     return notNullChild(PsiTreeUtil.getChildOfType(this, RobotTestCaseId.class));
   }
 
+  @Override
+  public @NotNull String getName() {
+    return RobotPsiImplUtil.getName(this);
+  }
+
 }

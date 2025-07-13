@@ -11,4 +11,6 @@ public interface RobotParameterId extends PsiNamedElement, RobotNamedElementExpr
 
   @NotNull PsiReference getReference();
 
+  @NotNull String getName();
+
 }

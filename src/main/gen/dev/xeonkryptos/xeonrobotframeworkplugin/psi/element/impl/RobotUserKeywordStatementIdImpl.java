@@ -27,4 +27,9 @@ public class RobotUserKeywordStatementIdImpl extends RobotPsiElementBase impleme
     else super.accept(visitor);
   }
 
+  @Override
+  public @NotNull String getName() {
+    return RobotPsiImplUtil.getName(this);
+  }
+
 }

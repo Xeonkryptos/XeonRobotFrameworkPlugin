@@ -27,4 +27,9 @@ public class RobotLanguageIdImpl extends RobotPsiElementBase implements RobotLan
     else super.accept(visitor);
   }
 
+  @Override
+  public @NotNull String getName() {
+    return RobotPsiImplUtil.getName(this);
+  }
+
 }

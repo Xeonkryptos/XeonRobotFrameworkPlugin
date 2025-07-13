@@ -1,7 +1,6 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.ide.parameterinfo;
 
 import com.intellij.codeInsight.CodeInsightBundle;
-import com.intellij.lang.injection.InjectedLanguageManager;
 import com.intellij.lang.parameterInfo.CreateParameterInfoContext;
 import com.intellij.lang.parameterInfo.ParameterInfoHandler;
 import com.intellij.lang.parameterInfo.ParameterInfoUIContext;
@@ -63,13 +62,12 @@ public class RobotParameterInfoHandler implements ParameterInfoHandler<RobotKeyw
     private RobotKeywordCall findKeywordStatement(PsiFile psiFile, int offset) {
         RobotKeywordCall keywordStatement = ParameterInfoUtils.findParentOfType(psiFile, offset, RobotKeywordCall.class);
         if (keywordStatement == null) {
-            InjectedLanguageManager injectedLanguageManager = InjectedLanguageManager.getInstance(psiFile.getProject());
             PsiElement element = psiFile.findElementAt(offset);
             if (element instanceof PsiWhiteSpace) {
                 boolean firstElement = true;
                 boolean newLineAssignedToStatement = false;
                 do {
-                    String unescapedWhitespaceText = injectedLanguageManager.getUnescapedText(element);
+                    String unescapedWhitespaceText = element.getText();
                     if (GlobalConstants.ELLIPSIS.equals(unescapedWhitespaceText)) {
                         newLineAssignedToStatement = true;
                     } else if ("\n".equals(unescapedWhitespaceText) && !firstElement) {

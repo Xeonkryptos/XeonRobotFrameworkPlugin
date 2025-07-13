@@ -24,9 +24,13 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.util.PythonInspector;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.Icon;
+import java.text.Collator;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -112,15 +116,32 @@ public abstract class RobotKeywordCallExtension extends RobotStubPsiElementBase<
     }
 
     @Override
-    public boolean allRequiredParametersArePresent() {
-        Set<String> definedParameters = getParameterList().stream().map(RobotParameter::getName).collect(Collectors.toSet());
+    public Collection<String> computeMissingRequiredParameters() {
+        Set<String> definedParameters = getParameterList().stream().map(RobotParameter::getName).collect(Collectors.toCollection(HashSet::new));
         Collection<String> requiredParameterNames = getAvailableParameters().stream()
                                                                             .filter(param -> !param.hasDefaultValue())
                                                                             .map(DefinedParameter::getLookup)
-                                                                            .collect(Collectors.toSet());
-        definedParameters.retainAll(requiredParameterNames);
-        int missingParameterCount = requiredParameterNames.size() - definedParameters.size() - getPositionalArgumentList().size();
-        return missingParameterCount <= 0;
+                                                                            .collect(Collectors.toCollection(HashSet::new));
+
+        RobotOptionsProvider robotOptionsProvider = RobotOptionsProvider.getInstance(getProject());
+        Collator parameterNameCollator = robotOptionsProvider.getParameterNameCollator();
+
+        Iterator<String> definedParamsIterator = definedParameters.iterator();
+        while (definedParamsIterator.hasNext()) {
+            String definedParamName = definedParamsIterator.next();
+            for (String requiredParameterName : requiredParameterNames) {
+                if (parameterNameCollator.equals(definedParamName, requiredParameterName)) {
+                    definedParamsIterator.remove();
+                    requiredParameterNames.remove(requiredParameterName);
+                    break;
+                }
+            }
+        }
+        int missingParameterCount = requiredParameterNames.size() - getPositionalArgumentList().size();
+        if (missingParameterCount <= 0) {
+            return List.of();
+        }
+        return requiredParameterNames;
     }
 
     @Override

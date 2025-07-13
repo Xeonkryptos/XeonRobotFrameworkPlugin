@@ -4,7 +4,11 @@ import java.util.Collection;
 
 public interface RobotKeywordCallExpression {
 
-    boolean allRequiredParametersArePresent();
+    default boolean allRequiredParametersArePresent() {
+        return computeMissingRequiredParameters().isEmpty();
+    }
+
+    Collection<String> computeMissingRequiredParameters();
 
     Collection<DefinedParameter> getAvailableParameters();
 

@@ -2,7 +2,6 @@ package dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl;
 
 import com.intellij.extapi.psi.ASTWrapperPsiElement;
 import com.intellij.lang.ASTNode;
-import com.intellij.lang.injection.InjectedLanguageManager;
 import com.intellij.navigation.ItemPresentation;
 import com.intellij.psi.PsiElement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotStatement;
@@ -13,8 +12,6 @@ import org.jetbrains.annotations.NotNull;
 import javax.swing.Icon;
 
 public abstract class RobotPsiElementBase extends ASTWrapperPsiElement implements RobotStatement {
-
-    private String name;
 
     public RobotPsiElementBase(@NotNull ASTNode node) {
         super(node);
@@ -31,7 +28,8 @@ public abstract class RobotPsiElementBase extends ASTWrapperPsiElement implement
 
             @Override
             public String getPresentableText() {
-                return RobotPsiElementBase.this.getPresentableText();
+                String name = RobotPsiElementBase.this.getName();
+                return name != null ? name : getText();
             }
 
             @Override
@@ -46,25 +44,10 @@ public abstract class RobotPsiElementBase extends ASTWrapperPsiElement implement
         };
     }
 
-    @Override
-    public String getName() {
-        if (name == null) {
-            name = getPresentableText();
-        }
-        return name;
-    }
-
     @NotNull
     public String getPresentableText() {
-        String unescapedText = InjectedLanguageManager.getInstance(getProject()).getUnescapedText(this);
+        String unescapedText = getText();
         return getPresentableText(unescapedText);
-    }
-
-    @Override
-    public void subtreeChanged() {
-        super.subtreeChanged();
-
-        name = null;
     }
 
     public PsiElement setName(@NotNull String newName) {
@@ -73,6 +56,6 @@ public abstract class RobotPsiElementBase extends ASTWrapperPsiElement implement
 
     @Override
     public String toString() {
-        return super.toString() + "(" + getPresentableText() + ")";
+        return super.toString() + "(" + getText() + ")";
     }
 }

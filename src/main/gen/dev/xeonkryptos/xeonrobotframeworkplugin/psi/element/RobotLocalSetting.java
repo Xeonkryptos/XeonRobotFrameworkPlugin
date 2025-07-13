@@ -20,4 +20,6 @@ public interface RobotLocalSetting extends RobotNamedElementExpression, PsiNameI
   @NotNull
   RobotLocalSettingId getNameIdentifier();
 
+  @NotNull String getName();
+
 }

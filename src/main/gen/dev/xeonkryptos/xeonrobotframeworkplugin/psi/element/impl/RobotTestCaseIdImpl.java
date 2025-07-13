@@ -27,4 +27,9 @@ public class RobotTestCaseIdImpl extends RobotPsiElementBase implements RobotTes
     else super.accept(visitor);
   }
 
+  @Override
+  public @NotNull String getName() {
+    return RobotPsiImplUtil.getName(this);
+  }
+
 }

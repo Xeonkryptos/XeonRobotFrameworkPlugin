@@ -27,4 +27,9 @@ public class RobotTaskIdImpl extends RobotPsiElementBase implements RobotTaskId 
     else super.accept(visitor);
   }
 
+  @Override
+  public @NotNull String getName() {
+    return RobotPsiImplUtil.getName(this);
+  }
+
 }

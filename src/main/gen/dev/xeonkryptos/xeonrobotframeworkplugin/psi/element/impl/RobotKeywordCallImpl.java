@@ -51,4 +51,9 @@ public class RobotKeywordCallImpl extends RobotKeywordCallExtension implements R
     return PsiTreeUtil.getStubChildrenOfTypeAsList(this, RobotPositionalArgument.class);
   }
 
+  @Override
+  public @NotNull String getName() {
+    return RobotPsiImplUtil.getName(this);
+  }
+
 }

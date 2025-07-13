@@ -3,9 +3,20 @@ package dev.xeonkryptos.xeonrobotframeworkplugin.psi;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiReference;
 import com.intellij.psi.util.PsiTreeUtil;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCall;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCallId;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLanguageId;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLocalSettingId;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotParameter;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotParameterId;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTaskId;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTaskStatement;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTemplateParameterId;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTestCaseId;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTestCaseStatement;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotUnknownSettingStatementId;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotUserKeywordStatement;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotUserKeywordStatementId;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariable;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableId;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.ref.RobotKeywordReference;
@@ -15,6 +26,70 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class RobotPsiImplUtil {
+
+    @NotNull
+    public static String getName(@NotNull RobotLanguageId languageId) {
+        return languageId.getText();
+    }
+
+    @NotNull
+    public static String getName(@NotNull RobotKeywordCall robotKeywordCall) {
+        RobotKeywordCallId keywordCallId = robotKeywordCall.getKeywordCallId();
+        return keywordCallId.getName();
+    }
+
+    @NotNull
+    public static String getName(@NotNull RobotKeywordCallId keywordCallId) {
+        return keywordCallId.getText();
+    }
+
+    @NotNull
+    public static String getName(@NotNull RobotLocalSettingId localSettingId) {
+        return localSettingId.getText();
+    }
+
+    @NotNull
+    public static String getName(@NotNull RobotUnknownSettingStatementId unknownSettingStatementId) {
+        return unknownSettingStatementId.getText();
+    }
+
+    @NotNull
+    public static String getName(@NotNull RobotUserKeywordStatement userKeywordStatement) {
+        RobotUserKeywordStatementId userKeywordStatementId = userKeywordStatement.getNameIdentifier();
+        return userKeywordStatementId.getText();
+    }
+
+    @NotNull
+    public static String getName(@NotNull RobotUserKeywordStatementId userKeywordStatementId) {
+        return userKeywordStatementId.getText();
+    }
+
+    @NotNull
+    public static String getName(@NotNull RobotTestCaseStatement robotTestCaseStatement) {
+        RobotTestCaseId testCaseId = robotTestCaseStatement.getNameIdentifier();
+        return testCaseId.getText();
+    }
+
+    @NotNull
+    public static String getName(@NotNull RobotTestCaseId testCaseId) {
+        return testCaseId.getText();
+    }
+
+    @NotNull
+    public static String getName(@NotNull RobotTaskStatement robotTaskStatement) {
+        RobotTaskId taskId = robotTaskStatement.getNameIdentifier();
+        return taskId.getText();
+    }
+
+    @NotNull
+    public static String getName(@NotNull RobotTaskId taskId) {
+        return taskId.getText();
+    }
+
+    @NotNull
+    public static String getName(@NotNull RobotTemplateParameterId templateParameterId) {
+        return templateParameterId.getText();
+    }
 
     @Nullable
     public static RobotVariableId getNameIdentifier(RobotVariable variable) {
@@ -47,6 +122,11 @@ public class RobotPsiImplUtil {
     public static String getName(RobotParameter parameter) {
         RobotParameterId nameIdentifier = parameter.getNameIdentifier();
         return nameIdentifier.getName();
+    }
+
+    @NotNull
+    public static String getName(RobotParameterId parameterId) {
+        return parameterId.getText();
     }
 
     @NotNull

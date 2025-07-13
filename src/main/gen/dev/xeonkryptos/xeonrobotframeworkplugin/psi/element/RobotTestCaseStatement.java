@@ -23,4 +23,6 @@ public interface RobotTestCaseStatement extends PsiNameIdentifierOwner, RobotSta
   @NotNull
   RobotTestCaseId getNameIdentifier();
 
+  @NotNull String getName();
+
 }

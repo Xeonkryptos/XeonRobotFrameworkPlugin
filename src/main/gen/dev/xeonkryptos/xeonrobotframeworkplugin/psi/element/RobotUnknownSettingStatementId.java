@@ -8,4 +8,6 @@ import com.intellij.psi.PsiNamedElement;
 
 public interface RobotUnknownSettingStatementId extends PsiNamedElement, RobotNamedElementExpression, RobotReferenceElementExpression, RobotStatement {
 
+  @NotNull String getName();
+
 }

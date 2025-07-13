@@ -18,6 +18,7 @@
     "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotNamedElementExpression"
     "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotReferenceElementExpression"
   ]
+  methods(".*_id")=[getName]
   implements("parameter|positional_argument")="argument"
 
   extends(".*_global_setting")="global_setting_statement"
@@ -122,7 +123,7 @@ test_case_statement ::= test_case_id (testcase_task_statement)* {
     pin=1
     implements = "com.intellij.psi.PsiNameIdentifierOwner"
     extends = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotTestCaseExtension"
-    methods = [nameIdentifier="test_case_id"]
+    methods = [nameIdentifier="test_case_id" getName]
     recoverWhile=test_case_statement_recover
 }
 test_case_id ::= TEST_CASE_NAME
@@ -131,7 +132,7 @@ task_statement ::= task_id (testcase_task_statement)* {
     pin=1
     implements = "com.intellij.psi.PsiNameIdentifierOwner"
     extends = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotTaskExtension"
-    methods = [nameIdentifier="task_id"]
+    methods = [nameIdentifier="task_id" getName]
     recoverWhile=task_statement_recover
 }
 task_id ::= TASK_NAME
@@ -175,7 +176,7 @@ user_keyword_statement ::= user_keyword_statement_id COMMENT* (local_setting | e
     mixin = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotUserKeywordExtension"
     stubClass = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotUserKeywordStub"
     elementTypeFactory = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotUserKeywordStubElement.create"
-    methods = [nameIdentifier="USER_KEYWORD_NAME"]
+    methods = [nameIdentifier="user_keyword_statement_id" getName]
     recoverWhile=user_keyword_statement_recover
 }
 user_keyword_statement_id ::= USER_KEYWORD_NAME
@@ -184,7 +185,7 @@ private user_keyword_statement_recover ::= !user_keyword_statement_id & section_
 local_setting ::= local_setting_id COMMENT* (local_setting_argument | positional_argument | eol_free_keyword_call)* COMMENT* eol_marker {
     implements = ["dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotNamedElementExpression" "com.intellij.psi.PsiNameIdentifierOwner"]
     mixin = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotLocalSettingExtension"
-    methods = [nameIdentifier="local_setting_id"]
+    methods = [nameIdentifier="local_setting_id" getName]
 }
 local_setting_id ::= LOCAL_SETTING_NAME
 local_setting_argument ::= variable ASSIGNMENT positional_argument {
@@ -226,6 +227,7 @@ fake keyword_call ::= base_keyword_call {
         "com.intellij.psi.PsiNameIdentifierOwner"
         "com.intellij.navigation.NavigationItem"
     ]
+    methods = [getName]
     mixin = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotKeywordCallExtension"
     stubClass = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotKeywordCallStub"
     elementTypeFactory = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotKeywordCallStubElement.create"
@@ -233,7 +235,7 @@ fake keyword_call ::= base_keyword_call {
 eol_based_keyword_call ::= base_keyword_call eol_marker {elementType=keyword_call}
 eol_free_keyword_call ::= base_keyword_call {elementType=keyword_call}
 private base_keyword_call ::= keyword_call_id (parameter | positional_argument | COMMENT)*
-keyword_call_id ::= KEYWORD_NAME { methods = [getReference] }
+keyword_call_id ::= KEYWORD_NAME { methods = [getReference getName] }
 
 fake argument ::= DUMMY // This is a placeholder for the argument type, which is used to represent both parameters and positional arguments in the grammar.
 parameter ::= parameter_id ASSIGNMENT positional_argument {

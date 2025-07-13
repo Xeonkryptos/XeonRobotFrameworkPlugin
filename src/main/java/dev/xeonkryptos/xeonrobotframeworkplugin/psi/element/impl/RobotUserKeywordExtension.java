@@ -1,7 +1,6 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl;
 
 import com.intellij.lang.ASTNode;
-import com.intellij.psi.PsiElement;
 import com.intellij.psi.stubs.IStubElementType;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.DefinedParameter;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLocalSetting;
@@ -11,7 +10,6 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotUserKeywordStub;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.QualifiedNameBuilder;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.visitor.RobotUserKeywordInputArgumentCollector;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
 import java.util.List;
@@ -40,12 +38,6 @@ public abstract class RobotUserKeywordExtension extends RobotStubPsiElementBase<
             return inputArgumentCollector.getInputArguments();
         }
         return List.of();
-    }
-
-    @NotNull
-    @Override
-    public PsiElement getNameIdentifier() {
-        return getUserKeywordStatementId();
     }
 
     @NotNull

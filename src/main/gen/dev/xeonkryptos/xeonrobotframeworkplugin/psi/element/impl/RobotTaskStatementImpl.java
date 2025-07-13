@@ -57,4 +57,9 @@ public class RobotTaskStatementImpl extends RobotTaskExtension implements RobotT
     return notNullChild(PsiTreeUtil.getChildOfType(this, RobotTaskId.class));
   }
 
+  @Override
+  public @NotNull String getName() {
+    return RobotPsiImplUtil.getName(this);
+  }
+
 }

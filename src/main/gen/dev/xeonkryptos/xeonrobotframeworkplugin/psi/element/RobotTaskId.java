@@ -8,4 +8,6 @@ import com.intellij.psi.PsiNamedElement;
 
 public interface RobotTaskId extends PsiNamedElement, RobotNamedElementExpression, RobotReferenceElementExpression, RobotStatement {
 
+  @NotNull String getName();
+
 }

@@ -11,4 +11,6 @@ public interface RobotKeywordCallId extends PsiNamedElement, RobotNamedElementEx
 
   @NotNull PsiReference getReference();
 
+  @NotNull String getName();
+
 }

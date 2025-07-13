@@ -7,10 +7,10 @@ import com.intellij.navigation.ItemPresentation;
 import com.intellij.openapi.editor.colors.TextAttributesKey;
 import com.intellij.pom.Navigatable;
 import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiNamedElement;
 import com.intellij.psi.util.PsiTreeUtil;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotFile;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotSection;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotStatement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTestCaseStatement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotUserKeywordStatement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableStatement;
@@ -117,8 +117,11 @@ public class RobotStructureViewElement implements StructureViewTreeElement {
     private String getDisplayName() {
         if (element instanceof RobotFile robotFile) {
             return robotFile.getName();
-        } else if (element instanceof RobotStatement robotStatement) {
-            return robotStatement.getPresentableText();
+        } else if (element instanceof PsiNamedElement namedElement) {
+            String name = namedElement.getName();
+            if (name != null) {
+                return name;
+            }
         }
         return UNKNOWN;
     }

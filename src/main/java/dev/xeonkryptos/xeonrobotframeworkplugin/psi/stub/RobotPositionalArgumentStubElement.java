@@ -1,7 +1,6 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub;
 
 import com.intellij.lang.ASTNode;
-import com.intellij.lang.injection.InjectedLanguageManager;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.stubs.IStubElementType;
 import com.intellij.psi.stubs.IndexSink;
@@ -36,7 +35,7 @@ public class RobotPositionalArgumentStubElement extends IStubElementType<RobotPo
     @NotNull
     @Override
     public RobotPositionalArgumentStub createStub(@NotNull RobotPositionalArgument psi, StubElement<? extends PsiElement> parentStub) {
-        String argumentText = InjectedLanguageManager.getInstance(psi.getProject()).getUnescapedText(psi);
+        String argumentText = psi.getText();
         RobotImportArgumentIdentifier robotImportArgumentIdentifier = new RobotImportArgumentIdentifier();
         psi.accept(robotImportArgumentIdentifier);
         return new RobotPositionalArgumentStubImpl(parentStub, argumentText, robotImportArgumentIdentifier.isImportArgument());

@@ -23,4 +23,6 @@ public interface RobotTaskStatement extends PsiNameIdentifierOwner, RobotStateme
   @NotNull
   RobotTaskId getNameIdentifier();
 
+  @NotNull String getName();
+
 }

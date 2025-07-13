@@ -33,4 +33,9 @@ public class RobotParameterIdImpl extends RobotPsiElementBase implements RobotPa
     return RobotPsiImplUtil.getReference(this);
   }
 
+  @Override
+  public @NotNull String getName() {
+    return RobotPsiImplUtil.getName(this);
+  }
+
 }

@@ -18,6 +18,8 @@ public interface RobotUserKeywordStatement extends RobotNamedElementExpression, 
   List<RobotLocalSetting> getLocalSettingList();
 
   @NotNull
-  RobotUserKeywordStatementId getUserKeywordStatementId();
+  RobotUserKeywordStatementId getNameIdentifier();
+
+  @NotNull String getName();
 
 }

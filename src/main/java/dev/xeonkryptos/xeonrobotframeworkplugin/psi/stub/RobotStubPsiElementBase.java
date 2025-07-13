@@ -2,7 +2,6 @@ package dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub;
 
 import com.intellij.extapi.psi.StubBasedPsiElementBase;
 import com.intellij.lang.ASTNode;
-import com.intellij.lang.injection.InjectedLanguageManager;
 import com.intellij.navigation.ItemPresentation;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.stubs.IStubElementType;
@@ -27,12 +26,11 @@ public abstract class RobotStubPsiElementBase<T extends StubElement<P>, P extend
     public String getPresentableText() {
         T stub = getStub();
         String text;
-        InjectedLanguageManager injectedLanguageManager = InjectedLanguageManager.getInstance(getProject());
         if (stub != null) {
             P psiElement = stub.getPsi();
-            text = injectedLanguageManager.getUnescapedText(psiElement);
+            text = psiElement.getText();
         } else {
-            text = injectedLanguageManager.getUnescapedText(this);
+            text = getText();
         }
         return RobotPsiElementBase.getPresentableText(text);
     }
@@ -56,11 +54,6 @@ public abstract class RobotStubPsiElementBase<T extends StubElement<P>, P extend
                 return RobotStubPsiElementBase.this.getIcon(ICON_FLAG_VISIBILITY);
             }
         };
-    }
-
-    @Override
-    public String getName() {
-        return getPresentableText();
     }
 
     public PsiElement setName(@NotNull String newName) {
