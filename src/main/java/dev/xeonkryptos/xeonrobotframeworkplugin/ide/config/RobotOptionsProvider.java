@@ -10,6 +10,9 @@ import com.jetbrains.python.psi.PyFunction;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.text.Collator;
+import java.text.ParseException;
+import java.text.RuleBasedCollator;
 import java.util.List;
 
 @State(name = "RobotOptionsProvider", storages = { @Storage("$WORKSPACE_FILE$") })
@@ -17,75 +20,130 @@ public class RobotOptionsProvider implements PersistentStateComponent<RobotOptio
 
     private final State state = new State();
 
+    private Collator parameterNameCollator;
+
     public static RobotOptionsProvider getInstance(Project project) {
         return project.getService(RobotOptionsProvider.class);
     }
 
     public final boolean allowTransitiveImports() {
-        return this.state.transitiveImports;
+        return state.transitiveImports;
     }
 
     public final void setAllowTransitiveImports(boolean transitiveImports) {
-        this.state.transitiveImports = transitiveImports;
+        state.transitiveImports = transitiveImports;
     }
 
     public final boolean capitalizeKeywords() {
-        return this.state.capitalizeKeywords;
+        return state.capitalizeKeywords;
     }
 
     public final void setCapitalizeKeywords(boolean capitalizeKeywords) {
-        this.state.capitalizeKeywords = capitalizeKeywords;
+        state.capitalizeKeywords = capitalizeKeywords;
     }
 
     public final boolean smartAutoEncloseVariable() {
-        return this.state.smartAutoEncloseVariable;
+        return state.smartAutoEncloseVariable;
     }
 
     public final void setSmartAutoEncloseVariable(boolean smartAutoEncloseVariable) {
-        this.state.smartAutoEncloseVariable = smartAutoEncloseVariable;
+        state.smartAutoEncloseVariable = smartAutoEncloseVariable;
     }
 
     public final boolean multilineIndentation() {
-        return this.state.multilineIndentation;
+        return state.multilineIndentation;
     }
 
     public final void setMultilineIndentation(boolean multilineIndentation) {
-        this.state.multilineIndentation = multilineIndentation;
+        state.multilineIndentation = multilineIndentation;
+    }
+
+    public final Collator getParameterNameCollator() {
+        if (parameterNameCollator == null) {
+            updateParameterNameCollator();
+        }
+        return parameterNameCollator;
+    }
+
+    public final String parameterNameCollationRules() {
+        return state.parameterNameCollationRules;
+    }
+
+    public final void setParameterNameCollationRules(String parameterNameCollationRules) {
+        state.parameterNameCollationRules = parameterNameCollationRules;
+        updateParameterNameCollator();
+    }
+
+    private void updateParameterNameCollator() {
+        RuleBasedCollator baseCollator = (RuleBasedCollator) Collator.getInstance();
+        String baseRules = baseCollator.getRules();
+        if (state.parameterNameCollationRules != null && !state.parameterNameCollationRules.isBlank()) {
+            try {
+                parameterNameCollator = new RuleBasedNormalizerCollator(baseRules + state.parameterNameCollationRules);
+            } catch (ParseException ignored) {
+                parameterNameCollator = getFallbackCollator(baseCollator);
+            }
+        } else {
+            parameterNameCollator = getFallbackCollator(baseCollator);
+        }
+        parameterNameCollator.setStrength(Collator.TERTIARY);
+    }
+
+    private Collator getFallbackCollator(RuleBasedCollator baseCollator) {
+        String baseRules = baseCollator.getRules();
+        try {
+            return new RuleBasedNormalizerCollator(baseRules);
+        } catch (ParseException ignored2) {
+            return baseCollator;
+        }
+    }
+
+    public final String canParseParameterNameCollationRules(String parameterNameCollationRules) {
+        if (parameterNameCollationRules == null || parameterNameCollationRules.isBlank()) {
+            return null;
+        }
+        try {
+            String baseRules = ((RuleBasedCollator) parameterNameCollator).getRules();
+            new RuleBasedCollator(baseRules + parameterNameCollationRules);
+        } catch (ParseException e) {
+            return e.getMessage();
+        }
+        return null;
     }
 
     public final boolean pythonLiveInspection() {
-        return this.state.pythonLiveInspection;
+        return state.pythonLiveInspection;
     }
 
     public final void setPythonLiveInspection(boolean pythonLiveInspection) {
-        this.state.pythonLiveInspection = pythonLiveInspection;
+        state.pythonLiveInspection = pythonLiveInspection;
     }
 
     public final String getPythonLiveInspectionAdditionalArguments() {
-        return this.state.pythonLiveInspectionAdditionalArguments;
+        return state.pythonLiveInspectionAdditionalArguments;
     }
 
     public final void setPythonLiveInspectionAdditionalArguments(String pythonLiveInspectionAdditionalArguments) {
-        this.state.pythonLiveInspectionAdditionalArguments = pythonLiveInspectionAdditionalArguments;
+        state.pythonLiveInspectionAdditionalArguments = pythonLiveInspectionAdditionalArguments;
     }
 
     public final List<String> getPythonLiveInspectionDecorators() {
-        return this.state.pythonLiveInspectionDecorators;
+        return state.pythonLiveInspectionDecorators;
     }
 
     public final void setPythonLiveInspectionDecorators(List<String> pythonLiveInspectionDecorators) {
-        this.state.pythonLiveInspectionDecorators = pythonLiveInspectionDecorators;
+        state.pythonLiveInspectionDecorators = pythonLiveInspectionDecorators;
     }
 
     @SuppressWarnings("UnstableApiUsage")
     public final boolean analyzeViaPythonLiveInspection(PyFunction function) {
-        if (this.state.pythonLiveInspection) {
+        if (state.pythonLiveInspection) {
             PyDecoratorList decoratorList = function.getDecoratorList();
             if (decoratorList != null) {
                 for (PyDecorator decorator : decoratorList.getDecorators()) {
                     String decoratorName = decorator.getName();
-                    if (!"keyword".equals(decoratorName) && (this.state.pythonLiveInspectionDecorators.isEmpty()
-                                                             || this.state.pythonLiveInspectionDecorators.contains(decoratorName))) {
+                    if (!"keyword".equals(decoratorName) && (state.pythonLiveInspectionDecorators.isEmpty() || state.pythonLiveInspectionDecorators.contains(
+                            decoratorName))) {
                         return true;
                     }
                 }
@@ -96,7 +154,7 @@ public class RobotOptionsProvider implements PersistentStateComponent<RobotOptio
 
     @Override
     public @Nullable State getState() {
-        return this.state;
+        return state;
     }
 
     @Override
@@ -105,6 +163,7 @@ public class RobotOptionsProvider implements PersistentStateComponent<RobotOptio
         this.state.capitalizeKeywords = state.capitalizeKeywords;
         this.state.smartAutoEncloseVariable = state.smartAutoEncloseVariable;
         this.state.multilineIndentation = state.multilineIndentation;
+        this.state.parameterNameCollationRules = state.parameterNameCollationRules;
         this.state.pythonLiveInspection = state.pythonLiveInspection;
         this.state.pythonLiveInspectionAdditionalArguments = state.pythonLiveInspectionAdditionalArguments;
         this.state.pythonLiveInspectionDecorators = state.pythonLiveInspectionDecorators;
@@ -115,6 +174,7 @@ public class RobotOptionsProvider implements PersistentStateComponent<RobotOptio
         public boolean capitalizeKeywords = true;
         public boolean smartAutoEncloseVariable = true;
         public boolean multilineIndentation = true;
+        public String parameterNameCollationRules = "& A < Ä = Ae & a < ä = ae & O < Ö = Oe & o < ö = oe & U < Ü = Ue & u < ü = ue & S < ß = Ss & s < ß = ss";
         public boolean pythonLiveInspection = false;
         public String pythonLiveInspectionAdditionalArguments = "-m robot.libdoc .robotframework-ls";
         public List<String> pythonLiveInspectionDecorators = List.of();

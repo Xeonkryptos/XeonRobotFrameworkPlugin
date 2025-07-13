@@ -39,4 +39,9 @@ public class RobotParameterImpl extends RobotParameterExtension implements Robot
     return notNullChild(PsiTreeUtil.getChildOfType(this, RobotParameterId.class));
   }
 
+  @Override
+  public @NotNull String getName() {
+    return RobotPsiImplUtil.getName(this);
+  }
+
 }

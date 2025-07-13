@@ -19,6 +19,7 @@ import com.intellij.util.ArrayUtilRt;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCall;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCallId;
+import dev.xeonkryptos.xeonrobotframeworkplugin.util.GlobalConstants;
 import one.util.streamex.MoreCollectors;
 import one.util.streamex.StreamEx;
 import org.jetbrains.annotations.NotNull;
@@ -69,7 +70,7 @@ public class RobotParameterInfoHandler implements ParameterInfoHandler<RobotKeyw
                 boolean newLineAssignedToStatement = false;
                 do {
                     String unescapedWhitespaceText = injectedLanguageManager.getUnescapedText(element);
-                    if ("...".equals(unescapedWhitespaceText)) {
+                    if (GlobalConstants.ELLIPSIS.equals(unescapedWhitespaceText)) {
                         newLineAssignedToStatement = true;
                     } else if ("\n".equals(unescapedWhitespaceText) && !firstElement) {
                         if (!newLineAssignedToStatement) {
@@ -105,10 +106,7 @@ public class RobotParameterInfoHandler implements ParameterInfoHandler<RobotKeyw
         }
 
         SyntaxTraverser<PsiElement> syntaxTraverser = SyntaxTraverser.psiTraverser(keywordStatement).expandAndSkip(Conditions.is(keywordStatement));
-        int parameterIndex = ParameterInfoHandlerUtil.getCurrentParameterIndex(syntaxTraverser,
-                                                                               offset,
-                                                                               RobotTypes.PARAMETER,
-                                                                               RobotTypes.POSITIONAL_ARGUMENT);
+        int parameterIndex = ParameterInfoHandlerUtil.getCurrentParameterIndex(syntaxTraverser, offset, RobotTypes.PARAMETER, RobotTypes.POSITIONAL_ARGUMENT);
         parameterIndex = parameterIndex - 1;
         context.setCurrentParameter(parameterIndex);
     }
@@ -154,7 +152,9 @@ public class RobotParameterInfoHandler implements ParameterInfoHandler<RobotKeyw
             if (hints.length == 0) {
                 signatureBuilder.append(getNoParamsMsg());
             } else {
-                for (String s : hints) signatureBuilder.append(s);
+                for (String s : hints) {
+                    signatureBuilder.append(s);
+                }
             }
             context.setupUIComponentPresentation(signatureBuilder.toString(), -1, 0, false, false, false, context.getDefaultParameterColor());
         }

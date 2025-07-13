@@ -29,7 +29,7 @@ public class VariableDto implements DefinedVariable {
         if (text == null) {
             return false;
         }
-        return matchingVariableName.equals(text.trim());
+        return matchingVariableName.equalsIgnoreCase(text.trim());
     }
 
     @Override

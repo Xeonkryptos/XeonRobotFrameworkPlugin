@@ -16,6 +16,7 @@ import com.intellij.psi.PsiFile;
 import com.intellij.psi.tree.IElementType;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotStatement;
+import dev.xeonkryptos.xeonrobotframeworkplugin.util.GlobalConstants;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -171,7 +172,7 @@ public class RobotFoldingBuilder extends FoldingBuilderEx implements DumbAware {
         if ((presentation = ((NavigationItem) node.getPsi()).getPresentation()) != null) {
             return CONTROL_STRUCTURE_TOKENS.contains(node.getElementType()) ? presentation.getPresentableText() + " ..." : presentation.getPresentableText();
         } else {
-            return "...";
+            return GlobalConstants.ELLIPSIS;
         }
     }
 

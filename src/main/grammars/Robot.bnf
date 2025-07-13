@@ -237,9 +237,13 @@ keyword_call_id ::= KEYWORD_NAME { methods = [getReference] }
 
 fake argument ::= DUMMY // This is a placeholder for the argument type, which is used to represent both parameters and positional arguments in the grammar.
 parameter ::= parameter_id ASSIGNMENT positional_argument {
-    implements = ["com.intellij.psi.PsiNameIdentifierOwner" "com.intellij.navigation.NavigationItem"]
+    implements = [
+        "com.intellij.psi.PsiNameIdentifierOwner"
+        "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotNamedElementExpression"
+        "com.intellij.navigation.NavigationItem"
+    ]
     mixin = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotParameterExtension"
-    methods = [nameIdentifier="parameter_id"]
+    methods = [nameIdentifier="parameter_id" getName]
 }
 parameter_id ::= PARAMETER_NAME {
     methods = [getReference]

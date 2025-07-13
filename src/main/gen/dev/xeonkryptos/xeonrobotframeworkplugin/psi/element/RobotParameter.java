@@ -7,12 +7,14 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiNameIdentifierOwner;
 import com.intellij.navigation.NavigationItem;
 
-public interface RobotParameter extends PsiNameIdentifierOwner, NavigationItem, RobotArgument, RobotStatement {
+public interface RobotParameter extends PsiNameIdentifierOwner, RobotNamedElementExpression, NavigationItem, RobotArgument, RobotStatement {
 
   @NotNull
   RobotPositionalArgument getPositionalArgument();
 
   @NotNull
   RobotParameterId getNameIdentifier();
+
+  @NotNull String getName();
 
 }

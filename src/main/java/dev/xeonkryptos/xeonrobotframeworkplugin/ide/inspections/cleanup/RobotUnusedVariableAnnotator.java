@@ -15,15 +15,13 @@ public class RobotUnusedVariableAnnotator implements Annotator {
 
     @Override
     public void annotate(@NotNull PsiElement element, @NotNull AnnotationHolder holder) {
-        if (element.isValid() && element instanceof RobotVariableDefinition variableDefinition) {
-            if (isUnused(variableDefinition)) {
-                holder.newAnnotation(HighlightSeverity.WARNING, RobotBundle.getMessage("annotation.variable.unused"))
-                      .textAttributes(CodeInsightColors.NOT_USED_ELEMENT_ATTRIBUTES)
-                      .highlightType(ProblemHighlightType.LIKE_UNUSED_SYMBOL)
-                      .range(variableDefinition)
-                      .withFix(new RemoveUnusedVariableDefinitionIntentAction(variableDefinition))
-                      .create();
-            }
+        if (element instanceof RobotVariableDefinition variableDefinition && isUnused(variableDefinition)) {
+            holder.newAnnotation(HighlightSeverity.WARNING, RobotBundle.getMessage("annotation.variable.unused"))
+                  .textAttributes(CodeInsightColors.NOT_USED_ELEMENT_ATTRIBUTES)
+                  .highlightType(ProblemHighlightType.LIKE_UNUSED_SYMBOL)
+                  .range(variableDefinition)
+                  .withFix(new RemoveUnusedVariableDefinitionIntentAction(variableDefinition))
+                  .create();
         }
     }
 

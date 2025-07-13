@@ -5,18 +5,21 @@ import com.intellij.lang.annotation.Annotator;
 import com.intellij.lang.annotation.HighlightSeverity;
 import com.intellij.openapi.project.DumbAware;
 import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiPolyVariantReference;
 import com.intellij.psi.util.PsiTreeUtil;
 import dev.xeonkryptos.xeonrobotframeworkplugin.RobotBundle;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.DefinedVariable;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotEnvironmentVariable;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLocalSetting;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLocalSettingArgument;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotPythonExpression;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariable;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableDefinition;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableId;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVisitor;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.ref.RobotFileManager;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Collection;
 import java.util.regex.Pattern;
 
 public class RobotVariableAnnotator implements Annotator, DumbAware {
@@ -32,13 +35,17 @@ public class RobotVariableAnnotator implements Annotator, DumbAware {
         if (variableName == null || variableName.isBlank() || NUMBERS_PATTERN.matcher(variableName).matches()) {
             return;
         }
+        Collection<DefinedVariable> globalVariables = RobotFileManager.getGlobalVariables(element.getProject());
+        if (globalVariables.stream().anyMatch(globalVariable -> globalVariable.matches(variableName))) {
+            return;
+        }
         RobotLocalSetting localSetting = PsiTreeUtil.getParentOfType(element, RobotLocalSetting.class);
         if (localSetting != null && "[Arguments]".equalsIgnoreCase(localSetting.getName())) {
             return;
         }
 
         RobotVariableId nameIdentifier = variable.getNameIdentifier();
-        if (nameIdentifier != null && nameIdentifier.getReference().resolve() != null) {
+        if (nameIdentifier != null && ((PsiPolyVariantReference) nameIdentifier.getReference()).multiResolve(false).length > 0) {
             return;
         }
         RobotVariableAnalyser robotVariableAnalyser = new RobotVariableAnalyser();

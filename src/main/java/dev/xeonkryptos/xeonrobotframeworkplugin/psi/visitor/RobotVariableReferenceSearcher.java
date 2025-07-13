@@ -21,7 +21,9 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariablesSectio
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVisitor;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Collection;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 public class RobotVariableReferenceSearcher extends RobotVisitor {
@@ -29,7 +31,7 @@ public class RobotVariableReferenceSearcher extends RobotVisitor {
     private final Set<PsiElement> parents;
     private final String variableName;
 
-    private PsiElement foundElement;
+    private final Set<PsiElement> foundElements = new LinkedHashSet<>();
 
     public RobotVariableReferenceSearcher(RobotVariableId variableId) {
         this.variableName = variableId.getName();
@@ -53,62 +55,54 @@ public class RobotVariableReferenceSearcher extends RobotVisitor {
 
     @Override
     public void visitVariablesSection(@NotNull RobotVariablesSection o) {
-        if (foundElement == null) {
-            o.acceptChildren(this);
-        }
+        o.acceptChildren(this);
     }
 
     @Override
     public void visitKeywordsSection(@NotNull RobotKeywordsSection o) {
-        if (parents.contains(o) && foundElement == null) {
+        if (parents.contains(o)) {
             o.acceptChildren(this);
         }
     }
 
     @Override
     public void visitTestCasesSection(@NotNull RobotTestCasesSection o) {
-        if (parents.contains(o) && foundElement == null) {
+        if (parents.contains(o)) {
             o.acceptChildren(this);
         }
     }
 
     @Override
     public void visitTestCaseStatement(@NotNull RobotTestCaseStatement o) {
-        if (foundElement == null) {
-            o.acceptChildren(this);
-        }
+        o.acceptChildren(this);
     }
 
     @Override
     public void visitTasksSection(@NotNull RobotTasksSection o) {
-        if (parents.contains(o) && foundElement == null) {
+        if (parents.contains(o)) {
             o.acceptChildren(this);
         }
     }
 
     @Override
     public void visitTaskStatement(@NotNull RobotTaskStatement o) {
-        if (foundElement == null) {
-            o.acceptChildren(this);
-        }
+        o.acceptChildren(this);
     }
 
     @Override
     public void visitUserKeywordStatement(@NotNull RobotUserKeywordStatement o) {
-        if (parents.contains(o) && foundElement == null) {
+        if (parents.contains(o)) {
             o.acceptChildren(this);
         }
     }
 
     @Override
     public void visitLocalSetting(@NotNull RobotLocalSetting o) {
-        if (foundElement == null) {
-            for (RobotLocalSettingArgument localSettingArgument : o.getLocalSettingArgumentList()) {
-                visitLocalSettingArgument(localSettingArgument);
-            }
-            for (RobotPositionalArgument positionalArgument : o.getPositionalArgumentList()) {
-                positionalArgument.acceptChildren(this);
-            }
+        for (RobotLocalSettingArgument localSettingArgument : o.getLocalSettingArgumentList()) {
+            visitLocalSettingArgument(localSettingArgument);
+        }
+        for (RobotPositionalArgument positionalArgument : o.getPositionalArgumentList()) {
+            positionalArgument.acceptChildren(this);
         }
     }
 
@@ -116,44 +110,38 @@ public class RobotVariableReferenceSearcher extends RobotVisitor {
     public void visitLocalSettingArgument(@NotNull RobotLocalSettingArgument o) {
         RobotVariable variable = o.getVariable();
         String definedVariableName = variable.getName();
-        if (variableName.equals(definedVariableName)) {
-            foundElement = o;
+        if (variableName.equalsIgnoreCase(definedVariableName)) {
+            foundElements.add(o);
         }
     }
 
     @Override
     public void visitVariableStatement(@NotNull RobotVariableStatement o) {
-        if (foundElement == null) {
-            o.acceptChildren(this);
-        }
+        o.acceptChildren(this);
     }
 
     @Override
     public void visitExecutableStatement(@NotNull RobotExecutableStatement o) {
-        if (foundElement == null) {
-            o.acceptChildren(this);
-        }
+        o.acceptChildren(this);
     }
 
     @Override
     public void visitVariableDefinition(@NotNull RobotVariableDefinition o) {
         String definedVariableName = o.getName();
-        if (variableName.equals(definedVariableName)) {
-            foundElement = o;
+        if (variableName.equalsIgnoreCase(definedVariableName)) {
+            foundElements.add(o);
         }
     }
 
     @Override
     public void visitVariable(@NotNull RobotVariable o) {
-        if (foundElement == null) {
-            String variableName = o.getName();
-            if (variableName != null && variableName.equals(this.variableName)) {
-                foundElement = o;
-            }
+        String variableName = o.getName();
+        if (variableName != null && variableName.equalsIgnoreCase(this.variableName)) {
+            foundElements.add(o);
         }
     }
 
-    public PsiElement getFoundElement() {
-        return foundElement;
+    public Collection<PsiElement> getFoundElements() {
+        return foundElements;
     }
 }

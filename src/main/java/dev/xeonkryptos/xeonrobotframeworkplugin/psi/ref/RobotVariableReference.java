@@ -1,45 +1,54 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.psi.ref;
 
 import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiElementResolveResult;
 import com.intellij.psi.PsiFile;
-import com.intellij.psi.PsiReferenceBase;
+import com.intellij.psi.PsiPolyVariantReferenceBase;
+import com.intellij.psi.ResolveResult;
 import com.intellij.psi.impl.source.resolve.ResolveCache;
 import com.intellij.psi.util.PsiTreeUtil;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotRoot;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableId;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.visitor.RobotVariableReferenceSearcher;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
-public class RobotVariableReference extends PsiReferenceBase<RobotVariableId> {
+import java.util.Collection;
+import java.util.List;
+
+public class RobotVariableReference extends PsiPolyVariantReferenceBase<RobotVariableId> {
 
     public RobotVariableReference(@NotNull RobotVariableId element) {
         super(element, false);
     }
 
-    @Nullable
     @Override
-    public PsiElement resolve() {
+    public ResolveResult @NotNull [] multiResolve(boolean incompleteCode) {
         RobotVariableId variableId = getElement();
         ResolveCache resolveCache = ResolveCache.getInstance(variableId.getProject());
-        return resolveCache.resolveWithCaching(this, (robotVariableReference, incompleteCode) -> {
+        return resolveCache.resolveWithCaching(this, (robotVariableReference, incompCode) -> {
             String variableName = variableId.getName();
             if (variableName == null || variableName.isBlank()) { // e.g. ${}, thus empty representation of a variable. There can be no reference.
-                return null;
+                return ResolveResult.EMPTY_ARRAY;
             }
 
-            PsiElement foundElement = null;
+            Collection<PsiElement> foundElements = List.of();
             RobotRoot rootElement = PsiTreeUtil.getParentOfType(variableId, RobotRoot.class);
             if (rootElement != null) {
                 RobotVariableReferenceSearcher variableReferenceSearcher = new RobotVariableReferenceSearcher(variableId);
                 rootElement.accept(variableReferenceSearcher);
-                foundElement = variableReferenceSearcher.getFoundElement();
+                foundElements = variableReferenceSearcher.getFoundElements();
             }
-            if (foundElement == null) {
+            if (foundElements.isEmpty()) {
                 PsiFile containingFile = variableId.getContainingFile();
-                foundElement = ResolverUtils.findVariableElement(variableName, containingFile);
+                PsiElement foundElement = ResolverUtils.findVariableElement(variableName, containingFile);
+                if (foundElement != null) {
+                    foundElements = List.of(foundElement);
+                }
             }
-            return foundElement;
+            if (foundElements.isEmpty()) {
+                return ResolveResult.EMPTY_ARRAY;
+            }
+            return foundElements.stream().map(PsiElementResolveResult::new).toArray(ResolveResult[]::new);
         }, true, false);
     }
 }

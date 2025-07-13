@@ -4,6 +4,7 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiReference;
 import com.intellij.psi.util.PsiTreeUtil;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCallId;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotParameter;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotParameterId;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariable;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableId;
@@ -35,11 +36,17 @@ public class RobotPsiImplUtil {
         String nameContent = contentElement.getText();
         for (int i = 0; i < nameContent.length(); i++) {
             char c = nameContent.charAt(i);
-            if (c == '.' || c == '[' || c == ':') {
+            if (c == '.' || c == '[' || c == ':' || c == '+' || c == '-' || c == '*' || c == '/') {
                 return nameContent.substring(0, i);
             }
         }
         return nameContent;
+    }
+
+    @NotNull
+    public static String getName(RobotParameter parameter) {
+        RobotParameterId nameIdentifier = parameter.getNameIdentifier();
+        return nameIdentifier.getName();
     }
 
     @NotNull
