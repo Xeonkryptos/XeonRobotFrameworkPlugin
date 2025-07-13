@@ -36,14 +36,14 @@ public class RobotParameterInfoHandler implements ParameterInfoHandler<RobotKeyw
     public RobotKeywordCall findElementForParameterInfo(@NotNull CreateParameterInfoContext context) {
         PsiFile psiFile = context.getFile();
         int offset = context.getOffset();
-        RobotKeywordCall keywordStatement = findKeywordStatement(psiFile, offset);
-        if (keywordStatement != null) {
-            RobotKeywordCallId keywordCallId = keywordStatement.getKeywordCallId();
+        RobotKeywordCall keywordCall = findKeywordCall(psiFile, offset);
+        if (keywordCall != null) {
+            RobotKeywordCallId keywordCallId = keywordCall.getKeywordCallId();
             PsiReference reference = keywordCallId.getReference();
             PsiElement resolvedElement = reference.resolve();
             context.setItemsToShow(new Object[] { resolvedElement });
         }
-        return keywordStatement;
+        return keywordCall;
     }
 
     @Override
@@ -56,12 +56,12 @@ public class RobotParameterInfoHandler implements ParameterInfoHandler<RobotKeyw
     public RobotKeywordCall findElementForUpdatingParameterInfo(@NotNull UpdateParameterInfoContext context) {
         PsiFile psiFile = context.getFile();
         int offset = context.getOffset();
-        return findKeywordStatement(psiFile, offset);
+        return findKeywordCall(psiFile, offset);
     }
 
-    private RobotKeywordCall findKeywordStatement(PsiFile psiFile, int offset) {
-        RobotKeywordCall keywordStatement = ParameterInfoUtils.findParentOfType(psiFile, offset, RobotKeywordCall.class);
-        if (keywordStatement == null) {
+    private RobotKeywordCall findKeywordCall(PsiFile psiFile, int offset) {
+        RobotKeywordCall keywordCall = ParameterInfoUtils.findParentOfType(psiFile, offset, RobotKeywordCall.class);
+        if (keywordCall == null) {
             PsiElement element = psiFile.findElementAt(offset);
             if (element instanceof PsiWhiteSpace) {
                 boolean firstElement = true;
@@ -81,29 +81,29 @@ public class RobotParameterInfoHandler implements ParameterInfoHandler<RobotKeyw
                 } while (element instanceof PsiWhiteSpace);
             }
             if (element instanceof RobotKeywordCall found) {
-                keywordStatement = found;
+                keywordCall = found;
             }
         }
-        return keywordStatement;
+        return keywordCall;
     }
 
     @Override
-    public void updateParameterInfo(@NotNull RobotKeywordCall keywordStatement, @NotNull UpdateParameterInfoContext context) {
+    public void updateParameterInfo(@NotNull RobotKeywordCall keywordCall, @NotNull UpdateParameterInfoContext context) {
         int offset = context.getEditor().getCaretModel().getOffset();
-        if (!keywordStatement.getTextRange().containsOffset(offset)) {
+        if (!keywordCall.getTextRange().containsOffset(offset)) {
             PsiElement element = context.getFile().findElementAt(offset);
             if (element instanceof PsiWhiteSpace) {
                 do {
                     element = element.getPrevSibling();
                 } while (element instanceof PsiWhiteSpace);
             }
-            if (element != keywordStatement) {
+            if (element != keywordCall) {
                 context.removeHint();
                 return;
             }
         }
 
-        SyntaxTraverser<PsiElement> syntaxTraverser = SyntaxTraverser.psiTraverser(keywordStatement).expandAndSkip(Conditions.is(keywordStatement));
+        SyntaxTraverser<PsiElement> syntaxTraverser = SyntaxTraverser.psiTraverser(keywordCall).expandAndSkip(Conditions.is(keywordCall));
         int parameterIndex = ParameterInfoHandlerUtil.getCurrentParameterIndex(syntaxTraverser, offset, RobotTypes.PARAMETER, RobotTypes.POSITIONAL_ARGUMENT);
         parameterIndex = parameterIndex - 1;
         context.setCurrentParameter(parameterIndex);
