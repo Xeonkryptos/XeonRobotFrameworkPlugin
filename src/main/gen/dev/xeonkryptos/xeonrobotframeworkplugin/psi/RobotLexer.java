@@ -4850,23 +4850,23 @@ public class RobotLexer implements FlexLexer {
   private boolean zzEOFDone;
 
   /* user code: */
-  private boolean globalTemplateEnabled = false;
-  private boolean localTemplateEnabled = false;
-  private boolean templateKeywordFound = false;
+  protected boolean globalTemplateEnabled = false;
+  protected boolean localTemplateEnabled = false;
+  protected boolean templateKeywordFound = false;
 
-  private final Stack<Integer> previousStates = new Stack<>();
+  protected final Stack<Integer> previousStates = new Stack<>();
 
   public RobotLexer() {
       this((java.io.Reader)null);
   }
 
-  private void enterNewState(int newState) {
+  protected void enterNewState(int newState) {
       int previousState = yystate();
       previousStates.push(previousState);
       yybegin(newState);
   }
 
-  private void leaveState() {
+  protected void leaveState() {
       if (!previousStates.empty()) {
           Integer previousState = previousStates.pop();
           yybegin(previousState);
@@ -4875,12 +4875,19 @@ public class RobotLexer implements FlexLexer {
       }
   }
 
-  private void reset() {
+  private void resetInternalState() {
       previousStates.clear();
       localTemplateEnabled = globalTemplateEnabled;
   }
 
-  private void pushBackTrailingWhitespace() {
+  protected void resetLexer() {
+      previousStates.clear();
+      localTemplateEnabled = false;
+      templateKeywordFound = false;
+      globalTemplateEnabled = false;
+  }
+
+  protected void pushBackTrailingWhitespace() {
       CharSequence text = yytext();
       int trailingWhitespaceLength = computeTrailingWhitespaceLength(text);
       if (trailingWhitespaceLength > 0) {
@@ -4888,7 +4895,7 @@ public class RobotLexer implements FlexLexer {
       }
   }
 
-  private int computeTrailingWhitespaceLength(CharSequence text) {
+  protected int computeTrailingWhitespaceLength(CharSequence text) {
       int length = 0;
       for (int i = text.length() - 1; i >= 0; i--) {
           char c = text.charAt(i);
@@ -5531,7 +5538,7 @@ public class RobotLexer implements FlexLexer {
           // fall through
           case 184: break;
           case 70:
-            { reset(); yybegin(TASK_NAME_DEFINITION); return TASKS_HEADER;
+            { resetInternalState(); yybegin(TASK_NAME_DEFINITION); return TASKS_HEADER;
             }
           // fall through
           case 185: break;
@@ -5575,7 +5582,7 @@ public class RobotLexer implements FlexLexer {
           // fall through
           case 192: break;
           case 78:
-            { reset(); yybegin(TASK_NAME_DEFINITION); pushBackTrailingWhitespace(); return TASKS_HEADER;
+            { resetInternalState(); yybegin(TASK_NAME_DEFINITION); pushBackTrailingWhitespace(); return TASKS_HEADER;
             }
           // fall through
           case 193: break;
@@ -5632,17 +5639,17 @@ public class RobotLexer implements FlexLexer {
           // fall through
           case 201: break;
           case 87:
-            { reset(); yybegin(COMMENTS_SECTION); return COMMENTS_HEADER;
+            { resetInternalState(); yybegin(COMMENTS_SECTION); return COMMENTS_HEADER;
             }
           // fall through
           case 202: break;
           case 88:
-            { reset(); yybegin(USER_KEYWORD_NAME_DEFINITION); return USER_KEYWORDS_HEADER;
+            { resetInternalState(); yybegin(USER_KEYWORD_NAME_DEFINITION); return USER_KEYWORDS_HEADER;
             }
           // fall through
           case 203: break;
           case 89:
-            { reset(); yybegin(SETTINGS_SECTION); return SETTINGS_HEADER;
+            { resetInternalState(); yybegin(SETTINGS_SECTION); return SETTINGS_HEADER;
             }
           // fall through
           case 204: break;
@@ -5662,17 +5669,17 @@ public class RobotLexer implements FlexLexer {
           // fall through
           case 207: break;
           case 93:
-            { reset(); yybegin(USER_KEYWORD_NAME_DEFINITION); pushBackTrailingWhitespace(); return USER_KEYWORDS_HEADER;
+            { resetInternalState(); yybegin(USER_KEYWORD_NAME_DEFINITION); pushBackTrailingWhitespace(); return USER_KEYWORDS_HEADER;
             }
           // fall through
           case 208: break;
           case 94:
-            { reset(); yybegin(SETTINGS_SECTION); pushBackTrailingWhitespace(); return SETTINGS_HEADER;
+            { resetInternalState(); yybegin(SETTINGS_SECTION); pushBackTrailingWhitespace(); return SETTINGS_HEADER;
             }
           // fall through
           case 209: break;
           case 95:
-            { reset(); yybegin(VARIABLES_SECTION); return VARIABLES_HEADER;
+            { resetInternalState(); yybegin(VARIABLES_SECTION); return VARIABLES_HEADER;
             }
           // fall through
           case 210: break;
@@ -5703,12 +5710,12 @@ public class RobotLexer implements FlexLexer {
           // fall through
           case 215: break;
           case 101:
-            { reset(); yybegin(VARIABLES_SECTION); pushBackTrailingWhitespace(); return VARIABLES_HEADER;
+            { resetInternalState(); yybegin(VARIABLES_SECTION); pushBackTrailingWhitespace(); return VARIABLES_HEADER;
             }
           // fall through
           case 216: break;
           case 102:
-            { reset(); yybegin(TESTCASE_NAME_DEFINITION); return TEST_CASES_HEADER;
+            { resetInternalState(); yybegin(TESTCASE_NAME_DEFINITION); return TEST_CASES_HEADER;
             }
           // fall through
           case 217: break;
@@ -5736,7 +5743,7 @@ public class RobotLexer implements FlexLexer {
           // fall through
           case 221: break;
           case 107:
-            { reset(); yybegin(TESTCASE_NAME_DEFINITION); pushBackTrailingWhitespace(); return TEST_CASES_HEADER;
+            { resetInternalState(); yybegin(TESTCASE_NAME_DEFINITION); pushBackTrailingWhitespace(); return TEST_CASES_HEADER;
             }
           // fall through
           case 222: break;

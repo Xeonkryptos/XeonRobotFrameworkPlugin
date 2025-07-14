@@ -11,23 +11,23 @@ import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.*;
 %%
 
 %{
-  private boolean globalTemplateEnabled = false;
-  private boolean localTemplateEnabled = false;
-  private boolean templateKeywordFound = false;
+  protected boolean globalTemplateEnabled = false;
+  protected boolean localTemplateEnabled = false;
+  protected boolean templateKeywordFound = false;
 
-  private final Stack<Integer> previousStates = new Stack<>();
+  protected final Stack<Integer> previousStates = new Stack<>();
 
   public RobotLexer() {
       this((java.io.Reader)null);
   }
 
-  private void enterNewState(int newState) {
+  protected void enterNewState(int newState) {
       int previousState = yystate();
       previousStates.push(previousState);
       yybegin(newState);
   }
 
-  private void leaveState() {
+  protected void leaveState() {
       if (!previousStates.empty()) {
           Integer previousState = previousStates.pop();
           yybegin(previousState);
@@ -36,12 +36,19 @@ import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.*;
       }
   }
 
-  private void reset() {
+  private void resetInternalState() {
       previousStates.clear();
       localTemplateEnabled = globalTemplateEnabled;
   }
 
-  private void pushBackTrailingWhitespace() {
+  protected void resetLexer() {
+      previousStates.clear();
+      localTemplateEnabled = false;
+      templateKeywordFound = false;
+      globalTemplateEnabled = false;
+  }
+
+  protected void pushBackTrailingWhitespace() {
       CharSequence text = yytext();
       int trailingWhitespaceLength = computeTrailingWhitespaceLength(text);
       if (trailingWhitespaceLength > 0) {
@@ -49,7 +56,7 @@ import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.*;
       }
   }
 
-  private int computeTrailingWhitespaceLength(CharSequence text) {
+  protected int computeTrailingWhitespaceLength(CharSequence text) {
       int length = 0;
       for (int i = text.length() - 1; i >= 0; i--) {
           char c = text.charAt(i);
@@ -177,12 +184,12 @@ LineComment = {LineCommentSign} {NON_EOL}*
           return LANGUAGE_KEYWORD;
       }
 
-{SettingsSectionIdentifier}   { reset(); yybegin(SETTINGS_SECTION); return SETTINGS_HEADER; }
-{VariablesSectionIdentifier}  { reset(); yybegin(VARIABLES_SECTION); return VARIABLES_HEADER; }
-{KeywordsSectionIdentifier}   { reset(); yybegin(USER_KEYWORD_NAME_DEFINITION); return USER_KEYWORDS_HEADER; }
-{TestcaseSectionIdentifier}   { reset(); yybegin(TESTCASE_NAME_DEFINITION); return TEST_CASES_HEADER; }
-{TasksSectionIdentifier}      { reset(); yybegin(TASK_NAME_DEFINITION); return TASKS_HEADER; }
-{CommentSectionIdentifier}    { reset(); yybegin(COMMENTS_SECTION); return COMMENTS_HEADER; }
+{SettingsSectionIdentifier}   { resetInternalState(); yybegin(SETTINGS_SECTION); return SETTINGS_HEADER; }
+{VariablesSectionIdentifier}  { resetInternalState(); yybegin(VARIABLES_SECTION); return VARIABLES_HEADER; }
+{KeywordsSectionIdentifier}   { resetInternalState(); yybegin(USER_KEYWORD_NAME_DEFINITION); return USER_KEYWORDS_HEADER; }
+{TestcaseSectionIdentifier}   { resetInternalState(); yybegin(TESTCASE_NAME_DEFINITION); return TEST_CASES_HEADER; }
+{TasksSectionIdentifier}      { resetInternalState(); yybegin(TASK_NAME_DEFINITION); return TASKS_HEADER; }
+{CommentSectionIdentifier}    { resetInternalState(); yybegin(COMMENTS_SECTION); return COMMENTS_HEADER; }
 
 <VARIABLES_SECTION> {
     {ScalarVariableStart}                    { enterNewState(VARIABLE_DEFINITION); return SCALAR_VARIABLE_START; }
@@ -429,11 +436,11 @@ LineComment = {LineCommentSign} {NON_EOL}*
 <SETTINGS_SECTION, SETTING, KEYWORD_ARGUMENTS, USER_KEYWORD_RETURN_STATEMENT> {RestrictedLiteralValue}        { pushBackTrailingWhitespace(); return LITERAL_CONSTANT; }
 
 <COMMENTS_SECTION> {
-    {SettingsSectionIdentifier}            { reset(); yybegin(SETTINGS_SECTION); pushBackTrailingWhitespace(); return SETTINGS_HEADER; }
-    {TestcaseSectionIdentifier}            { reset(); yybegin(TESTCASE_NAME_DEFINITION); pushBackTrailingWhitespace(); return TEST_CASES_HEADER; }
-    {TasksSectionIdentifier}               { reset(); yybegin(TASK_NAME_DEFINITION); pushBackTrailingWhitespace(); return TASKS_HEADER; }
-    {KeywordsSectionIdentifier}            { reset(); yybegin(USER_KEYWORD_NAME_DEFINITION); pushBackTrailingWhitespace(); return USER_KEYWORDS_HEADER; }
-    {VariablesSectionIdentifier}           { reset(); yybegin(VARIABLES_SECTION); pushBackTrailingWhitespace(); return VARIABLES_HEADER; }
+    {SettingsSectionIdentifier}            { resetInternalState(); yybegin(SETTINGS_SECTION); pushBackTrailingWhitespace(); return SETTINGS_HEADER; }
+    {TestcaseSectionIdentifier}            { resetInternalState(); yybegin(TESTCASE_NAME_DEFINITION); pushBackTrailingWhitespace(); return TEST_CASES_HEADER; }
+    {TasksSectionIdentifier}               { resetInternalState(); yybegin(TASK_NAME_DEFINITION); pushBackTrailingWhitespace(); return TASKS_HEADER; }
+    {KeywordsSectionIdentifier}            { resetInternalState(); yybegin(USER_KEYWORD_NAME_DEFINITION); pushBackTrailingWhitespace(); return USER_KEYWORDS_HEADER; }
+    {VariablesSectionIdentifier}           { resetInternalState(); yybegin(VARIABLES_SECTION); pushBackTrailingWhitespace(); return VARIABLES_HEADER; }
 
     ({Whitespace} | {Ellipsis} | {EOL})+   { return WHITE_SPACE; }
     {NON_EOL}+                             { return COMMENT; }

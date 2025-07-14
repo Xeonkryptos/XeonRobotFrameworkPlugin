@@ -40,7 +40,6 @@ public abstract class RobotKeywordCallExtension extends RobotStubPsiElementBase<
 
     private boolean liveInspectionEnabledLastTime;
 
-
     public RobotKeywordCallExtension(@NotNull ASTNode node) {
         super(node);
     }
@@ -58,9 +57,9 @@ public abstract class RobotKeywordCallExtension extends RobotStubPsiElementBase<
     public Collection<DefinedParameter> getAvailableParameters() {
         Collection<DefinedParameter> localDefinedParameters = availableKeywordParameters;
         boolean pythonLiveInspection = RobotOptionsProvider.getInstance(getProject()).pythonLiveInspection();
-        if (availableKeywordParameters == null || liveInspectionEnabledLastTime != pythonLiveInspection || localDefinedParameters.stream()
-                                                                                                                                 .map(DefinedParameter::reference)
-                                                                                                                                 .anyMatch(element -> !element.isValid())) {
+        if (localDefinedParameters == null || liveInspectionEnabledLastTime != pythonLiveInspection || localDefinedParameters.stream()
+                                                                                                                             .map(DefinedParameter::reference)
+                                                                                                                             .anyMatch(element -> !element.isValid())) {
             localDefinedParameters = collectKeywordParameters();
             availableKeywordParameters = localDefinedParameters;
             liveInspectionEnabledLastTime = pythonLiveInspection;
