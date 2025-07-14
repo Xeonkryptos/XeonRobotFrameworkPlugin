@@ -278,6 +278,7 @@ LineComment = {LineCommentSign} {NON_EOL}*
         pushBackTrailingWhitespace();
         leaveState();
         yypushback(yylength());
+        break;
     }
     {ParameterName} {EqualSign} (!\s{2} | !\R | !=)    { enterNewState(TEMPLATE_PARAMETER_ASSIGNMENT); yypushback(yylength() - yytext().toString().indexOf('=')); return TEMPLATE_PARAMETER_NAME; }
     <TEMPLATE_PARAMETER_ASSIGNMENT>  {EqualSign}       { yybegin(TEMPLATE_PARAMETER_VALUE); return ASSIGNMENT; }
@@ -294,7 +295,7 @@ LineComment = {LineCommentSign} {NON_EOL}*
           return RETURN;
       }
 
-    {RestrictedLiteralValue}       { enterNewState(KEYWORD_CALL); yypushback(yylength()); }
+    {RestrictedLiteralValue}       { enterNewState(KEYWORD_CALL); yypushback(yylength()); break; }
 }
 <TESTCASE_DEFINITION, TASK_DEFINITION> {
     {LocalTemplateKeyword} (\s{2} \s* | \s* {MultiLine}) "NONE"   {
@@ -304,7 +305,11 @@ LineComment = {LineCommentSign} {NON_EOL}*
           localTemplateEnabled = false;
           return LOCAL_SETTING_NAME;
       }
-    {LocalTemplateKeyword} \s* (\R \s* !{Ellipsis} | {MultiLine} \R)      { yypushback(yylength() - yytext().toString().indexOf("]")); localTemplateEnabled = false; return LOCAL_SETTING_NAME; }
+    {LocalTemplateKeyword} \s* (\R \s* !{Ellipsis} | {MultiLine} \R)      {
+          yypushback(yylength() - yytext().toString().indexOf("]"));
+          localTemplateEnabled = false;
+          return LOCAL_SETTING_NAME;
+      }
     {LocalTemplateKeyword} \s*              {
           enterNewState(SETTING_TEMPLATE_START);
           pushBackTrailingWhitespace();
@@ -371,6 +376,7 @@ LineComment = {LineCommentSign} {NON_EOL}*
               int nextState = localTemplateEnabled && templateKeywordFound ? TEMPLATE_DEFINITION : KEYWORD_CALL;
               enterNewState(nextState);
               yypushback(yylength());
+              break;
       }
 }
 
@@ -381,7 +387,11 @@ LineComment = {LineCommentSign} {NON_EOL}*
 }
 
 <KEYWORD_ARGUMENTS, SETTINGS_SECTION, TESTCASE_DEFINITION, TASK_DEFINITION, USER_KEYWORD_DEFINITION, VARIABLE_DEFINITION, SETTING> {
-    {ParameterName} {EqualSign} (!\s{2} | !\R | !=)    { enterNewState(PARAMETER_ASSIGNMENT); yypushback(yylength() - yytext().toString().indexOf('=')); return PARAMETER_NAME; }
+    {ParameterName} {EqualSign} (!\s{2} | !\R | !{EqualSign})    {
+          enterNewState(PARAMETER_ASSIGNMENT);
+          yypushback(yylength() - yytext().toString().indexOf('='));
+          return PARAMETER_NAME;
+      }
     {EqualSign}                                        { return ASSIGNMENT; }
 }
 <PARAMETER_ASSIGNMENT>  {EqualSign}                    { yybegin(PARAMETER_VALUE); return ASSIGNMENT; }
@@ -392,7 +402,7 @@ LineComment = {LineCommentSign} {NON_EOL}*
         {ListVariableStart}                            { enterNewState(VARIABLE_USAGE); return LIST_VARIABLE_START; }
         {DictVariableStart}                            { enterNewState(VARIABLE_USAGE); return DICT_VARIABLE_START; }
         {EnvVariableStart}                             { enterNewState(VARIABLE_USAGE); return ENV_VARIABLE_START; }
-        {Space}{2} \s* | {Tab} \s* | {EOL}+            { leaveState(); yypushback(yylength()); }
+        {Space}{2} \s* | {Tab} \s* | {EOL}+            { leaveState(); yypushback(yylength()); break; }
     }
 }
 

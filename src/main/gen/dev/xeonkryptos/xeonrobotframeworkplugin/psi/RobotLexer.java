@@ -5215,6 +5215,7 @@ public class RobotLexer implements FlexLexer {
             { int nextState = localTemplateEnabled && templateKeywordFound ? TEMPLATE_DEFINITION : KEYWORD_CALL;
               enterNewState(nextState);
               yypushback(yylength());
+              break;
             }
           // fall through
           case 123: break;
@@ -5239,7 +5240,7 @@ public class RobotLexer implements FlexLexer {
           // fall through
           case 127: break;
           case 13:
-            { enterNewState(KEYWORD_CALL); yypushback(yylength());
+            { enterNewState(KEYWORD_CALL); yypushback(yylength()); break;
             }
           // fall through
           case 128: break;
@@ -5283,6 +5284,7 @@ public class RobotLexer implements FlexLexer {
         pushBackTrailingWhitespace();
         leaveState();
         yypushback(yylength());
+        break;
             }
           // fall through
           case 136: break;
@@ -5342,7 +5344,7 @@ public class RobotLexer implements FlexLexer {
           // fall through
           case 147: break;
           case 33:
-            { leaveState(); yypushback(yylength());
+            { leaveState(); yypushback(yylength()); break;
             }
           // fall through
           case 148: break;
@@ -5382,7 +5384,9 @@ public class RobotLexer implements FlexLexer {
           // fall through
           case 155: break;
           case 41:
-            { enterNewState(PARAMETER_ASSIGNMENT); yypushback(yylength() - yytext().toString().indexOf('=')); return PARAMETER_NAME;
+            { enterNewState(PARAMETER_ASSIGNMENT);
+          yypushback(yylength() - yytext().toString().indexOf('='));
+          return PARAMETER_NAME;
             }
           // fall through
           case 156: break;
@@ -5747,7 +5751,9 @@ public class RobotLexer implements FlexLexer {
           // fall through
           case 224: break;
           case 110:
-            { yypushback(yylength() - yytext().toString().indexOf("]")); localTemplateEnabled = false; return LOCAL_SETTING_NAME;
+            { yypushback(yylength() - yytext().toString().indexOf("]"));
+          localTemplateEnabled = false;
+          return LOCAL_SETTING_NAME;
             }
           // fall through
           case 225: break;
