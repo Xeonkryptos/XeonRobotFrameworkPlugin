@@ -279,7 +279,7 @@ LineComment = {LineCommentSign} {NON_EOL}*
         leaveState();
         yypushback(yylength());
     }
-    {ParameterName} / {EqualSign} (!\s{2} | !\R | !=)  { enterNewState(TEMPLATE_PARAMETER_ASSIGNMENT); return TEMPLATE_PARAMETER_NAME; }
+    {ParameterName} {EqualSign} (!\s{2} | !\R | !=)    { enterNewState(TEMPLATE_PARAMETER_ASSIGNMENT); yypushback(yylength() - yytext().toString().indexOf('=')); return TEMPLATE_PARAMETER_NAME; }
     <TEMPLATE_PARAMETER_ASSIGNMENT>  {EqualSign}       { yybegin(TEMPLATE_PARAMETER_VALUE); return ASSIGNMENT; }
     {RestrictedLiteralValue}                           { pushBackTrailingWhitespace(); return TEMPLATE_ARGUMENT_VALUE; }
     {EOL}+                                             { return EOL; }
@@ -304,7 +304,7 @@ LineComment = {LineCommentSign} {NON_EOL}*
           localTemplateEnabled = false;
           return LOCAL_SETTING_NAME;
       }
-    {LocalTemplateKeyword} / \s* (\R \s* !{Ellipsis} | {MultiLine} \R)      { pushBackTrailingWhitespace(); localTemplateEnabled = false; return LOCAL_SETTING_NAME; }
+    {LocalTemplateKeyword} \s* (\R \s* !{Ellipsis} | {MultiLine} \R)      { yypushback(yylength() - yytext().toString().indexOf("]")); localTemplateEnabled = false; return LOCAL_SETTING_NAME; }
     {LocalTemplateKeyword} \s*              {
           enterNewState(SETTING_TEMPLATE_START);
           pushBackTrailingWhitespace();
@@ -381,7 +381,7 @@ LineComment = {LineCommentSign} {NON_EOL}*
 }
 
 <KEYWORD_ARGUMENTS, SETTINGS_SECTION, TESTCASE_DEFINITION, TASK_DEFINITION, USER_KEYWORD_DEFINITION, VARIABLE_DEFINITION, SETTING> {
-    {ParameterName} / {EqualSign} (!\s{2} | !\R | !=)  { enterNewState(PARAMETER_ASSIGNMENT); return PARAMETER_NAME; }
+    {ParameterName} {EqualSign} (!\s{2} | !\R | !=)    { enterNewState(PARAMETER_ASSIGNMENT); yypushback(yylength() - yytext().toString().indexOf('=')); return PARAMETER_NAME; }
     {EqualSign}                                        { return ASSIGNMENT; }
 }
 <PARAMETER_ASSIGNMENT>  {EqualSign}                    { yybegin(PARAMETER_VALUE); return ASSIGNMENT; }
