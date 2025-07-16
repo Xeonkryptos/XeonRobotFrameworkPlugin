@@ -19,8 +19,8 @@ public class RobotNestedVariable extends SimpleRobotInspection {
     @Override
     public final boolean skip(PsiElement element) {
         if (element instanceof RobotVariable variable) {
-            PsiElement nameIdentifier = variable.getNameIdentifier();
-            return nameIdentifier == null || ((RobotVariableId) nameIdentifier).getVariable() == null;
+            RobotVariableId nameIdentifier = variable.getNameIdentifier();
+            return nameIdentifier != null && nameIdentifier.getContent() != null;
         }
         return true;
     }
