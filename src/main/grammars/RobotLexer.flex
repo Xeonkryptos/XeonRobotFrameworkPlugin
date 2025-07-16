@@ -29,8 +29,7 @@ import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.*;
 
   protected void leaveState() {
       if (!previousStates.empty()) {
-          Integer previousState = previousStates.pop();
-          yybegin(previousState);
+          yybegin(previousStates.pop());
       } else {
           yybegin(YYINITIAL);
       }
@@ -49,18 +48,21 @@ import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.*;
   }
 
   protected void pushBackTrailingWhitespace() {
-      CharSequence text = yytext();
-      int trailingWhitespaceLength = computeTrailingWhitespaceLength(text);
-      if (trailingWhitespaceLength > 0) {
-          yypushback(trailingWhitespaceLength);
+      int textLength = yylength();
+      if (textLength > 0) {
+          int trailingWhitespaceLength = computeTrailingWhitespaceLength();
+          if (trailingWhitespaceLength > 0) {
+              yypushback(trailingWhitespaceLength);
+          }
       }
   }
 
-  protected int computeTrailingWhitespaceLength(CharSequence text) {
+  protected int computeTrailingWhitespaceLength() {
       int length = 0;
-      for (int i = text.length() - 1; i >= 0; i--) {
-          char c = text.charAt(i);
-          if (Character.isWhitespace(c)) {
+      int end = yylength() - 1;
+      for (int i = end; i >= 0; i--) {
+          char c = yycharat(i);
+          if (isWhitespace(c)) {
               length++;
           } else {
               break;
@@ -68,9 +70,24 @@ import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.*;
       }
       return length;
   }
+
+  protected boolean isWhitespace(char character) {
+      return character == ' ' || character == '\t' || character == '\r' || character == '\n';
+  }
+
+  protected int indexOf(char character) {
+      int length = yylength();
+      for (int i = 0; i < length; i++) {
+        if (yycharat(i) == character) {
+          return i;
+        }
+      }
+      return -1;
+  }
 %}
 
 %public
+%buffer 65536
 %class RobotLexer
 %implements FlexLexer
 %function advance
@@ -282,12 +299,16 @@ LineComment = {LineCommentSign} {NON_EOL}*
 <TEMPLATE_DEFINITION> {
     ^ {LiteralValue}    {
         templateKeywordFound = globalTemplateEnabled;
-        pushBackTrailingWhitespace();
         leaveState();
         yypushback(yylength());
         break;
     }
-    {ParameterName} {EqualSign} (!\s{2} | !\R | !=)    { enterNewState(TEMPLATE_PARAMETER_ASSIGNMENT); yypushback(yylength() - yytext().toString().indexOf('=')); return TEMPLATE_PARAMETER_NAME; }
+    {ParameterName} {EqualSign}         {
+          pushBackTrailingWhitespace();
+          yypushback(1);
+          enterNewState(TEMPLATE_PARAMETER_ASSIGNMENT);
+          return TEMPLATE_PARAMETER_NAME;
+      }
     <TEMPLATE_PARAMETER_ASSIGNMENT>  {EqualSign}       { yybegin(TEMPLATE_PARAMETER_VALUE); return ASSIGNMENT; }
     {RestrictedLiteralValue}                           { pushBackTrailingWhitespace(); return TEMPLATE_ARGUMENT_VALUE; }
     {EOL}+                                             { return EOL; }
@@ -297,7 +318,6 @@ LineComment = {LineCommentSign} {NON_EOL}*
 <USER_KEYWORD_DEFINITION> {
     "RETURN" (\s{2}\s* | \R+)     {
           yypushback(yylength() - "RETURN".length());
-          pushBackTrailingWhitespace();
           enterNewState(USER_KEYWORD_RETURN_STATEMENT);
           return RETURN;
       }
@@ -306,14 +326,13 @@ LineComment = {LineCommentSign} {NON_EOL}*
 }
 <TESTCASE_DEFINITION, TASK_DEFINITION> {
     {LocalTemplateKeyword} (\s{2} \s* | \s* {MultiLine}) "NONE"   {
-          yypushback("NONE".length());
-          pushBackTrailingWhitespace();
+          yypushback(yylength() - "NONE".length());
           enterNewState(SETTING);
           localTemplateEnabled = false;
           return LOCAL_SETTING_NAME;
       }
     {LocalTemplateKeyword} \s* (\R \s* !{Ellipsis} | {MultiLine} \R)      {
-          yypushback(yylength() - yytext().toString().indexOf("]"));
+          yypushback(yylength() - indexOf(']'));
           localTemplateEnabled = false;
           return LOCAL_SETTING_NAME;
       }
@@ -374,7 +393,6 @@ LineComment = {LineCommentSign} {NON_EOL}*
 
     "VAR" \s{2}\s* [^\R]+                        {
           yypushback(yylength() - "VAR".length());
-          pushBackTrailingWhitespace();
           enterNewState(INLINE_VARIABLE_DEFINITION);
           return VAR;
       }
@@ -394,9 +412,10 @@ LineComment = {LineCommentSign} {NON_EOL}*
 }
 
 <KEYWORD_ARGUMENTS, SETTINGS_SECTION, TESTCASE_DEFINITION, TASK_DEFINITION, USER_KEYWORD_DEFINITION, VARIABLE_DEFINITION, SETTING> {
-    {ParameterName} {EqualSign} (!\s{2} | !\R | !{EqualSign})    {
+    {ParameterName} {EqualSign}        {
+          pushBackTrailingWhitespace();
+          yypushback(1);
           enterNewState(PARAMETER_ASSIGNMENT);
-          yypushback(yylength() - yytext().toString().indexOf('='));
           return PARAMETER_NAME;
       }
     {EqualSign}                                        { return ASSIGNMENT; }
