@@ -42,6 +42,12 @@ public class RobotForLoopStructureImpl extends RobotExecutableStatementImpl impl
 
   @Override
   @NotNull
+  public List<RobotPositionalArgument> getPositionalArgumentList() {
+    return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotPositionalArgument.class);
+  }
+
+  @Override
+  @NotNull
   public RobotVariable getVariable() {
     return notNullChild(PsiTreeUtil.getChildOfType(this, RobotVariable.class));
   }

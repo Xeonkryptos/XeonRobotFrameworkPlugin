@@ -222,10 +222,10 @@ private call_structure ::= eol_based_keyword_call | keyword_variable_statement |
 private loop_control_structure ::= BREAK | CONTINUE
 private return_structure ::= RETURN positional_argument* eol_marker {pin=1}
 
-for_loop_structure ::= FOR variable FOR_IN positional_argument+ parameter* COMMENT* EOL executable_statement* COMMENT* END COMMENT* {pin=3}
+for_loop_structure ::= FOR variable FOR_IN positional_argument+ parameter* COMMENT* EOL executable_statement* COMMENT* END COMMENT*
 while_loop_structure ::= WHILE positional_argument parameter* COMMENT* EOL executable_statement* COMMENT* END COMMENT*
-if_structure ::= IF positional_argument eol_marker COMMENT* executable_statement*
-    (ELSE_IF positional_argument eol_marker COMMENT* executable_statement*)*
+if_structure ::= IF positional_argument+ eol_marker? COMMENT* executable_statement*
+    (ELSE_IF positional_argument+ eol_marker? COMMENT* executable_statement*)*
     (ELSE COMMENT* executable_statement*)?
     END? COMMENT*
 try_structure ::= TRY COMMENT* executable_statement* COMMENT*
@@ -250,7 +250,7 @@ fake keyword_call ::= base_keyword_call {
 }
 eol_based_keyword_call ::= base_keyword_call eol_marker {elementType=keyword_call}
 eol_free_keyword_call ::= base_keyword_call {elementType=keyword_call}
-private base_keyword_call ::= keyword_call_id (parameter | positional_argument | COMMENT)*
+private base_keyword_call ::= keyword_call_id (parameter | positional_argument | ASSIGNMENT | COMMENT)*
 keyword_call_id ::= KEYWORD_NAME { methods = [getReference getName] }
 
 fake argument ::= DUMMY // This is a placeholder for the argument type, which is used to represent both parameters and positional arguments in the grammar.
@@ -329,13 +329,14 @@ dict_variable ::= DICT_VARIABLE_START (variable_id | python_expression) VARIABLE
 }
 environment_variable ::= ENV_VARIABLE_START variable_id VARIABLE_END
 
-variable_id ::= variable | VARIABLE_BODY {
+variable_id ::= variable | variable_id_content {
     implements = [
       "com.intellij.psi.PsiNamedElement"
       "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotReferenceElementExpression"
     ]
-    methods=[content="VARIABLE_BODY" getReference getName]
+    methods=[content="variable_id_content" getReference getName]
 }
+variable_id_content ::= VARIABLE_BODY (variable VARIABLE_BODY)?
 python_expression ::= PYTHON_EXPRESSION_START PYTHON_EXPRESSION_CONTENT PYTHON_EXPRESSION_END { methods = [expressionContent="PYTHON_EXPRESSION_CONTENT"] }
 
 extended_variable_slice_access ::= VARIABLE_SLICE_ACCESS

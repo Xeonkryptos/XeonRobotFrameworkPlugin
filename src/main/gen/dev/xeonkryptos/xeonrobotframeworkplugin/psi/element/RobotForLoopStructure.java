@@ -14,6 +14,9 @@ public interface RobotForLoopStructure extends RobotExecutableStatement {
   List<RobotParameter> getParameterList();
 
   @NotNull
+  List<RobotPositionalArgument> getPositionalArgumentList();
+
+  @NotNull
   RobotVariable getVariable();
 
 }

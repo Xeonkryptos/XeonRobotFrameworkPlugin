@@ -257,7 +257,11 @@ LineComment = {LineCommentSign} {NON_EOL}*
     {VariableSliceAccess} \s+    { leaveState(); pushBackTrailingWhitespace(); return VARIABLE_SLICE_ACCESS; }
     {VariableIndexAccess} \s+    { leaveState(); pushBackTrailingWhitespace(); return VARIABLE_INDEX_ACCESS; }
     {VariableKeyAccess}   \s+    { leaveState(); pushBackTrailingWhitespace(); return VARIABLE_KEY_ACCESS; }
-    "]" \s+                      { leaveState(); pushBackTrailingWhitespace(); return VARIABLE_ACCESS_END; }
+    "]" (\s+ | ! "[")            {
+          leaveState();
+          yypushback(yylength() - 1);
+          return VARIABLE_ACCESS_END;
+      }
 }
 
 <PYTHON_EXPRESSION> {

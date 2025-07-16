@@ -339,6 +339,10 @@ public class RobotVisitor extends PsiElementVisitor {
     // visitStatement(o);
   }
 
+  public void visitVariableIdContent(@NotNull RobotVariableIdContent o) {
+    visitStatement(o);
+  }
+
   public void visitVariableStatement(@NotNull RobotVariableStatement o) {
     visitPsiNamedElement(o);
     // visitStatement(o);
