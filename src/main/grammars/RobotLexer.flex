@@ -435,15 +435,15 @@ LineComment = {LineCommentSign} {NON_EOL}*
 // Multiline handling (don't return EOL on detected multiline). If there is a multiline without the Ellipsis (...) marker,
 // then return EOL to mark the end of the statement.
 <SETTING, KEYWORD_CALL, KEYWORD_ARGUMENTS, VARIABLE_DEFINITION, VARIABLE_DEFINITION_ARGUMENTS> {
-    {MultiLine}                                { return WHITE_SPACE; }
-    {EOL} {Whitespace} {LineComment}           { yypushback(yylength() - 1); return WHITE_SPACE; }
+    <SETTING_TEMPLATE_START> {
+        {MultiLine}                                { return WHITE_SPACE; }
+        {EOL} {Whitespace}* {LineComment}          { yypushback(yylength() - 1); return WHITE_SPACE; }
+    }
     <USER_KEYWORD_RETURN_STATEMENT> {EOL}+     { leaveState(); return EOL; }
 }
 
 <SETTING_TEMPLATE_START>  {
     {RestrictedLiteralValue}                   { templateKeywordFound = true; pushBackTrailingWhitespace(); return KEYWORD_NAME; }
-    {MultiLine}                                { return WHITE_SPACE; }
-    {EOL} {Whitespace} {LineComment}           { yypushback(yylength() - 1); return WHITE_SPACE; }
     {EOL}+                                     { leaveState(); enterNewState(TEMPLATE_DEFINITION); return EOL; }
 }
 
