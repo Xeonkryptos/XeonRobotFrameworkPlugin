@@ -407,12 +407,12 @@ LineComment = {LineCommentSign} {NON_EOL}*
 
 <CONTROL_STRUCTURE_START>  {SpaceBasedEndMarker}     { yybegin(CONTROL_STRUCTURE); return WHITE_SPACE; }
 <CONTROL_STRUCTURE> {
-    {RestrictedLiteralValue}                         { pushBackTrailingWhitespace(); return LITERAL_CONSTANT; }
+    <SETTING> {RestrictedLiteralValue} | {EqualSign}           { pushBackTrailingWhitespace(); return LITERAL_CONSTANT; }
     {SpaceBasedEndMarker}                            { leaveState(); return EOL; }
 }
 
-<KEYWORD_ARGUMENTS, SETTINGS_SECTION, TESTCASE_DEFINITION, TASK_DEFINITION, USER_KEYWORD_DEFINITION, VARIABLE_DEFINITION, SETTING> {
-    {ParameterName} {EqualSign}        {
+<KEYWORD_ARGUMENTS, SETTINGS_SECTION, TESTCASE_DEFINITION, TASK_DEFINITION, USER_KEYWORD_DEFINITION, VARIABLE_DEFINITION> {
+    <SETTING> {ParameterName} {EqualSign}        {
           pushBackTrailingWhitespace();
           yypushback(1);
           enterNewState(PARAMETER_ASSIGNMENT);
