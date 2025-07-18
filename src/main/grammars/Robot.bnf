@@ -198,7 +198,7 @@ user_keyword_statement ::= user_keyword_statement_id COMMENT* (local_setting | e
 user_keyword_statement_id ::= USER_KEYWORD_NAME
 private user_keyword_statement_recover ::= !user_keyword_statement_id & section_recover
 
-local_setting ::= local_setting_id COMMENT* (local_setting_argument | positional_argument | eol_free_keyword_call)* COMMENT* eol_marker {
+local_setting ::= local_setting_id COMMENT* (local_setting_argument | positional_argument | eol_free_keyword_call | ASSIGNMENT)* COMMENT* eol_marker {
     implements = ["dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotNamedElementExpression" "com.intellij.psi.PsiNameIdentifierOwner"]
     mixin = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotLocalSettingExtension"
     methods = [nameIdentifier="local_setting_id" getName]
