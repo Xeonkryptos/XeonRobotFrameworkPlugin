@@ -329,14 +329,14 @@ dict_variable ::= DICT_VARIABLE_START (variable_id | python_expression) VARIABLE
 }
 environment_variable ::= ENV_VARIABLE_START variable_id VARIABLE_END
 
-variable_id ::= variable | variable_id_content {
+variable_id ::= variable | variable_body_value (VARIABLE_ACCESS_START (variable | variable_body_value) VARIABLE_ACCESS_END)? {
     implements = [
       "com.intellij.psi.PsiNamedElement"
       "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotReferenceElementExpression"
     ]
-    methods=[content="variable_id_content" getReference getName]
+    methods=[content="/variable_body_value[0]" getReference getName]
 }
-variable_id_content ::= VARIABLE_BODY (variable VARIABLE_BODY)?
+variable_body_value ::= VARIABLE_BODY
 python_expression ::= PYTHON_EXPRESSION_START PYTHON_EXPRESSION_CONTENT PYTHON_EXPRESSION_END { methods = [expressionContent="PYTHON_EXPRESSION_CONTENT"] }
 
 extended_variable_slice_access ::= VARIABLE_SLICE_ACCESS

@@ -11,26 +11,20 @@ import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.*;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.*;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotPsiImplUtil;
 
-public class RobotVariableIdContentImpl extends RobotPsiElementBase implements RobotVariableIdContent {
+public class RobotVariableBodyValueImpl extends RobotPsiElementBase implements RobotVariableBodyValue {
 
-  public RobotVariableIdContentImpl(@NotNull ASTNode node) {
+  public RobotVariableBodyValueImpl(@NotNull ASTNode node) {
     super(node);
   }
 
   public void accept(@NotNull RobotVisitor visitor) {
-    visitor.visitVariableIdContent(this);
+    visitor.visitVariableBodyValue(this);
   }
 
   @Override
   public void accept(@NotNull PsiElementVisitor visitor) {
     if (visitor instanceof RobotVisitor) accept((RobotVisitor)visitor);
     else super.accept(visitor);
-  }
-
-  @Override
-  @Nullable
-  public RobotVariable getVariable() {
-    return PsiTreeUtil.getChildOfType(this, RobotVariable.class);
   }
 
 }

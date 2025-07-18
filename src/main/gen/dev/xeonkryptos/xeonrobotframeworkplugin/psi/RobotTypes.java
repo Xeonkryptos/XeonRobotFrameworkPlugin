@@ -77,9 +77,9 @@ public interface RobotTypes {
   IElementType VARIABLE = new RobotElementType("VARIABLE");
   IElementType VARIABLES_IMPORT_GLOBAL_SETTING = new RobotElementType("VARIABLES_IMPORT_GLOBAL_SETTING");
   IElementType VARIABLES_SECTION = new RobotElementType("VARIABLES_SECTION");
+  IElementType VARIABLE_BODY_VALUE = new RobotElementType("VARIABLE_BODY_VALUE");
   IElementType VARIABLE_DEFINITION = RobotVariableDefinitionStubElement.create("VARIABLE_DEFINITION");
   IElementType VARIABLE_ID = new RobotElementType("VARIABLE_ID");
-  IElementType VARIABLE_ID_CONTENT = new RobotElementType("VARIABLE_ID_CONTENT");
   IElementType VARIABLE_VALUE = new RobotElementType("VARIABLE_VALUE");
   IElementType WHILE_LOOP_STRUCTURE = new RobotElementType("WHILE_LOOP_STRUCTURE");
 
@@ -334,14 +334,14 @@ public interface RobotTypes {
       else if (type == VARIABLES_SECTION) {
         return new RobotVariablesSectionImpl(node);
       }
+      else if (type == VARIABLE_BODY_VALUE) {
+        return new RobotVariableBodyValueImpl(node);
+      }
       else if (type == VARIABLE_DEFINITION) {
         return new RobotVariableDefinitionImpl(node);
       }
       else if (type == VARIABLE_ID) {
         return new RobotVariableIdImpl(node);
-      }
-      else if (type == VARIABLE_ID_CONTENT) {
-        return new RobotVariableIdContentImpl(node);
       }
       else if (type == VARIABLE_VALUE) {
         return new RobotVariableValueImpl(node);

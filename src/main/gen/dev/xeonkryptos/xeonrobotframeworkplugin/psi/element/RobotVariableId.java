@@ -12,8 +12,11 @@ public interface RobotVariableId extends PsiNamedElement, RobotReferenceElementE
   @Nullable
   RobotVariable getVariable();
 
+  @NotNull
+  List<RobotVariableBodyValue> getVariableBodyValueList();
+
   @Nullable
-  RobotVariableIdContent getContent();
+  RobotVariableBodyValue getContent();
 
   @NotNull PsiReference getReference();
 

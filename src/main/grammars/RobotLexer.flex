@@ -152,7 +152,7 @@ GenericSettingsKeyword = [\p{L}\p{N}_]+([ ][\p{L}\p{N}_])*
 AllowedChar = [^\s$@%&=] | [<>!=] = | [$@%&] [^{]
 AllowedSeq = {AllowedChar}+
 
-AllowedVarChar = [^\s$@%&}=] | [<>!=] = | [$@%&] [^{]
+AllowedVarChar = [^\s$@%&}=\[\]] | [<>!=] = | [$@%&] [^{]
 AllowedVarSeq = {AllowedVarChar}+
 
 AllowedParamChar = [^\s$@%&] | [$@%&] [^{]
@@ -251,8 +251,8 @@ LineComment = {LineCommentSign} {NON_EOL}*
     {VariableKeyAccess}          { return VARIABLE_KEY_ACCESS; }
 
     // Workaround for nested variable usage in the extended variable access syntax
-    "["                          { return VARIABLE_ACCESS_START; }
-    "]"                          { return VARIABLE_ACCESS_END; }
+    <VARIABLE_USAGE, VARIABLE_DEFINITION> "["         { return VARIABLE_ACCESS_START; }
+    <VARIABLE_USAGE, VARIABLE_DEFINITION> "]"         { return VARIABLE_ACCESS_END; }
 
     {VariableSliceAccess} \s+    { leaveState(); pushBackTrailingWhitespace(); return VARIABLE_SLICE_ACCESS; }
     {VariableIndexAccess} \s+    { leaveState(); pushBackTrailingWhitespace(); return VARIABLE_INDEX_ACCESS; }

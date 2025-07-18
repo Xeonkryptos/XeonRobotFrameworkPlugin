@@ -2594,6 +2594,18 @@ public class RobotParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
+  // VARIABLE_BODY
+  public static boolean variable_body_value(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "variable_body_value")) return false;
+    if (!nextTokenIs(b, VARIABLE_BODY)) return false;
+    boolean r;
+    Marker m = enter_section_(b);
+    r = consumeToken(b, VARIABLE_BODY);
+    exit_section_(b, m, VARIABLE_BODY_VALUE, r);
+    return r;
+  }
+
+  /* ********************************************************** */
   // variable
   public static boolean variable_definition(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "variable_definition")) return false;
@@ -2605,45 +2617,53 @@ public class RobotParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // variable | variable_id_content
+  // variable | variable_body_value (VARIABLE_ACCESS_START (variable | variable_body_value) VARIABLE_ACCESS_END)?
   public static boolean variable_id(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "variable_id")) return false;
     boolean r;
     Marker m = enter_section_(b, l, _NONE_, VARIABLE_ID, "<variable id>");
     r = variable(b, l + 1);
-    if (!r) r = variable_id_content(b, l + 1);
+    if (!r) r = variable_id_1(b, l + 1);
     exit_section_(b, l, m, r, false, null);
     return r;
   }
 
-  /* ********************************************************** */
-  // VARIABLE_BODY (variable VARIABLE_BODY)?
-  public static boolean variable_id_content(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "variable_id_content")) return false;
-    if (!nextTokenIs(b, VARIABLE_BODY)) return false;
+  // variable_body_value (VARIABLE_ACCESS_START (variable | variable_body_value) VARIABLE_ACCESS_END)?
+  private static boolean variable_id_1(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "variable_id_1")) return false;
     boolean r;
     Marker m = enter_section_(b);
-    r = consumeToken(b, VARIABLE_BODY);
-    r = r && variable_id_content_1(b, l + 1);
-    exit_section_(b, m, VARIABLE_ID_CONTENT, r);
+    r = variable_body_value(b, l + 1);
+    r = r && variable_id_1_1(b, l + 1);
+    exit_section_(b, m, null, r);
     return r;
   }
 
-  // (variable VARIABLE_BODY)?
-  private static boolean variable_id_content_1(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "variable_id_content_1")) return false;
-    variable_id_content_1_0(b, l + 1);
+  // (VARIABLE_ACCESS_START (variable | variable_body_value) VARIABLE_ACCESS_END)?
+  private static boolean variable_id_1_1(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "variable_id_1_1")) return false;
+    variable_id_1_1_0(b, l + 1);
     return true;
   }
 
-  // variable VARIABLE_BODY
-  private static boolean variable_id_content_1_0(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "variable_id_content_1_0")) return false;
+  // VARIABLE_ACCESS_START (variable | variable_body_value) VARIABLE_ACCESS_END
+  private static boolean variable_id_1_1_0(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "variable_id_1_1_0")) return false;
     boolean r;
     Marker m = enter_section_(b);
-    r = variable(b, l + 1);
-    r = r && consumeToken(b, VARIABLE_BODY);
+    r = consumeToken(b, VARIABLE_ACCESS_START);
+    r = r && variable_id_1_1_0_1(b, l + 1);
+    r = r && consumeToken(b, VARIABLE_ACCESS_END);
     exit_section_(b, m, null, r);
+    return r;
+  }
+
+  // variable | variable_body_value
+  private static boolean variable_id_1_1_0_1(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "variable_id_1_1_0_1")) return false;
+    boolean r;
+    r = variable(b, l + 1);
+    if (!r) r = variable_body_value(b, l + 1);
     return r;
   }
 
