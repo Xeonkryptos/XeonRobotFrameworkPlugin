@@ -1,9 +1,5 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.ide.actionhandler;
 
-import dev.xeonkryptos.xeonrobotframeworkplugin.ide.config.RobotOptionsProvider;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotFeatureFileType;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotResourceFileType;
-import dev.xeonkryptos.xeonrobotframeworkplugin.util.GlobalConstants;
 import com.intellij.codeInsight.editorActions.enter.EnterHandlerDelegateAdapter;
 import com.intellij.openapi.actionSystem.DataContext;
 import com.intellij.openapi.editor.Document;
@@ -14,6 +10,11 @@ import com.intellij.psi.PsiDocumentManager;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiWhiteSpace;
+import com.intellij.psi.util.PsiTreeUtil;
+import dev.xeonkryptos.xeonrobotframeworkplugin.ide.config.RobotOptionsProvider;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotFeatureFileType;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotResourceFileType;
+import dev.xeonkryptos.xeonrobotframeworkplugin.util.GlobalConstants;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -21,6 +22,12 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public abstract class AbstractRobotSmartMultilineEnterActionHandler<T extends PsiElement> extends EnterHandlerDelegateAdapter {
+
+    private final Class<T> expectedElementClass;
+
+    protected AbstractRobotSmartMultilineEnterActionHandler(Class<T> expectedElementClass) {
+        this.expectedElementClass = expectedElementClass;
+    }
 
     @Override
     public Result postProcessEnter(@NotNull PsiFile file, @NotNull Editor editor, @NotNull DataContext dataContext) {
@@ -37,17 +44,12 @@ public abstract class AbstractRobotSmartMultilineEnterActionHandler<T extends Ps
 
             int caretOffset = editor.getCaretModel().getOffset();
             PsiElement currentElement = file.findElementAt(caretOffset);
-            while (currentElement instanceof PsiWhiteSpace) {
-                currentElement = currentElement.getPrevSibling();
-            }
             if (currentElement == null) {
                 return Result.Continue;
             }
-            int elementTextOffset = currentElement.getTextOffset();
-            int lineNumber = document.getLineNumber(elementTextOffset);
-            int lineStartOffset = document.getLineStartOffset(lineNumber);
-            T element = getExpectedElement(currentElement, lineStartOffset);
-            if (element != null && isMultilineSupportedFor(element)) {
+            int previousLine = document.getLineNumber(caretOffset) - 1;
+            T element = getExpectedElement(currentElement, previousLine, document);
+            if (element != null) {
                 handleSmartMultilineIndentation(file, editor, element);
             }
         }
@@ -55,9 +57,38 @@ public abstract class AbstractRobotSmartMultilineEnterActionHandler<T extends Ps
     }
 
     @Nullable
-    protected abstract T getExpectedElement(@Nullable PsiElement element, int lineStartOffset);
+    protected T getExpectedElement(@Nullable PsiElement element, int previousLine, Document document) {
+        if (expectedElementClass.isInstance(element)) {
+            return expectedElementClass.cast(element);
+        }
+        T foundElement = PsiTreeUtil.getParentOfType(element, expectedElementClass);
+        if (foundElement != null) {
+            int textOffset = foundElement.getTextOffset();
+            int keywordCallLineNumber = document.getLineNumber(textOffset);
+            if (keywordCallLineNumber == previousLine) {
+                return foundElement;
+            }
 
-    protected abstract boolean isMultilineSupportedFor(@NotNull T element);
+            int lineStartOffset = document.getLineStartOffset(previousLine);
+            int lineEndOffset = document.getLineEndOffset(previousLine);
+            TextRange lineTextRange = new TextRange(lineStartOffset, lineEndOffset);
+            if (isLineStartingWithEllipsis(lineTextRange, document)) {
+                return foundElement;
+            }
+        }
+        return null;
+    }
+
+    protected boolean isLineStartingWithEllipsis(TextRange lineTextRange, Document document) {
+        String lineText = document.getText(lineTextRange);
+        for (int i = 0; i < lineText.length(); i++) {
+            int codePoint = lineText.codePointAt(i);
+            if (!Character.isWhitespace(codePoint)) {
+                return codePoint == '.' && i + 2 < lineText.length() && GlobalConstants.ELLIPSIS.equals(lineText.substring(i, i + 3));
+            }
+        }
+        return false;
+    }
 
     private void handleSmartMultilineIndentation(@NotNull PsiFile file, @NotNull Editor editor, T multilineElement) {
         int caretOffset = editor.getCaretModel().getOffset();
