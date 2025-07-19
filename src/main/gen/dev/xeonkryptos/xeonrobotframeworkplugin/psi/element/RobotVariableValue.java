@@ -13,4 +13,7 @@ public interface RobotVariableValue extends RobotStatement {
   @Nullable
   RobotPositionalArgument getPositionalArgument();
 
+  @Nullable
+  RobotVariable getVariable();
+
 }

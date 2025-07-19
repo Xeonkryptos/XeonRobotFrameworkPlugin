@@ -28,9 +28,9 @@ public class RobotParameterImpl extends RobotParameterExtension implements Robot
   }
 
   @Override
-  @NotNull
+  @Nullable
   public RobotPositionalArgument getPositionalArgument() {
-    return notNullChild(PsiTreeUtil.getChildOfType(this, RobotPositionalArgument.class));
+    return PsiTreeUtil.getChildOfType(this, RobotPositionalArgument.class);
   }
 
   @Override

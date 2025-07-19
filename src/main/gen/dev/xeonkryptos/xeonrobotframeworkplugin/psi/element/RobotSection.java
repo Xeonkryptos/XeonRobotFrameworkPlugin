@@ -6,7 +6,7 @@ import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiNameIdentifierOwner;
 
-public interface RobotSection extends RobotNamedElementExpression, PsiNameIdentifierOwner, RobotStatement {
+public interface RobotSection extends RobotStatement, RobotNamedElementExpression, PsiNameIdentifierOwner {
 
   @NotNull String getName();
 

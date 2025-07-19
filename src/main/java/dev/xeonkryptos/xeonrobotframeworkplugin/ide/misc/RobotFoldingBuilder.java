@@ -157,7 +157,9 @@ public class RobotFoldingBuilder extends FoldingBuilderEx implements DumbAware {
                 }
                 lastChild = lastChild.getLastChild();
             }
-            descriptors.add(new FoldingDescriptor(element, textRange));
+            if (textRange.getLength() > 0) {
+                descriptors.add(new FoldingDescriptor(element, textRange));
+            }
         }
 
         for (PsiElement child = element.getFirstChild(); child != null; child = child.getNextSibling()) {

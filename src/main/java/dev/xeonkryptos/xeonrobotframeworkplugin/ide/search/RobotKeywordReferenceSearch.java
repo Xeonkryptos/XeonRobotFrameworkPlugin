@@ -8,7 +8,6 @@ import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.psi.search.searches.ReferencesSearch.SearchParameters;
 import com.intellij.util.Processor;
 import com.jetbrains.python.psi.PyDecoratorList;
-import com.jetbrains.python.psi.PyExpression;
 import com.jetbrains.python.psi.PyFunction;
 import com.jetbrains.python.psi.PyStringLiteralExpression;
 import com.jetbrains.python.psi.StringLiteralExpression;
@@ -46,8 +45,7 @@ public class RobotKeywordReferenceSearch extends QueryExecutorBase<PsiReference,
             PyDecoratorList decoratorList = pyFunction.getDecoratorList();
             Optional<String> customKeywordNameOpt = Optional.ofNullable(decoratorList)
                                                             .map(decorators -> decorators.findDecorator("keyword"))
-                                                            .map(decorator -> decorator.getArgument(0, "name", PyExpression.class))
-                                                            .map(keywordNameExp -> (PyStringLiteralExpression) keywordNameExp)
+                                                            .map(decorator -> decorator.getArgument(0, "name", PyStringLiteralExpression.class))
                                                             .filter(PsiElement::isValid)
                                                             .map(StringLiteralExpression::getStringValue);
             customKeywordNameOpt.ifPresent(customKeywordName -> searchForKeywordsInIndex(customKeywordName, project, globalSearchScope, consumer));

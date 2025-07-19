@@ -9,7 +9,7 @@ import com.intellij.navigation.NavigationItem;
 
 public interface RobotParameter extends PsiNameIdentifierOwner, RobotNamedElementExpression, NavigationItem, RobotArgument, RobotStatement {
 
-  @NotNull
+  @Nullable
   RobotPositionalArgument getPositionalArgument();
 
   @NotNull

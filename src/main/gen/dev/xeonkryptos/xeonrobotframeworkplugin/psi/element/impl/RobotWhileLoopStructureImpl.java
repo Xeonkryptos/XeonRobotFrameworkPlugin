@@ -40,10 +40,4 @@ public class RobotWhileLoopStructureImpl extends RobotExecutableStatementImpl im
     return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotParameter.class);
   }
 
-  @Override
-  @NotNull
-  public RobotPositionalArgument getPositionalArgument() {
-    return notNullChild(PsiTreeUtil.getChildOfType(this, RobotPositionalArgument.class));
-  }
-
 }

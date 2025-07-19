@@ -28,15 +28,21 @@ public class RobotExtendedVariableNestedAccessImpl extends RobotPsiElementBase i
   }
 
   @Override
-  @Nullable
-  public RobotLiteralConstantValue getLiteralConstantValue() {
-    return PsiTreeUtil.getChildOfType(this, RobotLiteralConstantValue.class);
+  @NotNull
+  public List<RobotLiteralConstantValue> getLiteralConstantValueList() {
+    return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotLiteralConstantValue.class);
   }
 
   @Override
-  @Nullable
-  public RobotVariable getVariable() {
-    return PsiTreeUtil.getChildOfType(this, RobotVariable.class);
+  @NotNull
+  public List<RobotVariable> getVariableList() {
+    return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotVariable.class);
+  }
+
+  @Override
+  @NotNull
+  public List<RobotVariableBodyValue> getVariableBodyValueList() {
+    return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotVariableBodyValue.class);
   }
 
 }

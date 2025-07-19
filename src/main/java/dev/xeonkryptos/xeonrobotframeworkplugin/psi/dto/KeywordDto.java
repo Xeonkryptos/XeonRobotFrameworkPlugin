@@ -1,13 +1,5 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.psi.dto;
 
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.DefinedKeyword;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.DefinedParameter;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.DefinedVariable;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.ref.PyElementDeprecatedVisitor;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.ref.PyElementParentTraversalVisitor;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.PatternBuilder;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.PatternUtil;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.ReservedVariable;
 import com.intellij.psi.PsiElement;
 import com.jetbrains.python.psi.PyBoolLiteralExpression;
 import com.jetbrains.python.psi.PyElement;
@@ -17,6 +9,13 @@ import com.jetbrains.python.psi.PyNoneLiteralExpression;
 import com.jetbrains.python.psi.PyParameter;
 import com.jetbrains.python.psi.PyReferenceExpression;
 import com.jetbrains.python.psi.PyStringLiteralExpression;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.DefinedKeyword;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.DefinedParameter;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.DefinedVariable;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.ref.PyElementDeprecatedVisitor;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.ref.PyElementParentTraversalVisitor;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.PatternUtil;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.ReservedVariable;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -26,7 +25,6 @@ import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @SuppressWarnings("UnstableApiUsage")
@@ -34,8 +32,9 @@ public class KeywordDto implements DefinedKeyword {
 
     private final PsiElement reference;
     private final String name;
+    private final String keywordFunctionName;
     private final boolean args;
-    private final Pattern namePattern;
+    private final String namespace;
     private final Collection<DefinedParameter> parameters;
     private final boolean deprecated;
 
@@ -59,7 +58,8 @@ public class KeywordDto implements DefinedKeyword {
                       Object... ignored) { // Object... ignored is just a trick to avoid constructor clashing
         this.reference = reference;
         this.name = PatternUtil.functionToKeyword(name).trim();
-        this.namePattern = Pattern.compile(PatternBuilder.parseNamespace(namespace, PatternUtil.keywordToFunction(this.name)), Pattern.CASE_INSENSITIVE);
+        this.keywordFunctionName = PatternUtil.keywordToFunction(name).trim();
+        this.namespace = namespace;
         this.args = parameters != null && !parameters.isEmpty();
         this.parameters = parameters;
         if (reference instanceof PyElement) {
@@ -126,7 +126,14 @@ public class KeywordDto implements DefinedKeyword {
 
     @Override
     public final boolean matches(String text) {
-        return text != null && this.namePattern.matcher(PatternUtil.keywordToFunction(text).trim()).matches();
+        if (text == null) {
+            return false;
+        }
+        String keywordToFunction = PatternUtil.keywordToFunction(text).trim();
+        if (namespace != null && text.startsWith(namespace + ".")) {
+            keywordToFunction = keywordToFunction.substring(namespace.length() + 1);
+        }
+        return keywordFunctionName.equalsIgnoreCase(keywordToFunction);
     }
 
     @NotNull

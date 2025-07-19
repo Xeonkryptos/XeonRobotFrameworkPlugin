@@ -9,8 +9,11 @@ import com.intellij.psi.PsiReference;
 
 public interface RobotVariableId extends PsiNamedElement, RobotReferenceElementExpression, RobotStatement {
 
-  @Nullable
-  RobotVariable getVariable();
+  @NotNull
+  List<RobotExtendedVariableNestedAccess> getExtendedVariableNestedAccessList();
+
+  @NotNull
+  List<RobotVariable> getVariableList();
 
   @NotNull
   List<RobotVariableBodyValue> getVariableBodyValueList();

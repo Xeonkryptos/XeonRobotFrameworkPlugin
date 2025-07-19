@@ -10,7 +10,4 @@ public interface RobotIfStructure extends RobotExecutableStatement {
   @NotNull
   List<RobotExecutableStatement> getExecutableStatementList();
 
-  @NotNull
-  List<RobotPositionalArgument> getPositionalArgumentList();
-
 }

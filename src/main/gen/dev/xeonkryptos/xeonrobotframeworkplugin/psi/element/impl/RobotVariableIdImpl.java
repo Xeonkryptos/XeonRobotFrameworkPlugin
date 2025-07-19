@@ -29,9 +29,15 @@ public class RobotVariableIdImpl extends RobotPsiElementBase implements RobotVar
   }
 
   @Override
-  @Nullable
-  public RobotVariable getVariable() {
-    return PsiTreeUtil.getChildOfType(this, RobotVariable.class);
+  @NotNull
+  public List<RobotExtendedVariableNestedAccess> getExtendedVariableNestedAccessList() {
+    return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotExtendedVariableNestedAccess.class);
+  }
+
+  @Override
+  @NotNull
+  public List<RobotVariable> getVariableList() {
+    return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotVariable.class);
   }
 
   @Override

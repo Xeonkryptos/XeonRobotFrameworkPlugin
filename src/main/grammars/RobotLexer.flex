@@ -72,7 +72,7 @@ import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.*;
   }
 
   protected boolean isWhitespace(char character) {
-      return character == ' ' || character == '\t' || character == '\r' || character == '\n';
+      return character == ' ' || character == '\t' || character == '\r' || character == '\n' || character == '\u00A0';
   }
 
   protected int indexOf(char character) {
@@ -97,6 +97,7 @@ import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.*;
 
 Space = " "
 Tab = \t
+NBSP = \u00A0
 Star = "*"
 EqualSign = "="
 
@@ -105,7 +106,7 @@ LineCommentSign = "#"
 
 EmptyValue = \\ {Space}
 
-Whitespace = {Space} | {Tab}
+Whitespace = {Space} | {Tab} | {NBSP}
 
 SpaceBasedEndMarker = {Space}{2}{Space}* | {Tab}+
 
@@ -161,7 +162,7 @@ AllowedParamSeq = {AllowedParamChar}+
 RestrictedLiteralValue = {AllowedSeq} ({Space} {AllowedSeq})*
 VariableLiteralValue =   {AllowedVarSeq} ({Space} {AllowedVarSeq})*
 ParamLiteralValue =      {AllowedParamSeq} ({Space} {AllowedParamSeq})*
-LiteralValue = [^\s]+([ ][^\s]+)*[ ]?
+LiteralValue =           [^\s]+([ ][^\s]+)*[ ]?
 
 LocalSettingKeywordStart = "[" \s*
 LocalSettingKeywordEnd = \s* "]"
@@ -234,7 +235,8 @@ LineComment = {LineCommentSign} {NON_EOL}*
 }
 
 <VARIABLE_DEFINITION_ARGUMENTS> {
-    {RestrictedLiteralValue}     { pushBackTrailingWhitespace(); return LITERAL_CONSTANT; }
+    "scope" {EqualSign} !({SpaceBasedEndMarker} | {EOL})  { yypushback(yylength() - "scope".length()); enterNewState(PARAMETER_ASSIGNMENT); return PARAMETER_NAME; }
+    {ParamLiteralValue}                                   { pushBackTrailingWhitespace(); return LITERAL_CONSTANT; }
 }
 
 <VARIABLE_USAGE> {
@@ -257,6 +259,11 @@ LineComment = {LineCommentSign} {NON_EOL}*
     {VariableSliceAccess} \s+    { leaveState(); pushBackTrailingWhitespace(); return VARIABLE_SLICE_ACCESS; }
     {VariableIndexAccess} \s+    { leaveState(); pushBackTrailingWhitespace(); return VARIABLE_INDEX_ACCESS; }
     {VariableKeyAccess}   \s+    { leaveState(); pushBackTrailingWhitespace(); return VARIABLE_KEY_ACCESS; }
+
+    {VariableSliceAccess} !"["   { leaveState(); pushBackTrailingWhitespace(); yypushback(yylength() - indexOf(']') - 1); return VARIABLE_SLICE_ACCESS; }
+    {VariableIndexAccess} !"["   { leaveState(); pushBackTrailingWhitespace(); yypushback(yylength() - indexOf(']') - 1); return VARIABLE_INDEX_ACCESS; }
+    {VariableKeyAccess}   !"["   { leaveState(); pushBackTrailingWhitespace(); yypushback(yylength() - indexOf(']') - 1); return VARIABLE_KEY_ACCESS; }
+
     "]" (\s+ | ! "[")            {
           leaveState();
           yypushback(yylength() - 1);
@@ -302,7 +309,7 @@ LineComment = {LineCommentSign} {NON_EOL}*
 
 <TEMPLATE_DEFINITION> {
     ^ {LiteralValue}    {
-        templateKeywordFound = globalTemplateEnabled;
+        localTemplateEnabled = globalTemplateEnabled;
         leaveState();
         yypushback(yylength());
         break;
@@ -411,39 +418,42 @@ LineComment = {LineCommentSign} {NON_EOL}*
 
 <CONTROL_STRUCTURE_START>  {SpaceBasedEndMarker}     { yybegin(CONTROL_STRUCTURE); return WHITE_SPACE; }
 <CONTROL_STRUCTURE> {
-    <SETTING> {RestrictedLiteralValue} | {EqualSign}           { pushBackTrailingWhitespace(); return LITERAL_CONSTANT; }
+    <SETTING> {RestrictedLiteralValue} | {EqualSign} { pushBackTrailingWhitespace(); return LITERAL_CONSTANT; }
     {SpaceBasedEndMarker}                            { leaveState(); return EOL; }
-}
-
-<KEYWORD_ARGUMENTS, SETTINGS_SECTION, TESTCASE_DEFINITION, TASK_DEFINITION, USER_KEYWORD_DEFINITION, VARIABLE_DEFINITION> {
-    <SETTING> {ParameterName} {EqualSign}        {
-          pushBackTrailingWhitespace();
-          yypushback(1);
-          enterNewState(PARAMETER_ASSIGNMENT);
-          return PARAMETER_NAME;
-      }
-    {EqualSign}                                        { return ASSIGNMENT; }
-}
-<PARAMETER_ASSIGNMENT>  {EqualSign}                    { yybegin(PARAMETER_VALUE); return ASSIGNMENT; }
-<PARAMETER_VALUE>       {
-    {ParamLiteralValue}                                { pushBackTrailingWhitespace(); return LITERAL_CONSTANT; }
-    <TEMPLATE_PARAMETER_VALUE> {
-        {ScalarVariableStart}                          { enterNewState(VARIABLE_USAGE); return SCALAR_VARIABLE_START; }
-        {ListVariableStart}                            { enterNewState(VARIABLE_USAGE); return LIST_VARIABLE_START; }
-        {DictVariableStart}                            { enterNewState(VARIABLE_USAGE); return DICT_VARIABLE_START; }
-        {EnvVariableStart}                             { enterNewState(VARIABLE_USAGE); return ENV_VARIABLE_START; }
-        {Space}{2} \s* | {Tab} \s* | {EOL}+            { leaveState(); yypushback(yylength()); break; }
-    }
 }
 
 // Multiline handling (don't return EOL on detected multiline). If there is a multiline without the Ellipsis (...) marker,
 // then return EOL to mark the end of the statement.
 <SETTING, KEYWORD_CALL, KEYWORD_ARGUMENTS, VARIABLE_DEFINITION, VARIABLE_DEFINITION_ARGUMENTS> {
     <SETTING_TEMPLATE_START> {
-        {MultiLine}                                { return WHITE_SPACE; }
-        {EOL} {Whitespace}* {LineComment}          { yypushback(yylength() - 1); return WHITE_SPACE; }
+        {MultiLine}                                  { return WHITE_SPACE; }
+        {EOL} {Whitespace}* {LineComment}            { yypushback(yylength() - 1); return WHITE_SPACE; }
     }
-    <USER_KEYWORD_RETURN_STATEMENT> {EOL}+     { leaveState(); return EOL; }
+    <USER_KEYWORD_RETURN_STATEMENT> {EOL}+           { leaveState(); return EOL; }
+}
+
+<KEYWORD_ARGUMENTS, TESTCASE_DEFINITION, TASK_DEFINITION, USER_KEYWORD_DEFINITION, VARIABLE_DEFINITION> {
+    <SETTINGS_SECTION> {
+        <SETTING> {ParameterName} {EqualSign}        {
+              pushBackTrailingWhitespace();
+              yypushback(1);
+              enterNewState(PARAMETER_ASSIGNMENT);
+              return PARAMETER_NAME;
+          }
+        {EqualSign}                                   { return ASSIGNMENT; }
+    }
+    {EOL}+                                            { return EOL; }
+}
+<PARAMETER_ASSIGNMENT>  {EqualSign}                   { yybegin(PARAMETER_VALUE); return ASSIGNMENT; }
+<PARAMETER_VALUE>       {
+    {ParamLiteralValue}                               { pushBackTrailingWhitespace(); return LITERAL_CONSTANT; }
+    <TEMPLATE_PARAMETER_VALUE> {
+        {ScalarVariableStart}                         { enterNewState(VARIABLE_USAGE); return SCALAR_VARIABLE_START; }
+        {ListVariableStart}                           { enterNewState(VARIABLE_USAGE); return LIST_VARIABLE_START; }
+        {DictVariableStart}                           { enterNewState(VARIABLE_USAGE); return DICT_VARIABLE_START; }
+        {EnvVariableStart}                            { enterNewState(VARIABLE_USAGE); return ENV_VARIABLE_START; }
+        {Space}{2} \s* | {Tab} \s* | {EOL}+           { leaveState(); yypushback(yylength()); break; }
+    }
 }
 
 <SETTING_TEMPLATE_START>  {

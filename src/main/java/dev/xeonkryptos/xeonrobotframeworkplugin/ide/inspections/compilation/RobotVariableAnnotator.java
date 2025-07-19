@@ -6,8 +6,10 @@ import com.intellij.lang.annotation.HighlightSeverity;
 import com.intellij.openapi.project.DumbAware;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiPolyVariantReference;
+import com.intellij.psi.ResolveResult;
 import com.intellij.psi.util.PsiTreeUtil;
 import dev.xeonkryptos.xeonrobotframeworkplugin.RobotBundle;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotHighlighter;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.DefinedVariable;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotEnvironmentVariable;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLocalSetting;
@@ -46,7 +48,17 @@ public class RobotVariableAnnotator implements Annotator, DumbAware {
 
         RobotVariableId nameIdentifier = variable.getNameIdentifier();
         if (nameIdentifier != null && ((PsiPolyVariantReference) nameIdentifier.getReference()).multiResolve(false).length > 0) {
-            return;
+            ResolveResult[] resolveResults = ((PsiPolyVariantReference) nameIdentifier.getReference()).multiResolve(false);
+            if (resolveResults.length > 0) {
+                if (resolveResults.length > 1) {
+                    holder.newSilentAnnotation(HighlightSeverity.TEXT_ATTRIBUTES)
+                          .textAttributes(RobotHighlighter.REASSIGNED_VARIABLE)
+                          .tooltip(RobotBundle.getMessage("annotation.variable.reused"))
+                          .range(element)
+                          .create();
+                }
+                return;
+            }
         }
         RobotVariableAnalyser robotVariableAnalyser = new RobotVariableAnalyser();
         variable.accept(robotVariableAnalyser);

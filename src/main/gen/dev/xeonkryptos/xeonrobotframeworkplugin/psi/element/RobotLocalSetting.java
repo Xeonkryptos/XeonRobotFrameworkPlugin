@@ -15,6 +15,9 @@ public interface RobotLocalSetting extends RobotNamedElementExpression, PsiNameI
   List<RobotLocalSettingArgument> getLocalSettingArgumentList();
 
   @NotNull
+  List<RobotParameter> getParameterList();
+
+  @NotNull
   List<RobotPositionalArgument> getPositionalArgumentList();
 
   @NotNull

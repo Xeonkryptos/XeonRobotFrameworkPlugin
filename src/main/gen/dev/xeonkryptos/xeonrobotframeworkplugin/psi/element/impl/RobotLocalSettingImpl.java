@@ -41,6 +41,12 @@ public class RobotLocalSettingImpl extends RobotLocalSettingExtension implements
 
   @Override
   @NotNull
+  public List<RobotParameter> getParameterList() {
+    return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotParameter.class);
+  }
+
+  @Override
+  @NotNull
   public List<RobotPositionalArgument> getPositionalArgumentList() {
     return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotPositionalArgument.class);
   }

@@ -105,8 +105,8 @@ public class RobotVisitor extends PsiElementVisitor {
   }
 
   public void visitLanguage(@NotNull RobotLanguage o) {
-    visitPsiNameIdentifierOwner(o);
-    // visitStatement(o);
+    visitStatement(o);
+    // visitPsiNameIdentifierOwner(o);
   }
 
   public void visitLanguageId(@NotNull RobotLanguageId o) {
@@ -198,9 +198,9 @@ public class RobotVisitor extends PsiElementVisitor {
   }
 
   public void visitSection(@NotNull RobotSection o) {
-    visitNamedElementExpression(o);
+    visitStatement(o);
+    // visitNamedElementExpression(o);
     // visitPsiNameIdentifierOwner(o);
-    // visitStatement(o);
   }
 
   public void visitSettingsSection(@NotNull RobotSettingsSection o) {

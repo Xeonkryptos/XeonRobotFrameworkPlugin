@@ -7,10 +7,13 @@ import com.intellij.psi.PsiElement;
 
 public interface RobotExtendedVariableNestedAccess extends RobotStatement {
 
-  @Nullable
-  RobotLiteralConstantValue getLiteralConstantValue();
+  @NotNull
+  List<RobotLiteralConstantValue> getLiteralConstantValueList();
 
-  @Nullable
-  RobotVariable getVariable();
+  @NotNull
+  List<RobotVariable> getVariableList();
+
+  @NotNull
+  List<RobotVariableBodyValue> getVariableBodyValueList();
 
 }

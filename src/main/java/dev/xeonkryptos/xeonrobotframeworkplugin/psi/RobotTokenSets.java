@@ -5,7 +5,7 @@ import com.intellij.psi.tree.TokenSet;
 
 class RobotTokenSets {
 
-    static final TokenSet WHITESPACE_SET = TokenSet.create(TokenType.WHITE_SPACE);
+    static final TokenSet WHITESPACE_SET = TokenSet.create(TokenType.WHITE_SPACE, RobotTypes.COMMENT);
     static final TokenSet COMMENTS_SET = TokenSet.create(RobotTypes.COMMENT);
     static final TokenSet STRING_SET = TokenSet.create(RobotTypes.GIVEN,
                                                        RobotTypes.WHEN,

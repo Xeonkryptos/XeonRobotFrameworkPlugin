@@ -118,7 +118,7 @@ public abstract class RobotKeywordCallExtension extends RobotStubPsiElementBase<
     public Collection<String> computeMissingRequiredParameters() {
         Set<String> definedParameters = getParameterList().stream().map(RobotParameter::getName).collect(Collectors.toCollection(HashSet::new));
         Collection<String> requiredParameterNames = getAvailableParameters().stream()
-                                                                            .filter(param -> !param.hasDefaultValue())
+                                                                            .filter(param -> !param.hasDefaultValue() && !param.isKeywordContainer())
                                                                             .map(DefinedParameter::getLookup)
                                                                             .collect(Collectors.toCollection(HashSet::new));
 

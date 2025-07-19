@@ -13,7 +13,4 @@ public interface RobotWhileLoopStructure extends RobotExecutableStatement {
   @NotNull
   List<RobotParameter> getParameterList();
 
-  @NotNull
-  RobotPositionalArgument getPositionalArgument();
-
 }

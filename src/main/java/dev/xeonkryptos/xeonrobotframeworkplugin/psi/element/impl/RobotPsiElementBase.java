@@ -5,7 +5,6 @@ import com.intellij.lang.ASTNode;
 import com.intellij.navigation.ItemPresentation;
 import com.intellij.psi.PsiElement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotStatement;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.PatternUtil;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.QualifiedNameBuilder;
 import org.jetbrains.annotations.NotNull;
 
@@ -15,11 +14,6 @@ public abstract class RobotPsiElementBase extends ASTWrapperPsiElement implement
 
     public RobotPsiElementBase(@NotNull ASTNode node) {
         super(node);
-    }
-
-    @NotNull
-    public static String getPresentableText(String text) {
-        return PatternUtil.getPresentableText(text);
     }
 
     @Override
@@ -42,12 +36,6 @@ public abstract class RobotPsiElementBase extends ASTWrapperPsiElement implement
                 return RobotPsiElementBase.this.getIcon(ICON_FLAG_VISIBILITY);
             }
         };
-    }
-
-    @NotNull
-    public String getPresentableText() {
-        String unescapedText = getText();
-        return getPresentableText(unescapedText);
     }
 
     public PsiElement setName(@NotNull String newName) {

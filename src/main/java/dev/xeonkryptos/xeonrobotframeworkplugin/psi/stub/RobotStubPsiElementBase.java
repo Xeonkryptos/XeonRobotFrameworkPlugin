@@ -7,6 +7,7 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.stubs.IStubElementType;
 import com.intellij.psi.stubs.StubElement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotPsiElementBase;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.PatternUtil;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.QualifiedNameBuilder;
 import org.jetbrains.annotations.NotNull;
 
@@ -23,16 +24,16 @@ public abstract class RobotStubPsiElementBase<T extends StubElement<P>, P extend
     }
 
     @NotNull
-    public String getPresentableText() {
+    public String getText() {
         T stub = getStub();
         String text;
         if (stub != null) {
             P psiElement = stub.getPsi();
             text = psiElement.getText();
         } else {
-            text = getText();
+            text = super.getText();
         }
-        return RobotPsiElementBase.getPresentableText(text);
+        return text;
     }
 
     @Override
@@ -41,7 +42,7 @@ public abstract class RobotStubPsiElementBase<T extends StubElement<P>, P extend
 
             @Override
             public String getPresentableText() {
-                return RobotStubPsiElementBase.this.getPresentableText();
+                return RobotStubPsiElementBase.this.getText();
             }
 
             @Override
@@ -62,6 +63,6 @@ public abstract class RobotStubPsiElementBase<T extends StubElement<P>, P extend
 
     @Override
     public String toString() {
-        return super.toString() + "(" + getPresentableText() + ")";
+        return super.toString() + "(" + getText() + ")";
     }
 }
