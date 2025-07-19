@@ -145,7 +145,7 @@ public final class RobotUsedFilesCollector extends RobotVisitor {
 
     @Override
     public void visitParameter(@NotNull RobotParameter o) {
-        o.getPositionalArgument().accept(this);
+        o.acceptChildren(this);
     }
 
     @Override
