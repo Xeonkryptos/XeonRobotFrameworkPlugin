@@ -44,7 +44,7 @@ repositories {
 
 dependencies {
     implementation("org.eclipse.lsp4j:org.eclipse.lsp4j.debug:0.24.0")
-    implementation("org.apache.commons:commons-text:1.13.0")
+    implementation("org.apache.commons:commons-text:1.13.1")
 
     intellijPlatform {
         val platformVersion = properties("platformVersion")
@@ -108,7 +108,7 @@ intellijPlatform {
         ides {
             recommended()
             select {
-                types = listOf(IntelliJPlatformType.IntellijIdeaCommunity)
+                types = listOf(IntelliJPlatformType.IntellijIdeaUltimate)
                 channels = listOf(ProductRelease.Channel.RELEASE)
                 sinceBuild = properties("pluginSinceBuild")
                 untilBuild = properties("pluginUntilBuild")
