@@ -4,6 +4,10 @@
 
 ## Unreleased
 
+### Fixed
+
+- Fixed setting of breakpoints in robot files
+
 ## 0.4.0
 
 ### Changed

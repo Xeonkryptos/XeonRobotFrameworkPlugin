@@ -7,6 +7,7 @@ import com.intellij.openapi.util.Ref;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.TokenType;
+import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.xdebugger.XDebuggerUtil;
 import com.intellij.xdebugger.breakpoints.SuspendPolicy;
 import com.intellij.xdebugger.breakpoints.XLineBreakpointType;
@@ -14,7 +15,9 @@ import com.jetbrains.python.debugger.PyDebugSupportUtils;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotFeatureFileType;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotLanguage;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotResourceFileType;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.visitor.RobotStoppablePsiElement;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCall;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotSettingsSection;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableStatement;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -77,9 +80,8 @@ public class RobotLineBreakpointType extends XLineBreakpointType<RobotLineBreakp
             if (context == null) {
                 return false;
             }
-            RobotStoppablePsiElement stoppablePsiElement = new RobotStoppablePsiElement();
-            context.accept(stoppablePsiElement);
-            return stoppablePsiElement.isStoppable();
+            return PsiTreeUtil.getParentOfType(context, false, RobotKeywordCall.class, RobotVariableStatement.class) != null
+                   || context instanceof RobotSettingsSection;
         }
         return false;
     }
