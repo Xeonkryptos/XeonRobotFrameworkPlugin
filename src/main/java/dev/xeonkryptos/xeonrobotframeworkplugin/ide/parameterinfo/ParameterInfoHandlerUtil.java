@@ -279,7 +279,7 @@ public class ParameterInfoHandlerUtil {
                                                 });
                 }
             } else if (!parameterFound) {
-                int argIndex = Math.min(i + implicitOffset, positionalContainerIndex);
+                int argIndex = Math.max(0, Math.min(i + implicitOffset, positionalContainerIndex));
                 PyCallableParameter pyCallableParameter = parameterList.get(argIndex);
                 highlightParameter(pyCallableParameter, parameterHintToIndex, hintFlags, mustHighlight);
             }
