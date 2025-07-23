@@ -8,11 +8,11 @@ import org.jetbrains.annotations.Nullable;
 public enum ReservedVariable {
 
     // Scope Everywhere
-    CUR_DIR("${CUR_DIR}",
-            ReservedVariableScope.Global), // An absolute path to the directory where the test data file is located. This variable is case-sensitive.
-    TEMP_DIR("${TEMP_DIR}",
-             ReservedVariableScope.Global), // An absolute path to the system temporary directory. In UNIX-like systems this is typically /tmp, and in Windows c:\Documents and Settings\<user>\Local Settings\Temp.
-    EXEC_DIR("${EXEC_DIR}", ReservedVariableScope.Global), // An absolute path to the directory where test execution was started from.
+    CURDIR("${CURDIR}",
+           ReservedVariableScope.Global), // An absolute path to the directory where the test data file is located. This variable is case-sensitive.
+    TEMPDIR("${TEMPDIR}",
+            ReservedVariableScope.Global), // An absolute path to the system temporary directory. In UNIX-like systems this is typically /tmp, and in Windows c:\Documents and Settings\<user>\Local Settings\Temp.
+    EXECDIR("${EXECDIR}", ReservedVariableScope.Global), // An absolute path to the directory where test execution was started from.
     PATH_SEPARATOR("${/}", ReservedVariableScope.Global), // The system directory path separator. / in UNIX-like systems and \ in Windows.
     PATH_ELEMENT("${:}", ReservedVariableScope.Global), // The system path element separator. : in UNIX-like systems and ; in Windows.
     NEW_LINE("${\\n}", ReservedVariableScope.Global), // The system line separator. \n in UNIX-like systems and \r\n in Windows.
