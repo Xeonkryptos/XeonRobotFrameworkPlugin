@@ -7,6 +7,7 @@
 ### Fixed
 
 - Fixed setting of breakpoints in robot files
+- Fixed finding defined variables through keyword call (set global variable, set suite variable, set test variable)
 
 ## 0.4.0
 

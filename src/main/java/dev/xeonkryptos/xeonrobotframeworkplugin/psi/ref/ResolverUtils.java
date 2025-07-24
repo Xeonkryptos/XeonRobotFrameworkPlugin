@@ -2,7 +2,6 @@ package dev.xeonkryptos.xeonrobotframeworkplugin.psi.ref;
 
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
-import com.intellij.psi.util.PsiTreeUtil;
 import dev.xeonkryptos.xeonrobotframeworkplugin.ide.config.RobotOptionsProvider;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.dto.ImportType;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.dto.VariableDto;
@@ -87,9 +86,7 @@ public class ResolverUtils {
         String keywordName = keywordCall.getName();
         if (VARIABLE_SETTERS.contains(keywordName.toLowerCase())) {
             List<RobotPositionalArgument> positionalArgumentList = keywordCall.getPositionalArgumentList();
-            if (!positionalArgumentList.isEmpty()) {
-                RobotPositionalArgument positionalArgument = positionalArgumentList.getFirst();
-                RobotVariable variable = PsiTreeUtil.getRequiredChildOfType(positionalArgument, RobotVariable.class);
+            if (!positionalArgumentList.isEmpty() && positionalArgumentList.getFirst() instanceof RobotVariable variable) {
                 String variableName = variable.getName();
                 if (variableName != null) {
                     DefinedVariable definedVariable = new VariableDto(variable, variableName, null);
