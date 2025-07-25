@@ -10,7 +10,8 @@ public class RobotWordScanner extends DefaultWordsScanner {
     private static final TokenSet IDENTIFIERS = TokenSet.create(RobotTypes.USER_KEYWORD_NAME,
                                                                 RobotTypes.KEYWORD_NAME,
                                                                 RobotTypes.PARAMETER_NAME,
-                                                                RobotTypes.TEMPLATE_PARAMETER_NAME);
+                                                                RobotTypes.TEMPLATE_PARAMETER_NAME,
+                                                                RobotTypes.VARIABLE_BODY);
     private static final TokenSet COMMENTS = TokenSet.create(RobotTypes.COMMENT);
     private static final TokenSet LITERALS = TokenSet.create(RobotTypes.TASK_NAME, RobotTypes.TEST_CASE_NAME, RobotTypes.LITERAL_CONSTANT);
 

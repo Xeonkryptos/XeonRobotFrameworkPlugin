@@ -153,14 +153,18 @@ GenericSettingsKeyword = [\p{L}\p{N}_]+([ ][\p{L}\p{N}_])*
 AllowedChar = [^\s$@%&=] | [<>!=] = | [$@%&] [^{]
 AllowedSeq = {AllowedChar}+
 
-AllowedVarChar = [^\s$@%&}=\[\]] | [<>!=] = | [$@%&] [^{]
+AllowedVarChar = [\p{L}\p{N}_\s]
 AllowedVarSeq = {AllowedVarChar}+
+
+AllowedExtendedVarChar = [^$@%&}] | [$@%&] [^{]
+AllowedExtendedVarSeq = {AllowedExtendedVarChar}+
 
 AllowedParamChar = [^\s$@%&] | [$@%&] [^{]
 AllowedParamSeq = {AllowedParamChar}+
 
 RestrictedLiteralValue = {AllowedSeq} ({Space} {AllowedSeq})*
 VariableLiteralValue =   {AllowedVarSeq} ({Space} {AllowedVarSeq})*
+ExtendedVariableLiteralValue =   {AllowedExtendedVarSeq}
 ParamLiteralValue =      {AllowedParamSeq} ({Space} {AllowedParamSeq})*
 LiteralValue =           [^\s]+([ ][^\s]+)*[ ]?
 
@@ -186,7 +190,7 @@ LineComment = {LineCommentSign} {NON_EOL}*
 %state USER_KEYWORD_NAME_DEFINITION, USER_KEYWORD_DEFINITION, USER_KEYWORD_RETURN_STATEMENT
 %state SETTING, SETTING_TEMPLATE_START, TEMPLATE_DEFINITION
 %state KEYWORD_CALL, KEYWORD_ARGUMENTS
-%state INLINE_VARIABLE_DEFINITION, VARIABLE_DEFINITION, VARIABLE_DEFINITION_ARGUMENTS, VARIABLE_USAGE, EXTENDED_VARIABLE_ACCESS, PYTHON_EXPRESSION
+%state INLINE_VARIABLE_DEFINITION, VARIABLE_DEFINITION, VARIABLE_DEFINITION_ARGUMENTS, VARIABLE_USAGE, EXTENDED_VARIABLE_ACCESS, PYTHON_EXPRESSION, EXTENDED_VARIABLE_BODY
 %state PARAMETER_ASSIGNMENT, PARAMETER_VALUE, TEMPLATE_PARAMETER_ASSIGNMENT, TEMPLATE_PARAMETER_VALUE
 %state FOR_STRUCTURE, CONTROL_STRUCTURE_START, CONTROL_STRUCTURE
 
@@ -231,7 +235,12 @@ LineComment = {LineCommentSign} {NON_EOL}*
     {ClosingVariable} "["                    { enterNewState(EXTENDED_VARIABLE_ACCESS); yypushback(1); return VARIABLE_END; }
     {ClosingVariable} "]"                    { yybegin(VARIABLE_DEFINITION_ARGUMENTS); yypushback(1); return VARIABLE_END; }
     {EqualSign} \s*                          { yybegin(VARIABLE_DEFINITION_ARGUMENTS); pushBackTrailingWhitespace(); return ASSIGNMENT; }
-    {VariableLiteralValue}                   { pushBackTrailingWhitespace(); return VARIABLE_BODY; }
+    <VARIABLE_USAGE> {VariableLiteralValue}  {
+          if (yycharat(yylength() - 1) != '}') {
+              enterNewState(EXTENDED_VARIABLE_BODY);
+          }
+          return VARIABLE_BODY;
+      }
 }
 
 <VARIABLE_DEFINITION_ARGUMENTS> {
@@ -244,7 +253,11 @@ LineComment = {LineCommentSign} {NON_EOL}*
     {ClosingVariable} "]"                             { leaveState(); yypushback(1); return VARIABLE_END; }
     {ClosingVariable}                                 { leaveState(); return VARIABLE_END; }
     {OpeningVariable} ( ! {ClosingVariable}{2} )+     { enterNewState(PYTHON_EXPRESSION); yypushback(yylength() - 1); return PYTHON_EXPRESSION_START; }
-    {VariableLiteralValue}                            { return VARIABLE_BODY; }
+}
+
+<EXTENDED_VARIABLE_BODY> {
+    {ExtendedVariableLiteralValue}            { pushBackTrailingWhitespace(); return VARIABLE_BODY_EXTENSION; }
+    {ClosingVariable}                         { leaveState(); yypushback(yylength()); break; }
 }
 
 <EXTENDED_VARIABLE_ACCESS> {
@@ -252,9 +265,8 @@ LineComment = {LineCommentSign} {NON_EOL}*
     {VariableIndexAccess}        { return VARIABLE_INDEX_ACCESS; }
     {VariableKeyAccess}          { return VARIABLE_KEY_ACCESS; }
 
-    // Workaround for nested variable usage in the extended variable access syntax
-    <VARIABLE_USAGE, VARIABLE_DEFINITION> "["         { return VARIABLE_ACCESS_START; }
-    <VARIABLE_USAGE, VARIABLE_DEFINITION> "]"         { return VARIABLE_ACCESS_END; }
+    "["                          { return VARIABLE_ACCESS_START; }
+    "]"                          { return VARIABLE_ACCESS_END; }
 
     {VariableSliceAccess} \s+    { leaveState(); pushBackTrailingWhitespace(); return VARIABLE_SLICE_ACCESS; }
     {VariableIndexAccess} \s+    { leaveState(); pushBackTrailingWhitespace(); return VARIABLE_INDEX_ACCESS; }

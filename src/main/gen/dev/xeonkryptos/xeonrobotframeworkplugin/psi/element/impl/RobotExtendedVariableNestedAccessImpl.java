@@ -41,8 +41,8 @@ public class RobotExtendedVariableNestedAccessImpl extends RobotPsiElementBase i
 
   @Override
   @NotNull
-  public List<RobotVariableBodyValue> getVariableBodyValueList() {
-    return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotVariableBodyValue.class);
+  public List<RobotVariableBodyId> getVariableBodyIdList() {
+    return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotVariableBodyId.class);
   }
 
 }

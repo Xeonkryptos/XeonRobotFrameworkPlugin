@@ -5,9 +5,8 @@ import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiNamedElement;
-import com.intellij.psi.PsiReference;
 
-public interface RobotVariableId extends PsiNamedElement, RobotReferenceElementExpression, RobotStatement {
+public interface RobotVariableContent extends PsiNamedElement, RobotStatement {
 
   @NotNull
   List<RobotExtendedVariableNestedAccess> getExtendedVariableNestedAccessList();
@@ -16,13 +15,13 @@ public interface RobotVariableId extends PsiNamedElement, RobotReferenceElementE
   List<RobotVariable> getVariableList();
 
   @NotNull
-  List<RobotVariableBodyValue> getVariableBodyValueList();
+  List<RobotVariableBodyId> getVariableBodyIdList();
 
   @Nullable
-  RobotVariableBodyValue getContent();
+  RobotVariableBodyId getContent();
 
-  @NotNull PsiReference getReference();
-
-  @Nullable String getName();
+  //WARNING: getName(...) is skipped
+  //matching getName(RobotVariableContent, ...)
+  //methods are not found in RobotPsiImplUtil
 
 }

@@ -12,8 +12,8 @@ import com.intellij.util.Processor;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotResourceFileType;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotUserKeywordStatement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariable;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableBodyId;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableDefinition;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableId;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariablesSection;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.index.VariableNameIndex;
 import org.jetbrains.annotations.NotNull;
@@ -36,19 +36,19 @@ public class RobotVariableReferenceSearch extends QueryExecutorBase<PsiReference
         Project project = queryParameters.getProject();
 
         GlobalSearchScope globalSearchScope = QueryExecutorUtil.convertToGlobalSearchScope(queryParameters.getEffectiveSearchScope(), project);
-        if (element instanceof RobotVariableId variableId) {
-            String variableName = variableId.getName();
+        if (element instanceof RobotVariableBodyId variableBodyId) {
+            String variableName = variableBodyId.getName();
             if (variableName.isBlank()) { // Cannot search with an empty variable name
                 return;
             }
 
-            RobotUserKeywordStatement keywordDefinition = PsiTreeUtil.getParentOfType(variableId, RobotUserKeywordStatement.class);
-            RobotVariablesSection variablesSection = PsiTreeUtil.getParentOfType(variableId, RobotVariablesSection.class);
+            RobotUserKeywordStatement keywordDefinition = PsiTreeUtil.getParentOfType(variableBodyId, RobotUserKeywordStatement.class);
+            RobotVariablesSection variablesSection = PsiTreeUtil.getParentOfType(variableBodyId, RobotVariablesSection.class);
             if (keywordDefinition != null || variablesSection == null || variablesSection.getContainingFile().getFileType() != RobotResourceFileType.getInstance()) {
-                globalSearchScope = GlobalSearchScope.fileScope(variableId.getContainingFile());
+                globalSearchScope = GlobalSearchScope.fileScope(variableBodyId.getContainingFile());
             }
 
-            RobotVariableDefinition variableDefinition = PsiTreeUtil.getParentOfType(variableId, RobotVariableDefinition.class);
+            RobotVariableDefinition variableDefinition = PsiTreeUtil.getParentOfType(variableBodyId, RobotVariableDefinition.class);
             if (variableDefinition != null) {
                 searchForVariablesInIndex(variableDefinition, variableName, project, globalSearchScope, consumer);
             }

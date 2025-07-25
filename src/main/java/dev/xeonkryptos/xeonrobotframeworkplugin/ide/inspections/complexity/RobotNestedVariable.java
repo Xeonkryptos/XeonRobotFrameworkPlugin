@@ -4,7 +4,7 @@ import com.intellij.psi.PsiElement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.RobotBundle;
 import dev.xeonkryptos.xeonrobotframeworkplugin.ide.inspections.SimpleRobotInspection;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariable;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableId;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableBodyId;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NotNull;
 
@@ -19,8 +19,8 @@ public class RobotNestedVariable extends SimpleRobotInspection {
     @Override
     public final boolean skip(PsiElement element) {
         if (element instanceof RobotVariable variable) {
-            RobotVariableId nameIdentifier = variable.getNameIdentifier();
-            return nameIdentifier != null && nameIdentifier.getContent() != null;
+            RobotVariableBodyId nameIdentifier = variable.getNameIdentifier();
+            return nameIdentifier != null;
         }
         return true;
     }

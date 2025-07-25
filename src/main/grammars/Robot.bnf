@@ -13,7 +13,7 @@
   elementTypeClass="dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotElementType"
   tokenTypeClass="dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTokenType"
 
-  implements("(?!variable_id$).*_id")=[
+  implements(".*_id")=[
     "com.intellij.psi.PsiNamedElement"
     "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotNamedElementExpression"
     "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotReferenceElementExpression"
@@ -305,40 +305,42 @@ variable ::= scalar_variable | list_variable | dict_variable | environment_varia
     implements = ["com.intellij.psi.PsiNameIdentifierOwner" "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotReferenceElementExpression"]
     methods=[getNameIdentifier getName]
 }
-scalar_variable ::= SCALAR_VARIABLE_START (variable_id | python_expression) VARIABLE_END (extended_variable_key_access | extended_variable_slice_access | extended_variable_index_access | extended_variable_nested_access)* {
+scalar_variable ::= SCALAR_VARIABLE_START (variable_content | python_expression) VARIABLE_END (extended_variable_key_access | extended_variable_slice_access | extended_variable_index_access | extended_variable_nested_access)* {
     mixin = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotScalarVariableExtension"
     stubClass = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotScalarVariableStub"
     elementTypeFactory = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotScalarVariableStubElement.create"
     methods=[getNameIdentifier getName]
 }
-list_variable ::= LIST_VARIABLE_START (variable_id | python_expression) VARIABLE_END (extended_variable_slice_access | extended_variable_index_access | extended_variable_nested_access)* {
+list_variable ::= LIST_VARIABLE_START (variable_content | python_expression) VARIABLE_END (extended_variable_slice_access | extended_variable_index_access | extended_variable_nested_access)* {
     mixin = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotListVariableExtension"
     stubClass = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotListVariableStub"
     elementTypeFactory = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotListVariableStubElement.create"
     methods=[getNameIdentifier getName]
 }
-dict_variable ::= DICT_VARIABLE_START (variable_id | python_expression) VARIABLE_END (extended_variable_key_access | extended_variable_nested_access)* {
+dict_variable ::= DICT_VARIABLE_START (variable_content | python_expression) VARIABLE_END (extended_variable_key_access | extended_variable_nested_access)* {
     mixin = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotDictVariableExtension"
     stubClass = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotDictVariableStub"
     elementTypeFactory = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotDictVariableStubElement.create"
     methods=[getNameIdentifier getName]
 }
-environment_variable ::= ENV_VARIABLE_START variable_id VARIABLE_END
+environment_variable ::= ENV_VARIABLE_START variable_content VARIABLE_END
 
-variable_id ::= (variable | variable_body_value | extended_variable_nested_access)+ {
+variable_content ::= (variable | variable_body_id | VARIABLE_BODY_EXTENSION | extended_variable_nested_access)+ {
     implements = [
       "com.intellij.psi.PsiNamedElement"
-      "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotReferenceElementExpression"
     ]
-    methods=[content="/variable_body_value[0]" getReference getName]
+    methods=[content="/variable_body_id[0]" getName]
 }
-variable_body_value ::= VARIABLE_BODY
+variable_body_id ::= VARIABLE_BODY {
+    implements = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotReferenceElementExpression"
+    methods = [getReference getName]
+}
 python_expression ::= PYTHON_EXPRESSION_START PYTHON_EXPRESSION_CONTENT PYTHON_EXPRESSION_END { methods = [expressionContent="PYTHON_EXPRESSION_CONTENT"] }
 
 extended_variable_slice_access ::= VARIABLE_SLICE_ACCESS
 extended_variable_index_access ::= VARIABLE_INDEX_ACCESS
 extended_variable_key_access ::= VARIABLE_KEY_ACCESS
-extended_variable_nested_access ::= VARIABLE_ACCESS_START (variable | literal_constant_value | variable_body_value)+ VARIABLE_ACCESS_END
+extended_variable_nested_access ::= VARIABLE_ACCESS_START (variable | literal_constant_value | variable_body_id | VARIABLE_BODY_EXTENSION)+ VARIABLE_ACCESS_END
 
 literal_constant_value ::= LITERAL_CONSTANT
 

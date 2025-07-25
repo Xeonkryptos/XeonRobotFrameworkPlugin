@@ -16,8 +16,8 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTestCaseStateme
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTestCasesSection;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotUserKeywordStatement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariable;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableBodyId;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableDefinition;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableId;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableStatement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariablesSection;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVisitor;
@@ -37,9 +37,9 @@ public class RobotVariableReferenceSearcher extends RobotVisitor {
 
     private final Set<PsiElement> foundElements = new LinkedHashSet<>();
 
-    public RobotVariableReferenceSearcher(RobotVariableId variableId) {
-        this.variableName = variableId.getName();
-        this.parents = collectParentsOf(variableId);
+    public RobotVariableReferenceSearcher(RobotVariableBodyId variableBodyId) {
+        this.variableName = variableBodyId.getName().trim();
+        this.parents = collectParentsOf(variableBodyId);
     }
 
     private static Set<PsiElement> collectParentsOf(@NotNull PsiElement element) {
@@ -116,7 +116,7 @@ public class RobotVariableReferenceSearcher extends RobotVisitor {
     public void visitLocalSettingArgument(@NotNull RobotLocalSettingArgument o) {
         RobotVariable variable = o.getVariable();
         String definedVariableName = variable.getName();
-        if (variableName.equalsIgnoreCase(definedVariableName)) {
+        if (definedVariableName != null && variableName.equalsIgnoreCase(definedVariableName.trim())) {
             foundElements.add(o);
         }
     }
@@ -136,7 +136,7 @@ public class RobotVariableReferenceSearcher extends RobotVisitor {
     @Override
     public void visitVariableDefinition(@NotNull RobotVariableDefinition o) {
         String definedVariableName = o.getName();
-        if (variableName.equalsIgnoreCase(definedVariableName)) {
+        if (definedVariableName != null && variableName.equalsIgnoreCase(definedVariableName.trim())) {
             foundElements.add(o);
         }
     }
@@ -154,7 +154,7 @@ public class RobotVariableReferenceSearcher extends RobotVisitor {
     @Override
     public void visitVariable(@NotNull RobotVariable o) {
         String variableName = o.getName();
-        if (variableName != null && variableName.equalsIgnoreCase(this.variableName)) {
+        if (variableName != null && this.variableName.equalsIgnoreCase(variableName.trim())) {
             foundElements.add(o);
         }
     }

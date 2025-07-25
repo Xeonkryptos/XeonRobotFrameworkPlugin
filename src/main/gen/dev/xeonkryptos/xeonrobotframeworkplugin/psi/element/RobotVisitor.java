@@ -326,20 +326,23 @@ public class RobotVisitor extends PsiElementVisitor {
     // visitStatement(o);
   }
 
-  public void visitVariableBodyValue(@NotNull RobotVariableBodyValue o) {
-    visitStatement(o);
+  public void visitVariableBodyId(@NotNull RobotVariableBodyId o) {
+    visitReferenceElementExpression(o);
+    // visitPsiNamedElement(o);
+    // visitNamedElementExpression(o);
+    // visitReferenceElementExpression(o);
+    // visitStatement(o);
+  }
+
+  public void visitVariableContent(@NotNull RobotVariableContent o) {
+    visitPsiNamedElement(o);
+    // visitStatement(o);
   }
 
   public void visitVariableDefinition(@NotNull RobotVariableDefinition o) {
     visitPsiNameIdentifierOwner(o);
     // visitNavigationItem(o);
     // visitDefinedVariable(o);
-    // visitStatement(o);
-  }
-
-  public void visitVariableId(@NotNull RobotVariableId o) {
-    visitPsiNamedElement(o);
-    // visitReferenceElementExpression(o);
     // visitStatement(o);
   }
 

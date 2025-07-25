@@ -98,6 +98,7 @@ public class RobotHighlighter extends SyntaxHighlighterBase {
         keys1.put(RobotTypes.VARIABLE_KEY_ACCESS, VARIABLE);
         keys1.put(RobotTypes.VARIABLE_SLICE_ACCESS, VARIABLE);
         keys1.put(RobotTypes.VARIABLE_INDEX_ACCESS, VARIABLE);
+        keys1.put(RobotTypes.VARIABLE_BODY_EXTENSION, VARIABLE);
         keys1.put(RobotTypes.VARIABLE_ACCESS_START, EXTENDED_VARIABLE_ACCESS_BRACKETS);
         keys1.put(RobotTypes.VARIABLE_ACCESS_END, EXTENDED_VARIABLE_ACCESS_BRACKETS);
         keys1.put(RobotTypes.USER_KEYWORD_STATEMENT, KEYWORD_DEFINITION);

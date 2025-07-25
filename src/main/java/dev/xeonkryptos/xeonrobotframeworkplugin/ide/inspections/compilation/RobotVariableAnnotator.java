@@ -15,8 +15,8 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotEnvironmentVari
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLocalSetting;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotPythonExpression;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariable;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableBodyId;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableDefinition;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableId;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVisitor;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.ref.RobotFileManager;
 import org.jetbrains.annotations.NotNull;
@@ -46,7 +46,7 @@ public class RobotVariableAnnotator implements Annotator, DumbAware {
             return;
         }
 
-        RobotVariableId nameIdentifier = variable.getNameIdentifier();
+        RobotVariableBodyId nameIdentifier = variable.getNameIdentifier();
         if (nameIdentifier != null && ((PsiPolyVariantReference) nameIdentifier.getReference()).multiResolve(false).length > 0) {
             ResolveResult[] resolveResults = ((PsiPolyVariantReference) nameIdentifier.getReference()).multiResolve(false);
             if (resolveResults.length > 0) {

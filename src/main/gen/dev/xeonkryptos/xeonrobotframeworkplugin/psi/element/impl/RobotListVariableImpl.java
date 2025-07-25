@@ -59,12 +59,12 @@ public class RobotListVariableImpl extends RobotListVariableExtension implements
 
   @Override
   @Nullable
-  public RobotVariableId getVariableId() {
-    return PsiTreeUtil.getChildOfType(this, RobotVariableId.class);
+  public RobotVariableContent getVariableContent() {
+    return PsiTreeUtil.getChildOfType(this, RobotVariableContent.class);
   }
 
   @Override
-  public @Nullable RobotVariableId getNameIdentifier() {
+  public @Nullable RobotVariableBodyId getNameIdentifier() {
     return RobotPsiImplUtil.getNameIdentifier(this);
   }
 

@@ -14,6 +14,6 @@ public interface RobotExtendedVariableNestedAccess extends RobotStatement {
   List<RobotVariable> getVariableList();
 
   @NotNull
-  List<RobotVariableBodyValue> getVariableBodyValueList();
+  List<RobotVariableBodyId> getVariableBodyIdList();
 
 }

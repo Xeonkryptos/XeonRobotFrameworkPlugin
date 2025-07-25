@@ -8,6 +8,6 @@ import com.intellij.psi.PsiElement;
 public interface RobotEnvironmentVariable extends RobotVariable {
 
   @NotNull
-  RobotVariableId getVariableId();
+  RobotVariableContent getVariableContent();
 
 }

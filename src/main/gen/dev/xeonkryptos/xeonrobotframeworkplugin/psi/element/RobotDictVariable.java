@@ -19,9 +19,9 @@ public interface RobotDictVariable extends RobotVariable, StubBasedPsiElement<Ro
   RobotPythonExpression getPythonExpression();
 
   @Nullable
-  RobotVariableId getVariableId();
+  RobotVariableContent getVariableContent();
 
-  @Nullable RobotVariableId getNameIdentifier();
+  @Nullable RobotVariableBodyId getNameIdentifier();
 
   @Nullable String getName();
 
