@@ -53,7 +53,7 @@ public class RobotVariableAnnotator implements Annotator, DumbAware {
                 if (resolveResults.length > 1) {
                     holder.newSilentAnnotation(HighlightSeverity.TEXT_ATTRIBUTES)
                           .textAttributes(RobotHighlighter.REASSIGNED_VARIABLE)
-                          .tooltip(RobotBundle.getMessage("annotation.variable.reused"))
+                          .tooltip(RobotBundle.getMessage("annotation.variable.reassigned"))
                           .range(element)
                           .create();
                 }

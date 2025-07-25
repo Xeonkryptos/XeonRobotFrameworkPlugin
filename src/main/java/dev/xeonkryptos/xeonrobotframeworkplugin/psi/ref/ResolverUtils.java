@@ -86,7 +86,7 @@ public class ResolverUtils {
         String keywordName = keywordCall.getName();
         if (VARIABLE_SETTERS.contains(keywordName.toLowerCase())) {
             List<RobotPositionalArgument> positionalArgumentList = keywordCall.getPositionalArgumentList();
-            if (!positionalArgumentList.isEmpty() && positionalArgumentList.getFirst() instanceof RobotVariable variable) {
+            if (!positionalArgumentList.isEmpty() && positionalArgumentList.getFirst().getFirstChild() instanceof RobotVariable variable) {
                 String variableName = variable.getName();
                 if (variableName != null) {
                     DefinedVariable definedVariable = new VariableDto(variable, variableName, null);

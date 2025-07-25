@@ -102,11 +102,13 @@ public class RobotVariableReferenceSearcher extends RobotVisitor {
 
     @Override
     public void visitLocalSetting(@NotNull RobotLocalSetting o) {
-        for (RobotLocalSettingArgument localSettingArgument : o.getLocalSettingArgumentList()) {
-            visitLocalSettingArgument(localSettingArgument);
-        }
-        for (RobotPositionalArgument positionalArgument : o.getPositionalArgumentList()) {
-            positionalArgument.acceptChildren(this);
+        if ("[Arguments]".equals(o.getName())) {
+            for (RobotLocalSettingArgument localSettingArgument : o.getLocalSettingArgumentList()) {
+                visitLocalSettingArgument(localSettingArgument);
+            }
+            for (RobotPositionalArgument positionalArgument : o.getPositionalArgumentList()) {
+                positionalArgument.acceptChildren(this);
+            }
         }
     }
 
@@ -146,6 +148,14 @@ public class RobotVariableReferenceSearcher extends RobotVisitor {
             if (definedVariable.matches(variableName)) {
                 foundElements.add(definedVariable.reference());
             }
+        }
+    }
+
+    @Override
+    public void visitVariable(@NotNull RobotVariable o) {
+        String variableName = o.getName();
+        if (variableName != null && variableName.equalsIgnoreCase(this.variableName)) {
+            foundElements.add(o);
         }
     }
 
