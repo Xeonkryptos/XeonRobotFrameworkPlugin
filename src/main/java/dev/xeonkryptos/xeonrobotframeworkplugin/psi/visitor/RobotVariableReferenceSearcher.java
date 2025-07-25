@@ -1,8 +1,10 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.psi.visitor;
 
 import com.intellij.psi.PsiElement;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.DefinedVariable;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotExecutableStatement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotFile;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCall;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordsSection;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLocalSetting;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLocalSettingArgument;
@@ -19,11 +21,13 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableId;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableStatement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariablesSection;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVisitor;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.ref.ResolverUtils;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
 
 public class RobotVariableReferenceSearcher extends RobotVisitor {
@@ -122,7 +126,9 @@ public class RobotVariableReferenceSearcher extends RobotVisitor {
 
     @Override
     public void visitExecutableStatement(@NotNull RobotExecutableStatement o) {
-        o.acceptChildren(this);
+        if (parents.contains(o) || parents.contains(o.getParent())) {
+            o.acceptChildren(this);
+        }
     }
 
     @Override
@@ -134,10 +140,12 @@ public class RobotVariableReferenceSearcher extends RobotVisitor {
     }
 
     @Override
-    public void visitVariable(@NotNull RobotVariable o) {
-        String variableName = o.getName();
-        if (variableName != null && variableName.equalsIgnoreCase(this.variableName)) {
-            foundElements.add(o);
+    public void visitKeywordCall(@NotNull RobotKeywordCall o) {
+        List<DefinedVariable> definedVariables = ResolverUtils.walkKeyword(o);
+        for (DefinedVariable definedVariable : definedVariables) {
+            if (definedVariable.matches(variableName)) {
+                foundElements.add(definedVariable.reference());
+            }
         }
     }
 
