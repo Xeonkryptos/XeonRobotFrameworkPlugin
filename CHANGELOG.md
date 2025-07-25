@@ -9,6 +9,7 @@
 - Fixed setting of breakpoints in robot files
 - Fixed finding defined variables through keyword call (set global variable, set suite variable, set test variable)
 - Fixed finding of globally defined variables, especially defined in python files and imported via resource files or variable files
+- Fixed handling with variables in code completion
 
 ## 0.4.0
 

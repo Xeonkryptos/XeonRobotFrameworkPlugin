@@ -46,7 +46,22 @@ public class VariableDto implements DefinedVariable {
     @Nullable
     @Override
     public final String getLookup() {
+        return matchingVariableName;
+    }
+
+    @Override
+    public String getPresentableText() {
         return this.scope == null ? this.reference.getText() : this.name;
+    }
+
+    @Override
+    public String[] getLookupWords() {
+        return scope != null ? new String[] { matchingVariableName } : EMPTY_LOOKUP_WORDS;
+    }
+
+    @Override
+    public boolean isCaseSensitive() {
+        return false;
     }
 
     @Override
