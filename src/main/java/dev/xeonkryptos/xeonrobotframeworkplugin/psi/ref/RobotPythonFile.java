@@ -86,14 +86,14 @@ public class RobotPythonFile extends RobotPythonWrapper implements KeywordFile {
     @NotNull
     @Override
     @SuppressWarnings("UnstableApiUsage")
-    public final synchronized Collection<DefinedVariable> getDefinedVariables() {
+    public final Collection<DefinedVariable> getDefinedVariables() {
         if (importType == ImportType.VARIABLES) {
             return CachedValuesManager.getCachedValue(pythonFile, () -> {
                 Set<DefinedVariable> variables = new HashSet<>();
                 for (PyTargetExpression attribute : pythonFile.getTopLevelAttributes()) {
                     String attributeName = attribute.getName();
                     if (attributeName != null) {
-                        variables.add(new VariableDto(attribute, ReservedVariable.wrapToScalar(attributeName), ReservedVariableScope.Global));
+                        variables.add(new VariableDto(attribute, ReservedVariable.wrapToScalar(attributeName), attributeName, ReservedVariableScope.Global));
                     }
                 }
                 for (PyClass pyClass : pythonFile.getTopLevelClasses()) {

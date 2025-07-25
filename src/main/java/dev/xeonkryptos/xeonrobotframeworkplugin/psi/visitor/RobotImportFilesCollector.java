@@ -74,9 +74,9 @@ public final class RobotImportFilesCollector extends RobotVisitor {
         PsiElement resolved = positionalArgument.getReference().resolve();
 
         if (resolved instanceof PyClass pyClass) {
-            files.add(new RobotPythonClass(namespace, pyClass, ImportType.LIBRARY, false));
+            files.add(new RobotPythonClass(namespace, pyClass, ImportType.VARIABLES, false));
         } else if (resolved instanceof PyFile file) {
-            files.add(new RobotPythonFile(namespace, file, ImportType.LIBRARY, false));
+            files.add(new RobotPythonFile(namespace, file, ImportType.VARIABLES, false));
         }
     }
 
