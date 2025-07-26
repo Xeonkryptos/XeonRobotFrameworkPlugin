@@ -5364,7 +5364,7 @@ public class RobotLexer implements FlexLexer {
           // fall through
           case 149: break;
           case 31:
-            { pushBackTrailingWhitespace(); return VARIABLE_BODY_EXTENSION;
+            { return VARIABLE_BODY_EXTENSION;
             }
           // fall through
           case 150: break;

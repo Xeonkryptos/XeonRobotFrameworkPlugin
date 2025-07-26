@@ -256,7 +256,7 @@ LineComment = {LineCommentSign} {NON_EOL}*
 }
 
 <EXTENDED_VARIABLE_BODY> {
-    {ExtendedVariableLiteralValue}            { pushBackTrailingWhitespace(); return VARIABLE_BODY_EXTENSION; }
+    {ExtendedVariableLiteralValue}            { return VARIABLE_BODY_EXTENSION; }
     {ClosingVariable}                         { leaveState(); yypushback(yylength()); break; }
 }
 
