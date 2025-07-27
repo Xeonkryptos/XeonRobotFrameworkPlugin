@@ -2,6 +2,7 @@ package dev.xeonkryptos.xeonrobotframeworkplugin.psi.element;
 
 import com.intellij.extapi.psi.PsiFileBase;
 import com.intellij.openapi.fileTypes.FileType;
+import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Key;
 import com.intellij.openapi.vfs.VirtualFile;
@@ -84,6 +85,7 @@ public class RobotFileImpl extends PsiFileBase implements KeywordFile, RobotFile
         Collection<KeywordFile> importedFiles = getImportedFiles(false);
         Set<DefinedVariable> importedVariables = new HashSet<>();
         for (KeywordFile keywordFile : importedFiles) {
+            ProgressManager.checkCanceled();
             if (visitedFiles.add(keywordFile)) {
                 importedVariables.addAll(keywordFile.getDefinedVariables(visitedFiles));
             }
