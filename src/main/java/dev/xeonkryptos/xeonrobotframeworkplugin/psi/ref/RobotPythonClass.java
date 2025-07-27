@@ -25,13 +25,11 @@ public class RobotPythonClass implements KeywordFile {
     private final String library;
     private final PyClass pythonClass;
     private final ImportType importType;
-    private final boolean isDifferentNamespace;
 
-    public RobotPythonClass(@NotNull String library, @NotNull PyClass pythonClass, @NotNull ImportType importType, boolean isDifferentNamespace) {
+    public RobotPythonClass(@NotNull String library, @NotNull PyClass pythonClass, @NotNull ImportType importType) {
         this.library = library;
         this.pythonClass = pythonClass;
         this.importType = importType;
-        this.isDifferentNamespace = isDifferentNamespace;
     }
 
     @NotNull
@@ -45,6 +43,12 @@ public class RobotPythonClass implements KeywordFile {
             });
         }
         return Set.of();
+    }
+
+    @NotNull
+    @Override
+    public Collection<DefinedVariable> getDefinedVariables(Collection<KeywordFile> visitedFiles) {
+        return getDefinedVariables();
     }
 
     @NotNull
@@ -104,10 +108,5 @@ public class RobotPythonClass implements KeywordFile {
     @Override
     public final PsiFile getPsiFile() {
         return this.pythonClass.getContainingFile();
-    }
-
-    @Override
-    public final boolean isDifferentNamespace() {
-        return this.isDifferentNamespace;
     }
 }

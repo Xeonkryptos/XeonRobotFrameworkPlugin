@@ -31,13 +31,11 @@ public class RobotPythonFile implements KeywordFile {
     private final String namespace;
     private final PyFile pythonFile;
     private final ImportType importType;
-    private final boolean isDifferentNamespace;
 
-    public RobotPythonFile(@NotNull String namespace, @NotNull PyFile pythonFile, @NotNull ImportType importType, boolean isDifferentNamespace) {
+    public RobotPythonFile(@NotNull String namespace, @NotNull PyFile pythonFile, @NotNull ImportType importType) {
         this.namespace = namespace;
         this.pythonFile = pythonFile;
         this.importType = importType;
-        this.isDifferentNamespace = isDifferentNamespace;
     }
 
     @NotNull
@@ -70,7 +68,7 @@ public class RobotPythonFile implements KeywordFile {
                         if (className == null) {
                             className = "";
                         }
-                        if (namespace.equals(className) || isDifferentNamespace) {
+                        if (namespace.equals(className)) {
                             className = namespace;
                         }
                         RobotKeywordFileResolver.addDefinedKeywords(pyClass, className, keywordSet);
@@ -80,6 +78,12 @@ public class RobotPythonFile implements KeywordFile {
             });
         }
         return Set.of();
+    }
+
+    @NotNull
+    @Override
+    public Collection<DefinedVariable> getDefinedVariables(Collection<KeywordFile> visitedFiles) {
+        return getDefinedVariables();
     }
 
     @NotNull
@@ -136,10 +140,5 @@ public class RobotPythonFile implements KeywordFile {
     @Override
     public final PsiFile getPsiFile() {
         return pythonFile;
-    }
-
-    @Override
-    public final boolean isDifferentNamespace() {
-        return isDifferentNamespace;
     }
 }

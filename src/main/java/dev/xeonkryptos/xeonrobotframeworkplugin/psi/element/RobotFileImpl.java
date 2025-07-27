@@ -10,11 +10,11 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiManager;
 import com.intellij.psi.PsiReference;
+import com.intellij.psi.util.CachedValue;
 import com.intellij.psi.util.CachedValueProvider.Result;
 import com.intellij.psi.util.CachedValuesManager;
 import com.intellij.psi.util.ParameterizedCachedValue;
 import com.jetbrains.python.psi.PyClass;
-import dev.xeonkryptos.xeonrobotframeworkplugin.ide.config.RobotOptionsProvider;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotLanguage;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.dto.ImportType;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.dto.KeywordFileWithDependentsWrapper;
@@ -41,7 +41,9 @@ public class RobotFileImpl extends PsiFileBase implements KeywordFile, RobotFile
 
     private static final String ROBOT_BUILT_IN = "robot.libraries.BuiltIn";
 
-    private static final Key<ParameterizedCachedValue<Collection<KeywordFile>, Boolean>> IMPORTED_FILES_CACHE_KEY = Key.create("IMPORTED_FILES_CACHE");
+    private static final Key<CachedValue<Collection<KeywordFile>>> TRANSITIVELY_IMPORTED_FILES_CACHE_KEY = Key.create("Transitively imported files");
+    private static final Key<CachedValue<Collection<KeywordFile>>> NON_TRANSITIVELY_IMPORTED_FILES_CACHE_KEY = Key.create("Non-Transitively imported files");
+    private static final Key<CachedValue<Collection<KeywordFile>>> DIRECTLY_IMPORTED_FILES_CACHE_KEY = Key.create("DIRECTLY_IMPORTED_FILES_CACHE");
     private static final Key<ParameterizedCachedValue<Collection<VirtualFile>, Boolean>> IMPORTED_VIRTUAL_FILES_CACHE_KEY = Key.create(
             "IMPORTED_VIRTUAL_FILES_CACHE");
 
@@ -70,16 +72,28 @@ public class RobotFileImpl extends PsiFileBase implements KeywordFile, RobotFile
     @NotNull
     @Override
     public final Collection<DefinedVariable> getDefinedVariables() {
+        return getDefinedVariables(new HashSet<>());
+    }
+
+    @NotNull
+    @Override
+    public Collection<DefinedVariable> getDefinedVariables(Collection<KeywordFile> visitedFiles) {
         Collection<DefinedVariable> sectionVariables = getSectionVariables();
         Collection<DefinedVariable> globalVariables = RobotFileManager.getGlobalVariables(getProject());
         Collection<DefinedVariable> definedVariables = collectRobotInitVariables();
-        boolean transitiveImports = RobotOptionsProvider.getInstance(getProject()).allowTransitiveImports();
-        Stream<DefinedVariable> importedVariablesStream = getImportedFiles(transitiveImports).stream()
-                                                                                             .flatMap(keywordFile -> keywordFile.getDefinedVariables()
-                                                                                                                                .stream());
-        return Stream.concat(sectionVariables.stream(),
-                             Stream.concat(globalVariables.stream(), Stream.concat(definedVariables.stream(), importedVariablesStream)))
-                     .collect(Collectors.toSet());
+        Collection<KeywordFile> importedFiles = getImportedFiles(false);
+        Set<DefinedVariable> importedVariables = new HashSet<>();
+        for (KeywordFile keywordFile : importedFiles) {
+            if (visitedFiles.add(keywordFile)) {
+                importedVariables.addAll(keywordFile.getDefinedVariables(visitedFiles));
+            }
+        }
+        Set<DefinedVariable> variables = new HashSet<>(sectionVariables.size() + globalVariables.size() + definedVariables.size() + importedVariables.size());
+        variables.addAll(sectionVariables);
+        variables.addAll(globalVariables);
+        variables.addAll(definedVariables);
+        variables.addAll(importedVariables);
+        return variables;
     }
 
     @NotNull
@@ -116,7 +130,7 @@ public class RobotFileImpl extends PsiFileBase implements KeywordFile, RobotFile
     private Collection<DefinedVariable> getSectionVariables() {
         RobotSectionVariablesCollector visitor = new RobotSectionVariablesCollector();
         acceptChildren(visitor);
-        return new LinkedHashSet<>(visitor.getVariables());
+        return visitor.getVariables();
     }
 
     @NotNull
@@ -182,14 +196,15 @@ public class RobotFileImpl extends PsiFileBase implements KeywordFile, RobotFile
     @NotNull
     @Override
     public Collection<KeywordFile> getImportedFiles(boolean includeTransitive) {
-        return CachedValuesManager.getManager(getProject()).getParameterizedCachedValue(this, IMPORTED_FILES_CACHE_KEY, transitive -> {
+        Key<CachedValue<Collection<KeywordFile>>> key = includeTransitive ? TRANSITIVELY_IMPORTED_FILES_CACHE_KEY : NON_TRANSITIVELY_IMPORTED_FILES_CACHE_KEY;
+        return CachedValuesManager.getCachedValue(this, key, () -> {
             Set<KeywordFile> results = new LinkedHashSet<>();
             for (KeywordFile keywordFile : collectImportFiles()) {
-                collectTransitiveKeywordFiles(results, keywordFile, transitive);
+                collectTransitiveKeywordFiles(results, keywordFile, includeTransitive);
             }
-            Object[] dependents = Stream.concat(results.stream().map(KeywordFile::getPsiFile), Stream.of(this)).toArray();
+            Object[] dependents = Stream.concat(results.stream().map(KeywordFile::getPsiFile), Stream.of(this)).distinct().toArray();
             return new Result<>(results, dependents);
-        }, false, includeTransitive);
+        });
     }
 
     @NotNull
@@ -214,9 +229,11 @@ public class RobotFileImpl extends PsiFileBase implements KeywordFile, RobotFile
     }
 
     private Collection<KeywordFile> collectImportFiles() {
-        RobotImportFilesCollector importFilesCollector = new RobotImportFilesCollector();
-        acceptChildren(importFilesCollector);
-        return importFilesCollector.getFiles();
+        return CachedValuesManager.getCachedValue(this, DIRECTLY_IMPORTED_FILES_CACHE_KEY, () -> {
+            RobotImportFilesCollector importFilesCollector = new RobotImportFilesCollector();
+            acceptChildren(importFilesCollector);
+            return Result.create(importFilesCollector.getFiles(), this);
+        });
     }
 
     private void collectCompleteImportParentTree(KeywordFile parent, Map<KeywordFile, Set<KeywordFile>> childParentsIndex, Collection<KeywordFile> parents) {
@@ -233,7 +250,7 @@ public class RobotFileImpl extends PsiFileBase implements KeywordFile, RobotFile
     private void addBuiltInImports(@NotNull Collection<KeywordFile> files) {
         PyClass builtIn = PythonResolver.findClass(ROBOT_BUILT_IN, getProject());
         if (builtIn != null) {
-            files.add(new RobotPythonClass(ROBOT_BUILT_IN, builtIn, ImportType.LIBRARY, false));
+            files.add(new RobotPythonClass(ROBOT_BUILT_IN, builtIn, ImportType.LIBRARY));
         }
     }
 
@@ -253,11 +270,6 @@ public class RobotFileImpl extends PsiFileBase implements KeywordFile, RobotFile
     @Override
     public final PsiFile getPsiFile() {
         return this;
-    }
-
-    @Override
-    public final boolean isDifferentNamespace() {
-        return false;
     }
 
     private void collectTransitiveKeywordFiles(Collection<KeywordFile> results, KeywordFile keywordFile, boolean includeTransitive) {

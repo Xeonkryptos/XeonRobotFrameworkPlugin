@@ -60,9 +60,9 @@ public final class RobotImportFilesCollector extends RobotVisitor {
         }
 
         if (resolved instanceof PyClass pyClass) {
-            files.add(new RobotPythonClass(namespace, pyClass, ImportType.LIBRARY, isDifferentNamespace));
+            files.add(new RobotPythonClass(namespace, pyClass, ImportType.LIBRARY));
         } else if (resolved instanceof PyFile file) {
-            files.add(new RobotPythonFile(namespace, file, ImportType.LIBRARY, isDifferentNamespace));
+            files.add(new RobotPythonFile(namespace, file, ImportType.LIBRARY));
         }
     }
 
@@ -74,9 +74,9 @@ public final class RobotImportFilesCollector extends RobotVisitor {
         PsiElement resolved = positionalArgument.getReference().resolve();
 
         if (resolved instanceof PyClass pyClass) {
-            files.add(new RobotPythonClass(namespace, pyClass, ImportType.VARIABLES, false));
+            files.add(new RobotPythonClass(namespace, pyClass, ImportType.VARIABLES));
         } else if (resolved instanceof PyFile file) {
-            files.add(new RobotPythonFile(namespace, file, ImportType.VARIABLES, false));
+            files.add(new RobotPythonFile(namespace, file, ImportType.VARIABLES));
         }
     }
 

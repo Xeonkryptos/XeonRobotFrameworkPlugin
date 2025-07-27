@@ -16,6 +16,9 @@ public interface KeywordFile {
    Collection<DefinedVariable> getDefinedVariables();
 
    @NotNull
+   Collection<DefinedVariable> getDefinedVariables(Collection<KeywordFile> visitedFiles);
+
+   @NotNull
    ImportType getImportType();
 
    @NotNull
@@ -27,6 +30,4 @@ public interface KeywordFile {
    VirtualFile getVirtualFile();
 
    PsiFile getPsiFile();
-
-   boolean isDifferentNamespace();
 }
