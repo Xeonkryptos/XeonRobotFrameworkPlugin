@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+## 0.4.1
+
 ### Added
 - Follow Python imports when searching for defined variables
 
