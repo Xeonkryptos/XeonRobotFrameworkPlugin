@@ -1,7 +1,9 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.psi.ref;
 
+import com.intellij.openapi.util.Key;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiFile;
+import com.intellij.psi.util.CachedValue;
 import com.intellij.psi.util.CachedValueProvider.Result;
 import com.intellij.psi.util.CachedValuesManager;
 import com.jetbrains.python.psi.PyClass;
@@ -15,9 +17,10 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.stream.Stream;
 
-public class RobotPythonClass extends RobotPythonWrapper implements KeywordFile {
+public class RobotPythonClass implements KeywordFile {
+
+    private static final Key<CachedValue<Collection<DefinedKeyword>>> KEYWORD_CACHE_KEY = new Key<>("ROBOT_PYTHON_CLASS_KEYWORDS_CACHE");
 
     private final String library;
     private final PyClass pythonClass;
@@ -34,12 +37,11 @@ public class RobotPythonClass extends RobotPythonWrapper implements KeywordFile 
     @NotNull
     @Override
     public final Collection<DefinedKeyword> getDefinedKeywords() {
-        if (importType == ImportType.LIBRARY && pythonClass.isValid()) {
-            return CachedValuesManager.getCachedValue(pythonClass, () -> {
+        if (importType == ImportType.LIBRARY) {
+            return CachedValuesManager.getCachedValue(pythonClass, KEYWORD_CACHE_KEY, () -> {
                 Set<DefinedKeyword> newKeywords = new HashSet<>();
-                addDefinedKeywords(pythonClass, library, newKeywords);
-                Object[] dependents = Stream.concat(Stream.of(pythonClass), newKeywords.stream().map(DefinedKeyword::reference)).toArray();
-                return new Result<>(newKeywords, dependents);
+                RobotKeywordFileResolver.addDefinedKeywords(pythonClass, library, newKeywords);
+                return new Result<>(newKeywords, new Object[] { pythonClass });
             });
         }
         return Set.of();
@@ -48,15 +50,7 @@ public class RobotPythonClass extends RobotPythonWrapper implements KeywordFile 
     @NotNull
     @Override
     public final Collection<DefinedVariable> getDefinedVariables() {
-        if (importType == ImportType.VARIABLES && pythonClass.isValid()) {
-            return CachedValuesManager.getCachedValue(pythonClass, () -> {
-                Set<DefinedVariable> newVariables = new HashSet<>();
-                addDefinedVariables(pythonClass, newVariables);
-                Object[] dependents = Stream.concat(Stream.of(pythonClass), newVariables.stream().map(DefinedVariable::reference)).toArray();
-                return new Result<>(newVariables, dependents);
-            });
-        }
-        return Set.of();
+        return RobotKeywordFileResolver.resolveVariables(pythonClass);
     }
 
     @NotNull
@@ -65,8 +59,9 @@ public class RobotPythonClass extends RobotPythonWrapper implements KeywordFile 
         return importType;
     }
 
+    @NotNull
     @Override
-    public final @NotNull Collection<KeywordFile> getImportedFiles(boolean includeTransitive) {
+    public final Collection<KeywordFile> getImportedFiles(boolean includeTransitive) {
         return Collections.emptyList();
     }
 
@@ -114,10 +109,5 @@ public class RobotPythonClass extends RobotPythonWrapper implements KeywordFile 
     @Override
     public final boolean isDifferentNamespace() {
         return this.isDifferentNamespace;
-    }
-
-    @Override
-    public boolean isValid() {
-        return pythonClass.isValid();
     }
 }

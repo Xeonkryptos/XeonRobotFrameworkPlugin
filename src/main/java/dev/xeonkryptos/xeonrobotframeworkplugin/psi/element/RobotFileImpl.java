@@ -10,10 +10,11 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiManager;
 import com.intellij.psi.PsiReference;
-import com.intellij.psi.util.CachedValue;
 import com.intellij.psi.util.CachedValueProvider.Result;
 import com.intellij.psi.util.CachedValuesManager;
+import com.intellij.psi.util.ParameterizedCachedValue;
 import com.jetbrains.python.psi.PyClass;
+import dev.xeonkryptos.xeonrobotframeworkplugin.ide.config.RobotOptionsProvider;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotLanguage;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.dto.ImportType;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.dto.KeywordFileWithDependentsWrapper;
@@ -40,10 +41,11 @@ public class RobotFileImpl extends PsiFileBase implements KeywordFile, RobotFile
 
     private static final String ROBOT_BUILT_IN = "robot.libraries.BuiltIn";
 
-    private final FileType fileType;
+    private static final Key<ParameterizedCachedValue<Collection<KeywordFile>, Boolean>> IMPORTED_FILES_CACHE_KEY = Key.create("IMPORTED_FILES_CACHE");
+    private static final Key<ParameterizedCachedValue<Collection<VirtualFile>, Boolean>> IMPORTED_VIRTUAL_FILES_CACHE_KEY = Key.create(
+            "IMPORTED_VIRTUAL_FILES_CACHE");
 
-    private static final Key<CachedValue<Collection<KeywordFile>>> TRANSITIVELY_IMPORTED_FILES_CACHE_KEY = Key.create("Transitively imported files");
-    private static final Key<CachedValue<Collection<KeywordFile>>> NON_TRANSITIVELY_IMPORTED_FILES_CACHE_KEY = Key.create("Non-Transitively imported files");
+    private final FileType fileType;
 
     private Collection<DefinedVariable> robotInitVariables;
 
@@ -70,11 +72,14 @@ public class RobotFileImpl extends PsiFileBase implements KeywordFile, RobotFile
     public final Collection<DefinedVariable> getDefinedVariables() {
         Collection<DefinedVariable> sectionVariables = getSectionVariables();
         Collection<DefinedVariable> globalVariables = RobotFileManager.getGlobalVariables(getProject());
-        Set<DefinedVariable> results = new LinkedHashSet<>(globalVariables);
-        results.addAll(sectionVariables);
         Collection<DefinedVariable> definedVariables = collectRobotInitVariables();
-        results.addAll(definedVariables);
-        return results;
+        boolean transitiveImports = RobotOptionsProvider.getInstance(getProject()).allowTransitiveImports();
+        Stream<DefinedVariable> importedVariablesStream = getImportedFiles(transitiveImports).stream()
+                                                                                             .flatMap(keywordFile -> keywordFile.getDefinedVariables()
+                                                                                                                                .stream());
+        return Stream.concat(sectionVariables.stream(),
+                             Stream.concat(globalVariables.stream(), Stream.concat(definedVariables.stream(), importedVariablesStream)))
+                     .collect(Collectors.toSet());
     }
 
     @NotNull
@@ -111,10 +116,7 @@ public class RobotFileImpl extends PsiFileBase implements KeywordFile, RobotFile
     private Collection<DefinedVariable> getSectionVariables() {
         RobotSectionVariablesCollector visitor = new RobotSectionVariablesCollector();
         acceptChildren(visitor);
-
-        Set<DefinedVariable> results = new LinkedHashSet<>(RobotFileManager.getGlobalVariables(getProject()));
-        results.addAll(visitor.getVariables());
-        return results;
+        return new LinkedHashSet<>(visitor.getVariables());
     }
 
     @NotNull
@@ -180,14 +182,14 @@ public class RobotFileImpl extends PsiFileBase implements KeywordFile, RobotFile
     @NotNull
     @Override
     public Collection<KeywordFile> getImportedFiles(boolean includeTransitive) {
-        Key<CachedValue<Collection<KeywordFile>>> key = includeTransitive ? TRANSITIVELY_IMPORTED_FILES_CACHE_KEY : NON_TRANSITIVELY_IMPORTED_FILES_CACHE_KEY;
-        return CachedValuesManager.getCachedValue(this, key, () -> {
+        return CachedValuesManager.getManager(getProject()).getParameterizedCachedValue(this, IMPORTED_FILES_CACHE_KEY, transitive -> {
             Set<KeywordFile> results = new LinkedHashSet<>();
             for (KeywordFile keywordFile : collectImportFiles()) {
-                collectTransitiveKeywordFiles(results, keywordFile, includeTransitive);
+                collectTransitiveKeywordFiles(results, keywordFile, transitive);
             }
-            return new Result<>(results, Stream.concat(results.stream().map(KeywordFile::getPsiFile), Stream.of(this)).toArray());
-        });
+            Object[] dependents = Stream.concat(results.stream().map(KeywordFile::getPsiFile), Stream.of(this)).toArray();
+            return new Result<>(results, dependents);
+        }, false, includeTransitive);
     }
 
     @NotNull
@@ -212,12 +214,9 @@ public class RobotFileImpl extends PsiFileBase implements KeywordFile, RobotFile
     }
 
     private Collection<KeywordFile> collectImportFiles() {
-        return CachedValuesManager.getCachedValue(this, () -> {
-            RobotImportFilesCollector importFilesCollector = new RobotImportFilesCollector();
-            acceptChildren(importFilesCollector);
-            Set<KeywordFile> files = new LinkedHashSet<>(importFilesCollector.getFiles());
-            return new Result<>(files, Stream.concat(files.stream().map(KeywordFile::getPsiFile), Stream.of(this)).toArray());
-        });
+        RobotImportFilesCollector importFilesCollector = new RobotImportFilesCollector();
+        acceptChildren(importFilesCollector);
+        return importFilesCollector.getFiles();
     }
 
     private void collectCompleteImportParentTree(KeywordFile parent, Map<KeywordFile, Set<KeywordFile>> childParentsIndex, Collection<KeywordFile> parents) {
@@ -241,13 +240,14 @@ public class RobotFileImpl extends PsiFileBase implements KeywordFile, RobotFile
     @NotNull
     @Override
     public final Collection<VirtualFile> getVirtualFiles(boolean includeTransitive) {
-        return CachedValuesManager.getCachedValue(this, () -> {
+        return CachedValuesManager.getManager(getProject()).getParameterizedCachedValue(this, IMPORTED_VIRTUAL_FILES_CACHE_KEY, transitive -> {
             Set<VirtualFile> files = new LinkedHashSet<>();
-            for (KeywordFile keywordFile : collectImportedFiles(includeTransitive)) {
+            for (KeywordFile keywordFile : collectImportedFiles(transitive)) {
                 files.add(keywordFile.getVirtualFile());
             }
-            return new Result<>(files, Stream.concat(files.stream(), Stream.of(this)).toArray());
-        });
+            Object[] dependents = Stream.concat(files.stream(), Stream.of(this)).toArray();
+            return new Result<>(files, dependents);
+        }, false, includeTransitive);
     }
 
     @Override

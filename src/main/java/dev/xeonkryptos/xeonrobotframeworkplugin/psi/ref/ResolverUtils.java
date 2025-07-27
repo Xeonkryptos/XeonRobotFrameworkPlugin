@@ -3,7 +3,6 @@ package dev.xeonkryptos.xeonrobotframeworkplugin.psi.ref;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import dev.xeonkryptos.xeonrobotframeworkplugin.ide.config.RobotOptionsProvider;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.dto.ImportType;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.dto.VariableDto;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.DefinedKeyword;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.DefinedVariable;
@@ -66,11 +65,9 @@ public class ResolverUtils {
 
         boolean includeTransitive = RobotOptionsProvider.getInstance(psiFile.getProject()).allowTransitiveImports();
         for (KeywordFile keywordFile : robotFile.collectImportedFiles(includeTransitive)) {
-            if (keywordFile.getImportType() != ImportType.LIBRARY) {
-                for (DefinedVariable definedVariable : keywordFile.getDefinedVariables()) {
-                    if (definedVariable.matches(variableName)) {
-                        return definedVariable.reference();
-                    }
+            for (DefinedVariable definedVariable : keywordFile.getDefinedVariables()) {
+                if (definedVariable.matches(variableName)) {
+                    return definedVariable.reference();
                 }
             }
         }

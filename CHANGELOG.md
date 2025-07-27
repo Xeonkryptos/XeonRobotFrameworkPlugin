@@ -4,6 +4,9 @@
 
 ## Unreleased
 
+### Added
+- Follow Python imports when searching for defined variables
+
 ### Fixed
 
 - Fixed setting of breakpoints in robot files

@@ -29,6 +29,4 @@ public interface KeywordFile {
    PsiFile getPsiFile();
 
    boolean isDifferentNamespace();
-
-   boolean isValid();
 }
