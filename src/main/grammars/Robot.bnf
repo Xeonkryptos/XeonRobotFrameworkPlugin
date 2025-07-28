@@ -137,18 +137,30 @@ unknown_setting_statements_global_setting ::= UNKNOWN_SETTING_KEYWORD (parameter
 
 test_case_statement ::= test_case_id eol_marker? testcase_task_statement* {
     pin=2
-    implements = "com.intellij.psi.PsiNameIdentifierOwner"
+    implements = [
+        "com.intellij.psi.PsiNameIdentifierOwner"
+        "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotQualifiedNameOwner"
+        "com.intellij.navigation.NavigationItem"
+    ]
     extends = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotTestCaseExtension"
     methods = [nameIdentifier="test_case_id" getName]
+    stubClass = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotTestCaseStatementStub"
+    elementTypeFactory = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotTestCaseStatementStubElement.create"
     recoverWhile=test_case_statement_recover
 }
 test_case_id ::= TEST_CASE_NAME
 private test_case_statement_recover ::= !test_case_id & section_recover
 task_statement ::= task_id eol_marker? testcase_task_statement* {
     pin=2
-    implements = "com.intellij.psi.PsiNameIdentifierOwner"
+    implements = [
+        "com.intellij.psi.PsiNameIdentifierOwner"
+        "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotQualifiedNameOwner"
+        "com.intellij.navigation.NavigationItem"
+    ]
     extends = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotTaskExtension"
     methods = [nameIdentifier="task_id" getName]
+    stubClass = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotTaskStatementStub"
+    elementTypeFactory = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotTaskStatementStubElement.create"
     recoverWhile=task_statement_recover
 }
 task_id ::= TASK_NAME
@@ -295,6 +307,7 @@ variable_definition ::= variable {
         "com.intellij.psi.PsiNameIdentifierOwner"
         "com.intellij.navigation.NavigationItem"
         "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.DefinedVariable"
+        "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotQualifiedNameOwner"
     ]
     mixin = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotVariableDefinitionExtension"
     stubClass = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotVariableDefinitionStub"

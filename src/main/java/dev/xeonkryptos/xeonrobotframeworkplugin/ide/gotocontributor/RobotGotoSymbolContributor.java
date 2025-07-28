@@ -16,10 +16,14 @@ import com.intellij.util.indexing.IdFilter;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotLanguage;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCall;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotQualifiedNameOwner;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTaskStatement;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTestCaseStatement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotUserKeywordStatement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableDefinition;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.index.KeywordDefinitionNameIndex;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.index.KeywordStatementNameIndex;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.index.TaskNameIndex;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.index.TestCaseNameIndex;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.index.VariableDefinitionNameIndex;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -31,6 +35,12 @@ public class RobotGotoSymbolContributor implements GotoClassContributor, ChooseB
         StubIndex stubIndex = StubIndex.getInstance();
         DumbModeAccessType.RAW_INDEX_DATA_ACCEPTABLE.ignoreDumbMode(() -> {
             if (!stubIndex.processAllKeys(KeywordDefinitionNameIndex.KEY, processor, scope, filter)) {
+                return;
+            }
+            if (!stubIndex.processAllKeys(TaskNameIndex.KEY, processor, scope, filter)) {
+                return;
+            }
+            if (!stubIndex.processAllKeys(TestCaseNameIndex.KEY, processor, scope, filter)) {
                 return;
             }
             if (!stubIndex.processAllKeys(KeywordStatementNameIndex.KEY, processor, scope, filter)) {
@@ -48,6 +58,12 @@ public class RobotGotoSymbolContributor implements GotoClassContributor, ChooseB
         StubIndex stubIndex = StubIndex.getInstance();
         DumbModeAccessType.RELIABLE_DATA_ONLY.ignoreDumbMode(() -> {
             if (!stubIndex.processElements(KeywordDefinitionNameIndex.KEY, name, project, scope, filter, RobotUserKeywordStatement.class, processor)) {
+                return;
+            }
+            if (!stubIndex.processElements(TaskNameIndex.KEY, name, project, scope, filter, RobotTaskStatement.class, processor)) {
+                return;
+            }
+            if (!stubIndex.processElements(TestCaseNameIndex.KEY, name, project, scope, filter, RobotTestCaseStatement.class, processor)) {
                 return;
             }
             if (!stubIndex.processElements(KeywordStatementNameIndex.KEY, name, project, scope, filter, RobotKeywordCall.class, processor)) {

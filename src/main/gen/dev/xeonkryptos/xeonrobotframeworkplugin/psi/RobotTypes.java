@@ -9,6 +9,8 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotKeywordCallStubEle
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotListVariableStubElement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotPositionalArgumentStubElement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotScalarVariableStubElement;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotTaskStatementStubElement;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotTestCaseStatementStubElement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotUserKeywordStubElement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotVariableDefinitionStubElement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.*;
@@ -59,7 +61,7 @@ public interface RobotTypes {
   IElementType TAGS_STATEMENT_GLOBAL_SETTING = new RobotElementType("TAGS_STATEMENT_GLOBAL_SETTING");
   IElementType TASKS_SECTION = new RobotElementType("TASKS_SECTION");
   IElementType TASK_ID = new RobotElementType("TASK_ID");
-  IElementType TASK_STATEMENT = new RobotElementType("TASK_STATEMENT");
+  IElementType TASK_STATEMENT = RobotTaskStatementStubElement.create("TASK_STATEMENT");
   IElementType TEMPLATE_ARGUMENT = new RobotElementType("TEMPLATE_ARGUMENT");
   IElementType TEMPLATE_ARGUMENTS = new RobotElementType("TEMPLATE_ARGUMENTS");
   IElementType TEMPLATE_PARAMETER = new RobotElementType("TEMPLATE_PARAMETER");
@@ -68,7 +70,7 @@ public interface RobotTypes {
   IElementType TEMPLATE_STATEMENTS_GLOBAL_SETTING = new RobotElementType("TEMPLATE_STATEMENTS_GLOBAL_SETTING");
   IElementType TEST_CASES_SECTION = new RobotElementType("TEST_CASES_SECTION");
   IElementType TEST_CASE_ID = new RobotElementType("TEST_CASE_ID");
-  IElementType TEST_CASE_STATEMENT = new RobotElementType("TEST_CASE_STATEMENT");
+  IElementType TEST_CASE_STATEMENT = RobotTestCaseStatementStubElement.create("TEST_CASE_STATEMENT");
   IElementType TIMEOUT_STATEMENTS_GLOBAL_SETTING = new RobotElementType("TIMEOUT_STATEMENTS_GLOBAL_SETTING");
   IElementType TRY_STRUCTURE = new RobotElementType("TRY_STRUCTURE");
   IElementType UNKNOWN_SETTING_STATEMENTS_GLOBAL_SETTING = new RobotElementType("UNKNOWN_SETTING_STATEMENTS_GLOBAL_SETTING");

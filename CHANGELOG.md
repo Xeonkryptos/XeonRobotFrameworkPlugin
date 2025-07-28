@@ -4,6 +4,10 @@
 
 ## Unreleased
 
+### Fixed
+
+- Fixed missing test case names and symbols in PyCharm's searches
+
 ## 0.4.1
 
 ### Added

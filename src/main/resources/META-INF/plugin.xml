@@ -48,6 +48,8 @@
         <stubIndex implementation="dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.index.PositionalArgumentImportIndex"/>
         <stubIndex implementation="dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.index.VariableNameIndex"/>
         <stubIndex implementation="dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.index.VariableDefinitionNameIndex"/>
+        <stubIndex implementation="dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.index.TestCaseNameIndex"/>
+        <stubIndex implementation="dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.index.TaskNameIndex"/>
 
         <codeInsight.parameterInfo language="Robot"
                                    implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.ide.parameterinfo.RobotParameterInfoHandler"/>

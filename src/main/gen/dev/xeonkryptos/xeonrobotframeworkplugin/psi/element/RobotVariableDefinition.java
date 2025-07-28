@@ -9,7 +9,7 @@ import com.intellij.navigation.NavigationItem;
 import com.intellij.psi.StubBasedPsiElement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotVariableDefinitionStub;
 
-public interface RobotVariableDefinition extends PsiNameIdentifierOwner, NavigationItem, DefinedVariable, RobotStatement, StubBasedPsiElement<RobotVariableDefinitionStub> {
+public interface RobotVariableDefinition extends PsiNameIdentifierOwner, NavigationItem, DefinedVariable, RobotQualifiedNameOwner, RobotStatement, StubBasedPsiElement<RobotVariableDefinitionStub> {
 
   @NotNull
   RobotVariable getVariable();

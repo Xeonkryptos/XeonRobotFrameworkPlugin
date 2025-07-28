@@ -10,11 +10,17 @@ import com.intellij.psi.util.PsiTreeUtil;
 import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.*;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.*;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotPsiImplUtil;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotTestCaseStatementStub;
+import com.intellij.psi.stubs.IStubElementType;
 
 public class RobotTestCaseStatementImpl extends RobotTestCaseExtension implements RobotTestCaseStatement {
 
   public RobotTestCaseStatementImpl(@NotNull ASTNode node) {
     super(node);
+  }
+
+  public RobotTestCaseStatementImpl(RobotTestCaseStatementStub stub, IStubElementType<RobotTestCaseStatementStub, RobotTestCaseStatement> type) {
+    super(stub, type);
   }
 
   public void accept(@NotNull RobotVisitor visitor) {

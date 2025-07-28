@@ -14,7 +14,7 @@ import com.intellij.psi.util.CachedValueProvider.Result;
 import com.intellij.psi.util.CachedValuesManager;
 import com.intellij.psi.util.PsiModificationTracker;
 import com.intellij.psi.util.PsiTreeUtil;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotUserKeywordStatement;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotQualifiedNameOwner;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
@@ -47,10 +47,10 @@ public final class QualifiedNameBuilder {
             PsiFile containingFile = element.getContainingFile();
             VirtualFile virtualFile = containingFile.getVirtualFile();
             Project project = containingFile.getProject();
-            RobotUserKeywordStatement keywordDefinition = PsiTreeUtil.getParentOfType(element, RobotUserKeywordStatement.class);
+            RobotQualifiedNameOwner qualifiedNameOwner = PsiTreeUtil.getParentOfType(element, RobotQualifiedNameOwner.class);
             String qualifiedName;
-            if (keywordDefinition != null) {
-                qualifiedName = keywordDefinition.getQualifiedName();
+            if (qualifiedNameOwner != null) {
+                qualifiedName = qualifiedNameOwner.getQualifiedName();
             } else {
                 qualifiedName = Arrays.stream(ModuleManager.getInstance(project).getModules())
                                       .filter(module -> ModuleRootManager.getInstance(module).getFileIndex().isInContent(virtualFile))

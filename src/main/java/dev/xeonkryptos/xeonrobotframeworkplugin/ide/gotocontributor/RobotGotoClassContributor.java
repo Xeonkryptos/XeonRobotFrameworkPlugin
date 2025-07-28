@@ -15,8 +15,12 @@ import com.intellij.util.indexing.FindSymbolParameters;
 import com.intellij.util.indexing.IdFilter;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotLanguage;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotQualifiedNameOwner;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTaskStatement;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTestCaseStatement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotUserKeywordStatement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.index.KeywordDefinitionNameIndex;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.index.TaskNameIndex;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.index.TestCaseNameIndex;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -24,8 +28,16 @@ public class RobotGotoClassContributor implements GotoClassContributor, ChooseBy
 
     @Override
     public void processNames(@NotNull Processor<? super String> processor, @NotNull GlobalSearchScope scope, @Nullable IdFilter filter) {
-        DumbModeAccessType.RAW_INDEX_DATA_ACCEPTABLE.ignoreDumbMode(() -> StubIndex.getInstance()
-                                                                                   .processAllKeys(KeywordDefinitionNameIndex.KEY, processor, scope, filter));
+        StubIndex stubIndex = StubIndex.getInstance();
+        DumbModeAccessType.RAW_INDEX_DATA_ACCEPTABLE.ignoreDumbMode(() -> {
+            if (!stubIndex.processAllKeys(KeywordDefinitionNameIndex.KEY, processor, scope, filter)) {
+                return;
+            }
+            if (!stubIndex.processAllKeys(TaskNameIndex.KEY, processor, scope, filter)) {
+                return;
+            }
+            stubIndex.processAllKeys(TestCaseNameIndex.KEY, processor, scope, filter);
+        });
     }
 
     @Override
@@ -33,14 +45,16 @@ public class RobotGotoClassContributor implements GotoClassContributor, ChooseBy
         Project project = parameters.getProject();
         GlobalSearchScope scope = parameters.getSearchScope();
         IdFilter filter = parameters.getIdFilter();
-        DumbModeAccessType.RELIABLE_DATA_ONLY.ignoreDumbMode(() -> StubIndex.getInstance()
-                                                                            .processElements(KeywordDefinitionNameIndex.KEY,
-                                                                                             name,
-                                                                                             project,
-                                                                                             scope,
-                                                                                             filter,
-                                                                                             RobotUserKeywordStatement.class,
-                                                                                             processor));
+        StubIndex stubIndex = StubIndex.getInstance();
+        DumbModeAccessType.RELIABLE_DATA_ONLY.ignoreDumbMode(() -> {
+            if (!stubIndex.processElements(KeywordDefinitionNameIndex.KEY, name, project, scope, filter, RobotUserKeywordStatement.class, processor)) {
+                return;
+            }
+            if (!stubIndex.processElements(TaskNameIndex.KEY, name, project, scope, filter, RobotTaskStatement.class, processor)) {
+                return;
+            }
+            stubIndex.processElements(TestCaseNameIndex.KEY, name, project, scope, filter, RobotTestCaseStatement.class, processor);
+        });
     }
 
     @Nullable

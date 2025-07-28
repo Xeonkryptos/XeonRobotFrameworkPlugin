@@ -238,6 +238,8 @@ public class RobotVisitor extends PsiElementVisitor {
 
   public void visitTaskStatement(@NotNull RobotTaskStatement o) {
     visitPsiNameIdentifierOwner(o);
+    // visitQualifiedNameOwner(o);
+    // visitNavigationItem(o);
     // visitStatement(o);
   }
 
@@ -283,6 +285,8 @@ public class RobotVisitor extends PsiElementVisitor {
 
   public void visitTestCaseStatement(@NotNull RobotTestCaseStatement o) {
     visitPsiNameIdentifierOwner(o);
+    // visitQualifiedNameOwner(o);
+    // visitNavigationItem(o);
     // visitStatement(o);
   }
 
@@ -343,6 +347,7 @@ public class RobotVisitor extends PsiElementVisitor {
     visitPsiNameIdentifierOwner(o);
     // visitNavigationItem(o);
     // visitDefinedVariable(o);
+    // visitQualifiedNameOwner(o);
     // visitStatement(o);
   }
 

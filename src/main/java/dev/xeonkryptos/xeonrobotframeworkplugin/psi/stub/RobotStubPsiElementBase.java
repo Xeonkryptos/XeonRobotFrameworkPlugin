@@ -6,8 +6,6 @@ import com.intellij.navigation.ItemPresentation;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.stubs.IStubElementType;
 import com.intellij.psi.stubs.StubElement;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotPsiElementBase;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.PatternUtil;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.QualifiedNameBuilder;
 import org.jetbrains.annotations.NotNull;
 
@@ -21,19 +19,6 @@ public abstract class RobotStubPsiElementBase<T extends StubElement<P>, P extend
 
     public RobotStubPsiElementBase(final T stub, final IStubElementType<T, P> nodeType) {
         super(stub, nodeType);
-    }
-
-    @NotNull
-    public String getText() {
-        T stub = getStub();
-        String text;
-        if (stub != null) {
-            P psiElement = stub.getPsi();
-            text = psiElement.getText();
-        } else {
-            text = super.getText();
-        }
-        return text;
     }
 
     @Override

@@ -5,8 +5,11 @@ import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiNameIdentifierOwner;
+import com.intellij.navigation.NavigationItem;
+import com.intellij.psi.StubBasedPsiElement;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotTestCaseStatementStub;
 
-public interface RobotTestCaseStatement extends PsiNameIdentifierOwner, RobotStatement {
+public interface RobotTestCaseStatement extends PsiNameIdentifierOwner, RobotQualifiedNameOwner, NavigationItem, RobotStatement, StubBasedPsiElement<RobotTestCaseStatementStub> {
 
   @NotNull
   List<RobotBddStatement> getBddStatementList();

@@ -12,6 +12,7 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableStateme
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariablesSection;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotStubPsiElementBase;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotVariableDefinitionStub;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.QualifiedNameBuilder;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.ReservedVariableScope;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -76,5 +77,11 @@ public abstract class RobotVariableDefinitionExtension extends RobotStubPsiEleme
     @Override
     public PsiElement reference() {
         return this;
+    }
+
+    @NotNull
+    @Override
+    public String getQualifiedName() {
+        return QualifiedNameBuilder.computeQualifiedName(this);
     }
 }
