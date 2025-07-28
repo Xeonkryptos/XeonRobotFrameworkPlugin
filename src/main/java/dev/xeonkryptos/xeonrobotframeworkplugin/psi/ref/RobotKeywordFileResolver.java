@@ -1,10 +1,17 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.psi.ref;
 
+import com.intellij.openapi.module.Module;
+import com.intellij.openapi.module.ModuleUtilCore;
 import com.intellij.openapi.progress.ProcessCanceledException;
 import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.projectRoots.Sdk;
+import com.intellij.openapi.roots.OrderRootType;
 import com.intellij.openapi.util.Key;
+import com.intellij.openapi.vfs.VfsUtilCore;
+import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiFile;
 import com.intellij.psi.util.CachedValue;
 import com.intellij.psi.util.CachedValueProvider.Result;
 import com.intellij.psi.util.CachedValuesManager;
@@ -22,6 +29,7 @@ import com.jetbrains.python.psi.PyImportStatementBase;
 import com.jetbrains.python.psi.PyTargetExpression;
 import com.jetbrains.python.psi.resolve.RatedResolveResult;
 import com.jetbrains.python.psi.types.TypeEvalContext;
+import com.jetbrains.python.sdk.PythonSdkUtil;
 import dev.xeonkryptos.xeonrobotframeworkplugin.MyLogger;
 import dev.xeonkryptos.xeonrobotframeworkplugin.ide.config.RobotOptionsProvider;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.dto.KeywordDto;
@@ -53,6 +61,7 @@ class RobotKeywordFileResolver {
             "ROBOT_PYTHON_TRANSITIVE_VARIABLES_CACHE");
     private static final Key<CachedValue<Collection<DefinedVariable>>> FILE_VARIABLES_CACHE_KEY = new Key<>("ROBOT_PYTHON_FILE_VARIABLES_CACHE");
     private static final Key<CachedValue<Collection<DefinedVariable>>> CLASS_VARIABLES_CACHE_KEY = new Key<>("ROBOT_PYTHON_CLASS_VARIABLES_CACHE");
+    private static final Key<CachedValue<Boolean>> SYSTEM_PSI_FILE_KEY = new Key<>("ROBOT_PYTHON_SYSTEM_FILE_CACHE");
 
     private RobotKeywordFileResolver() {
         throw new UnsupportedOperationException("Utility class cannot be instantiated");
@@ -64,6 +73,10 @@ class RobotKeywordFileResolver {
     }
 
     static Collection<DefinedVariable> resolveVariables(PyFile pythonFile) {
+        if (isSystemLibrary(pythonFile)) {
+            return List.of();
+        }
+
         Project project = pythonFile.getProject();
         boolean transitiveImports = RobotOptionsProvider.getInstance(project).allowTransitiveImports();
         CachedValuesManager cachedValuesManager = CachedValuesManager.getManager(project);
@@ -325,5 +338,21 @@ class RobotKeywordFileResolver {
             }
             keywords.add(new KeywordDto(method, namespace, methodName, Arrays.asList(method.getParameterList().getParameters())));
         }
+    }
+
+    private static boolean isSystemLibrary(PsiFile psiFile) {
+        return CachedValuesManager.getCachedValue(psiFile, SYSTEM_PSI_FILE_KEY, () -> {
+            Module module = ModuleUtilCore.findModuleForPsiElement(psiFile);
+            if (module != null) {
+                Sdk sdk = PythonSdkUtil.findPythonSdk(module);
+                if (sdk != null) {
+                    VirtualFile[] roots = sdk.getRootProvider().getFiles(OrderRootType.CLASSES);
+                    VirtualFile fileVirtual = psiFile.getVirtualFile();
+                    boolean result = Arrays.stream(roots).anyMatch(root -> VfsUtilCore.isAncestor(root, fileVirtual, false));
+                    return Result.createSingleDependency(result, psiFile);
+                }
+            }
+            return Result.createSingleDependency(false, psiFile);
+        });
     }
 }

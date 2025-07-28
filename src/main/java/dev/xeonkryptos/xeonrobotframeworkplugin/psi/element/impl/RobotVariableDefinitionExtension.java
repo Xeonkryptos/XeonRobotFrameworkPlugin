@@ -60,7 +60,7 @@ public abstract class RobotVariableDefinitionExtension extends RobotStubPsiEleme
             return false;
         }
         String variableName = getName();
-        return text.equals(variableName);
+        return text.equalsIgnoreCase(variableName);
     }
 
     @NotNull
@@ -71,7 +71,12 @@ public abstract class RobotVariableDefinitionExtension extends RobotStubPsiEleme
 
     @Override
     public String getLookup() {
-        return getName();
+        return getText();
+    }
+
+    @Override
+    public String[] getLookupWords() {
+        return new String[] { getName(), getText() };
     }
 
     @Override

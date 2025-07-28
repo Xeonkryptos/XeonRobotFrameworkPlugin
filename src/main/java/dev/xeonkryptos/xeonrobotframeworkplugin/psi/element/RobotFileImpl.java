@@ -47,6 +47,7 @@ public class RobotFileImpl extends PsiFileBase implements KeywordFile, RobotFile
     private static final Key<CachedValue<Collection<KeywordFile>>> DIRECTLY_IMPORTED_FILES_CACHE_KEY = Key.create("DIRECTLY_IMPORTED_FILES_CACHE");
     private static final Key<ParameterizedCachedValue<Collection<VirtualFile>, Boolean>> IMPORTED_VIRTUAL_FILES_CACHE_KEY = Key.create(
             "IMPORTED_VIRTUAL_FILES_CACHE");
+    private static final Key<CachedValue<Collection<DefinedVariable>>> SECTION_VARIABLES_CACHE_KEY = Key.create("SECTION_VARIABLES_CACHE");
 
     private final FileType fileType;
 
@@ -87,9 +88,11 @@ public class RobotFileImpl extends PsiFileBase implements KeywordFile, RobotFile
         for (KeywordFile keywordFile : importedFiles) {
             ProgressManager.checkCanceled();
             if (visitedFiles.add(keywordFile)) {
-                importedVariables.addAll(keywordFile.getDefinedVariables(visitedFiles));
+                Collection<DefinedVariable> subVariables = keywordFile.getDefinedVariables(visitedFiles);
+                importedVariables.addAll(subVariables);
             }
         }
+
         Set<DefinedVariable> variables = new HashSet<>(sectionVariables.size() + globalVariables.size() + definedVariables.size() + importedVariables.size());
         variables.addAll(sectionVariables);
         variables.addAll(globalVariables);
@@ -130,9 +133,11 @@ public class RobotFileImpl extends PsiFileBase implements KeywordFile, RobotFile
     }
 
     private Collection<DefinedVariable> getSectionVariables() {
-        RobotSectionVariablesCollector visitor = new RobotSectionVariablesCollector();
-        acceptChildren(visitor);
-        return visitor.getVariables();
+        return CachedValuesManager.getCachedValue(this, SECTION_VARIABLES_CACHE_KEY, () -> {
+            RobotSectionVariablesCollector visitor = new RobotSectionVariablesCollector();
+            acceptChildren(visitor);
+            return Result.create(visitor.getVariables(), this);
+        });
     }
 
     @NotNull

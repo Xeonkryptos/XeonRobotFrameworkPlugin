@@ -1,5 +1,9 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.psi.dto;
 
+import com.intellij.codeInsight.completion.InsertHandler;
+import com.intellij.codeInsight.lookup.LookupElement;
+import com.intellij.openapi.editor.Document;
+import com.intellij.openapi.util.TextRange;
 import com.intellij.psi.PsiElement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.DefinedVariable;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.ReservedVariableScope;
@@ -8,13 +12,15 @@ import org.jetbrains.annotations.Nullable;
 
 public class VariableDto implements DefinedVariable {
 
+    private static final String SCALAR_VARIABLE_FORMAT = "${%s}";
+
     private final PsiElement reference;
     private final String name;
     private final String matchingVariableName;
     private final ReservedVariableScope scope;
 
     public VariableDto(@NotNull PsiElement reference, @NotNull String name, @Nullable ReservedVariableScope scope) {
-        this(reference, name, name, scope);
+        this(reference, SCALAR_VARIABLE_FORMAT.formatted(name.trim()), name, scope);
     }
 
     public VariableDto(@NotNull PsiElement reference, @NotNull String name, @NotNull String matchingVariableName, @Nullable ReservedVariableScope scope) {
@@ -46,17 +52,41 @@ public class VariableDto implements DefinedVariable {
     @Nullable
     @Override
     public final String getLookup() {
-        return matchingVariableName;
+        return name;
     }
 
     @Override
     public String getPresentableText() {
-        return this.scope == null ? this.reference.getText() : this.name;
+        return this.name;
     }
 
     @Override
     public String[] getLookupWords() {
-        return scope != null ? new String[] { matchingVariableName } : EMPTY_LOOKUP_WORDS;
+        return new String[] { name, matchingVariableName };
+    }
+
+    @Override
+    public InsertHandler<LookupElement> getInsertHandler() {
+        return (context, item) -> {
+            Document document = context.getDocument();
+            String lookupString = item.getLookupString();
+
+            int startOffset = context.getStartOffset();
+            int selectionEndOffset = context.getSelectionEndOffset();
+
+            int targetStartOffset = Math.max(startOffset - 2, 0);
+            int targetEndOffset = Math.min(selectionEndOffset + 1, document.getTextLength());
+
+            String text = document.getText(new TextRange(targetStartOffset, targetEndOffset));
+            if (text.startsWith("${") || text.startsWith("%{") || text.startsWith("@{") || text.startsWith("&{")) {
+                startOffset -= 2;
+            }
+            if (text.endsWith("}")) {
+                selectionEndOffset += 1;
+            }
+
+            document.replaceString(startOffset, selectionEndOffset, lookupString);
+        };
     }
 
     @Override

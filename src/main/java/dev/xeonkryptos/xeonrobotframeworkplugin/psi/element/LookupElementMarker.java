@@ -1,10 +1,10 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.psi.element;
 
+import com.intellij.codeInsight.completion.InsertHandler;
+import com.intellij.codeInsight.lookup.LookupElement;
 import com.intellij.psi.PsiElement;
 
 public interface LookupElementMarker {
-
-    String[] EMPTY_LOOKUP_WORDS = new String[0];
 
     String getLookup();
 
@@ -13,7 +13,11 @@ public interface LookupElementMarker {
     }
 
     default String[] getLookupWords() {
-        return EMPTY_LOOKUP_WORDS;
+        return new String[] { getLookup() };
+    }
+
+    default InsertHandler<LookupElement> getInsertHandler() {
+        return null;
     }
 
     PsiElement reference();

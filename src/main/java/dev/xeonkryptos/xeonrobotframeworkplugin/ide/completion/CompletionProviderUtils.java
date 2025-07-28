@@ -30,7 +30,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Stream;
 
 final class CompletionProviderUtils {
 
@@ -113,13 +112,14 @@ final class CompletionProviderUtils {
         String lookup = lookupElementMarker.getLookup();
         if (lookup != null) {
             String[] lookupWords = lookupElementMarker.getLookupWords();
-            List<String> lookupStrings = Stream.concat(Stream.of(lookup), Arrays.stream(lookupWords)).toList();
+            List<String> lookupStrings = Arrays.asList(lookupWords);
             LookupElementBuilder builder = LookupElementBuilder.create(lookup)
                                                                .withLookupStrings(lookupStrings)
                                                                .withIcon(icon)
                                                                .withPsiElement(lookupElementMarker.reference())
                                                                .withCaseSensitivity(lookupElementMarker.isCaseSensitive())
-                                                               .withPresentableText(lookupElementMarker.getPresentableText());
+                                                               .withPresentableText(lookupElementMarker.getPresentableText())
+                                                               .withInsertHandler(lookupElementMarker.getInsertHandler());
             if (bold) {
                 builder = builder.bold();
             }

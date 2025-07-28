@@ -4,9 +4,14 @@
 
 ## Unreleased
 
+### Changed
+
+- Improved code completion performance when variables are to be considered by ignoring system libraries
+
 ### Fixed
 
 - Fixed missing test case names and symbols in PyCharm's searches
+- Fixed variable insertion handling
 
 ## 0.4.1
 
