@@ -4,6 +4,7 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiFile;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.dto.ImportType;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
 
@@ -30,4 +31,7 @@ public interface KeywordFile {
    VirtualFile getVirtualFile();
 
    PsiFile getPsiFile();
+
+   @Nullable
+   String getLibraryName();
 }

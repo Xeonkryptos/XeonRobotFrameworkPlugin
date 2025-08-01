@@ -3,17 +3,26 @@ package dev.xeonkryptos.xeonrobotframeworkplugin.psi;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiReference;
 import com.intellij.psi.util.PsiTreeUtil;
+import dev.xeonkryptos.xeonrobotframeworkplugin.ide.icons.RobotIcons;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotDocumentationStatementGlobalSetting;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotInlineVariableStatement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCall;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCallId;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCallLibrary;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCallLibraryName;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCallName;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLanguageId;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLibraryImportGlobalSetting;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLocalSetting;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLocalSettingArgument;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLocalSettingId;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotMetadataStatementGlobalSetting;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotParameter;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotParameterId;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotPositionalArgument;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotResourceImportGlobalSetting;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotSection;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotSetupTeardownStatementsGlobalSetting;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotSingleVariableStatement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotSuiteNameStatementGlobalSetting;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTagsStatementGlobalSetting;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTaskId;
@@ -28,12 +37,20 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotUserKeywordStat
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotUserKeywordStatementId;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariable;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableBodyId;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableDefinition;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableStatement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariablesImportGlobalSetting;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.ref.RobotKeywordReference;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotTestCaseExtension;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.ref.RobotArgumentReference;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.ref.RobotKeywordCallLibraryReference;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.ref.RobotKeywordCallNameReference;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.ref.RobotParameterReference;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.ref.RobotVariableBodyReference;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.QualifiedNameBuilder;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import javax.swing.Icon;
 
 public class RobotPsiImplUtil {
 
@@ -111,13 +128,18 @@ public class RobotPsiImplUtil {
 
     @NotNull
     public static String getName(@NotNull RobotKeywordCall robotKeywordCall) {
-        RobotKeywordCallId keywordCallId = robotKeywordCall.getKeywordCallId();
-        return keywordCallId.getName();
+        RobotKeywordCallName keywordCallName = robotKeywordCall.getKeywordCallName();
+        return keywordCallName.getName();
     }
 
     @NotNull
-    public static String getName(@NotNull RobotKeywordCallId keywordCallId) {
-        return keywordCallId.getText();
+    public static String getName(@NotNull RobotKeywordCallName keywordCallName) {
+        return keywordCallName.getText();
+    }
+
+    @NotNull
+    public static String getName(@NotNull RobotKeywordCallLibrary keywordCallLibrary) {
+        return keywordCallLibrary.getNameIdentifier().getText();
     }
 
     @NotNull
@@ -150,7 +172,7 @@ public class RobotPsiImplUtil {
     @NotNull
     public static String getName(@NotNull RobotTaskStatement robotTaskStatement) {
         RobotTaskId taskId = robotTaskStatement.getNameIdentifier();
-        return taskId.getText();
+        return taskId.getName();
     }
 
     @NotNull
@@ -161,11 +183,6 @@ public class RobotPsiImplUtil {
     @NotNull
     public static String getName(@NotNull RobotTemplateParameterId templateParameterId) {
         return templateParameterId.getText();
-    }
-
-    @Nullable
-    public static RobotVariableBodyId getNameIdentifier(RobotVariable variable) {
-        return PsiTreeUtil.findChildOfType(variable, RobotVariableBodyId.class);
     }
 
     @Nullable
@@ -190,18 +207,129 @@ public class RobotPsiImplUtil {
         return parameterId.getText();
     }
 
+    @Nullable
+    public static String getName(RobotInlineVariableStatement inlineVariableStatement) {
+        return inlineVariableStatement.getNameIdentifier().getName();
+    }
+
+    @NotNull
+    public static String getName(@NotNull RobotLocalSetting localSetting) {
+        return localSetting.getNameIdentifier().getName();
+    }
+
+    @NotNull
+    public static String getName(@NotNull RobotSetupTeardownStatementsGlobalSetting setupTeardownStatementsGlobalSetting) {
+        return setupTeardownStatementsGlobalSetting.getNameIdentifier().getText();
+    }
+
+    @Nullable
+    public static String getName(@NotNull RobotVariableDefinition variableDefinition) {
+        RobotVariable nameIdentifier = variableDefinition.getNameIdentifier();
+        return nameIdentifier.getName();
+    }
+
+    @Nullable
+    public static RobotVariableBodyId getNameIdentifier(RobotVariable variable) {
+        return PsiTreeUtil.findChildOfType(variable, RobotVariableBodyId.class);
+    }
+
+    @NotNull
+    public static RobotVariable getNameIdentifier(@NotNull RobotInlineVariableStatement inlineVariableStatement) {
+        return inlineVariableStatement.getVariableDefinition().getVariable();
+    }
+
+    @NotNull
+    public static RobotKeywordCallName getNameIdentifier(@NotNull RobotKeywordCall keywordCall) {
+        return keywordCall.getKeywordCallName();
+    }
+
+    @Nullable
+    public static RobotVariableBodyId getNameIdentifier(@NotNull RobotLocalSettingArgument localSettingArgument) {
+        RobotVariable variable = localSettingArgument.getVariable();
+        return PsiTreeUtil.getChildOfType(variable, RobotVariableBodyId.class);
+    }
+
+    @NotNull
+    public static RobotVariable getNameIdentifier(@NotNull RobotSingleVariableStatement singleVariableStatement) {
+        return singleVariableStatement.getVariableDefinition().getVariable();
+    }
+
+    @NotNull
+    public static RobotVariable getNameIdentifier(@NotNull RobotVariableDefinition variableDefinition) {
+        return variableDefinition.getVariable();
+    }
+
+    @NotNull
+    public static RobotKeywordCallLibraryName getNameIdentifier(@NotNull RobotKeywordCallLibrary keywordCallLibrary) {
+        return keywordCallLibrary.getKeywordCallLibraryName();
+    }
+
     @NotNull
     public static PsiReference getReference(RobotVariableBodyId variableBodyId) {
         return new RobotVariableBodyReference(variableBodyId);
     }
 
     @NotNull
-    public static PsiReference getReference(RobotKeywordCallId keywordCallId) {
-        return new RobotKeywordReference(keywordCallId);
+    public static PsiReference getReference(RobotKeywordCallLibraryName keywordCallLibraryId) {
+        return new RobotKeywordCallLibraryReference(keywordCallLibraryId);
+    }
+
+    @NotNull
+    public static PsiReference getReference(RobotKeywordCallName keywordCallName) {
+        return new RobotKeywordCallNameReference(keywordCallName);
     }
 
     @NotNull
     public static PsiReference getReference(RobotParameterId parameterId) {
         return new RobotParameterReference(parameterId);
+    }
+
+    @NotNull
+    public static PsiReference getReference(RobotPositionalArgument positionalArgument) {
+        return new RobotArgumentReference(positionalArgument);
+    }
+
+    @NotNull
+    @SuppressWarnings("unused")
+    public static Icon getIcon(RobotTaskStatement taskStatement, int flags) {
+        return RobotIcons.JUNIT;
+    }
+
+    @NotNull
+    @SuppressWarnings("unused")
+    public static Icon getIcon(RobotTestCaseExtension testCaseExtension, int flags) {
+        return RobotIcons.JUNIT;
+    }
+
+    @NotNull
+    @SuppressWarnings("unused")
+    public static Icon getIcon(RobotVariableDefinition variableDefinition, int flags) {
+        return RobotIcons.VARIABLE;
+    }
+
+    @NotNull
+    @SuppressWarnings("unused")
+    public static Icon getIcon(RobotVariableStatement variableStatement, int flags) {
+        return RobotIcons.VARIABLE;
+    }
+
+    @NotNull
+    public static String getQualifiedName(RobotTaskStatement taskStatement) {
+        return QualifiedNameBuilder.computeQualifiedName(taskStatement);
+    }
+
+    @NotNull
+    public static String getQualifiedName(RobotTestCaseExtension testCaseExtension) {
+        return QualifiedNameBuilder.computeQualifiedName(testCaseExtension);
+    }
+
+    @NotNull
+    public static String getQualifiedName(RobotUserKeywordStatement userKeywordStatement) {
+        return QualifiedNameBuilder.computeQualifiedName(userKeywordStatement);
+    }
+
+    @NotNull
+    public static String getQualifiedName(RobotVariableDefinition variableDefinition) {
+        return QualifiedNameBuilder.computeQualifiedName(variableDefinition);
     }
 }

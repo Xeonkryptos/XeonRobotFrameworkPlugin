@@ -29,7 +29,7 @@ public class RobotHighlighter extends SyntaxHighlighterBase {
     public static final TextAttributesKey KEYWORD_DEFINITION = TextAttributesKey.createTextAttributesKey("User Keyword Definition",
                                                                                                          DefaultLanguageHighlighterColors.KEYWORD);
     public static final TextAttributesKey KEYWORD = TextAttributesKey.createTextAttributesKey("Keyword Usage",
-                                                                                              DefaultLanguageHighlighterColors.FUNCTION_DECLARATION);
+                                                                                              DefaultLanguageHighlighterColors.FUNCTION_CALL);
     public static final TextAttributesKey PARAMETER = TextAttributesKey.createTextAttributesKey("Parameter", DefaultLanguageHighlighterColors.PARAMETER);
     public static final TextAttributesKey ARGUMENT = TextAttributesKey.createTextAttributesKey("Positional Argument",
                                                                                                DefaultLanguageHighlighterColors.STATIC_FIELD);
@@ -102,6 +102,8 @@ public class RobotHighlighter extends SyntaxHighlighterBase {
         keys1.put(RobotTypes.VARIABLE_ACCESS_START, EXTENDED_VARIABLE_ACCESS_BRACKETS);
         keys1.put(RobotTypes.VARIABLE_ACCESS_END, EXTENDED_VARIABLE_ACCESS_BRACKETS);
         keys1.put(RobotTypes.USER_KEYWORD_STATEMENT, KEYWORD_DEFINITION);
+        keys1.put(RobotTypes.KEYWORD_LIBRARY_NAME, KEYWORD);
+        keys1.put(RobotTypes.KEYWORD_LIBRARY_SEPARATOR, KEYWORD);
         keys1.put(RobotTypes.KEYWORD_NAME, KEYWORD);
 
         keys1.put(RobotTypes.SUITE_NAME_KEYWORD, SETTING);

@@ -10,8 +10,9 @@ import com.intellij.psi.util.PsiTreeUtil;
 import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.*;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.*;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotPsiImplUtil;
+import javax.swing.Icon;
 
-public class RobotVariableStatementImpl extends RobotVariableStatementExtension implements RobotVariableStatement {
+public class RobotVariableStatementImpl extends RobotPsiElementBase implements RobotVariableStatement {
 
   public RobotVariableStatementImpl(@NotNull ASTNode node) {
     super(node);
@@ -25,6 +26,11 @@ public class RobotVariableStatementImpl extends RobotVariableStatementExtension 
   public void accept(@NotNull PsiElementVisitor visitor) {
     if (visitor instanceof RobotVisitor) accept((RobotVisitor)visitor);
     else super.accept(visitor);
+  }
+
+  @Override
+  public @NotNull Icon getIcon(int flags) {
+    return RobotPsiImplUtil.getIcon(this, flags);
   }
 
 }

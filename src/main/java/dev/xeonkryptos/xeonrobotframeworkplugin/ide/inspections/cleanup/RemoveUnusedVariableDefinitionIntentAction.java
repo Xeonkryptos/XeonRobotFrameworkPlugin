@@ -9,10 +9,8 @@ import com.intellij.psi.PsiFile;
 import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.util.IncorrectOperationException;
 import dev.xeonkryptos.xeonrobotframeworkplugin.RobotBundle;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotInlineVariableStatement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCall;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordVariableStatement;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotSingleVariableStatement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableDefinition;
 import org.jetbrains.annotations.NotNull;
 
@@ -59,7 +57,7 @@ public class RemoveUnusedVariableDefinitionIntentAction extends BaseIntentionAct
             // simply setting a value into a variable. Then, we should only remove the variable, but not the keyword itself.
             // Also, we have to consider the case that a "keyword" isn't a real keyword. It could be rather an argument identified as a keyword but "converted"
             // to an argument. Handle those cases as setting only a variable.
-            if (SET_VARIABLE_KEYWORD_NAMES.contains(keywordStatementName.toLowerCase()) || keywordCall.getKeywordCallId().getReference().resolve() == null) {
+            if (SET_VARIABLE_KEYWORD_NAMES.contains(keywordStatementName.toLowerCase()) || keywordCall.getKeywordCallName().getReference().resolve() == null) {
                 removeEverything(robotKeywordVariableStatement);
             } else {
                 if (moreThanOneVariable) {

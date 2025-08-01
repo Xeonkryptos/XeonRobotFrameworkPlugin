@@ -34,32 +34,23 @@ public class KeywordDto implements DefinedKeyword {
     private final String name;
     private final String keywordFunctionName;
     private final boolean args;
-    private final String namespace;
     private final Collection<DefinedParameter> parameters;
     private final boolean deprecated;
 
-    public KeywordDto(@NotNull PsiElement reference, @NotNull String namespace, @NotNull String name) {
-        this(reference, namespace, name, null);
+    public KeywordDto(@NotNull PsiElement reference, @NotNull String name) {
+        this(reference, name, null);
     }
 
-    // Used for user defined keywords
-    public KeywordDto(@NotNull PsiElement reference, @NotNull String name, @Nullable Collection<DefinedParameter> parameters) {
-        this(reference, "", name, parameters);
+    public KeywordDto(@NotNull PsiElement reference, @NotNull String name, Collection<PyParameter> parameters) {
+        this(reference, name, convertPyParameters(parameters));
     }
 
-    public KeywordDto(@NotNull PsiElement reference, @NotNull String namespace, @NotNull String name, Collection<PyParameter> parameters) {
-        this(reference, namespace, name, convertPyParameters(parameters));
-    }
-
-    public KeywordDto(@NotNull PsiElement reference,
-                      @NotNull String namespace,
-                      @NotNull String name,
+    public KeywordDto(@NotNull PsiElement reference, @NotNull String name,
                       Collection<DefinedParameter> parameters,
                       Object... ignored) { // Object... ignored is just a trick to avoid constructor clashing
         this.reference = reference;
         this.name = PatternUtil.functionToKeyword(name).trim();
         this.keywordFunctionName = PatternUtil.keywordToFunction(name).trim();
-        this.namespace = namespace;
         this.args = parameters != null && !parameters.isEmpty();
         this.parameters = parameters;
         if (reference instanceof PyElement) {
@@ -130,9 +121,9 @@ public class KeywordDto implements DefinedKeyword {
             return false;
         }
         String keywordToFunction = PatternUtil.keywordToFunction(text).trim();
-        if (namespace != null && text.startsWith(namespace + ".")) {
-            keywordToFunction = keywordToFunction.substring(namespace.length() + 1);
-        }
+//        if (namespace != null && text.startsWith(namespace + ".")) {
+//            keywordToFunction = keywordToFunction.substring(namespace.length() + 1);
+//        }
         return keywordFunctionName.equalsIgnoreCase(keywordToFunction);
     }
 

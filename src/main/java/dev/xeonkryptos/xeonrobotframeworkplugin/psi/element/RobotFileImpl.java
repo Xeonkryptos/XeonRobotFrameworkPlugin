@@ -16,9 +16,9 @@ import com.intellij.psi.util.CachedValueProvider.Result;
 import com.intellij.psi.util.CachedValuesManager;
 import com.intellij.psi.util.ParameterizedCachedValue;
 import com.jetbrains.python.psi.PyClass;
+import dev.xeonkryptos.xeonrobotframeworkplugin.ide.config.RobotOptionsProvider;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotLanguage;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.dto.ImportType;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.dto.KeywordFileWithDependentsWrapper;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.ref.PythonResolver;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.ref.RobotFileManager;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.ref.RobotPythonClass;
@@ -27,12 +27,12 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.visitor.RobotSectionVariable
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.visitor.RobotUsedFilesCollector;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.visitor.RobotUserKeywordsCollector;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -42,8 +42,7 @@ public class RobotFileImpl extends PsiFileBase implements KeywordFile, RobotFile
 
     private static final String ROBOT_BUILT_IN = "robot.libraries.BuiltIn";
 
-    private static final Key<CachedValue<Collection<KeywordFile>>> TRANSITIVELY_IMPORTED_FILES_CACHE_KEY = Key.create("Transitively imported files");
-    private static final Key<CachedValue<Collection<KeywordFile>>> NON_TRANSITIVELY_IMPORTED_FILES_CACHE_KEY = Key.create("Non-Transitively imported files");
+    private static final Key<ParameterizedCachedValue<Collection<KeywordFile>, Boolean>> IMPORTED_FILES_CACHE_KEY = Key.create("IMPORTED_FILES_CACHE");
     private static final Key<CachedValue<Collection<KeywordFile>>> DIRECTLY_IMPORTED_FILES_CACHE_KEY = Key.create("DIRECTLY_IMPORTED_FILES_CACHE");
     private static final Key<ParameterizedCachedValue<Collection<VirtualFile>, Boolean>> IMPORTED_VIRTUAL_FILES_CACHE_KEY = Key.create(
             "IMPORTED_VIRTUAL_FILES_CACHE");
@@ -74,7 +73,7 @@ public class RobotFileImpl extends PsiFileBase implements KeywordFile, RobotFile
     @NotNull
     @Override
     public final Collection<DefinedVariable> getDefinedVariables() {
-        return getDefinedVariables(new HashSet<>());
+        return getDefinedVariables(new LinkedHashSet<>());
     }
 
     @NotNull
@@ -93,7 +92,8 @@ public class RobotFileImpl extends PsiFileBase implements KeywordFile, RobotFile
             }
         }
 
-        Set<DefinedVariable> variables = new HashSet<>(sectionVariables.size() + globalVariables.size() + definedVariables.size() + importedVariables.size());
+        Set<DefinedVariable> variables = new LinkedHashSet<>(
+                sectionVariables.size() + globalVariables.size() + definedVariables.size() + importedVariables.size());
         variables.addAll(sectionVariables);
         variables.addAll(globalVariables);
         variables.addAll(definedVariables);
@@ -202,37 +202,24 @@ public class RobotFileImpl extends PsiFileBase implements KeywordFile, RobotFile
 
     @NotNull
     @Override
-    public Collection<KeywordFile> getImportedFiles(boolean includeTransitive) {
-        Key<CachedValue<Collection<KeywordFile>>> key = includeTransitive ? TRANSITIVELY_IMPORTED_FILES_CACHE_KEY : NON_TRANSITIVELY_IMPORTED_FILES_CACHE_KEY;
-        return CachedValuesManager.getCachedValue(this, key, () -> {
-            Set<KeywordFile> results = new LinkedHashSet<>();
-            for (KeywordFile keywordFile : collectImportFiles()) {
-                collectTransitiveKeywordFiles(results, keywordFile, includeTransitive);
-            }
-            Object[] dependents = Stream.concat(results.stream().map(KeywordFile::getPsiFile), Stream.of(this)).distinct().toArray();
-            return new Result<>(results, dependents);
-        });
+    public Collection<KeywordFile> findImportedFilesWithLibraryName(@NotNull String libraryName) {
+        boolean includeTransitive = RobotOptionsProvider.getInstance(getProject()).allowTransitiveImports();
+        return getImportedFiles(includeTransitive).stream()
+                                                  .filter(importedFile -> libraryName.equals(importedFile.getLibraryName()))
+                                                  .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
     @NotNull
     @Override
-    public Collection<KeywordFileWithDependentsWrapper> getImportedFilesWithDependents(boolean includeTransitive) {
-        Set<KeywordFileWithParentWrapper> results = new LinkedHashSet<>();
-        for (KeywordFile keywordFile : collectImportFiles()) {
-            collectTransitiveKeywordFilesWithDependencyTracking(results, this, keywordFile, includeTransitive);
-        }
-        Map<KeywordFile, Set<KeywordFile>> childParentIndex = results.stream()
-                                                                     .collect(Collectors.groupingBy(wrapper -> wrapper.keywordFile,
-                                                                                                    Collectors.mapping(wrapper -> wrapper.parent,
-                                                                                                                       Collectors.toCollection(LinkedHashSet::new))));
-        return results.stream().map(KeywordFileWithParentWrapper::keywordFile).map(keywordFile -> {
-            Set<KeywordFile> detectedParents = childParentIndex.get(keywordFile);
-            Set<KeywordFile> parents = new LinkedHashSet<>();
-            for (KeywordFile detectedParent : detectedParents) {
-                collectCompleteImportParentTree(detectedParent, childParentIndex, parents);
+    public Collection<KeywordFile> getImportedFiles(boolean includeTransitive) {
+        return CachedValuesManager.getManager(getProject()).getParameterizedCachedValue(this, IMPORTED_FILES_CACHE_KEY, transitive -> {
+            Set<KeywordFile> results = new LinkedHashSet<>();
+            for (KeywordFile keywordFile : collectImportFiles()) {
+                collectTransitiveKeywordFiles(results, keywordFile, transitive);
             }
-            return new KeywordFileWithDependentsWrapper(keywordFile, parents);
-        }).collect(Collectors.toCollection(LinkedHashSet::new));
+            Object[] dependents = Stream.concat(results.stream().map(KeywordFile::getPsiFile), Stream.of(this)).distinct().toArray();
+            return new Result<>(results, dependents);
+        }, false, includeTransitive);
     }
 
     private Collection<KeywordFile> collectImportFiles() {
@@ -241,17 +228,6 @@ public class RobotFileImpl extends PsiFileBase implements KeywordFile, RobotFile
             acceptChildren(importFilesCollector);
             return Result.create(importFilesCollector.getFiles(), this);
         });
-    }
-
-    private void collectCompleteImportParentTree(KeywordFile parent, Map<KeywordFile, Set<KeywordFile>> childParentsIndex, Collection<KeywordFile> parents) {
-        if (parents.add(parent)) {
-            Set<KeywordFile> foundParents = childParentsIndex.get(parent);
-            if (foundParents != null) {
-                for (KeywordFile foundParent : foundParents) {
-                    collectCompleteImportParentTree(foundParent, childParentsIndex, parents);
-                }
-            }
-        }
     }
 
     private void addBuiltInImports(@NotNull Collection<KeywordFile> files) {
@@ -287,18 +263,11 @@ public class RobotFileImpl extends PsiFileBase implements KeywordFile, RobotFile
         }
     }
 
-    private void collectTransitiveKeywordFilesWithDependencyTracking(Collection<KeywordFileWithParentWrapper> results,
-                                                                     KeywordFile parentFile,
-                                                                     KeywordFile keywordFile,
-                                                                     boolean includeTransitive) {
-        if (results.add(new KeywordFileWithParentWrapper(keywordFile, parentFile)) && includeTransitive) {
-            for (KeywordFile child : keywordFile.getImportedFiles(false)) {
-                collectTransitiveKeywordFilesWithDependencyTracking(results, keywordFile, child, true);
-            }
-        }
+    @Nullable
+    @Override
+    public String getLibraryName() {
+        return null;
     }
-
-    private record KeywordFileWithParentWrapper(KeywordFile keywordFile, KeywordFile parent) {}
 
     @Override
     public String toString() {

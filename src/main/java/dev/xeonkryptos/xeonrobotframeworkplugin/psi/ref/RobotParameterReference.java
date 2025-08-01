@@ -1,7 +1,6 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.psi.ref;
 
 import com.intellij.psi.PsiElement;
-import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiReference;
 import com.intellij.psi.PsiReferenceBase;
 import com.intellij.psi.impl.source.resolve.ResolveCache;
@@ -10,6 +9,7 @@ import com.jetbrains.python.psi.PyClass;
 import dev.xeonkryptos.xeonrobotframeworkplugin.ide.config.RobotOptionsProvider;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.DefinedParameter;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCall;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCallName;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLibraryImportGlobalSetting;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotParameterId;
 import org.jetbrains.annotations.NotNull;
@@ -57,9 +57,8 @@ public class RobotParameterReference extends PsiReferenceBase<RobotParameterId> 
                                           .orElse(null);
         if (reference == null) {
             // Fall back to PyFunction element. The parameter itself couldn't be found
-            String keywordStatementName = keywordCall.getName();
-            PsiFile containingFile = keywordCall.getContainingFile();
-            reference = ResolverUtils.findKeywordReference(keywordStatementName, containingFile);
+            RobotKeywordCallName keywordCallName = keywordCall.getKeywordCallName();
+            reference = keywordCallName.getReference().resolve();
         }
         return reference;
     }

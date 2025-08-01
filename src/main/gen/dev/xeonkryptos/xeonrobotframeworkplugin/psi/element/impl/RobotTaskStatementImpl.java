@@ -10,6 +10,7 @@ import com.intellij.psi.util.PsiTreeUtil;
 import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.*;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.*;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotPsiImplUtil;
+import javax.swing.Icon;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotTaskStatementStub;
 import com.intellij.psi.stubs.IStubElementType;
 
@@ -66,6 +67,16 @@ public class RobotTaskStatementImpl extends RobotTaskExtension implements RobotT
   @Override
   public @NotNull String getName() {
     return RobotPsiImplUtil.getName(this);
+  }
+
+  @Override
+  public @NotNull Icon getIcon(int flags) {
+    return RobotPsiImplUtil.getIcon(this, flags);
+  }
+
+  @Override
+  public @NotNull String getQualifiedName() {
+    return RobotPsiImplUtil.getQualifiedName(this);
   }
 
 }

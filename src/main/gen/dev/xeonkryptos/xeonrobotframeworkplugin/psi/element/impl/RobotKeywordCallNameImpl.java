@@ -10,15 +10,16 @@ import com.intellij.psi.util.PsiTreeUtil;
 import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.*;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.*;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotPsiImplUtil;
+import com.intellij.psi.PsiReference;
 
-public class RobotTemplateParameterImpl extends RobotPsiElementBase implements RobotTemplateParameter {
+public class RobotKeywordCallNameImpl extends RobotPsiElementBase implements RobotKeywordCallName {
 
-  public RobotTemplateParameterImpl(@NotNull ASTNode node) {
+  public RobotKeywordCallNameImpl(@NotNull ASTNode node) {
     super(node);
   }
 
   public void accept(@NotNull RobotVisitor visitor) {
-    visitor.visitTemplateParameter(this);
+    visitor.visitKeywordCallName(this);
   }
 
   @Override
@@ -29,20 +30,18 @@ public class RobotTemplateParameterImpl extends RobotPsiElementBase implements R
 
   @Override
   @Nullable
-  public RobotTemplateParameterArgument getTemplateParameterArgument() {
-    return PsiTreeUtil.getChildOfType(this, RobotTemplateParameterArgument.class);
+  public RobotKeywordCallLibrary getKeywordCallLibrary() {
+    return PsiTreeUtil.getChildOfType(this, RobotKeywordCallLibrary.class);
   }
 
   @Override
-  @Nullable
-  public RobotVariable getVariable() {
-    return PsiTreeUtil.getChildOfType(this, RobotVariable.class);
+  public @NotNull String getName() {
+    return RobotPsiImplUtil.getName(this);
   }
 
   @Override
-  @NotNull
-  public RobotTemplateParameterId getNameIdentifier() {
-    return notNullChild(PsiTreeUtil.getChildOfType(this, RobotTemplateParameterId.class));
+  public @NotNull PsiReference getReference() {
+    return RobotPsiImplUtil.getReference(this);
   }
 
 }

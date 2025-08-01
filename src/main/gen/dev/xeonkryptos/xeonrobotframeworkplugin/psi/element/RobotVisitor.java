@@ -81,19 +81,24 @@ public class RobotVisitor extends PsiElementVisitor {
   }
 
   public void visitKeywordCall(@NotNull RobotKeywordCall o) {
-    visitNamedElementExpression(o);
+    visitPsiNameIdentifierOwner(o);
     // visitKeywordCallExpression(o);
     // visitQualifiedNameOwner(o);
-    // visitPsiNameIdentifierOwner(o);
     // visitNavigationItem(o);
     // visitStatement(o);
   }
 
-  public void visitKeywordCallId(@NotNull RobotKeywordCallId o) {
-    visitPsiNamedElement(o);
-    // visitNamedElementExpression(o);
-    // visitReferenceElementExpression(o);
+  public void visitKeywordCallLibrary(@NotNull RobotKeywordCallLibrary o) {
+    visitPsiNameIdentifierOwner(o);
     // visitStatement(o);
+  }
+
+  public void visitKeywordCallLibraryName(@NotNull RobotKeywordCallLibraryName o) {
+    visitStatement(o);
+  }
+
+  public void visitKeywordCallName(@NotNull RobotKeywordCallName o) {
+    visitStatement(o);
   }
 
   public void visitKeywordVariableStatement(@NotNull RobotKeywordVariableStatement o) {
@@ -111,8 +116,6 @@ public class RobotVisitor extends PsiElementVisitor {
 
   public void visitLanguageId(@NotNull RobotLanguageId o) {
     visitPsiNamedElement(o);
-    // visitNamedElementExpression(o);
-    // visitReferenceElementExpression(o);
     // visitStatement(o);
   }
 
@@ -131,8 +134,7 @@ public class RobotVisitor extends PsiElementVisitor {
   }
 
   public void visitLocalSetting(@NotNull RobotLocalSetting o) {
-    visitNamedElementExpression(o);
-    // visitPsiNameIdentifierOwner(o);
+    visitPsiNameIdentifierOwner(o);
     // visitStatement(o);
   }
 
@@ -143,8 +145,6 @@ public class RobotVisitor extends PsiElementVisitor {
 
   public void visitLocalSettingId(@NotNull RobotLocalSettingId o) {
     visitPsiNamedElement(o);
-    // visitNamedElementExpression(o);
-    // visitReferenceElementExpression(o);
     // visitStatement(o);
   }
 
@@ -159,7 +159,6 @@ public class RobotVisitor extends PsiElementVisitor {
 
   public void visitParameter(@NotNull RobotParameter o) {
     visitPsiNameIdentifierOwner(o);
-    // visitNamedElementExpression(o);
     // visitNavigationItem(o);
     // visitArgument(o);
     // visitStatement(o);
@@ -167,15 +166,11 @@ public class RobotVisitor extends PsiElementVisitor {
 
   public void visitParameterId(@NotNull RobotParameterId o) {
     visitPsiNamedElement(o);
-    // visitNamedElementExpression(o);
-    // visitReferenceElementExpression(o);
     // visitStatement(o);
   }
 
   public void visitPositionalArgument(@NotNull RobotPositionalArgument o) {
-    visitReferenceElementExpression(o);
-    // visitNavigationItem(o);
-    // visitArgument(o);
+    visitArgument(o);
     // visitStatement(o);
   }
 
@@ -199,7 +194,6 @@ public class RobotVisitor extends PsiElementVisitor {
 
   public void visitSection(@NotNull RobotSection o) {
     visitStatement(o);
-    // visitNamedElementExpression(o);
     // visitPsiNameIdentifierOwner(o);
   }
 
@@ -209,7 +203,6 @@ public class RobotVisitor extends PsiElementVisitor {
 
   public void visitSetupTeardownStatementsGlobalSetting(@NotNull RobotSetupTeardownStatementsGlobalSetting o) {
     visitGlobalSettingStatement(o);
-    // visitNamedElementExpression(o);
     // visitPsiNameIdentifierOwner(o);
     // visitPsiNameIdentifierOwner(o);
   }
@@ -231,8 +224,6 @@ public class RobotVisitor extends PsiElementVisitor {
 
   public void visitTaskId(@NotNull RobotTaskId o) {
     visitPsiNamedElement(o);
-    // visitNamedElementExpression(o);
-    // visitReferenceElementExpression(o);
     // visitStatement(o);
   }
 
@@ -266,8 +257,6 @@ public class RobotVisitor extends PsiElementVisitor {
 
   public void visitTemplateParameterId(@NotNull RobotTemplateParameterId o) {
     visitPsiNamedElement(o);
-    // visitNamedElementExpression(o);
-    // visitReferenceElementExpression(o);
     // visitStatement(o);
   }
 
@@ -278,8 +267,6 @@ public class RobotVisitor extends PsiElementVisitor {
 
   public void visitTestCaseId(@NotNull RobotTestCaseId o) {
     visitPsiNamedElement(o);
-    // visitNamedElementExpression(o);
-    // visitReferenceElementExpression(o);
     // visitStatement(o);
   }
 
@@ -309,8 +296,7 @@ public class RobotVisitor extends PsiElementVisitor {
   }
 
   public void visitUserKeywordStatement(@NotNull RobotUserKeywordStatement o) {
-    visitNamedElementExpression(o);
-    // visitQualifiedNameOwner(o);
+    visitQualifiedNameOwner(o);
     // visitUserKeywordStatementExpression(o);
     // visitPsiNameIdentifierOwner(o);
     // visitNavigationItem(o);
@@ -319,22 +305,16 @@ public class RobotVisitor extends PsiElementVisitor {
 
   public void visitUserKeywordStatementId(@NotNull RobotUserKeywordStatementId o) {
     visitPsiNamedElement(o);
-    // visitNamedElementExpression(o);
-    // visitReferenceElementExpression(o);
     // visitStatement(o);
   }
 
   public void visitVariable(@NotNull RobotVariable o) {
     visitPsiNameIdentifierOwner(o);
-    // visitReferenceElementExpression(o);
     // visitStatement(o);
   }
 
   public void visitVariableBodyId(@NotNull RobotVariableBodyId o) {
-    visitReferenceElementExpression(o);
-    // visitPsiNamedElement(o);
-    // visitNamedElementExpression(o);
-    // visitReferenceElementExpression(o);
+    visitPsiNamedElement(o);
     // visitStatement(o);
   }
 
@@ -382,11 +362,7 @@ public class RobotVisitor extends PsiElementVisitor {
     visitElement(o);
   }
 
-  public void visitNamedElementExpression(@NotNull RobotNamedElementExpression o) {
-    visitPsiElement(o);
-  }
-
-  public void visitReferenceElementExpression(@NotNull RobotReferenceElementExpression o) {
+  public void visitQualifiedNameOwner(@NotNull RobotQualifiedNameOwner o) {
     visitPsiElement(o);
   }
 

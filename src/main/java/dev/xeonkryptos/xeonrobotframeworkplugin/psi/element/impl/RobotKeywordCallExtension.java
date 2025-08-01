@@ -49,11 +49,6 @@ public abstract class RobotKeywordCallExtension extends RobotStubPsiElementBase<
     }
 
     @Override
-    public PsiElement getNameIdentifier() {
-        return getKeywordCallId();
-    }
-
-    @Override
     public Collection<DefinedParameter> getAvailableParameters() {
         Collection<DefinedParameter> localDefinedParameters = availableKeywordParameters;
         boolean pythonLiveInspection = RobotOptionsProvider.getInstance(getProject()).pythonLiveInspection();
@@ -71,7 +66,7 @@ public abstract class RobotKeywordCallExtension extends RobotStubPsiElementBase<
     private Collection<DefinedParameter> collectKeywordParameters() {
         Set<DefinedParameter> results = new LinkedHashSet<>();
 
-        PsiElement psiElement = getKeywordCallId().getReference().resolve();
+        PsiElement psiElement = getKeywordCallName().getReference().resolve();
         if (psiElement != null) {
             if (psiElement instanceof PyFunction pyFunction) {
                 RobotOptionsProvider robotOptionsProvider = RobotOptionsProvider.getInstance(pyFunction.getProject());

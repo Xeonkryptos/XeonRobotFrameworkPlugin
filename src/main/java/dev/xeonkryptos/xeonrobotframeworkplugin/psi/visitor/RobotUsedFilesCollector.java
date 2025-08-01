@@ -7,7 +7,7 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotExecutableState
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotGlobalSettingStatement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotImportGlobalSettingExpression;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCall;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCallId;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCallName;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLibraryImportGlobalSetting;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotParameter;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotPositionalArgument;
@@ -138,8 +138,8 @@ public final class RobotUsedFilesCollector extends RobotVisitor {
 
     @Override
     public void visitKeywordCall(@NotNull RobotKeywordCall o) {
-        RobotKeywordCallId keywordCallId = o.getKeywordCallId();
-        references.put(keywordCallId.getName(), keywordCallId.getReference());
+        RobotKeywordCallName keywordCallName = o.getKeywordCallName();
+        references.put(keywordCallName.getName(), keywordCallName.getReference());
         o.getAllCallArguments().forEach(argument -> argument.accept(this));
     }
 

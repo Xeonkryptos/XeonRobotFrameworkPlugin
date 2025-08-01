@@ -4,6 +4,10 @@
 
 ## Unreleased
 
+### Added
+
+- Support for keywords with a custom library name
+
 ### Changed
 
 - Improved code completion performance when variables are to be considered by ignoring system libraries

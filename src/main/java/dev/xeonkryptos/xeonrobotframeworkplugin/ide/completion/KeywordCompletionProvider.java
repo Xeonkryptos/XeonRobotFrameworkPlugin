@@ -47,12 +47,12 @@ class KeywordCompletionProvider extends CompletionProvider<CompletionParameters>
             section.accept(keywordCallHolderSection);
             if (keywordCallHolderSection.isKeywordCallHolderSection()) {
                 PsiElement positionContext = position.getContext();
-                RobotKeywordCall keywordStatement = PsiTreeUtil.getParentOfType(positionContext, RobotKeywordCall.class);
-                if (keywordStatement == null) {
+                RobotKeywordCall keywordCall = PsiTreeUtil.getParentOfType(positionContext, RobotKeywordCall.class);
+                if (keywordCall == null) {
                     return;
                 }
 
-                String name = keywordStatement.getName();
+                String name = keywordCall.getName();
                 KeywordCompletionModification keywordCompletionModification = KeywordCompletionModification.NONE;
                 if (!name.isEmpty()) {
                     char firstCharacter = name.charAt(0);
@@ -62,10 +62,10 @@ class KeywordCompletionProvider extends CompletionProvider<CompletionParameters>
                                                           .findFirst()
                                                           .orElse(KeywordCompletionModification.NONE);
                 }
-                Collection<DefinedParameter> alreadyAddedParameters = keywordStatement.getParameterList()
-                                                                                      .stream()
-                                                                                      .map(param -> new ParameterDto(param, param.getName(), null))
-                                                                                      .collect(Collectors.toSet());
+                Collection<DefinedParameter> alreadyAddedParameters = keywordCall.getParameterList()
+                                                                                 .stream()
+                                                                                 .map(param -> new ParameterDto(param, param.getName(), null))
+                                                                                 .collect(Collectors.toSet());
 
                 addDefinedKeywordsFromFile(result, parameters.getOriginalFile(), keywordCompletionModification, alreadyAddedParameters);
             }

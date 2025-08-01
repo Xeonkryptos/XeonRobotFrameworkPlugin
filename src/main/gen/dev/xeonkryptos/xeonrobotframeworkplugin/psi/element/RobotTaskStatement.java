@@ -8,6 +8,7 @@ import com.intellij.psi.PsiNameIdentifierOwner;
 import com.intellij.navigation.NavigationItem;
 import com.intellij.psi.StubBasedPsiElement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotTaskStatementStub;
+import javax.swing.Icon;
 
 public interface RobotTaskStatement extends PsiNameIdentifierOwner, RobotQualifiedNameOwner, NavigationItem, RobotStatement, StubBasedPsiElement<RobotTaskStatementStub> {
 
@@ -27,5 +28,9 @@ public interface RobotTaskStatement extends PsiNameIdentifierOwner, RobotQualifi
   RobotTaskId getNameIdentifier();
 
   @NotNull String getName();
+
+  @NotNull Icon getIcon(int flags);
+
+  @NotNull String getQualifiedName();
 
 }

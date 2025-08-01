@@ -12,7 +12,7 @@ import com.jetbrains.python.psi.PyFunction;
 import com.jetbrains.python.psi.PyStringLiteralExpression;
 import com.jetbrains.python.psi.StringLiteralExpression;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCall;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCallId;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCallName;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotUserKeywordStatement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.index.KeywordStatementNameIndex;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.PatternUtil;
@@ -65,8 +65,8 @@ public class RobotKeywordReferenceSearch extends QueryExecutorBase<PsiReference,
         Collection<RobotKeywordCall> keywordStatements = keywordStatementNameIndex.getKeywordCalls(keywordName, project, globalSearchScope);
         for (RobotKeywordCall keywordStatement : keywordStatements) {
             if (keywordStatement.isValid()) {
-                RobotKeywordCallId invokable = keywordStatement.getKeywordCallId();
-                if (!consumer.process(invokable.getReference())) {
+                RobotKeywordCallName keywordCallName = keywordStatement.getKeywordCallName();
+                if (!consumer.process(keywordCallName.getReference())) {
                     return true;
                 }
             }

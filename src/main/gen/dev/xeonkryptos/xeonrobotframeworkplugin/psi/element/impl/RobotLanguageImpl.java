@@ -29,7 +29,7 @@ public class RobotLanguageImpl extends RobotLanguageExtension implements RobotLa
 
   @Override
   @Nullable
-  public RobotLanguageId getLanguageId() {
+  public RobotLanguageId getNameIdentifier() {
     return PsiTreeUtil.getChildOfType(this, RobotLanguageId.class);
   }
 

@@ -7,7 +7,6 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLocalSetting;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotUserKeywordStatement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotStubPsiElementBase;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotUserKeywordStub;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.QualifiedNameBuilder;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.visitor.RobotUserKeywordInputArgumentCollector;
 import org.jetbrains.annotations.NotNull;
 
@@ -38,11 +37,5 @@ public abstract class RobotUserKeywordExtension extends RobotStubPsiElementBase<
             return inputArgumentCollector.getInputArguments();
         }
         return List.of();
-    }
-
-    @NotNull
-    @Override
-    public String getQualifiedName() {
-        return QualifiedNameBuilder.computeQualifiedName(this);
     }
 }

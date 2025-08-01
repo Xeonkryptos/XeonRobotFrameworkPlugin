@@ -26,7 +26,7 @@ public final class RobotImportFilesCollector extends RobotVisitor {
 
     private final Set<KeywordFile> files = new LinkedHashSet<>();
 
-    private String namespace;
+    private String newLibraryName;
 
     @Override
     public void visitRoot(@NotNull RobotRoot o) {
@@ -54,15 +54,14 @@ public final class RobotImportFilesCollector extends RobotVisitor {
 
         PsiElement resolved = positionalArgument.getReference().resolve();
         RobotNewLibraryName newLibraryName = o.getNewLibraryName();
-        boolean isDifferentNamespace = newLibraryName != null;
-        if (isDifferentNamespace) {
-            namespace = newLibraryName.getText();
+        if (newLibraryName != null) {
+            this.newLibraryName = newLibraryName.getText();
         }
 
         if (resolved instanceof PyClass pyClass) {
-            files.add(new RobotPythonClass(namespace, pyClass, ImportType.LIBRARY));
+            files.add(new RobotPythonClass(this.newLibraryName, pyClass, ImportType.LIBRARY));
         } else if (resolved instanceof PyFile file) {
-            files.add(new RobotPythonFile(namespace, file, ImportType.LIBRARY));
+            files.add(new RobotPythonFile(this.newLibraryName, file, ImportType.LIBRARY));
         }
     }
 
@@ -74,15 +73,15 @@ public final class RobotImportFilesCollector extends RobotVisitor {
         PsiElement resolved = positionalArgument.getReference().resolve();
 
         if (resolved instanceof PyClass pyClass) {
-            files.add(new RobotPythonClass(namespace, pyClass, ImportType.VARIABLES));
+            files.add(new RobotPythonClass(newLibraryName, pyClass, ImportType.VARIABLES));
         } else if (resolved instanceof PyFile file) {
-            files.add(new RobotPythonFile(namespace, file, ImportType.VARIABLES));
+            files.add(new RobotPythonFile(newLibraryName, file, ImportType.VARIABLES));
         }
     }
 
     @Override
     public void visitLiteralConstantValue(@NotNull RobotLiteralConstantValue o) {
-        namespace = o.getText();
+        newLibraryName = o.getText();
     }
 
     public Collection<KeywordFile> getFiles() {

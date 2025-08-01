@@ -34,7 +34,9 @@ public interface RobotTypes {
   IElementType INLINE_VARIABLE_STATEMENT = new RobotElementType("INLINE_VARIABLE_STATEMENT");
   IElementType KEYWORDS_SECTION = new RobotElementType("KEYWORDS_SECTION");
   IElementType KEYWORD_CALL = RobotKeywordCallStubElement.create("KEYWORD_CALL");
-  IElementType KEYWORD_CALL_ID = new RobotElementType("KEYWORD_CALL_ID");
+  IElementType KEYWORD_CALL_LIBRARY = new RobotElementType("KEYWORD_CALL_LIBRARY");
+  IElementType KEYWORD_CALL_LIBRARY_NAME = new RobotElementType("KEYWORD_CALL_LIBRARY_NAME");
+  IElementType KEYWORD_CALL_NAME = new RobotElementType("KEYWORD_CALL_NAME");
   IElementType KEYWORD_VARIABLE_STATEMENT = new RobotElementType("KEYWORD_VARIABLE_STATEMENT");
   IElementType LANGUAGE = new RobotElementType("LANGUAGE");
   IElementType LANGUAGE_ID = new RobotElementType("LANGUAGE_ID");
@@ -86,7 +88,6 @@ public interface RobotTypes {
   IElementType WHILE_LOOP_STRUCTURE = new RobotElementType("WHILE_LOOP_STRUCTURE");
 
   IElementType AND = new RobotTokenType("AND");
-  IElementType ARGUMENT_VALUE = new RobotTokenType("ARGUMENT_VALUE");
   IElementType ASSIGNMENT = new RobotTokenType("ASSIGNMENT");
   IElementType BREAK = new RobotTokenType("BREAK");
   IElementType BUT = new RobotTokenType("BUT");
@@ -107,6 +108,8 @@ public interface RobotTypes {
   IElementType GIVEN = new RobotTokenType("GIVEN");
   IElementType GROUP = new RobotTokenType("GROUP");
   IElementType IF = new RobotTokenType("IF");
+  IElementType KEYWORD_LIBRARY_NAME = new RobotTokenType("KEYWORD_LIBRARY_NAME");
+  IElementType KEYWORD_LIBRARY_SEPARATOR = new RobotTokenType("KEYWORD_LIBRARY_SEPARATOR");
   IElementType KEYWORD_NAME = new RobotTokenType("KEYWORD_NAME");
   IElementType LANGUAGE_KEYWORD = new RobotTokenType("LANGUAGE_KEYWORD");
   IElementType LANGUAGE_NAME = new RobotTokenType("LANGUAGE_NAME");
@@ -208,8 +211,14 @@ public interface RobotTypes {
       else if (type == KEYWORD_CALL) {
         return new RobotKeywordCallImpl(node);
       }
-      else if (type == KEYWORD_CALL_ID) {
-        return new RobotKeywordCallIdImpl(node);
+      else if (type == KEYWORD_CALL_LIBRARY) {
+        return new RobotKeywordCallLibraryImpl(node);
+      }
+      else if (type == KEYWORD_CALL_LIBRARY_NAME) {
+        return new RobotKeywordCallLibraryNameImpl(node);
+      }
+      else if (type == KEYWORD_CALL_NAME) {
+        return new RobotKeywordCallNameImpl(node);
       }
       else if (type == KEYWORD_VARIABLE_STATEMENT) {
         return new RobotKeywordVariableStatementImpl(node);

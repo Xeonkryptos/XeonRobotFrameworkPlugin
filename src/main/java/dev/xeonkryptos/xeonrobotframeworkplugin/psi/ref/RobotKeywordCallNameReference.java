@@ -4,9 +4,10 @@ import com.intellij.codeInsight.TailTypes;
 import com.intellij.codeInsight.lookup.LookupElementBuilder;
 import com.intellij.codeInsight.lookup.TailTypeDecorator;
 import com.intellij.icons.AllIcons.Nodes;
-import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiElementResolveResult;
 import com.intellij.psi.PsiFile;
-import com.intellij.psi.PsiReferenceBase;
+import com.intellij.psi.PsiPolyVariantReferenceBase;
+import com.intellij.psi.ResolveResult;
 import com.intellij.psi.impl.source.resolve.ResolveCache;
 import dev.xeonkryptos.xeonrobotframeworkplugin.ide.RobotTailTypes;
 import dev.xeonkryptos.xeonrobotframeworkplugin.ide.completion.KeywordCompletionModification;
@@ -15,56 +16,58 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.dto.ImportType;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.DefinedKeyword;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.KeywordFile;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotFile;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCallId;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCallLibrary;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCallName;
 import dev.xeonkryptos.xeonrobotframeworkplugin.util.LookupElementUtil;
 import org.apache.commons.text.WordUtils;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
-public class RobotKeywordReference extends PsiReferenceBase<RobotKeywordCallId> {
+public class RobotKeywordCallNameReference extends PsiPolyVariantReferenceBase<RobotKeywordCallName> {
 
-    public RobotKeywordReference(@NotNull RobotKeywordCallId keyword) {
+    public RobotKeywordCallNameReference(@NotNull RobotKeywordCallName keyword) {
         super(keyword, false);
     }
 
-    @Nullable
     @Override
-    public PsiElement resolve() {
-        RobotKeywordCallId keywordInvokable = getElement();
-        ResolveCache resolveCache = ResolveCache.getInstance(keywordInvokable.getProject());
-        return resolveCache.resolveWithCaching(this, (robotKeywordReference, incompleteCode) -> {
-            String keywordInvokableName = keywordInvokable.getName();
-            if (KeywordCompletionModification.isKeywordStartsWithModifier(keywordInvokableName)) {
-                keywordInvokableName = keywordInvokableName.substring(1);
-            }
-            PsiFile containingFile = keywordInvokable.getContainingFile();
-            return ResolverUtils.findKeywordReference(keywordInvokableName, containingFile);
+    public ResolveResult @NotNull [] multiResolve(boolean incompleteCode) {
+        RobotKeywordCallName keywordCallName = getElement();
+        ResolveCache resolveCache = ResolveCache.getInstance(keywordCallName.getProject());
+        return resolveCache.resolveWithCaching(this, (robotKeywordReference, incompCode) -> {
+            PsiFile containingFile = keywordCallName.getContainingFile();
+            return Arrays.stream(ResolverUtils.findKeywordReferences(keywordCallName, containingFile))
+                         .map(PsiElementResolveResult::new)
+                         .toArray(ResolveResult[]::new);
         }, false, false);
     }
 
     @Override
     public Object @NotNull [] getVariants() {
-        String name = getElement().getName();
-        String keywordPrefix = name.split("\\.")[0];
-        PsiFile containingFile = getElement().getContainingFile();
-
+        RobotKeywordCallName keywordCallName = getElement();
+        RobotKeywordCallLibrary keywordCallLibrary = keywordCallName.getKeywordCallLibrary();
+        String libraryName = keywordCallLibrary != null ? keywordCallLibrary.getName() : null;
+        PsiFile containingFile = keywordCallName.getContainingFile();
         if (containingFile instanceof RobotFile robotFile) {
-            boolean capitalizeKeywords = RobotOptionsProvider.getInstance(containingFile.getProject()).capitalizeKeywords();
-            for (KeywordFile keywordFile : robotFile.collectImportedFiles(true)) {
+            if (KeywordCompletionModification.isKeywordStartsWithModifier(libraryName)) {
+                libraryName = libraryName.substring(1);
+            }
+            RobotOptionsProvider optionsProvider = RobotOptionsProvider.getInstance(containingFile.getProject());
+            boolean capitalizeKeywords = optionsProvider.capitalizeKeywords();
+            boolean transitiveImports = optionsProvider.allowTransitiveImports();
+            for (KeywordFile keywordFile : robotFile.collectImportedFiles(transitiveImports)) {
                 if (keywordFile.getImportType() == ImportType.LIBRARY) {
-                    String libraryName = keywordFile.toString();
-                    if (keywordPrefix.equalsIgnoreCase(libraryName)) {
+                    String currentLibraryName = keywordFile.getLibraryName();
+                    if (libraryName == null || libraryName.equalsIgnoreCase(currentLibraryName)) {
                         Collection<DefinedKeyword> definedKeywords = keywordFile.getDefinedKeywords();
                         List<TailTypeDecorator<LookupElementBuilder>> tailTypeDecorators = new ArrayList<>();
 
                         for (DefinedKeyword definedKeyword : definedKeywords) {
                             String keywordName = capitalizeKeywords ? WordUtils.capitalize(definedKeyword.getKeywordName()) : definedKeyword.getKeywordName();
-                            String fullKeywordName = (capitalizeKeywords ? WordUtils.capitalize(libraryName) : libraryName) + "." + keywordName;
+                            String fullKeywordName = (capitalizeKeywords ? WordUtils.capitalize(currentLibraryName) : currentLibraryName) + "." + keywordName;
                             String[] lookupStrings = { fullKeywordName,
                                                        WordUtils.capitalize(fullKeywordName),
                                                        fullKeywordName.toLowerCase(),

@@ -6,7 +6,7 @@ import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiNameIdentifierOwner;
 
-public interface RobotSetupTeardownStatementsGlobalSetting extends RobotGlobalSettingStatement, RobotNamedElementExpression, PsiNameIdentifierOwner {
+public interface RobotSetupTeardownStatementsGlobalSetting extends RobotGlobalSettingStatement, PsiNameIdentifierOwner {
 
   @Nullable
   RobotKeywordCall getKeywordCall();

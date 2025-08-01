@@ -35,8 +35,8 @@ public class RobotKeywordCallImpl extends RobotKeywordCallExtension implements R
 
   @Override
   @NotNull
-  public RobotKeywordCallId getKeywordCallId() {
-    return notNullChild(PsiTreeUtil.getChildOfType(this, RobotKeywordCallId.class));
+  public RobotKeywordCallName getKeywordCallName() {
+    return notNullChild(PsiTreeUtil.getChildOfType(this, RobotKeywordCallName.class));
   }
 
   @Override
@@ -54,6 +54,11 @@ public class RobotKeywordCallImpl extends RobotKeywordCallExtension implements R
   @Override
   public @NotNull String getName() {
     return RobotPsiImplUtil.getName(this);
+  }
+
+  @Override
+  public @NotNull RobotKeywordCallName getNameIdentifier() {
+    return RobotPsiImplUtil.getNameIdentifier(this);
   }
 
 }

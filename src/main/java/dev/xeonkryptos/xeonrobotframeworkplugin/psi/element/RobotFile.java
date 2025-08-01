@@ -1,7 +1,6 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.psi.element;
 
 import com.intellij.psi.PsiFile;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.dto.KeywordFileWithDependentsWrapper;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
@@ -26,19 +25,10 @@ public interface RobotFile extends PsiFile {
      *
      * @return a collection of keyword files that this files knows about.
      */
-    @NotNull
-    Collection<KeywordFile> collectImportedFiles(boolean includeTransitive);
-
-    /**
-     * Gets all the imported keyword files that are considered in scope for this file. The result consists of a pair of files. The first parameter is the
-     * parent this file is imported from (e.g. the file that contains the import statement) and the second parameter is the imported file itself.
-     *
-     * @param includeTransitive if files that are imported by the imported files should be included as well
-     * @return a collection of keyword files that this file knows about
-     */
-    @NotNull
-    Collection<KeywordFileWithDependentsWrapper> getImportedFilesWithDependents(boolean includeTransitive);
+    @NotNull Collection<KeywordFile> collectImportedFiles(boolean includeTransitive);
 
     @NotNull
-    Collection<DefinedVariable> getDefinedVariables();
+    Collection<KeywordFile> findImportedFilesWithLibraryName(@NotNull String libraryName);
+
+    @NotNull Collection<DefinedVariable> getDefinedVariables();
 }

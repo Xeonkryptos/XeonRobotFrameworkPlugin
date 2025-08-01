@@ -2,16 +2,21 @@ package dev.xeonkryptos.xeonrobotframeworkplugin.psi.ref;
 
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
+import dev.xeonkryptos.xeonrobotframeworkplugin.ide.completion.KeywordCompletionModification;
 import dev.xeonkryptos.xeonrobotframeworkplugin.ide.config.RobotOptionsProvider;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.dto.ImportType;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.dto.VariableDto;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.DefinedKeyword;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.DefinedVariable;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.KeywordFile;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotFile;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCall;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCallLibrary;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCallName;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotPositionalArgument;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotUserKeywordStatement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariable;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.visitor.RobotLibraryNamesCollector;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.visitor.RobotSectionVariablesCollector;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -19,7 +24,9 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.Set;
 
 public class ResolverUtils {
@@ -27,29 +34,74 @@ public class ResolverUtils {
     private static final Collection<String> VARIABLE_SETTERS = Set.of("set test variable", "set suite variable", "set global variable");
 
     private ResolverUtils() {
+        throw new UnsupportedOperationException("Utility class cannot be instantiated");
     }
 
-    public static PsiElement findKeywordReference(@Nullable String keyword, @Nullable PsiFile psiFile) {
-        if (keyword == null || !(psiFile instanceof RobotFile robotFile)) {
+    @NotNull
+    public static PsiElement[] findKeywordReferences(@NotNull RobotKeywordCallName keywordCallName, @Nullable PsiFile psiFile) {
+        RobotKeywordCallLibrary keywordCallLibrary = keywordCallName.getKeywordCallLibrary();
+        String libraryName = keywordCallLibrary != null ? keywordCallLibrary.getName() : null;
+        String keywordName = keywordCallName.getName();
+        if (KeywordCompletionModification.isKeywordStartsWithModifier(libraryName)) {
+            libraryName = libraryName.substring(1);
+        } else if (libraryName == null && KeywordCompletionModification.isKeywordStartsWithModifier(keywordName)) {
+            keywordName = keywordName.substring(1);
+        }
+        if (libraryName != null) {
+            int libraryNameLength = libraryName.length();
+            keywordName = keywordName.substring(libraryNameLength + 1);
+        }
+        return findKeywordReferences(libraryName, keywordName, psiFile);
+    }
+
+    @NotNull
+    public static PsiElement[] findKeywordReferences(@Nullable String libraryName, @NotNull String keyword, @Nullable PsiFile psiFile) {
+        if (!(psiFile instanceof RobotFile robotFile)) {
             return null;
         }
 
+        Collection<PsiElement> keywordElements = new LinkedHashSet<>();
         for (DefinedKeyword definedKeyword : robotFile.getDefinedKeywords()) {
             if (definedKeyword.matches(keyword)) {
-                return definedKeyword.reference();
+                keywordElements.add(definedKeyword.reference());
             }
         }
 
-        boolean includeTransitive = RobotOptionsProvider.getInstance(psiFile.getProject()).allowTransitiveImports();
-        Collection<KeywordFile> importedFiles = robotFile.collectImportedFiles(includeTransitive);
+        Collection<KeywordFile> importedFiles;
+        if (libraryName != null) {
+            importedFiles = robotFile.findImportedFilesWithLibraryName(libraryName);
+        } else {
+            boolean includeTransitive = RobotOptionsProvider.getInstance(psiFile.getProject()).allowTransitiveImports();
+            importedFiles = robotFile.collectImportedFiles(includeTransitive);
+        }
+
         for (KeywordFile keywordFile : importedFiles) {
             for (DefinedKeyword definedKeyword : keywordFile.getDefinedKeywords()) {
                 if (definedKeyword.matches(keyword)) {
-                    return definedKeyword.reference();
+                    keywordElements.add(definedKeyword.reference());
                 }
             }
         }
-        return null;
+        return keywordElements.toArray(PsiElement[]::new);
+    }
+
+    @NotNull
+    public static PsiElement @NotNull [] findKeywordLibraryReference(@NotNull String libraryName, @Nullable PsiFile psiFile) {
+        if (!(psiFile instanceof RobotFile robotFile)) {
+            return PsiElement.EMPTY_ARRAY;
+        }
+        boolean includeTransitive = RobotOptionsProvider.getInstance(psiFile.getProject()).allowTransitiveImports();
+        return robotFile.collectImportedFiles(includeTransitive)
+                        .stream()
+                        .filter(keywordFile -> keywordFile.getImportType() == ImportType.RESOURCE)
+                        .flatMap(keywordFile -> {
+                            RobotLibraryNamesCollector libraryNamesCollector = new RobotLibraryNamesCollector();
+                            keywordFile.getPsiFile().acceptChildren(libraryNamesCollector);
+                            return libraryNamesCollector.getRenamedLibraries().entrySet().stream();
+                        })
+                        .filter(entry -> libraryName.equals(entry.getKey()))
+                        .map(Entry::getValue)
+                        .toArray(PsiElement[]::new);
     }
 
     @Nullable
@@ -94,7 +146,7 @@ public class ResolverUtils {
         }
 
         List<DefinedVariable> variables = new ArrayList<>();
-        PsiElement resolvedElement = keywordCall.getKeywordCallId().getReference().resolve();
+        PsiElement resolvedElement = keywordCall.getKeywordCallName().getReference().resolve();
         if (resolvedElement instanceof RobotUserKeywordStatement userKeywordStatement) {
             RobotSectionVariablesCollector variablesCollector = new RobotSectionVariablesCollector();
             userKeywordStatement.accept(variablesCollector);

@@ -49,13 +49,13 @@ public class RobotParser implements PsiParser, LightPsiParser {
   };
 
   /* ********************************************************** */
-  // keyword_call_id (parameter | positional_argument | ASSIGNMENT)*
+  // keyword_call_name (parameter | positional_argument | ASSIGNMENT)*
   static boolean base_keyword_call(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "base_keyword_call")) return false;
-    if (!nextTokenIs(b, KEYWORD_NAME)) return false;
+    if (!nextTokenIs(b, "", KEYWORD_LIBRARY_NAME, KEYWORD_NAME)) return false;
     boolean r, p;
     Marker m = enter_section_(b, l, _NONE_);
-    r = keyword_call_id(b, l + 1);
+    r = keyword_call_name(b, l + 1);
     p = r; // pin = 1
     r = r && base_keyword_call_1(b, l + 1);
     exit_section_(b, l, m, r, p, null);
@@ -331,12 +331,12 @@ public class RobotParser implements PsiParser, LightPsiParser {
   // base_keyword_call eol_marker?
   public static boolean eol_based_keyword_call(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "eol_based_keyword_call")) return false;
-    if (!nextTokenIs(b, KEYWORD_NAME)) return false;
+    if (!nextTokenIs(b, "<eol based keyword call>", KEYWORD_LIBRARY_NAME, KEYWORD_NAME)) return false;
     boolean r;
-    Marker m = enter_section_(b);
+    Marker m = enter_section_(b, l, _NONE_, KEYWORD_CALL, "<eol based keyword call>");
     r = base_keyword_call(b, l + 1);
     r = r && eol_based_keyword_call_1(b, l + 1);
-    exit_section_(b, m, KEYWORD_CALL, r);
+    exit_section_(b, l, m, r, false, null);
     return r;
   }
 
@@ -351,11 +351,11 @@ public class RobotParser implements PsiParser, LightPsiParser {
   // base_keyword_call
   public static boolean eol_free_keyword_call(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "eol_free_keyword_call")) return false;
-    if (!nextTokenIs(b, KEYWORD_NAME)) return false;
+    if (!nextTokenIs(b, "<eol free keyword call>", KEYWORD_LIBRARY_NAME, KEYWORD_NAME)) return false;
     boolean r;
-    Marker m = enter_section_(b);
+    Marker m = enter_section_(b, l, _NONE_, KEYWORD_CALL, "<eol free keyword call>");
     r = base_keyword_call(b, l + 1);
-    exit_section_(b, m, KEYWORD_CALL, r);
+    exit_section_(b, l, m, r, false, null);
     return r;
   }
 
@@ -852,15 +852,48 @@ public class RobotParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // KEYWORD_NAME
-  public static boolean keyword_call_id(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "keyword_call_id")) return false;
-    if (!nextTokenIs(b, KEYWORD_NAME)) return false;
+  // keyword_call_library_name KEYWORD_LIBRARY_SEPARATOR
+  public static boolean keyword_call_library(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "keyword_call_library")) return false;
+    if (!nextTokenIs(b, KEYWORD_LIBRARY_NAME)) return false;
     boolean r;
     Marker m = enter_section_(b);
-    r = consumeToken(b, KEYWORD_NAME);
-    exit_section_(b, m, KEYWORD_CALL_ID, r);
+    r = keyword_call_library_name(b, l + 1);
+    r = r && consumeToken(b, KEYWORD_LIBRARY_SEPARATOR);
+    exit_section_(b, m, KEYWORD_CALL_LIBRARY, r);
     return r;
+  }
+
+  /* ********************************************************** */
+  // KEYWORD_LIBRARY_NAME
+  public static boolean keyword_call_library_name(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "keyword_call_library_name")) return false;
+    if (!nextTokenIs(b, KEYWORD_LIBRARY_NAME)) return false;
+    boolean r;
+    Marker m = enter_section_(b);
+    r = consumeToken(b, KEYWORD_LIBRARY_NAME);
+    exit_section_(b, m, KEYWORD_CALL_LIBRARY_NAME, r);
+    return r;
+  }
+
+  /* ********************************************************** */
+  // keyword_call_library? KEYWORD_NAME
+  public static boolean keyword_call_name(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "keyword_call_name")) return false;
+    if (!nextTokenIs(b, "<keyword call name>", KEYWORD_LIBRARY_NAME, KEYWORD_NAME)) return false;
+    boolean r;
+    Marker m = enter_section_(b, l, _NONE_, KEYWORD_CALL_NAME, "<keyword call name>");
+    r = keyword_call_name_0(b, l + 1);
+    r = r && consumeToken(b, KEYWORD_NAME);
+    exit_section_(b, l, m, r, false, null);
+    return r;
+  }
+
+  // keyword_call_library?
+  private static boolean keyword_call_name_0(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "keyword_call_name_0")) return false;
+    keyword_call_library(b, l + 1);
+    return true;
   }
 
   /* ********************************************************** */
@@ -953,16 +986,15 @@ public class RobotParser implements PsiParser, LightPsiParser {
   public static boolean library_import_global_setting(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "library_import_global_setting")) return false;
     if (!nextTokenIs(b, LIBRARY_IMPORT_KEYWORD)) return false;
-    boolean r, p;
-    Marker m = enter_section_(b, l, _NONE_, LIBRARY_IMPORT_GLOBAL_SETTING, null);
+    boolean r;
+    Marker m = enter_section_(b);
     r = consumeToken(b, LIBRARY_IMPORT_KEYWORD);
     r = r && positional_argument(b, l + 1);
     r = r && library_import_global_setting_2(b, l + 1);
-    p = r; // pin = 3
-    r = r && report_error_(b, library_import_global_setting_3(b, l + 1));
-    r = p && eol_marker(b, l + 1) && r;
-    exit_section_(b, l, m, r, p, null);
-    return r || p;
+    r = r && library_import_global_setting_3(b, l + 1);
+    r = r && eol_marker(b, l + 1);
+    exit_section_(b, m, LIBRARY_IMPORT_GLOBAL_SETTING, r);
+    return r;
   }
 
   // (parameter | positional_argument)*
@@ -1188,13 +1220,13 @@ public class RobotParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // ARGUMENT_VALUE
+  // LITERAL_CONSTANT
   public static boolean new_library_name(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "new_library_name")) return false;
-    if (!nextTokenIs(b, ARGUMENT_VALUE)) return false;
+    if (!nextTokenIs(b, LITERAL_CONSTANT)) return false;
     boolean r;
     Marker m = enter_section_(b);
-    r = consumeToken(b, ARGUMENT_VALUE);
+    r = consumeToken(b, LITERAL_CONSTANT);
     exit_section_(b, m, NEW_LIBRARY_NAME, r);
     return r;
   }

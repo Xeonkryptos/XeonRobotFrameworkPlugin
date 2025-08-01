@@ -11,7 +11,7 @@ import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.*;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.*;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotPsiImplUtil;
 
-public class RobotSetupTeardownStatementsGlobalSettingImpl extends RobotSetupTeardownStatementsGlobalSettingExtension implements RobotSetupTeardownStatementsGlobalSetting {
+public class RobotSetupTeardownStatementsGlobalSettingImpl extends RobotGlobalSettingStatementImpl implements RobotSetupTeardownStatementsGlobalSetting {
 
   public RobotSetupTeardownStatementsGlobalSettingImpl(@NotNull ASTNode node) {
     super(node);
@@ -44,6 +44,11 @@ public class RobotSetupTeardownStatementsGlobalSettingImpl extends RobotSetupTea
   @NotNull
   public PsiElement getNameIdentifier() {
     return notNullChild(findChildByType(SETUP_TEARDOWN_STATEMENT_KEYWORDS));
+  }
+
+  @Override
+  public @NotNull String getName() {
+    return RobotPsiImplUtil.getName(this);
   }
 
 }

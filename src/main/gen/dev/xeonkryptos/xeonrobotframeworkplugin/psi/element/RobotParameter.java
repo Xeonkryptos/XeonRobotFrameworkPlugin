@@ -7,7 +7,7 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiNameIdentifierOwner;
 import com.intellij.navigation.NavigationItem;
 
-public interface RobotParameter extends PsiNameIdentifierOwner, RobotNamedElementExpression, NavigationItem, RobotArgument, RobotStatement {
+public interface RobotParameter extends PsiNameIdentifierOwner, NavigationItem, RobotArgument, RobotStatement {
 
   @Nullable
   RobotPositionalArgument getPositionalArgument();

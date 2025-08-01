@@ -11,7 +11,7 @@ import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.*;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.*;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotPsiImplUtil;
 
-public class RobotParameterImpl extends RobotParameterExtension implements RobotParameter {
+public class RobotParameterImpl extends RobotPsiElementBase implements RobotParameter {
 
   public RobotParameterImpl(@NotNull ASTNode node) {
     super(node);

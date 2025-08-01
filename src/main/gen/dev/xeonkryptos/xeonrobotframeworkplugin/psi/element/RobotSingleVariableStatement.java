@@ -14,4 +14,6 @@ public interface RobotSingleVariableStatement extends RobotVariableStatement, Ps
   @NotNull
   List<RobotVariableValue> getVariableValueList();
 
+  @NotNull RobotVariable getNameIdentifier();
+
 }

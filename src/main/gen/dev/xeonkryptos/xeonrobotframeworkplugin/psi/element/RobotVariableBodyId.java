@@ -7,7 +7,7 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiNamedElement;
 import com.intellij.psi.PsiReference;
 
-public interface RobotVariableBodyId extends RobotReferenceElementExpression, PsiNamedElement, RobotNamedElementExpression, RobotStatement {
+public interface RobotVariableBodyId extends PsiNamedElement, RobotStatement {
 
   @NotNull PsiReference getReference();
 

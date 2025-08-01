@@ -244,7 +244,7 @@ class RobotKeywordFileResolver {
         return keywordName;
     }
 
-    static void addDefinedKeywords(@NotNull PyClass pyClass, @NotNull String namespace, @NotNull Collection<DefinedKeyword> keywords) {
+    static void addDefinedKeywords(@NotNull PyClass pyClass, @NotNull Collection<DefinedKeyword> keywords) {
         Map<String, PyFunction> methods = new LinkedHashMap<>();
         String className = pyClass.getName();
         pyClass.visitMethods(method -> {
@@ -255,7 +255,7 @@ class RobotKeywordFileResolver {
             if (propertyDecorated) {
                 String attributeName = getValidName(methodName);
                 if (attributeName != null) {
-                    keywords.add(new KeywordDto(method, namespace, attributeName));
+                    keywords.add(new KeywordDto(method, attributeName));
                 }
                 return true;
             }
@@ -265,12 +265,18 @@ class RobotKeywordFileResolver {
             }
             return true;
         }, true, null);
+        String namespace = pyClass.getQualifiedName();
+        if (namespace == null && className != null) {
+            namespace = className;
+        } else {
+            namespace = "";
+        }
         addDefinedKeywords(pyClass, namespace, keywords, className, methods);
 
         pyClass.visitClassAttributes(attribute -> {
             String attributeName = getValidName(attribute.getName());
             if (attributeName != null) {
-                keywords.add(new KeywordDto(attribute, namespace, attributeName));
+                keywords.add(new KeywordDto(attribute, attributeName));
             }
             return true;
         }, true, null);
@@ -317,9 +323,7 @@ class RobotKeywordFileResolver {
                     if (keywordName != null) {
                         methodName = keywordName;
                     }
-                    keywords.add(new KeywordDto(method,
-                                                namespace,
-                                                methodName,
+                    keywords.add(new KeywordDto(method, methodName,
                                                 PythonInspector.convertPyParameters(parameters, method.getParameterList().getParameters(), true)));
                 }
             } catch (ProcessCanceledException e) {
@@ -336,7 +340,7 @@ class RobotKeywordFileResolver {
             if (keywordName != null) {
                 methodName = keywordName;
             }
-            keywords.add(new KeywordDto(method, namespace, methodName, Arrays.asList(method.getParameterList().getParameters())));
+            keywords.add(new KeywordDto(method, methodName, Arrays.asList(method.getParameterList().getParameters())));
         }
     }
 

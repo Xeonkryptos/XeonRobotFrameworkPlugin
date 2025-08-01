@@ -16,6 +16,7 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.DefinedKeyword;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.DefinedVariable;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.KeywordFile;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -28,12 +29,12 @@ public class RobotPythonFile implements KeywordFile {
 
     private static final Key<CachedValue<Collection<DefinedKeyword>>> KEYWORDS_CACHE_KEY = new Key<>("ROBOT_PYTHON_FILE_KEYWORDS_CACHE");
 
-    private final String namespace;
+    private final String library;
     private final PyFile pythonFile;
     private final ImportType importType;
 
-    public RobotPythonFile(@NotNull String namespace, @NotNull PyFile pythonFile, @NotNull ImportType importType) {
-        this.namespace = namespace;
+    public RobotPythonFile(@NotNull String library, @NotNull PyFile pythonFile, @NotNull ImportType importType) {
+        this.library = library;
         this.pythonFile = pythonFile;
         this.importType = importType;
     }
@@ -52,26 +53,19 @@ public class RobotPythonFile implements KeywordFile {
                         functions.put(functionName, function);
                     }
                 }
-                RobotKeywordFileResolver.addDefinedKeywords(pythonFile, namespace, keywordSet, functions);
+                RobotKeywordFileResolver.addDefinedKeywords(pythonFile, library, keywordSet, functions);
 
                 for (PyTargetExpression attribute : pythonFile.getTopLevelAttributes()) {
                     String attributeName = RobotKeywordFileResolver.getValidName(attribute.getName());
                     if (attributeName != null) {
-                        keywordSet.add(new KeywordDto(attribute, namespace, attributeName));
+                        keywordSet.add(new KeywordDto(attribute, attributeName));
                     }
                 }
 
                 for (PyClass pyClass : pythonFile.getTopLevelClasses()) {
                     String className = pyClass.getName();
                     if (className != null && !className.startsWith("_")) {
-                        className = pyClass.getQualifiedName();
-                        if (className == null) {
-                            className = "";
-                        }
-                        if (namespace.equals(className)) {
-                            className = namespace;
-                        }
-                        RobotKeywordFileResolver.addDefinedKeywords(pyClass, className, keywordSet);
+                        RobotKeywordFileResolver.addDefinedKeywords(pyClass, keywordSet);
                     }
                 }
                 return new Result<>(keywordSet, new Object[] { pythonFile });
@@ -119,17 +113,17 @@ public class RobotPythonFile implements KeywordFile {
             return false;
         }
         RobotPythonFile that = (RobotPythonFile) obj;
-        return namespace.equals(that.namespace) && pythonFile.equals(that.pythonFile);
+        return library.equals(that.library) && pythonFile.equals(that.pythonFile);
     }
 
     @Override
     public int hashCode() {
-        return 31 * namespace.hashCode() + pythonFile.hashCode();
+        return 31 * library.hashCode() + pythonFile.hashCode();
     }
 
     @Override
     public String toString() {
-        return namespace;
+        return library;
     }
 
     @Override
@@ -140,5 +134,11 @@ public class RobotPythonFile implements KeywordFile {
     @Override
     public final PsiFile getPsiFile() {
         return pythonFile;
+    }
+
+    @Nullable
+    @Override
+    public String getLibraryName() {
+        return library;
     }
 }

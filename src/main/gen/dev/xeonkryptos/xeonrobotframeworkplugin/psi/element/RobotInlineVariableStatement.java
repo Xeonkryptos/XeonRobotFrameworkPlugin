@@ -14,4 +14,8 @@ public interface RobotInlineVariableStatement extends RobotVariableStatement, Ps
   @NotNull
   List<RobotVariableValue> getVariableValueList();
 
+  @NotNull RobotVariable getNameIdentifier();
+
+  @Nullable String getName();
+
 }

@@ -4,10 +4,15 @@ package dev.xeonkryptos.xeonrobotframeworkplugin.psi.element;
 import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
-import com.intellij.psi.PsiNamedElement;
+import com.intellij.psi.PsiReference;
 
-public interface RobotLocalSettingId extends PsiNamedElement, RobotStatement {
+public interface RobotKeywordCallName extends RobotStatement {
+
+  @Nullable
+  RobotKeywordCallLibrary getKeywordCallLibrary();
 
   @NotNull String getName();
+
+  @NotNull PsiReference getReference();
 
 }

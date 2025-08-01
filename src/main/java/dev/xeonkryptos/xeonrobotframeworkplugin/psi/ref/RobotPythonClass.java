@@ -12,10 +12,11 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.DefinedKeyword;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.DefinedVariable;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.KeywordFile;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 public class RobotPythonClass implements KeywordFile {
@@ -37,8 +38,8 @@ public class RobotPythonClass implements KeywordFile {
     public final Collection<DefinedKeyword> getDefinedKeywords() {
         if (importType == ImportType.LIBRARY) {
             return CachedValuesManager.getCachedValue(pythonClass, KEYWORD_CACHE_KEY, () -> {
-                Set<DefinedKeyword> newKeywords = new HashSet<>();
-                RobotKeywordFileResolver.addDefinedKeywords(pythonClass, library, newKeywords);
+                Set<DefinedKeyword> newKeywords = new LinkedHashSet<>();
+                RobotKeywordFileResolver.addDefinedKeywords(pythonClass, newKeywords);
                 return new Result<>(newKeywords, new Object[] { pythonClass });
             });
         }
@@ -108,5 +109,11 @@ public class RobotPythonClass implements KeywordFile {
     @Override
     public final PsiFile getPsiFile() {
         return this.pythonClass.getContainingFile();
+    }
+
+    @Nullable
+    @Override
+    public String getLibraryName() {
+        return library;
     }
 }

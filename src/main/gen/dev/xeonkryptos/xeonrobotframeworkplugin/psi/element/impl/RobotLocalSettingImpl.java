@@ -11,7 +11,7 @@ import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.*;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.*;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotPsiImplUtil;
 
-public class RobotLocalSettingImpl extends RobotLocalSettingExtension implements RobotLocalSetting {
+public class RobotLocalSettingImpl extends RobotPsiElementBase implements RobotLocalSetting {
 
   public RobotLocalSettingImpl(@NotNull ASTNode node) {
     super(node);
@@ -55,6 +55,11 @@ public class RobotLocalSettingImpl extends RobotLocalSettingExtension implements
   @NotNull
   public RobotLocalSettingId getNameIdentifier() {
     return notNullChild(PsiTreeUtil.getChildOfType(this, RobotLocalSettingId.class));
+  }
+
+  @Override
+  public @NotNull String getName() {
+    return RobotPsiImplUtil.getName(this);
   }
 
 }

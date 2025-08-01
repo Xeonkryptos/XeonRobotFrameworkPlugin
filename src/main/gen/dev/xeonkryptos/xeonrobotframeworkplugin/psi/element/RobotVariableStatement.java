@@ -5,7 +5,10 @@ import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiNamedElement;
+import javax.swing.Icon;
 
 public interface RobotVariableStatement extends PsiNamedElement, RobotStatement {
+
+  @NotNull Icon getIcon(int flags);
 
 }

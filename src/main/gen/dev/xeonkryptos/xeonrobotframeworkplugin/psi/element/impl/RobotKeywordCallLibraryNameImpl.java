@@ -12,14 +12,14 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.*;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotPsiImplUtil;
 import com.intellij.psi.PsiReference;
 
-public class RobotKeywordCallIdImpl extends RobotPsiElementBase implements RobotKeywordCallId {
+public class RobotKeywordCallLibraryNameImpl extends RobotPsiElementBase implements RobotKeywordCallLibraryName {
 
-  public RobotKeywordCallIdImpl(@NotNull ASTNode node) {
+  public RobotKeywordCallLibraryNameImpl(@NotNull ASTNode node) {
     super(node);
   }
 
   public void accept(@NotNull RobotVisitor visitor) {
-    visitor.visitKeywordCallId(this);
+    visitor.visitKeywordCallLibraryName(this);
   }
 
   @Override
@@ -31,11 +31,6 @@ public class RobotKeywordCallIdImpl extends RobotPsiElementBase implements Robot
   @Override
   public @NotNull PsiReference getReference() {
     return RobotPsiImplUtil.getReference(this);
-  }
-
-  @Override
-  public @NotNull String getName() {
-    return RobotPsiImplUtil.getName(this);
   }
 
 }

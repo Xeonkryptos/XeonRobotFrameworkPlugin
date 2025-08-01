@@ -11,12 +11,13 @@ import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.*;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.*;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotPsiImplUtil;
 
-public class RobotInlineVariableStatementImpl extends RobotInlineVariableStatementExtension implements RobotInlineVariableStatement {
+public class RobotInlineVariableStatementImpl extends RobotVariableStatementImpl implements RobotInlineVariableStatement {
 
   public RobotInlineVariableStatementImpl(@NotNull ASTNode node) {
     super(node);
   }
 
+  @Override
   public void accept(@NotNull RobotVisitor visitor) {
     visitor.visitInlineVariableStatement(this);
   }
@@ -37,6 +38,16 @@ public class RobotInlineVariableStatementImpl extends RobotInlineVariableStateme
   @NotNull
   public List<RobotVariableValue> getVariableValueList() {
     return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotVariableValue.class);
+  }
+
+  @Override
+  public @NotNull RobotVariable getNameIdentifier() {
+    return RobotPsiImplUtil.getNameIdentifier(this);
+  }
+
+  @Override
+  public @Nullable String getName() {
+    return RobotPsiImplUtil.getName(this);
   }
 
 }

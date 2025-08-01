@@ -13,11 +13,6 @@ public abstract class RobotLanguageExtension extends RobotPsiElementBase impleme
     }
 
     @Override
-    public PsiElement getNameIdentifier() {
-        return getLanguageId();
-    }
-
-    @Override
     public PsiElement setName(@NotNull String newName) throws IncorrectOperationException {
         throw new IncorrectOperationException("Renaming operation is not supported for RobotLanguage elements.");
     }

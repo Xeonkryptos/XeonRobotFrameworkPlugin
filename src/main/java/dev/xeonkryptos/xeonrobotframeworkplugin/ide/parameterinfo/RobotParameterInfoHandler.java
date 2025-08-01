@@ -17,7 +17,7 @@ import com.intellij.psi.SyntaxTraverser;
 import com.intellij.util.ArrayUtilRt;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCall;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCallId;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCallName;
 import dev.xeonkryptos.xeonrobotframeworkplugin.util.GlobalConstants;
 import one.util.streamex.MoreCollectors;
 import one.util.streamex.StreamEx;
@@ -38,8 +38,8 @@ public class RobotParameterInfoHandler implements ParameterInfoHandler<RobotKeyw
         int offset = context.getOffset();
         RobotKeywordCall keywordCall = findKeywordCall(psiFile, offset);
         if (keywordCall != null) {
-            RobotKeywordCallId keywordCallId = keywordCall.getKeywordCallId();
-            PsiReference reference = keywordCallId.getReference();
+            RobotKeywordCallName keywordCallName = keywordCall.getKeywordCallName();
+            PsiReference reference = keywordCallName.getReference();
             PsiElement resolvedElement = reference.resolve();
             context.setItemsToShow(new Object[] { resolvedElement });
         }

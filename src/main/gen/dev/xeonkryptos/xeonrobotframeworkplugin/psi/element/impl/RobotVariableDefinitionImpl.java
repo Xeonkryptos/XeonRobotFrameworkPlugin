@@ -10,6 +10,7 @@ import com.intellij.psi.util.PsiTreeUtil;
 import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.*;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.*;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotPsiImplUtil;
+import javax.swing.Icon;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotVariableDefinitionStub;
 import com.intellij.psi.stubs.IStubElementType;
 
@@ -37,6 +38,26 @@ public class RobotVariableDefinitionImpl extends RobotVariableDefinitionExtensio
   @NotNull
   public RobotVariable getVariable() {
     return notNullChild(PsiTreeUtil.getChildOfType(this, RobotVariable.class));
+  }
+
+  @Override
+  public @NotNull RobotVariable getNameIdentifier() {
+    return RobotPsiImplUtil.getNameIdentifier(this);
+  }
+
+  @Override
+  public @Nullable String getName() {
+    return RobotPsiImplUtil.getName(this);
+  }
+
+  @Override
+  public @NotNull Icon getIcon(int flags) {
+    return RobotPsiImplUtil.getIcon(this, flags);
+  }
+
+  @Override
+  public @NotNull String getQualifiedName() {
+    return RobotPsiImplUtil.getQualifiedName(this);
   }
 
 }

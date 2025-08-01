@@ -6,9 +6,13 @@ import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiNameIdentifierOwner;
 
-public interface RobotLanguage extends RobotStatement, PsiNameIdentifierOwner {
+public interface RobotKeywordCallLibrary extends PsiNameIdentifierOwner, RobotStatement {
 
-  @Nullable
-  RobotLanguageId getNameIdentifier();
+  @NotNull
+  RobotKeywordCallLibraryName getKeywordCallLibraryName();
+
+  @NotNull String getName();
+
+  @NotNull RobotKeywordCallLibraryName getNameIdentifier();
 
 }

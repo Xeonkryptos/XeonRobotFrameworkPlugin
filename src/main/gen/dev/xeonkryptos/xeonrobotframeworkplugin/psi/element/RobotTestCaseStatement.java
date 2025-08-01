@@ -8,6 +8,7 @@ import com.intellij.psi.PsiNameIdentifierOwner;
 import com.intellij.navigation.NavigationItem;
 import com.intellij.psi.StubBasedPsiElement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotTestCaseStatementStub;
+import javax.swing.Icon;
 
 public interface RobotTestCaseStatement extends PsiNameIdentifierOwner, RobotQualifiedNameOwner, NavigationItem, RobotStatement, StubBasedPsiElement<RobotTestCaseStatementStub> {
 
@@ -27,5 +28,9 @@ public interface RobotTestCaseStatement extends PsiNameIdentifierOwner, RobotQua
   RobotTestCaseId getNameIdentifier();
 
   @NotNull String getName();
+
+  @NotNull Icon getIcon(int flags);
+
+  @NotNull String getQualifiedName();
 
 }

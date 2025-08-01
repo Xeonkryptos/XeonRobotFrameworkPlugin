@@ -6,7 +6,7 @@ import com.intellij.usages.UsageTarget;
 import com.intellij.usages.impl.rules.UsageType;
 import com.intellij.usages.impl.rules.UsageTypeProviderEx;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCall;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCallId;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCallName;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -23,7 +23,7 @@ public class RobotUsageTypeProvider implements UsageTypeProviderEx {
     @Nullable
     @Override
     public UsageType getUsageType(PsiElement element, UsageTarget @NotNull [] targets) {
-        if (element instanceof RobotKeywordCall || element instanceof RobotKeywordCallId) {
+        if (element instanceof RobotKeywordCall || element instanceof RobotKeywordCallName) {
             return KEYWORD_USAGE_TYPE;
         }
         return null;

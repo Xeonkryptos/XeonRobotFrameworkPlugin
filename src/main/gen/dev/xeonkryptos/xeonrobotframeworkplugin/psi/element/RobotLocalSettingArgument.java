@@ -14,4 +14,6 @@ public interface RobotLocalSettingArgument extends PsiNameIdentifierOwner, Robot
   @NotNull
   RobotVariable getVariable();
 
+  @Nullable RobotVariableBodyId getNameIdentifier();
+
 }

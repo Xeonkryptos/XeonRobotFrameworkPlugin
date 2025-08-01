@@ -4,20 +4,15 @@ import com.intellij.lang.ASTNode;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.stubs.IStubElementType;
 import com.intellij.psi.util.PsiTreeUtil;
-import dev.xeonkryptos.xeonrobotframeworkplugin.ide.icons.RobotIcons;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotResourceFileType;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariable;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableDefinition;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableStatement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariablesSection;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotStubPsiElementBase;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotVariableDefinitionStub;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.QualifiedNameBuilder;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.ReservedVariableScope;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-
-import javax.swing.Icon;
 
 public abstract class RobotVariableDefinitionExtension extends RobotStubPsiElementBase<RobotVariableDefinitionStub, RobotVariableDefinition>
         implements RobotVariableDefinition {
@@ -28,17 +23,6 @@ public abstract class RobotVariableDefinitionExtension extends RobotStubPsiEleme
 
     public RobotVariableDefinitionExtension(RobotVariableDefinitionStub stub, IStubElementType<RobotVariableDefinitionStub, RobotVariableDefinition> nodeType) {
         super(stub, nodeType);
-    }
-
-    @Override
-    public String getName() {
-        RobotVariable nameIdentifier = getVariable();
-        return nameIdentifier.getName();
-    }
-
-    @Override
-    public RobotVariable getNameIdentifier() {
-        return getVariable();
     }
 
     @Override
@@ -63,12 +47,6 @@ public abstract class RobotVariableDefinitionExtension extends RobotStubPsiEleme
         return text.equalsIgnoreCase(variableName);
     }
 
-    @NotNull
-    @Override
-    public Icon getIcon(int flags) {
-        return RobotIcons.VARIABLE;
-    }
-
     @Override
     public String getLookup() {
         return getText();
@@ -82,11 +60,5 @@ public abstract class RobotVariableDefinitionExtension extends RobotStubPsiEleme
     @Override
     public PsiElement reference() {
         return this;
-    }
-
-    @NotNull
-    @Override
-    public String getQualifiedName() {
-        return QualifiedNameBuilder.computeQualifiedName(this);
     }
 }

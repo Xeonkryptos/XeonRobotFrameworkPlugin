@@ -153,6 +153,12 @@ GenericSettingsKeyword = [\p{L}\p{N}_]+([ ][\p{L}\p{N}_])*
 AllowedChar = [^\s$@%&=] | [<>!=] = | [$@%&] [^{]
 AllowedSeq = {AllowedChar}+
 
+AllowedKeywordLibraryNameChar = [\p{L}\p{N}_-]
+AllowedKeywordLibraryNameSeq = {AllowedKeywordLibraryNameChar}+
+
+AllowedKeywordChar = [^\s$@%&.] | [$@%&] [^{]
+AllowedKeywordSeq = {AllowedKeywordChar}+
+
 AllowedVarChar = [\p{L}\p{N}_\s]
 AllowedVarSeq = {AllowedVarChar}+
 
@@ -163,6 +169,8 @@ AllowedParamChar = [^\s$@%&] | [$@%&] [^{]
 AllowedParamSeq = {AllowedParamChar}+
 
 RestrictedLiteralValue = {AllowedSeq} ({Space} {AllowedSeq})*
+KeywordLibraryNameLiteralValue = [/*]? {AllowedKeywordLibraryNameSeq}+ "."
+KeywordLiteralValue = {AllowedKeywordSeq} ({Space} {AllowedKeywordSeq})*
 VariableLiteralValue =   {AllowedVarSeq} ({Space} {AllowedVarSeq})*
 ExtendedVariableLiteralValue =   {AllowedExtendedVarSeq}
 ParamLiteralValue =      {AllowedParamSeq} ({Space} {AllowedParamSeq})*
@@ -290,7 +298,6 @@ LineComment = {LineCommentSign} {NON_EOL}*
 
 <SETTINGS_SECTION> {
     {LibraryImportKeyword} \s+             { enterNewState(SETTING); pushBackTrailingWhitespace(); return LIBRARY_IMPORT_KEYWORD; }
-    {WithNameKeyword} \s+                  { enterNewState(SETTING); pushBackTrailingWhitespace(); return WITH_NAME; }
     {ResourceImportKeyword} \s+            { enterNewState(SETTING); pushBackTrailingWhitespace(); return RESOURCE_IMPORT_KEYWORD; }
     {VariablesImportKeyword} \s+           { enterNewState(SETTING); pushBackTrailingWhitespace(); return VARIABLES_IMPORT_KEYWORD; }
     {NameKeyword} \s+                      { enterNewState(SETTING); pushBackTrailingWhitespace(); return SUITE_NAME_KEYWORD; }
@@ -434,6 +441,8 @@ LineComment = {LineCommentSign} {NON_EOL}*
     {SpaceBasedEndMarker}                            { leaveState(); return EOL; }
 }
 
+<SETTING>     {WithNameKeyword} \s+                  { pushBackTrailingWhitespace(); return WITH_NAME; }
+
 // Multiline handling (don't return EOL on detected multiline). If there is a multiline without the Ellipsis (...) marker,
 // then return EOL to mark the end of the statement.
 <SETTING, KEYWORD_CALL, KEYWORD_ARGUMENTS, VARIABLE_DEFINITION, VARIABLE_DEFINITION_ARGUMENTS> {
@@ -469,14 +478,20 @@ LineComment = {LineCommentSign} {NON_EOL}*
 }
 
 <SETTING_TEMPLATE_START>  {
-    {RestrictedLiteralValue}                   { templateKeywordFound = true; pushBackTrailingWhitespace(); return KEYWORD_NAME; }
-    {EOL}+                                     { leaveState(); enterNewState(TEMPLATE_DEFINITION); return EOL; }
+    {KeywordLibraryNameLiteralValue}      { yypushback(1); return KEYWORD_LIBRARY_NAME; }
+    "."                                   { return KEYWORD_LIBRARY_SEPARATOR; }
+    {KeywordLiteralValue}                 { templateKeywordFound = true; pushBackTrailingWhitespace(); return KEYWORD_NAME; }
+    {EOL}+                                { leaveState(); enterNewState(TEMPLATE_DEFINITION); return EOL; }
 }
 
 // Consciously used yybegin instead of enterNewState to avoid pushing the state onto the stack. We're technically still in the KEYWORD_CALL state
 // and when we're, even in KEYWORD_ARGUMENTS, leave the state, it should return to whatever was before KEYWORD_CALL.
 // Just switched into another state to provide keyword arguments as such instead of interpreting them incorrectly as KEYWORD_NAME.
-<KEYWORD_CALL>      {RestrictedLiteralValue}  { yybegin(KEYWORD_ARGUMENTS); pushBackTrailingWhitespace(); return KEYWORD_NAME; }
+<KEYWORD_CALL>      {
+    {KeywordLibraryNameLiteralValue}      { yypushback(1); return KEYWORD_LIBRARY_NAME; }
+    "."                                   { return KEYWORD_LIBRARY_SEPARATOR; }
+    {KeywordLiteralValue}                 { yybegin(KEYWORD_ARGUMENTS); pushBackTrailingWhitespace(); return KEYWORD_NAME; }
+}
 
 <SETTINGS_SECTION, SETTING, KEYWORD_ARGUMENTS, USER_KEYWORD_RETURN_STATEMENT> {RestrictedLiteralValue}        { pushBackTrailingWhitespace(); return LITERAL_CONSTANT; }
 

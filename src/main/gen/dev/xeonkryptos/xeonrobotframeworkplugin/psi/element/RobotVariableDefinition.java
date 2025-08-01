@@ -8,10 +8,19 @@ import com.intellij.psi.PsiNameIdentifierOwner;
 import com.intellij.navigation.NavigationItem;
 import com.intellij.psi.StubBasedPsiElement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotVariableDefinitionStub;
+import javax.swing.Icon;
 
 public interface RobotVariableDefinition extends PsiNameIdentifierOwner, NavigationItem, DefinedVariable, RobotQualifiedNameOwner, RobotStatement, StubBasedPsiElement<RobotVariableDefinitionStub> {
 
   @NotNull
   RobotVariable getVariable();
+
+  @NotNull RobotVariable getNameIdentifier();
+
+  @Nullable String getName();
+
+  @NotNull Icon getIcon(int flags);
+
+  @NotNull String getQualifiedName();
 
 }
