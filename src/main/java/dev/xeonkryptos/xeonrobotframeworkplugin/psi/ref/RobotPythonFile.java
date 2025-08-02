@@ -23,6 +23,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 public class RobotPythonFile implements KeywordFile {
@@ -33,7 +34,7 @@ public class RobotPythonFile implements KeywordFile {
     private final PyFile pythonFile;
     private final ImportType importType;
 
-    public RobotPythonFile(@NotNull String library, @NotNull PyFile pythonFile, @NotNull ImportType importType) {
+    public RobotPythonFile(@Nullable String library, @NotNull PyFile pythonFile, @NotNull ImportType importType) {
         this.library = library;
         this.pythonFile = pythonFile;
         this.importType = importType;
@@ -58,14 +59,14 @@ public class RobotPythonFile implements KeywordFile {
                 for (PyTargetExpression attribute : pythonFile.getTopLevelAttributes()) {
                     String attributeName = RobotKeywordFileResolver.getValidName(attribute.getName());
                     if (attributeName != null) {
-                        keywordSet.add(new KeywordDto(attribute, attributeName));
+                        keywordSet.add(new KeywordDto(attribute, library, attributeName));
                     }
                 }
 
                 for (PyClass pyClass : pythonFile.getTopLevelClasses()) {
                     String className = pyClass.getName();
                     if (className != null && !className.startsWith("_")) {
-                        RobotKeywordFileResolver.addDefinedKeywords(pyClass, keywordSet);
+                        RobotKeywordFileResolver.addDefinedKeywords(pyClass, library, keywordSet);
                     }
                 }
                 return new Result<>(keywordSet, new Object[] { pythonFile });
@@ -113,12 +114,15 @@ public class RobotPythonFile implements KeywordFile {
             return false;
         }
         RobotPythonFile that = (RobotPythonFile) obj;
-        return library.equals(that.library) && pythonFile.equals(that.pythonFile);
+        return Objects.equals(library, that.library) && pythonFile.equals(that.pythonFile);
     }
 
     @Override
     public int hashCode() {
-        return 31 * library.hashCode() + pythonFile.hashCode();
+        if (library != null) {
+            return 31 * library.hashCode() + pythonFile.hashCode();
+        }
+        return pythonFile.hashCode();
     }
 
     @Override

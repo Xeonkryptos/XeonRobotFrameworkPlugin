@@ -31,6 +31,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 class KeywordCompletionProvider extends CompletionProvider<CompletionParameters> {
 
@@ -112,10 +113,19 @@ class KeywordCompletionProvider extends CompletionProvider<CompletionParameters>
         for (DefinedKeyword keyword : keywords) {
             String keywordName = keyword.getKeywordName();
             String displayName = capitalize ? WordUtils.capitalize(keywordName) : keywordName;
-            String[] lookupStrings = new String[] { keywordName, WordUtils.capitalize(keywordName), keywordName.toLowerCase() };
-            lookupStrings = Arrays.stream(lookupStrings).map(lookup -> keywordCompletionModification.getIdentifier() + lookup).toArray(String[]::new);
+            String libraryName = keyword.getLibraryName();
+            if (libraryName != null) {
+                displayName = libraryName + "." + displayName;
+            }
+            List<String> lookupStrings = Stream.of(keywordName, WordUtils.capitalize(keywordName), keywordName.toLowerCase()).flatMap(lookup -> {
+                Character identifier = keywordCompletionModification.getIdentifier();
+                if (libraryName != null) {
+                    return Stream.of(identifier + libraryName + "." + lookup, identifier + lookup);
+                }
+                return Stream.of(identifier + lookup);
+            }).toList();
             LookupElementBuilder lookupElement = LookupElementBuilder.create(displayName)
-                                                                     .withLookupStrings(Arrays.asList(lookupStrings))
+                                                                     .withLookupStrings(lookupStrings)
                                                                      .withPresentableText(displayName)
                                                                      .withCaseSensitivity(true)
                                                                      .withIcon(Nodes.Function)

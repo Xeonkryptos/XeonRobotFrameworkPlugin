@@ -50,23 +50,24 @@ public final class RobotImportFilesCollector extends RobotVisitor {
     @Override
     public void visitLibraryImportGlobalSetting(@NotNull RobotLibraryImportGlobalSetting o) {
         RobotPositionalArgument positionalArgument = o.getImportedFile();
-        positionalArgument.acceptChildren(this);
-
         PsiElement resolved = positionalArgument.getReference().resolve();
-        RobotNewLibraryName newLibraryName = o.getNewLibraryName();
-        if (newLibraryName != null) {
-            this.newLibraryName = newLibraryName.getText();
+        RobotNewLibraryName newLibraryNameElement = o.getNewLibraryName();
+        String newLibraryName = null;
+        if (newLibraryNameElement != null) {
+            newLibraryName = newLibraryNameElement.getText();
         }
 
         if (resolved instanceof PyClass pyClass) {
-            files.add(new RobotPythonClass(this.newLibraryName, pyClass, ImportType.LIBRARY));
+            files.add(new RobotPythonClass(newLibraryName, pyClass, ImportType.LIBRARY));
         } else if (resolved instanceof PyFile file) {
-            files.add(new RobotPythonFile(this.newLibraryName, file, ImportType.LIBRARY));
+            files.add(new RobotPythonFile(newLibraryName, file, ImportType.LIBRARY));
         }
     }
 
     @Override
     public void visitVariablesImportGlobalSetting(@NotNull RobotVariablesImportGlobalSetting o) {
+        newLibraryName = null;
+
         RobotPositionalArgument positionalArgument = o.getImportedFile();
         positionalArgument.acceptChildren(this);
 

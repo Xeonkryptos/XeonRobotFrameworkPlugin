@@ -41,7 +41,7 @@ public final class RobotUserKeywordsCollector extends RobotVisitor {
         o.acceptChildren(this);
 
         String keywordName = o.getName();
-        KeywordDto keywordDto = new KeywordDto(o, keywordName, keywordArguments);
+        KeywordDto keywordDto = new KeywordDto(o, null, keywordName, keywordArguments);
         keywords.add(keywordDto);
     }
 

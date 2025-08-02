@@ -9,6 +9,8 @@ import com.intellij.psi.stubs.StubInputStream;
 import com.intellij.psi.stubs.StubOutputStream;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotLanguage;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCall;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCallLibrary;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCallName;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotKeywordCallImpl;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.index.KeywordStatementNameIndex;
 import org.jetbrains.annotations.NonNls;
@@ -34,7 +36,11 @@ public class RobotKeywordCallStubElement extends IStubElementType<RobotKeywordCa
     @NotNull
     @Override
     public RobotKeywordCallStub createStub(@NotNull RobotKeywordCall psi, StubElement<? extends PsiElement> parentStub) {
-        return new RobotKeywordCallStubImpl(parentStub, psi.getName());
+        RobotKeywordCallName keywordCallName = psi.getKeywordCallName();
+        RobotKeywordCallLibrary keywordCallLibrary = keywordCallName.getKeywordCallLibrary();
+        String libraryName = keywordCallLibrary != null ? keywordCallLibrary.getName() : null;
+        String fullKeywordName = psi.getName();
+        return new RobotKeywordCallStubImpl(parentStub, libraryName, fullKeywordName);
     }
 
     @Override
@@ -50,18 +56,29 @@ public class RobotKeywordCallStubElement extends IStubElementType<RobotKeywordCa
 
     @Override
     public void serialize(@NotNull RobotKeywordCallStub stub, @NotNull StubOutputStream dataStream) throws IOException {
-        dataStream.writeName(stub.getName());
+        String libraryName = stub.getLibraryName();
+        String name = stub.getName();
+
+        dataStream.writeName(libraryName);
+        dataStream.writeName(name);
     }
 
     @NotNull
     @Override
     public RobotKeywordCallStub deserialize(@NotNull StubInputStream dataStream, StubElement parentStub) throws IOException {
-        return new RobotKeywordCallStubImpl(parentStub, dataStream.readNameString());
+        String libraryName = dataStream.readNameString();
+        String name = dataStream.readNameString();
+        return new RobotKeywordCallStubImpl(parentStub, libraryName, name);
     }
 
     @Override
     public void indexStub(@NotNull RobotKeywordCallStub stub, @NotNull IndexSink sink) {
-        String keywordNameInLowerCase = stub.getName().toLowerCase();
-        sink.occurrence(KeywordStatementNameIndex.KEY, keywordNameInLowerCase);
+        String libraryName = stub.getLibraryName();
+        String keywordName = stub.getName();
+        if (libraryName != null) {
+            keywordName = keywordName.substring(libraryName.length() + 1);
+        }
+        sink.occurrence(KeywordStatementNameIndex.KEY, keywordName);
+        sink.occurrence(KeywordStatementNameIndex.KEY, keywordName.toLowerCase());
     }
 }

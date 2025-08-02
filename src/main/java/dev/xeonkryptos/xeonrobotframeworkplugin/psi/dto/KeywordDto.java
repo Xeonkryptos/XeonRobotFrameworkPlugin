@@ -31,24 +31,28 @@ import java.util.stream.Collectors;
 public class KeywordDto implements DefinedKeyword {
 
     private final PsiElement reference;
+    private final String libraryName;
     private final String name;
     private final String keywordFunctionName;
     private final boolean args;
     private final Collection<DefinedParameter> parameters;
     private final boolean deprecated;
 
-    public KeywordDto(@NotNull PsiElement reference, @NotNull String name) {
-        this(reference, name, null);
+    public KeywordDto(@NotNull PsiElement reference, @Nullable String libraryName, @NotNull String name) {
+        this(reference, libraryName, name, null);
     }
 
-    public KeywordDto(@NotNull PsiElement reference, @NotNull String name, Collection<PyParameter> parameters) {
-        this(reference, name, convertPyParameters(parameters));
+    public KeywordDto(@NotNull PsiElement reference, @Nullable String libraryName, @NotNull String name, Collection<PyParameter> parameters) {
+        this(reference, libraryName, name, convertPyParameters(parameters));
     }
 
-    public KeywordDto(@NotNull PsiElement reference, @NotNull String name,
+    public KeywordDto(@NotNull PsiElement reference,
+                      @Nullable String libraryName,
+                      @NotNull String name,
                       Collection<DefinedParameter> parameters,
                       Object... ignored) { // Object... ignored is just a trick to avoid constructor clashing
         this.reference = reference;
+        this.libraryName = libraryName;
         this.name = PatternUtil.functionToKeyword(name).trim();
         this.keywordFunctionName = PatternUtil.keywordToFunction(name).trim();
         this.args = parameters != null && !parameters.isEmpty();
@@ -61,6 +65,12 @@ public class KeywordDto implements DefinedKeyword {
         } else {
             deprecated = false;
         }
+    }
+
+    @Nullable
+    @Override
+    public String getLibraryName() {
+        return libraryName;
     }
 
     @Override
@@ -121,9 +131,9 @@ public class KeywordDto implements DefinedKeyword {
             return false;
         }
         String keywordToFunction = PatternUtil.keywordToFunction(text).trim();
-//        if (namespace != null && text.startsWith(namespace + ".")) {
-//            keywordToFunction = keywordToFunction.substring(namespace.length() + 1);
-//        }
+        //        if (namespace != null && text.startsWith(namespace + ".")) {
+        //            keywordToFunction = keywordToFunction.substring(namespace.length() + 1);
+        //        }
         return keywordFunctionName.equalsIgnoreCase(keywordToFunction);
     }
 

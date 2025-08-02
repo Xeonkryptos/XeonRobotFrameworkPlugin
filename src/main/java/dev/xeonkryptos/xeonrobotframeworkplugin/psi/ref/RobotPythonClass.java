@@ -17,6 +17,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashSet;
+import java.util.Objects;
 import java.util.Set;
 
 public class RobotPythonClass implements KeywordFile {
@@ -27,7 +28,7 @@ public class RobotPythonClass implements KeywordFile {
     private final PyClass pythonClass;
     private final ImportType importType;
 
-    public RobotPythonClass(@NotNull String library, @NotNull PyClass pythonClass, @NotNull ImportType importType) {
+    public RobotPythonClass(@Nullable String library, @NotNull PyClass pythonClass, @NotNull ImportType importType) {
         this.library = library;
         this.pythonClass = pythonClass;
         this.importType = importType;
@@ -39,7 +40,7 @@ public class RobotPythonClass implements KeywordFile {
         if (importType == ImportType.LIBRARY) {
             return CachedValuesManager.getCachedValue(pythonClass, KEYWORD_CACHE_KEY, () -> {
                 Set<DefinedKeyword> newKeywords = new LinkedHashSet<>();
-                RobotKeywordFileResolver.addDefinedKeywords(pythonClass, newKeywords);
+                RobotKeywordFileResolver.addDefinedKeywords(pythonClass, library, newKeywords);
                 return new Result<>(newKeywords, new Object[] { pythonClass });
             });
         }
@@ -86,29 +87,31 @@ public class RobotPythonClass implements KeywordFile {
         }
 
         RobotPythonClass that = (RobotPythonClass) o;
-        return this.library.equals(that.library) && this.pythonClass.equals(that.pythonClass);
+        return Objects.equals(this.library, that.library) && this.pythonClass.equals(that.pythonClass);
     }
 
     @Override
     public int hashCode() {
-        int result = this.library.hashCode();
-        result = 31 * result + this.pythonClass.hashCode();
-        return result;
+        if (library != null) {
+            int result = library.hashCode();
+            return 31 * result + pythonClass.hashCode();
+        }
+        return pythonClass.hashCode();
     }
 
     @Override
     public String toString() {
-        return this.library;
+        return library;
     }
 
     @Override
     public VirtualFile getVirtualFile() {
-        return this.getPsiFile().getVirtualFile();
+        return getPsiFile().getVirtualFile();
     }
 
     @Override
     public final PsiFile getPsiFile() {
-        return this.pythonClass.getContainingFile();
+        return pythonClass.getContainingFile();
     }
 
     @Nullable

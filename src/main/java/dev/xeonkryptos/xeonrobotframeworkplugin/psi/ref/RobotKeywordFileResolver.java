@@ -244,7 +244,7 @@ class RobotKeywordFileResolver {
         return keywordName;
     }
 
-    static void addDefinedKeywords(@NotNull PyClass pyClass, @NotNull Collection<DefinedKeyword> keywords) {
+    static void addDefinedKeywords(@NotNull PyClass pyClass, @Nullable String libraryName, @NotNull Collection<DefinedKeyword> keywords) {
         Map<String, PyFunction> methods = new LinkedHashMap<>();
         String className = pyClass.getName();
         pyClass.visitMethods(method -> {
@@ -255,7 +255,7 @@ class RobotKeywordFileResolver {
             if (propertyDecorated) {
                 String attributeName = getValidName(methodName);
                 if (attributeName != null) {
-                    keywords.add(new KeywordDto(method, attributeName));
+                    keywords.add(new KeywordDto(method, libraryName, attributeName));
                 }
                 return true;
             }
@@ -271,26 +271,27 @@ class RobotKeywordFileResolver {
         } else {
             namespace = "";
         }
-        addDefinedKeywords(pyClass, namespace, keywords, className, methods);
+        addDefinedKeywords(pyClass, namespace, libraryName, keywords, className, methods);
 
         pyClass.visitClassAttributes(attribute -> {
             String attributeName = getValidName(attribute.getName());
             if (attributeName != null) {
-                keywords.add(new KeywordDto(attribute, attributeName));
+                keywords.add(new KeywordDto(attribute, libraryName, attributeName));
             }
             return true;
         }, true, null);
     }
 
     static void addDefinedKeywords(@NotNull PsiElement sourceElement,
-                                   @NotNull String namespace,
+                                   @Nullable String libraryName,
                                    @NotNull Collection<DefinedKeyword> keywords,
                                    Map<String, PyFunction> methods) {
-        addDefinedKeywords(sourceElement, namespace, keywords, null, methods);
+        addDefinedKeywords(sourceElement, "", libraryName, keywords, null, methods);
     }
 
     private static void addDefinedKeywords(@NotNull PsiElement sourceElement,
                                            @NotNull String namespace,
+                                           @Nullable String libraryName,
                                            @NotNull Collection<DefinedKeyword> keywords,
                                            @Nullable String className,
                                            Map<String, PyFunction> methods) {
@@ -323,7 +324,9 @@ class RobotKeywordFileResolver {
                     if (keywordName != null) {
                         methodName = keywordName;
                     }
-                    keywords.add(new KeywordDto(method, methodName,
+                    keywords.add(new KeywordDto(method,
+                                                libraryName,
+                                                methodName,
                                                 PythonInspector.convertPyParameters(parameters, method.getParameterList().getParameters(), true)));
                 }
             } catch (ProcessCanceledException e) {
@@ -340,7 +343,7 @@ class RobotKeywordFileResolver {
             if (keywordName != null) {
                 methodName = keywordName;
             }
-            keywords.add(new KeywordDto(method, methodName, Arrays.asList(method.getParameterList().getParameters())));
+            keywords.add(new KeywordDto(method, libraryName, methodName, Arrays.asList(method.getParameterList().getParameters())));
         }
     }
 
