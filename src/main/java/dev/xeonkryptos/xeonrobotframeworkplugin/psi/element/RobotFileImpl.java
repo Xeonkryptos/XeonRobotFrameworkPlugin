@@ -42,7 +42,10 @@ public class RobotFileImpl extends PsiFileBase implements KeywordFile, RobotFile
 
     private static final String ROBOT_BUILT_IN = "robot.libraries.BuiltIn";
 
-    private static final Key<ParameterizedCachedValue<Collection<KeywordFile>, Boolean>> IMPORTED_FILES_CACHE_KEY = Key.create("IMPORTED_FILES_CACHE");
+    private static final Key<ParameterizedCachedValue<Collection<KeywordFile>, Boolean>> TRANSITIVE_IMPORTED_FILES_CACHE_KEY = Key.create(
+            "TRANSITIVE_IMPORTED_FILES_CACHE");
+    private static final Key<ParameterizedCachedValue<Collection<KeywordFile>, Boolean>> NON_TRANSITIVE_IMPORTED_FILES_CACHE_KEY = Key.create(
+            "NON_TRANSITIVE_IMPORTED_FILES_CACHE");
     private static final Key<CachedValue<Collection<KeywordFile>>> DIRECTLY_IMPORTED_FILES_CACHE_KEY = Key.create("DIRECTLY_IMPORTED_FILES_CACHE");
     private static final Key<ParameterizedCachedValue<Collection<VirtualFile>, Boolean>> IMPORTED_VIRTUAL_FILES_CACHE_KEY = Key.create(
             "IMPORTED_VIRTUAL_FILES_CACHE");
@@ -212,7 +215,10 @@ public class RobotFileImpl extends PsiFileBase implements KeywordFile, RobotFile
     @NotNull
     @Override
     public Collection<KeywordFile> getImportedFiles(boolean includeTransitive) {
-        return CachedValuesManager.getManager(getProject()).getParameterizedCachedValue(this, IMPORTED_FILES_CACHE_KEY, transitive -> {
+        Key<ParameterizedCachedValue<Collection<KeywordFile>, Boolean>> cacheKey = includeTransitive ?
+                                                                                   TRANSITIVE_IMPORTED_FILES_CACHE_KEY :
+                                                                                   NON_TRANSITIVE_IMPORTED_FILES_CACHE_KEY;
+        return CachedValuesManager.getManager(getProject()).getParameterizedCachedValue(this, cacheKey, transitive -> {
             Set<KeywordFile> results = new LinkedHashSet<>();
             for (KeywordFile keywordFile : collectImportFiles()) {
                 collectTransitiveKeywordFiles(results, keywordFile, transitive);

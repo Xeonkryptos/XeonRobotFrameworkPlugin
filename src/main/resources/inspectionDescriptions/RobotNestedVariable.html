@@ -1,0 +1,40 @@
+<html lang="en">
+    <body>
+        Detects nested variable syntax in Robot Framework files that reduces code readability and maintainability.
+
+        <p>
+            Nested variables like <code>${${variable_name}}</code> create complex expressions that are difficult to understand
+            and debug. This pattern makes test cases harder to maintain and can lead to parsing issues in different
+            Robot Framework versions.
+        </p>
+
+        <p>
+            The inspection helps identify opportunities to refactor complex variable references into simpler,
+            more readable alternatives that follow clean code principles.
+        </p>
+
+        <p>
+            Example of problematic code:
+        </p>
+        <pre><code>
+*** Variables ***
+${ENV}         prod
+${PROD_URL}    https://prod.example.com
+${DEV_URL}     https://dev.example.com
+
+*** Test Cases ***
+Test Login
+    # Nested variable - hard to read and maintain
+    Open Browser    ${${ENV}_URL}
+
+    # Better alternative - explicit and clear
+    ${target_url}=    Set Variable If    '${ENV}' == 'prod'    ${PROD_URL}    ${DEV_URL}
+    Open Browser    ${target_url}
+</code></pre>
+
+        <!-- tooltip end -->
+        <p>Text after this comment will only be shown in the settings of the inspection.</p>
+
+        <p>Consider using conditional logic, keyword arguments, or separate test data files to eliminate nested variable patterns and improve code clarity.</p>
+    </body>
+</html>

@@ -1,14 +1,14 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.ide.inspections.cleanup;
 
-import com.intellij.codeInsight.intention.impl.BaseIntentionAction;
+import com.intellij.codeInspection.LocalQuickFixOnPsiElement;
 import com.intellij.codeInspection.util.IntentionFamilyName;
-import com.intellij.openapi.editor.Editor;
+import com.intellij.codeInspection.util.IntentionName;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.util.PsiTreeUtil;
-import com.intellij.util.IncorrectOperationException;
 import dev.xeonkryptos.xeonrobotframeworkplugin.RobotBundle;
+import dev.xeonkryptos.xeonrobotframeworkplugin.ide.misc.RobotReadWriteAccessDetector;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCall;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordVariableStatement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableDefinition;
@@ -17,34 +17,22 @@ import org.jetbrains.annotations.NotNull;
 import java.util.List;
 import java.util.Set;
 
-public class RemoveUnusedVariableDefinitionIntentAction extends BaseIntentionAction {
+public class RemoveUnusedVariableDefinitionQuickFix extends LocalQuickFixOnPsiElement {
 
-    private static final Set<String> SET_VARIABLE_KEYWORD_NAMES = Set.of("set variable",
-                                                                         "set global variable",
-                                                                         "set local variable",
-                                                                         "set test variable",
-                                                                         "set task variable",
-                                                                         "set suite variable",
-                                                                         "set variable if");
-    private final RobotVariableDefinition variableDefinition;
+    public RemoveUnusedVariableDefinitionQuickFix(@NotNull PsiElement element) {
+        super(element);
+    }
 
-    public RemoveUnusedVariableDefinitionIntentAction(RobotVariableDefinition variableDefinition) {
-        this.variableDefinition = variableDefinition;
-
-        setText(RobotBundle.getMessage("intention.family.remove.text.unused-variable"));
+    @NotNull
+    @Override
+    @IntentionName
+    public String getText() {
+        return RobotBundle.getMessage("intention.family.remove.text.unused-variable");
     }
 
     @Override
-    public boolean isAvailable(@NotNull Project project, Editor editor, PsiFile file) {
-        return true;
-    }
-
-    @Override
-    public void invoke(@NotNull Project project, Editor editor, PsiFile file) throws IncorrectOperationException {
-        if (!variableDefinition.isValid()) {
-            return;
-        }
-
+    public void invoke(@NotNull Project project, @NotNull PsiFile file, @NotNull PsiElement startElement, @NotNull PsiElement endElement) {
+        RobotVariableDefinition variableDefinition = (RobotVariableDefinition) startElement;
         RobotKeywordVariableStatement robotKeywordVariableStatement = PsiTreeUtil.getParentOfType(variableDefinition, RobotKeywordVariableStatement.class);
 
         if (robotKeywordVariableStatement != null) {
@@ -52,12 +40,13 @@ public class RemoveUnusedVariableDefinitionIntentAction extends BaseIntentionAct
             RobotKeywordCall keywordCall = robotKeywordVariableStatement.getKeywordCall();
             boolean moreThanOneVariable = variableDefinitionList.size() > 1;
 
-            String keywordStatementName = keywordCall.getName().toLowerCase();
+            String keywordStatementName = keywordCall.getName();
             // To avoid side effects and keep it as simple as possible for the beginning, check if a valid keyword is used/gets called and this keyword isn't
             // simply setting a value into a variable. Then, we should only remove the variable, but not the keyword itself.
             // Also, we have to consider the case that a "keyword" isn't a real keyword. It could be rather an argument identified as a keyword but "converted"
             // to an argument. Handle those cases as setting only a variable.
-            if (SET_VARIABLE_KEYWORD_NAMES.contains(keywordStatementName.toLowerCase()) || keywordCall.getKeywordCallName().getReference().resolve() == null) {
+            if (RobotReadWriteAccessDetector.isVariableSetterKeyword(keywordStatementName)
+                || keywordCall.getKeywordCallName().getReference().resolve() == null) {
                 removeEverything(robotKeywordVariableStatement);
             } else {
                 if (moreThanOneVariable) {

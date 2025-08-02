@@ -1,0 +1,38 @@
+<html lang="en">
+    <body>
+        Reports unused imports in Robot Framework files that clutter the code and reduce maintainability.
+
+        <p>
+            Unused imports make test files harder to read and understand by introducing unnecessary dependencies.
+            They can also slow down test execution and create confusion about which resources are actually needed.
+        </p>
+
+        <p>
+            This inspection helps maintain clean, minimal imports by identifying library, resource, and variable file
+            imports that are declared but never referenced in the test suite.
+        </p>
+
+        <p>
+            Example of problematic code:
+        </p>
+        <pre><code>
+*** Settings ***
+Library           SeleniumLibrary
+Library           RequestsLibrary    # Not used anywhere
+Resource          common_keywords.robot
+Resource          unused_resource.robot    # Not used anywhere
+Variables         config.py
+Variables         unused_vars.py    # Not used anywhere
+
+*** Test Cases ***
+Test Example
+    Open Browser    http://example.com    chrome
+    Title Should Be    Example Page
+</code></pre>
+
+        <!-- tooltip end -->
+        <p>Text after this comment will only be shown in the settings of the inspection.</p>
+
+        <p>Remove unused imports to keep your Robot Framework files clean and focused on the actual test requirements. This improves code readability and reduces maintenance overhead.</p>
+    </body>
+</html>

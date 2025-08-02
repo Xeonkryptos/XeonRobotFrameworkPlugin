@@ -13,4 +13,6 @@ public interface RobotKeywordCallExpression {
     Collection<DefinedParameter> getAvailableParameters();
 
     Collection<RobotArgument> getAllCallArguments();
+
+    String getSimpleKeywordName();
 }

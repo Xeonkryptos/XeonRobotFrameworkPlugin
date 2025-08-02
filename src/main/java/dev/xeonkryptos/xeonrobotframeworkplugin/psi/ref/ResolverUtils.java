@@ -4,6 +4,7 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import dev.xeonkryptos.xeonrobotframeworkplugin.ide.completion.KeywordCompletionModification;
 import dev.xeonkryptos.xeonrobotframeworkplugin.ide.config.RobotOptionsProvider;
+import dev.xeonkryptos.xeonrobotframeworkplugin.ide.misc.RobotReadWriteAccessDetector;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.dto.ImportType;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.dto.VariableDto;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.DefinedKeyword;
@@ -27,11 +28,8 @@ import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map.Entry;
-import java.util.Set;
 
 public class ResolverUtils {
-
-    private static final Collection<String> VARIABLE_SETTERS = Set.of("set test variable", "set suite variable", "set global variable");
 
     private ResolverUtils() {
         throw new UnsupportedOperationException("Utility class cannot be instantiated");
@@ -133,7 +131,7 @@ public class ResolverUtils {
         }
 
         String keywordName = keywordCall.getName();
-        if (VARIABLE_SETTERS.contains(keywordName.toLowerCase())) {
+        if (RobotReadWriteAccessDetector.isVariableSetterKeyword(keywordName)) {
             List<RobotPositionalArgument> positionalArgumentList = keywordCall.getPositionalArgumentList();
             if (!positionalArgumentList.isEmpty() && positionalArgumentList.getFirst().getFirstChild() instanceof RobotVariable variable) {
                 String variableName = variable.getName();

@@ -24,4 +24,6 @@ public interface RobotKeywordCall extends PsiNameIdentifierOwner, RobotKeywordCa
 
   @NotNull RobotKeywordCallName getNameIdentifier();
 
+  @NotNull String getSimpleKeywordName();
+
 }

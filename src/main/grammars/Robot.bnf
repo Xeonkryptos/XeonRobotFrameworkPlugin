@@ -245,7 +245,7 @@ fake keyword_call ::= base_keyword_call {
         "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotQualifiedNameOwner"
         "com.intellij.navigation.NavigationItem"
     ]
-    methods = [getName getNameIdentifier]
+    methods = [getName getNameIdentifier getSimpleKeywordName]
     mixin = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotKeywordCallExtension"
     stubClass = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotKeywordCallStub"
     elementTypeFactory = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotKeywordCallStubElement.create"

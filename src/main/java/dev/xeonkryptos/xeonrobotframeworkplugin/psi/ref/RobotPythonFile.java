@@ -127,7 +127,7 @@ public class RobotPythonFile implements KeywordFile {
 
     @Override
     public String toString() {
-        return library;
+        return pythonFile.toString();
     }
 
     @Override

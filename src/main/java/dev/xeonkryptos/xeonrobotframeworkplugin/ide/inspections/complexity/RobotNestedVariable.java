@@ -1,38 +1,28 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.ide.inspections.complexity;
 
-import com.intellij.psi.PsiElement;
+import com.intellij.codeInspection.LocalInspectionTool;
+import com.intellij.codeInspection.ProblemsHolder;
+import com.intellij.psi.PsiElementVisitor;
 import dev.xeonkryptos.xeonrobotframeworkplugin.RobotBundle;
-import dev.xeonkryptos.xeonrobotframeworkplugin.ide.inspections.SimpleRobotInspection;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariable;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableBodyId;
-import org.jetbrains.annotations.Nls;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVisitor;
 import org.jetbrains.annotations.NotNull;
 
-public class RobotNestedVariable extends SimpleRobotInspection {
-
-    @Nls
-    @NotNull
-    public String getDisplayName() {
-        return RobotBundle.getMessage("INSP.NAME.variable.nested");
-    }
+public class RobotNestedVariable extends LocalInspectionTool {
 
     @Override
-    public final boolean skip(PsiElement element) {
-        if (element instanceof RobotVariable variable) {
-            RobotVariableBodyId nameIdentifier = variable.getNameIdentifier();
-            return nameIdentifier != null;
-        }
-        return true;
-    }
+    public @NotNull PsiElementVisitor buildVisitor(@NotNull ProblemsHolder holder, boolean isOnTheFly) {
+        return new RobotVisitor() {
 
-    @Override
-    public final String getMessage() {
-        return RobotBundle.getMessage("INSP.variable.nested");
-    }
-
-    @NotNull
-    @Override
-    protected final String getGroupNameKey() {
-        return "INSP.GROUP.complexity";
+            @Override
+            public void visitVariable(@NotNull RobotVariable o) {
+                super.visitVariable(o);
+                RobotVariableBodyId nameIdentifier = o.getNameIdentifier();
+                if (nameIdentifier == null) {
+                    holder.registerProblem(o, RobotBundle.getMessage("INSP.variable.nested"));
+                }
+            }
+        };
     }
 }

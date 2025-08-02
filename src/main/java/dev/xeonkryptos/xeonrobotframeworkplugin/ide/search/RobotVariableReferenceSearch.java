@@ -36,22 +36,20 @@ public class RobotVariableReferenceSearch extends QueryExecutorBase<PsiReference
         Project project = queryParameters.getProject();
 
         GlobalSearchScope globalSearchScope = QueryExecutorUtil.convertToGlobalSearchScope(queryParameters.getEffectiveSearchScope(), project);
-        if (element instanceof RobotVariableBodyId variableBodyId) {
-            String variableName = variableBodyId.getName();
-            if (variableName.isBlank()) { // Cannot search with an empty variable name
+        if (element instanceof RobotVariableDefinition variableDefinition) {
+            String variableName = variableDefinition.getName();
+            if (variableName == null) {
                 return;
             }
 
-            RobotUserKeywordStatement keywordDefinition = PsiTreeUtil.getParentOfType(variableBodyId, RobotUserKeywordStatement.class);
-            RobotVariablesSection variablesSection = PsiTreeUtil.getParentOfType(variableBodyId, RobotVariablesSection.class);
-            if (keywordDefinition != null || variablesSection == null || variablesSection.getContainingFile().getFileType() != RobotResourceFileType.getInstance()) {
-                globalSearchScope = GlobalSearchScope.fileScope(variableBodyId.getContainingFile());
+            RobotUserKeywordStatement keywordDefinition = PsiTreeUtil.getParentOfType(variableDefinition, RobotUserKeywordStatement.class);
+            RobotVariablesSection variablesSection = PsiTreeUtil.getParentOfType(variableDefinition, RobotVariablesSection.class);
+            if (keywordDefinition != null || variablesSection == null
+                || variablesSection.getContainingFile().getFileType() != RobotResourceFileType.getInstance()) {
+                globalSearchScope = GlobalSearchScope.fileScope(variableDefinition.getContainingFile());
             }
 
-            RobotVariableDefinition variableDefinition = PsiTreeUtil.getParentOfType(variableBodyId, RobotVariableDefinition.class);
-            if (variableDefinition != null) {
-                searchForVariablesInIndex(variableDefinition, variableName, project, globalSearchScope, consumer);
-            }
+            searchForVariablesInIndex(variableDefinition, variableName, project, globalSearchScope, consumer);
         }
     }
 
@@ -63,9 +61,10 @@ public class RobotVariableReferenceSearch extends QueryExecutorBase<PsiReference
         VariableNameIndex variableNameIndex = VariableNameIndex.getInstance();
         Collection<RobotVariable> variables = ReadAction.compute(() -> variableNameIndex.getVariables(variableName, project, globalSearchScope));
         for (RobotVariable variable : variables) {
-            if (variableDefinition.isInScope(variable)) {
-                PsiReference reference = variable.getReference();
-                if (!consumer.process(reference)) {
+            RobotVariableBodyId variableBodyId = variable.getNameIdentifier();
+            if (variableBodyId != null) {
+                PsiReference reference = variableBodyId.getReference();
+                if (!PsiTreeUtil.isAncestor(variableDefinition, variable, true) && !consumer.process(reference)) {
                     break;
                 }
             }

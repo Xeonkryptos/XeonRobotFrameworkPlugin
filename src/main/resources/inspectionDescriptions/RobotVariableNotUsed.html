@@ -1,0 +1,34 @@
+<html lang="en">
+    <body>
+        <p>Detects unused variables in Robot Framework test files.</p>
+
+        <p>
+            This inspection helps identify unnecessary variables that are defined but never used.
+            This can lead to cleaner code and reveal potential errors caused by typos in variable names.
+        </p>
+
+        <p>Example:</p>
+        <pre><code>
+*** Variables ***
+${USED_VARIABLE}      Hello
+${UNUSED_VARIABLE}    World    # will be marked as unused
+
+*** Test Cases ***
+Example Test
+    Log    ${USED_VARIABLE}
+</code></pre>
+
+        <p>
+            The inspection checks both global variables from the Variables section and local variables
+            defined in test cases or keywords.
+        </p>
+
+        <!-- tooltip end -->
+        <p>Text after this comment will only be shown in the settings of the inspection.</p>
+
+        <p>
+            This inspection can help keep code cleaner by removing redundant variable definitions.
+            This improves readability and maintainability of Robot Framework tests.
+        </p>
+    </body>
+</html>

@@ -228,6 +228,18 @@ public class RobotPsiImplUtil {
         return nameIdentifier.getName();
     }
 
+    @NotNull
+    public static String getSimpleKeywordName(@NotNull RobotKeywordCall keywordCall) {
+        RobotKeywordCallName keywordCallName = keywordCall.getNameIdentifier();
+        RobotKeywordCallLibrary keywordCallLibrary = keywordCallName.getKeywordCallLibrary();
+        String keywordName = keywordCallName.getName();
+        if (keywordCallLibrary != null) {
+            String libraryName = keywordCallLibrary.getName();
+            keywordName = keywordName.substring(libraryName.length() + 1);
+        }
+        return keywordName;
+    }
+
     @Nullable
     public static RobotVariableBodyId getNameIdentifier(RobotVariable variable) {
         return PsiTreeUtil.findChildOfType(variable, RobotVariableBodyId.class);

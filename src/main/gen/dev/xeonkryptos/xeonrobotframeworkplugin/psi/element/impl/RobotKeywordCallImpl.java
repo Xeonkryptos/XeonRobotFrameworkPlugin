@@ -61,4 +61,9 @@ public class RobotKeywordCallImpl extends RobotKeywordCallExtension implements R
     return RobotPsiImplUtil.getNameIdentifier(this);
   }
 
+  @Override
+  public @NotNull String getSimpleKeywordName() {
+    return RobotPsiImplUtil.getSimpleKeywordName(this);
+  }
+
 }

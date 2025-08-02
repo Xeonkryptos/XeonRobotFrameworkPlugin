@@ -16,6 +16,7 @@
 
 - Fixed missing test case names and symbols in PyCharm's searches
 - Fixed variable insertion handling
+- Fixed unused variable detection
 
 ## 0.4.1
 

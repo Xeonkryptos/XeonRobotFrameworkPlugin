@@ -73,15 +73,17 @@
         <annotator language="Robot" implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.ide.inspections.compilation.RobotKeywordAnnotator"/>
         <annotator language="Robot" implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.ide.inspections.compilation.RobotImportAnnotator"/>
         <annotator language="Robot" implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.ide.inspections.compilation.RobotVariableAnnotator"/>
-        <annotator language="Robot" implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.ide.inspections.cleanup.RobotUnusedVariableAnnotator"/>
 
         <!-- Inspections -->
         <!-- TODO: inspection: error?: resource import is not a robot file -->
         <!-- TODO: inspection: warn: import python file vs class -->
         <!-- Inspections: Cleanup -->
         <localInspection language="Robot" shortName="RobotImportNotUsed" bundle="messages.RobotBundle" key="INSP.NAME.import.unused" groupPath="Robot"
-                         groupKey="INSP.GROUP.cleanup" enabledByDefault="true" level="WARNING"
+                         groupKey="INSP.GROUP.cleanup" enabledByDefault="true" level="WARNING" dumbAware="true"
                          implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.ide.inspections.cleanup.RobotImportNotUsed"/>
+        <localInspection language="Robot" shortName="RobotVariableNotUsed" bundle="messages.RobotBundle" key="INSP.NAME.variable.unused" groupPath="Robot"
+                         groupKey="INSP.GROUP.cleanup" enabledByDefault="true" level="WARNING" dumbAware="false"
+                         implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.ide.inspections.cleanup.RobotUnusedVariableInspection"/>
         <!-- Inspections: Readability -->
         <!-- TODO: inspection: warn: use of I in keyword; decreased readability -->
         <!-- TODO: inspection: warn: scenario step does not start with gherkin; decreased readability -->
@@ -90,7 +92,7 @@
         <!-- Inspections: Complexity -->
         <!-- TODO: inspection: warn: keyword definitions that contain gherkin; trying to do too much -->
         <localInspection language="Robot" shortName="RobotNestedVariable" bundle="messages.RobotBundle" key="INSP.NAME.variable.nested" groupPath="Robot"
-                         groupKey="INSP.GROUP.complexity" enabledByDefault="true" level="WARNING"
+                         groupKey="INSP.GROUP.complexity" enabledByDefault="true" level="WARNING" dumbAware="true"
                          implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.ide.inspections.complexity.RobotNestedVariable"/>
         <!-- Inspections: Deprecated -->
         <!-- TODO: inspection: warn: deprecated settings; '*** user keywords ***', timeout, etc -->
@@ -132,6 +134,8 @@
 
         <gotoClassContributor implementation="dev.xeonkryptos.xeonrobotframeworkplugin.ide.gotocontributor.RobotGotoClassContributor"/>
         <gotoSymbolContributor implementation="dev.xeonkryptos.xeonrobotframeworkplugin.ide.gotocontributor.RobotGotoSymbolContributor"/>
+
+        <readWriteAccessDetector implementation="dev.xeonkryptos.xeonrobotframeworkplugin.ide.misc.RobotReadWriteAccessDetector"/>
     </extensions>
     <actions>
         <action id="XeonRobotFrameworkPlugin.CreateNew" class="dev.xeonkryptos.xeonrobotframeworkplugin.ide.RobotCreateAction">
