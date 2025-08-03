@@ -51,4 +51,9 @@ public class RobotImportNotUsed extends LocalInspectionTool {
             }
         };
     }
+
+    @Override
+    public boolean runForWholeFile() {
+        return true;
+    }
 }

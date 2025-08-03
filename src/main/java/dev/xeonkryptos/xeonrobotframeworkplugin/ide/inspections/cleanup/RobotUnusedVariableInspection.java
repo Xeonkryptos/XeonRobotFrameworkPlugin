@@ -43,6 +43,11 @@ public class RobotUnusedVariableInspection extends LocalInspectionTool {
         }
     }
 
+    @Override
+    public boolean runForWholeFile() {
+        return true;
+    }
+
     private static class RobotVariableUsageVisitor extends RobotVisitor {
 
         private final Set<String> definedVariableNames = ConcurrentHashMap.newKeySet();
