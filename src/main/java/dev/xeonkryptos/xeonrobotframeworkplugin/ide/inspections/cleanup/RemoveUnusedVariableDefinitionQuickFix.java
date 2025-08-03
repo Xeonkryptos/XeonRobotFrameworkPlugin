@@ -6,6 +6,7 @@ import com.intellij.codeInspection.util.IntentionName;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
+import com.intellij.psi.codeStyle.CodeStyleManager;
 import com.intellij.psi.util.PsiTreeUtil;
 import dev.xeonkryptos.xeonrobotframeworkplugin.RobotBundle;
 import dev.xeonkryptos.xeonrobotframeworkplugin.ide.misc.RobotReadWriteAccessDetector;
@@ -14,6 +15,7 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordVariable
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableDefinition;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
@@ -61,11 +63,21 @@ public class RemoveUnusedVariableDefinitionQuickFix extends LocalQuickFixOnPsiEl
         }
     }
 
-    private void removeEverything(PsiElement variableDefinitionGroup) {
-        variableDefinitionGroup.delete();
+    private void removeEverything(PsiElement element) {
+        PsiElement superParent = element.getParent();
+        PsiElement prevSibling = element.getPrevSibling();
+        PsiElement copiedPrevSibling = prevSibling.copy();
+
+        CodeStyleManager.getInstance(element.getProject()).performActionWithFormatterDisabled((Runnable) element::delete);
+
+        // Re-adding the previous sibling to the super parent if it doesn't exist anymore to keep empty lines and don't collapse everything maybe invalidly, too
+        if (Arrays.stream(superParent.getChildren()).noneMatch(child -> child == copiedPrevSibling)) {
+            superParent.add(copiedPrevSibling);
+        }
     }
 
     private void removeOneVariableOnly(RobotVariableDefinition variableDefinition, RobotKeywordVariableStatement keywordVariableStatement) {
+        CodeStyleManager codeStyleManager = CodeStyleManager.getInstance(variableDefinition.getProject());
         List<RobotVariableDefinition> variableDefinitionList = keywordVariableStatement.getVariableDefinitionList();
         Set<RobotVariableDefinition> variableDefinitionSet = Set.copyOf(variableDefinitionList);
         PsiElement firstChild = variableDefinitionList.getFirst();
@@ -73,21 +85,22 @@ public class RemoveUnusedVariableDefinitionQuickFix extends LocalQuickFixOnPsiEl
         if (firstChild != variableDefinition && prevVariableDefinition != null && variableDefinitionSet.contains(prevVariableDefinition)) {
             // Removing whitespace to the previous variable definition
             PsiElement nextSibling = prevVariableDefinition.getNextSibling();
-            keywordVariableStatement.deleteChildRange(nextSibling, variableDefinition);
+            codeStyleManager.performActionWithFormatterDisabled((Runnable) () -> keywordVariableStatement.deleteChildRange(nextSibling, variableDefinition));
         } else {
             RobotVariableDefinition nextVariableDefinition = PsiTreeUtil.getNextSiblingOfType(variableDefinition, RobotVariableDefinition.class);
             if (nextVariableDefinition != null && variableDefinitionSet.contains(prevVariableDefinition)) {
                 // Removing whitespace to the next variable definition
                 PsiElement prevSibling = nextVariableDefinition.getPrevSibling();
-                keywordVariableStatement.deleteChildRange(variableDefinition, prevSibling);
+                codeStyleManager.performActionWithFormatterDisabled((Runnable) () -> keywordVariableStatement.deleteChildRange(variableDefinition,
+                                                                                                                               prevSibling));
             } else {
-                variableDefinition.delete();
+                codeStyleManager.performActionWithFormatterDisabled((Runnable) variableDefinition::delete);
             }
         }
     }
 
     private void replaceGroupWithKeyword(RobotKeywordVariableStatement keywordVariableStatement, RobotKeywordCall keywordCall) {
-        keywordVariableStatement.replace(keywordCall);
+        CodeStyleManager.getInstance(keywordCall.getProject()).performActionWithFormatterDisabled(() -> keywordVariableStatement.replace(keywordCall));
     }
 
     @NotNull
