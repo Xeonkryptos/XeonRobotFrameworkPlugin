@@ -4,14 +4,10 @@ import com.intellij.openapi.util.TextRange;
 import com.intellij.psi.AbstractElementManipulator;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
-import com.intellij.psi.PsiFileFactory;
-import com.intellij.psi.impl.PsiFileFactoryImpl;
-import com.intellij.testFramework.LightVirtualFile;
 import com.intellij.util.IncorrectOperationException;
-import com.jetbrains.python.PythonLanguage;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotFeatureFileType;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableBodyId;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVisitor;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.RobotElementGenerator;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -21,17 +17,14 @@ public class RobotVariableBodyIdManipulator extends AbstractElementManipulator<R
     @Override
     public RobotVariableBodyId handleContentChange(@NotNull RobotVariableBodyId variableBodyId, @NotNull TextRange textRange, String newText) throws
                                                                                                                                               IncorrectOperationException {
-        String originalVariableName = variableBodyId.getText();
-        String newVariableName = textRange.replace(originalVariableName, newText);
-        String variableDefinition = """
-                                    *** Variables ***
-                                    ${%s}=  DUMMY
-                                    """.formatted(newVariableName);
+        String original = variableBodyId.getText();
+        String newContent = textRange.replace(original, newText);
+        String fileContent = """
+                             *** Variables ***
+                             ${%s}=  DUMMY
+                             """.formatted(newContent);
 
-        PsiFileFactory factory = PsiFileFactory.getInstance(variableBodyId.getProject());
-
-        LightVirtualFile virtualFile = new LightVirtualFile("dummy.robot", RobotFeatureFileType.getInstance(), variableDefinition);
-        PsiFile psiFile = ((PsiFileFactoryImpl) factory).trySetupPsiForFile(virtualFile, PythonLanguage.getInstance(), false, true);
+        PsiFile psiFile = RobotElementGenerator.getInstance(variableBodyId.getProject()).createDummyPsiFile(fileContent);
         if (psiFile == null) {
             return null;
         }

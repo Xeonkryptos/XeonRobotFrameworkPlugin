@@ -7,7 +7,9 @@
 ### Added
 
 - Support for keywords with a custom library name
-- Support for rename-refactoring of variables
+- Support for rename-refactoring of variables, positional arguments (when referencing a file or class in import statements), parameters, custom library names
+  and keywords
+- Support for brace matching of variables added
 
 ### Changed
 
@@ -23,6 +25,7 @@
 ## 0.4.1
 
 ### Added
+
 - Follow Python imports when searching for defined variables
 
 ### Fixed

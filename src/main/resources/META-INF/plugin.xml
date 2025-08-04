@@ -41,6 +41,7 @@
         <lang.commenter language="Robot" implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.ide.misc.RobotCommenter"/>
         <lang.foldingBuilder language="Robot" implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.ide.misc.RobotFoldingBuilder"/>
         <lang.parserDefinition language="Robot" implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotParserDefinition"/>
+        <lang.braceMatcher language="Robot" implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.ide.misc.RobotPairedBraceMatcher"/>
 
         <stubElementTypeHolder class="dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes" externalIdPrefix="robot."/>
         <stubIndex implementation="dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.index.KeywordDefinitionNameIndex"/>
