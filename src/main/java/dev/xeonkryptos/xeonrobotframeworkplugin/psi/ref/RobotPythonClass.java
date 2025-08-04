@@ -3,9 +3,9 @@ package dev.xeonkryptos.xeonrobotframeworkplugin.psi.ref;
 import com.intellij.openapi.util.Key;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiFile;
-import com.intellij.psi.util.CachedValue;
 import com.intellij.psi.util.CachedValueProvider.Result;
 import com.intellij.psi.util.CachedValuesManager;
+import com.intellij.psi.util.ParameterizedCachedValue;
 import com.jetbrains.python.psi.PyClass;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.dto.ImportType;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.DefinedKeyword;
@@ -22,7 +22,7 @@ import java.util.Set;
 
 public class RobotPythonClass implements KeywordFile {
 
-    private static final Key<CachedValue<Collection<DefinedKeyword>>> KEYWORD_CACHE_KEY = new Key<>("ROBOT_PYTHON_CLASS_KEYWORDS_CACHE");
+    private static final Key<ParameterizedCachedValue<Collection<DefinedKeyword>, String>> KEYWORD_CACHE_KEY = new Key<>("ROBOT_PYTHON_CLASS_KEYWORDS_CACHE");
 
     private final String library;
     private final PyClass pythonClass;
@@ -38,11 +38,11 @@ public class RobotPythonClass implements KeywordFile {
     @Override
     public final Collection<DefinedKeyword> getDefinedKeywords() {
         if (importType == ImportType.LIBRARY) {
-            return CachedValuesManager.getCachedValue(pythonClass, KEYWORD_CACHE_KEY, () -> {
+            return CachedValuesManager.getManager(pythonClass.getProject()).getParameterizedCachedValue(pythonClass, KEYWORD_CACHE_KEY, libraryName -> {
                 Set<DefinedKeyword> newKeywords = new LinkedHashSet<>();
-                RobotKeywordFileResolver.addDefinedKeywords(pythonClass, library, newKeywords);
+                RobotKeywordFileResolver.addDefinedKeywords(pythonClass, libraryName, newKeywords);
                 return new Result<>(newKeywords, new Object[] { pythonClass });
-            });
+            }, false, library);
         }
         return Set.of();
     }

@@ -3,9 +3,9 @@ package dev.xeonkryptos.xeonrobotframeworkplugin.psi.ref;
 import com.intellij.openapi.util.Key;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiFile;
-import com.intellij.psi.util.CachedValue;
 import com.intellij.psi.util.CachedValueProvider.Result;
 import com.intellij.psi.util.CachedValuesManager;
+import com.intellij.psi.util.ParameterizedCachedValue;
 import com.jetbrains.python.psi.PyClass;
 import com.jetbrains.python.psi.PyFile;
 import com.jetbrains.python.psi.PyFunction;
@@ -28,7 +28,7 @@ import java.util.Set;
 
 public class RobotPythonFile implements KeywordFile {
 
-    private static final Key<CachedValue<Collection<DefinedKeyword>>> KEYWORDS_CACHE_KEY = new Key<>("ROBOT_PYTHON_FILE_KEYWORDS_CACHE");
+    private static final Key<ParameterizedCachedValue<Collection<DefinedKeyword>, String>> KEYWORDS_CACHE_KEY = new Key<>("ROBOT_PYTHON_FILE_KEYWORDS_CACHE");
 
     private final String library;
     private final PyFile pythonFile;
@@ -45,7 +45,7 @@ public class RobotPythonFile implements KeywordFile {
     @SuppressWarnings("UnstableApiUsage")
     public final Collection<DefinedKeyword> getDefinedKeywords() {
         if (importType == ImportType.LIBRARY) {
-            return CachedValuesManager.getCachedValue(pythonFile, KEYWORDS_CACHE_KEY, () -> {
+            return CachedValuesManager.getManager(pythonFile.getProject()).getParameterizedCachedValue(pythonFile, KEYWORDS_CACHE_KEY, libraryName -> {
                 Set<DefinedKeyword> keywordSet = new HashSet<>();
                 Map<String, PyFunction> functions = new LinkedHashMap<>();
                 for (PyFunction function : pythonFile.getTopLevelFunctions()) {
@@ -54,23 +54,23 @@ public class RobotPythonFile implements KeywordFile {
                         functions.put(functionName, function);
                     }
                 }
-                RobotKeywordFileResolver.addDefinedKeywords(pythonFile, library, keywordSet, functions);
+                RobotKeywordFileResolver.addDefinedKeywords(pythonFile, libraryName, keywordSet, functions);
 
                 for (PyTargetExpression attribute : pythonFile.getTopLevelAttributes()) {
                     String attributeName = RobotKeywordFileResolver.getValidName(attribute.getName());
                     if (attributeName != null) {
-                        keywordSet.add(new KeywordDto(attribute, library, attributeName));
+                        keywordSet.add(new KeywordDto(attribute, libraryName, attributeName));
                     }
                 }
 
                 for (PyClass pyClass : pythonFile.getTopLevelClasses()) {
                     String className = pyClass.getName();
                     if (className != null && !className.startsWith("_")) {
-                        RobotKeywordFileResolver.addDefinedKeywords(pyClass, library, keywordSet);
+                        RobotKeywordFileResolver.addDefinedKeywords(pyClass, libraryName, keywordSet);
                     }
                 }
                 return new Result<>(keywordSet, new Object[] { pythonFile });
-            });
+            }, false, library);
         }
         return Set.of();
     }
