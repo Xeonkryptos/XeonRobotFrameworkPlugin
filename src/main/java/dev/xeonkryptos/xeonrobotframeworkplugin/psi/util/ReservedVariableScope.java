@@ -10,8 +10,8 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLocalSetting;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotPositionalArgument;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotSettingsSection;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotSetupTeardownStatementsGlobalSetting;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTestCaseStatement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTestCasesSection;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotUserKeywordStatement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariable;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.ref.PythonResolver;
 import org.jetbrains.annotations.NotNull;
@@ -56,11 +56,11 @@ public enum ReservedVariableScope {
     };
 
     private static boolean isArgument(@NotNull PsiElement position) {
-        return position instanceof RobotPositionalArgument || PsiTreeUtil.getParentOfType(position, RobotPositionalArgument.class) != null;
+        return PsiTreeUtil.getParentOfType(position, RobotPositionalArgument.class, false) != null;
     }
 
     private static boolean isVariable(@NotNull PsiElement position) {
-        return position instanceof RobotVariable || PsiTreeUtil.getParentOfType(position, RobotVariable.class) != null;
+        return PsiTreeUtil.getParentOfType(position, RobotVariable.class, false) != null;
     }
 
     /**
@@ -75,7 +75,6 @@ public enum ReservedVariableScope {
         if (keyword == null) {
             return false;
         }
-        // and that keyword is in the test cases heading
         RobotSettingsSection settingsSection = PsiTreeUtil.getParentOfType(keyword, RobotSettingsSection.class);
         return settingsSection != null;
     }
@@ -88,9 +87,9 @@ public enum ReservedVariableScope {
      * @return true if this or one of its parents is the Test Cases header.
      */
     private static boolean isInSameTestCase(@NotNull PsiElement sourceElement, @NotNull PsiElement position) {
-        RobotUserKeywordStatement sourceKeywordDefinition = getUserKeywordStatement(sourceElement);
-        RobotUserKeywordStatement targetKeywordDefinition = getUserKeywordStatement(position);
-        return sourceKeywordDefinition == targetKeywordDefinition;
+        RobotTestCaseStatement sourceTestCaseStatement = getTestCaseStatement(sourceElement);
+        RobotTestCaseStatement targetTestCaseStatement = getTestCaseStatement(position);
+        return sourceTestCaseStatement == targetTestCaseStatement;
     }
 
     /**
@@ -225,21 +224,19 @@ public enum ReservedVariableScope {
     @Nullable
     private static RobotKeywordCall getKeywordCall(@NotNull PsiElement position) {
         // either we are a keyword or we have a parent that is
-        return position instanceof RobotKeywordCall keywordCall ? keywordCall : PsiTreeUtil.getParentOfType(position, RobotKeywordCall.class);
+        return PsiTreeUtil.getParentOfType(position, RobotKeywordCall.class, false);
     }
 
     /**
-     * Gets the keyword definition element associated with this element.
+     * Gets the test case definition element associated with this element.
      *
      * @param position the element in question.
      *
-     * @return either this element or one of its parents that is a keyword definition; else null.
+     * @return either this element or one of its parents that is a test case definition; else null.
      */
     @Nullable
-    private static RobotUserKeywordStatement getUserKeywordStatement(@NotNull PsiElement position) {
-        return position instanceof RobotUserKeywordStatement userKeywordStatement ?
-               userKeywordStatement :
-               PsiTreeUtil.getParentOfType(position, RobotUserKeywordStatement.class);
+    private static RobotTestCaseStatement getTestCaseStatement(@NotNull PsiElement position) {
+        return PsiTreeUtil.getParentOfType(position, RobotTestCaseStatement.class, false);
     }
 
     @Nullable

@@ -7,6 +7,7 @@
 ### Added
 
 - Support for keywords with a custom library name
+- Support for rename-refactoring of variables
 
 ### Changed
 
@@ -17,6 +18,7 @@
 - Fixed missing test case names and symbols in PyCharm's searches
 - Fixed variable insertion handling
 - Fixed unused variable detection
+- Fixed find usages scope of variables to their direct environment
 
 ## 0.4.1
 
