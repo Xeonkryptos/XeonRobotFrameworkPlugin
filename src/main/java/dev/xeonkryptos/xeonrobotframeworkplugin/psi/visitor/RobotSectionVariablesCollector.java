@@ -57,7 +57,7 @@ public final class RobotSectionVariablesCollector extends RobotVisitor {
 
     @Override
     public void visitSetupTeardownStatementsGlobalSetting(@NotNull RobotSetupTeardownStatementsGlobalSetting o) {
-        String settingName = o.getName();
+        String settingName = o.getNameElement().getText();
         if ("Suite Setup".equalsIgnoreCase(settingName) || "Test Setup".equalsIgnoreCase(settingName)) {
             o.acceptChildren(this);
         }

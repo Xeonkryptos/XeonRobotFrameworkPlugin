@@ -1,15 +1,16 @@
 // This is a generated file. Not intended for manual editing.
 package dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl;
 
-import java.util.List;
-import org.jetbrains.annotations.*;
 import com.intellij.lang.ASTNode;
-import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.*;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.*;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotPsiImplUtil;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotSingleVariableStatement;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableDefinition;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableValue;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVisitor;
+import org.jetbrains.annotations.NotNull;
+
+import java.util.List;
 
 public class RobotSingleVariableStatementImpl extends RobotVariableStatementImpl implements RobotSingleVariableStatement {
 
@@ -38,11 +39,6 @@ public class RobotSingleVariableStatementImpl extends RobotVariableStatementImpl
   @NotNull
   public List<RobotVariableValue> getVariableValueList() {
     return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotVariableValue.class);
-  }
-
-  @Override
-  public @NotNull RobotVariable getNameIdentifier() {
-    return RobotPsiImplUtil.getNameIdentifier(this);
   }
 
 }

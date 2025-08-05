@@ -7,8 +7,10 @@ import com.intellij.psi.stubs.IndexSink;
 import com.intellij.psi.stubs.StubElement;
 import com.intellij.psi.stubs.StubInputStream;
 import com.intellij.psi.stubs.StubOutputStream;
+import com.intellij.psi.util.PsiTreeUtil;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotLanguage;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotDictVariable;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableBodyId;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotDictVariableImpl;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.index.VariableNameIndex;
 import org.jetbrains.annotations.NonNls;
@@ -34,7 +36,9 @@ public class RobotDictVariableStubElement extends IStubElementType<RobotDictVari
     @NotNull
     @Override
     public RobotDictVariableStub createStub(@NotNull RobotDictVariable psi, StubElement<? extends PsiElement> parentStub) {
-        return new RobotDictVariableStubImpl(parentStub, psi.getName());
+        RobotVariableBodyId variableBodyId = PsiTreeUtil.getChildOfType(psi, RobotVariableBodyId.class);
+        String variableName = variableBodyId != null ? variableBodyId.getText() : null;
+        return new RobotDictVariableStubImpl(parentStub, variableName);
     }
 
     @Override
@@ -50,7 +54,7 @@ public class RobotDictVariableStubElement extends IStubElementType<RobotDictVari
 
     @Override
     public void serialize(@NotNull RobotDictVariableStub stub, @NotNull StubOutputStream dataStream) throws IOException {
-        String variableName = stub.getName();
+        String variableName = stub.getVariableName();
         dataStream.writeName(variableName);
     }
 
@@ -62,7 +66,7 @@ public class RobotDictVariableStubElement extends IStubElementType<RobotDictVari
 
     @Override
     public void indexStub(@NotNull RobotDictVariableStub stub, @NotNull IndexSink sink) {
-        String variableName = stub.getName();
+        String variableName = stub.getVariableName();
         if (variableName != null) {
             String variableNameInLowerCase = variableName.toLowerCase();
             sink.occurrence(VariableNameIndex.KEY, variableNameInLowerCase);

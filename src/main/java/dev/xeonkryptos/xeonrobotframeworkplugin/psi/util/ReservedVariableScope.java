@@ -125,7 +125,7 @@ public enum ReservedVariableScope {
             }
             PsiElement sibling = getPreviousStatement(keyword);
             if (sibling instanceof RobotSetupTeardownStatementsGlobalSetting globalSetting) {
-                return globalSetting.getText().equalsIgnoreCase("Suite Teardown");
+                return globalSetting.getText().equalsIgnoreCase("[Suite Teardown]");
             }
         }
         return false;
@@ -148,7 +148,7 @@ public enum ReservedVariableScope {
             }
             PsiElement sibling = getPreviousStatement(keyword);
             if (sibling instanceof RobotSetupTeardownStatementsGlobalSetting) {
-                return sibling.getText().equalsIgnoreCase("Test Teardown");
+                return sibling.getText().equalsIgnoreCase("[Test Teardown]");
             }
         } else if (isInTestCase(position)) {
             // check that we are next to a teardown bracket setting
@@ -158,7 +158,7 @@ public enum ReservedVariableScope {
             }
             PsiElement sibling = getPreviousStatement(keyword);
             if (sibling instanceof RobotLocalSetting localSetting) {
-                return localSetting.getName().equalsIgnoreCase("Teardown");
+                return localSetting.getLocalSettingId().getText().equalsIgnoreCase("[Teardown]");
             }
         }
         return false;
@@ -208,7 +208,7 @@ public enum ReservedVariableScope {
         if (keywordsSection != null) {
             PsiElement sibling = getPreviousStatement(keyword);
             if (sibling instanceof RobotLocalSetting localSetting) {
-                return localSetting.getName().equalsIgnoreCase("Teardown");
+                return localSetting.getLocalSettingId().getText().equalsIgnoreCase("[Teardown]");
             }
         }
         return false;

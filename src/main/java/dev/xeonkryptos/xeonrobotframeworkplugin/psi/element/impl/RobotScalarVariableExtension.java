@@ -2,10 +2,12 @@ package dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl;
 
 import com.intellij.lang.ASTNode;
 import com.intellij.psi.stubs.IStubElementType;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotPsiImplUtil;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotScalarVariable;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotScalarVariableStub;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotStubPsiElementBase;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public abstract class RobotScalarVariableExtension extends RobotStubPsiElementBase<RobotScalarVariableStub, RobotScalarVariable> implements RobotScalarVariable {
 
@@ -15,5 +17,11 @@ public abstract class RobotScalarVariableExtension extends RobotStubPsiElementBa
 
     public RobotScalarVariableExtension(RobotScalarVariableStub stub, IStubElementType<RobotScalarVariableStub, RobotScalarVariable> nodeType) {
         super(stub, nodeType);
+    }
+
+    @Nullable
+    @Override
+    public String getVariableName() {
+        return RobotPsiImplUtil.getVariableName(this);
     }
 }

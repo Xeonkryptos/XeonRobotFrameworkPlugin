@@ -1,20 +1,17 @@
 // This is a generated file. Not intended for manual editing.
 package dev.xeonkryptos.xeonrobotframeworkplugin.psi.element;
 
-import java.util.List;
-import org.jetbrains.annotations.*;
-import com.intellij.psi.PsiElement;
-import com.intellij.psi.PsiNameIdentifierOwner;
-import com.intellij.navigation.NavigationItem;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-public interface RobotParameter extends PsiNameIdentifierOwner, NavigationItem, RobotArgument, RobotStatement {
+public interface RobotParameter extends RobotArgument, RobotStatement {
+
+  @NotNull
+  RobotParameterId getParameterId();
 
   @Nullable
   RobotPositionalArgument getPositionalArgument();
 
-  @NotNull
-  RobotParameterId getNameIdentifier();
-
-  @NotNull String getName();
+  @NotNull String getParameterName();
 
 }

@@ -21,14 +21,12 @@ public final class RobotUserKeywordInputArgumentCollector extends RobotVisitor {
 
     @Override
     public void visitLocalSettingArgument(@NotNull RobotLocalSettingArgument o) {
-        PsiElement nameIdentifier = o.getNameIdentifier();
-        if (nameIdentifier != null) {
-            argumentReference = o;
-            argumentName = nameIdentifier.getText();
-            o.acceptChildren(this);
-            argumentName = null;
-            argumentReference = null;
-        }
+        RobotVariable variable = o.getVariable();
+        argumentReference = o;
+        argumentName = variable.getVariableName();
+        o.acceptChildren(this);
+        argumentName = null;
+        argumentReference = null;
     }
 
     @Override
@@ -45,9 +43,8 @@ public final class RobotUserKeywordInputArgumentCollector extends RobotVisitor {
 
     @Override
     public void visitVariable(@NotNull RobotVariable o) {
-        PsiElement nameIdentifier = o.getNameIdentifier();
-        if (nameIdentifier != null) {
-            String variableName = nameIdentifier.getText();
+        String variableName = o.getVariableName();
+        if (variableName != null) {
             ParameterDto parameterDto = argumentName != null ?
                                         new ParameterDto(argumentReference, argumentName, o.getText()) :
                                         new ParameterDto(argumentReference, variableName, null);

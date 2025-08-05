@@ -13,13 +13,9 @@
   elementTypeClass="dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotElementType"
   tokenTypeClass="dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTokenType"
 
-  implements(".*_id")=["com.intellij.psi.PsiNamedElement"]
-  methods(".*_id")=[getName]
   implements("parameter|positional_argument")="argument"
 
-  implements(".*_global_setting")="com.intellij.psi.PsiNameIdentifierOwner"
   extends(".*_global_setting")="global_setting_statement"
-  methods(".*_global_setting")=[getName]
 
   implements(".*_import_global_setting")="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotImportGlobalSettingExpression"
 
@@ -30,23 +26,15 @@
 
   extends(".*_variable_statement")="variable_statement"
 
-  implements(".*_keyword_call")=["com.intellij.psi.PsiNameIdentifierOwner"]
   extends(".*_keyword_call")="keyword_call"
 
   extends(".*_structure")="executable_statement"
-
-  implements(".*_variable")="com.intellij.psi.PsiNameIdentifierOwner"
 
   implements(".*")="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotStatement"
   extends(".*")="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotPsiElementBase"
 
   pin("language")=1
-  implements("language")="com.intellij.psi.PsiNameIdentifierOwner"
-  mixin("language")="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotLanguageExtension"
 
-  implements("section")=["com.intellij.psi.PsiNameIdentifierOwner"]
-  methods("section")=[getName]
-  
   pin(".*_section")=1
   recoverWhile(".*_section")="section_recover"
 }
@@ -86,61 +74,58 @@ global_setting_statement ::= library_import_global_setting
     | unknown_setting_statements_global_setting
 
 library_import_global_setting ::= LIBRARY_IMPORT_KEYWORD positional_argument (parameter | positional_argument)* (WITH_NAME new_library_name)? eol_marker {
-    methods=[importedFile="/positional_argument[0]" nameIdentifier="LIBRARY_IMPORT_KEYWORD"]
+    methods=[importedFile="/positional_argument[0]" nameElement="LIBRARY_IMPORT_KEYWORD"]
 }
 new_library_name ::= LITERAL_CONSTANT
 resource_import_global_setting ::= RESOURCE_IMPORT_KEYWORD positional_argument eol_marker {
     pin=3
-    methods=[importedFile="positional_argument" nameIdentifier="RESOURCE_IMPORT_KEYWORD"]
+    methods=[importedFile="positional_argument" nameElement="RESOURCE_IMPORT_KEYWORD"]
 }
 variables_import_global_setting ::= VARIABLES_IMPORT_KEYWORD positional_argument (parameter | positional_argument)* eol_marker {
     pin=3
-    methods=[importedFile="/positional_argument[0]" nameIdentifier="VARIABLES_IMPORT_KEYWORD"]
+    methods=[importedFile="/positional_argument[0]" nameElement="VARIABLES_IMPORT_KEYWORD"]
 }
 suite_name_statement_global_setting ::= SUITE_NAME_KEYWORD positional_argument eol_marker {
     pin=3
-    methods=[nameIdentifier="SUITE_NAME_KEYWORD"]
+    methods=[nameElement="SUITE_NAME_KEYWORD"]
 }
 documentation_statement_global_setting ::= DOCUMENTATION_KEYWORD positional_argument* eol_marker {
     pin=3
-    methods = [nameIdentifier="DOCUMENTATION_KEYWORD"]
+    methods = [nameElement="DOCUMENTATION_KEYWORD"]
 }
 metadata_statement_global_setting ::= METADATA_KEYWORD positional_argument* eol_marker {
     pin=3
-    methods = [nameIdentifier="METADATA_KEYWORD"]
+    methods = [nameElement="METADATA_KEYWORD"]
 }
 setup_teardown_statements_global_setting ::= SETUP_TEARDOWN_STATEMENT_KEYWORDS (eol_based_keyword_call | variable) {
     pin=3
-    implements = ["com.intellij.psi.PsiNameIdentifierOwner"]
-    methods = [nameIdentifier="SETUP_TEARDOWN_STATEMENT_KEYWORDS" getName]
+    methods = [nameElement="SETUP_TEARDOWN_STATEMENT_KEYWORDS"]
 }
 tags_statement_global_setting ::= TAGS_KEYWORDS positional_argument* eol_marker {
     pin=3
-    methods = [nameIdentifier="TAGS_KEYWORDS"]
+    methods = [nameElement="TAGS_KEYWORDS"]
 }
 template_statements_global_setting ::= TEMPLATE_KEYWORDS eol_based_keyword_call {
     pin=3
-    methods = [nameIdentifier="TEMPLATE_KEYWORDS"]
+    methods = [nameElement="TEMPLATE_KEYWORDS"]
 }
 timeout_statements_global_setting ::= TIMEOUT_KEYWORDS positional_argument eol_marker {
     pin=3
-    methods = [nameIdentifier="TIMEOUT_KEYWORDS"]
+    methods = [nameElement="TIMEOUT_KEYWORDS"]
 }
 unknown_setting_statements_global_setting ::= UNKNOWN_SETTING_KEYWORD (parameter | positional_argument)* eol_marker {
     pin=1
-    extends = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotUnknownSettingStatementsGlobalSettingExtension"
-    methods = [nameIdentifier="UNKNOWN_SETTING_KEYWORD"]
+    methods = [nameElement="UNKNOWN_SETTING_KEYWORD"]
 }
 
 test_case_statement ::= test_case_id eol_marker? testcase_task_statement* {
     pin=2
     implements = [
-        "com.intellij.psi.PsiNameIdentifierOwner"
         "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotQualifiedNameOwner"
         "com.intellij.navigation.NavigationItem"
     ]
     extends = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotTestCaseExtension"
-    methods = [nameIdentifier="test_case_id" getName getIcon getQualifiedName]
+    methods = [getIcon getQualifiedName]
     stubClass = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotTestCaseStatementStub"
     elementTypeFactory = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotTestCaseStatementStubElement.create"
     recoverWhile=test_case_statement_recover
@@ -150,12 +135,11 @@ private test_case_statement_recover ::= !test_case_id & section_recover
 task_statement ::= task_id eol_marker? testcase_task_statement* {
     pin=2
     implements = [
-        "com.intellij.psi.PsiNameIdentifierOwner"
         "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotQualifiedNameOwner"
         "com.intellij.navigation.NavigationItem"
     ]
     extends = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotTaskExtension"
-    methods = [nameIdentifier="task_id" getName getIcon getQualifiedName]
+    methods = [getIcon getQualifiedName]
     stubClass = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotTaskStatementStub"
     elementTypeFactory = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotTaskStatementStubElement.create"
     recoverWhile=task_statement_recover
@@ -170,11 +154,7 @@ private testcase_task_statement ::= local_setting
 
 template_arguments ::= (template_argument | template_parameter | variable)+ eol_marker
 template_argument ::= TEMPLATE_ARGUMENT_VALUE
-template_parameter ::= template_parameter_id ASSIGNMENT (template_parameter_argument | variable) {
-    pin=2
-    implements = "com.intellij.psi.PsiNameIdentifierOwner"
-    methods = [nameIdentifier="template_parameter_id"]
-}
+template_parameter ::= template_parameter_id ASSIGNMENT (template_parameter_argument | variable) {pin=2}
 template_parameter_id ::= TEMPLATE_PARAMETER_NAME
 template_parameter_argument ::= TEMPLATE_ARGUMENT_VALUE
 
@@ -202,15 +182,9 @@ user_keyword_statement ::= user_keyword_statement_id eol_marker (local_setting |
 user_keyword_statement_id ::= USER_KEYWORD_NAME
 private user_keyword_statement_recover ::= !user_keyword_statement_id & section_recover
 
-local_setting ::= local_setting_id (local_setting_argument | positional_argument | parameter | eol_free_keyword_call | ASSIGNMENT)* eol_marker {
-    implements = ["com.intellij.psi.PsiNameIdentifierOwner"]
-    methods = [nameIdentifier="local_setting_id" getName]
-}
+local_setting ::= local_setting_id (local_setting_argument | positional_argument | parameter | eol_free_keyword_call | ASSIGNMENT)* eol_marker {methods=[getSettingName]}
 local_setting_id ::= LOCAL_SETTING_NAME
-local_setting_argument ::= variable ASSIGNMENT positional_argument {
-    implements = "com.intellij.psi.PsiNameIdentifierOwner"
-    methods = [getNameIdentifier]
-}
+local_setting_argument ::= variable ASSIGNMENT positional_argument
 
 executable_statement ::= loop_structure | loop_control_structure | control_structure | call_structure | return_structure
 
@@ -240,12 +214,11 @@ group_structure ::= GROUP positional_argument? eol_marker executable_statement* 
 
 fake keyword_call ::= base_keyword_call {
     implements = [
-        "com.intellij.psi.PsiNameIdentifierOwner"
-        "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCallExpression"
         "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotQualifiedNameOwner"
+        "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCallExpression"
         "com.intellij.navigation.NavigationItem"
     ]
-    methods = [getName getNameIdentifier getSimpleKeywordName]
+    methods = [getName getSimpleKeywordName]
     mixin = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotKeywordCallExtension"
     stubClass = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotKeywordCallStub"
     elementTypeFactory = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotKeywordCallStubElement.create"
@@ -254,38 +227,17 @@ eol_based_keyword_call ::= base_keyword_call eol_marker? {elementType=keyword_ca
 eol_free_keyword_call ::= base_keyword_call {elementType=keyword_call}
 private base_keyword_call ::= keyword_call_name (parameter | positional_argument | ASSIGNMENT)* {pin=1}
 keyword_call_name ::= keyword_call_library? KEYWORD_NAME { methods = [getName getReference] }
-keyword_call_library ::= keyword_call_library_name KEYWORD_LIBRARY_SEPARATOR {
-    implements = "com.intellij.psi.PsiNameIdentifierOwner"
-    methods = [getName getNameIdentifier]
-}
-keyword_call_library_name ::= KEYWORD_LIBRARY_NAME {
-    methods = [getReference]
-}
+keyword_call_library ::= keyword_call_library_name KEYWORD_LIBRARY_SEPARATOR
+keyword_call_library_name ::= KEYWORD_LIBRARY_NAME {methods = [getReference]}
 
 fake argument ::= DUMMY // This is a placeholder for the argument type, which is used to represent both parameters and positional arguments in the grammar.
-parameter ::= parameter_id ASSIGNMENT positional_argument? {
-    implements = ["com.intellij.psi.PsiNameIdentifierOwner" "com.intellij.navigation.NavigationItem"]
-    methods = [nameIdentifier="parameter_id" getName]
-}
-parameter_id ::= PARAMETER_NAME {
-    methods = [getReference]
-}
+parameter ::= parameter_id ASSIGNMENT positional_argument? {methods=[getParameterName]}
+parameter_id ::= PARAMETER_NAME {methods = [getReference]}
 
-fake variable_statement ::= DUMMY {
-    implements = "com.intellij.psi.PsiNamedElement"
-    methods = [getIcon]
-}
-inline_variable_statement ::= VAR variable_definition ASSIGNMENT? variable_value+ eol_marker? {
-    implements = "com.intellij.psi.PsiNameIdentifierOwner"
-    methods = [getNameIdentifier getName]
-}
-single_variable_statement ::= variable_definition ASSIGNMENT? variable_value* eol_marker? {
-    implements = "com.intellij.psi.PsiNameIdentifierOwner"
-    methods = [getNameIdentifier]
-}
-keyword_variable_statement ::= variable_definition+ ASSIGNMENT? eol_based_keyword_call { // Without EOL as it is handled at a lower level
-    implements = "com.intellij.psi.PsiNamedElement"
-}
+fake variable_statement ::= DUMMY {methods = [getIcon]}
+inline_variable_statement ::= VAR variable_definition ASSIGNMENT? variable_value+ eol_marker?
+single_variable_statement ::= variable_definition ASSIGNMENT? variable_value* eol_marker?
+keyword_variable_statement ::= variable_definition+ ASSIGNMENT? eol_based_keyword_call // Without EOL as it is handled at a lower level
 variable_value ::= variable | positional_argument | parameter
 
 positional_argument ::= external_positional_argument {
@@ -311,37 +263,30 @@ variable_definition ::= variable {
 }
 
 variable ::= scalar_variable | list_variable | dict_variable | environment_variable {
-    implements = ["com.intellij.psi.PsiNameIdentifierOwner"]
-    methods=[getNameIdentifier getName]
+    methods = [getVariableName]
 }
 scalar_variable ::= SCALAR_VARIABLE_START (variable_content | python_expression) VARIABLE_END (extended_variable_key_access | extended_variable_slice_access | extended_variable_index_access | extended_variable_nested_access)* {
     mixin = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotScalarVariableExtension"
     stubClass = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotScalarVariableStub"
     elementTypeFactory = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotScalarVariableStubElement.create"
-    methods=[getNameIdentifier getName]
 }
 list_variable ::= LIST_VARIABLE_START (variable_content | python_expression) VARIABLE_END (extended_variable_slice_access | extended_variable_index_access | extended_variable_nested_access)* {
     mixin = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotListVariableExtension"
     stubClass = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotListVariableStub"
     elementTypeFactory = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotListVariableStubElement.create"
-    methods=[getNameIdentifier getName]
 }
 dict_variable ::= DICT_VARIABLE_START (variable_content | python_expression) VARIABLE_END (extended_variable_key_access | extended_variable_nested_access)* {
     mixin = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotDictVariableExtension"
     stubClass = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotDictVariableStub"
     elementTypeFactory = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotDictVariableStubElement.create"
-    methods=[getNameIdentifier getName]
 }
 environment_variable ::= ENV_VARIABLE_START variable_content VARIABLE_END
 
 variable_content ::= (variable | variable_body_id | VARIABLE_BODY_EXTENSION | extended_variable_nested_access)+ {
-    implements = [
-      "com.intellij.psi.PsiNamedElement"
-    ]
-    methods=[content="/variable_body_id[0]" getName]
+    methods=[content="/variable_body_id[0]"]
 }
 variable_body_id ::= VARIABLE_BODY {
-    methods = [getReference getName]
+    methods = [getReference]
 }
 python_expression ::= PYTHON_EXPRESSION_START PYTHON_EXPRESSION_CONTENT PYTHON_EXPRESSION_END { methods = [expressionContent="PYTHON_EXPRESSION_CONTENT"] }
 

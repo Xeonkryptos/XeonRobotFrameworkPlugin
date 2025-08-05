@@ -257,7 +257,7 @@ public class ParameterInfoHandlerUtil {
             if (arg instanceof RobotParameter parameter) {
                 parameterFound = true;
 
-                String parameterName = parameter.getName();
+                String parameterName = parameter.getParameterName();
                 if (nameToCallableParameterIndex.containsKey(parameterName)) {
                     PyCallableParameter pyCallableParameter = nameToCallableParameterIndex.get(parameterName);
                     highlightParameter(pyCallableParameter, parameterHintToIndex, hintFlags, mustHighlight);
@@ -305,7 +305,7 @@ public class ParameterInfoHandlerUtil {
             if (arg instanceof RobotParameter parameter) {
                 parameterFound = true;
 
-                String parameterName = parameter.getName();
+                String parameterName = parameter.getParameterName();
                 if (nameToCallableParameterIndex.containsKey(parameterName)) {
                     DefinedParameter pyCallableParameter = nameToCallableParameterIndex.get(parameterName);
                     highlightParameter(pyCallableParameter, parameterHintToIndex, hintFlags, mustHighlight);

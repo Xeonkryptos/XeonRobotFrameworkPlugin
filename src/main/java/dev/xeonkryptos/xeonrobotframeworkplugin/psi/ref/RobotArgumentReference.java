@@ -94,7 +94,7 @@ public class RobotArgumentReference extends PsiPolyVariantReferenceBase<RobotPos
         RobotPositionalArgument currentPositionalArgument = getElement();
         RobotParameter parameter = PsiTreeUtil.getParentOfType(currentPositionalArgument, RobotParameter.class);
         if (parameter != null) {
-            PsiElement resolvedElement = parameter.getNameIdentifier().getReference().resolve();
+            PsiElement resolvedElement = parameter.getParameterId().getReference().resolve();
             Optional<PyExpression> pyExpressionOpt = Optional.ofNullable(resolvedElement)
                                                              .filter(element -> element instanceof PyParameter)
                                                              .map(element -> PsiTreeUtil.findChildOfType(element, PyAnnotation.class))

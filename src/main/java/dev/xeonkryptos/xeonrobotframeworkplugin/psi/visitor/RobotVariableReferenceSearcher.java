@@ -38,7 +38,7 @@ public class RobotVariableReferenceSearcher extends RobotVisitor {
     private final Set<PsiElement> foundElements = new LinkedHashSet<>();
 
     public RobotVariableReferenceSearcher(RobotVariableBodyId variableBodyId) {
-        this.variableName = variableBodyId.getName().trim();
+        this.variableName = variableBodyId.getText().trim();
         this.parents = collectParentsOf(variableBodyId);
     }
 
@@ -102,7 +102,7 @@ public class RobotVariableReferenceSearcher extends RobotVisitor {
 
     @Override
     public void visitLocalSetting(@NotNull RobotLocalSetting o) {
-        if ("[Arguments]".equals(o.getName())) {
+        if ("[Arguments]".equals(o.getSettingName())) {
             for (RobotLocalSettingArgument localSettingArgument : o.getLocalSettingArgumentList()) {
                 visitLocalSettingArgument(localSettingArgument);
             }
@@ -115,7 +115,7 @@ public class RobotVariableReferenceSearcher extends RobotVisitor {
     @Override
     public void visitLocalSettingArgument(@NotNull RobotLocalSettingArgument o) {
         RobotVariable variable = o.getVariable();
-        String definedVariableName = variable.getName();
+        String definedVariableName = variable.getVariableName();
         if (definedVariableName != null && variableName.equalsIgnoreCase(definedVariableName.trim())) {
             foundElements.add(o);
         }
@@ -153,7 +153,7 @@ public class RobotVariableReferenceSearcher extends RobotVisitor {
 
     @Override
     public void visitVariable(@NotNull RobotVariable o) {
-        String variableName = o.getName();
+        String variableName = o.getVariableName();
         if (variableName != null && this.variableName.equalsIgnoreCase(variableName.trim())) {
             foundElements.add(o);
         }

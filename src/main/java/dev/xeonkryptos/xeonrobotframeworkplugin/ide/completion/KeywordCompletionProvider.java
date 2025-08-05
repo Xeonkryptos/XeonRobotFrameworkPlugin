@@ -65,7 +65,7 @@ class KeywordCompletionProvider extends CompletionProvider<CompletionParameters>
                 }
                 Collection<DefinedParameter> alreadyAddedParameters = keywordCall.getParameterList()
                                                                                  .stream()
-                                                                                 .map(param -> new ParameterDto(param, param.getName(), null))
+                                                                                 .map(param -> new ParameterDto(param, param.getParameterName(), null))
                                                                                  .collect(Collectors.toSet());
 
                 addDefinedKeywordsFromFile(result, parameters.getOriginalFile(), keywordCompletionModification, alreadyAddedParameters);

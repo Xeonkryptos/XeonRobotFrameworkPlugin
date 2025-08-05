@@ -26,7 +26,7 @@ public class RobotVariableBodyReference extends PsiPolyVariantReferenceBase<Robo
         RobotVariableBodyId variableBodyId = getElement();
         ResolveCache resolveCache = ResolveCache.getInstance(variableBodyId.getProject());
         return resolveCache.resolveWithCaching(this, (robotVariableReference, incompCode) -> {
-            String variableName = variableBodyId.getName();
+            String variableName = variableBodyId.getText();
             if (variableName.isBlank()) { // e.g. ${}, thus empty representation of a variable. There can be no reference.
                 return ResolveResult.EMPTY_ARRAY;
             }

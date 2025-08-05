@@ -33,7 +33,7 @@ public class RobotVariableAnnotator implements Annotator, DumbAware {
         if (!(element instanceof RobotVariable variable) || element instanceof RobotEnvironmentVariable) {
             return;
         }
-        String variableName = variable.getName();
+        String variableName = variable.getVariableName();
         if (variableName == null || variableName.isBlank() || NUMBERS_PATTERN.matcher(variableName).matches()) {
             return;
         }
@@ -42,13 +42,13 @@ public class RobotVariableAnnotator implements Annotator, DumbAware {
             return;
         }
         RobotLocalSetting localSetting = PsiTreeUtil.getParentOfType(element, RobotLocalSetting.class);
-        if (localSetting != null && "[Arguments]".equalsIgnoreCase(localSetting.getName())) {
+        if (localSetting != null && "[Arguments]".equalsIgnoreCase(localSetting.getLocalSettingId().getText())) {
             return;
         }
 
-        RobotVariableBodyId nameIdentifier = variable.getNameIdentifier();
-        if (nameIdentifier != null && ((PsiPolyVariantReference) nameIdentifier.getReference()).multiResolve(false).length > 0) {
-            ResolveResult[] resolveResults = ((PsiPolyVariantReference) nameIdentifier.getReference()).multiResolve(false);
+        RobotVariableBodyId variableBodyId = PsiTreeUtil.getRequiredChildOfType(variable, RobotVariableBodyId.class);
+        if (((PsiPolyVariantReference) variableBodyId.getReference()).multiResolve(false).length > 0) {
+            ResolveResult[] resolveResults = ((PsiPolyVariantReference) variableBodyId.getReference()).multiResolve(false);
             if (resolveResults.length > 0) {
                 if (resolveResults.length > 1) {
                     holder.newSilentAnnotation(HighlightSeverity.TEXT_ATTRIBUTES)

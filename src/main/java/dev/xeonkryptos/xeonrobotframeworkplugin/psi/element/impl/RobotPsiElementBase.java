@@ -3,7 +3,6 @@ package dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl;
 import com.intellij.extapi.psi.ASTWrapperPsiElement;
 import com.intellij.lang.ASTNode;
 import com.intellij.navigation.ItemPresentation;
-import com.intellij.psi.PsiElement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotStatement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.QualifiedNameBuilder;
 import org.jetbrains.annotations.NotNull;
@@ -36,10 +35,6 @@ public abstract class RobotPsiElementBase extends ASTWrapperPsiElement implement
                 return RobotPsiElementBase.this.getIcon(ICON_FLAG_VISIBILITY);
             }
         };
-    }
-
-    public PsiElement setName(@NotNull String newName) {
-        return this;
     }
 
     @Override

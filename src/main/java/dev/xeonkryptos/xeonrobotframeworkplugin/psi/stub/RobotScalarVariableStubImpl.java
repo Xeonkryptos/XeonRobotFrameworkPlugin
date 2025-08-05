@@ -17,7 +17,7 @@ public class RobotScalarVariableStubImpl extends StubBase<RobotScalarVariable> i
     }
 
     @Override
-    public String getName() {
+    public String getVariableName() {
         return myName;
     }
 }

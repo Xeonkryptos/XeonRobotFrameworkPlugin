@@ -1,12 +1,12 @@
 // This is a generated file. Not intended for manual editing.
 package dev.xeonkryptos.xeonrobotframeworkplugin.psi.element;
 
-import java.util.List;
-import org.jetbrains.annotations.*;
-import com.intellij.psi.PsiElement;
-import com.intellij.psi.PsiNamedElement;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-public interface RobotVariableContent extends PsiNamedElement, RobotStatement {
+import java.util.List;
+
+public interface RobotVariableContent extends RobotStatement {
 
   @NotNull
   List<RobotExtendedVariableNestedAccess> getExtendedVariableNestedAccessList();
@@ -19,9 +19,5 @@ public interface RobotVariableContent extends PsiNamedElement, RobotStatement {
 
   @Nullable
   RobotVariableBodyId getContent();
-
-  //WARNING: getName(...) is skipped
-  //matching getName(RobotVariableContent, ...)
-  //methods are not found in RobotPsiImplUtil
 
 }

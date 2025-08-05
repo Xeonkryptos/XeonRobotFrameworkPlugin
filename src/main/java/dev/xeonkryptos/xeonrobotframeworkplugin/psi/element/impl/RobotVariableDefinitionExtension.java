@@ -4,6 +4,7 @@ import com.intellij.lang.ASTNode;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.stubs.IStubElementType;
 import com.intellij.psi.util.PsiTreeUtil;
+import com.intellij.util.IncorrectOperationException;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotResourceFileType;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableDefinition;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableStatement;
@@ -45,6 +46,11 @@ public abstract class RobotVariableDefinitionExtension extends RobotStubPsiEleme
         }
         String variableName = getName();
         return text.equalsIgnoreCase(variableName);
+    }
+
+    @Override
+    public PsiElement setName(@NotNull String newName) throws IncorrectOperationException {
+        return this;
     }
 
     @Override

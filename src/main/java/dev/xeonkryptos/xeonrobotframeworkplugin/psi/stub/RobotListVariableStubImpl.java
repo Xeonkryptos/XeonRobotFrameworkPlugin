@@ -17,7 +17,7 @@ public class RobotListVariableStubImpl extends StubBase<RobotListVariable> imple
     }
 
     @Override
-    public String getName() {
+    public String getVariableName() {
         return myName;
     }
 }

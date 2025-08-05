@@ -1,19 +1,14 @@
 // This is a generated file. Not intended for manual editing.
 package dev.xeonkryptos.xeonrobotframeworkplugin.psi.element;
 
-import java.util.List;
-import org.jetbrains.annotations.*;
-import com.intellij.psi.PsiElement;
-import com.intellij.psi.PsiNameIdentifierOwner;
+import org.jetbrains.annotations.NotNull;
 
-public interface RobotLocalSettingArgument extends PsiNameIdentifierOwner, RobotStatement {
+public interface RobotLocalSettingArgument extends RobotStatement {
 
   @NotNull
   RobotPositionalArgument getPositionalArgument();
 
   @NotNull
   RobotVariable getVariable();
-
-  @Nullable RobotVariableBodyId getNameIdentifier();
 
 }

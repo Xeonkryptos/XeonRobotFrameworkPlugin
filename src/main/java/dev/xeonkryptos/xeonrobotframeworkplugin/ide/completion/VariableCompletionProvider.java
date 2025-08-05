@@ -35,7 +35,7 @@ class VariableCompletionProvider extends CompletionProvider<CompletionParameters
     @Override
     protected void addCompletions(@NotNull CompletionParameters parameters, @NotNull ProcessingContext context, @NotNull CompletionResultSet result) {
         RobotLocalSetting localSettingElement = PsiTreeUtil.getParentOfType(parameters.getOriginalPosition(), RobotLocalSetting.class);
-        if (localSettingElement != null && RESTRICTED_VARIABLE_COMPLETION_LOCAL_SETTING_NAMES.contains(localSettingElement.getName())) {
+        if (localSettingElement != null && RESTRICTED_VARIABLE_COMPLETION_LOCAL_SETTING_NAMES.contains(localSettingElement.getSettingName())) {
             return;
         }
 

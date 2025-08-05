@@ -47,7 +47,7 @@ public final class RobotUserKeywordsCollector extends RobotVisitor {
 
     @Override
     public void visitLocalSetting(@NotNull RobotLocalSetting o) {
-        String settingName = o.getName();
+        String settingName = o.getSettingName();
         if ("[Arguments]".equalsIgnoreCase(settingName)) {
             o.acceptChildren(this);
         }
@@ -58,7 +58,7 @@ public final class RobotUserKeywordsCollector extends RobotVisitor {
         RobotVariable parameterVariableElement = o.getVariable();
         RobotPositionalArgument parameterValueElement = o.getPositionalArgument();
 
-        String parameterName = parameterVariableElement.getName();
+        String parameterName = parameterVariableElement.getVariableName();
         String defaultValue = parameterValueElement.getText();
 
         ParameterDto parameterDto = new ParameterDto(parameterVariableElement, parameterName, defaultValue);
@@ -72,7 +72,7 @@ public final class RobotUserKeywordsCollector extends RobotVisitor {
 
     @Override
     public void visitVariable(@NotNull RobotVariable o) {
-        String parameterName = o.getName();
+        String parameterName = o.getVariableName();
         ParameterDto parameterDto = new ParameterDto(o, parameterName, null);
         keywordArguments.add(parameterDto);
     }

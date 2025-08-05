@@ -2,6 +2,7 @@ package dev.xeonkryptos.xeonrobotframeworkplugin.psi.visitor;
 
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiReference;
+import com.intellij.psi.util.PsiTreeUtil;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotBddStatement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotExecutableStatement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotGlobalSettingStatement;
@@ -22,6 +23,7 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTemplateStateme
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTestCaseStatement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotUserKeywordStatement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariable;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableBodyId;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableStatement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableValue;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariablesImportGlobalSetting;
@@ -139,7 +141,7 @@ public final class RobotUsedFilesCollector extends RobotVisitor {
     @Override
     public void visitKeywordCall(@NotNull RobotKeywordCall o) {
         RobotKeywordCallName keywordCallName = o.getKeywordCallName();
-        references.put(keywordCallName.getName(), keywordCallName.getReference());
+        references.put(keywordCallName.getText(), keywordCallName.getReference());
         o.getAllCallArguments().forEach(argument -> argument.accept(this));
     }
 
@@ -155,10 +157,10 @@ public final class RobotUsedFilesCollector extends RobotVisitor {
 
     @Override
     public void visitVariable(@NotNull RobotVariable o) {
-        PsiElement nameIdentifier = o.getNameIdentifier();
-        if (nameIdentifier != null) {
-            String variableName = o.getName();
-            PsiReference reference = nameIdentifier.getReference();
+        PsiElement variableBodyId = PsiTreeUtil.getChildOfType(o, RobotVariableBodyId.class);
+        if (variableBodyId != null) {
+            String variableName = o.getVariableName();
+            PsiReference reference = variableBodyId.getReference();
             references.put(variableName, reference);
         }
     }

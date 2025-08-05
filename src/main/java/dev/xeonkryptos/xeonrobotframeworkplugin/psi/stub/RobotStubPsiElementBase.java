@@ -42,10 +42,6 @@ public abstract class RobotStubPsiElementBase<T extends StubElement<P>, P extend
         };
     }
 
-    public PsiElement setName(@NotNull String newName) {
-        return this;
-    }
-
     @Override
     public String toString() {
         return super.toString() + "(" + getText() + ")";

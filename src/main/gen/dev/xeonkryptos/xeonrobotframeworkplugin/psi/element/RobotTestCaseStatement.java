@@ -1,16 +1,15 @@
 // This is a generated file. Not intended for manual editing.
 package dev.xeonkryptos.xeonrobotframeworkplugin.psi.element;
 
-import java.util.List;
-import org.jetbrains.annotations.*;
-import com.intellij.psi.PsiElement;
-import com.intellij.psi.PsiNameIdentifierOwner;
 import com.intellij.navigation.NavigationItem;
 import com.intellij.psi.StubBasedPsiElement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotTestCaseStatementStub;
-import javax.swing.Icon;
+import org.jetbrains.annotations.NotNull;
 
-public interface RobotTestCaseStatement extends PsiNameIdentifierOwner, RobotQualifiedNameOwner, NavigationItem, RobotStatement, StubBasedPsiElement<RobotTestCaseStatementStub> {
+import javax.swing.Icon;
+import java.util.List;
+
+public interface RobotTestCaseStatement extends RobotQualifiedNameOwner, NavigationItem, RobotStatement, StubBasedPsiElement<RobotTestCaseStatementStub> {
 
   @NotNull
   List<RobotBddStatement> getBddStatementList();
@@ -25,9 +24,7 @@ public interface RobotTestCaseStatement extends PsiNameIdentifierOwner, RobotQua
   List<RobotTemplateArguments> getTemplateArgumentsList();
 
   @NotNull
-  RobotTestCaseId getNameIdentifier();
-
-  @NotNull String getName();
+  RobotTestCaseId getTestCaseId();
 
   @NotNull Icon getIcon(int flags);
 

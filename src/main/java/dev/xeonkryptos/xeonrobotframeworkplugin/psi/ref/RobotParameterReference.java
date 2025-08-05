@@ -35,7 +35,7 @@ public class RobotParameterReference extends PsiReferenceBase<RobotParameterId> 
             RobotOptionsProvider robotOptionsProvider = RobotOptionsProvider.getInstance(parameterId.getProject());
             Collator parameterNameCollator = robotOptionsProvider.getParameterNameCollator();
 
-            String parameterName = parameterId.getName();
+            String parameterName = parameterId.getText();
             RobotKeywordCall keywordCall = PsiTreeUtil.getParentOfType(parameterId, RobotKeywordCall.class);
             PsiElement reference = null;
             if (keywordCall != null) {

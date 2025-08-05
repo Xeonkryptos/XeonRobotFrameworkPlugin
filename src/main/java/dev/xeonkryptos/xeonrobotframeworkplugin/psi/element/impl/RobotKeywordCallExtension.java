@@ -3,6 +3,7 @@ package dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl;
 import com.intellij.lang.ASTNode;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.stubs.IStubElementType;
+import com.intellij.util.IncorrectOperationException;
 import com.jetbrains.python.psi.PyClass;
 import com.jetbrains.python.psi.PyFunction;
 import com.jetbrains.python.psi.PyNamedParameter;
@@ -111,7 +112,9 @@ public abstract class RobotKeywordCallExtension extends RobotStubPsiElementBase<
 
     @Override
     public Collection<String> computeMissingRequiredParameters() {
-        Set<String> definedParameters = getParameterList().stream().map(RobotParameter::getName).collect(Collectors.toCollection(HashSet::new));
+        Set<String> definedParameters = getParameterList().stream()
+                                                          .map(RobotParameter::getParameterName)
+                                                          .collect(Collectors.toCollection(HashSet::new));
         Collection<String> requiredParameterNames = getAvailableParameters().stream()
                                                                             .filter(param -> !param.hasDefaultValue() && !param.isKeywordContainer())
                                                                             .map(DefinedParameter::getLookup)
@@ -143,6 +146,11 @@ public abstract class RobotKeywordCallExtension extends RobotStubPsiElementBase<
         RobotKeywordCallArgumentsCollector callArgumentsCollector = new RobotKeywordCallArgumentsCollector();
         acceptChildren(callArgumentsCollector);
         return callArgumentsCollector.getArguments();
+    }
+
+    @Override
+    public PsiElement setName(@NotNull String newName) throws IncorrectOperationException {
+        return this;
     }
 
     @NotNull

@@ -61,7 +61,7 @@ public class RobotVariableReferenceSearch extends QueryExecutorBase<PsiReference
         VariableNameIndex variableNameIndex = VariableNameIndex.getInstance();
         Collection<RobotVariable> variables = ReadAction.compute(() -> variableNameIndex.getVariables(variableName, project, globalSearchScope));
         for (RobotVariable variable : variables) {
-            RobotVariableBodyId variableBodyId = variable.getNameIdentifier();
+            RobotVariableBodyId variableBodyId = PsiTreeUtil.getChildOfType(variable, RobotVariableBodyId.class);
             if (variableBodyId != null && variableDefinition.isInScope(variable)) {
                 PsiReference reference = variableBodyId.getReference();
                 if (!consumer.process(reference)) {

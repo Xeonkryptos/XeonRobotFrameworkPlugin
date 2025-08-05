@@ -49,7 +49,7 @@ public class RobotKeywordCallNameReference extends PsiPolyVariantReferenceBase<R
     public Object @NotNull [] getVariants() {
         RobotKeywordCallName keywordCallName = getElement();
         RobotKeywordCallLibrary keywordCallLibrary = keywordCallName.getKeywordCallLibrary();
-        String libraryName = keywordCallLibrary != null ? keywordCallLibrary.getName() : null;
+        String libraryName = keywordCallLibrary != null ? keywordCallLibrary.getText() : null;
         PsiFile containingFile = keywordCallName.getContainingFile();
         if (containingFile instanceof RobotFile robotFile) {
             if (KeywordCompletionModification.isKeywordStartsWithModifier(libraryName)) {

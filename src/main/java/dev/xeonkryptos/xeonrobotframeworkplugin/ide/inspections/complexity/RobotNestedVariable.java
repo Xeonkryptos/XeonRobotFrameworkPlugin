@@ -5,7 +5,6 @@ import com.intellij.codeInspection.ProblemsHolder;
 import com.intellij.psi.PsiElementVisitor;
 import dev.xeonkryptos.xeonrobotframeworkplugin.RobotBundle;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariable;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableBodyId;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVisitor;
 import org.jetbrains.annotations.NotNull;
 
@@ -18,8 +17,9 @@ public class RobotNestedVariable extends LocalInspectionTool {
             @Override
             public void visitVariable(@NotNull RobotVariable o) {
                 super.visitVariable(o);
-                RobotVariableBodyId nameIdentifier = o.getNameIdentifier();
-                if (nameIdentifier == null) {
+                String variableName = o.getVariableName();
+                if (variableName == null) {
+                    // Without a variable name identifiable in Robot code, it means a nested variable construct is used
                     holder.registerProblem(o, RobotBundle.getMessage("INSP.variable.nested"));
                 }
             }

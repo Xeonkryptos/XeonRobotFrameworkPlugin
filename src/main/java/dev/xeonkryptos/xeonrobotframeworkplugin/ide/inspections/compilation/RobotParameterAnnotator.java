@@ -11,6 +11,7 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.DefinedParameter;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCall;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLocalSetting;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotParameter;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotParameterId;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariable;
 import org.jetbrains.annotations.NotNull;
 
@@ -26,7 +27,7 @@ public class RobotParameterAnnotator implements Annotator {
         RobotKeywordCall keywordStatement = PsiTreeUtil.getParentOfType(parameter, RobotKeywordCall.class);
         if (keywordStatement != null) {
             Collection<DefinedParameter> availableParameters = keywordStatement.getAvailableParameters();
-            String parameterName = parameter.getName();
+            String parameterName = parameter.getParameterName();
             boolean directMatchFound = availableParameters.stream().anyMatch(param -> param.matches(parameterName));
             if (!directMatchFound && availableParameters.stream().noneMatch(DefinedParameter::isKeywordContainer)) {
                 convertParameterToArgumentVisually(holder, parameter);
@@ -40,8 +41,8 @@ public class RobotParameterAnnotator implements Annotator {
         TextRange parameterTextAttributeRange = parameter.getTextRange();
         RobotVariable variable = PsiTreeUtil.findChildOfType(parameter, RobotVariable.class);
         if (variable != null) {
-            PsiElement nameIdentifier = parameter.getNameIdentifier();
-            parameterTextAttributeRange = nameIdentifier.getTextRange();
+            RobotParameterId parameterId = parameter.getParameterId();
+            parameterTextAttributeRange = parameterId.getTextRange();
             int textOffset = variable.getTextOffset();
             parameterTextAttributeRange = new TextRange(parameterTextAttributeRange.getStartOffset(), textOffset);
         }

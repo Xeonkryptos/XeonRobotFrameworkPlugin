@@ -28,7 +28,10 @@ class KeywordParametersCompletionProvider extends CompletionProvider<CompletionP
 
     private void addKeywordParameters(@NotNull RobotKeywordCall keywordStatement, @NotNull CompletionResultSet resultSet) {
         Collection<DefinedParameter> availableParameters = keywordStatement.getAvailableParameters();
-        Set<String> arguments = keywordStatement.getParameterList().stream().map(RobotParameter::getName).collect(Collectors.toSet());
+        Set<String> arguments = keywordStatement.getParameterList()
+                                                .stream()
+                                                .map(RobotParameter::getParameterName)
+                                                .collect(Collectors.toSet());
         availableParameters.removeIf(parameter -> arguments.contains(parameter.getLookup()) || parameter.isKeywordContainer());
 
         for (DefinedParameter parameter : availableParameters) {

@@ -38,7 +38,7 @@ public class RobotKeywordCallStubElement extends IStubElementType<RobotKeywordCa
     public RobotKeywordCallStub createStub(@NotNull RobotKeywordCall psi, StubElement<? extends PsiElement> parentStub) {
         RobotKeywordCallName keywordCallName = psi.getKeywordCallName();
         RobotKeywordCallLibrary keywordCallLibrary = keywordCallName.getKeywordCallLibrary();
-        String libraryName = keywordCallLibrary != null ? keywordCallLibrary.getName() : null;
+        String libraryName = keywordCallLibrary != null ? keywordCallLibrary.getText() : null;
         String fullKeywordName = psi.getName();
         return new RobotKeywordCallStubImpl(parentStub, libraryName, fullKeywordName);
     }

@@ -38,8 +38,8 @@ public class ResolverUtils {
     @NotNull
     public static PsiElement[] findKeywordReferences(@NotNull RobotKeywordCallName keywordCallName, @Nullable PsiFile psiFile) {
         RobotKeywordCallLibrary keywordCallLibrary = keywordCallName.getKeywordCallLibrary();
-        String libraryName = keywordCallLibrary != null ? keywordCallLibrary.getName() : null;
-        String keywordName = keywordCallName.getName();
+        String libraryName = keywordCallLibrary != null ? keywordCallLibrary.getText() : null;
+        String keywordName = keywordCallName.getText();
         if (KeywordCompletionModification.isKeywordStartsWithModifier(libraryName)) {
             libraryName = libraryName.substring(1);
         } else if (libraryName == null && KeywordCompletionModification.isKeywordStartsWithModifier(keywordName)) {
@@ -134,7 +134,7 @@ public class ResolverUtils {
         if (RobotReadWriteAccessDetector.isVariableSetterKeyword(keywordName)) {
             List<RobotPositionalArgument> positionalArgumentList = keywordCall.getPositionalArgumentList();
             if (!positionalArgumentList.isEmpty() && positionalArgumentList.getFirst().getFirstChild() instanceof RobotVariable variable) {
-                String variableName = variable.getName();
+                String variableName = variable.getVariableName();
                 if (variableName != null) {
                     DefinedVariable definedVariable = new VariableDto(variable, variableName, null);
                     return Collections.singletonList(definedVariable);

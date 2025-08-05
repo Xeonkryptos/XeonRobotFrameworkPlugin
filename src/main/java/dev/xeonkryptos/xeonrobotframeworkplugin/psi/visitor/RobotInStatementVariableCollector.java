@@ -62,7 +62,7 @@ public class RobotInStatementVariableCollector extends RobotVisitor {
         if (o.getTextRange().getStartOffset() < definitionEndOffset) {
             RobotVariable variable = o.getVariable();
             String wrappedVariableName = variable.getText();
-            String variableName = variable.getName();
+            String variableName = variable.getVariableName();
             if (variableName != null) {
                 VariableDto variableDto = new VariableDto(o, wrappedVariableName, variableName, ReservedVariableScope.TestCase);
                 availableVariables.add(variableDto);

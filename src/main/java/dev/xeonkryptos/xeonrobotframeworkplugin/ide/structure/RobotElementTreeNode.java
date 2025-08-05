@@ -5,7 +5,7 @@ import com.intellij.ide.projectView.ViewSettings;
 import com.intellij.ide.projectView.impl.nodes.BasePsiNode;
 import com.intellij.ide.util.treeView.AbstractTreeNode;
 import com.intellij.openapi.project.Project;
-import com.intellij.psi.PsiNamedElement;
+import com.intellij.psi.PsiElement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotGlobalSettingStatement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCall;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotSection;
@@ -17,11 +17,11 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.Collection;
 
-public class RobotElementTreeNode extends BasePsiNode<PsiNamedElement> {
+public class RobotElementTreeNode extends BasePsiNode<PsiElement> {
 
     private final RobotViewElementType type;
 
-    public RobotElementTreeNode(Project project, PsiNamedElement element, ViewSettings viewSettings, RobotViewElementType type) {
+    public RobotElementTreeNode(Project project, PsiElement element, ViewSettings viewSettings, RobotViewElementType type) {
         super(project, element, viewSettings);
 
         this.type = type;
@@ -29,17 +29,17 @@ public class RobotElementTreeNode extends BasePsiNode<PsiNamedElement> {
 
     @Override
     protected void updateImpl(@NotNull PresentationData data) {
-        PsiNamedElement namedElement = getValue();
-        if (namedElement != null) {
-            String keywordName = namedElement.getName();
-            data.setPresentableText(keywordName);
-            data.setIcon(type.getIcon(namedElement));
+        PsiElement element = getValue();
+        if (element != null) {
+            String presentableText = element.getText();
+            data.setPresentableText(presentableText);
+            data.setIcon(type.getIcon(element));
         }
     }
 
     @Override
     public Collection<AbstractTreeNode<?>> getChildrenImpl() {
-        PsiNamedElement element = getValue();
+        PsiElement element = getValue();
 
         RobotSectionElementsCollector treeNodeCollector = new RobotSectionElementsCollector();
         element.acceptChildren(treeNodeCollector);
@@ -49,7 +49,7 @@ public class RobotElementTreeNode extends BasePsiNode<PsiNamedElement> {
             children.add(new RobotElementTreeNode(getProject(), section, getSettings(), RobotViewElementType.Section));
         }
         for (RobotGlobalSettingStatement statement : treeNodeCollector.getMetadataStatements()) {
-            children.add(new RobotElementTreeNode(getProject(), (PsiNamedElement) statement, getSettings(), RobotViewElementType.Settings));
+            children.add(new RobotElementTreeNode(getProject(), statement, getSettings(), RobotViewElementType.Settings));
         }
 
         for (RobotUserKeywordStatement userKeywordStatement : treeNodeCollector.getUserKeywordStatements()) {
