@@ -7,8 +7,10 @@ import com.intellij.util.IncorrectOperationException;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.DefinedParameter;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLocalSetting;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotUserKeywordStatement;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotUserKeywordStatementId;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotStubPsiElementBase;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotUserKeywordStub;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.RobotElementGenerator;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.visitor.RobotUserKeywordInputArgumentCollector;
 import org.jetbrains.annotations.NotNull;
 
@@ -43,6 +45,10 @@ public abstract class RobotUserKeywordExtension extends RobotStubPsiElementBase<
 
     @Override
     public PsiElement setName(@NotNull String newName) throws IncorrectOperationException {
+        RobotUserKeywordStatementId newUserKeywordStatementId = RobotElementGenerator.getInstance(getProject()).createNewUserKeywordStatementId(newName);
+        if (newUserKeywordStatementId != null) {
+            getNameIdentifier().replace(newUserKeywordStatementId);
+        }
         return this;
     }
 }

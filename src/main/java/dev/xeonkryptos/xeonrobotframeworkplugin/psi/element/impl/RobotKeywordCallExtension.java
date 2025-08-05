@@ -15,11 +15,13 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.dto.ParameterDto;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.DefinedParameter;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotArgument;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCall;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCallName;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotParameter;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotUserKeywordStatement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotKeywordCallStub;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotStubPsiElementBase;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.QualifiedNameBuilder;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.RobotElementGenerator;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.visitor.RobotKeywordCallArgumentsCollector;
 import dev.xeonkryptos.xeonrobotframeworkplugin.util.PythonInspector;
 import org.jetbrains.annotations.NotNull;
@@ -150,6 +152,10 @@ public abstract class RobotKeywordCallExtension extends RobotStubPsiElementBase<
 
     @Override
     public PsiElement setName(@NotNull String newName) throws IncorrectOperationException {
+        RobotKeywordCallName newKeywordCallName = RobotElementGenerator.getInstance(getProject()).createNewKeywordCallName(newName);
+        if (newKeywordCallName != null) {
+            getKeywordCallName().replace(newKeywordCallName);
+        }
         return this;
     }
 
