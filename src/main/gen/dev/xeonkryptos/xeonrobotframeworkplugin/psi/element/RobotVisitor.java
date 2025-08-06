@@ -1,10 +1,11 @@
 // This is a generated file. Not intended for manual editing.
 package dev.xeonkryptos.xeonrobotframeworkplugin.psi.element;
 
-import com.intellij.psi.PsiElement;
+import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElementVisitor;
+import com.intellij.psi.PsiElement;
+import com.intellij.navigation.NavigationItem;
 import com.intellij.psi.PsiNameIdentifierOwner;
-import org.jetbrains.annotations.NotNull;
 
 public class RobotVisitor extends PsiElementVisitor {
 

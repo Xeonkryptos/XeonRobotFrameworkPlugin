@@ -12,7 +12,10 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLocalSettingId;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotParameter;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotParameterId;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotPositionalArgument;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTaskId;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTaskStatement;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTestCaseId;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTestCaseStatement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotUserKeywordStatement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotUserKeywordStatementId;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariable;
@@ -50,6 +53,18 @@ public class RobotPsiImplUtil {
     public static String getName(@NotNull RobotVariableDefinition variableDefinition) {
         RobotVariable nameIdentifier = variableDefinition.getNameIdentifier();
         return nameIdentifier.getVariableName();
+    }
+
+    @NotNull
+    public static String getName(@NotNull RobotTestCaseStatement testCaseStatement) {
+        RobotTestCaseId testCaseId = testCaseStatement.getTestCaseId();
+        return testCaseId.getText();
+    }
+
+    @NotNull
+    public static String getName(@NotNull RobotTaskStatement taskStatement) {
+        RobotTaskId taskId = taskStatement.getTaskId();
+        return taskId.getText();
     }
 
     @NotNull

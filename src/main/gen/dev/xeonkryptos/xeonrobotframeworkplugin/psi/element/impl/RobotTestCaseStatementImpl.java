@@ -1,23 +1,18 @@
 // This is a generated file. Not intended for manual editing.
 package dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl;
 
-import com.intellij.lang.ASTNode;
-import com.intellij.psi.PsiElementVisitor;
-import com.intellij.psi.stubs.IStubElementType;
-import com.intellij.psi.util.PsiTreeUtil;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotPsiImplUtil;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotBddStatement;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotExecutableStatement;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLocalSetting;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTemplateArguments;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTestCaseId;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTestCaseStatement;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVisitor;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotTestCaseStatementStub;
-import org.jetbrains.annotations.NotNull;
-
-import javax.swing.Icon;
 import java.util.List;
+import org.jetbrains.annotations.*;
+import com.intellij.lang.ASTNode;
+import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiElementVisitor;
+import com.intellij.psi.util.PsiTreeUtil;
+import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.*;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.*;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotPsiImplUtil;
+import javax.swing.Icon;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotTestCaseStatementStub;
+import com.intellij.psi.stubs.IStubElementType;
 
 public class RobotTestCaseStatementImpl extends RobotTestCaseExtension implements RobotTestCaseStatement {
 
@@ -67,6 +62,11 @@ public class RobotTestCaseStatementImpl extends RobotTestCaseExtension implement
   @NotNull
   public RobotTestCaseId getTestCaseId() {
     return notNullChild(PsiTreeUtil.getChildOfType(this, RobotTestCaseId.class));
+  }
+
+  @Override
+  public @NotNull String getName() {
+    return RobotPsiImplUtil.getName(this);
   }
 
   @Override

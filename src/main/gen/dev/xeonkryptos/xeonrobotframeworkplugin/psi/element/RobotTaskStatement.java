@@ -1,13 +1,13 @@
 // This is a generated file. Not intended for manual editing.
 package dev.xeonkryptos.xeonrobotframeworkplugin.psi.element;
 
+import java.util.List;
+import org.jetbrains.annotations.*;
+import com.intellij.psi.PsiElement;
 import com.intellij.navigation.NavigationItem;
 import com.intellij.psi.StubBasedPsiElement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotTaskStatementStub;
-import org.jetbrains.annotations.NotNull;
-
 import javax.swing.Icon;
-import java.util.List;
 
 public interface RobotTaskStatement extends RobotQualifiedNameOwner, NavigationItem, RobotStatement, StubBasedPsiElement<RobotTaskStatementStub> {
 
@@ -25,6 +25,8 @@ public interface RobotTaskStatement extends RobotQualifiedNameOwner, NavigationI
 
   @NotNull
   List<RobotTemplateArguments> getTemplateArgumentsList();
+
+  @NotNull String getName();
 
   @NotNull Icon getIcon(int flags);
 

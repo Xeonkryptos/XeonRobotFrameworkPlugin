@@ -125,7 +125,7 @@ test_case_statement ::= test_case_id eol_marker? testcase_task_statement* {
         "com.intellij.navigation.NavigationItem"
     ]
     extends = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotTestCaseExtension"
-    methods = [getIcon getQualifiedName]
+    methods = [getName getIcon getQualifiedName]
     stubClass = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotTestCaseStatementStub"
     elementTypeFactory = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotTestCaseStatementStubElement.create"
     recoverWhile=test_case_statement_recover
@@ -139,7 +139,7 @@ task_statement ::= task_id eol_marker? testcase_task_statement* {
         "com.intellij.navigation.NavigationItem"
     ]
     extends = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotTaskExtension"
-    methods = [getIcon getQualifiedName]
+    methods = [getName getIcon getQualifiedName]
     stubClass = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotTaskStatementStub"
     elementTypeFactory = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotTaskStatementStubElement.create"
     recoverWhile=task_statement_recover
