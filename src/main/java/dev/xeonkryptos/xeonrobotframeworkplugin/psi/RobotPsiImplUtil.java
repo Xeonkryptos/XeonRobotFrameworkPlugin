@@ -17,6 +17,7 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotUserKeywordStat
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotUserKeywordStatementId;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariable;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableBodyId;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableContent;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableDefinition;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableStatement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotTestCaseExtension;
@@ -58,7 +59,7 @@ public class RobotPsiImplUtil {
 
     @Nullable
     public static String getVariableName(@NotNull RobotVariable variable) {
-        RobotVariableBodyId variableBodyId = PsiTreeUtil.getChildOfType(variable, RobotVariableBodyId.class);
+        RobotVariableBodyId variableBodyId = getVariableBodyId(variable);
         return variableBodyId != null ? variableBodyId.getText() : null;
     }
 
@@ -153,5 +154,14 @@ public class RobotPsiImplUtil {
     @NotNull
     public static String getQualifiedName(RobotVariableDefinition variableDefinition) {
         return QualifiedNameBuilder.computeQualifiedName(variableDefinition);
+    }
+
+    @Nullable
+    public static RobotVariableBodyId getVariableBodyId(RobotVariable variable) {
+        RobotVariableContent variableContent = PsiTreeUtil.getChildOfType(variable, RobotVariableContent.class);
+        if (variableContent != null) {
+            return PsiTreeUtil.getChildOfType(variableContent, RobotVariableBodyId.class);
+        }
+        return null;
     }
 }

@@ -10,6 +10,7 @@ import com.intellij.psi.ResolveResult;
 import com.intellij.psi.util.PsiTreeUtil;
 import dev.xeonkryptos.xeonrobotframeworkplugin.RobotBundle;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotHighlighter;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotPsiImplUtil;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.DefinedVariable;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotEnvironmentVariable;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLocalSetting;
@@ -46,7 +47,8 @@ public class RobotVariableAnnotator implements Annotator, DumbAware {
             return;
         }
 
-        RobotVariableBodyId variableBodyId = PsiTreeUtil.getRequiredChildOfType(variable, RobotVariableBodyId.class);
+        RobotVariableBodyId variableBodyId = RobotPsiImplUtil.getVariableBodyId(variable);
+        assert variableBodyId != null;
         if (((PsiPolyVariantReference) variableBodyId.getReference()).multiResolve(false).length > 0) {
             ResolveResult[] resolveResults = ((PsiPolyVariantReference) variableBodyId.getReference()).multiResolve(false);
             if (resolveResults.length > 0) {

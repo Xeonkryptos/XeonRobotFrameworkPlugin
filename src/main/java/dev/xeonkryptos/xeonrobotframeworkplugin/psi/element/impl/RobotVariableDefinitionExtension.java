@@ -5,6 +5,7 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.stubs.IStubElementType;
 import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.util.IncorrectOperationException;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotPsiImplUtil;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotResourceFileType;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableBodyId;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableDefinition;
@@ -53,8 +54,8 @@ public abstract class RobotVariableDefinitionExtension extends RobotStubPsiEleme
     @Override
     public PsiElement setName(@NotNull String newName) throws IncorrectOperationException {
         RobotVariableBodyId newVariableBodyId = RobotElementGenerator.getInstance(getProject()).createNewVariableBodyId(newName);
-        RobotVariableBodyId variableBodyId = PsiTreeUtil.getRequiredChildOfType(getVariable(), RobotVariableBodyId.class);
-        if (newVariableBodyId != null) {
+        RobotVariableBodyId variableBodyId = RobotPsiImplUtil.getVariableBodyId(getVariable());
+        if (variableBodyId != null && newVariableBodyId != null) {
             variableBodyId.replace(newVariableBodyId);
         }
         return this;
