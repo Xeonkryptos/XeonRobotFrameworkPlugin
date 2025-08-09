@@ -122,10 +122,11 @@ test_case_statement ::= test_case_id eol_marker? testcase_task_statement* {
     pin=2
     implements = [
         "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotQualifiedNameOwner"
+        "com.intellij.psi.PsiNameIdentifierOwner"
         "com.intellij.navigation.NavigationItem"
     ]
     extends = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotTestCaseExtension"
-    methods = [getName getIcon getQualifiedName]
+    methods = [getName getNameIdentifier getIcon getQualifiedName]
     stubClass = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotTestCaseStatementStub"
     elementTypeFactory = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotTestCaseStatementStubElement.create"
     recoverWhile=test_case_statement_recover
@@ -136,10 +137,11 @@ task_statement ::= task_id eol_marker? testcase_task_statement* {
     pin=2
     implements = [
         "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotQualifiedNameOwner"
+        "com.intellij.psi.PsiNameIdentifierOwner"
         "com.intellij.navigation.NavigationItem"
     ]
     extends = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotTaskExtension"
-    methods = [getName getIcon getQualifiedName]
+    methods = [getName getNameIdentifier getIcon getQualifiedName]
     stubClass = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotTaskStatementStub"
     elementTypeFactory = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotTaskStatementStubElement.create"
     recoverWhile=task_statement_recover
@@ -176,7 +178,7 @@ user_keyword_statement ::= user_keyword_statement_id eol_marker (local_setting |
     mixin = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotUserKeywordExtension"
     stubClass = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotUserKeywordStub"
     elementTypeFactory = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotUserKeywordStubElement.create"
-    methods = [nameIdentifier="user_keyword_statement_id" getName getQualifiedName]
+    methods = [getNameIdentifier getName getQualifiedName]
     recoverWhile=user_keyword_statement_recover
 }
 user_keyword_statement_id ::= USER_KEYWORD_NAME
@@ -216,9 +218,10 @@ fake keyword_call ::= base_keyword_call {
     implements = [
         "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotQualifiedNameOwner"
         "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCallExpression"
+        "com.intellij.psi.PsiNameIdentifierOwner"
         "com.intellij.navigation.NavigationItem"
     ]
-    methods = [getName getSimpleKeywordName]
+    methods = [getName getNameIdentifier getSimpleKeywordName]
     mixin = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotKeywordCallExtension"
     stubClass = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotKeywordCallStub"
     elementTypeFactory = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotKeywordCallStubElement.create"
@@ -226,7 +229,7 @@ fake keyword_call ::= base_keyword_call {
 eol_based_keyword_call ::= base_keyword_call eol_marker? {elementType=keyword_call}
 eol_free_keyword_call ::= base_keyword_call {elementType=keyword_call}
 private base_keyword_call ::= keyword_call_name (parameter | positional_argument | ASSIGNMENT)* {pin=1}
-keyword_call_name ::= keyword_call_library? KEYWORD_NAME { methods = [getName getReference] }
+keyword_call_name ::= keyword_call_library? KEYWORD_NAME { methods = [getReference] }
 keyword_call_library ::= keyword_call_library_name KEYWORD_LIBRARY_SEPARATOR
 keyword_call_library_name ::= KEYWORD_LIBRARY_NAME {methods = [getReference]}
 

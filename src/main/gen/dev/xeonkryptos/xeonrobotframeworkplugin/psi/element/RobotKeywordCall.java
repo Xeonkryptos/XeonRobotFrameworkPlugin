@@ -4,11 +4,12 @@ package dev.xeonkryptos.xeonrobotframeworkplugin.psi.element;
 import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiNameIdentifierOwner;
 import com.intellij.navigation.NavigationItem;
 import com.intellij.psi.StubBasedPsiElement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotKeywordCallStub;
 
-public interface RobotKeywordCall extends RobotQualifiedNameOwner, RobotKeywordCallExpression, NavigationItem, RobotStatement, StubBasedPsiElement<RobotKeywordCallStub> {
+public interface RobotKeywordCall extends RobotQualifiedNameOwner, RobotKeywordCallExpression, PsiNameIdentifierOwner, NavigationItem, RobotStatement, StubBasedPsiElement<RobotKeywordCallStub> {
 
   @NotNull
   RobotKeywordCallName getKeywordCallName();
@@ -20,6 +21,8 @@ public interface RobotKeywordCall extends RobotQualifiedNameOwner, RobotKeywordC
   List<RobotPositionalArgument> getPositionalArgumentList();
 
   @NotNull String getName();
+
+  @NotNull RobotKeywordCallName getNameIdentifier();
 
   @NotNull String getSimpleKeywordName();
 

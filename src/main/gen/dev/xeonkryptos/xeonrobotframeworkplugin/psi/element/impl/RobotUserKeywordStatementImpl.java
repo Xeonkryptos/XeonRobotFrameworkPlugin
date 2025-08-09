@@ -47,8 +47,13 @@ public class RobotUserKeywordStatementImpl extends RobotUserKeywordExtension imp
 
   @Override
   @NotNull
-  public RobotUserKeywordStatementId getNameIdentifier() {
+  public RobotUserKeywordStatementId getUserKeywordStatementId() {
     return notNullChild(PsiTreeUtil.getChildOfType(this, RobotUserKeywordStatementId.class));
+  }
+
+  @Override
+  public @NotNull RobotUserKeywordStatementId getNameIdentifier() {
+    return RobotPsiImplUtil.getNameIdentifier(this);
   }
 
   @Override

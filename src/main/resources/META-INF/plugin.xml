@@ -138,6 +138,8 @@
         <gotoSymbolContributor implementation="dev.xeonkryptos.xeonrobotframeworkplugin.ide.gotocontributor.RobotGotoSymbolContributor"/>
 
         <readWriteAccessDetector implementation="dev.xeonkryptos.xeonrobotframeworkplugin.ide.misc.RobotReadWriteAccessDetector"/>
+        <renamePsiElementProcessor implementation="dev.xeonkryptos.xeonrobotframeworkplugin.ide.rename.RenameRobotKeywordCallElementProcessor"/>
+        <renameHandler implementation="dev.xeonkryptos.xeonrobotframeworkplugin.ide.rename.RobotMemberInplaceRenameHandler"/>
     </extensions>
     <actions>
         <action id="XeonRobotFrameworkPlugin.CreateNew" class="dev.xeonkryptos.xeonrobotframeworkplugin.ide.RobotCreateAction">

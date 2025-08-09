@@ -70,6 +70,11 @@ public class RobotTestCaseStatementImpl extends RobotTestCaseExtension implement
   }
 
   @Override
+  public @NotNull RobotTestCaseId getNameIdentifier() {
+    return RobotPsiImplUtil.getNameIdentifier(this);
+  }
+
+  @Override
   public @NotNull Icon getIcon(int flags) {
     return RobotPsiImplUtil.getIcon(this, flags);
   }

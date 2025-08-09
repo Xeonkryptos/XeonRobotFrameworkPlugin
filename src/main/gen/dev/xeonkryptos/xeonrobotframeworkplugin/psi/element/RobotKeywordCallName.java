@@ -11,10 +11,6 @@ public interface RobotKeywordCallName extends RobotStatement {
   @Nullable
   RobotKeywordCallLibrary getKeywordCallLibrary();
 
-  //WARNING: getName(...) is skipped
-  //matching getName(RobotKeywordCallName, ...)
-  //methods are not found in RobotPsiImplUtil
-
   @NotNull PsiReference getReference();
 
 }

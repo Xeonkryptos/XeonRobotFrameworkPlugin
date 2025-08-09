@@ -4,8 +4,8 @@ package dev.xeonkryptos.xeonrobotframeworkplugin.psi.element;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.PsiElement;
-import com.intellij.navigation.NavigationItem;
 import com.intellij.psi.PsiNameIdentifierOwner;
+import com.intellij.navigation.NavigationItem;
 
 public class RobotVisitor extends PsiElementVisitor {
 
@@ -80,6 +80,7 @@ public class RobotVisitor extends PsiElementVisitor {
   public void visitKeywordCall(@NotNull RobotKeywordCall o) {
     visitQualifiedNameOwner(o);
     // visitKeywordCallExpression(o);
+    // visitPsiNameIdentifierOwner(o);
     // visitNavigationItem(o);
     // visitStatement(o);
   }
@@ -206,6 +207,7 @@ public class RobotVisitor extends PsiElementVisitor {
 
   public void visitTaskStatement(@NotNull RobotTaskStatement o) {
     visitQualifiedNameOwner(o);
+    // visitPsiNameIdentifierOwner(o);
     // visitNavigationItem(o);
     // visitStatement(o);
   }
@@ -244,6 +246,7 @@ public class RobotVisitor extends PsiElementVisitor {
 
   public void visitTestCaseStatement(@NotNull RobotTestCaseStatement o) {
     visitQualifiedNameOwner(o);
+    // visitPsiNameIdentifierOwner(o);
     // visitNavigationItem(o);
     // visitStatement(o);
   }

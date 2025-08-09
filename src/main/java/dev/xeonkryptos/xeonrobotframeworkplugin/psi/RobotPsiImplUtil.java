@@ -39,20 +39,20 @@ public class RobotPsiImplUtil {
 
     @NotNull
     public static String getName(@NotNull RobotKeywordCall robotKeywordCall) {
-        RobotKeywordCallName keywordCallName = robotKeywordCall.getKeywordCallName();
+        RobotKeywordCallName keywordCallName = getNameIdentifier(robotKeywordCall);
         return keywordCallName.getText();
     }
 
     @NotNull
     public static String getName(@NotNull RobotUserKeywordStatement userKeywordStatement) {
-        RobotUserKeywordStatementId userKeywordStatementId = userKeywordStatement.getNameIdentifier();
+        RobotUserKeywordStatementId userKeywordStatementId = getNameIdentifier(userKeywordStatement);
         return userKeywordStatementId.getText();
     }
 
     @Nullable
     public static String getName(@NotNull RobotVariableDefinition variableDefinition) {
-        RobotVariable nameIdentifier = variableDefinition.getNameIdentifier();
-        return nameIdentifier.getVariableName();
+        RobotVariable variable = getNameIdentifier(variableDefinition);
+        return variable.getVariableName();
     }
 
     @NotNull
@@ -65,6 +65,26 @@ public class RobotPsiImplUtil {
     public static String getName(@NotNull RobotTaskStatement taskStatement) {
         RobotTaskId taskId = taskStatement.getTaskId();
         return taskId.getText();
+    }
+
+    @NotNull
+    public static RobotUserKeywordStatementId getNameIdentifier(@NotNull RobotUserKeywordStatement userKeywordStatement) {
+        return userKeywordStatement.getUserKeywordStatementId();
+    }
+
+    @NotNull
+    public static RobotKeywordCallName getNameIdentifier(@NotNull RobotKeywordCall keywordCall) {
+        return keywordCall.getKeywordCallName();
+    }
+
+    @NotNull
+    public static RobotTaskId getNameIdentifier(@NotNull RobotTaskStatement taskStatement) {
+        return taskStatement.getTaskId();
+    }
+
+    @NotNull
+    public static RobotTestCaseId getNameIdentifier(@NotNull RobotTestCaseStatement testCaseStatement) {
+        return testCaseStatement.getTestCaseId();
     }
 
     @NotNull
