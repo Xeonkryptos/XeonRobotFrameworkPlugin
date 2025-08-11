@@ -1,8 +1,5 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.ide.debugger;
 
-import dev.xeonkryptos.xeonrobotframeworkplugin.ide.execution.RobotCommandLineState;
-import dev.xeonkryptos.xeonrobotframeworkplugin.ide.execution.RobotPythonCommandLineState;
-import dev.xeonkryptos.xeonrobotframeworkplugin.ide.execution.config.RobotRunConfiguration;
 import com.intellij.execution.ExecutionException;
 import com.intellij.execution.ExecutionResult;
 import com.intellij.execution.configurations.RunProfile;
@@ -16,6 +13,9 @@ import com.intellij.xdebugger.XDebugSession;
 import com.jetbrains.python.debugger.PyDebugProcess;
 import com.jetbrains.python.debugger.PyDebugRunner;
 import com.jetbrains.python.run.PythonCommandLineState;
+import dev.xeonkryptos.xeonrobotframeworkplugin.ide.execution.RobotCommandLineState;
+import dev.xeonkryptos.xeonrobotframeworkplugin.ide.execution.RobotPythonCommandLineState;
+import dev.xeonkryptos.xeonrobotframeworkplugin.ide.execution.config.RobotRunConfiguration;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -29,7 +29,7 @@ public class RobotDebugRunner implements ProgramRunner<RunnerSettings> {
     @NotNull
     @Override
     public String getRunnerId() {
-        return "com.github.jnhyperion.hyperrobotframeworkplugin.HyperRobotFrameworkDebugRunner";
+        return "dev.xeonkryptos.xeonrobotframeworkplugin.RobotDebugRunner";
     }
 
     @Override
@@ -50,11 +50,20 @@ public class RobotDebugRunner implements ProgramRunner<RunnerSettings> {
         @Override
         protected Promise<@Nullable RunContentDescriptor> execute(@NotNull ExecutionEnvironment environment, @NotNull RunProfileState state) throws
                                                                                                                                              ExecutionException {
-            if (state instanceof RobotCommandLineState) {
-                state = new RobotPythonCommandLineState(((RobotCommandLineState) state).getRobotRunConfiguration(), environment);
+            if (state instanceof RobotCommandLineState robotState) {
+                state = new RobotPythonCommandLineState(robotState.getRobotRunConfiguration(), environment);
             }
             robotPythonCommandLineState = (RobotPythonCommandLineState) state;
             return super.execute(environment, state);
+        }
+
+        @Override
+        protected Promise<@NotNull XDebugSession> createSession(@NotNull RunProfileState state, @NotNull ExecutionEnvironment environment) {
+            if (state instanceof RobotCommandLineState robotState) {
+                state = new RobotPythonCommandLineState(robotState.getRobotRunConfiguration(), environment);
+            }
+            robotPythonCommandLineState = (RobotPythonCommandLineState) state;
+            return super.createSession(state, environment);
         }
 
         @NotNull

@@ -1,6 +1,5 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.ide.execution;
 
-import dev.xeonkryptos.xeonrobotframeworkplugin.ide.execution.config.RobotRunConfiguration;
 import com.intellij.execution.configurations.RunProfile;
 import com.intellij.execution.configurations.RunProfileState;
 import com.intellij.execution.configurations.RunnerSettings;
@@ -9,6 +8,7 @@ import com.intellij.execution.runners.AsyncProgramRunner;
 import com.intellij.execution.runners.ExecutionEnvironment;
 import com.intellij.execution.ui.RunContentDescriptor;
 import com.jetbrains.python.run.PythonRunner;
+import dev.xeonkryptos.xeonrobotframeworkplugin.ide.execution.config.RobotRunConfiguration;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -20,7 +20,7 @@ public class RobotRunner extends AsyncProgramRunner<RunnerSettings> {
     @NotNull
     @Override
     public String getRunnerId() {
-        return "com.github.jnhyperion.hyperrobotframeworkplugin.HyperRobotFrameworkRunner";
+        return "dev.xeonkryptos.xeonrobotframeworkplugin.RobotRunner";
     }
 
     @Override

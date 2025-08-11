@@ -22,6 +22,12 @@
 - Fixed unused variable detection
 - Fixed find usages scope of variables to their direct environment
 
+## 0.4.2
+
+### Fixed
+
+- Fixed debug issues with Robot run configurations on new IDE version 2025.2
+
 ## 0.4.1
 
 ### Added
