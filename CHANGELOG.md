@@ -2,7 +2,11 @@
 
 # XeonRobotFrameworkPlugin Changelog
 
-## Unreleased
+## 0.4.2
+
+### Fixed
+
+- Fixed debug issues with Robot run configurations on new IDE version 2025.2
 
 ## 0.4.1
 
