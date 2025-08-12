@@ -4,7 +4,6 @@ import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModuleUtilCore;
 import com.intellij.openapi.progress.ProcessCanceledException;
 import com.intellij.openapi.progress.ProgressManager;
-import com.intellij.openapi.project.Project;
 import com.intellij.openapi.projectRoots.Sdk;
 import com.intellij.openapi.roots.OrderRootType;
 import com.intellij.openapi.util.Key;
@@ -15,8 +14,6 @@ import com.intellij.psi.PsiFile;
 import com.intellij.psi.util.CachedValue;
 import com.intellij.psi.util.CachedValueProvider.Result;
 import com.intellij.psi.util.CachedValuesManager;
-import com.intellij.psi.util.ParameterizedCachedValue;
-import com.intellij.psi.util.QualifiedName;
 import com.jetbrains.python.psi.Property;
 import com.jetbrains.python.psi.PyClass;
 import com.jetbrains.python.psi.PyDecorator;
@@ -24,10 +21,7 @@ import com.jetbrains.python.psi.PyDecoratorList;
 import com.jetbrains.python.psi.PyExpression;
 import com.jetbrains.python.psi.PyFile;
 import com.jetbrains.python.psi.PyFunction;
-import com.jetbrains.python.psi.PyImportElement;
-import com.jetbrains.python.psi.PyImportStatementBase;
 import com.jetbrains.python.psi.PyTargetExpression;
-import com.jetbrains.python.psi.resolve.RatedResolveResult;
 import com.jetbrains.python.psi.types.TypeEvalContext;
 import com.jetbrains.python.sdk.PythonSdkUtil;
 import dev.xeonkryptos.xeonrobotframeworkplugin.MyLogger;
@@ -57,8 +51,7 @@ import java.util.stream.Stream;
 @SuppressWarnings("UnstableApiUsage")
 class RobotKeywordFileResolver {
 
-    private static final Key<ParameterizedCachedValue<Collection<DefinedVariable>, Boolean>> TRANSITIVE_VARIABLES_CACHE_KEY = new Key<>(
-            "ROBOT_PYTHON_TRANSITIVE_VARIABLES_CACHE");
+    private static final Key<CachedValue<Collection<DefinedVariable>>> VARIABLES_CACHE_KEY = new Key<>("ROBOT_PYTHON_FILE_VARIABLES_CACHE");
     private static final Key<CachedValue<Collection<DefinedVariable>>> FILE_VARIABLES_CACHE_KEY = new Key<>("ROBOT_PYTHON_FILE_VARIABLES_CACHE");
     private static final Key<CachedValue<Collection<DefinedVariable>>> CLASS_VARIABLES_CACHE_KEY = new Key<>("ROBOT_PYTHON_CLASS_VARIABLES_CACHE");
     private static final Key<CachedValue<Boolean>> SYSTEM_PSI_FILE_KEY = new Key<>("ROBOT_PYTHON_SYSTEM_FILE_CACHE");
@@ -77,26 +70,14 @@ class RobotKeywordFileResolver {
             return List.of();
         }
 
-        Project project = pythonFile.getProject();
-        boolean transitiveImports = RobotOptionsProvider.getInstance(project).allowTransitiveImports();
-        CachedValuesManager cachedValuesManager = CachedValuesManager.getManager(project);
-        return cachedValuesManager.getParameterizedCachedValue(pythonFile, TRANSITIVE_VARIABLES_CACHE_KEY, transitive -> {
+        return CachedValuesManager.getCachedValue(pythonFile, VARIABLES_CACHE_KEY, () -> {
             Set<PyFile> pyFiles = new HashSet<>();
-            Set<PyClass> pyClasses = new HashSet<>();
-            if (transitive) {
-                collectScannableElementsFromImports(pythonFile, pyFiles, pyClasses);
-            }
             pyFiles.add(pythonFile);
 
             Set<DefinedVariable> definedVariables = new HashSet<>();
             for (PyFile pyFile : pyFiles) {
                 ProgressManager.checkCanceled();
                 Collection<DefinedVariable> foundVariables = resolveDefinedVariables(pyFile);
-                definedVariables.addAll(foundVariables);
-            }
-            for (PyClass pyClass : pyClasses) {
-                ProgressManager.checkCanceled();
-                Collection<DefinedVariable> foundVariables = resolveDefinedVariables(pyClass);
                 definedVariables.addAll(foundVariables);
             }
 
@@ -106,7 +87,7 @@ class RobotKeywordFileResolver {
                                                                 .map(PsiElement::getContainingFile)
                                                                 .filter(Objects::nonNull)).distinct().toArray();
             return Result.create(definedVariables, dependents);
-        }, false, transitiveImports);
+        });
     }
 
     static Collection<DefinedVariable> resolveDefinedVariables(PyClass pythonClass) {
@@ -175,43 +156,6 @@ class RobotKeywordFileResolver {
             if (superClassName != null && !superClassName.equals("object")) {
                 addDefinedVariables(superClass, definedVariables, instanceVariables);
             }
-        }
-    }
-
-    static void collectScannableElementsFromImports(PyFile pyFile, Collection<PyFile> pyFiles, Collection<PyClass> pyClasses) {
-        collectScannableElementsFromImports(pyFile, pyFiles, pyClasses, new HashSet<>());
-    }
-
-    static void collectScannableElementsFromImports(PyFile pyFile,
-                                                    Collection<PyFile> pyFiles,
-                                                    Collection<PyClass> pyClasses,
-                                                    Collection<QualifiedName> visitedImports) {
-        Set<PyFile> scanImportsFiles = new HashSet<>();
-        for (PyImportStatementBase importStatement : pyFile.getImportBlock()) {
-            for (PyImportElement importElement : importStatement.getImportElements()) {
-                QualifiedName importedQName = importElement.getImportedQName();
-                if (importedQName == null || !visitedImports.add(importedQName)) {
-                    continue;
-                }
-
-                ProgressManager.checkCanceled();
-                List<RatedResolveResult> ratedResolveResults = importElement.multiResolve();
-                for (RatedResolveResult ratedResolveResult : ratedResolveResults) {
-                    PsiElement element = ratedResolveResult.getElement();
-                    if (element instanceof PyFile resolvedPyFile && pyFile != resolvedPyFile && pyFiles.add(resolvedPyFile)) {
-                        scanImportsFiles.add(resolvedPyFile);
-                    } else if (element instanceof PyClass resolvedPyClass) {
-                        PyFile containingFile = (PyFile) resolvedPyClass.getContainingFile();
-                        if (pyClasses.add(resolvedPyClass) && !pyFiles.contains(containingFile)) {
-                            scanImportsFiles.add(containingFile);
-                        }
-                    }
-                }
-            }
-        }
-        for (PyFile scanImportsFile : scanImportsFiles) {
-            ProgressManager.checkCanceled();
-            collectScannableElementsFromImports(scanImportsFile, pyFiles, pyClasses, visitedImports);
         }
     }
 
