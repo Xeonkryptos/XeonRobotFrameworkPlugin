@@ -13,7 +13,8 @@
 
 ### Changed
 
-- Improved code completion performance when variables are to be considered by ignoring system libraries
+- Removed recursive lookup of variables through python imports
+- Consider keywords depending on the library decorator and its configuration
 
 ### Fixed
 

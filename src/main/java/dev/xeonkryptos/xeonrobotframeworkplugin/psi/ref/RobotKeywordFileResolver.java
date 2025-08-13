@@ -15,6 +15,7 @@ import com.intellij.psi.util.CachedValue;
 import com.intellij.psi.util.CachedValueProvider.Result;
 import com.intellij.psi.util.CachedValuesManager;
 import com.jetbrains.python.psi.Property;
+import com.jetbrains.python.psi.PyBoolLiteralExpression;
 import com.jetbrains.python.psi.PyClass;
 import com.jetbrains.python.psi.PyDecorator;
 import com.jetbrains.python.psi.PyDecoratorList;
@@ -61,8 +62,11 @@ class RobotKeywordFileResolver {
     }
 
     static Collection<DefinedVariable> resolveVariables(PyClass pythonClass) {
-        PyFile containingFile = (PyFile) pythonClass.getContainingFile();
-        return resolveVariables(containingFile);
+        if (!isLibraryDecorated(pythonClass)) {
+            PyFile containingFile = (PyFile) pythonClass.getContainingFile();
+            return resolveVariables(containingFile);
+        }
+        return List.of();
     }
 
     static Collection<DefinedVariable> resolveVariables(PyFile pythonFile) {
@@ -116,7 +120,7 @@ class RobotKeywordFileResolver {
         });
     }
 
-    protected static void addDefinedVariables(@NotNull PyFile pyFile, @NotNull Collection<DefinedVariable> definedVariables) {
+    private static void addDefinedVariables(@NotNull PyFile pyFile, @NotNull Collection<DefinedVariable> definedVariables) {
         for (PyTargetExpression attribute : pyFile.getTopLevelAttributes()) {
             String attributeName = attribute.getName();
             if (attributeName != null) {
@@ -163,7 +167,7 @@ class RobotKeywordFileResolver {
         return name != null && isNotReservedName(name) ? name : null;
     }
 
-    static boolean isNotReservedName(@NotNull String name) {
+    private static boolean isNotReservedName(@NotNull String name) {
         return !name.startsWith("_") && !name.startsWith("ROBOT_LIBRARY_");
     }
 
@@ -191,12 +195,14 @@ class RobotKeywordFileResolver {
     static void addDefinedKeywords(@NotNull PyClass pyClass, @Nullable String libraryName, @NotNull Collection<DefinedKeyword> keywords) {
         Map<String, PyFunction> methods = new LinkedHashMap<>();
         String className = pyClass.getName();
+        boolean shouldImportOnlyDecoratedMethods = shouldImportOnlyDecoratedMethods(pyClass);
+        boolean libraryDecorated = isLibraryDecorated(pyClass);
         pyClass.visitMethods(method -> {
             boolean propertyDecorated = Optional.ofNullable(method.getDecoratorList())
                                                 .map(decoratorList -> decoratorList.findDecorator("property"))
                                                 .isPresent();
             String methodName = method.getName();
-            if (propertyDecorated) {
+            if (propertyDecorated && !libraryDecorated) {
                 String attributeName = getValidName(methodName);
                 if (attributeName != null) {
                     keywords.add(new KeywordDto(method, libraryName, attributeName));
@@ -204,7 +210,7 @@ class RobotKeywordFileResolver {
                 return true;
             }
             methodName = getValidName(methodName);
-            if (methodName != null) {
+            if (methodName != null && (!shouldImportOnlyDecoratedMethods || isMethodKeywordDecorated(method))) {
                 methods.put(methodName, method);
             }
             return true;
@@ -219,7 +225,7 @@ class RobotKeywordFileResolver {
 
         pyClass.visitClassAttributes(attribute -> {
             String attributeName = getValidName(attribute.getName());
-            if (attributeName != null) {
+            if (attributeName != null && !libraryDecorated) {
                 keywords.add(new KeywordDto(attribute, libraryName, attributeName));
             }
             return true;
@@ -305,5 +311,28 @@ class RobotKeywordFileResolver {
             }
             return Result.createSingleDependency(false, psiFile);
         });
+    }
+
+    private static boolean isLibraryDecorated(PyClass pyClass) {
+        return Optional.ofNullable(pyClass.getDecoratorList()).map(decoratorList -> decoratorList.findDecorator("library")).isPresent();
+    }
+
+    private static boolean shouldImportOnlyDecoratedMethods(PyClass pyClass) {
+        Optional<@Nullable PyDecorator> libraryDecoratorOpt = Optional.ofNullable(pyClass.getDecoratorList())
+                                                                      .map(decoratorList -> decoratorList.findDecorator("library"));
+        if (libraryDecoratorOpt.isPresent()) {
+            PyDecorator libraryDecorator = libraryDecoratorOpt.get();
+            PyBoolLiteralExpression autoKeywords = libraryDecorator.getArgument(5, "auto_keywords", PyBoolLiteralExpression.class);
+            if (autoKeywords != null && autoKeywords.getValue()) {
+                return autoKeywords.getValue();
+            } else {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static boolean isMethodKeywordDecorated(@NotNull PyFunction method) {
+        return Optional.ofNullable(method.getDecoratorList()).map(decoratorList -> decoratorList.findDecorator("keyword")).isPresent();
     }
 }
