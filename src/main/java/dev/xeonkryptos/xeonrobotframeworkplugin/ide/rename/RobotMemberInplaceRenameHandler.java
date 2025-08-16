@@ -17,6 +17,7 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotFeatureFileType;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotResourceFileType;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCall;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCallName;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotStatement;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -53,13 +54,12 @@ public class RobotMemberInplaceRenameHandler extends MemberInplaceRenameHandler 
             element.putUserData(REFERENCED_PY_FUNCTION_KEY, pyFunction);
             return editor.getSettings().isVariableInplaceRenameEnabled();
         }
-        return false;
+        return editor.getSettings().isVariableInplaceRenameEnabled() && element instanceof PsiNameIdentifierOwner && element instanceof RobotStatement;
     }
 
+    @NotNull
     @Override
-    protected @NotNull MemberInplaceRenamer createMemberRenamer(@NotNull PsiElement element,
-                                                                @NotNull PsiNameIdentifierOwner elementToRename,
-                                                                @NotNull Editor editor) {
+    protected MemberInplaceRenamer createMemberRenamer(@NotNull PsiElement element, @NotNull PsiNameIdentifierOwner elementToRename, @NotNull Editor editor) {
         PsiNamedElement sourceStatement = element.getUserData(SOURCE_STATEMENT_KEY);
         PsiNamedElement psiNamedElement = Objects.requireNonNullElse(sourceStatement, elementToRename);
         return new MemberInplaceRenamer(psiNamedElement, element, editor);
