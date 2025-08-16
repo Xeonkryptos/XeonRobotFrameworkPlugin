@@ -1,10 +1,11 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.ide.usage;
 
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.PatternUtil;
 import com.intellij.find.findUsages.FindUsagesHandler;
 import com.intellij.psi.PsiElement;
 import com.jetbrains.python.psi.PyExpression;
 import com.jetbrains.python.psi.PyFunction;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.PatternUtil;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.RobotPyUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -47,10 +48,9 @@ public class RobotPythonFindUsagesHandler extends FindUsagesHandler {
     @NotNull
     @SuppressWarnings("UnstableApiUsage")
     private static Optional<String> getDecoratorKeywordName(PyFunction pyFunction) {
-        return Optional.ofNullable(pyFunction.getDecoratorList())
-                       .map(decorators -> decorators.findDecorator("keyword"))
-                       .map(decorator -> decorator.getArgument(0, "keyword", PyExpression.class))
-                       .map(PyExpression::getText);
+        return RobotPyUtil.findCustomKeywordDecorator(pyFunction)
+                          .map(decorator -> decorator.getArgument(0, "keyword", PyExpression.class))
+                          .map(PyExpression::getText);
     }
 
     @Override

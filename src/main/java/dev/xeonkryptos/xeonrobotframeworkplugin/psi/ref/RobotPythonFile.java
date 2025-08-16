@@ -70,7 +70,7 @@ public class RobotPythonFile implements KeywordFile {
                         RobotKeywordFileResolver.addDefinedKeywords(pyClass, libraryName, keywordSet);
                     }
                 }
-                return new Result<>(keywordSet, new Object[] { pythonFile });
+                return Result.createSingleDependency(keywordSet, pythonFile);
             }, false, library);
         }
         return Set.of();

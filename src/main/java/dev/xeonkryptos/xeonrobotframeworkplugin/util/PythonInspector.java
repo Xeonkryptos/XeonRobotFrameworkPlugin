@@ -1,5 +1,6 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.util;
 
+import com.intellij.psi.util.PsiModificationTracker;
 import dev.xeonkryptos.xeonrobotframeworkplugin.MyLogger;
 import dev.xeonkryptos.xeonrobotframeworkplugin.ide.config.RobotOptionsProvider;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.dto.ParameterDto;
@@ -130,7 +131,7 @@ public class PythonInspector {
                                 MyLogger.logger.error(errorStream);
                                 throw new RuntimeException("Python process exited with code " + process.exitValue());
                             }
-                            return new CachedValueProvider.Result<>(functions, (Object[]) elements.values().toArray(PsiElement[]::new));
+                            return new CachedValueProvider.Result<>(functions, PsiModificationTracker.MODIFICATION_COUNT);
                         } catch (Exception e) {
                             throw new RuntimeException("Error while reading Python process output", e);
                         }

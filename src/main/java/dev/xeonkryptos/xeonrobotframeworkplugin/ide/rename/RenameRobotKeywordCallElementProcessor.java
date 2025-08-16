@@ -9,14 +9,13 @@ import com.intellij.refactoring.rename.RenamePsiElementProcessor;
 import com.intellij.usageView.UsageInfo;
 import com.intellij.util.IncorrectOperationException;
 import com.jetbrains.python.psi.PyFunction;
-import com.jetbrains.python.psi.PyStringLiteralExpression;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCall;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.RobotPyUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
 
 import java.util.Collection;
-import java.util.Optional;
 
 public class RenameRobotKeywordCallElementProcessor extends RenamePsiElementProcessor {
 
@@ -24,9 +23,7 @@ public class RenameRobotKeywordCallElementProcessor extends RenamePsiElementProc
     public boolean canProcessElement(@NotNull PsiElement element) {
         if (element instanceof RobotKeywordCall keywordCall) {
             PsiReference reference = keywordCall.getKeywordCallName().getReference();
-            if (reference.resolve() instanceof PyFunction pyFunction) {
-                return findCustomKeywordNameDecoratorExpression(pyFunction).isPresent();
-            }
+            return reference.resolve() instanceof PyFunction;
         }
         return false;
     }
@@ -51,14 +48,6 @@ public class RenameRobotKeywordCallElementProcessor extends RenamePsiElementProc
 
         super.renameElement(element, newName, usages, listener);
 
-        PyStringLiteralExpression pyStringLiteralExpression = findCustomKeywordNameDecoratorExpression(pyFunction).orElseThrow();
-        pyStringLiteralExpression.updateText(newName);
-    }
-
-    @SuppressWarnings("UnstableApiUsage")
-    private Optional<PyStringLiteralExpression> findCustomKeywordNameDecoratorExpression(@NotNull PyFunction pyFunction) {
-        return Optional.ofNullable(pyFunction.getDecoratorList())
-                       .map(decoratorList -> decoratorList.findDecorator("keyword"))
-                       .map(decorator -> decorator.getArgument(0, "name", PyStringLiteralExpression.class));
+        RobotPyUtil.findCustomKeywordNameDecoratorExpression(pyFunction).ifPresent(expression -> expression.updateText(newName));
     }
 }

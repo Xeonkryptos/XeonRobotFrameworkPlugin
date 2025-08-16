@@ -7,15 +7,14 @@ import com.intellij.psi.PsiReference;
 import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.psi.search.searches.ReferencesSearch.SearchParameters;
 import com.intellij.util.Processor;
-import com.jetbrains.python.psi.PyDecoratorList;
 import com.jetbrains.python.psi.PyFunction;
-import com.jetbrains.python.psi.PyStringLiteralExpression;
 import com.jetbrains.python.psi.StringLiteralExpression;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCall;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCallName;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotUserKeywordStatement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.index.KeywordStatementNameIndex;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.PatternUtil;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.RobotPyUtil;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
@@ -42,12 +41,9 @@ public class RobotKeywordReferenceSearch extends QueryExecutorBase<PsiReference,
             if (possibleKeywordName != null && pyFunction.isValid() && searchForKeywordsInIndex(possibleKeywordName, project, globalSearchScope, consumer)) {
                 return;
             }
-            PyDecoratorList decoratorList = pyFunction.getDecoratorList();
-            Optional<String> customKeywordNameOpt = Optional.ofNullable(decoratorList)
-                                                            .map(decorators -> decorators.findDecorator("keyword"))
-                                                            .map(decorator -> decorator.getArgument(0, "name", PyStringLiteralExpression.class))
-                                                            .filter(PsiElement::isValid)
-                                                            .map(StringLiteralExpression::getStringValue);
+            Optional<String> customKeywordNameOpt = RobotPyUtil.findCustomKeywordNameDecoratorExpression(pyFunction)
+                                                               .filter(PsiElement::isValid)
+                                                               .map(StringLiteralExpression::getStringValue);
             customKeywordNameOpt.ifPresent(customKeywordName -> searchForKeywordsInIndex(customKeywordName, project, globalSearchScope, consumer));
         } else if (element instanceof RobotUserKeywordStatement userKeywordStatement) {
             if (userKeywordStatement.isValid()) {

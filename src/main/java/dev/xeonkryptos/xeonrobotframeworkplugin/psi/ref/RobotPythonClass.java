@@ -42,7 +42,7 @@ public class RobotPythonClass implements KeywordFile {
             return CachedValuesManager.getManager(pythonClass.getProject()).getParameterizedCachedValue(pythonClass, KEYWORD_CACHE_KEY, libraryName -> {
                 Set<DefinedKeyword> newKeywords = new LinkedHashSet<>();
                 RobotKeywordFileResolver.addDefinedKeywords(pythonClass, libraryName, newKeywords);
-                return new Result<>(newKeywords, new Object[] { pythonClass });
+                return Result.createSingleDependency(newKeywords, pythonClass);
             }, false, library);
         }
         return Set.of();

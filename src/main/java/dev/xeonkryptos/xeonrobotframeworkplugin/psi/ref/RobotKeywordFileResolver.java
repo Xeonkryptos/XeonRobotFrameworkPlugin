@@ -14,12 +14,11 @@ import com.intellij.psi.PsiFile;
 import com.intellij.psi.util.CachedValue;
 import com.intellij.psi.util.CachedValueProvider.Result;
 import com.intellij.psi.util.CachedValuesManager;
+import com.intellij.psi.util.PsiModificationTracker;
 import com.jetbrains.python.psi.Property;
 import com.jetbrains.python.psi.PyBoolLiteralExpression;
 import com.jetbrains.python.psi.PyClass;
 import com.jetbrains.python.psi.PyDecorator;
-import com.jetbrains.python.psi.PyDecoratorList;
-import com.jetbrains.python.psi.PyExpression;
 import com.jetbrains.python.psi.PyFile;
 import com.jetbrains.python.psi.PyFunction;
 import com.jetbrains.python.psi.PyTargetExpression;
@@ -32,6 +31,7 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.dto.VariableDto;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.DefinedKeyword;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.DefinedVariable;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.ReservedVariableScope;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.RobotPyUtil;
 import dev.xeonkryptos.xeonrobotframeworkplugin.util.PythonInspector;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -44,10 +44,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Stream;
 
 @SuppressWarnings("UnstableApiUsage")
 class RobotKeywordFileResolver {
@@ -84,13 +82,7 @@ class RobotKeywordFileResolver {
                 Collection<DefinedVariable> foundVariables = resolveDefinedVariables(pyFile);
                 definedVariables.addAll(foundVariables);
             }
-
-            Object[] dependents = Stream.concat(Stream.of(pythonFile),
-                                                definedVariables.stream()
-                                                                .map(DefinedVariable::reference)
-                                                                .map(PsiElement::getContainingFile)
-                                                                .filter(Objects::nonNull)).distinct().toArray();
-            return Result.create(definedVariables, dependents);
+            return Result.create(definedVariables, PsiModificationTracker.MODIFICATION_COUNT);
         });
     }
 
@@ -98,12 +90,7 @@ class RobotKeywordFileResolver {
         return CachedValuesManager.getCachedValue(pythonClass, CLASS_VARIABLES_CACHE_KEY, () -> {
             Set<DefinedVariable> newVariables = new HashSet<>();
             addDefinedVariables(pythonClass, newVariables, true);
-            Object[] dependents = Stream.concat(newVariables.stream().map(DefinedVariable::reference), Stream.of(pythonClass))
-                                        .map(PsiElement::getContainingFile)
-                                        .filter(Objects::nonNull)
-                                        .distinct()
-                                        .toArray();
-            return new Result<>(newVariables, dependents);
+            return new Result<>(newVariables, PsiModificationTracker.MODIFICATION_COUNT);
         });
     }
 
@@ -111,12 +98,7 @@ class RobotKeywordFileResolver {
         return CachedValuesManager.getCachedValue(pythonFile, FILE_VARIABLES_CACHE_KEY, () -> {
             Set<DefinedVariable> variables = new HashSet<>();
             addDefinedVariables(pythonFile, variables);
-            Object[] dependents = Stream.concat(variables.stream().map(DefinedVariable::reference), Stream.of(pythonFile))
-                                        .map(PsiElement::getContainingFile)
-                                        .filter(Objects::nonNull)
-                                        .distinct()
-                                        .toArray();
-            return new Result<>(variables, dependents);
+            return new Result<>(variables, PsiModificationTracker.MODIFICATION_COUNT);
         });
     }
 
@@ -174,20 +156,10 @@ class RobotKeywordFileResolver {
     @Nullable
     private static String getKeywordName(@NotNull PyFunction function) {
         String keywordName = null;
-        PyDecoratorList decoratorList = function.getDecoratorList();
-        if (decoratorList != null) {
-            PyDecorator keywordDecorator = decoratorList.findDecorator("keyword");
-            if (keywordDecorator != null && keywordDecorator.hasArgumentList()) {
-                PyExpression nameArgument = keywordDecorator.getKeywordArgument("name");
-                if (nameArgument != null) {
-                    keywordName = nameArgument.getText().replaceAll("^\"|\"|'|'$", "");
-                } else {
-                    PyExpression[] arguments = keywordDecorator.getArguments();
-                    if (arguments.length > 0 && arguments[0].getName() == null) {
-                        keywordName = arguments[0].getText().replaceAll("^\"|\"|'|'$", "");
-                    }
-                }
-            }
+        Optional<String> normalizedKeywordNameOpt = RobotPyUtil.findCustomKeywordNameDecoratorExpression(function)
+                                                               .map(expression -> expression.getText().replaceAll("^\"|\"|'|'$", ""));
+        if (normalizedKeywordNameOpt.isPresent()) {
+            keywordName = normalizedKeywordNameOpt.get();
         }
         return keywordName;
     }
@@ -309,7 +281,7 @@ class RobotKeywordFileResolver {
                     return Result.createSingleDependency(result, psiFile);
                 }
             }
-            return Result.createSingleDependency(false, psiFile);
+            return Result.createSingleDependency(false, PsiModificationTracker.MODIFICATION_COUNT);
         });
     }
 

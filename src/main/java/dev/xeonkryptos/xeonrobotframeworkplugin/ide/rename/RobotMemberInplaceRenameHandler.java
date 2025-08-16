@@ -21,6 +21,7 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCall;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCallName;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotStatement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableDefinition;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.RobotPyUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -48,15 +49,17 @@ public class RobotMemberInplaceRenameHandler extends MemberInplaceRenameHandler 
         if (element == null) {
             return false;
         }
-        if (element instanceof PyFunction && nameSuggestionContext != null && (nameSuggestionContext.getContext() instanceof RobotKeywordCallName
-                                                                               || nameSuggestionContext.getContext() instanceof RobotKeywordCall)) {
+        if (element instanceof PyFunction pyFunction && nameSuggestionContext != null && (nameSuggestionContext.getContext() instanceof RobotKeywordCallName
+                                                                                          || nameSuggestionContext.getContext() instanceof RobotKeywordCall)) {
             RobotKeywordCall keywordCall = PsiTreeUtil.getParentOfType(nameSuggestionContext, RobotKeywordCall.class);
-            if (keywordCall != null) {
+            if (keywordCall != null && RobotPyUtil.findCustomKeywordNameDecoratorExpression(pyFunction).isPresent()) {
                 element.putUserData(SOURCE_STATEMENT_KEY, keywordCall);
                 return editor.getSettings().isVariableInplaceRenameEnabled();
             }
         }
         return editor.getSettings().isVariableInplaceRenameEnabled() && element instanceof PsiNameIdentifierOwner && element instanceof RobotStatement
+               // There is currently an issue with variable definitions. When a variable definition itself is target of the rename, two versions are in the template
+               // that is internally created, leading to an issue and an exception suppressing the inplace-rename
                && !(element instanceof RobotVariableDefinition);
     }
 

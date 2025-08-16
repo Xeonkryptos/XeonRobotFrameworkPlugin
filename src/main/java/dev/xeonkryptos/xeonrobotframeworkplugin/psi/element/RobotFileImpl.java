@@ -15,6 +15,7 @@ import com.intellij.psi.util.CachedValue;
 import com.intellij.psi.util.CachedValueProvider.Result;
 import com.intellij.psi.util.CachedValuesManager;
 import com.intellij.psi.util.ParameterizedCachedValue;
+import com.intellij.psi.util.PsiModificationTracker;
 import com.jetbrains.python.psi.PyClass;
 import dev.xeonkryptos.xeonrobotframeworkplugin.ide.config.RobotOptionsProvider;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotLanguage;
@@ -36,11 +37,8 @@ import java.util.LinkedHashSet;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class RobotFileImpl extends PsiFileBase implements KeywordFile, RobotFile {
-
-    private static final String ROBOT_BUILT_IN = "robot.libraries.BuiltIn";
 
     private static final Key<ParameterizedCachedValue<Collection<KeywordFile>, Boolean>> TRANSITIVE_IMPORTED_FILES_CACHE_KEY = Key.create(
             "TRANSITIVE_IMPORTED_FILES_CACHE");
@@ -189,7 +187,7 @@ public class RobotFileImpl extends PsiFileBase implements KeywordFile, RobotFile
                     }
                 }
             }
-            return new Result<>(results, Stream.concat(results.stream(), Stream.of(this)).toArray());
+            return new Result<>(results, PsiModificationTracker.MODIFICATION_COUNT);
         });
     }
 
@@ -223,8 +221,7 @@ public class RobotFileImpl extends PsiFileBase implements KeywordFile, RobotFile
             for (KeywordFile keywordFile : collectImportFiles()) {
                 collectTransitiveKeywordFiles(results, keywordFile, transitive);
             }
-            Object[] dependents = Stream.concat(results.stream().map(KeywordFile::getPsiFile), Stream.of(this)).distinct().toArray();
-            return new Result<>(results, dependents);
+            return Result.createSingleDependency(results, PsiModificationTracker.MODIFICATION_COUNT);
         }, false, includeTransitive);
     }
 
@@ -237,6 +234,7 @@ public class RobotFileImpl extends PsiFileBase implements KeywordFile, RobotFile
     }
 
     private void addBuiltInImports(@NotNull Collection<KeywordFile> files) {
+        final String ROBOT_BUILT_IN = "robot.libraries.BuiltIn";
         PyClass builtIn = PythonResolver.findClass(ROBOT_BUILT_IN, getProject());
         if (builtIn != null) {
             files.add(new RobotPythonClass(ROBOT_BUILT_IN, builtIn, ImportType.LIBRARY));
@@ -251,8 +249,7 @@ public class RobotFileImpl extends PsiFileBase implements KeywordFile, RobotFile
             for (KeywordFile keywordFile : collectImportedFiles(transitive)) {
                 files.add(keywordFile.getVirtualFile());
             }
-            Object[] dependents = Stream.concat(files.stream(), Stream.of(this)).toArray();
-            return new Result<>(files, dependents);
+            return Result.createSingleDependency(files, PsiModificationTracker.MODIFICATION_COUNT);
         }, false, includeTransitive);
     }
 
