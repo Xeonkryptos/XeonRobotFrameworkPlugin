@@ -20,6 +20,7 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotResourceFileType;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCall;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCallName;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotStatement;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableDefinition;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -55,7 +56,8 @@ public class RobotMemberInplaceRenameHandler extends MemberInplaceRenameHandler 
                 return editor.getSettings().isVariableInplaceRenameEnabled();
             }
         }
-        return editor.getSettings().isVariableInplaceRenameEnabled() && element instanceof PsiNameIdentifierOwner && element instanceof RobotStatement;
+        return editor.getSettings().isVariableInplaceRenameEnabled() && element instanceof PsiNameIdentifierOwner && element instanceof RobotStatement
+               && !(element instanceof RobotVariableDefinition);
     }
 
     @NotNull

@@ -138,10 +138,10 @@
         <gotoSymbolContributor implementation="dev.xeonkryptos.xeonrobotframeworkplugin.ide.gotocontributor.RobotGotoSymbolContributor"/>
 
         <readWriteAccessDetector implementation="dev.xeonkryptos.xeonrobotframeworkplugin.ide.misc.RobotReadWriteAccessDetector"/>
-        <renamePsiElementProcessor implementation="dev.xeonkryptos.xeonrobotframeworkplugin.ide.rename.RenameRobotKeywordCallElementProcessor"
-                                   order="before pyvar"/>
-        <renameHandler implementation="dev.xeonkryptos.xeonrobotframeworkplugin.ide.rename.RobotMemberInplaceRenameHandler"/>
         <lang.namesValidator language="Robot" implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.ide.rename.RobotNamesValidator"/>
+
+        <renamePsiElementProcessor implementation="dev.xeonkryptos.xeonrobotframeworkplugin.ide.rename.RenameRobotKeywordCallElementProcessor"/>
+        <renameHandler implementation="dev.xeonkryptos.xeonrobotframeworkplugin.ide.rename.RobotMemberInplaceRenameHandler"/>
     </extensions>
     <actions>
         <action id="XeonRobotFrameworkPlugin.CreateNew" class="dev.xeonkryptos.xeonrobotframeworkplugin.ide.RobotCreateAction">
