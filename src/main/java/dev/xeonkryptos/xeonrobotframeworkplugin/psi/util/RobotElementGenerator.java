@@ -17,7 +17,6 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTaskId;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTestCaseId;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotUserKeywordStatementId;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableBodyId;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVisitor;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.visitor.RecursiveRobotVisitor;
 import org.jetbrains.annotations.NotNull;
 
@@ -191,7 +190,7 @@ public record RobotElementGenerator(Project project) {
         }
     }
 
-    private static final class RobotKeywordCallLibraryNameFinder extends RobotVisitor {
+    private static final class RobotKeywordCallLibraryNameFinder extends RecursiveRobotVisitor {
 
         private RobotKeywordCallLibraryName keywordCallLibraryName;
 
@@ -202,7 +201,7 @@ public record RobotElementGenerator(Project project) {
         }
     }
 
-    private static final class RobotKeywordCallNameFinder extends RobotVisitor {
+    private static final class RobotKeywordCallNameFinder extends RecursiveRobotVisitor {
 
         private RobotKeywordCallName keywordCallName;
 
@@ -213,7 +212,7 @@ public record RobotElementGenerator(Project project) {
         }
     }
 
-    private static final class RobotParameterIdFinder extends RobotVisitor {
+    private static final class RobotParameterIdFinder extends RecursiveRobotVisitor {
 
         private RobotParameterId parameterId;
 
@@ -224,7 +223,7 @@ public record RobotElementGenerator(Project project) {
         }
     }
 
-    private static final class RobotPositionalArgumentFinder extends RobotVisitor {
+    private static final class RobotPositionalArgumentFinder extends RecursiveRobotVisitor {
 
         private RobotPositionalArgument positionalArgument;
 
@@ -235,7 +234,7 @@ public record RobotElementGenerator(Project project) {
         }
     }
 
-    private static final class RobotVariableBodyIdFinder extends RobotVisitor {
+    private static final class RobotVariableBodyIdFinder extends RecursiveRobotVisitor {
 
         private RobotVariableBodyId variableBodyId;
 
