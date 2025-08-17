@@ -4,11 +4,8 @@ import com.intellij.codeInsight.highlighting.ReadWriteAccessDetector;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiReference;
 import com.intellij.psi.util.PsiTreeUtil;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCall;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotPositionalArgument;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariable;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableDefinition;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableStatement;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
@@ -41,13 +38,9 @@ public class RobotReadWriteAccessDetector extends ReadWriteAccessDetector {
     @NotNull
     @Override
     public Access getReferenceAccess(@NotNull PsiElement referencedElement, @NotNull PsiReference reference) {
-        PsiElement referenceElement = reference.getElement();
-        PsiElement parentElement = PsiTreeUtil.getParentOfType(referenceElement, RobotVariable.class, RobotVariableDefinition.class);
+        PsiElement parentElement = PsiTreeUtil.getParentOfType(referencedElement, RobotVariable.class, RobotVariableDefinition.class);
         if (parentElement instanceof RobotVariable && parentElement.getParent() instanceof RobotVariableDefinition
             || parentElement instanceof RobotVariableDefinition) {
-            return Access.Write;
-        }
-        if (parentElement instanceof RobotVariable && isWriteContext(parentElement)) {
             return Access.Write;
         }
         return Access.Read;
@@ -64,23 +57,9 @@ public class RobotReadWriteAccessDetector extends ReadWriteAccessDetector {
             if (expression.getParent() instanceof RobotVariableDefinition) {
                 return Access.Write;
             }
-            return isWriteContext(expression) ? Access.Write : Access.Read;
+            return Access.Read;
         }
 
         return Access.Read;
-    }
-
-    private boolean isWriteContext(PsiElement element) {
-        PsiElement parent = element.getParent();
-        if (parent instanceof RobotPositionalArgument && parent.getParent() instanceof RobotKeywordCall keywordCall) {
-            String simpleKeywordName = keywordCall.getSimpleKeywordName();
-            return isWriteKeyword(simpleKeywordName) && PsiTreeUtil.getParentOfType(keywordCall, RobotVariableStatement.class) == null;
-        }
-        return false;
-    }
-
-    private boolean isWriteKeyword(@NotNull String keywordName) {
-        String keywordNameLowerCase = keywordName.toLowerCase();
-        return VARIABLE_SETTERS.contains(keywordNameLowerCase);
     }
 }

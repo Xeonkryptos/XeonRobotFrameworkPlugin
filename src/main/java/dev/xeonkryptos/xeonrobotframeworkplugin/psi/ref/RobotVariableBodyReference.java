@@ -14,7 +14,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
-import java.util.List;
+import java.util.LinkedHashSet;
 
 public class RobotVariableBodyReference extends PsiPolyVariantReferenceBase<RobotVariableBodyId> {
 
@@ -39,18 +39,22 @@ public class RobotVariableBodyReference extends PsiPolyVariantReferenceBase<Robo
                 return ResolveResult.EMPTY_ARRAY;
             }
 
-            Collection<PsiElement> foundElements = List.of();
+            Collection<PsiElement> foundElements = new LinkedHashSet<>();
             RobotRoot rootElement = PsiTreeUtil.getParentOfType(variableBodyId, RobotRoot.class);
+            RobotVariableReferenceSearcher variableReferenceSearcher = new RobotVariableReferenceSearcher(variableBodyId);
             if (rootElement != null) {
-                RobotVariableReferenceSearcher variableReferenceSearcher = new RobotVariableReferenceSearcher(variableBodyId);
                 rootElement.accept(variableReferenceSearcher);
-                foundElements = variableReferenceSearcher.getFoundElements();
+                Collection<PsiElement> resolvedElements = variableReferenceSearcher.getFoundElements();
+                foundElements.addAll(resolvedElements);
             }
-            if (foundElements.isEmpty()) {
+            if (foundElements.isEmpty() || !variableReferenceSearcher.isOvershadowing()) {
                 PsiFile containingFile = variableBodyId.getContainingFile();
                 PsiElement foundElement = ResolverUtils.findVariableElement(variableName, containingFile);
                 if (foundElement != null) {
-                    foundElements = List.of(foundElement);
+                    Collection<PsiElement> previousElements = foundElements;
+                    foundElements = new LinkedHashSet<>();
+                    foundElements.add(foundElement);
+                    foundElements.addAll(previousElements);
                 }
             }
             if (foundElements.isEmpty()) {
