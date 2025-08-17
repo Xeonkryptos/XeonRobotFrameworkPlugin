@@ -1,10 +1,11 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.ide.usage;
 
 import com.intellij.find.findUsages.FindUsagesHandler;
+import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiElement;
 import com.jetbrains.python.psi.PyExpression;
 import com.jetbrains.python.psi.PyFunction;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.PatternUtil;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.KeywordUtil;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.RobotPyUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -39,8 +40,9 @@ public class RobotPythonFindUsagesHandler extends FindUsagesHandler {
     private static void addStringsToSearch(@NotNull PyFunction pyFunction, @NotNull Set<String> keywordNames) {
         getDecoratorKeywordName(pyFunction).ifPresent(keywordNames::add);
         String pyFunctionName = pyFunction.getName();
-        String convertedKeywordName = PatternUtil.functionToKeyword(pyFunctionName);
-        if (convertedKeywordName != null) {
+        if (pyFunctionName != null) {
+            Project project = pyFunction.getProject();
+            String convertedKeywordName = KeywordUtil.getInstance(project).functionToKeyword(pyFunctionName);
             keywordNames.add(convertedKeywordName);
         }
     }

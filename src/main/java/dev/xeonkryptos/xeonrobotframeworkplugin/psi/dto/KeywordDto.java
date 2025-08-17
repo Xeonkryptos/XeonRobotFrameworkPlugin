@@ -1,5 +1,6 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.psi.dto;
 
+import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiElement;
 import com.jetbrains.python.psi.PyBoolLiteralExpression;
 import com.jetbrains.python.psi.PyElement;
@@ -14,7 +15,7 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.DefinedParameter;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.DefinedVariable;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.ref.PyElementDeprecatedVisitor;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.ref.PyElementParentTraversalVisitor;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.PatternUtil;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.KeywordUtil;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.ReservedVariable;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -53,8 +54,9 @@ public class KeywordDto implements DefinedKeyword {
                       Object... ignored) { // Object... ignored is just a trick to avoid constructor clashing
         this.reference = reference;
         this.libraryName = libraryName;
-        this.name = PatternUtil.functionToKeyword(name).trim();
-        this.keywordFunctionName = PatternUtil.keywordToFunction(name).trim();
+        Project project = reference.getProject();
+        this.name = KeywordUtil.getInstance(project).functionToKeyword(name).trim();
+        this.keywordFunctionName = KeywordUtil.getInstance(project).keywordToFunction(name).trim();
         this.args = parameters != null && !parameters.isEmpty();
         this.parameters = parameters;
         if (reference instanceof PyElement) {
@@ -130,10 +132,8 @@ public class KeywordDto implements DefinedKeyword {
         if (text == null) {
             return false;
         }
-        String keywordToFunction = PatternUtil.keywordToFunction(text).trim();
-        //        if (namespace != null && text.startsWith(namespace + ".")) {
-        //            keywordToFunction = keywordToFunction.substring(namespace.length() + 1);
-        //        }
+        Project project = reference.getProject();
+        String keywordToFunction = KeywordUtil.getInstance(project).keywordToFunction(text).trim();
         return keywordFunctionName.equalsIgnoreCase(keywordToFunction);
     }
 
