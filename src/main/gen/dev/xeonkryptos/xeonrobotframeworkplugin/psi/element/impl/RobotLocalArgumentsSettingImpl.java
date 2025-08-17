@@ -11,14 +11,14 @@ import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.*;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.*;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotPsiImplUtil;
 
-public class RobotLocalSettingImpl extends RobotPsiElementBase implements RobotLocalSetting {
+public class RobotLocalArgumentsSettingImpl extends RobotPsiElementBase implements RobotLocalArgumentsSetting {
 
-  public RobotLocalSettingImpl(@NotNull ASTNode node) {
+  public RobotLocalArgumentsSettingImpl(@NotNull ASTNode node) {
     super(node);
   }
 
   public void accept(@NotNull RobotVisitor visitor) {
-    visitor.visitLocalSetting(this);
+    visitor.visitLocalArgumentsSetting(this);
   }
 
   @Override
@@ -29,26 +29,20 @@ public class RobotLocalSettingImpl extends RobotPsiElementBase implements RobotL
 
   @Override
   @NotNull
-  public List<RobotKeywordCall> getKeywordCallList() {
-    return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotKeywordCall.class);
+  public List<RobotLocalArgumentsSettingArgument> getLocalArgumentsSettingArgumentList() {
+    return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotLocalArgumentsSettingArgument.class);
   }
 
   @Override
   @NotNull
-  public RobotLocalSettingId getLocalSettingId() {
-    return notNullChild(PsiTreeUtil.getChildOfType(this, RobotLocalSettingId.class));
+  public RobotLocalArgumentsSettingId getLocalArgumentsSettingId() {
+    return notNullChild(PsiTreeUtil.getChildOfType(this, RobotLocalArgumentsSettingId.class));
   }
 
   @Override
   @NotNull
-  public List<RobotParameter> getParameterList() {
-    return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotParameter.class);
-  }
-
-  @Override
-  @NotNull
-  public List<RobotPositionalArgument> getPositionalArgumentList() {
-    return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotPositionalArgument.class);
+  public List<RobotVariableDefinition> getVariableDefinitionList() {
+    return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotVariableDefinition.class);
   }
 
   @Override

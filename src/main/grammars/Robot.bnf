@@ -167,7 +167,7 @@ bdd_statement ::= (
     )
     THEN eol_based_keyword_call (AND eol_based_keyword_call)* (BUT eol_based_keyword_call)*
 
-user_keyword_statement ::= user_keyword_statement_id eol_marker (local_setting | executable_statement)* {
+user_keyword_statement ::= user_keyword_statement_id eol_marker (local_setting | local_arguments_setting | executable_statement)* {
     pin=1
     implements = [
         "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotQualifiedNameOwner"
@@ -184,9 +184,15 @@ user_keyword_statement ::= user_keyword_statement_id eol_marker (local_setting |
 user_keyword_statement_id ::= USER_KEYWORD_NAME
 private user_keyword_statement_recover ::= !user_keyword_statement_id & section_recover
 
-local_setting ::= local_setting_id (local_setting_argument | positional_argument | parameter | eol_free_keyword_call | ASSIGNMENT)* eol_marker {methods=[getSettingName]}
+local_setting ::= local_setting_id (positional_argument | parameter | eol_free_keyword_call | ASSIGNMENT)* eol_marker {methods=[getSettingName]}
 local_setting_id ::= LOCAL_SETTING_NAME
-local_setting_argument ::= variable ASSIGNMENT positional_argument
+
+local_arguments_setting ::= local_arguments_setting_id (local_arguments_setting_argument | variable_definition)* eol_marker {
+    pin=1
+    methods=[getSettingName]
+}
+local_arguments_setting_id ::= ARGUMENTS_SETTING_NAME
+local_arguments_setting_argument ::= variable_definition "=" positional_argument
 
 executable_statement ::= loop_structure | loop_control_structure | control_structure | call_structure | return_structure
 
@@ -268,7 +274,7 @@ variable_definition ::= variable {
 variable ::= scalar_variable | list_variable | dict_variable | environment_variable {
     methods = [getVariableName]
 }
-scalar_variable ::= SCALAR_VARIABLE_START (variable_content | python_expression) VARIABLE_END (extended_variable_key_access | extended_variable_slice_access | extended_variable_index_access | extended_variable_nested_access)* {
+scalar_variable ::= SCALAR_VARIABLE_START (variable_content | python_expression)? VARIABLE_END (extended_variable_key_access | extended_variable_slice_access | extended_variable_index_access | extended_variable_nested_access)* {
     mixin = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotScalarVariableExtension"
     stubClass = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotScalarVariableStub"
     elementTypeFactory = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotScalarVariableStubElement.create"

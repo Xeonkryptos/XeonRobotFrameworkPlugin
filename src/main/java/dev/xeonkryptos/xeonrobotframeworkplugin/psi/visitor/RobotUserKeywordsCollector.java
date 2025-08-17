@@ -5,12 +5,13 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.dto.ParameterDto;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.DefinedKeyword;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.DefinedParameter;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordsSection;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLocalSetting;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLocalSettingArgument;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLocalArgumentsSetting;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLocalArgumentsSettingArgument;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotPositionalArgument;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotRoot;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotUserKeywordStatement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariable;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableDefinition;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVisitor;
 import org.jetbrains.annotations.NotNull;
 
@@ -46,23 +47,25 @@ public final class RobotUserKeywordsCollector extends RobotVisitor {
     }
 
     @Override
-    public void visitLocalSetting(@NotNull RobotLocalSetting o) {
-        String settingName = o.getSettingName();
-        if ("[Arguments]".equalsIgnoreCase(settingName)) {
-            o.acceptChildren(this);
-        }
+    public void visitLocalArgumentsSetting(@NotNull RobotLocalArgumentsSetting o) {
+        super.visitLocalArgumentsSetting(o);
+        o.acceptChildren(this);
     }
 
     @Override
-    public void visitLocalSettingArgument(@NotNull RobotLocalSettingArgument o) {
-        RobotVariable parameterVariableElement = o.getVariable();
-        RobotPositionalArgument parameterValueElement = o.getPositionalArgument();
+    public void visitLocalArgumentsSettingArgument(@NotNull RobotLocalArgumentsSettingArgument o) {
+        super.visitLocalArgumentsSettingArgument(o);
 
-        String parameterName = parameterVariableElement.getVariableName();
-        String defaultValue = parameterValueElement.getText();
+        RobotVariableDefinition variableDefinition = o.getVariableDefinition();
+        String parameterName = variableDefinition.getName();
+        if (parameterName != null) {
+            RobotPositionalArgument parameterValueElement = o.getPositionalArgument();
 
-        ParameterDto parameterDto = new ParameterDto(parameterVariableElement, parameterName, defaultValue);
-        keywordArguments.add(parameterDto);
+            String defaultValue = parameterValueElement.getText();
+
+            ParameterDto parameterDto = new ParameterDto(variableDefinition, parameterName, defaultValue);
+            keywordArguments.add(parameterDto);
+        }
     }
 
     @Override

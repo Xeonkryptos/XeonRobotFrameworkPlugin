@@ -18,7 +18,7 @@ public class RobotNestedVariable extends LocalInspectionTool {
             public void visitVariable(@NotNull RobotVariable o) {
                 super.visitVariable(o);
                 String variableName = o.getVariableName();
-                if (variableName == null) {
+                if (variableName == null && o.getTextLength() > 3) {
                     // Without a variable name identifiable in Robot code, it means a nested variable construct is used
                     holder.registerProblem(o, RobotBundle.getMessage("INSP.variable.nested"));
                 }

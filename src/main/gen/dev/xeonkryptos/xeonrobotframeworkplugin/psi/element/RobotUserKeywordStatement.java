@@ -15,6 +15,9 @@ public interface RobotUserKeywordStatement extends RobotQualifiedNameOwner, Robo
   List<RobotExecutableStatement> getExecutableStatementList();
 
   @NotNull
+  List<RobotLocalArgumentsSetting> getLocalArgumentsSettingList();
+
+  @NotNull
   List<RobotLocalSetting> getLocalSettingList();
 
   @NotNull

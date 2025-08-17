@@ -6,9 +6,8 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotExecutableState
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotFile;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCall;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordsSection;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLocalSetting;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLocalSettingArgument;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotPositionalArgument;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLocalArgumentsSetting;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLocalArgumentsSettingArgument;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotRoot;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTaskStatement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTasksSection;
@@ -101,23 +100,18 @@ public class RobotVariableReferenceSearcher extends RobotVisitor {
     }
 
     @Override
-    public void visitLocalSetting(@NotNull RobotLocalSetting o) {
-        if ("[Arguments]".equals(o.getSettingName())) {
-            for (RobotLocalSettingArgument localSettingArgument : o.getLocalSettingArgumentList()) {
-                visitLocalSettingArgument(localSettingArgument);
-            }
-            for (RobotPositionalArgument positionalArgument : o.getPositionalArgumentList()) {
-                positionalArgument.acceptChildren(this);
-            }
-        }
+    public void visitLocalArgumentsSetting(@NotNull RobotLocalArgumentsSetting o) {
+        super.visitLocalArgumentsSetting(o);
+        o.acceptChildren(this);
     }
 
     @Override
-    public void visitLocalSettingArgument(@NotNull RobotLocalSettingArgument o) {
-        RobotVariable variable = o.getVariable();
-        String definedVariableName = variable.getVariableName();
-        if (definedVariableName != null && variableName.equalsIgnoreCase(definedVariableName.trim())) {
-            foundElements.add(o);
+    public void visitLocalArgumentsSettingArgument(@NotNull RobotLocalArgumentsSettingArgument o) {
+        super.visitLocalArgumentsSettingArgument(o);
+        RobotVariableDefinition variableDefinition = o.getVariableDefinition();
+        String name = variableDefinition.getName();
+        if (name != null && variableName.equalsIgnoreCase(name.trim())) {
+            foundElements.add(variableDefinition);
         }
     }
 

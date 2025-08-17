@@ -1093,7 +1093,67 @@ public class RobotParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // local_setting_id (local_setting_argument | positional_argument | parameter | eol_free_keyword_call | ASSIGNMENT)* eol_marker
+  // local_arguments_setting_id (local_arguments_setting_argument | variable_definition)* eol_marker
+  public static boolean local_arguments_setting(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "local_arguments_setting")) return false;
+    if (!nextTokenIs(b, ARGUMENTS_SETTING_NAME)) return false;
+    boolean r, p;
+    Marker m = enter_section_(b, l, _NONE_, LOCAL_ARGUMENTS_SETTING, null);
+    r = local_arguments_setting_id(b, l + 1);
+    p = r; // pin = 1
+    r = r && report_error_(b, local_arguments_setting_1(b, l + 1));
+    r = p && eol_marker(b, l + 1) && r;
+    exit_section_(b, l, m, r, p, null);
+    return r || p;
+  }
+
+  // (local_arguments_setting_argument | variable_definition)*
+  private static boolean local_arguments_setting_1(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "local_arguments_setting_1")) return false;
+    while (true) {
+      int c = current_position_(b);
+      if (!local_arguments_setting_1_0(b, l + 1)) break;
+      if (!empty_element_parsed_guard_(b, "local_arguments_setting_1", c)) break;
+    }
+    return true;
+  }
+
+  // local_arguments_setting_argument | variable_definition
+  private static boolean local_arguments_setting_1_0(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "local_arguments_setting_1_0")) return false;
+    boolean r;
+    r = local_arguments_setting_argument(b, l + 1);
+    if (!r) r = variable_definition(b, l + 1);
+    return r;
+  }
+
+  /* ********************************************************** */
+  // variable_definition "=" positional_argument
+  public static boolean local_arguments_setting_argument(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "local_arguments_setting_argument")) return false;
+    boolean r;
+    Marker m = enter_section_(b, l, _NONE_, LOCAL_ARGUMENTS_SETTING_ARGUMENT, "<local arguments setting argument>");
+    r = variable_definition(b, l + 1);
+    r = r && consumeToken(b, "=");
+    r = r && positional_argument(b, l + 1);
+    exit_section_(b, l, m, r, false, null);
+    return r;
+  }
+
+  /* ********************************************************** */
+  // ARGUMENTS_SETTING_NAME
+  public static boolean local_arguments_setting_id(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "local_arguments_setting_id")) return false;
+    if (!nextTokenIs(b, ARGUMENTS_SETTING_NAME)) return false;
+    boolean r;
+    Marker m = enter_section_(b);
+    r = consumeToken(b, ARGUMENTS_SETTING_NAME);
+    exit_section_(b, m, LOCAL_ARGUMENTS_SETTING_ID, r);
+    return r;
+  }
+
+  /* ********************************************************** */
+  // local_setting_id (positional_argument | parameter | eol_free_keyword_call | ASSIGNMENT)* eol_marker
   public static boolean local_setting(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "local_setting")) return false;
     if (!nextTokenIs(b, LOCAL_SETTING_NAME)) return false;
@@ -1106,7 +1166,7 @@ public class RobotParser implements PsiParser, LightPsiParser {
     return r;
   }
 
-  // (local_setting_argument | positional_argument | parameter | eol_free_keyword_call | ASSIGNMENT)*
+  // (positional_argument | parameter | eol_free_keyword_call | ASSIGNMENT)*
   private static boolean local_setting_1(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "local_setting_1")) return false;
     while (true) {
@@ -1117,28 +1177,14 @@ public class RobotParser implements PsiParser, LightPsiParser {
     return true;
   }
 
-  // local_setting_argument | positional_argument | parameter | eol_free_keyword_call | ASSIGNMENT
+  // positional_argument | parameter | eol_free_keyword_call | ASSIGNMENT
   private static boolean local_setting_1_0(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "local_setting_1_0")) return false;
     boolean r;
-    r = local_setting_argument(b, l + 1);
-    if (!r) r = positional_argument(b, l + 1);
+    r = positional_argument(b, l + 1);
     if (!r) r = parameter(b, l + 1);
     if (!r) r = eol_free_keyword_call(b, l + 1);
     if (!r) r = consumeToken(b, ASSIGNMENT);
-    return r;
-  }
-
-  /* ********************************************************** */
-  // variable ASSIGNMENT positional_argument
-  public static boolean local_setting_argument(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "local_setting_argument")) return false;
-    boolean r;
-    Marker m = enter_section_(b, l, _NONE_, LOCAL_SETTING_ARGUMENT, "<local setting argument>");
-    r = variable(b, l + 1);
-    r = r && consumeToken(b, ASSIGNMENT);
-    r = r && positional_argument(b, l + 1);
-    exit_section_(b, l, m, r, false, null);
     return r;
   }
 
@@ -1379,7 +1425,7 @@ public class RobotParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // SCALAR_VARIABLE_START (variable_content | python_expression) VARIABLE_END (extended_variable_key_access | extended_variable_slice_access | extended_variable_index_access | extended_variable_nested_access)*
+  // SCALAR_VARIABLE_START (variable_content | python_expression)? VARIABLE_END (extended_variable_key_access | extended_variable_slice_access | extended_variable_index_access | extended_variable_nested_access)*
   public static boolean scalar_variable(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "scalar_variable")) return false;
     if (!nextTokenIs(b, SCALAR_VARIABLE_START)) return false;
@@ -1393,9 +1439,16 @@ public class RobotParser implements PsiParser, LightPsiParser {
     return r;
   }
 
-  // variable_content | python_expression
+  // (variable_content | python_expression)?
   private static boolean scalar_variable_1(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "scalar_variable_1")) return false;
+    scalar_variable_1_0(b, l + 1);
+    return true;
+  }
+
+  // variable_content | python_expression
+  private static boolean scalar_variable_1_0(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "scalar_variable_1_0")) return false;
     boolean r;
     r = variable_content(b, l + 1);
     if (!r) r = python_expression(b, l + 1);
@@ -2130,7 +2183,7 @@ public class RobotParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // user_keyword_statement_id eol_marker (local_setting | executable_statement)*
+  // user_keyword_statement_id eol_marker (local_setting | local_arguments_setting | executable_statement)*
   public static boolean user_keyword_statement(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "user_keyword_statement")) return false;
     boolean r, p;
@@ -2143,7 +2196,7 @@ public class RobotParser implements PsiParser, LightPsiParser {
     return r || p;
   }
 
-  // (local_setting | executable_statement)*
+  // (local_setting | local_arguments_setting | executable_statement)*
   private static boolean user_keyword_statement_2(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "user_keyword_statement_2")) return false;
     while (true) {
@@ -2154,11 +2207,12 @@ public class RobotParser implements PsiParser, LightPsiParser {
     return true;
   }
 
-  // local_setting | executable_statement
+  // local_setting | local_arguments_setting | executable_statement
   private static boolean user_keyword_statement_2_0(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "user_keyword_statement_2_0")) return false;
     boolean r;
     r = local_setting(b, l + 1);
+    if (!r) r = local_arguments_setting(b, l + 1);
     if (!r) r = executable_statement(b, l + 1);
     return r;
   }

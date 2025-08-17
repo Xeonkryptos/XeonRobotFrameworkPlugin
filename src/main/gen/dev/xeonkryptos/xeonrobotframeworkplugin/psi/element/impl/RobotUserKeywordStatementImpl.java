@@ -41,6 +41,12 @@ public class RobotUserKeywordStatementImpl extends RobotUserKeywordExtension imp
 
   @Override
   @NotNull
+  public List<RobotLocalArgumentsSetting> getLocalArgumentsSettingList() {
+    return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotLocalArgumentsSetting.class);
+  }
+
+  @Override
+  @NotNull
   public List<RobotLocalSetting> getLocalSettingList() {
     return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotLocalSetting.class);
   }

@@ -180,6 +180,7 @@ LocalSettingKeywordStart = "[" \s*
 LocalSettingKeywordEnd = \s* "]"
 LocalTemplateKeyword = {LocalSettingKeywordStart} "Template" {LocalSettingKeywordEnd}
 LocalSetupTeardownKeywords = {LocalSettingKeywordStart} ("Setup" | "Teardown") {LocalSettingKeywordEnd}
+LocalArgumentsSettingKeyword = {LocalSettingKeywordStart} "Arguments" {LocalSettingKeywordEnd}
 LocalSettingKeyword = {LocalSettingKeywordStart} {GenericSettingsKeyword} {LocalSettingKeywordEnd}
 
 ParameterName = [\p{L}_][\p{L}\p{N}_]*
@@ -375,6 +376,7 @@ LineComment = {LineCommentSign} {NON_EOL}*
 
     <USER_KEYWORD_DEFINITION> {
         {LocalSetupTeardownKeywords} \s+          { enterNewState(KEYWORD_CALL); pushBackTrailingWhitespace(); return LOCAL_SETTING_NAME; }
+        {LocalArgumentsSettingKeyword} \s+        { enterNewState(SETTING); pushBackTrailingWhitespace(); return ARGUMENTS_SETTING_NAME; }
         {LocalSettingKeyword} \s*                 { enterNewState(SETTING); pushBackTrailingWhitespace(); return LOCAL_SETTING_NAME; }
 
         "FOR" \s{2}\s* {LiteralValue}             { yypushback(yylength() - "FOR".length()); return FOR; }

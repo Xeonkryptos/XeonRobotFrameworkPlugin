@@ -7,6 +7,8 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCall;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCallLibrary;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCallLibraryName;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCallName;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLocalArgumentsSetting;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLocalArgumentsSettingId;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLocalSetting;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLocalSettingId;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotParameter;
@@ -107,6 +109,12 @@ public class RobotPsiImplUtil {
     @NotNull
     public static String getSettingName(@NotNull RobotLocalSetting localSetting) {
         RobotLocalSettingId localSettingId = localSetting.getLocalSettingId();
+        return localSettingId.getText();
+    }
+
+    @NotNull
+    public static String getSettingName(@NotNull RobotLocalArgumentsSetting localArgumentsSetting) {
+        RobotLocalArgumentsSettingId localSettingId = localArgumentsSetting.getLocalArgumentsSettingId();
         return localSettingId.getText();
     }
 

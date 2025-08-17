@@ -17,6 +17,7 @@ public class RobotIcons {
     public static final Icon FUNCTION = Nodes.Function;
     public static final Icon JUNIT = RunConfigurations.Junit;
     public static final Icon VARIABLE = Nodes.Variable;
+    public static final Icon PARAMETER = Nodes.Parameter;
 
     private RobotIcons() {
     }

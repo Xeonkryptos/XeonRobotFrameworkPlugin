@@ -8,6 +8,7 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCall;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotPositionalArgument;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariable;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableDefinition;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableStatement;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
@@ -73,7 +74,7 @@ public class RobotReadWriteAccessDetector extends ReadWriteAccessDetector {
         PsiElement parent = element.getParent();
         if (parent instanceof RobotPositionalArgument && parent.getParent() instanceof RobotKeywordCall keywordCall) {
             String simpleKeywordName = keywordCall.getSimpleKeywordName();
-            return isWriteKeyword(simpleKeywordName);
+            return isWriteKeyword(simpleKeywordName) && PsiTreeUtil.getParentOfType(keywordCall, RobotVariableStatement.class) == null;
         }
         return false;
     }

@@ -2,6 +2,7 @@ package dev.xeonkryptos.xeonrobotframeworkplugin.psi.ref;
 
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
+import com.intellij.psi.util.PsiTreeUtil;
 import dev.xeonkryptos.xeonrobotframeworkplugin.ide.completion.KeywordCompletionModification;
 import dev.xeonkryptos.xeonrobotframeworkplugin.ide.config.RobotOptionsProvider;
 import dev.xeonkryptos.xeonrobotframeworkplugin.ide.misc.RobotReadWriteAccessDetector;
@@ -17,6 +18,7 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCallName
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotPositionalArgument;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotUserKeywordStatement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariable;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableStatement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.visitor.RobotLibraryNamesCollector;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.visitor.RobotSectionVariablesCollector;
 import org.jetbrains.annotations.NotNull;
@@ -131,7 +133,8 @@ public class ResolverUtils {
         }
 
         String keywordName = keywordCall.getName();
-        if (RobotReadWriteAccessDetector.isVariableSetterKeyword(keywordName)) {
+        if (RobotReadWriteAccessDetector.isVariableSetterKeyword(keywordName)
+            && PsiTreeUtil.getParentOfType(keywordCall, RobotVariableStatement.class) == null) {
             List<RobotPositionalArgument> positionalArgumentList = keywordCall.getPositionalArgumentList();
             if (!positionalArgumentList.isEmpty() && positionalArgumentList.getFirst().getFirstChild() instanceof RobotVariable variable) {
                 String variableName = variable.getVariableName();
