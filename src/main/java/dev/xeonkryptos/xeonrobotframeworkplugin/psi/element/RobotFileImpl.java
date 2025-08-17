@@ -27,6 +27,7 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.visitor.RobotImportFilesColl
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.visitor.RobotSectionVariablesCollector;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.visitor.RobotUsedFilesCollector;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.visitor.RobotUserKeywordsCollector;
+import dev.xeonkryptos.xeonrobotframeworkplugin.util.GlobalConstants;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -234,10 +235,9 @@ public class RobotFileImpl extends PsiFileBase implements KeywordFile, RobotFile
     }
 
     private void addBuiltInImports(@NotNull Collection<KeywordFile> files) {
-        final String ROBOT_BUILT_IN = "robot.libraries.BuiltIn";
-        PyClass builtIn = PythonResolver.findClass(ROBOT_BUILT_IN, getProject());
+        PyClass builtIn = PythonResolver.findClass(GlobalConstants.ROBOT_BUILT_IN, getProject());
         if (builtIn != null) {
-            files.add(new RobotPythonClass(ROBOT_BUILT_IN, builtIn, ImportType.LIBRARY));
+            files.add(new RobotPythonClass(GlobalConstants.ROBOT_BUILT_IN, builtIn, ImportType.LIBRARY));
         }
     }
 

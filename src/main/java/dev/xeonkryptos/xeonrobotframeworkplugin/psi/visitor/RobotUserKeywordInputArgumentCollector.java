@@ -32,7 +32,7 @@ public final class RobotUserKeywordInputArgumentCollector extends RobotVisitor {
     @Override
     public void visitPositionalArgument(@NotNull RobotPositionalArgument o) {
         boolean resetArgumentReference = argumentReference == null;
-        if (argumentReference != null) {
+        if (argumentReference == null) {
             argumentReference = o;
         }
         o.acceptChildren(this);

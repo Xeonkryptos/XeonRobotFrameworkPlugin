@@ -15,6 +15,7 @@
 
 - Removed recursive lookup of variables through python imports
 - Consider keywords depending on the library decorator and its configuration
+- Optimized code completion for importable python classes
 
 ### Fixed
 
