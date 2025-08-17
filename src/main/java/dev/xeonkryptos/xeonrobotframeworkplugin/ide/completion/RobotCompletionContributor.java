@@ -4,10 +4,13 @@ import com.intellij.codeInsight.completion.CompletionContributor;
 import com.intellij.codeInsight.completion.CompletionParameters;
 import com.intellij.codeInsight.completion.CompletionResultSet;
 import com.intellij.codeInsight.completion.CompletionType;
+import com.intellij.patterns.ElementPattern;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotFile;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotImportGlobalSettingExpression;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLibraryImportGlobalSetting;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLocalSetting;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLocalSettingId;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotParameter;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotResourceImportGlobalSetting;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotSettingsSection;
@@ -70,11 +73,19 @@ public class RobotCompletionContributor extends CompletionContributor {
         extend(CompletionType.BASIC,
                psiElement().andOr(psiElement(RobotTypes.LITERAL_CONSTANT), psiElement(RobotTypes.VARIABLE_BODY)).inFile(psiElement(RobotFile.class)),
                new VariableCompletionProvider());
+        extend(CompletionType.BASIC,
+               psiElement(RobotTypes.LITERAL_CONSTANT).inside(true, withElementInLocalSetting("[Tags]")).inFile(psiElement(RobotFile.class)),
+               new StandardTagCompletionProvider());
     }
 
     @Override
     public void fillCompletionVariants(@NotNull CompletionParameters parameters, @NotNull CompletionResultSet result) {
         // debugging point
         super.fillCompletionVariants(parameters, result);
+    }
+
+    @SuppressWarnings("SameParameterValue")
+    private ElementPattern<RobotLocalSetting> withElementInLocalSetting(@NotNull String localSettingId) {
+        return psiElement(RobotLocalSetting.class).withFirstChild(psiElement(RobotLocalSettingId.class).withText(localSettingId));
     }
 }
