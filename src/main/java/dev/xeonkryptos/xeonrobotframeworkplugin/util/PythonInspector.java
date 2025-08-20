@@ -1,30 +1,24 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.util;
 
-import com.intellij.psi.util.PsiModificationTracker;
-import dev.xeonkryptos.xeonrobotframeworkplugin.MyLogger;
-import dev.xeonkryptos.xeonrobotframeworkplugin.ide.config.RobotOptionsProvider;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.dto.ParameterDto;
 import com.intellij.openapi.application.PathManager;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModuleUtilCore;
 import com.intellij.openapi.projectRoots.Sdk;
-import com.intellij.openapi.roots.ModuleRootManager;
-import com.intellij.openapi.roots.ProjectRootManager;
-import com.intellij.openapi.vfs.VfsUtilCore;
-import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.util.CachedValueProvider;
 import com.intellij.psi.util.CachedValuesManager;
+import com.intellij.psi.util.PsiModificationTracker;
 import com.jetbrains.python.psi.PyClass;
 import com.jetbrains.python.psi.PyFunction;
 import com.jetbrains.python.psi.PyParameter;
-import com.jetbrains.python.sdk.PythonSdkUtil;
+import dev.xeonkryptos.xeonrobotframeworkplugin.MyLogger;
+import dev.xeonkryptos.xeonrobotframeworkplugin.ide.config.RobotOptionsProvider;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.dto.ParameterDto;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.DefinedParameter;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
@@ -45,7 +39,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @SuppressWarnings("UnstableApiUsage")
 public class PythonInspector {
@@ -105,7 +98,7 @@ public class PythonInspector {
             return Map.of();
         }
 
-        Sdk sdk = findPythonSdk(sourceElement);
+        Sdk sdk = RobotLocalProcessExecutor.findPythonSdk(sourceElement);
         if (sdk == null) {
             return Map.of();
         }
@@ -118,7 +111,7 @@ public class PythonInspector {
                 ProcessBuilder processBuilder = new ProcessBuilder(processArguments);
 
                 Module module = ModuleUtilCore.findModuleForPsiElement(sourceElement);
-                setupPythonPathForModule(processBuilder, module);
+                RobotLocalProcessExecutor.setupPythonPathForModule(processBuilder, module);
 
                 Process process = processBuilder.start();
                 try {
@@ -202,23 +195,6 @@ public class PythonInspector {
         return functions;
     }
 
-    private static void setupPythonPathForModule(ProcessBuilder processBuilder, Module module) {
-        if (module == null) {
-            return;
-        }
-
-        VirtualFile[] sourceRoots = ModuleRootManager.getInstance(module).getSourceRoots();
-        VirtualFile[] contentRoots = ProjectRootManager.getInstance(module.getProject()).getContentRoots();
-        String pythonPath = Stream.concat(Stream.of(sourceRoots), Stream.of(contentRoots))
-                                  .map(VfsUtilCore::virtualToIoFile)
-                                  .map(File::getAbsolutePath)
-                                  .collect(Collectors.joining(File.pathSeparator));
-
-        Map<String, String> env = processBuilder.environment();
-        env.put("PYTHONPATH", pythonPath);
-        env.put("PYTHONIOENCODING", "utf-8");
-    }
-
     private static @NotNull List<PythonInspectorParameter> extractPythonInspectorParameters(Matcher matcher) {
         List<PythonInspectorParameter> parameters = new ArrayList<>();
         while (matcher.find()) {
@@ -230,17 +206,6 @@ public class PythonInspector {
             parameters.add(new PythonInspectorParameter(index, name, defaultValue, type));
         }
         return parameters;
-    }
-
-    private static Sdk findPythonSdk(PsiElement sourceElement) {
-        Sdk sdk = PythonSdkUtil.findPythonSdk(sourceElement);
-        if (sdk == null) {
-            sdk = ProjectRootManager.getInstance(sourceElement.getProject()).getProjectSdk();
-            if (sdk != null && !PythonSdkUtil.isPythonSdk(sdk)) {
-                sdk = null;
-            }
-        }
-        return sdk;
     }
 
     public static Collection<DefinedParameter> convertPyParameters(PythonInspector.PythonInspectorParameter[] parameters,

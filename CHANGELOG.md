@@ -10,7 +10,7 @@
 - Support for rename-refactoring of variables, positional arguments (when referencing a file or class in import statements), parameters, custom library names
   and keywords
 - Support for brace matching of variables added
-- Show default robot tags in code completion
+- Show default robot tags in code completion based on your local robot installation and already defined tags
 
 ### Changed
 
