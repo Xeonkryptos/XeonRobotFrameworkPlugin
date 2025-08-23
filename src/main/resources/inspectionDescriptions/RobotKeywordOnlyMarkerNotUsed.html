@@ -1,0 +1,24 @@
+<html lang="en">
+    <body>
+        Reports unused keyword-only markers in Robot Framework keyword arguments.
+        <p>
+            In Robot Framework, a keyword-only marker (represented by an empty variable <code>${}</code>) is used to separate
+            positional arguments from keyword-only arguments. However, if no arguments with default values follow the
+            keyword-only marker, it serves no purpose and should be removed.
+        </p>
+        <p><b>Example:</b></p>
+        <pre><code>*** Keywords ***
+My Keyword
+    [Arguments]    ${arg1}    ${}    # &lt;-- unnecessary marker
+    Log    ${arg1}
+
+My Other Keyword
+    [Arguments]    ${arg1}    ${}    ${arg2}=default    # &lt;-- marker is needed
+    Log    ${arg1}    ${arg2}
+</code></pre>
+        <p>
+            This inspection helps maintain clean and readable Robot Framework code by identifying and highlighting
+            redundant keyword-only markers.
+        </p>
+    </body>
+</html>
