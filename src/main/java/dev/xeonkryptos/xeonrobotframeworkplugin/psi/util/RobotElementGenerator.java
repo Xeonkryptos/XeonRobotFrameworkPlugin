@@ -3,6 +3,7 @@ package dev.xeonkryptos.xeonrobotframeworkplugin.psi.util;
 import com.intellij.openapi.components.Service;
 import com.intellij.openapi.components.Service.Level;
 import com.intellij.openapi.project.Project;
+import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiFileFactory;
 import com.intellij.psi.impl.PsiFileFactoryImpl;
@@ -17,7 +18,6 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTaskId;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTestCaseId;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotUserKeywordStatementId;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableBodyId;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVisitor;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.visitor.RecursiveRobotVisitor;
 import org.jetbrains.annotations.NotNull;
 
@@ -151,6 +151,22 @@ public record RobotElementGenerator(Project project) {
         return variableBodyFinder.variableBodyId;
     }
 
+    public PsiElement createEolElement(int count) {
+        String repeatedEols = "\n".repeat(Math.max(0, count - 1));
+        String fileContent = """
+                             *** Test Case ***
+                             Dummy%s
+                             """.formatted(repeatedEols);
+
+        PsiFile psiFile = createDummyPsiFile(fileContent);
+        if (psiFile == null) {
+            return null;
+        }
+        RobotTestCaseIdFinder testCaseIdFinder = new RobotTestCaseIdFinder();
+        psiFile.acceptChildren(testCaseIdFinder);
+        return testCaseIdFinder.testCaseId.getNextSibling();
+    }
+
     public PsiFile createDummyPsiFile(String text) {
         PsiFileFactory factory = PsiFileFactory.getInstance(project);
 
@@ -164,7 +180,6 @@ public record RobotElementGenerator(Project project) {
 
         @Override
         public void visitUserKeywordStatementId(@NotNull RobotUserKeywordStatementId o) {
-            super.visitUserKeywordStatementId(o);
             userKeywordStatementId = o;
         }
     }
@@ -175,7 +190,6 @@ public record RobotElementGenerator(Project project) {
 
         @Override
         public void visitTaskId(@NotNull RobotTaskId o) {
-            super.visitTaskId(o);
             taskId = o;
         }
     }
@@ -186,62 +200,56 @@ public record RobotElementGenerator(Project project) {
 
         @Override
         public void visitTestCaseId(@NotNull RobotTestCaseId o) {
-            super.visitTestCaseId(o);
             testCaseId = o;
         }
     }
 
-    private static final class RobotKeywordCallLibraryNameFinder extends RobotVisitor {
+    private static final class RobotKeywordCallLibraryNameFinder extends RecursiveRobotVisitor {
 
         private RobotKeywordCallLibraryName keywordCallLibraryName;
 
         @Override
         public void visitKeywordCallLibraryName(@NotNull RobotKeywordCallLibraryName o) {
-            super.visitKeywordCallLibraryName(o);
             keywordCallLibraryName = o;
         }
     }
 
-    private static final class RobotKeywordCallNameFinder extends RobotVisitor {
+    private static final class RobotKeywordCallNameFinder extends RecursiveRobotVisitor {
 
         private RobotKeywordCallName keywordCallName;
 
         @Override
         public void visitKeywordCallName(@NotNull RobotKeywordCallName o) {
-            super.visitKeywordCallName(o);
             keywordCallName = o;
         }
     }
 
-    private static final class RobotParameterIdFinder extends RobotVisitor {
+    private static final class RobotParameterIdFinder extends RecursiveRobotVisitor {
 
         private RobotParameterId parameterId;
 
         @Override
         public void visitParameterId(@NotNull RobotParameterId o) {
-            super.visitParameterId(o);
             parameterId = o;
         }
     }
 
-    private static final class RobotPositionalArgumentFinder extends RobotVisitor {
+    private static final class RobotPositionalArgumentFinder extends RecursiveRobotVisitor {
 
         private RobotPositionalArgument positionalArgument;
 
         @Override
         public void visitPositionalArgument(@NotNull RobotPositionalArgument o) {
-            super.visitPositionalArgument(o);
             positionalArgument = o;
         }
     }
 
-    private static final class RobotVariableBodyIdFinder extends RobotVisitor {
+    private static final class RobotVariableBodyIdFinder extends RecursiveRobotVisitor {
 
         private RobotVariableBodyId variableBodyId;
 
         @Override
         public void visitVariableBodyId(@NotNull RobotVariableBodyId o) {
-            super.visitVariableBodyId(o);
             variableBodyId = o;
         }
     }

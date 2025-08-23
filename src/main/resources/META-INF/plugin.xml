@@ -68,13 +68,15 @@
         <lang.elementManipulator forClass="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotParameterId"
                                  implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.manipulator.RobotParameterIdManipulator"/>
 
-        <vetoRenameCondition implementation="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.manipulator.veto.RobotRenameVeto"/>
-
         <!-- Annotations -->
         <annotator language="Robot" implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.ide.inspections.compilation.RobotParameterAnnotator"/>
         <annotator language="Robot" implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.ide.inspections.compilation.RobotKeywordAnnotator"/>
         <annotator language="Robot" implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.ide.inspections.compilation.RobotImportAnnotator"/>
         <annotator language="Robot" implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.ide.inspections.compilation.RobotVariableAnnotator"/>
+        <annotator language="Robot"
+                   implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.ide.inspections.compilation.RobotUserKeywordStatementAnnotator"/>
+        <annotator language="Robot"
+                   implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.ide.inspections.compilation.RobotLocalArgumentsSettingAnnotator"/>
 
         <!-- Inspections -->
         <!-- TODO: inspection: error?: resource import is not a robot file -->
@@ -86,6 +88,9 @@
         <localInspection language="Robot" shortName="RobotVariableNotUsed" bundle="messages.RobotBundle" key="INSP.NAME.variable.unused" groupPath="Robot"
                          groupKey="INSP.GROUP.cleanup" enabledByDefault="true" level="WARNING" dumbAware="false"
                          implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.ide.inspections.cleanup.RobotUnusedVariableInspection"/>
+        <localInspection language="Robot" shortName="RobotKeywordOnlyMarkerNotUsed" bundle="messages.RobotBundle" key="INSP.NAME.keyword-only-marker.unused"
+                         groupPath="Robot" groupKey="INSP.GROUP.cleanup" enabledByDefault="true" level="WARNING" dumbAware="true"
+                         implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.ide.inspections.cleanup.RobotUnusedKeywordOnlyMarkerInspection"/>
         <!-- Inspections: Readability -->
         <!-- TODO: inspection: warn: use of I in keyword; decreased readability -->
         <!-- TODO: inspection: warn: scenario step does not start with gherkin; decreased readability -->
@@ -138,6 +143,8 @@
         <gotoSymbolContributor implementation="dev.xeonkryptos.xeonrobotframeworkplugin.ide.gotocontributor.RobotGotoSymbolContributor"/>
 
         <readWriteAccessDetector implementation="dev.xeonkryptos.xeonrobotframeworkplugin.ide.misc.RobotReadWriteAccessDetector"/>
+        <lang.namesValidator language="Robot" implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.ide.rename.RobotNamesValidator"/>
+
         <renamePsiElementProcessor implementation="dev.xeonkryptos.xeonrobotframeworkplugin.ide.rename.RenameRobotKeywordCallElementProcessor"/>
         <renameHandler implementation="dev.xeonkryptos.xeonrobotframeworkplugin.ide.rename.RobotMemberInplaceRenameHandler"/>
     </extensions>

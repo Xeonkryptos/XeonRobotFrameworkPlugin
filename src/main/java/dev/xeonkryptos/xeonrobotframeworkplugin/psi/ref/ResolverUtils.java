@@ -4,29 +4,19 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import dev.xeonkryptos.xeonrobotframeworkplugin.ide.completion.KeywordCompletionModification;
 import dev.xeonkryptos.xeonrobotframeworkplugin.ide.config.RobotOptionsProvider;
-import dev.xeonkryptos.xeonrobotframeworkplugin.ide.misc.RobotReadWriteAccessDetector;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.dto.ImportType;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.dto.VariableDto;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.DefinedKeyword;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.DefinedVariable;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.KeywordFile;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotFile;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCall;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCallLibrary;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCallName;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotPositionalArgument;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotUserKeywordStatement;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariable;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.visitor.RobotLibraryNamesCollector;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.visitor.RobotSectionVariablesCollector;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Map.Entry;
 
 public class ResolverUtils {
@@ -122,35 +112,5 @@ public class ResolverUtils {
             }
         }
         return null;
-    }
-
-    @NotNull
-    public static List<DefinedVariable> walkKeyword(@Nullable RobotKeywordCall keywordCall) {
-        if (keywordCall == null) {
-            return Collections.emptyList();
-        }
-
-        String keywordName = keywordCall.getName();
-        if (RobotReadWriteAccessDetector.isVariableSetterKeyword(keywordName)) {
-            List<RobotPositionalArgument> positionalArgumentList = keywordCall.getPositionalArgumentList();
-            if (!positionalArgumentList.isEmpty() && positionalArgumentList.getFirst().getFirstChild() instanceof RobotVariable variable) {
-                String variableName = variable.getVariableName();
-                if (variableName != null) {
-                    DefinedVariable definedVariable = new VariableDto(variable, variableName, null);
-                    return Collections.singletonList(definedVariable);
-                }
-            }
-            return Collections.emptyList();
-        }
-
-        List<DefinedVariable> variables = new ArrayList<>();
-        PsiElement resolvedElement = keywordCall.getKeywordCallName().getReference().resolve();
-        if (resolvedElement instanceof RobotUserKeywordStatement userKeywordStatement) {
-            RobotSectionVariablesCollector variablesCollector = new RobotSectionVariablesCollector();
-            userKeywordStatement.accept(variablesCollector);
-            Collection<DefinedVariable> collectedVariables = variablesCollector.getVariables();
-            variables.addAll(collectedVariables);
-        }
-        return variables;
     }
 }

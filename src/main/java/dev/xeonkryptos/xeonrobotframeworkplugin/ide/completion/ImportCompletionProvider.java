@@ -16,6 +16,7 @@ import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.util.ProcessingContext;
 import com.jetbrains.python.psi.PyClass;
+import com.jetbrains.python.psi.PyFile;
 import com.jetbrains.python.psi.stubs.PyClassNameIndex;
 import dev.xeonkryptos.xeonrobotframeworkplugin.ide.icons.RobotIcons;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotKeywordProvider;
@@ -23,6 +24,8 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotImportGlobalSet
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLibraryImportGlobalSetting;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotResourceImportGlobalSetting;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.ref.RobotFileManager;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.RobotPyUtil;
+import dev.xeonkryptos.xeonrobotframeworkplugin.util.GlobalConstants;
 import org.apache.commons.text.WordUtils;
 import org.jetbrains.annotations.NotNull;
 
@@ -56,6 +59,7 @@ class ImportCompletionProvider extends CompletionProvider<CompletionParameters> 
                 addPythonClassCompletions(projectPyClasses, classNameKey, RobotLookupScope.PROJECT_SCOPE, result);
 
                 Collection<PyClass> pyClasses = PyClassNameIndex.find(classNameKey, project, projectExcludedScope);
+                pyClasses.removeIf(RobotPyUtil::isSystemLibrary);
                 addPythonClassCompletions(pyClasses, classNameKey, RobotLookupScope.LIBRARY_SCOPE, result);
             }
         } else if (importElement instanceof RobotResourceImportGlobalSetting) {
@@ -72,7 +76,7 @@ class ImportCompletionProvider extends CompletionProvider<CompletionParameters> 
                                                                       .withLookupStrings(Arrays.asList(lookupStrings))
                                                                       .withCaseSensitivity(true)
                                                                       .withIcon(AllIcons.Nodes.Package)
-                                                                      .withTypeText("robot.libraries.Builtin");
+                                                                      .withTypeText(GlobalConstants.ROBOT_BUILT_IN);
             resultSet.addElement(elementBuilder);
         }
     }
@@ -102,6 +106,7 @@ class ImportCompletionProvider extends CompletionProvider<CompletionParameters> 
             return;
         }
         pyClasses.stream()
+                 .filter(this::isTopLevelClass)
                  .map(pyClass -> pyClass.getQualifiedName() != null ? pyClass.getQualifiedName() : classNameKey)
                  .distinct()
                  .map(className -> LookupElementBuilder.create(className).withIcon(Nodes.Class).withCaseSensitivity(true))
@@ -110,5 +115,10 @@ class ImportCompletionProvider extends CompletionProvider<CompletionParameters> 
                      element.putUserData(CompletionKeys.ROBOT_LOOKUP_SCOPE, lookupScope);
                      result.addElement(element);
                  });
+    }
+
+    private boolean isTopLevelClass(PyClass pyClass) {
+        PyFile pyFile = (PyFile) pyClass.getContainingFile();
+        return pyFile.getTopLevelClasses().contains(pyClass);
     }
 }

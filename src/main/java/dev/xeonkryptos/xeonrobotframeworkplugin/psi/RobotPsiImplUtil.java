@@ -4,9 +4,10 @@ import com.intellij.psi.PsiReference;
 import com.intellij.psi.util.PsiTreeUtil;
 import dev.xeonkryptos.xeonrobotframeworkplugin.ide.icons.RobotIcons;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCall;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCallLibrary;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCallLibraryName;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCallName;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLocalArgumentsSetting;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLocalArgumentsSettingId;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLocalSetting;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLocalSettingId;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotParameter;
@@ -111,15 +112,9 @@ public class RobotPsiImplUtil {
     }
 
     @NotNull
-    public static String getSimpleKeywordName(@NotNull RobotKeywordCall keywordCall) {
-        RobotKeywordCallName keywordCallName = PsiTreeUtil.getRequiredChildOfType(keywordCall, RobotKeywordCallName.class);
-        RobotKeywordCallLibrary keywordCallLibrary = keywordCallName.getKeywordCallLibrary();
-        String keywordName = keywordCallName.getText();
-        if (keywordCallLibrary != null) {
-            String libraryName = keywordCallLibrary.getText();
-            keywordName = keywordName.substring(libraryName.length());
-        }
-        return keywordName;
+    public static String getSettingName(@NotNull RobotLocalArgumentsSetting localArgumentsSetting) {
+        RobotLocalArgumentsSettingId localSettingId = localArgumentsSetting.getLocalArgumentsSettingId();
+        return localSettingId.getText();
     }
 
     @NotNull

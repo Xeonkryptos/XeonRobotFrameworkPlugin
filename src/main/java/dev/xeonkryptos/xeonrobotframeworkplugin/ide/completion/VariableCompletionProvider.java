@@ -16,10 +16,15 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.dto.ImportType;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.DefinedVariable;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.KeywordFile;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotFile;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCall;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLocalSetting;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotParameter;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotPositionalArgument;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotStatement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTaskStatement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTestCaseStatement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotUserKeywordStatement;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.visitor.RecursiveRobotVisitor;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.visitor.RobotInStatementVariableCollector;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.visitor.RobotSectionVariablesCollector;
 import org.jetbrains.annotations.NotNull;
@@ -40,6 +45,26 @@ class VariableCompletionProvider extends CompletionProvider<CompletionParameters
         }
 
         PsiElement psiElement = parameters.getPosition();
+        RobotStatement parentOfInterest = PsiTreeUtil.getParentOfType(psiElement, RobotParameter.class, RobotKeywordCall.class);
+        if (parentOfInterest instanceof RobotKeywordCall keywordCall) {
+            Optional<Integer> startOfKeywordsOnlyIndex = keywordCall.getStartOfKeywordsOnlyIndex();
+            if (startOfKeywordsOnlyIndex.isPresent()) {
+                int keywordsOnlyStartIndex = startOfKeywordsOnlyIndex.get();
+                if (keywordsOnlyStartIndex == 0) {
+                    // As easy as that. With keywords only starting at 0 means, no variables are allowed when a parameter is expected
+                    return;
+                }
+                RobotKeywordCallLocationIdentifier locationIdentifier = new RobotKeywordCallLocationIdentifier(psiElement);
+                keywordCall.acceptChildren(locationIdentifier);
+
+                int elementIndex = locationIdentifier.getElementIndex();
+                if (elementIndex >= keywordsOnlyStartIndex) {
+                    // After or at the position where keywords only are expected, no variables are allowed
+                    return;
+                }
+            }
+        }
+
         addDefinedVariablesFromImportedFiles(result, parameters.getOriginalFile(), psiElement);
         addDefinedVariablesFromOwnSection(result, psiElement);
         addDefinedVariablesFromKeyword(result, psiElement);
@@ -72,8 +97,10 @@ class VariableCompletionProvider extends CompletionProvider<CompletionParameters
         robotStatement.accept(variableCollector);
         Collection<DefinedVariable> definedVariables = variableCollector.getAvailableVariables();
         if (!definedVariables.isEmpty()) {
-            addDefinedVariables(definedVariables, resultSet, element).forEach(lookupElement -> lookupElement.putUserData(CompletionKeys.ROBOT_LOOKUP_ELEMENT_TYPE,
-                                                                                                                         RobotLookupElementType.VARIABLE));
+            addDefinedVariables(definedVariables,
+                                resultSet,
+                                element).forEach(lookupElement -> lookupElement.putUserData(CompletionKeys.ROBOT_LOOKUP_ELEMENT_TYPE,
+                                                                                            RobotLookupElementType.VARIABLE));
         }
     }
 
@@ -108,5 +135,46 @@ class VariableCompletionProvider extends CompletionProvider<CompletionParameters
                         .filter(Optional::isPresent)
                         .map(Optional::get)
                         .toList();
+    }
+
+    private static final class RobotKeywordCallLocationIdentifier extends RecursiveRobotVisitor {
+
+        private final int startOffsetInParent;
+
+        private int currentIndex = -1;
+        private int elementIndex = -1;
+
+        private RobotKeywordCallLocationIdentifier(PsiElement sourceElement) {
+            startOffsetInParent = sourceElement.getStartOffsetInParent();
+        }
+
+        @Override
+        public void visitParameter(@NotNull RobotParameter o) {
+            ++currentIndex;
+
+            int currentOffsetInParent = o.getStartOffsetInParent();
+            updateFoundElementIndex(currentOffsetInParent);
+        }
+
+        @Override
+        public void visitPositionalArgument(@NotNull RobotPositionalArgument o) {
+            ++currentIndex;
+
+            int currentOffsetInParent = o.getStartOffsetInParent();
+            updateFoundElementIndex(currentOffsetInParent);
+        }
+
+        private void updateFoundElementIndex(int currentOffsetInParent) {
+            if (elementIndex == -1 && currentOffsetInParent >= startOffsetInParent) {
+                elementIndex = currentIndex;
+            }
+        }
+
+        public int getElementIndex() {
+            if (currentIndex != -1 && elementIndex == -1) {
+                elementIndex = currentIndex;
+            }
+            return elementIndex;
+        }
     }
 }

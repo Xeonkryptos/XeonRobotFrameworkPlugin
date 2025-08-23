@@ -58,8 +58,8 @@ class KeywordCompletionProvider extends CompletionProvider<CompletionParameters>
                 if (!name.isEmpty()) {
                     char firstCharacter = name.charAt(0);
                     keywordCompletionModification = Arrays.stream(KeywordCompletionModification.values())
-                                                          .filter(modification -> modification.getIdentifier() != null)
-                                                          .filter(modification -> firstCharacter == modification.getIdentifier())
+                                                          .filter(modification -> modification.getIdentifier() != null
+                                                                                  && firstCharacter == modification.getIdentifier())
                                                           .findFirst()
                                                           .orElse(KeywordCompletionModification.NONE);
                 }

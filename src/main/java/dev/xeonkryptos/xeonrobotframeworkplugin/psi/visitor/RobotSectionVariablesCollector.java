@@ -1,5 +1,6 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.psi.visitor;
 
+import com.intellij.psi.PsiElement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.DefinedVariable;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotExecutableStatement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotGlobalSettingStatement;
@@ -13,12 +14,10 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableDefinit
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableStatement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariablesSection;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVisitor;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.ref.ResolverUtils;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Set;
 
 public final class RobotSectionVariablesCollector extends RobotVisitor {
@@ -80,8 +79,13 @@ public final class RobotSectionVariablesCollector extends RobotVisitor {
 
     @Override
     public void visitKeywordCall(@NotNull RobotKeywordCall o) {
-        List<DefinedVariable> definedVariables = ResolverUtils.walkKeyword(o);
-        variables.addAll(definedVariables);
+        PsiElement resolvedElement = o.getKeywordCallName().getReference().resolve();
+        if (resolvedElement instanceof RobotUserKeywordStatement userKeywordStatement) {
+            RobotSectionVariablesCollector variablesCollector = new RobotSectionVariablesCollector();
+            userKeywordStatement.accept(variablesCollector);
+            Collection<DefinedVariable> collectedVariables = variablesCollector.getVariables();
+            variables.addAll(collectedVariables);
+        }
     }
 
     public Collection<DefinedVariable> getVariables() {

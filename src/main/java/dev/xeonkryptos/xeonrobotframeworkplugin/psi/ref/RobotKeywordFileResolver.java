@@ -1,35 +1,21 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.psi.ref;
 
-import com.intellij.openapi.module.Module;
-import com.intellij.openapi.module.ModuleUtilCore;
 import com.intellij.openapi.progress.ProcessCanceledException;
 import com.intellij.openapi.progress.ProgressManager;
-import com.intellij.openapi.project.Project;
-import com.intellij.openapi.projectRoots.Sdk;
-import com.intellij.openapi.roots.OrderRootType;
 import com.intellij.openapi.util.Key;
-import com.intellij.openapi.vfs.VfsUtilCore;
-import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiElement;
-import com.intellij.psi.PsiFile;
 import com.intellij.psi.util.CachedValue;
 import com.intellij.psi.util.CachedValueProvider.Result;
 import com.intellij.psi.util.CachedValuesManager;
-import com.intellij.psi.util.ParameterizedCachedValue;
-import com.intellij.psi.util.QualifiedName;
+import com.intellij.psi.util.PsiModificationTracker;
 import com.jetbrains.python.psi.Property;
+import com.jetbrains.python.psi.PyBoolLiteralExpression;
 import com.jetbrains.python.psi.PyClass;
 import com.jetbrains.python.psi.PyDecorator;
-import com.jetbrains.python.psi.PyDecoratorList;
-import com.jetbrains.python.psi.PyExpression;
 import com.jetbrains.python.psi.PyFile;
 import com.jetbrains.python.psi.PyFunction;
-import com.jetbrains.python.psi.PyImportElement;
-import com.jetbrains.python.psi.PyImportStatementBase;
 import com.jetbrains.python.psi.PyTargetExpression;
-import com.jetbrains.python.psi.resolve.RatedResolveResult;
 import com.jetbrains.python.psi.types.TypeEvalContext;
-import com.jetbrains.python.sdk.PythonSdkUtil;
 import dev.xeonkryptos.xeonrobotframeworkplugin.MyLogger;
 import dev.xeonkryptos.xeonrobotframeworkplugin.ide.config.RobotOptionsProvider;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.dto.KeywordDto;
@@ -37,6 +23,7 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.dto.VariableDto;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.DefinedKeyword;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.DefinedVariable;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.ReservedVariableScope;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.RobotPyUtil;
 import dev.xeonkryptos.xeonrobotframeworkplugin.util.PythonInspector;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -49,43 +36,35 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Stream;
 
 @SuppressWarnings("UnstableApiUsage")
 class RobotKeywordFileResolver {
 
-    private static final Key<ParameterizedCachedValue<Collection<DefinedVariable>, Boolean>> TRANSITIVE_VARIABLES_CACHE_KEY = new Key<>(
-            "ROBOT_PYTHON_TRANSITIVE_VARIABLES_CACHE");
+    private static final Key<CachedValue<Collection<DefinedVariable>>> VARIABLES_CACHE_KEY = new Key<>("ROBOT_PYTHON_FILE_VARIABLES_CACHE");
     private static final Key<CachedValue<Collection<DefinedVariable>>> FILE_VARIABLES_CACHE_KEY = new Key<>("ROBOT_PYTHON_FILE_VARIABLES_CACHE");
     private static final Key<CachedValue<Collection<DefinedVariable>>> CLASS_VARIABLES_CACHE_KEY = new Key<>("ROBOT_PYTHON_CLASS_VARIABLES_CACHE");
-    private static final Key<CachedValue<Boolean>> SYSTEM_PSI_FILE_KEY = new Key<>("ROBOT_PYTHON_SYSTEM_FILE_CACHE");
 
     private RobotKeywordFileResolver() {
         throw new UnsupportedOperationException("Utility class cannot be instantiated");
     }
 
     static Collection<DefinedVariable> resolveVariables(PyClass pythonClass) {
-        PyFile containingFile = (PyFile) pythonClass.getContainingFile();
-        return resolveVariables(containingFile);
+        if (!isLibraryDecorated(pythonClass)) {
+            PyFile containingFile = (PyFile) pythonClass.getContainingFile();
+            return resolveVariables(containingFile);
+        }
+        return List.of();
     }
 
     static Collection<DefinedVariable> resolveVariables(PyFile pythonFile) {
-        if (isSystemLibrary(pythonFile)) {
+        if (RobotPyUtil.isSystemLibrary(pythonFile)) {
             return List.of();
         }
 
-        Project project = pythonFile.getProject();
-        boolean transitiveImports = RobotOptionsProvider.getInstance(project).allowTransitiveImports();
-        CachedValuesManager cachedValuesManager = CachedValuesManager.getManager(project);
-        return cachedValuesManager.getParameterizedCachedValue(pythonFile, TRANSITIVE_VARIABLES_CACHE_KEY, transitive -> {
+        return CachedValuesManager.getCachedValue(pythonFile, VARIABLES_CACHE_KEY, () -> {
             Set<PyFile> pyFiles = new HashSet<>();
-            Set<PyClass> pyClasses = new HashSet<>();
-            if (transitive) {
-                collectScannableElementsFromImports(pythonFile, pyFiles, pyClasses);
-            }
             pyFiles.add(pythonFile);
 
             Set<DefinedVariable> definedVariables = new HashSet<>();
@@ -94,31 +73,15 @@ class RobotKeywordFileResolver {
                 Collection<DefinedVariable> foundVariables = resolveDefinedVariables(pyFile);
                 definedVariables.addAll(foundVariables);
             }
-            for (PyClass pyClass : pyClasses) {
-                ProgressManager.checkCanceled();
-                Collection<DefinedVariable> foundVariables = resolveDefinedVariables(pyClass);
-                definedVariables.addAll(foundVariables);
-            }
-
-            Object[] dependents = Stream.concat(Stream.of(pythonFile),
-                                                definedVariables.stream()
-                                                                .map(DefinedVariable::reference)
-                                                                .map(PsiElement::getContainingFile)
-                                                                .filter(Objects::nonNull)).distinct().toArray();
-            return Result.create(definedVariables, dependents);
-        }, false, transitiveImports);
+            return Result.create(definedVariables, PsiModificationTracker.MODIFICATION_COUNT);
+        });
     }
 
     static Collection<DefinedVariable> resolveDefinedVariables(PyClass pythonClass) {
         return CachedValuesManager.getCachedValue(pythonClass, CLASS_VARIABLES_CACHE_KEY, () -> {
             Set<DefinedVariable> newVariables = new HashSet<>();
             addDefinedVariables(pythonClass, newVariables, true);
-            Object[] dependents = Stream.concat(newVariables.stream().map(DefinedVariable::reference), Stream.of(pythonClass))
-                                        .map(PsiElement::getContainingFile)
-                                        .filter(Objects::nonNull)
-                                        .distinct()
-                                        .toArray();
-            return new Result<>(newVariables, dependents);
+            return new Result<>(newVariables, PsiModificationTracker.MODIFICATION_COUNT);
         });
     }
 
@@ -126,16 +89,11 @@ class RobotKeywordFileResolver {
         return CachedValuesManager.getCachedValue(pythonFile, FILE_VARIABLES_CACHE_KEY, () -> {
             Set<DefinedVariable> variables = new HashSet<>();
             addDefinedVariables(pythonFile, variables);
-            Object[] dependents = Stream.concat(variables.stream().map(DefinedVariable::reference), Stream.of(pythonFile))
-                                        .map(PsiElement::getContainingFile)
-                                        .filter(Objects::nonNull)
-                                        .distinct()
-                                        .toArray();
-            return new Result<>(variables, dependents);
+            return new Result<>(variables, PsiModificationTracker.MODIFICATION_COUNT);
         });
     }
 
-    protected static void addDefinedVariables(@NotNull PyFile pyFile, @NotNull Collection<DefinedVariable> definedVariables) {
+    private static void addDefinedVariables(@NotNull PyFile pyFile, @NotNull Collection<DefinedVariable> definedVariables) {
         for (PyTargetExpression attribute : pyFile.getTopLevelAttributes()) {
             String attributeName = attribute.getName();
             if (attributeName != null) {
@@ -178,68 +136,21 @@ class RobotKeywordFileResolver {
         }
     }
 
-    static void collectScannableElementsFromImports(PyFile pyFile, Collection<PyFile> pyFiles, Collection<PyClass> pyClasses) {
-        collectScannableElementsFromImports(pyFile, pyFiles, pyClasses, new HashSet<>());
-    }
-
-    static void collectScannableElementsFromImports(PyFile pyFile,
-                                                    Collection<PyFile> pyFiles,
-                                                    Collection<PyClass> pyClasses,
-                                                    Collection<QualifiedName> visitedImports) {
-        Set<PyFile> scanImportsFiles = new HashSet<>();
-        for (PyImportStatementBase importStatement : pyFile.getImportBlock()) {
-            for (PyImportElement importElement : importStatement.getImportElements()) {
-                QualifiedName importedQName = importElement.getImportedQName();
-                if (importedQName == null || !visitedImports.add(importedQName)) {
-                    continue;
-                }
-
-                ProgressManager.checkCanceled();
-                List<RatedResolveResult> ratedResolveResults = importElement.multiResolve();
-                for (RatedResolveResult ratedResolveResult : ratedResolveResults) {
-                    PsiElement element = ratedResolveResult.getElement();
-                    if (element instanceof PyFile resolvedPyFile && pyFile != resolvedPyFile && pyFiles.add(resolvedPyFile)) {
-                        scanImportsFiles.add(resolvedPyFile);
-                    } else if (element instanceof PyClass resolvedPyClass) {
-                        PyFile containingFile = (PyFile) resolvedPyClass.getContainingFile();
-                        if (pyClasses.add(resolvedPyClass) && !pyFiles.contains(containingFile)) {
-                            scanImportsFiles.add(containingFile);
-                        }
-                    }
-                }
-            }
-        }
-        for (PyFile scanImportsFile : scanImportsFiles) {
-            ProgressManager.checkCanceled();
-            collectScannableElementsFromImports(scanImportsFile, pyFiles, pyClasses, visitedImports);
-        }
-    }
-
     static String getValidName(@Nullable String name) {
         return name != null && isNotReservedName(name) ? name : null;
     }
 
-    static boolean isNotReservedName(@NotNull String name) {
+    private static boolean isNotReservedName(@NotNull String name) {
         return !name.startsWith("_") && !name.startsWith("ROBOT_LIBRARY_");
     }
 
     @Nullable
     private static String getKeywordName(@NotNull PyFunction function) {
         String keywordName = null;
-        PyDecoratorList decoratorList = function.getDecoratorList();
-        if (decoratorList != null) {
-            PyDecorator keywordDecorator = decoratorList.findDecorator("keyword");
-            if (keywordDecorator != null && keywordDecorator.hasArgumentList()) {
-                PyExpression nameArgument = keywordDecorator.getKeywordArgument("name");
-                if (nameArgument != null) {
-                    keywordName = nameArgument.getText().replaceAll("^\"|\"|'|'$", "");
-                } else {
-                    PyExpression[] arguments = keywordDecorator.getArguments();
-                    if (arguments.length > 0 && arguments[0].getName() == null) {
-                        keywordName = arguments[0].getText().replaceAll("^\"|\"|'|'$", "");
-                    }
-                }
-            }
+        Optional<String> normalizedKeywordNameOpt = RobotPyUtil.findCustomKeywordNameDecoratorExpression(function)
+                                                               .map(expression -> expression.getText().replaceAll("^\"|\"|'|'$", ""));
+        if (normalizedKeywordNameOpt.isPresent()) {
+            keywordName = normalizedKeywordNameOpt.get();
         }
         return keywordName;
     }
@@ -247,12 +158,14 @@ class RobotKeywordFileResolver {
     static void addDefinedKeywords(@NotNull PyClass pyClass, @Nullable String libraryName, @NotNull Collection<DefinedKeyword> keywords) {
         Map<String, PyFunction> methods = new LinkedHashMap<>();
         String className = pyClass.getName();
+        boolean shouldImportOnlyDecoratedMethods = shouldImportOnlyDecoratedMethods(pyClass);
+        boolean libraryDecorated = isLibraryDecorated(pyClass);
         pyClass.visitMethods(method -> {
             boolean propertyDecorated = Optional.ofNullable(method.getDecoratorList())
                                                 .map(decoratorList -> decoratorList.findDecorator("property"))
                                                 .isPresent();
             String methodName = method.getName();
-            if (propertyDecorated) {
+            if (propertyDecorated && !libraryDecorated) {
                 String attributeName = getValidName(methodName);
                 if (attributeName != null) {
                     keywords.add(new KeywordDto(method, libraryName, attributeName));
@@ -260,7 +173,7 @@ class RobotKeywordFileResolver {
                 return true;
             }
             methodName = getValidName(methodName);
-            if (methodName != null) {
+            if (methodName != null && (!shouldImportOnlyDecoratedMethods || isMethodKeywordDecorated(method))) {
                 methods.put(methodName, method);
             }
             return true;
@@ -275,7 +188,7 @@ class RobotKeywordFileResolver {
 
         pyClass.visitClassAttributes(attribute -> {
             String attributeName = getValidName(attribute.getName());
-            if (attributeName != null) {
+            if (attributeName != null && !libraryDecorated) {
                 keywords.add(new KeywordDto(attribute, libraryName, attributeName));
             }
             return true;
@@ -347,19 +260,26 @@ class RobotKeywordFileResolver {
         }
     }
 
-    private static boolean isSystemLibrary(PsiFile psiFile) {
-        return CachedValuesManager.getCachedValue(psiFile, SYSTEM_PSI_FILE_KEY, () -> {
-            Module module = ModuleUtilCore.findModuleForPsiElement(psiFile);
-            if (module != null) {
-                Sdk sdk = PythonSdkUtil.findPythonSdk(module);
-                if (sdk != null) {
-                    VirtualFile[] roots = sdk.getRootProvider().getFiles(OrderRootType.CLASSES);
-                    VirtualFile fileVirtual = psiFile.getVirtualFile();
-                    boolean result = Arrays.stream(roots).anyMatch(root -> VfsUtilCore.isAncestor(root, fileVirtual, false));
-                    return Result.createSingleDependency(result, psiFile);
-                }
+    private static boolean isLibraryDecorated(PyClass pyClass) {
+        return Optional.ofNullable(pyClass.getDecoratorList()).map(decoratorList -> decoratorList.findDecorator("library")).isPresent();
+    }
+
+    private static boolean shouldImportOnlyDecoratedMethods(PyClass pyClass) {
+        Optional<@Nullable PyDecorator> libraryDecoratorOpt = Optional.ofNullable(pyClass.getDecoratorList())
+                                                                      .map(decoratorList -> decoratorList.findDecorator("library"));
+        if (libraryDecoratorOpt.isPresent()) {
+            PyDecorator libraryDecorator = libraryDecoratorOpt.get();
+            PyBoolLiteralExpression autoKeywords = libraryDecorator.getArgument(5, "auto_keywords", PyBoolLiteralExpression.class);
+            if (autoKeywords != null && autoKeywords.getValue()) {
+                return autoKeywords.getValue();
+            } else {
+                return true;
             }
-            return Result.createSingleDependency(false, psiFile);
-        });
+        }
+        return false;
+    }
+
+    private static boolean isMethodKeywordDecorated(@NotNull PyFunction method) {
+        return Optional.ofNullable(method.getDecoratorList()).map(decoratorList -> decoratorList.findDecorator("keyword")).isPresent();
     }
 }

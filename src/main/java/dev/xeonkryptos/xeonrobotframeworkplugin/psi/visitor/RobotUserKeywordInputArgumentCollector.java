@@ -1,11 +1,9 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.psi.visitor;
 
-import com.intellij.psi.PsiElement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.dto.ParameterDto;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.DefinedParameter;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLocalSettingArgument;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotPositionalArgument;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariable;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLocalArgumentsSettingArgument;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableDefinition;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVisitor;
 import org.jetbrains.annotations.NotNull;
 
@@ -16,38 +14,27 @@ public final class RobotUserKeywordInputArgumentCollector extends RobotVisitor {
 
     private final Collection<DefinedParameter> inputArguments = new LinkedHashSet<>();
 
-    private PsiElement argumentReference;
-    private String argumentName;
-
     @Override
-    public void visitLocalSettingArgument(@NotNull RobotLocalSettingArgument o) {
-        RobotVariable variable = o.getVariable();
-        argumentReference = o;
-        argumentName = variable.getVariableName();
-        o.acceptChildren(this);
-        argumentName = null;
-        argumentReference = null;
-    }
+    public void visitLocalArgumentsSettingArgument(@NotNull RobotLocalArgumentsSettingArgument o) {
+        super.visitLocalArgumentsSettingArgument(o);
+        RobotVariableDefinition variableDefinition = o.getVariableDefinition();
 
-    @Override
-    public void visitPositionalArgument(@NotNull RobotPositionalArgument o) {
-        boolean resetArgumentReference = argumentReference == null;
-        if (argumentReference != null) {
-            argumentReference = o;
-        }
-        o.acceptChildren(this);
-        if (resetArgumentReference) {
-            argumentReference = null;
+        String argumentName = variableDefinition.getName();
+        if (argumentName != null) {
+            String defaultValue = o.getPositionalArgument().getText();
+
+            ParameterDto parameterDto = new ParameterDto(variableDefinition, argumentName, defaultValue);
+            inputArguments.add(parameterDto);
         }
     }
 
     @Override
-    public void visitVariable(@NotNull RobotVariable o) {
-        String variableName = o.getVariableName();
-        if (variableName != null) {
-            ParameterDto parameterDto = argumentName != null ?
-                                        new ParameterDto(argumentReference, argumentName, o.getText()) :
-                                        new ParameterDto(argumentReference, variableName, null);
+    public void visitVariableDefinition(@NotNull RobotVariableDefinition o) {
+        super.visitVariableDefinition(o);
+
+        String argumentName = o.getName();
+        if (argumentName != null) {
+            ParameterDto parameterDto = new ParameterDto(o, argumentName, null);
             inputArguments.add(parameterDto);
         }
     }

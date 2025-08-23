@@ -5,6 +5,7 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.stubs.IStubElementType;
 import com.intellij.util.IncorrectOperationException;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.DefinedParameter;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLocalArgumentsSetting;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLocalSetting;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotUserKeywordStatement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotUserKeywordStatementId;
@@ -31,11 +32,9 @@ public abstract class RobotUserKeywordExtension extends RobotStubPsiElementBase<
 
     @Override
     public Collection<DefinedParameter> getInputParameters() {
-        Optional<RobotLocalSetting> argumentsSetting = getLocalSettingList().stream()
-                                                                            .filter(localSetting -> "[Arguments]".equals(localSetting.getSettingName()))
-                                                                            .findFirst();
+        Optional<RobotLocalArgumentsSetting> argumentsSetting = getLocalArgumentsSettingList().stream().findFirst();
         if (argumentsSetting.isPresent()) {
-            RobotLocalSetting robotLocalSetting = argumentsSetting.get();
+            RobotLocalArgumentsSetting robotLocalSetting = argumentsSetting.get();
             RobotUserKeywordInputArgumentCollector inputArgumentCollector = new RobotUserKeywordInputArgumentCollector();
             robotLocalSetting.acceptChildren(inputArgumentCollector);
             return inputArgumentCollector.getInputArguments();

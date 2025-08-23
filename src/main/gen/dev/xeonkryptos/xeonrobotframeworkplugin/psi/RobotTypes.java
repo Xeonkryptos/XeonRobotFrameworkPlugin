@@ -43,8 +43,10 @@ public interface RobotTypes {
   IElementType LIBRARY_IMPORT_GLOBAL_SETTING = new RobotElementType("LIBRARY_IMPORT_GLOBAL_SETTING");
   IElementType LIST_VARIABLE = RobotListVariableStubElement.create("LIST_VARIABLE");
   IElementType LITERAL_CONSTANT_VALUE = new RobotElementType("LITERAL_CONSTANT_VALUE");
+  IElementType LOCAL_ARGUMENTS_SETTING = new RobotElementType("LOCAL_ARGUMENTS_SETTING");
+  IElementType LOCAL_ARGUMENTS_SETTING_ARGUMENT = new RobotElementType("LOCAL_ARGUMENTS_SETTING_ARGUMENT");
+  IElementType LOCAL_ARGUMENTS_SETTING_ID = new RobotElementType("LOCAL_ARGUMENTS_SETTING_ID");
   IElementType LOCAL_SETTING = new RobotElementType("LOCAL_SETTING");
-  IElementType LOCAL_SETTING_ARGUMENT = new RobotElementType("LOCAL_SETTING_ARGUMENT");
   IElementType LOCAL_SETTING_ID = new RobotElementType("LOCAL_SETTING_ID");
   IElementType METADATA_STATEMENT_GLOBAL_SETTING = new RobotElementType("METADATA_STATEMENT_GLOBAL_SETTING");
   IElementType NEW_LIBRARY_NAME = new RobotElementType("NEW_LIBRARY_NAME");
@@ -88,6 +90,7 @@ public interface RobotTypes {
   IElementType WHILE_LOOP_STRUCTURE = new RobotElementType("WHILE_LOOP_STRUCTURE");
 
   IElementType AND = new RobotTokenType("AND");
+  IElementType ARGUMENTS_SETTING_NAME = new RobotTokenType("ARGUMENTS_SETTING_NAME");
   IElementType ASSIGNMENT = new RobotTokenType("ASSIGNMENT");
   IElementType BREAK = new RobotTokenType("BREAK");
   IElementType BUT = new RobotTokenType("BUT");
@@ -235,11 +238,17 @@ public interface RobotTypes {
       else if (type == LITERAL_CONSTANT_VALUE) {
         return new RobotLiteralConstantValueImpl(node);
       }
+      else if (type == LOCAL_ARGUMENTS_SETTING) {
+        return new RobotLocalArgumentsSettingImpl(node);
+      }
+      else if (type == LOCAL_ARGUMENTS_SETTING_ARGUMENT) {
+        return new RobotLocalArgumentsSettingArgumentImpl(node);
+      }
+      else if (type == LOCAL_ARGUMENTS_SETTING_ID) {
+        return new RobotLocalArgumentsSettingIdImpl(node);
+      }
       else if (type == LOCAL_SETTING) {
         return new RobotLocalSettingImpl(node);
-      }
-      else if (type == LOCAL_SETTING_ARGUMENT) {
-        return new RobotLocalSettingArgumentImpl(node);
       }
       else if (type == LOCAL_SETTING_ID) {
         return new RobotLocalSettingIdImpl(node);

@@ -5,19 +5,16 @@ import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 
-public interface RobotLocalSetting extends RobotStatement {
+public interface RobotLocalArgumentsSetting extends RobotStatement {
 
   @NotNull
-  List<RobotKeywordCall> getKeywordCallList();
+  List<RobotLocalArgumentsSettingArgument> getLocalArgumentsSettingArgumentList();
 
   @NotNull
-  RobotLocalSettingId getLocalSettingId();
+  RobotLocalArgumentsSettingId getLocalArgumentsSettingId();
 
   @NotNull
-  List<RobotParameter> getParameterList();
-
-  @NotNull
-  List<RobotPositionalArgument> getPositionalArgumentList();
+  List<RobotVariableDefinition> getVariableDefinitionList();
 
   @NotNull String getSettingName();
 

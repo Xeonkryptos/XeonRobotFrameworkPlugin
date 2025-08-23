@@ -10,10 +10,15 @@
 - Support for rename-refactoring of variables, positional arguments (when referencing a file or class in import statements), parameters, custom library names
   and keywords
 - Support for brace matching of variables added
+- Show default robot tags in code completion based on your local robot installation and already defined tags
 
 ### Changed
 
-- Improved code completion performance when variables are to be considered by ignoring system libraries
+- Removed recursive lookup of variables through python imports
+- Consider keywords depending on the library decorator and its configuration
+- Optimized code completion for importable python classes
+- Optimized code completion for keywords by verifying the existence of a keyword only marker to not provide variable suggestions where parameter names are the
+  only option
 
 ### Fixed
 
@@ -21,6 +26,7 @@
 - Fixed variable insertion handling
 - Fixed unused variable detection
 - Fixed find usages scope of variables to their direct environment
+- Fixed corrupt marking of parameter calls in keyword calls in some cases
 
 ## 0.4.2
 
