@@ -3,6 +3,7 @@ package dev.xeonkryptos.xeonrobotframeworkplugin.psi.util;
 import com.intellij.openapi.components.Service;
 import com.intellij.openapi.components.Service.Level;
 import com.intellij.openapi.project.Project;
+import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiFileFactory;
 import com.intellij.psi.impl.PsiFileFactoryImpl;
@@ -150,6 +151,22 @@ public record RobotElementGenerator(Project project) {
         return variableBodyFinder.variableBodyId;
     }
 
+    public PsiElement createEolElement(int count) {
+        String repeatedEols = "\n".repeat(Math.max(0, count - 1));
+        String fileContent = """
+                             *** Test Case ***
+                             Dummy%s
+                             """.formatted(repeatedEols);
+
+        PsiFile psiFile = createDummyPsiFile(fileContent);
+        if (psiFile == null) {
+            return null;
+        }
+        RobotTestCaseIdFinder testCaseIdFinder = new RobotTestCaseIdFinder();
+        psiFile.acceptChildren(testCaseIdFinder);
+        return testCaseIdFinder.testCaseId.getNextSibling();
+    }
+
     public PsiFile createDummyPsiFile(String text) {
         PsiFileFactory factory = PsiFileFactory.getInstance(project);
 
@@ -163,7 +180,6 @@ public record RobotElementGenerator(Project project) {
 
         @Override
         public void visitUserKeywordStatementId(@NotNull RobotUserKeywordStatementId o) {
-            super.visitUserKeywordStatementId(o);
             userKeywordStatementId = o;
         }
     }
@@ -174,7 +190,6 @@ public record RobotElementGenerator(Project project) {
 
         @Override
         public void visitTaskId(@NotNull RobotTaskId o) {
-            super.visitTaskId(o);
             taskId = o;
         }
     }
@@ -185,7 +200,6 @@ public record RobotElementGenerator(Project project) {
 
         @Override
         public void visitTestCaseId(@NotNull RobotTestCaseId o) {
-            super.visitTestCaseId(o);
             testCaseId = o;
         }
     }
@@ -196,7 +210,6 @@ public record RobotElementGenerator(Project project) {
 
         @Override
         public void visitKeywordCallLibraryName(@NotNull RobotKeywordCallLibraryName o) {
-            super.visitKeywordCallLibraryName(o);
             keywordCallLibraryName = o;
         }
     }
@@ -207,7 +220,6 @@ public record RobotElementGenerator(Project project) {
 
         @Override
         public void visitKeywordCallName(@NotNull RobotKeywordCallName o) {
-            super.visitKeywordCallName(o);
             keywordCallName = o;
         }
     }
@@ -218,7 +230,6 @@ public record RobotElementGenerator(Project project) {
 
         @Override
         public void visitParameterId(@NotNull RobotParameterId o) {
-            super.visitParameterId(o);
             parameterId = o;
         }
     }
@@ -229,7 +240,6 @@ public record RobotElementGenerator(Project project) {
 
         @Override
         public void visitPositionalArgument(@NotNull RobotPositionalArgument o) {
-            super.visitPositionalArgument(o);
             positionalArgument = o;
         }
     }
@@ -240,7 +250,6 @@ public record RobotElementGenerator(Project project) {
 
         @Override
         public void visitVariableBodyId(@NotNull RobotVariableBodyId o) {
-            super.visitVariableBodyId(o);
             variableBodyId = o;
         }
     }

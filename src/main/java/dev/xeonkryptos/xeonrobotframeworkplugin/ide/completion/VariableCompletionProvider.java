@@ -150,7 +150,6 @@ class VariableCompletionProvider extends CompletionProvider<CompletionParameters
 
         @Override
         public void visitParameter(@NotNull RobotParameter o) {
-            super.visitElement(o);
             ++currentIndex;
 
             int currentOffsetInParent = o.getStartOffsetInParent();
@@ -159,7 +158,6 @@ class VariableCompletionProvider extends CompletionProvider<CompletionParameters
 
         @Override
         public void visitPositionalArgument(@NotNull RobotPositionalArgument o) {
-            super.visitElement(o);
             ++currentIndex;
 
             int currentOffsetInParent = o.getStartOffsetInParent();

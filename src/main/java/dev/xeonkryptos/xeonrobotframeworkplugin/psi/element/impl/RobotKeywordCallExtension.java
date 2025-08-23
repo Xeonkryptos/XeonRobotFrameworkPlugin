@@ -35,7 +35,6 @@ import org.jetbrains.annotations.NotNull;
 import javax.swing.Icon;
 import java.text.Collator;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -77,7 +76,7 @@ public abstract class RobotKeywordCallExtension extends RobotStubPsiElementBase<
                 });
             }
         }
-        return null;
+        return List.of();
     }
 
     @SuppressWarnings("UnstableApiUsage")
@@ -96,11 +95,11 @@ public abstract class RobotKeywordCallExtension extends RobotStubPsiElementBase<
 
     @Override
     public Collection<String> computeMissingRequiredParameters() {
-        Set<String> definedParameters = getParameterList().stream().map(RobotParameter::getParameterName).collect(Collectors.toCollection(HashSet::new));
+        Set<String> definedParameters = getParameterList().stream().map(RobotParameter::getParameterName).collect(Collectors.toCollection(LinkedHashSet::new));
         Collection<String> requiredParameterNames = getAvailableParameters().stream()
                                                                             .filter(param -> !param.hasDefaultValue() && !param.isKeywordContainer())
                                                                             .map(DefinedParameter::getLookup)
-                                                                            .collect(Collectors.toCollection(HashSet::new));
+                                                                            .collect(Collectors.toCollection(LinkedHashSet::new));
 
         RobotOptionsProvider robotOptionsProvider = RobotOptionsProvider.getInstance(getProject());
         Collator parameterNameCollator = robotOptionsProvider.getParameterNameCollator();
