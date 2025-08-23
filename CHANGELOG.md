@@ -17,6 +17,8 @@
 - Removed recursive lookup of variables through python imports
 - Consider keywords depending on the library decorator and its configuration
 - Optimized code completion for importable python classes
+- Optimized code completion for keywords by verifying the existence of a keyword only marker to not provide variable suggestions where parameter names are the
+  only option
 
 ### Fixed
 
@@ -24,6 +26,7 @@
 - Fixed variable insertion handling
 - Fixed unused variable detection
 - Fixed find usages scope of variables to their direct environment
+- Fixed corrupt marking of parameter calls in keyword calls in some cases
 
 ## 0.4.1
 
