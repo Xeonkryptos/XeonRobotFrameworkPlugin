@@ -48,7 +48,7 @@ public class RobotArgumentAnnotator implements Annotator {
                 }
                 index++;
             }
-            if (index != allCallArguments.size() && index >= keywordsOnlyIndex) {
+            if (index >= keywordsOnlyIndex) {
                 highlightPositionalArgumentAsInvalidlyPlaced(positionalArgument, holder);
             }
         }

@@ -57,7 +57,7 @@ public class RobotParameterAnnotator implements Annotator {
                 }
                 index++;
             }
-            if (index != allCallArguments.size() && index >= keywordsOnlyIndex) {
+            if (index >= keywordsOnlyIndex) {
                 highlightParameterAsNotFound(parameter, holder);
             } else {
                 convertParameterToArgumentVisually(holder, parameter);

@@ -7,6 +7,7 @@ import com.intellij.psi.stubs.IStubElementType;
 import com.intellij.psi.util.CachedValue;
 import com.intellij.psi.util.CachedValueProvider.Result;
 import com.intellij.psi.util.CachedValuesManager;
+import com.intellij.psi.util.ParameterizedCachedValue;
 import com.intellij.util.IncorrectOperationException;
 import com.jetbrains.python.psi.PyFunction;
 import com.jetbrains.python.psi.PyNamedParameter;
@@ -44,7 +45,8 @@ import java.util.stream.Collectors;
 
 public abstract class RobotKeywordCallExtension extends RobotStubPsiElementBase<RobotKeywordCallStub, RobotKeywordCall> implements RobotKeywordCall {
 
-    private static final Key<CachedValue<Collection<DefinedParameter>>> AVAILABLE_KEYWORD_PARAMETERS_KEY = Key.create("AVAILABLE_KEYWORD_PARAMETERS_KEY");
+    private static final Key<ParameterizedCachedValue<Collection<DefinedParameter>, PsiElement>> AVAILABLE_KEYWORD_PARAMETERS_KEY = Key.create(
+            "AVAILABLE_KEYWORD_PARAMETERS_KEY");
     private static final Key<CachedValue<OptionalInt>> START_OF_KEYWORDS_ONLY_INDEX_KEY = Key.create("START_OF_KEYWORDS_ONLY_INDEX_KEY");
 
     private Collection<RobotArgument> allCallArguments;
@@ -61,20 +63,19 @@ public abstract class RobotKeywordCallExtension extends RobotStubPsiElementBase<
     public Collection<DefinedParameter> getAvailableParameters() {
         PsiElement psiElement = getKeywordCallName().getReference().resolve();
         if (psiElement != null) {
-            if (psiElement instanceof PyFunction pyFunction) {
-                return CachedValuesManager.getCachedValue(this, AVAILABLE_KEYWORD_PARAMETERS_KEY, () -> {
+            CachedValuesManager cachedValuesManager = CachedValuesManager.getManager(getProject());
+            return cachedValuesManager.getParameterizedCachedValue(this, AVAILABLE_KEYWORD_PARAMETERS_KEY, element -> {
+                if (element instanceof PyFunction pyFunction) {
                     Set<DefinedParameter> results = new LinkedHashSet<>();
                     PyParameter[] pyParameters = pyFunction.getParameterList().getParameters();
                     inspectPythonFunctionStatically(pyParameters, results);
                     return Result.create(results, pyFunction, this);
-                });
-            } else {
-                RobotUserKeywordStatement keywordDefinition = (RobotUserKeywordStatement) psiElement;
-                return CachedValuesManager.getCachedValue(this, () -> {
+                } else {
+                    RobotUserKeywordStatement keywordDefinition = (RobotUserKeywordStatement) element;
                     Collection<DefinedParameter> parameters = keywordDefinition.getInputParameters();
                     return Result.create(parameters, keywordDefinition, this);
-                });
-            }
+                }
+            }, false, psiElement);
         }
         return List.of();
     }
