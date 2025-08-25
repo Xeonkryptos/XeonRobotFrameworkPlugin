@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+## 0.5.0
+
 ### Added
 
 - Support for keywords with a custom library name

@@ -38,14 +38,14 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Optional;
+import java.util.OptionalInt;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 public abstract class RobotKeywordCallExtension extends RobotStubPsiElementBase<RobotKeywordCallStub, RobotKeywordCall> implements RobotKeywordCall {
 
     private static final Key<CachedValue<Collection<DefinedParameter>>> AVAILABLE_KEYWORD_PARAMETERS_KEY = Key.create("AVAILABLE_KEYWORD_PARAMETERS_KEY");
-    private static final Key<CachedValue<Optional<Integer>>> START_OF_KEYWORDS_ONLY_INDEX_KEY = Key.create("START_OF_KEYWORDS_ONLY_INDEX_KEY");
+    private static final Key<CachedValue<OptionalInt>> START_OF_KEYWORDS_ONLY_INDEX_KEY = Key.create("START_OF_KEYWORDS_ONLY_INDEX_KEY");
 
     private Collection<RobotArgument> allCallArguments;
 
@@ -133,24 +133,24 @@ public abstract class RobotKeywordCallExtension extends RobotStubPsiElementBase<
     }
 
     @Override
-    public Optional<Integer> getStartOfKeywordsOnlyIndex() {
+    public OptionalInt getStartOfKeywordsOnlyIndex() {
         PsiElement reference = getKeywordCallName().getReference().resolve();
         if (reference instanceof RobotUserKeywordStatement userKeywordStatement) {
             return CachedValuesManager.getCachedValue(userKeywordStatement, START_OF_KEYWORDS_ONLY_INDEX_KEY, () -> {
-                Optional<Integer> startOfKeywordsOnlyIndexOpt = computeKeywordsOnlyStartIndexFor(userKeywordStatement);
+                OptionalInt startOfKeywordsOnlyIndexOpt = computeKeywordsOnlyStartIndexFor(userKeywordStatement);
                 return Result.createSingleDependency(startOfKeywordsOnlyIndexOpt, userKeywordStatement);
             });
         } else if (reference instanceof PyFunction pyFunction) {
             return CachedValuesManager.getCachedValue(reference, START_OF_KEYWORDS_ONLY_INDEX_KEY, () -> {
-                Optional<Integer> startOfKeywordsOnlyIndexOpt = computeKeywordsOnlyStartIndexFor(pyFunction);
+                OptionalInt startOfKeywordsOnlyIndexOpt = computeKeywordsOnlyStartIndexFor(pyFunction);
                 return Result.createSingleDependency(startOfKeywordsOnlyIndexOpt, pyFunction);
             });
         }
-        return Optional.empty();
+        return OptionalInt.empty();
     }
 
     @NotNull
-    private static Optional<Integer> computeKeywordsOnlyStartIndexFor(RobotUserKeywordStatement userKeywordStatement) {
+    private static OptionalInt computeKeywordsOnlyStartIndexFor(RobotUserKeywordStatement userKeywordStatement) {
         Integer startOfKeywordsOnlyIndex = null;
         List<RobotLocalArgumentsSetting> argumentsSettings = userKeywordStatement.getLocalArgumentsSettingList();
         if (!argumentsSettings.isEmpty()) {
@@ -161,12 +161,12 @@ public abstract class RobotKeywordCallExtension extends RobotStubPsiElementBase<
                 startOfKeywordsOnlyIndex = visitor.keywordsOnlyIndex;
             }
         }
-        return Optional.ofNullable(startOfKeywordsOnlyIndex);
+        return startOfKeywordsOnlyIndex != null ? OptionalInt.of(startOfKeywordsOnlyIndex) : OptionalInt.empty();
     }
 
     @NotNull
     @SuppressWarnings("UnstableApiUsage")
-    private static Optional<Integer> computeKeywordsOnlyStartIndexFor(PyFunction pyFunction) {
+    private static OptionalInt computeKeywordsOnlyStartIndexFor(PyFunction pyFunction) {
         PyParameterList parameterList = pyFunction.getParameterList();
 
         Integer startOfKeywordsOnlyIndex = null;
@@ -184,7 +184,7 @@ public abstract class RobotKeywordCallExtension extends RobotStubPsiElementBase<
                 }
             }
         }
-        return Optional.ofNullable(startOfKeywordsOnlyIndex);
+        return startOfKeywordsOnlyIndex != null ? OptionalInt.of(startOfKeywordsOnlyIndex) : OptionalInt.empty();
     }
 
     @Override

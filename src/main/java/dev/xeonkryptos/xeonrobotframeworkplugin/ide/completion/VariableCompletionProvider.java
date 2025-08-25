@@ -31,6 +31,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
 import java.util.Optional;
+import java.util.OptionalInt;
 import java.util.Set;
 
 class VariableCompletionProvider extends CompletionProvider<CompletionParameters> {
@@ -47,9 +48,9 @@ class VariableCompletionProvider extends CompletionProvider<CompletionParameters
         PsiElement psiElement = parameters.getPosition();
         RobotStatement parentOfInterest = PsiTreeUtil.getParentOfType(psiElement, RobotParameter.class, RobotKeywordCall.class);
         if (parentOfInterest instanceof RobotKeywordCall keywordCall) {
-            Optional<Integer> startOfKeywordsOnlyIndex = keywordCall.getStartOfKeywordsOnlyIndex();
+            OptionalInt startOfKeywordsOnlyIndex = keywordCall.getStartOfKeywordsOnlyIndex();
             if (startOfKeywordsOnlyIndex.isPresent()) {
-                int keywordsOnlyStartIndex = startOfKeywordsOnlyIndex.get();
+                int keywordsOnlyStartIndex = startOfKeywordsOnlyIndex.getAsInt();
                 if (keywordsOnlyStartIndex == 0) {
                     // As easy as that. With keywords only starting at 0 means, no variables are allowed when a parameter is expected
                     return;

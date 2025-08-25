@@ -1,7 +1,7 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.psi.element;
 
 import java.util.Collection;
-import java.util.Optional;
+import java.util.OptionalInt;
 
 public interface RobotKeywordCallExpression {
 
@@ -15,5 +15,5 @@ public interface RobotKeywordCallExpression {
 
     Collection<RobotArgument> getAllCallArguments();
 
-    Optional<Integer> getStartOfKeywordsOnlyIndex();
+    OptionalInt getStartOfKeywordsOnlyIndex();
 }
