@@ -145,7 +145,10 @@
         <readWriteAccessDetector implementation="dev.xeonkryptos.xeonrobotframeworkplugin.ide.misc.RobotReadWriteAccessDetector"/>
         <lang.namesValidator language="Robot" implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.ide.rename.RobotNamesValidator"/>
 
-        <renamePsiElementProcessor implementation="dev.xeonkryptos.xeonrobotframeworkplugin.ide.rename.RenameRobotKeywordCallElementProcessor"/>
+        <renamePsiElementProcessor implementation="dev.xeonkryptos.xeonrobotframeworkplugin.ide.rename.RenameRobotPyFunctionProcessor"
+                                   order="first, before pyvar"/>
+        <renamePsiElementProcessor implementation="dev.xeonkryptos.xeonrobotframeworkplugin.ide.rename.RenameRobotKeywordCallElementProcessor"
+                                   order="first, before pyvar"/>
         <renameHandler implementation="dev.xeonkryptos.xeonrobotframeworkplugin.ide.rename.RobotMemberInplaceRenameHandler"/>
     </extensions>
     <actions>
