@@ -59,4 +59,10 @@ public class RobotLibraryImportGlobalSettingImpl extends RobotGlobalSettingState
     return notNullChild(findChildByType(LIBRARY_IMPORT_KEYWORD));
   }
 
+  @Override
+  @Nullable
+  public PsiElement getLibraryNameElement() {
+    return findChildByType(WITH_NAME);
+  }
+
 }

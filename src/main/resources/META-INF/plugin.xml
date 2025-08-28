@@ -103,7 +103,20 @@
                          groupKey="INSP.GROUP.complexity" enabledByDefault="true" level="WARNING" dumbAware="true"
                          implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.ide.inspections.complexity.RobotNestedVariable"/>
         <!-- Inspections: Deprecated -->
-        <!-- TODO: inspection: warn: deprecated settings; '*** user keywords ***', timeout, etc -->
+        <localInspection language="Robot" shortName="RobotDeprecatedSectionsNaming" bundle="messages.RobotBundle" key="INSP.NAME.deprecated.sections.naming"
+                         groupPath="Robot" groupKey="INSP.GROUP.deprecated" enabledByDefault="true" level="WARNING" dumbAware="true"
+                         implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.ide.inspections.deprecation.RobotDeprecatedSectionsNamingInspection"/>
+        <localInspection language="Robot" shortName="RobotDeprecatedGlobalSettingsNaming" bundle="messages.RobotBundle"
+                         key="INSP.NAME.deprecated.settings.global"
+                         groupPath="Robot" groupKey="INSP.GROUP.deprecated" enabledByDefault="true" level="WARNING" dumbAware="true"
+                         implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.ide.inspections.deprecation.RobotDeprecatedGlobalSettingsInspection"/>
+        <localInspection language="Robot" shortName="RobotDeprecatedWithName" bundle="messages.RobotBundle" key="INSP.NAME.deprecated.import.with-name"
+                         groupPath="Robot" groupKey="INSP.GROUP.deprecated" enabledByDefault="true" level="WARNING" dumbAware="true"
+                         implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.ide.inspections.deprecation.RobotDeprecatedWithNameInspection"/>
+        <localInspection language="Robot" shortName="RobotDeprecatedKeywordSettings" bundle="messages.RobotBundle" key="INSP.NAME.deprecated.settings.local"
+                         groupPath="Robot" groupKey="INSP.GROUP.deprecated" enabledByDefault="true" level="WARNING" dumbAware="true"
+                         implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.ide.inspections.deprecation.RobotDeprecatedKeywordSettingsInspection"/>
+
         <runConfigurationProducer implementation="dev.xeonkryptos.xeonrobotframeworkplugin.ide.execution.config.RobotRunConfigurationProducer"/>
         <runLineMarkerContributor language="Robot" id="gradleGroovyRunLineMarkerProvider"
                                   implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.ide.execution.RobotRunLineMarkerProvider"/>

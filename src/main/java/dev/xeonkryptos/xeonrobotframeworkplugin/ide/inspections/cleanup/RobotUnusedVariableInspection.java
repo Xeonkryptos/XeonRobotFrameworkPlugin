@@ -6,6 +6,7 @@ import com.intellij.codeInspection.LocalInspectionTool;
 import com.intellij.codeInspection.LocalInspectionToolSession;
 import com.intellij.codeInspection.ProblemHighlightType;
 import com.intellij.codeInspection.ProblemsHolder;
+import com.intellij.openapi.project.DumbAware;
 import com.intellij.openapi.util.Key;
 import com.intellij.psi.PsiElementVisitor;
 import dev.xeonkryptos.xeonrobotframeworkplugin.RobotBundle;
@@ -18,7 +19,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class RobotUnusedVariableInspection extends LocalInspectionTool {
+public class RobotUnusedVariableInspection extends LocalInspectionTool implements DumbAware {
 
     private static final Key<RobotVariableUsageVisitor> VARIABLE_USAGE_VISITOR_KEY = Key.create("ROBOT_VARIABLE_USAGE_VISITOR");
 

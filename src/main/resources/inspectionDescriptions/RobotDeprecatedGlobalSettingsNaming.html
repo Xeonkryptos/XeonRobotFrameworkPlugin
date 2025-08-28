@@ -1,0 +1,28 @@
+<html lang="en">
+    <body>
+        <p>
+            Reports usage of deprecated global settings 'Default Tags' and 'Force Tags' in Robot Framework files.
+        </p>
+        <p>
+            These global settings have been deprecated since Robot Framework 6.1.0:
+        </p>
+        <ul>
+            <li><strong>Force Tags:</strong> Should be replaced with the new <code>Test Tags</code> setting</li>
+            <li><strong>Default Tags:</strong> Has been removed without replacement</li>
+        </ul>
+        <p>
+            Example of deprecated usage:
+        </p>
+        <pre><code>*** Settings ***
+Force Tags      smoke
+Default Tags    regression</code></pre>
+        <p>
+            Should be updated to:
+        </p>
+        <pre><code>*** Settings ***
+Test Tags       smoke
+# Default Tags has no replacement - remove or handle differently</code></pre>
+        <!-- tooltip end -->
+        <p>This inspection helps maintain compatibility with newer versions of Robot Framework by identifying outdated global setting names.</p>
+    </body>
+</html>

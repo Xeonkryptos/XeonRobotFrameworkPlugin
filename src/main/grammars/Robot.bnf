@@ -74,7 +74,7 @@ global_setting_statement ::= library_import_global_setting
     | unknown_setting_statements_global_setting
 
 library_import_global_setting ::= LIBRARY_IMPORT_KEYWORD positional_argument (parameter | positional_argument)* (WITH_NAME new_library_name)? eol_marker {
-    methods=[importedFile="/positional_argument[0]" nameElement="LIBRARY_IMPORT_KEYWORD"]
+    methods=[importedFile="/positional_argument[0]" nameElement="LIBRARY_IMPORT_KEYWORD" libraryNameElement="WITH_NAME"]
 }
 new_library_name ::= LITERAL_CONSTANT
 resource_import_global_setting ::= RESOURCE_IMPORT_KEYWORD positional_argument eol_marker {

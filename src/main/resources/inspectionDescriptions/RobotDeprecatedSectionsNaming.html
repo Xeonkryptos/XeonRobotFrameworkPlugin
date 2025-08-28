@@ -1,0 +1,38 @@
+<html lang="en">
+    <body>
+        Reports deprecated section naming conventions in Robot Framework files.
+        <p>
+            This inspection detects the use of deprecated section headers like `*** Test Case ***` (singular)
+            instead of the recommended `*** Test Cases ***` (plural) format. It helps maintain consistency
+            with current Robot Framework best practices and ensures compatibility with newer versions.
+        </p>
+        <p>
+            The inspection will highlight deprecated section names such as:
+        </p>
+        <ul>
+            <li><code>*** Test Case ***</code> → should be <code>*** Test Cases ***</code></li>
+            <li><code>*** Keyword ***</code> → should be <code>*** Keywords ***</code></li>
+            <li><code>*** Setting ***</code> → should be <code>*** Settings ***</code></li>
+            <li><code>*** Variable ***</code> → should be <code>*** Variables ***</code></li>
+        </ul>
+        <p>
+            Example of deprecated usage:
+        </p>
+        <pre><code>*** Setting ***
+Library    Collections
+
+*** Variable ***
+${NAME}    Example
+
+*** Test Case ***
+My Test
+    Log    Hello World
+
+*** Keyword ***
+My Keyword
+    Log    Custom keyword
+</code></pre>
+        <!-- tooltip end -->
+        <p>This inspection helps modernize Robot Framework test files by identifying outdated section naming conventions.</p>
+    </body>
+</html>

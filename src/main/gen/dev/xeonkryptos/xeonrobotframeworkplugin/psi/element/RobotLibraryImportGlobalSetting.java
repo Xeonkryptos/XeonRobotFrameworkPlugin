@@ -22,4 +22,7 @@ public interface RobotLibraryImportGlobalSetting extends RobotGlobalSettingState
   @NotNull
   PsiElement getNameElement();
 
+  @Nullable
+  PsiElement getLibraryNameElement();
+
 }

@@ -4,7 +4,9 @@ import com.intellij.openapi.components.Service
 import com.intellij.openapi.components.service
 import com.intellij.openapi.module.ModuleUtilCore
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.util.Key
 import com.intellij.psi.PsiElement
+import com.intellij.psi.util.CachedValue
 import com.intellij.psi.util.CachedValueProvider
 import com.intellij.psi.util.CachedValuesManager
 import com.intellij.psi.util.PsiModificationTracker
@@ -17,13 +19,15 @@ class RobotVersionProvider {
         fun getInstance(project: Project): RobotVersionProvider = project.service()
 
         private val ROBOT_FRAMEWORK_VERSION_REGEX = Regex("""(\d+)\.(\d+)\.(\d+)""")
+
+        val ROBOT_VERSION_CACHE_KEY: Key<CachedValue<RobotVersion?>?> = Key.create("ROBOT_VERSION_KEY")
     }
 
     fun getRobotVersion(sourceElement: PsiElement): RobotVersion? {
         val sdk = RobotLocalProcessExecutor.findPythonSdk(sourceElement)
         if (sdk == null || sdk.homePath == null) return null
 
-        return CachedValuesManager.getCachedValue(sourceElement) {
+        return CachedValuesManager.getCachedValue(sourceElement, ROBOT_VERSION_CACHE_KEY) {
             val processArguments = mutableListOf(sdk.homePath!!, "-m", "robot", "--version")
 
             val processBuilder = ProcessBuilder(processArguments)
@@ -47,7 +51,7 @@ class RobotVersionProvider {
     data class RobotVersion(val major: Int, val minor: Int, val patch: Int) {
 
         fun supports(version: RobotVersion): Boolean {
-            return this.major >= version.major && this.minor >= version.minor && this.patch >= version.patch
+            return major > version.major || major == version.major && minor > version.minor || major == version.major && minor == version.minor && patch >= version.patch
         }
     }
 }

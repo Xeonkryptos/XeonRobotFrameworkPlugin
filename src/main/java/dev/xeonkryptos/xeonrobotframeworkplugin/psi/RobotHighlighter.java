@@ -28,13 +28,14 @@ public class RobotHighlighter extends SyntaxHighlighterBase {
                                                                                                           DefaultLanguageHighlighterColors.HIGHLIGHTED_REFERENCE);
     public static final TextAttributesKey KEYWORD_DEFINITION = TextAttributesKey.createTextAttributesKey("User Keyword Definition",
                                                                                                          DefaultLanguageHighlighterColors.KEYWORD);
-    public static final TextAttributesKey KEYWORD = TextAttributesKey.createTextAttributesKey("Keyword Usage",
-                                                                                              DefaultLanguageHighlighterColors.FUNCTION_CALL);
+    public static final TextAttributesKey KEYWORD = TextAttributesKey.createTextAttributesKey("Keyword Usage", DefaultLanguageHighlighterColors.FUNCTION_CALL);
     public static final TextAttributesKey PARAMETER = TextAttributesKey.createTextAttributesKey("Parameter", DefaultLanguageHighlighterColors.PARAMETER);
     public static final TextAttributesKey ARGUMENT = TextAttributesKey.createTextAttributesKey("Positional Argument",
                                                                                                DefaultLanguageHighlighterColors.STATIC_FIELD);
     public static final TextAttributesKey VARIABLE = TextAttributesKey.createTextAttributesKey("Variable Usage",
                                                                                                DefaultLanguageHighlighterColors.DOC_COMMENT_MARKUP);
+    public static final TextAttributesKey VARIABLE_DEFINITION = TextAttributesKey.createTextAttributesKey("Variable Definition",
+                                                                                                          DefaultLanguageHighlighterColors.DOC_COMMENT_MARKUP);
     public static final TextAttributesKey EXTENDED_VARIABLE_ACCESS_BRACKETS = TextAttributesKey.createTextAttributesKey("Extended Variable Brackets",
                                                                                                                         DefaultLanguageHighlighterColors.BRACKETS);
     public static final TextAttributesKey COMMENT = TextAttributesKey.createTextAttributesKey("Comment", DefaultLanguageHighlighterColors.LINE_COMMENT);
@@ -89,6 +90,7 @@ public class RobotHighlighter extends SyntaxHighlighterBase {
         keys1.put(RobotTypes.CONTINUE, SYNTAX_MARKER);
         keys1.put(RobotTypes.WITH_NAME, SYNTAX_MARKER);
 
+        keys1.put(RobotTypes.VARIABLE_DEFINITION, VARIABLE_DEFINITION);
         keys1.put(RobotTypes.SCALAR_VARIABLE_START, VARIABLE);
         keys1.put(RobotTypes.LIST_VARIABLE_START, VARIABLE);
         keys1.put(RobotTypes.DICT_VARIABLE_START, VARIABLE);

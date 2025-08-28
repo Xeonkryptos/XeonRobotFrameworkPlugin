@@ -1,0 +1,18 @@
+<html lang="en">
+    <body>
+        Reports usage of the deprecated 'WITH NAME' suffix in Robot Framework library imports.
+        <p>
+            The 'WITH NAME' suffix was deprecated in Robot Framework 6.0.0 and should be replaced with the 'AS' suffix for better consistency and readability.
+        </p>
+        <p>
+            Example of deprecated syntax:
+        </p>
+        <pre><code>Library    MyLibrary    WITH NAME    MyLib</code></pre>
+        <p>
+            Should be replaced with:
+        </p>
+        <pre><code>Library    MyLibrary    AS    MyLib</code></pre>
+        <!-- tooltip end -->
+        <p>This inspection only triggers when Robot Framework version 6.0.0 or higher is detected in your project.</p>
+    </body>
+</html>

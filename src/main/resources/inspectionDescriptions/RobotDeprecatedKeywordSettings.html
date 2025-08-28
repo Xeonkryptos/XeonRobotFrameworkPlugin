@@ -1,0 +1,24 @@
+<html lang="en">
+    <body>
+        Detects deprecated keyword settings in Robot Framework code and suggests modern alternatives.
+        <p>
+            This inspection identifies the deprecated `[Return]` setting in user keywords, which has been superseded by the `RETURN` statement since Robot Framework 7.0.0. Using the modern syntax improves code readability and follows current best practices.
+        </p>
+        <p>
+            Example of deprecated usage:
+        </p>
+        <pre><code>My Keyword
+    [Arguments]    ${arg}
+    [Return]       ${result}    # deprecated
+</code></pre>
+        <p>
+            Should be replaced with:
+        </p>
+        <pre><code>My Keyword
+    [Arguments]    ${arg}
+    RETURN         ${result}    # modern syntax
+</code></pre>
+        <!-- tooltip end -->
+        <p>This inspection only triggers when Robot Framework version 7.0.0 or later is detected in the project.</p>
+    </body>
+</html>

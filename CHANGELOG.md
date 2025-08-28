@@ -4,6 +4,10 @@
 
 ## Unreleased
 
+### Added
+
+- New inspections for deprecated Robot features like Force Tags, Default Tags, \[Return], etc.
+
 ## 0.5.0
 
 ### Added

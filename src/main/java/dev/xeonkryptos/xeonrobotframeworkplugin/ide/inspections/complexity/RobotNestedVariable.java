@@ -2,13 +2,14 @@ package dev.xeonkryptos.xeonrobotframeworkplugin.ide.inspections.complexity;
 
 import com.intellij.codeInspection.LocalInspectionTool;
 import com.intellij.codeInspection.ProblemsHolder;
+import com.intellij.openapi.project.DumbAware;
 import com.intellij.psi.PsiElementVisitor;
 import dev.xeonkryptos.xeonrobotframeworkplugin.RobotBundle;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariable;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVisitor;
 import org.jetbrains.annotations.NotNull;
 
-public class RobotNestedVariable extends LocalInspectionTool {
+public class RobotNestedVariable extends LocalInspectionTool implements DumbAware {
 
     @Override
     public @NotNull PsiElementVisitor buildVisitor(@NotNull ProblemsHolder holder, boolean isOnTheFly) {
