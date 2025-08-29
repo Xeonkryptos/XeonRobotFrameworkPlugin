@@ -237,7 +237,7 @@ public class RobotFileImpl extends PsiFileBase implements KeywordFile, RobotFile
     private void addBuiltInImports(@NotNull Collection<KeywordFile> files) {
         PyClass builtIn = PythonResolver.findClass(GlobalConstants.ROBOT_BUILT_IN, getProject());
         if (builtIn != null) {
-            files.add(new RobotPythonClass(GlobalConstants.ROBOT_BUILT_IN, builtIn, ImportType.LIBRARY));
+            files.add(new RobotPythonClass(null, builtIn, ImportType.LIBRARY));
         }
     }
 
