@@ -27,7 +27,12 @@ public abstract class RobotStubPsiElementBase<T extends StubElement<P>, P extend
 
             @Override
             public String getPresentableText() {
-                return RobotStubPsiElementBase.this.getText();
+                String name = RobotStubPsiElementBase.this.getName();
+                if (name == null) {
+                    String text = getText();
+                    return text.lines().findFirst().orElse(null);
+                }
+                return name;
             }
 
             @Override

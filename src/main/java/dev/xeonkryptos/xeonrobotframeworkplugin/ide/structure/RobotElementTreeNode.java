@@ -4,6 +4,8 @@ import com.intellij.ide.projectView.PresentationData;
 import com.intellij.ide.projectView.ViewSettings;
 import com.intellij.ide.projectView.impl.nodes.BasePsiNode;
 import com.intellij.ide.util.treeView.AbstractTreeNode;
+import com.intellij.navigation.ItemPresentation;
+import com.intellij.navigation.NavigationItem;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiElement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotGlobalSettingStatement;
@@ -31,7 +33,16 @@ public class RobotElementTreeNode extends BasePsiNode<PsiElement> {
     protected void updateImpl(@NotNull PresentationData data) {
         PsiElement element = getValue();
         if (element != null) {
-            String presentableText = element.getText();
+            String presentableText = null;
+            if (element instanceof NavigationItem navigationItem) {
+                ItemPresentation presentation = navigationItem.getPresentation();
+                if (presentation != null) {
+                    presentableText = presentation.getPresentableText();
+                }
+            }
+            if (presentableText == null) {
+                presentableText = element.getText().lines().findFirst().orElse("");
+            }
             data.setPresentableText(presentableText);
             data.setIcon(type.getIcon(element));
         }

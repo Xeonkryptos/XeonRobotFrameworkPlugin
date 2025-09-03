@@ -22,7 +22,11 @@ public abstract class RobotPsiElementBase extends ASTWrapperPsiElement implement
             @Override
             public String getPresentableText() {
                 String name = RobotPsiElementBase.this.getName();
-                return name != null ? name : getText();
+                if (name == null) {
+                    String text = getText();
+                    return text.lines().findFirst().orElse(null);
+                }
+                return name;
             }
 
             @Override

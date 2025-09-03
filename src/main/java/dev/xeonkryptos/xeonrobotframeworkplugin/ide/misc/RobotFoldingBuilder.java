@@ -59,7 +59,7 @@ public class RobotFoldingBuilder extends FoldingBuilderEx implements DumbAware {
     private Collection<FoldingDescriptor> processDescriptors(Collection<FoldingDescriptor> descriptors) {
         List<FoldingDescriptor> descriptorsCopy = new ArrayList<>(descriptors);
         int count = 0;
-        LinkedList<LinkedList<FoldingDescriptor>> groupedComments = new LinkedList<>();
+        List<LinkedList<FoldingDescriptor>> groupedComments = new LinkedList<>();
 
         for (FoldingDescriptor descriptor : descriptors) {
             if (descriptor.getElement().getElementType() == RobotTypes.COMMENT) {
@@ -77,7 +77,7 @@ public class RobotFoldingBuilder extends FoldingBuilderEx implements DumbAware {
             }
         }
 
-        for (LinkedList<FoldingDescriptor> group : groupedComments) {
+        for (List<FoldingDescriptor> group : groupedComments) {
             if (group.size() > 1) {
                 TextRange combinedRange = null;
                 for (FoldingDescriptor descriptor : group) {
@@ -172,7 +172,11 @@ public class RobotFoldingBuilder extends FoldingBuilderEx implements DumbAware {
     public String getPlaceholderText(@NotNull ASTNode node) {
         ItemPresentation presentation;
         if ((presentation = ((NavigationItem) node.getPsi()).getPresentation()) != null) {
-            return CONTROL_STRUCTURE_TOKENS.contains(node.getElementType()) ? presentation.getPresentableText() + " ..." : presentation.getPresentableText();
+            String presentableText = presentation.getPresentableText();
+            if (CONTROL_STRUCTURE_TOKENS.contains(node.getElementType())) {
+                return presentableText + " ...";
+            }
+            return presentableText;
         } else {
             return GlobalConstants.ELLIPSIS;
         }
