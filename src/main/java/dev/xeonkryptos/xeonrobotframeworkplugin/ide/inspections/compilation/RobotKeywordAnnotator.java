@@ -12,6 +12,9 @@ import com.jetbrains.python.psi.PyElementVisitor;
 import dev.xeonkryptos.xeonrobotframeworkplugin.RobotBundle;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCall;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCallName;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLocalSetting;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotStatement;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTemplateStatementsGlobalSetting;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.ref.PyElementDeprecatedVisitor;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.ref.PyElementParentTraversalVisitor;
 import org.jetbrains.annotations.NotNull;
@@ -44,11 +47,14 @@ public class RobotKeywordAnnotator implements Annotator {
 
         RobotKeywordCall keywordCall = PsiTreeUtil.getParentOfType(robotKeywordCallName, RobotKeywordCall.class);
         if (keywordCall != null && !keywordCall.allRequiredParametersArePresent()) {
-            String missingRequiredParameters = String.join(", ", keywordCall.computeMissingRequiredParameters());
-            holder.newAnnotation(HighlightSeverity.ERROR, RobotBundle.getMessage("annotation.keyword.parameters.missing", missingRequiredParameters))
-                  .highlightType(ProblemHighlightType.GENERIC_ERROR)
-                  .range(robotKeywordCallName)
-                  .create();
+            RobotStatement ignoringParameterCheckParent = PsiTreeUtil.getParentOfType(keywordCall, true, RobotLocalSetting.class, RobotTemplateStatementsGlobalSetting.class);
+            if (ignoringParameterCheckParent == null) {
+                String missingRequiredParameters = String.join(", ", keywordCall.computeMissingRequiredParameters());
+                holder.newAnnotation(HighlightSeverity.ERROR, RobotBundle.getMessage("annotation.keyword.parameters.missing", missingRequiredParameters))
+                      .highlightType(ProblemHighlightType.GENERIC_ERROR)
+                      .range(robotKeywordCallName)
+                      .create();
+            }
         }
     }
 }
