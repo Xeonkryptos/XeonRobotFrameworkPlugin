@@ -8,6 +8,10 @@
 
 - New inspections for deprecated Robot features like Force Tags, Default Tags, \[Return], etc.
 
+### Fixed
+
+- Don't complain about missing keyword parameters when defined as a template
+
 ## 0.5.0
 
 ### Added
