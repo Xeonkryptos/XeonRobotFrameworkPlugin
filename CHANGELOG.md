@@ -14,12 +14,14 @@
 ### Changed
 
 - Folding logic changed to optimize its end results (simple folding of multi-line statements, folding of sections)
+- Changed sorting of code completion results to place mandatory parameters of keywords before any optional parameter
 
 ### Fixed
 
 - Code completion that added Robot.Libraries.BuiltIn in front of robot's builtin keywords
 - Don't complain about missing keyword parameters when defined as a template
 - Added Tasks to the member structure view
+- Use the same Collator logic for parameter code completion as for parameter resolving
 
 ## 0.5.0
 

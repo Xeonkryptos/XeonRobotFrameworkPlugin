@@ -10,6 +10,7 @@ public class RobotContextLevelWeigher extends CompletionWeigher {
     private static final int PROJECT_SCOPE_WEIGHT = 1_050;
     private static final int LIBRARY_SCOPE_WEIGHT = 1_025;
     private static final int PARAMETER_WEIGHT = 1_000;
+    private static final int OPTIONAL_PARAMETER_WEIGHT = 995;
     private static final int VARIABLE_WEIGHT = 900;
     private static final int KEYWORDS_WEIGHT = 800;
 
@@ -20,7 +21,7 @@ public class RobotContextLevelWeigher extends CompletionWeigher {
         if (lookupContext == RobotLookupContext.WITHIN_KEYWORD_STATEMENT) {
             RobotLookupElementType lookupElementType = element.getUserData(CompletionKeys.ROBOT_LOOKUP_ELEMENT_TYPE);
             if (lookupElementType == RobotLookupElementType.PARAMETER || lookupElementType == RobotLookupElementType.ARGUMENT) {
-                return PARAMETER_WEIGHT;
+                return Boolean.TRUE.equals(element.getUserData(CompletionKeys.ROBOT_REQUIRED_VALUE)) ? PARAMETER_WEIGHT : OPTIONAL_PARAMETER_WEIGHT;
             }
             return VARIABLE_WEIGHT;
         }

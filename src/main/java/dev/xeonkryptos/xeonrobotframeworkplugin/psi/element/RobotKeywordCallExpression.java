@@ -11,6 +11,8 @@ public interface RobotKeywordCallExpression {
 
     Collection<String> computeMissingRequiredParameters();
 
+    Collection<DefinedParameter> computeMissingParameters();
+
     Collection<DefinedParameter> getAvailableParameters();
 
     Collection<RobotArgument> getAllCallArguments();

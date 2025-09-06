@@ -97,30 +97,43 @@ public abstract class RobotKeywordCallExtension extends RobotStubPsiElementBase<
     @Override
     public Collection<String> computeMissingRequiredParameters() {
         Set<String> definedParameters = getParameterList().stream().map(RobotParameter::getParameterName).collect(Collectors.toCollection(LinkedHashSet::new));
-        Collection<String> requiredParameterNames = getAvailableParameters().stream()
-                                                                            .filter(param -> !param.hasDefaultValue() && !param.isKeywordContainer())
-                                                                            .map(DefinedParameter::getLookup)
-                                                                            .collect(Collectors.toCollection(LinkedHashSet::new));
+        Collection<DefinedParameter> requiredParameterNames = getAvailableParameters().stream()
+                                                                                      .filter(param -> !param.hasDefaultValue() && !param.isKeywordContainer())
+                                                                                      .collect(Collectors.toCollection(LinkedHashSet::new));
+        removeMatchingParameters(definedParameters, getAvailableParameters());
+        int missingParameterCount = requiredParameterNames.size() - getPositionalArgumentList().size();
+        if (missingParameterCount <= 0) {
+            return List.of();
+        }
+        return requiredParameterNames.stream().map(DefinedParameter::getLookup).collect(Collectors.toCollection(LinkedHashSet::new));
+    }
 
+    @Override
+    public Collection<DefinedParameter> computeMissingParameters() {
+        Set<String> definedParameters = getParameterList().stream().map(RobotParameter::getParameterName).collect(Collectors.toCollection(LinkedHashSet::new));
+        Collection<DefinedParameter> availableParameters = new LinkedHashSet<>(getAvailableParameters());
+        removeMatchingParameters(definedParameters, getAvailableParameters());
+        return availableParameters;
+    }
+
+    private void removeMatchingParameters(Set<String> definedParameters, Collection<? extends DefinedParameter> availableParameters) {
         RobotOptionsProvider robotOptionsProvider = RobotOptionsProvider.getInstance(getProject());
         Collator parameterNameCollator = robotOptionsProvider.getParameterNameCollator();
 
         Iterator<String> definedParamsIterator = definedParameters.iterator();
         while (definedParamsIterator.hasNext()) {
             String definedParamName = definedParamsIterator.next();
-            for (String requiredParameterName : requiredParameterNames) {
-                if (parameterNameCollator.equals(definedParamName, requiredParameterName)) {
+            Iterator<? extends DefinedParameter> availableParamsIterator = availableParameters.iterator();
+            while (availableParamsIterator.hasNext()) {
+                DefinedParameter availableParameter = availableParamsIterator.next();
+                String availableParameterName = availableParameter.getLookup();
+                if (parameterNameCollator.equals(definedParamName, availableParameterName)) {
                     definedParamsIterator.remove();
-                    requiredParameterNames.remove(requiredParameterName);
+                    availableParamsIterator.remove();
                     break;
                 }
             }
         }
-        int missingParameterCount = requiredParameterNames.size() - getPositionalArgumentList().size();
-        if (missingParameterCount <= 0) {
-            return List.of();
-        }
-        return requiredParameterNames;
     }
 
     @Override
