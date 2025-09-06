@@ -54,6 +54,17 @@ public enum RobotViewElementType {
         protected String getMessage() {
             return RobotBundle.getMessage("action.structureView.show.testCases");
         }
+    }, Task {
+        @Override
+        protected Icon getIcon(@Nullable PsiElement element) {
+            return RobotIcons.APPLICATION;
+        }
+
+        @NotNull
+        @Override
+        protected String getMessage() {
+            return RobotBundle.getMessage("action.structureView.show.tasks");
+        }
     }, Keyword {
         @Override
         protected Icon getIcon(@Nullable PsiElement element) {

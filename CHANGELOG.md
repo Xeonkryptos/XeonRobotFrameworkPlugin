@@ -12,6 +12,7 @@
 
 - Code completion that added Robot.Libraries.BuiltIn in front of robot's builtin keywords
 - Don't complain about missing keyword parameters when defined as a template
+- Added Tasks to the member structure view
 
 ## 0.5.0
 

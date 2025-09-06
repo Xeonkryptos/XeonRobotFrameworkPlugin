@@ -11,6 +11,7 @@ import com.intellij.psi.PsiElement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotGlobalSettingStatement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCall;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotSection;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTaskStatement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTestCaseStatement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotUserKeywordStatement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableDefinition;
@@ -69,6 +70,10 @@ public class RobotElementTreeNode extends BasePsiNode<PsiElement> {
 
         for (RobotTestCaseStatement testCase : treeNodeCollector.getTestCases()) {
             children.add(new RobotElementTreeNode(getProject(), testCase, getSettings(), RobotViewElementType.TestCase));
+        }
+
+        for (RobotTaskStatement task : treeNodeCollector.getTasks()) {
+            children.add(new RobotElementTreeNode(getProject(), task, getSettings(), RobotViewElementType.Task));
         }
 
         for (RobotVariableDefinition variableDefinition : treeNodeCollector.getVariableDefinitions()) {

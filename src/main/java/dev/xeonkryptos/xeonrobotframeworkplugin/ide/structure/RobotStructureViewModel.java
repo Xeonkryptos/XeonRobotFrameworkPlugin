@@ -17,6 +17,7 @@ import org.jetbrains.annotations.Nullable;
 public class RobotStructureViewModel extends StructureViewModelBase implements ElementInfoProvider, ExpandInfoProvider {
 
     private static final Filter[] FILTERS = new Filter[] { new RobotTypeFilter("SHOW_TEST_CASES", RobotViewElementType.TestCase),
+                                                           new RobotTypeFilter("SHOW_TASKS", RobotViewElementType.Task),
                                                            new RobotTypeFilter("SHOW_KEYWORDS", RobotViewElementType.Keyword),
                                                            new RobotTypeFilter("SHOW_VARIABLES", RobotViewElementType.Variable),
                                                            new RobotTypeFilter("SHOW_SETTINGS", RobotViewElementType.Settings),

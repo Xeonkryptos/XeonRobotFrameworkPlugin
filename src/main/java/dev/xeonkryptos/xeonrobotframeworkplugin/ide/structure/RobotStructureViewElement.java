@@ -12,6 +12,7 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotFile;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotGlobalSettingStatement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCall;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotSection;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTaskStatement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTestCaseStatement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotUserKeywordStatement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableDefinition;
@@ -24,8 +25,6 @@ import java.util.Collection;
 import java.util.List;
 
 public class RobotStructureViewElement implements StructureViewTreeElement {
-
-    private static final String UNKNOWN = "Unknown";
 
     private final PsiElement element;
     private final RobotViewElementType type;
@@ -105,6 +104,10 @@ public class RobotStructureViewElement implements StructureViewTreeElement {
             elements.add(createChild(testCase, RobotViewElementType.TestCase));
         }
 
+        for (RobotTaskStatement task : collector.getTasks()) {
+            elements.add(createChild(task, RobotViewElementType.Task));
+        }
+
         for (RobotVariableDefinition variableDefinition : collector.getVariableDefinitions()) {
             elements.add(createChild(variableDefinition, RobotViewElementType.Variable));
         }
@@ -125,7 +128,7 @@ public class RobotStructureViewElement implements StructureViewTreeElement {
                 return name;
             }
         }
-        return UNKNOWN;
+        return "Unknown";
     }
 
     @NotNull

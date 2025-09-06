@@ -6,6 +6,7 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCall;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordsSection;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotRoot;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotSection;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTaskStatement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTasksSection;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTestCaseStatement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTestCasesSection;
@@ -24,6 +25,7 @@ final class RobotSectionElementsCollector extends RobotVisitor {
     private final Collection<RobotSection> sections = new LinkedHashSet<>();
     private final Collection<RobotGlobalSettingStatement> metadataStatements = new LinkedHashSet<>();
     private final Collection<RobotTestCaseStatement> testCases = new LinkedHashSet<>();
+    private final Collection<RobotTaskStatement> tasks = new LinkedHashSet<>();
     private final Collection<RobotVariableDefinition> variableDefinitions = new LinkedHashSet<>();
     private final Collection<RobotUserKeywordStatement> userKeywordStatements = new LinkedHashSet<>();
     private final Collection<RobotKeywordCall> keywordCalls = new LinkedHashSet<>();
@@ -75,6 +77,12 @@ final class RobotSectionElementsCollector extends RobotVisitor {
     }
 
     @Override
+    public void visitTaskStatement(@NotNull RobotTaskStatement o) {
+        super.visitTaskStatement(o);
+        tasks.add(o);
+    }
+
+    @Override
     public void visitExecutableStatement(@NotNull RobotExecutableStatement o) {
         super.visitExecutableStatement(o);
         o.acceptChildren(this);
@@ -118,6 +126,10 @@ final class RobotSectionElementsCollector extends RobotVisitor {
 
     public Collection<RobotTestCaseStatement> getTestCases() {
         return testCases;
+    }
+
+    public Collection<RobotTaskStatement> getTasks() {
+        return tasks;
     }
 
     public Collection<RobotUserKeywordStatement> getUserKeywordStatements() {
