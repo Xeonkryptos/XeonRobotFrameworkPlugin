@@ -118,6 +118,7 @@ public class RobotHighlighter extends SyntaxHighlighterBase {
         keys1.put(RobotTypes.UNKNOWN_SETTING_KEYWORD, SETTING);
 
         keys1.put(RobotTypes.LOCAL_SETTING_NAME, LOCAL_SETTING);
+        keys1.put(RobotTypes.ARGUMENTS_SETTING_NAME, LOCAL_SETTING);
 
         keys1.put(RobotTypes.LIBRARY_IMPORT_KEYWORD, IMPORT);
         keys1.put(RobotTypes.RESOURCE_IMPORT_KEYWORD, IMPORT);
