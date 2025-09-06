@@ -8,6 +8,7 @@ import com.intellij.navigation.NavigationItem;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.util.TextRange;
 import com.intellij.psi.PsiElement;
+import com.intellij.psi.TokenType;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotStatement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.util.GlobalConstants;
@@ -24,17 +25,8 @@ public class RobotFoldingBuilder extends CustomFoldingBuilder {
 
     private void appendDescriptors(PsiElement element, Document document, List<FoldingDescriptor> descriptors) {
         if (element instanceof RobotStatement) {
-            int ignorableNewLines = 0;
-            CharSequence charsSequence = document.getCharsSequence();
             TextRange textRange = element.getTextRange();
-            for (int i = textRange.getEndOffset() - 1; i >= textRange.getStartOffset(); i--) {
-                char c = charsSequence.charAt(i);
-                if (c != '\n' && c != '\r') {
-                    break;
-                }
-                ignorableNewLines++;
-            }
-            textRange = textRange.grown(-ignorableNewLines);
+            textRange = computeOptimizedTextRange(element, textRange, document);
             if (textRange.getLength() > 0) {
                 descriptors.add(new FoldingDescriptor(element, textRange));
             }
@@ -43,6 +35,41 @@ public class RobotFoldingBuilder extends CustomFoldingBuilder {
         for (PsiElement child = element.getFirstChild(); child != null; child = child.getNextSibling()) {
             appendDescriptors(child, document, descriptors);
         }
+    }
+
+    private static TextRange computeOptimizedTextRange(PsiElement element, TextRange textRange, Document document) {
+        int ignorableNewLines = 0;
+        CharSequence charsSequence = document.getCharsSequence();
+        for (int i = textRange.getEndOffset() - 1; i >= textRange.getStartOffset(); i--) {
+            char c = charsSequence.charAt(i);
+            if (c != '\n' && c != '\r') {
+                int offset = textRange.getEndOffset() - ignorableNewLines;
+                PsiElement elementAt = element.findElementAt(offset);
+                if (elementAt != null && elementAt.getNode().getElementType() == RobotTypes.EOL) {
+                    return computeTextRangeWithoutCommentsInDifferentLines(elementAt, textRange, document);
+                }
+                break;
+            }
+            // Count any new lines at the end of this element to ignore them in the folding region later on. That way, newlines which are a part of the element
+            // tree structure as children are ignored, and the folding region keeps the basic spaces/structure of the code without too much interruption.
+            ignorableNewLines++;
+        }
+        return textRange.grown(-ignorableNewLines);
+    }
+
+    private static TextRange computeTextRangeWithoutCommentsInDifferentLines(PsiElement elementAt, TextRange textRange, Document document) {
+        PsiElement prevSibling = elementAt.getPrevSibling();
+        ASTNode prevSiblingNode = prevSibling.getNode();
+        while (prevSiblingNode.getElementType() == RobotTypes.EOL || prevSiblingNode.getElementType() == TokenType.WHITE_SPACE) {
+            prevSibling = prevSibling.getPrevSibling();
+            prevSiblingNode = prevSibling.getNode();
+        }
+        int newEndOffset = prevSibling.getTextRange().getEndOffset();
+        // Look for the end offset of the current line identified as the relevant line to stop the folding region at. That way, any comment in the same line
+        // as the last relevant element is also included in the folding region. Any other comments in different lines are excluded.
+        int lineNumber = document.getLineNumber(newEndOffset);
+        newEndOffset = document.getLineEndOffset(lineNumber);
+        return new TextRange(textRange.getStartOffset(), newEndOffset);
     }
 
     @Override

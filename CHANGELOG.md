@@ -8,6 +8,10 @@
 
 - New inspections for deprecated Robot features like Force Tags, Default Tags, \[Return], etc.
 
+### Changed
+
+- Folding logic changed to optimize its end results (simple folding of multi-line statements, folding of sections)
+
 ### Fixed
 
 - Code completion that added Robot.Libraries.BuiltIn in front of robot's builtin keywords
