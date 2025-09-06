@@ -39,10 +39,11 @@ public class RobotParser implements PsiParser, LightPsiParser {
     create_token_set_(INLINE_VARIABLE_STATEMENT, KEYWORD_VARIABLE_STATEMENT, SINGLE_VARIABLE_STATEMENT),
     create_token_set_(DICT_VARIABLE, ENVIRONMENT_VARIABLE, LIST_VARIABLE, SCALAR_VARIABLE,
       VARIABLE),
-    create_token_set_(EXECUTABLE_STATEMENT, FOR_LOOP_STRUCTURE, GROUP_STRUCTURE, IF_STRUCTURE,
-      TRY_STRUCTURE, WHILE_LOOP_STRUCTURE),
     create_token_set_(COMMENTS_SECTION, KEYWORDS_SECTION, SECTION, SETTINGS_SECTION,
       TASKS_SECTION, TEST_CASES_SECTION, VARIABLES_SECTION),
+    create_token_set_(ELSE_IF_STRUCTURE, EXCEPT_STRUCTURE, EXECUTABLE_STATEMENT, FINALLY_STRUCTURE,
+      FOR_LOOP_STRUCTURE, GROUP_STRUCTURE, IF_ELSE_STRUCTURE, IF_STRUCTURE,
+      TRY_ELSE_STRUCTURE, TRY_STRUCTURE, WHILE_LOOP_STRUCTURE),
     create_token_set_(DOCUMENTATION_STATEMENT_GLOBAL_SETTING, GLOBAL_SETTING_STATEMENT, LIBRARY_IMPORT_GLOBAL_SETTING, METADATA_STATEMENT_GLOBAL_SETTING,
       RESOURCE_IMPORT_GLOBAL_SETTING, SETUP_TEARDOWN_STATEMENTS_GLOBAL_SETTING, SUITE_NAME_STATEMENT_GLOBAL_SETTING, TAGS_STATEMENT_GLOBAL_SETTING,
       TEMPLATE_STATEMENTS_GLOBAL_SETTING, TIMEOUT_STATEMENTS_GLOBAL_SETTING, UNKNOWN_SETTING_STATEMENTS_GLOBAL_SETTING, VARIABLES_IMPORT_GLOBAL_SETTING),
@@ -234,12 +235,64 @@ public class RobotParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // if_structure | try_structure | group_structure
+  // if_structure else_if_structure* if_else_structure? (END eol_marker)?
+  static boolean conditional_structure(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "conditional_structure")) return false;
+    if (!nextTokenIs(b, IF)) return false;
+    boolean r, p;
+    Marker m = enter_section_(b, l, _NONE_);
+    r = if_structure(b, l + 1);
+    p = r; // pin = 1
+    r = r && report_error_(b, conditional_structure_1(b, l + 1));
+    r = p && report_error_(b, conditional_structure_2(b, l + 1)) && r;
+    r = p && conditional_structure_3(b, l + 1) && r;
+    exit_section_(b, l, m, r, p, null);
+    return r || p;
+  }
+
+  // else_if_structure*
+  private static boolean conditional_structure_1(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "conditional_structure_1")) return false;
+    while (true) {
+      int c = current_position_(b);
+      if (!else_if_structure(b, l + 1)) break;
+      if (!empty_element_parsed_guard_(b, "conditional_structure_1", c)) break;
+    }
+    return true;
+  }
+
+  // if_else_structure?
+  private static boolean conditional_structure_2(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "conditional_structure_2")) return false;
+    if_else_structure(b, l + 1);
+    return true;
+  }
+
+  // (END eol_marker)?
+  private static boolean conditional_structure_3(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "conditional_structure_3")) return false;
+    conditional_structure_3_0(b, l + 1);
+    return true;
+  }
+
+  // END eol_marker
+  private static boolean conditional_structure_3_0(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "conditional_structure_3_0")) return false;
+    boolean r;
+    Marker m = enter_section_(b);
+    r = consumeToken(b, END);
+    r = r && eol_marker(b, l + 1);
+    exit_section_(b, m, null, r);
+    return r;
+  }
+
+  /* ********************************************************** */
+  // conditional_structure | exception_handling_structure | group_structure
   static boolean control_structure(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "control_structure")) return false;
     boolean r;
-    r = if_structure(b, l + 1);
-    if (!r) r = try_structure(b, l + 1);
+    r = conditional_structure(b, l + 1);
+    if (!r) r = exception_handling_structure(b, l + 1);
     if (!r) r = group_structure(b, l + 1);
     return r;
   }
@@ -309,6 +362,54 @@ public class RobotParser implements PsiParser, LightPsiParser {
       int c = current_position_(b);
       if (!positional_argument(b, l + 1)) break;
       if (!empty_element_parsed_guard_(b, "documentation_statement_global_setting_1", c)) break;
+    }
+    return true;
+  }
+
+  /* ********************************************************** */
+  // ELSE_IF positional_argument+ eol_marker? executable_statement*
+  public static boolean else_if_structure(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "else_if_structure")) return false;
+    if (!nextTokenIs(b, ELSE_IF)) return false;
+    boolean r;
+    Marker m = enter_section_(b);
+    r = consumeToken(b, ELSE_IF);
+    r = r && else_if_structure_1(b, l + 1);
+    r = r && else_if_structure_2(b, l + 1);
+    r = r && else_if_structure_3(b, l + 1);
+    exit_section_(b, m, ELSE_IF_STRUCTURE, r);
+    return r;
+  }
+
+  // positional_argument+
+  private static boolean else_if_structure_1(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "else_if_structure_1")) return false;
+    boolean r;
+    Marker m = enter_section_(b);
+    r = positional_argument(b, l + 1);
+    while (r) {
+      int c = current_position_(b);
+      if (!positional_argument(b, l + 1)) break;
+      if (!empty_element_parsed_guard_(b, "else_if_structure_1", c)) break;
+    }
+    exit_section_(b, m, null, r);
+    return r;
+  }
+
+  // eol_marker?
+  private static boolean else_if_structure_2(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "else_if_structure_2")) return false;
+    eol_marker(b, l + 1);
+    return true;
+  }
+
+  // executable_statement*
+  private static boolean else_if_structure_3(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "else_if_structure_3")) return false;
+    while (true) {
+      int c = current_position_(b);
+      if (!executable_statement(b, l + 1)) break;
+      if (!empty_element_parsed_guard_(b, "else_if_structure_3", c)) break;
     }
     return true;
   }
@@ -384,6 +485,108 @@ public class RobotParser implements PsiParser, LightPsiParser {
     }
     exit_section_(b, m, null, r);
     return r;
+  }
+
+  /* ********************************************************** */
+  // EXCEPT (positional_argument | parameter*)? eol_marker executable_statement*
+  public static boolean except_structure(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "except_structure")) return false;
+    if (!nextTokenIs(b, EXCEPT)) return false;
+    boolean r;
+    Marker m = enter_section_(b);
+    r = consumeToken(b, EXCEPT);
+    r = r && except_structure_1(b, l + 1);
+    r = r && eol_marker(b, l + 1);
+    r = r && except_structure_3(b, l + 1);
+    exit_section_(b, m, EXCEPT_STRUCTURE, r);
+    return r;
+  }
+
+  // (positional_argument | parameter*)?
+  private static boolean except_structure_1(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "except_structure_1")) return false;
+    except_structure_1_0(b, l + 1);
+    return true;
+  }
+
+  // positional_argument | parameter*
+  private static boolean except_structure_1_0(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "except_structure_1_0")) return false;
+    boolean r;
+    Marker m = enter_section_(b);
+    r = positional_argument(b, l + 1);
+    if (!r) r = except_structure_1_0_1(b, l + 1);
+    exit_section_(b, m, null, r);
+    return r;
+  }
+
+  // parameter*
+  private static boolean except_structure_1_0_1(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "except_structure_1_0_1")) return false;
+    while (true) {
+      int c = current_position_(b);
+      if (!parameter(b, l + 1)) break;
+      if (!empty_element_parsed_guard_(b, "except_structure_1_0_1", c)) break;
+    }
+    return true;
+  }
+
+  // executable_statement*
+  private static boolean except_structure_3(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "except_structure_3")) return false;
+    while (true) {
+      int c = current_position_(b);
+      if (!executable_statement(b, l + 1)) break;
+      if (!empty_element_parsed_guard_(b, "except_structure_3", c)) break;
+    }
+    return true;
+  }
+
+  /* ********************************************************** */
+  // try_structure
+  //     except_structure*
+  //     try_else_structure?
+  //     finally_structure?
+  //     END eol_marker
+  static boolean exception_handling_structure(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "exception_handling_structure")) return false;
+    if (!nextTokenIs(b, TRY)) return false;
+    boolean r, p;
+    Marker m = enter_section_(b, l, _NONE_);
+    r = try_structure(b, l + 1);
+    p = r; // pin = 1
+    r = r && report_error_(b, exception_handling_structure_1(b, l + 1));
+    r = p && report_error_(b, exception_handling_structure_2(b, l + 1)) && r;
+    r = p && report_error_(b, exception_handling_structure_3(b, l + 1)) && r;
+    r = p && report_error_(b, consumeToken(b, END)) && r;
+    r = p && eol_marker(b, l + 1) && r;
+    exit_section_(b, l, m, r, p, null);
+    return r || p;
+  }
+
+  // except_structure*
+  private static boolean exception_handling_structure_1(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "exception_handling_structure_1")) return false;
+    while (true) {
+      int c = current_position_(b);
+      if (!except_structure(b, l + 1)) break;
+      if (!empty_element_parsed_guard_(b, "exception_handling_structure_1", c)) break;
+    }
+    return true;
+  }
+
+  // try_else_structure?
+  private static boolean exception_handling_structure_2(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "exception_handling_structure_2")) return false;
+    try_else_structure(b, l + 1);
+    return true;
+  }
+
+  // finally_structure?
+  private static boolean exception_handling_structure_3(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "exception_handling_structure_3")) return false;
+    finally_structure(b, l + 1);
+    return true;
   }
 
   /* ********************************************************** */
@@ -475,6 +678,30 @@ public class RobotParser implements PsiParser, LightPsiParser {
     r = consumeToken(b, VARIABLE_SLICE_ACCESS);
     exit_section_(b, m, EXTENDED_VARIABLE_SLICE_ACCESS, r);
     return r;
+  }
+
+  /* ********************************************************** */
+  // FINALLY executable_statement*
+  public static boolean finally_structure(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "finally_structure")) return false;
+    if (!nextTokenIs(b, FINALLY)) return false;
+    boolean r;
+    Marker m = enter_section_(b);
+    r = consumeToken(b, FINALLY);
+    r = r && finally_structure_1(b, l + 1);
+    exit_section_(b, m, FINALLY_STRUCTURE, r);
+    return r;
+  }
+
+  // executable_statement*
+  private static boolean finally_structure_1(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "finally_structure_1")) return false;
+    while (true) {
+      int c = current_position_(b);
+      if (!executable_statement(b, l + 1)) break;
+      if (!empty_element_parsed_guard_(b, "finally_structure_1", c)) break;
+    }
+    return true;
   }
 
   /* ********************************************************** */
@@ -618,25 +845,50 @@ public class RobotParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
+  // ELSE eol_marker? executable_statement*
+  public static boolean if_else_structure(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "if_else_structure")) return false;
+    if (!nextTokenIs(b, ELSE)) return false;
+    boolean r;
+    Marker m = enter_section_(b);
+    r = consumeToken(b, ELSE);
+    r = r && if_else_structure_1(b, l + 1);
+    r = r && if_else_structure_2(b, l + 1);
+    exit_section_(b, m, IF_ELSE_STRUCTURE, r);
+    return r;
+  }
+
+  // eol_marker?
+  private static boolean if_else_structure_1(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "if_else_structure_1")) return false;
+    eol_marker(b, l + 1);
+    return true;
+  }
+
+  // executable_statement*
+  private static boolean if_else_structure_2(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "if_else_structure_2")) return false;
+    while (true) {
+      int c = current_position_(b);
+      if (!executable_statement(b, l + 1)) break;
+      if (!empty_element_parsed_guard_(b, "if_else_structure_2", c)) break;
+    }
+    return true;
+  }
+
+  /* ********************************************************** */
   // IF positional_argument+ eol_marker? executable_statement*
-  //     (ELSE_IF positional_argument+ eol_marker? executable_statement*)*
-  //     (ELSE eol_marker? executable_statement*)?
-  //     (END eol_marker)?
   public static boolean if_structure(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "if_structure")) return false;
     if (!nextTokenIs(b, IF)) return false;
-    boolean r, p;
-    Marker m = enter_section_(b, l, _NONE_, IF_STRUCTURE, null);
+    boolean r;
+    Marker m = enter_section_(b);
     r = consumeToken(b, IF);
-    p = r; // pin = 1
-    r = r && report_error_(b, if_structure_1(b, l + 1));
-    r = p && report_error_(b, if_structure_2(b, l + 1)) && r;
-    r = p && report_error_(b, if_structure_3(b, l + 1)) && r;
-    r = p && report_error_(b, if_structure_4(b, l + 1)) && r;
-    r = p && report_error_(b, if_structure_5(b, l + 1)) && r;
-    r = p && if_structure_6(b, l + 1) && r;
-    exit_section_(b, l, m, r, p, null);
-    return r || p;
+    r = r && if_structure_1(b, l + 1);
+    r = r && if_structure_2(b, l + 1);
+    r = r && if_structure_3(b, l + 1);
+    exit_section_(b, m, IF_STRUCTURE, r);
+    return r;
   }
 
   // positional_argument+
@@ -670,118 +922,6 @@ public class RobotParser implements PsiParser, LightPsiParser {
       if (!empty_element_parsed_guard_(b, "if_structure_3", c)) break;
     }
     return true;
-  }
-
-  // (ELSE_IF positional_argument+ eol_marker? executable_statement*)*
-  private static boolean if_structure_4(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "if_structure_4")) return false;
-    while (true) {
-      int c = current_position_(b);
-      if (!if_structure_4_0(b, l + 1)) break;
-      if (!empty_element_parsed_guard_(b, "if_structure_4", c)) break;
-    }
-    return true;
-  }
-
-  // ELSE_IF positional_argument+ eol_marker? executable_statement*
-  private static boolean if_structure_4_0(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "if_structure_4_0")) return false;
-    boolean r;
-    Marker m = enter_section_(b);
-    r = consumeToken(b, ELSE_IF);
-    r = r && if_structure_4_0_1(b, l + 1);
-    r = r && if_structure_4_0_2(b, l + 1);
-    r = r && if_structure_4_0_3(b, l + 1);
-    exit_section_(b, m, null, r);
-    return r;
-  }
-
-  // positional_argument+
-  private static boolean if_structure_4_0_1(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "if_structure_4_0_1")) return false;
-    boolean r;
-    Marker m = enter_section_(b);
-    r = positional_argument(b, l + 1);
-    while (r) {
-      int c = current_position_(b);
-      if (!positional_argument(b, l + 1)) break;
-      if (!empty_element_parsed_guard_(b, "if_structure_4_0_1", c)) break;
-    }
-    exit_section_(b, m, null, r);
-    return r;
-  }
-
-  // eol_marker?
-  private static boolean if_structure_4_0_2(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "if_structure_4_0_2")) return false;
-    eol_marker(b, l + 1);
-    return true;
-  }
-
-  // executable_statement*
-  private static boolean if_structure_4_0_3(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "if_structure_4_0_3")) return false;
-    while (true) {
-      int c = current_position_(b);
-      if (!executable_statement(b, l + 1)) break;
-      if (!empty_element_parsed_guard_(b, "if_structure_4_0_3", c)) break;
-    }
-    return true;
-  }
-
-  // (ELSE eol_marker? executable_statement*)?
-  private static boolean if_structure_5(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "if_structure_5")) return false;
-    if_structure_5_0(b, l + 1);
-    return true;
-  }
-
-  // ELSE eol_marker? executable_statement*
-  private static boolean if_structure_5_0(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "if_structure_5_0")) return false;
-    boolean r;
-    Marker m = enter_section_(b);
-    r = consumeToken(b, ELSE);
-    r = r && if_structure_5_0_1(b, l + 1);
-    r = r && if_structure_5_0_2(b, l + 1);
-    exit_section_(b, m, null, r);
-    return r;
-  }
-
-  // eol_marker?
-  private static boolean if_structure_5_0_1(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "if_structure_5_0_1")) return false;
-    eol_marker(b, l + 1);
-    return true;
-  }
-
-  // executable_statement*
-  private static boolean if_structure_5_0_2(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "if_structure_5_0_2")) return false;
-    while (true) {
-      int c = current_position_(b);
-      if (!executable_statement(b, l + 1)) break;
-      if (!empty_element_parsed_guard_(b, "if_structure_5_0_2", c)) break;
-    }
-    return true;
-  }
-
-  // (END eol_marker)?
-  private static boolean if_structure_6(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "if_structure_6")) return false;
-    if_structure_6_0(b, l + 1);
-    return true;
-  }
-
-  // END eol_marker
-  private static boolean if_structure_6_0(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "if_structure_6_0")) return false;
-    boolean r;
-    Marker m = enter_section_(b);
-    r = consumeToken(b, END);
-    r = r && eol_marker(b, l + 1);
-    exit_section_(b, m, null, r);
-    return r;
   }
 
   /* ********************************************************** */
@@ -1986,27 +2126,42 @@ public class RobotParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
+  // ELSE eol_marker executable_statement*
+  public static boolean try_else_structure(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "try_else_structure")) return false;
+    if (!nextTokenIs(b, ELSE)) return false;
+    boolean r;
+    Marker m = enter_section_(b);
+    r = consumeToken(b, ELSE);
+    r = r && eol_marker(b, l + 1);
+    r = r && try_else_structure_2(b, l + 1);
+    exit_section_(b, m, TRY_ELSE_STRUCTURE, r);
+    return r;
+  }
+
+  // executable_statement*
+  private static boolean try_else_structure_2(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "try_else_structure_2")) return false;
+    while (true) {
+      int c = current_position_(b);
+      if (!executable_statement(b, l + 1)) break;
+      if (!empty_element_parsed_guard_(b, "try_else_structure_2", c)) break;
+    }
+    return true;
+  }
+
+  /* ********************************************************** */
   // TRY eol_marker executable_statement+
-  //     (EXCEPT (positional_argument | parameter*)? eol_marker executable_statement*)*
-  //     (ELSE eol_marker executable_statement*)?
-  //     (FINALLY executable_statement*)?
-  //     END eol_marker
   public static boolean try_structure(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "try_structure")) return false;
     if (!nextTokenIs(b, TRY)) return false;
-    boolean r, p;
-    Marker m = enter_section_(b, l, _NONE_, TRY_STRUCTURE, null);
+    boolean r;
+    Marker m = enter_section_(b);
     r = consumeToken(b, TRY);
-    p = r; // pin = 1
-    r = r && report_error_(b, eol_marker(b, l + 1));
-    r = p && report_error_(b, try_structure_2(b, l + 1)) && r;
-    r = p && report_error_(b, try_structure_3(b, l + 1)) && r;
-    r = p && report_error_(b, try_structure_4(b, l + 1)) && r;
-    r = p && report_error_(b, try_structure_5(b, l + 1)) && r;
-    r = p && report_error_(b, consumeToken(b, END)) && r;
-    r = p && eol_marker(b, l + 1) && r;
-    exit_section_(b, l, m, r, p, null);
-    return r || p;
+    r = r && eol_marker(b, l + 1);
+    r = r && try_structure_2(b, l + 1);
+    exit_section_(b, m, TRY_STRUCTURE, r);
+    return r;
   }
 
   // executable_statement+
@@ -2022,129 +2177,6 @@ public class RobotParser implements PsiParser, LightPsiParser {
     }
     exit_section_(b, m, null, r);
     return r;
-  }
-
-  // (EXCEPT (positional_argument | parameter*)? eol_marker executable_statement*)*
-  private static boolean try_structure_3(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "try_structure_3")) return false;
-    while (true) {
-      int c = current_position_(b);
-      if (!try_structure_3_0(b, l + 1)) break;
-      if (!empty_element_parsed_guard_(b, "try_structure_3", c)) break;
-    }
-    return true;
-  }
-
-  // EXCEPT (positional_argument | parameter*)? eol_marker executable_statement*
-  private static boolean try_structure_3_0(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "try_structure_3_0")) return false;
-    boolean r;
-    Marker m = enter_section_(b);
-    r = consumeToken(b, EXCEPT);
-    r = r && try_structure_3_0_1(b, l + 1);
-    r = r && eol_marker(b, l + 1);
-    r = r && try_structure_3_0_3(b, l + 1);
-    exit_section_(b, m, null, r);
-    return r;
-  }
-
-  // (positional_argument | parameter*)?
-  private static boolean try_structure_3_0_1(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "try_structure_3_0_1")) return false;
-    try_structure_3_0_1_0(b, l + 1);
-    return true;
-  }
-
-  // positional_argument | parameter*
-  private static boolean try_structure_3_0_1_0(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "try_structure_3_0_1_0")) return false;
-    boolean r;
-    Marker m = enter_section_(b);
-    r = positional_argument(b, l + 1);
-    if (!r) r = try_structure_3_0_1_0_1(b, l + 1);
-    exit_section_(b, m, null, r);
-    return r;
-  }
-
-  // parameter*
-  private static boolean try_structure_3_0_1_0_1(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "try_structure_3_0_1_0_1")) return false;
-    while (true) {
-      int c = current_position_(b);
-      if (!parameter(b, l + 1)) break;
-      if (!empty_element_parsed_guard_(b, "try_structure_3_0_1_0_1", c)) break;
-    }
-    return true;
-  }
-
-  // executable_statement*
-  private static boolean try_structure_3_0_3(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "try_structure_3_0_3")) return false;
-    while (true) {
-      int c = current_position_(b);
-      if (!executable_statement(b, l + 1)) break;
-      if (!empty_element_parsed_guard_(b, "try_structure_3_0_3", c)) break;
-    }
-    return true;
-  }
-
-  // (ELSE eol_marker executable_statement*)?
-  private static boolean try_structure_4(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "try_structure_4")) return false;
-    try_structure_4_0(b, l + 1);
-    return true;
-  }
-
-  // ELSE eol_marker executable_statement*
-  private static boolean try_structure_4_0(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "try_structure_4_0")) return false;
-    boolean r;
-    Marker m = enter_section_(b);
-    r = consumeToken(b, ELSE);
-    r = r && eol_marker(b, l + 1);
-    r = r && try_structure_4_0_2(b, l + 1);
-    exit_section_(b, m, null, r);
-    return r;
-  }
-
-  // executable_statement*
-  private static boolean try_structure_4_0_2(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "try_structure_4_0_2")) return false;
-    while (true) {
-      int c = current_position_(b);
-      if (!executable_statement(b, l + 1)) break;
-      if (!empty_element_parsed_guard_(b, "try_structure_4_0_2", c)) break;
-    }
-    return true;
-  }
-
-  // (FINALLY executable_statement*)?
-  private static boolean try_structure_5(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "try_structure_5")) return false;
-    try_structure_5_0(b, l + 1);
-    return true;
-  }
-
-  // FINALLY executable_statement*
-  private static boolean try_structure_5_0(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "try_structure_5_0")) return false;
-    boolean r;
-    Marker m = enter_section_(b);
-    r = consumeToken(b, FINALLY);
-    r = r && try_structure_5_0_1(b, l + 1);
-    exit_section_(b, m, null, r);
-    return r;
-  }
-
-  // executable_statement*
-  private static boolean try_structure_5_0_1(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "try_structure_5_0_1")) return false;
-    while (true) {
-      int c = current_position_(b);
-      if (!executable_statement(b, l + 1)) break;
-      if (!empty_element_parsed_guard_(b, "try_structure_5_0_1", c)) break;
-    }
-    return true;
   }
 
   /* ********************************************************** */

@@ -11,14 +11,15 @@ import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.*;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.*;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotPsiImplUtil;
 
-public class RobotExecutableStatementImpl extends RobotPsiElementBase implements RobotExecutableStatement {
+public class RobotExceptStructureImpl extends RobotExecutableStatementImpl implements RobotExceptStructure {
 
-  public RobotExecutableStatementImpl(@NotNull ASTNode node) {
+  public RobotExceptStructureImpl(@NotNull ASTNode node) {
     super(node);
   }
 
+  @Override
   public void accept(@NotNull RobotVisitor visitor) {
-    visitor.visitExecutableStatement(this);
+    visitor.visitExceptStructure(this);
   }
 
   @Override
@@ -29,26 +30,14 @@ public class RobotExecutableStatementImpl extends RobotPsiElementBase implements
 
   @Override
   @NotNull
-  public List<RobotExecutableStatement> getExecutableStatementList() {
-    return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotExecutableStatement.class);
+  public List<RobotParameter> getParameterList() {
+    return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotParameter.class);
   }
 
   @Override
   @Nullable
-  public RobotKeywordCall getKeywordCall() {
-    return PsiTreeUtil.getChildOfType(this, RobotKeywordCall.class);
-  }
-
-  @Override
-  @NotNull
-  public List<RobotPositionalArgument> getPositionalArgumentList() {
-    return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotPositionalArgument.class);
-  }
-
-  @Override
-  @Nullable
-  public RobotVariableStatement getVariableStatement() {
-    return PsiTreeUtil.getChildOfType(this, RobotVariableStatement.class);
+  public RobotPositionalArgument getPositionalArgument() {
+    return PsiTreeUtil.getChildOfType(this, RobotPositionalArgument.class);
   }
 
 }

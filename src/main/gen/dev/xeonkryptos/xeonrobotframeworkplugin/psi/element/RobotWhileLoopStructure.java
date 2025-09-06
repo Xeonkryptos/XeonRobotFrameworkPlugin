@@ -8,9 +8,6 @@ import com.intellij.psi.PsiElement;
 public interface RobotWhileLoopStructure extends RobotExecutableStatement {
 
   @NotNull
-  List<RobotExecutableStatement> getExecutableStatementList();
-
-  @NotNull
   List<RobotParameter> getParameterList();
 
 }

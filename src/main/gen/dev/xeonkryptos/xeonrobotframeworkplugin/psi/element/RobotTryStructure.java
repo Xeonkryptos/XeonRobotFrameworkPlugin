@@ -10,7 +10,4 @@ public interface RobotTryStructure extends RobotExecutableStatement {
   @NotNull
   List<RobotExecutableStatement> getExecutableStatementList();
 
-  @NotNull
-  List<RobotParameter> getParameterList();
-
 }

@@ -8,6 +8,6 @@ import com.intellij.psi.PsiElement;
 public interface RobotBlockOpeningStructure extends RobotExecutableStatement {
 
   @NotNull
-  RobotExecutableStatement getExecutableStatement();
+  List<RobotExecutableStatement> getExecutableStatementList();
 
 }

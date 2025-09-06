@@ -5,12 +5,9 @@ import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 
-public interface RobotForLoopStructure extends RobotExecutableStatement {
+public interface RobotElseIfStructure extends RobotExecutableStatement {
 
   @NotNull
-  List<RobotParameter> getParameterList();
-
-  @NotNull
-  List<RobotVariable> getVariableList();
+  List<RobotPositionalArgument> getPositionalArgumentList();
 
 }

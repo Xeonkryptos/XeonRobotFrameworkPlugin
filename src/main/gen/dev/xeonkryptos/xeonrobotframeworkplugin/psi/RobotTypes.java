@@ -21,15 +21,19 @@ public interface RobotTypes {
   IElementType COMMENTS_SECTION = new RobotElementType("COMMENTS_SECTION");
   IElementType DICT_VARIABLE = RobotDictVariableStubElement.create("DICT_VARIABLE");
   IElementType DOCUMENTATION_STATEMENT_GLOBAL_SETTING = new RobotElementType("DOCUMENTATION_STATEMENT_GLOBAL_SETTING");
+  IElementType ELSE_IF_STRUCTURE = new RobotElementType("ELSE_IF_STRUCTURE");
   IElementType ENVIRONMENT_VARIABLE = new RobotElementType("ENVIRONMENT_VARIABLE");
+  IElementType EXCEPT_STRUCTURE = new RobotElementType("EXCEPT_STRUCTURE");
   IElementType EXECUTABLE_STATEMENT = new RobotElementType("EXECUTABLE_STATEMENT");
   IElementType EXTENDED_VARIABLE_INDEX_ACCESS = new RobotElementType("EXTENDED_VARIABLE_INDEX_ACCESS");
   IElementType EXTENDED_VARIABLE_KEY_ACCESS = new RobotElementType("EXTENDED_VARIABLE_KEY_ACCESS");
   IElementType EXTENDED_VARIABLE_NESTED_ACCESS = new RobotElementType("EXTENDED_VARIABLE_NESTED_ACCESS");
   IElementType EXTENDED_VARIABLE_SLICE_ACCESS = new RobotElementType("EXTENDED_VARIABLE_SLICE_ACCESS");
+  IElementType FINALLY_STRUCTURE = new RobotElementType("FINALLY_STRUCTURE");
   IElementType FOR_LOOP_STRUCTURE = new RobotElementType("FOR_LOOP_STRUCTURE");
   IElementType GLOBAL_SETTING_STATEMENT = new RobotElementType("GLOBAL_SETTING_STATEMENT");
   IElementType GROUP_STRUCTURE = new RobotElementType("GROUP_STRUCTURE");
+  IElementType IF_ELSE_STRUCTURE = new RobotElementType("IF_ELSE_STRUCTURE");
   IElementType IF_STRUCTURE = new RobotElementType("IF_STRUCTURE");
   IElementType INLINE_VARIABLE_STATEMENT = new RobotElementType("INLINE_VARIABLE_STATEMENT");
   IElementType KEYWORDS_SECTION = new RobotElementType("KEYWORDS_SECTION");
@@ -76,6 +80,7 @@ public interface RobotTypes {
   IElementType TEST_CASE_ID = new RobotElementType("TEST_CASE_ID");
   IElementType TEST_CASE_STATEMENT = RobotTestCaseStatementStubElement.create("TEST_CASE_STATEMENT");
   IElementType TIMEOUT_STATEMENTS_GLOBAL_SETTING = new RobotElementType("TIMEOUT_STATEMENTS_GLOBAL_SETTING");
+  IElementType TRY_ELSE_STRUCTURE = new RobotElementType("TRY_ELSE_STRUCTURE");
   IElementType TRY_STRUCTURE = new RobotElementType("TRY_STRUCTURE");
   IElementType UNKNOWN_SETTING_STATEMENTS_GLOBAL_SETTING = new RobotElementType("UNKNOWN_SETTING_STATEMENTS_GLOBAL_SETTING");
   IElementType USER_KEYWORD_STATEMENT = RobotUserKeywordStubElement.create("USER_KEYWORD_STATEMENT");
@@ -175,8 +180,14 @@ public interface RobotTypes {
       else if (type == DOCUMENTATION_STATEMENT_GLOBAL_SETTING) {
         return new RobotDocumentationStatementGlobalSettingImpl(node);
       }
+      else if (type == ELSE_IF_STRUCTURE) {
+        return new RobotElseIfStructureImpl(node);
+      }
       else if (type == ENVIRONMENT_VARIABLE) {
         return new RobotEnvironmentVariableImpl(node);
+      }
+      else if (type == EXCEPT_STRUCTURE) {
+        return new RobotExceptStructureImpl(node);
       }
       else if (type == EXECUTABLE_STATEMENT) {
         return new RobotExecutableStatementImpl(node);
@@ -193,11 +204,17 @@ public interface RobotTypes {
       else if (type == EXTENDED_VARIABLE_SLICE_ACCESS) {
         return new RobotExtendedVariableSliceAccessImpl(node);
       }
+      else if (type == FINALLY_STRUCTURE) {
+        return new RobotFinallyStructureImpl(node);
+      }
       else if (type == FOR_LOOP_STRUCTURE) {
         return new RobotForLoopStructureImpl(node);
       }
       else if (type == GROUP_STRUCTURE) {
         return new RobotGroupStructureImpl(node);
+      }
+      else if (type == IF_ELSE_STRUCTURE) {
+        return new RobotIfElseStructureImpl(node);
       }
       else if (type == IF_STRUCTURE) {
         return new RobotIfStructureImpl(node);
@@ -333,6 +350,9 @@ public interface RobotTypes {
       }
       else if (type == TIMEOUT_STATEMENTS_GLOBAL_SETTING) {
         return new RobotTimeoutStatementsGlobalSettingImpl(node);
+      }
+      else if (type == TRY_ELSE_STRUCTURE) {
+        return new RobotTryElseStructureImpl(node);
       }
       else if (type == TRY_STRUCTURE) {
         return new RobotTryStructureImpl(node);

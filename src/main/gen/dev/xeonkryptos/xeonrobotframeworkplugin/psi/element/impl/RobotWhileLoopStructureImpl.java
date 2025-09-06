@@ -30,12 +30,6 @@ public class RobotWhileLoopStructureImpl extends RobotExecutableStatementImpl im
 
   @Override
   @NotNull
-  public List<RobotExecutableStatement> getExecutableStatementList() {
-    return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotExecutableStatement.class);
-  }
-
-  @Override
-  @NotNull
   public List<RobotParameter> getParameterList() {
     return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotParameter.class);
   }

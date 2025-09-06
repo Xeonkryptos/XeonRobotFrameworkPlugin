@@ -197,7 +197,7 @@ local_arguments_setting_argument ::= variable_definition "=" positional_argument
 executable_statement ::= loop_structure | loop_control_structure | control_structure | call_structure | return_structure
 
 fake block_opening_structure ::= loop_structure | control_structure
-private control_structure ::= if_structure | try_structure | group_structure {
+private control_structure ::= conditional_structure | exception_handling_structure | group_structure {
     implements = "block_opening_structure"
 }
 private loop_structure ::= for_loop_structure | while_loop_structure {
@@ -209,15 +209,19 @@ private return_structure ::= RETURN positional_argument* eol_marker? {pin=1}
 
 for_loop_structure ::= FOR variable+ FOR_IN positional_argument+ parameter* eol_marker executable_statement* END eol_marker {pin=1}
 while_loop_structure ::= WHILE positional_argument+ eol_marker (parameter+ eol_marker)? executable_statement* END eol_marker {pin=1}
+private conditional_structure ::= if_structure else_if_structure* if_else_structure? (END eol_marker)? {pin=1}
 if_structure ::= IF positional_argument+ eol_marker? executable_statement*
-    (ELSE_IF positional_argument+ eol_marker? executable_statement*)*
-    (ELSE eol_marker? executable_statement*)?
-    (END eol_marker)? {pin=1}
-try_structure ::= TRY eol_marker executable_statement+
-    (EXCEPT (positional_argument | parameter*)? eol_marker executable_statement*)*
-    (ELSE eol_marker executable_statement*)?
-    (FINALLY executable_statement*)?
+else_if_structure ::= ELSE_IF positional_argument+ eol_marker? executable_statement*
+if_else_structure ::= ELSE eol_marker? executable_statement*
+private exception_handling_structure ::= try_structure
+    except_structure*
+    try_else_structure?
+    finally_structure?
     END eol_marker {pin=1}
+try_structure ::= TRY eol_marker executable_statement+
+except_structure ::= EXCEPT (positional_argument | parameter*)? eol_marker executable_statement*
+try_else_structure ::= ELSE eol_marker executable_statement*
+finally_structure ::= FINALLY executable_statement*
 group_structure ::= GROUP positional_argument? eol_marker executable_statement* END eol_marker {pin=1}
 
 fake keyword_call ::= base_keyword_call {

@@ -30,8 +30,8 @@ public class RobotBlockOpeningStructureImpl extends RobotExecutableStatementImpl
 
   @Override
   @NotNull
-  public RobotExecutableStatement getExecutableStatement() {
-    return notNullChild(PsiTreeUtil.getChildOfType(this, RobotExecutableStatement.class));
+  public List<RobotExecutableStatement> getExecutableStatementList() {
+    return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotExecutableStatement.class);
   }
 
 }

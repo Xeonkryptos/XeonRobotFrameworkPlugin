@@ -33,8 +33,16 @@ public class RobotVisitor extends PsiElementVisitor {
     visitGlobalSettingStatement(o);
   }
 
+  public void visitElseIfStructure(@NotNull RobotElseIfStructure o) {
+    visitExecutableStatement(o);
+  }
+
   public void visitEnvironmentVariable(@NotNull RobotEnvironmentVariable o) {
     visitVariable(o);
+  }
+
+  public void visitExceptStructure(@NotNull RobotExceptStructure o) {
+    visitExecutableStatement(o);
   }
 
   public void visitExecutableStatement(@NotNull RobotExecutableStatement o) {
@@ -57,6 +65,10 @@ public class RobotVisitor extends PsiElementVisitor {
     visitStatement(o);
   }
 
+  public void visitFinallyStructure(@NotNull RobotFinallyStructure o) {
+    visitExecutableStatement(o);
+  }
+
   public void visitForLoopStructure(@NotNull RobotForLoopStructure o) {
     visitExecutableStatement(o);
   }
@@ -66,6 +78,10 @@ public class RobotVisitor extends PsiElementVisitor {
   }
 
   public void visitGroupStructure(@NotNull RobotGroupStructure o) {
+    visitExecutableStatement(o);
+  }
+
+  public void visitIfElseStructure(@NotNull RobotIfElseStructure o) {
     visitExecutableStatement(o);
   }
 
@@ -265,6 +281,10 @@ public class RobotVisitor extends PsiElementVisitor {
 
   public void visitTimeoutStatementsGlobalSetting(@NotNull RobotTimeoutStatementsGlobalSetting o) {
     visitGlobalSettingStatement(o);
+  }
+
+  public void visitTryElseStructure(@NotNull RobotTryElseStructure o) {
+    visitExecutableStatement(o);
   }
 
   public void visitTryStructure(@NotNull RobotTryStructure o) {
