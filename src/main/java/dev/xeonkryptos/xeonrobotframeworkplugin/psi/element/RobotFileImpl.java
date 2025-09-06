@@ -45,14 +45,15 @@ public class RobotFileImpl extends PsiFileBase implements KeywordFile, RobotFile
             "TRANSITIVE_IMPORTED_FILES_CACHE");
     private static final Key<ParameterizedCachedValue<Collection<KeywordFile>, Boolean>> NON_TRANSITIVE_IMPORTED_FILES_CACHE_KEY = Key.create(
             "NON_TRANSITIVE_IMPORTED_FILES_CACHE");
-    private static final Key<CachedValue<Collection<KeywordFile>>> DIRECTLY_IMPORTED_FILES_CACHE_KEY = Key.create("DIRECTLY_IMPORTED_FILES_CACHE");
     private static final Key<ParameterizedCachedValue<Collection<VirtualFile>, Boolean>> IMPORTED_VIRTUAL_FILES_CACHE_KEY = Key.create(
             "IMPORTED_VIRTUAL_FILES_CACHE");
-    private static final Key<CachedValue<Collection<DefinedVariable>>> SECTION_VARIABLES_CACHE_KEY = Key.create("SECTION_VARIABLES_CACHE");
+    private static final Key<CachedValue<Collection<DefinedVariable>>> ROBOT_INIT_VARIABLES_CACHE_KEY = Key.create("ROBOT_INIT_VARIABLES_CACHE");
 
     private final FileType fileType;
 
-    private Collection<DefinedVariable> robotInitVariables;
+    private Collection<KeywordFile> directlyImportedFiles;
+    private Collection<DefinedVariable> sectionVariables;
+    private Collection<DefinedKeyword> definedKeywords;
 
     public RobotFileImpl(FileViewProvider fileViewProvider) {
         super(fileViewProvider, RobotLanguage.INSTANCE);
@@ -60,16 +61,19 @@ public class RobotFileImpl extends PsiFileBase implements KeywordFile, RobotFile
         fileType = fileViewProvider.getFileType();
     }
 
+    @Override
+    public void subtreeChanged() {
+        super.subtreeChanged();
+
+        directlyImportedFiles = null;
+        sectionVariables = null;
+        definedKeywords = null;
+    }
+
     @NotNull
     @Override
     public FileType getFileType() {
         return fileType;
-    }
-
-    @Override
-    public void subtreeChanged() {
-        super.subtreeChanged();
-        reset();
     }
 
     @NotNull
@@ -105,10 +109,9 @@ public class RobotFileImpl extends PsiFileBase implements KeywordFile, RobotFile
 
     @NotNull
     public final Collection<DefinedVariable> collectRobotInitVariables() {
-        Collection<DefinedVariable> results = this.robotInitVariables;
-        if (results == null) {
+        return CachedValuesManager.getCachedValue(this, ROBOT_INIT_VARIABLES_CACHE_KEY, () -> {
             Set<VirtualFile> virtualFiles = new LinkedHashSet<>();
-            results = new LinkedHashSet<>();
+            Collection<DefinedVariable> results = new LinkedHashSet<>();
             for (KeywordFile importedFile : collectImportedFiles(true)) {
                 if (importedFile instanceof RobotFile robotFile) {
                     VirtualFile virtualRobotFile = robotFile.getVirtualFile();
@@ -129,17 +132,18 @@ public class RobotFileImpl extends PsiFileBase implements KeywordFile, RobotFile
                     results.addAll(definedVariables);
                 }
             }
-            this.robotInitVariables = results;
-        }
-        return results;
+            return Result.createSingleDependency(results, PsiModificationTracker.MODIFICATION_COUNT);
+        });
     }
 
     private Collection<DefinedVariable> getSectionVariables() {
-        return CachedValuesManager.getCachedValue(this, SECTION_VARIABLES_CACHE_KEY, () -> {
+        Collection<DefinedVariable> sectionVariables = this.sectionVariables;
+        if (sectionVariables == null) {
             RobotSectionVariablesCollector visitor = new RobotSectionVariablesCollector();
             acceptChildren(visitor);
-            return Result.create(visitor.getVariables(), this);
-        });
+            sectionVariables = visitor.getVariables();
+        }
+        return sectionVariables;
     }
 
     @NotNull
@@ -151,14 +155,13 @@ public class RobotFileImpl extends PsiFileBase implements KeywordFile, RobotFile
     @NotNull
     @Override
     public final Collection<DefinedKeyword> getDefinedKeywords() {
-        RobotUserKeywordsCollector userKeywordsCollector = new RobotUserKeywordsCollector();
-        acceptChildren(userKeywordsCollector);
-        return userKeywordsCollector.getKeywords();
-    }
-
-    @Override
-    public final void reset() {
-        robotInitVariables = null;
+        Collection<DefinedKeyword> keywords = this.definedKeywords;
+        if (keywords == null) {
+            RobotUserKeywordsCollector userKeywordsCollector = new RobotUserKeywordsCollector();
+            acceptChildren(userKeywordsCollector);
+            keywords = userKeywordsCollector.getKeywords();
+        }
+        return keywords;
     }
 
     @NotNull
@@ -227,11 +230,13 @@ public class RobotFileImpl extends PsiFileBase implements KeywordFile, RobotFile
     }
 
     private Collection<KeywordFile> collectImportFiles() {
-        return CachedValuesManager.getCachedValue(this, DIRECTLY_IMPORTED_FILES_CACHE_KEY, () -> {
+        Collection<KeywordFile> importedFiles = directlyImportedFiles;
+        if (importedFiles == null) {
             RobotImportFilesCollector importFilesCollector = new RobotImportFilesCollector();
             acceptChildren(importFilesCollector);
-            return Result.create(importFilesCollector.getFiles(), this);
-        });
+            directlyImportedFiles = importFilesCollector.getFiles();
+        }
+        return directlyImportedFiles;
     }
 
     private void addBuiltInImports(@NotNull Collection<KeywordFile> files) {

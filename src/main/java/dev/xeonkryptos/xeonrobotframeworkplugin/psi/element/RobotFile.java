@@ -12,8 +12,6 @@ public interface RobotFile extends PsiFile {
      */
     @NotNull Collection<DefinedKeyword> getDefinedKeywords();
 
-    void reset();
-
     /**
      * @return all files that contain references to invoked keywords and used variables.
      */

@@ -8,7 +8,7 @@ If you like this plugin, please leave your [review](https://plugins.jetbrains.co
 
 ### Syntax Highlighting
 
-### Code Completion
+### Context-sensitive Code Completion
 
 ### Easy Test Execution
 
@@ -43,6 +43,8 @@ to the completion list for the parameter.
 The SMT Console View is a console view that shows the output of the Robot Framework test execution. It is the same view used for all test 
 executions in Jetbrains IDEs. It shows the output of the test execution in a tree view, with the ability to expand and collapse the test cases 
 and keywords.
+
+### Rename-Refactor
 
 ## Prerequisites
   * Set your `Python` interpreter properly for your `PyCharm`
