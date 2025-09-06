@@ -41,17 +41,12 @@ import java.util.stream.Collectors;
 
 public class RobotFileImpl extends PsiFileBase implements KeywordFile, RobotFile {
 
-    private static final Key<ParameterizedCachedValue<Collection<KeywordFile>, Boolean>> TRANSITIVE_IMPORTED_FILES_CACHE_KEY = Key.create(
-            "TRANSITIVE_IMPORTED_FILES_CACHE");
-    private static final Key<ParameterizedCachedValue<Collection<KeywordFile>, Boolean>> NON_TRANSITIVE_IMPORTED_FILES_CACHE_KEY = Key.create(
-            "NON_TRANSITIVE_IMPORTED_FILES_CACHE");
     private static final Key<ParameterizedCachedValue<Collection<VirtualFile>, Boolean>> IMPORTED_VIRTUAL_FILES_CACHE_KEY = Key.create(
             "IMPORTED_VIRTUAL_FILES_CACHE");
     private static final Key<CachedValue<Collection<DefinedVariable>>> ROBOT_INIT_VARIABLES_CACHE_KEY = Key.create("ROBOT_INIT_VARIABLES_CACHE");
 
     private final FileType fileType;
 
-    private Collection<KeywordFile> directlyImportedFiles;
     private Collection<DefinedVariable> sectionVariables;
     private Collection<DefinedKeyword> definedKeywords;
 
@@ -65,7 +60,6 @@ public class RobotFileImpl extends PsiFileBase implements KeywordFile, RobotFile
     public void subtreeChanged() {
         super.subtreeChanged();
 
-        directlyImportedFiles = null;
         sectionVariables = null;
         definedKeywords = null;
     }
@@ -217,26 +211,30 @@ public class RobotFileImpl extends PsiFileBase implements KeywordFile, RobotFile
     @NotNull
     @Override
     public Collection<KeywordFile> getImportedFiles(boolean includeTransitive) {
-        Key<ParameterizedCachedValue<Collection<KeywordFile>, Boolean>> cacheKey = includeTransitive ?
-                                                                                   TRANSITIVE_IMPORTED_FILES_CACHE_KEY :
-                                                                                   NON_TRANSITIVE_IMPORTED_FILES_CACHE_KEY;
-        return CachedValuesManager.getManager(getProject()).getParameterizedCachedValue(this, cacheKey, transitive -> {
-            Set<KeywordFile> results = new LinkedHashSet<>();
-            for (KeywordFile keywordFile : collectImportFiles()) {
-                collectTransitiveKeywordFiles(results, keywordFile, transitive);
-            }
-            return Result.createSingleDependency(results, PsiModificationTracker.MODIFICATION_COUNT);
-        }, false, includeTransitive);
+        if (!includeTransitive) {
+            return collectImportFiles();
+        }
+        Set<KeywordFile> results = new LinkedHashSet<>();
+        for (KeywordFile keywordFile : collectImportFiles()) {
+            collectTransitiveKeywordFiles(keywordFile, results);
+        }
+        return results;
     }
 
     private Collection<KeywordFile> collectImportFiles() {
-        Collection<KeywordFile> importedFiles = directlyImportedFiles;
-        if (importedFiles == null) {
-            RobotImportFilesCollector importFilesCollector = new RobotImportFilesCollector();
-            acceptChildren(importFilesCollector);
-            directlyImportedFiles = importFilesCollector.getFiles();
+        // Don't implement caching here. The method is based on the result of some reference resolves. When we cache the results here, we might not retrieve
+        // the latest reference resolves and thus missing some imports.
+        RobotImportFilesCollector importFilesCollector = new RobotImportFilesCollector();
+        acceptChildren(importFilesCollector);
+        return importFilesCollector.getFiles();
+    }
+
+    private void collectTransitiveKeywordFiles(KeywordFile keywordFile, Collection<KeywordFile> results) {
+        if (results.add(keywordFile) && keywordFile != this) {
+            for (KeywordFile child : keywordFile.getImportedFiles(false)) {
+                collectTransitiveKeywordFiles(child, results);
+            }
         }
-        return directlyImportedFiles;
     }
 
     private void addBuiltInImports(@NotNull Collection<KeywordFile> files) {
@@ -261,14 +259,6 @@ public class RobotFileImpl extends PsiFileBase implements KeywordFile, RobotFile
     @Override
     public final PsiFile getPsiFile() {
         return this;
-    }
-
-    private void collectTransitiveKeywordFiles(Collection<KeywordFile> results, KeywordFile keywordFile, boolean includeTransitive) {
-        if (results.add(keywordFile) && includeTransitive && keywordFile != this) {
-            for (KeywordFile child : keywordFile.getImportedFiles(false)) {
-                collectTransitiveKeywordFiles(results, child, true);
-            }
-        }
     }
 
     @Nullable

@@ -5,7 +5,6 @@ import com.intellij.lang.annotation.AnnotationHolder;
 import com.intellij.lang.annotation.Annotator;
 import com.intellij.lang.annotation.HighlightSeverity;
 import com.intellij.psi.PsiElement;
-import com.intellij.psi.PsiReference;
 import com.intellij.psi.util.PsiTreeUtil;
 import dev.xeonkryptos.xeonrobotframeworkplugin.RobotBundle;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCall;
@@ -13,29 +12,16 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCallName
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLocalSetting;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotStatement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTemplateStatementsGlobalSetting;
-import dev.xeonkryptos.xeonrobotframeworkplugin.util.DeprecationInspector;
 import org.jetbrains.annotations.NotNull;
 
-public class RobotKeywordAnnotator implements Annotator {
+import java.util.Collection;
+
+public class RobotMissingMandatoryKeywordParametersAnnotator implements Annotator {
 
     @Override
     public void annotate(@NotNull PsiElement element, @NotNull AnnotationHolder holder) {
         if (!(element instanceof RobotKeywordCallName robotKeywordCallName)) {
             return;
-        }
-
-        PsiReference reference = robotKeywordCallName.getReference();
-        PsiElement resolvedElement = reference.resolve();
-        boolean isResolved = resolvedElement != null;
-        if (!isResolved) {
-            holder.newAnnotation(HighlightSeverity.ERROR, RobotBundle.getMessage("annotation.keyword.not-found"))
-                  .highlightType(ProblemHighlightType.ERROR)
-                  .range(element)
-                  .create();
-        } else {
-            if (DeprecationInspector.isDeprecated(resolvedElement)) {
-                holder.newSilentAnnotation(HighlightSeverity.WARNING).range(element).highlightType(ProblemHighlightType.LIKE_DEPRECATED).create();
-            }
         }
 
         RobotKeywordCall keywordCall = PsiTreeUtil.getParentOfType(robotKeywordCallName, RobotKeywordCall.class);
@@ -45,10 +31,12 @@ public class RobotKeywordAnnotator implements Annotator {
                                                                                       RobotLocalSetting.class,
                                                                                       RobotTemplateStatementsGlobalSetting.class);
             if (ignoringParameterCheckParent == null) {
-                String missingRequiredParameters = String.join(", ", keywordCall.computeMissingRequiredParameters());
+                Collection<String> missingParameters = keywordCall.computeMissingRequiredParameters();
+                String missingRequiredParameters = String.join(", ", missingParameters);
                 holder.newAnnotation(HighlightSeverity.ERROR, RobotBundle.getMessage("annotation.keyword.parameters.missing", missingRequiredParameters))
                       .highlightType(ProblemHighlightType.GENERIC_ERROR)
-                      .range(robotKeywordCallName)
+                      .range(element)
+                      .withFix(new InsertMissingMandatoryKeywordParametersQuickFix(missingParameters))
                       .create();
             }
         }

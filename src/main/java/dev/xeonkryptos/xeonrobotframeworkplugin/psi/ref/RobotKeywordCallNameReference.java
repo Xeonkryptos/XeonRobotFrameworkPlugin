@@ -4,6 +4,7 @@ import com.intellij.codeInsight.TailTypes;
 import com.intellij.codeInsight.lookup.LookupElementBuilder;
 import com.intellij.codeInsight.lookup.TailTypeDecorator;
 import com.intellij.icons.AllIcons.Nodes;
+import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiElementResolveResult;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiPolyVariantReferenceBase;
@@ -39,7 +40,8 @@ public class RobotKeywordCallNameReference extends PsiPolyVariantReferenceBase<R
         ResolveCache resolveCache = ResolveCache.getInstance(keywordCallName.getProject());
         return resolveCache.resolveWithCaching(this, (robotKeywordReference, incompCode) -> {
             PsiFile containingFile = keywordCallName.getContainingFile();
-            return Arrays.stream(ResolverUtils.findKeywordReferences(keywordCallName, containingFile))
+            PsiElement[] keywordReferences = ResolverUtils.findKeywordReferences(keywordCallName, containingFile);
+            return Arrays.stream(keywordReferences)
                          .map(PsiElementResolveResult::new)
                          .toArray(ResolveResult[]::new);
         }, false, false);

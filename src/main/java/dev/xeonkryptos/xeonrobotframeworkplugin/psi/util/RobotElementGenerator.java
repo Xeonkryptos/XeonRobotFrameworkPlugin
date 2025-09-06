@@ -12,6 +12,7 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotFeatureFileType;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotLanguage;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCallLibraryName;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCallName;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotParameter;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotParameterId;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotPositionalArgument;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTaskId;
@@ -102,6 +103,22 @@ public record RobotElementGenerator(Project project) {
         RobotKeywordCallNameFinder finder = new RobotKeywordCallNameFinder();
         psiFile.acceptChildren(finder);
         return finder.keywordCallName;
+    }
+
+    public RobotParameter createNewParameter(String parameterId) {
+        String fileContent = """
+                             *** Test Case ***
+                             Dummy
+                                 Keyword  %s=\s\s
+                            \s""".formatted(parameterId);
+
+        PsiFile psiFile = createDummyPsiFile(fileContent);
+        if (psiFile == null) {
+            return null;
+        }
+        RobotParameterFinder parameterFinder = new RobotParameterFinder();
+        psiFile.acceptChildren(parameterFinder);
+        return parameterFinder.parameter;
     }
 
     public RobotParameterId createNewParameterId(String parameterId) {
@@ -221,6 +238,16 @@ public record RobotElementGenerator(Project project) {
         @Override
         public void visitKeywordCallName(@NotNull RobotKeywordCallName o) {
             keywordCallName = o;
+        }
+    }
+
+    private static final class RobotParameterFinder extends RecursiveRobotVisitor {
+
+        private RobotParameter parameter;
+
+        @Override
+        public void visitParameter(@NotNull RobotParameter o) {
+            parameter = o;
         }
     }
 
