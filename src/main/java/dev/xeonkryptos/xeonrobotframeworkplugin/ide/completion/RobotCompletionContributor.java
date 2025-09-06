@@ -8,6 +8,7 @@ import com.intellij.patterns.ElementPattern;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotFile;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotImportGlobalSettingExpression;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordsSection;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLibraryImportGlobalSetting;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLocalSetting;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLocalSettingId;
@@ -15,9 +16,10 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotParameter;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotResourceImportGlobalSetting;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotSettingsSection;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTaskStatement;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTasksSection;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTestCaseStatement;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTestCasesSection;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotUserKeywordStatement;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariablesSection;
 import org.jetbrains.annotations.NotNull;
 
 import static com.intellij.patterns.PlatformPatterns.psiComment;
@@ -63,8 +65,9 @@ public class RobotCompletionContributor extends CompletionContributor {
                // TODO: There are keywords executing other keywords. Keywords are provided as arguments to those keywords.
                //  Extend code completion to support those keywords and provide code completion for keywords in argument list.
                psiElement().andNot(or(psiComment(), psiElement(RobotTypes.LITERAL_CONSTANT), psiElement(RobotTypes.VARIABLE_BODY)))
-                           // Exclude keywords suggestions in variables section. It isn't supported to call keywords in variables section.
-                           .andNot(psiElement().inside(RobotVariablesSection.class)).inFile(psiElement(RobotFile.class)), new KeywordCompletionProvider());
+                           .inside(true,
+                                   or(instanceOf(RobotTestCasesSection.class), instanceOf(RobotTasksSection.class), instanceOf(RobotKeywordsSection.class)))
+                           .inFile(psiElement(RobotFile.class)), new KeywordCompletionProvider());
         // Provide parameter completions in context of keyword statements
         extend(CompletionType.BASIC,
                psiElement(RobotTypes.LITERAL_CONSTANT).andNot(psiElement().inside(true, instanceOf(RobotParameter.class))).inFile(psiElement(RobotFile.class)),

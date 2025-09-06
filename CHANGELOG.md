@@ -7,6 +7,8 @@
 ### Added
 
 - New inspections for deprecated Robot features like Force Tags, Default Tags, \[Return], etc.
+- Mark used keywords as deprecated when Robot's standard deprecation marker **\*DEPRECATED** in documentation is used; in user keywords and python functions
+- Exclude private keywords from code completion when those are imported ones
 
 ### Changed
 

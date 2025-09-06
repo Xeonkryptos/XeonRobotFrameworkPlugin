@@ -21,7 +21,6 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.KeywordFile;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotFile;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCall;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotSection;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.visitor.RobotKeywordCallHolderSection;
 import dev.xeonkryptos.xeonrobotframeworkplugin.util.LookupElementUtil;
 import org.apache.commons.text.WordUtils;
 import org.jetbrains.annotations.NotNull;
@@ -44,32 +43,28 @@ class KeywordCompletionProvider extends CompletionProvider<CompletionParameters>
                 return;
             }
 
-            RobotKeywordCallHolderSection keywordCallHolderSection = new RobotKeywordCallHolderSection();
-            section.accept(keywordCallHolderSection);
-            if (keywordCallHolderSection.isKeywordCallHolderSection()) {
-                PsiElement positionContext = position.getContext();
-                RobotKeywordCall keywordCall = PsiTreeUtil.getParentOfType(positionContext, RobotKeywordCall.class);
-                if (keywordCall == null) {
-                    return;
-                }
-
-                String name = keywordCall.getName();
-                KeywordCompletionModification keywordCompletionModification = KeywordCompletionModification.NONE;
-                if (!name.isEmpty()) {
-                    char firstCharacter = name.charAt(0);
-                    keywordCompletionModification = Arrays.stream(KeywordCompletionModification.values())
-                                                          .filter(modification -> modification.getIdentifier() != null
-                                                                                  && firstCharacter == modification.getIdentifier())
-                                                          .findFirst()
-                                                          .orElse(KeywordCompletionModification.NONE);
-                }
-                Collection<DefinedParameter> alreadyAddedParameters = keywordCall.getParameterList()
-                                                                                 .stream()
-                                                                                 .map(param -> new ParameterDto(param, param.getParameterName(), null))
-                                                                                 .collect(Collectors.toSet());
-
-                addDefinedKeywordsFromFile(result, parameters.getOriginalFile(), keywordCompletionModification, alreadyAddedParameters);
+            PsiElement positionContext = position.getContext();
+            RobotKeywordCall keywordCall = PsiTreeUtil.getParentOfType(positionContext, RobotKeywordCall.class);
+            if (keywordCall == null) {
+                return;
             }
+
+            String name = keywordCall.getName();
+            KeywordCompletionModification keywordCompletionModification = KeywordCompletionModification.NONE;
+            if (!name.isEmpty()) {
+                char firstCharacter = name.charAt(0);
+                keywordCompletionModification = Arrays.stream(KeywordCompletionModification.values())
+                                                      .filter(modification -> modification.getIdentifier() != null
+                                                                              && firstCharacter == modification.getIdentifier())
+                                                      .findFirst()
+                                                      .orElse(KeywordCompletionModification.NONE);
+            }
+            Collection<DefinedParameter> alreadyAddedParameters = keywordCall.getParameterList()
+                                                                             .stream()
+                                                                             .map(param -> new ParameterDto(param, param.getParameterName(), null))
+                                                                             .collect(Collectors.toSet());
+
+            addDefinedKeywordsFromFile(result, parameters.getOriginalFile(), keywordCompletionModification, alreadyAddedParameters);
         }
     }
 
@@ -90,7 +85,10 @@ class KeywordCompletionProvider extends CompletionProvider<CompletionParameters>
                     });
             for (KeywordFile importedFile : robotFile.collectImportedFiles(allowTransitiveImports)) {
                 if (importedFile.getImportType() != ImportType.VARIABLES) {
-                    Collection<DefinedKeyword> definedKeywordsFromImportedFile = importedFile.getDefinedKeywords();
+                    Collection<DefinedKeyword> definedKeywordsFromImportedFile = importedFile.getDefinedKeywords()
+                                                                                             .stream()
+                                                                                             .filter(keyword -> !keyword.isPrivate())
+                                                                                             .toList();
                     addDefinedKeywords(definedKeywordsFromImportedFile,
                                        resultSet,
                                        capitalizeKeywords,

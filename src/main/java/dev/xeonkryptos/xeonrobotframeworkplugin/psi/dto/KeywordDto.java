@@ -3,7 +3,6 @@ package dev.xeonkryptos.xeonrobotframeworkplugin.psi.dto;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiElement;
 import com.jetbrains.python.psi.PyBoolLiteralExpression;
-import com.jetbrains.python.psi.PyElement;
 import com.jetbrains.python.psi.PyElementVisitor;
 import com.jetbrains.python.psi.PyExpression;
 import com.jetbrains.python.psi.PyNoneLiteralExpression;
@@ -13,10 +12,9 @@ import com.jetbrains.python.psi.PyStringLiteralExpression;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.DefinedKeyword;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.DefinedParameter;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.DefinedVariable;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.ref.PyElementDeprecatedVisitor;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.ref.PyElementParentTraversalVisitor;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.KeywordUtil;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.ReservedVariable;
+import dev.xeonkryptos.xeonrobotframeworkplugin.util.DeprecationInspector;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -38,19 +36,21 @@ public class KeywordDto implements DefinedKeyword {
     private final boolean args;
     private final Collection<DefinedParameter> parameters;
     private final boolean deprecated;
+    private final boolean markedAsPrivate;
 
     public KeywordDto(@NotNull PsiElement reference, @Nullable String libraryName, @NotNull String name) {
-        this(reference, libraryName, name, null);
+        this(reference, libraryName, name, null, false);
     }
 
     public KeywordDto(@NotNull PsiElement reference, @Nullable String libraryName, @NotNull String name, Collection<PyParameter> parameters) {
-        this(reference, libraryName, name, convertPyParameters(parameters));
+        this(reference, libraryName, name, convertPyParameters(parameters), false);
     }
 
     public KeywordDto(@NotNull PsiElement reference,
                       @Nullable String libraryName,
                       @NotNull String name,
                       Collection<DefinedParameter> parameters,
+                      boolean markedAsPrivate,
                       Object... ignored) { // Object... ignored is just a trick to avoid constructor clashing
         this.reference = reference;
         this.libraryName = libraryName;
@@ -59,14 +59,8 @@ public class KeywordDto implements DefinedKeyword {
         this.keywordFunctionName = KeywordUtil.getInstance(project).keywordToFunction(name).trim();
         this.args = parameters != null && !parameters.isEmpty();
         this.parameters = parameters;
-        if (reference instanceof PyElement) {
-            PyElementDeprecatedVisitor deprecationVisitor = new PyElementDeprecatedVisitor();
-            PyElementVisitor pyElementParentTraversalVisitor = new PyElementParentTraversalVisitor(deprecationVisitor);
-            reference.accept(pyElementParentTraversalVisitor);
-            deprecated = deprecationVisitor.isDeprecated();
-        } else {
-            deprecated = false;
-        }
+        this.deprecated = DeprecationInspector.isDeprecated(reference);
+        this.markedAsPrivate = markedAsPrivate;
     }
 
     @Nullable
@@ -169,6 +163,11 @@ public class KeywordDto implements DefinedKeyword {
     @Override
     public boolean isDeprecated() {
         return deprecated;
+    }
+
+    @Override
+    public boolean isPrivate() {
+        return markedAsPrivate;
     }
 
     @Override

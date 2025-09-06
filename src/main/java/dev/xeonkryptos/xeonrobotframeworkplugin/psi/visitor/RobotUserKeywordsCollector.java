@@ -5,14 +5,17 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.dto.ParameterDto;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.DefinedKeyword;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.DefinedParameter;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordsSection;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLiteralConstantValue;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLocalArgumentsSetting;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLocalArgumentsSettingArgument;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLocalSetting;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotPositionalArgument;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotRoot;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotUserKeywordStatement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariable;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableDefinition;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVisitor;
+import dev.xeonkryptos.xeonrobotframeworkplugin.util.RobotTag;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
@@ -24,6 +27,10 @@ public final class RobotUserKeywordsCollector extends RobotVisitor {
     private final Set<DefinedKeyword> keywords = new LinkedHashSet<>();
 
     private final Collection<DefinedParameter> keywordArguments = new LinkedHashSet<>();
+
+    private boolean lookingForPrivateMarker;
+
+    private boolean markedAsPrivate;
 
     @Override
     public void visitRoot(@NotNull RobotRoot o) {
@@ -42,8 +49,19 @@ public final class RobotUserKeywordsCollector extends RobotVisitor {
         o.acceptChildren(this);
 
         String keywordName = o.getName();
-        KeywordDto keywordDto = new KeywordDto(o, null, keywordName, keywordArguments);
+        KeywordDto keywordDto = new KeywordDto(o, null, keywordName, keywordArguments, markedAsPrivate);
         keywords.add(keywordDto);
+    }
+
+    @Override
+    public void visitLocalSetting(@NotNull RobotLocalSetting o) {
+        super.visitLocalSetting(o);
+
+        if ("[Tags]".equalsIgnoreCase(o.getSettingName())) {
+            lookingForPrivateMarker = true;
+            o.acceptChildren(this);
+            lookingForPrivateMarker = false;
+        }
     }
 
     @Override
@@ -78,6 +96,17 @@ public final class RobotUserKeywordsCollector extends RobotVisitor {
         String parameterName = o.getVariableName();
         ParameterDto parameterDto = new ParameterDto(o, parameterName, null);
         keywordArguments.add(parameterDto);
+    }
+
+    @Override
+    public void visitLiteralConstantValue(@NotNull RobotLiteralConstantValue o) {
+        super.visitLiteralConstantValue(o);
+        if (lookingForPrivateMarker) {
+            String privateTagName = RobotTag.PRIVATE.getTag();
+            if (privateTagName.equalsIgnoreCase(o.getText())) {
+                markedAsPrivate = true;
+            }
+        }
     }
 
     public Collection<DefinedKeyword> getKeywords() {

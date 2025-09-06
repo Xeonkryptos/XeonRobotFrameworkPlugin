@@ -240,7 +240,8 @@ class RobotKeywordFileResolver {
                     keywords.add(new KeywordDto(method,
                                                 libraryName,
                                                 methodName,
-                                                PythonInspector.convertPyParameters(parameters, method.getParameterList().getParameters(), true)));
+                                                PythonInspector.convertPyParameters(parameters, method.getParameterList().getParameters(), true),
+                                                false));
                 }
             } catch (ProcessCanceledException e) {
                 throw e;

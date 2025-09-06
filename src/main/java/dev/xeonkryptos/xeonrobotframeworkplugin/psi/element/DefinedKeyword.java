@@ -25,4 +25,6 @@ public interface DefinedKeyword {
    String getArgumentsDisplayable();
 
    boolean isDeprecated();
+
+    boolean isPrivate();
 }
