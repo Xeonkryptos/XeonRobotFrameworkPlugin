@@ -21,7 +21,7 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTestCaseStateme
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotUserKeywordStatement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableDefinition;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.index.KeywordDefinitionNameIndex;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.index.KeywordStatementNameIndex;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.index.KeywordCallNameIndex;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.index.TaskNameIndex;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.index.TestCaseNameIndex;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.index.VariableDefinitionNameIndex;
@@ -43,7 +43,7 @@ public class RobotGotoSymbolContributor implements GotoClassContributor, ChooseB
             if (!stubIndex.processAllKeys(TestCaseNameIndex.KEY, processor, scope, filter)) {
                 return;
             }
-            if (!stubIndex.processAllKeys(KeywordStatementNameIndex.KEY, processor, scope, filter)) {
+            if (!stubIndex.processAllKeys(KeywordCallNameIndex.KEY, processor, scope, filter)) {
                 return;
             }
             stubIndex.processAllKeys(VariableDefinitionNameIndex.KEY, processor, scope, filter);
@@ -66,7 +66,7 @@ public class RobotGotoSymbolContributor implements GotoClassContributor, ChooseB
             if (!stubIndex.processElements(TestCaseNameIndex.KEY, name, project, scope, filter, RobotTestCaseStatement.class, processor)) {
                 return;
             }
-            if (!stubIndex.processElements(KeywordStatementNameIndex.KEY, name, project, scope, filter, RobotKeywordCall.class, processor)) {
+            if (!stubIndex.processElements(KeywordCallNameIndex.KEY, name, project, scope, filter, RobotKeywordCall.class, processor)) {
                 return;
             }
             stubIndex.processElements(VariableDefinitionNameIndex.KEY, name, project, scope, filter, RobotVariableDefinition.class, processor);

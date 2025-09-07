@@ -12,7 +12,7 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCall;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCallLibrary;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCallName;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotKeywordCallImpl;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.index.KeywordStatementNameIndex;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.index.KeywordCallNameIndex;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
 
@@ -78,7 +78,7 @@ public class RobotKeywordCallStubElement extends IStubElementType<RobotKeywordCa
         if (libraryName != null) {
             keywordName = keywordName.substring(libraryName.length() + 1);
         }
-        sink.occurrence(KeywordStatementNameIndex.KEY, keywordName);
-        sink.occurrence(KeywordStatementNameIndex.KEY, keywordName.toLowerCase());
+        sink.occurrence(KeywordCallNameIndex.KEY, keywordName);
+        sink.occurrence(KeywordCallNameIndex.KEY, keywordName.toLowerCase());
     }
 }

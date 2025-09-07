@@ -46,7 +46,7 @@
 
         <stubElementTypeHolder class="dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes" externalIdPrefix="robot."/>
         <stubIndex implementation="dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.index.KeywordDefinitionNameIndex"/>
-        <stubIndex implementation="dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.index.KeywordStatementNameIndex"/>
+        <stubIndex implementation="dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.index.KeywordCallNameIndex"/>
         <stubIndex implementation="dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.index.PositionalArgumentImportIndex"/>
         <stubIndex implementation="dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.index.VariableNameIndex"/>
         <stubIndex implementation="dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.index.VariableDefinitionNameIndex"/>
@@ -135,6 +135,7 @@
 
         <enterHandlerDelegate implementation="dev.xeonkryptos.xeonrobotframeworkplugin.ide.actionhandler.RobotKeywordIndentationActionHandler"/>
         <enterHandlerDelegate implementation="dev.xeonkryptos.xeonrobotframeworkplugin.ide.actionhandler.RobotLocalSettingEnterActionHandler"/>
+        <enterHandlerDelegate implementation="dev.xeonkryptos.xeonrobotframeworkplugin.ide.actionhandler.RobotLocalArgumentsSettingEnterActionHandler"/>
         <enterHandlerDelegate implementation="dev.xeonkryptos.xeonrobotframeworkplugin.ide.actionhandler.RobotKeywordCallEnterActionHandler"/>
 
         <typedHandler implementation="dev.xeonkryptos.xeonrobotframeworkplugin.ide.actionhandler.RobotTypedActionHandler"/>

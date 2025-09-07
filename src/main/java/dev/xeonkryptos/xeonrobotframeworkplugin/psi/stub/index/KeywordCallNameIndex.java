@@ -10,13 +10,13 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
 
-public class KeywordStatementNameIndex extends StringStubIndexExtension<RobotKeywordCall> {
+public class KeywordCallNameIndex extends StringStubIndexExtension<RobotKeywordCall> {
 
-    public static final StubIndexKey<String, RobotKeywordCall> KEY = StubIndexKey.createIndexKey("robot.keywordStatement");
+    public static final StubIndexKey<String, RobotKeywordCall> KEY = StubIndexKey.createIndexKey("robot.keywordCall");
 
-    private static final KeywordStatementNameIndex ourInstance = new KeywordStatementNameIndex();
+    private static final KeywordCallNameIndex ourInstance = new KeywordCallNameIndex();
 
-    public static KeywordStatementNameIndex getInstance() {
+    public static KeywordCallNameIndex getInstance() {
         return ourInstance;
     }
 
