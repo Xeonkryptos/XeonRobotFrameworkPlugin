@@ -51,6 +51,7 @@ public abstract class AbstractRobotSmartMultilineEnterActionHandler<T extends Ps
             T element = getExpectedElement(currentElement, previousLine, document);
             if (element != null) {
                 handleSmartMultilineIndentation(file, editor, element);
+                return Result.Stop;
             }
         }
         return Result.Continue;

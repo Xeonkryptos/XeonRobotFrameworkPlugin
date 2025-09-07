@@ -201,7 +201,7 @@ LineComment = {LineCommentSign} {NON_EOL}*
 %state KEYWORD_CALL, KEYWORD_ARGUMENTS
 %state INLINE_VARIABLE_DEFINITION, VARIABLE_DEFINITION, VARIABLE_DEFINITION_ARGUMENTS, VARIABLE_USAGE, EXTENDED_VARIABLE_ACCESS, PYTHON_EXPRESSION, EXTENDED_VARIABLE_BODY
 %state PARAMETER_ASSIGNMENT, PARAMETER_VALUE, TEMPLATE_PARAMETER_ASSIGNMENT, TEMPLATE_PARAMETER_VALUE
-%state FOR_STRUCTURE, CONTROL_STRUCTURE_START, CONTROL_STRUCTURE
+%state FOR_STRUCTURE, SIMPLE_CONTROL_STRUCTURE_START, CONTROL_STRUCTURE_START, SIMPLE_CONTROL_STRUCTURE, CONTROL_STRUCTURE
 
 %xstate COMMENTS_SECTION
 
@@ -389,11 +389,11 @@ LineComment = {LineCommentSign} {NON_EOL}*
         "ELSE IF" \s{2}\s* {LiteralValue}         { yypushback(yylength() - "ELSE IF".length()); enterNewState(CONTROL_STRUCTURE_START); return ELSE_IF; }
         "ELSE" \s*                                { pushBackTrailingWhitespace(); return ELSE; }
         "TRY" \s*                                 { pushBackTrailingWhitespace(); return TRY; }
-        "EXCEPT" \s{2}\s* {LiteralValue}          { yypushback(yylength() - "EXCEPT".length()); enterNewState(CONTROL_STRUCTURE_START); return EXCEPT; }
+        "EXCEPT" \s{2}\s* {LiteralValue}          { yypushback(yylength() - "EXCEPT".length()); enterNewState(SIMPLE_CONTROL_STRUCTURE_START); return EXCEPT; }
         "FINALLY" \s*                             { pushBackTrailingWhitespace(); return FINALLY; }
         "BREAK" \s*                               { pushBackTrailingWhitespace(); return BREAK; }
         "CONTINUE" \s*                            { pushBackTrailingWhitespace(); return CONTINUE; }
-        "GROUP" (\s{2}\s* {LiteralValue})?        { yypushback(yylength() - "GROUP".length()); enterNewState(CONTROL_STRUCTURE_START); return GROUP; }
+        "GROUP" (\s{2}\s* {LiteralValue})?        { yypushback(yylength() - "GROUP".length()); enterNewState(SIMPLE_CONTROL_STRUCTURE_START); return GROUP; }
         "END" \s*                                 { pushBackTrailingWhitespace(); return END; }
     }
 
@@ -437,12 +437,13 @@ LineComment = {LineCommentSign} {NON_EOL}*
       }
 }
 
-<CONTROL_STRUCTURE_START>  {SpaceBasedEndMarker}     { yybegin(CONTROL_STRUCTURE); return WHITE_SPACE; }
-<CONTROL_STRUCTURE> {
-    <SETTING> {RestrictedLiteralValue} | {EqualSign} { pushBackTrailingWhitespace(); return LITERAL_CONSTANT; }
+<SIMPLE_CONTROL_STRUCTURE_START>  {SpaceBasedEndMarker}     { yybegin(SIMPLE_CONTROL_STRUCTURE); return WHITE_SPACE; }
+<CONTROL_STRUCTURE_START>         {SpaceBasedEndMarker}     { yybegin(CONTROL_STRUCTURE); return WHITE_SPACE; }
+
+<SIMPLE_CONTROL_STRUCTURE> {
+    <SETTING, CONTROL_STRUCTURE> {RestrictedLiteralValue} | {EqualSign} { pushBackTrailingWhitespace(); return LITERAL_CONSTANT; }
     {SpaceBasedEndMarker}                            { leaveState(); return EOL; }
 }
-
 <SETTING>     {WithNameKeyword} \s+                  { pushBackTrailingWhitespace(); return WITH_NAME; }
 
 // Multiline handling (don't return EOL on detected multiline). If there is a multiline without the Ellipsis (...) marker,
@@ -452,7 +453,7 @@ LineComment = {LineCommentSign} {NON_EOL}*
         {MultiLine}                                  { return WHITE_SPACE; }
         {EOL} {Whitespace}* {LineComment}            { yypushback(yylength() - 1); return WHITE_SPACE; }
     }
-    <USER_KEYWORD_RETURN_STATEMENT> {EOL}+           { leaveState(); return EOL; }
+    <USER_KEYWORD_RETURN_STATEMENT, CONTROL_STRUCTURE> {EOL}+           { leaveState(); return EOL; }
 }
 
 <KEYWORD_ARGUMENTS, TESTCASE_DEFINITION, TASK_DEFINITION, USER_KEYWORD_DEFINITION, VARIABLE_DEFINITION> {

@@ -6,7 +6,6 @@ import com.intellij.openapi.editor.colors.TextAttributesKey;
 import com.intellij.openapi.fileTypes.SyntaxHighlighterBase;
 import com.intellij.psi.TokenType;
 import com.intellij.psi.tree.IElementType;
-import com.jetbrains.python.highlighting.PyHighlighter;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
@@ -31,7 +30,7 @@ public class RobotHighlighter extends SyntaxHighlighterBase {
                                                                                                          DefaultLanguageHighlighterColors.KEYWORD);
     public static final TextAttributesKey KEYWORD = TextAttributesKey.createTextAttributesKey("Keyword Usage",
                                                                                               DefaultLanguageHighlighterColors.FUNCTION_DECLARATION);
-    public static final TextAttributesKey PARAMETER = TextAttributesKey.createTextAttributesKey("Parameter", PyHighlighter.PY_KEYWORD_ARGUMENT);
+    public static final TextAttributesKey PARAMETER = TextAttributesKey.createTextAttributesKey("Parameter", DefaultLanguageHighlighterColors.PARAMETER);
     public static final TextAttributesKey ARGUMENT = TextAttributesKey.createTextAttributesKey("Positional Argument",
                                                                                                DefaultLanguageHighlighterColors.STATIC_FIELD);
     public static final TextAttributesKey VARIABLE = TextAttributesKey.createTextAttributesKey("Variable Usage",
