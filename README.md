@@ -8,17 +8,25 @@ If you like this plugin, please leave your [review](https://plugins.jetbrains.co
 
 ### Syntax Highlighting
 
-### Context-sensitive Code Completion
+![](https://raw.githubusercontent.com/xeonkryptos/XeonRobotFrameworkPlugin/main/docs/imgs/syntax-highlighting.jpg)
 
 ### Easy Test Execution
 
+![](https://raw.githubusercontent.com/xeonkryptos/XeonRobotFrameworkPlugin/main/docs/imgs/easy-test-execution.jpg)
+
 ### Debugging In Python And Robot Code
 
+![](https://raw.githubusercontent.com/xeonkryptos/XeonRobotFrameworkPlugin/main/docs/imgs/debugging-in-robot-code.jpg)
+
 ### Code Navigation
+
+![](https://raw.githubusercontent.com/xeonkryptos/XeonRobotFrameworkPlugin/main/docs/imgs/navigation.jpg)
 
 ### Find Usages For Keywords and Variables
 
 ### Robot File Structure And Folding
+
+![](https://raw.githubusercontent.com/xeonkryptos/XeonRobotFrameworkPlugin/main/docs/imgs/folding.jpg)
 
 ### Code Inspection
 
@@ -38,6 +46,8 @@ mandatory or all parameters.
 If you also use type hints in your Python code and one of the parameters you want to fill references to an enum, the enum values are added
 to the completion list for the parameter.
 
+![](https://raw.githubusercontent.com/xeonkryptos/XeonRobotFrameworkPlugin/main/docs/imgs/code-completion.jpg)
+
 ### SMT Console View
 
 The SMT Console View is a console view that shows the output of the Robot Framework test execution. It is the same view used for all test 
@@ -45,6 +55,8 @@ executions in Jetbrains IDEs. It shows the output of the test execution in a tre
 and keywords.
 
 ### Rename-Refactor
+
+![](https://raw.githubusercontent.com/xeonkryptos/XeonRobotFrameworkPlugin/main/docs/imgs/rename-refactor.jpg)
 
 ## Prerequisites
   * Set your `Python` interpreter properly for your `PyCharm`
