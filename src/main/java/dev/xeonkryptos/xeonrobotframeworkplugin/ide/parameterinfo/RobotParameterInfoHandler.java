@@ -7,6 +7,7 @@ import com.intellij.lang.parameterInfo.ParameterInfoUIContext;
 import com.intellij.lang.parameterInfo.ParameterInfoUIContextEx;
 import com.intellij.lang.parameterInfo.ParameterInfoUtils;
 import com.intellij.lang.parameterInfo.UpdateParameterInfoContext;
+import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Conditions;
 import com.intellij.openapi.util.Pair;
 import com.intellij.psi.PsiElement;
@@ -14,10 +15,13 @@ import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiReference;
 import com.intellij.psi.PsiWhiteSpace;
 import com.intellij.psi.SyntaxTraverser;
+import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.util.ArrayUtilRt;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCall;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCallName;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTemplateArguments;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.KeywordUtil;
 import dev.xeonkryptos.xeonrobotframeworkplugin.util.GlobalConstants;
 import one.util.streamex.MoreCollectors;
 import one.util.streamex.StreamEx;
@@ -48,7 +52,11 @@ public class RobotParameterInfoHandler implements ParameterInfoHandler<RobotKeyw
 
     @Override
     public void showParameterInfo(@NotNull RobotKeywordCall element, @NotNull CreateParameterInfoContext context) {
-        context.showHint(element, element.getTextOffset(), this);
+        int offset = element.getTextOffset();
+        if (!element.getTextRange().containsOffset(offset)) {
+            offset = context.getOffset();
+        }
+        context.showHint(element, offset, this);
     }
 
     @Nullable
@@ -82,6 +90,12 @@ public class RobotParameterInfoHandler implements ParameterInfoHandler<RobotKeyw
             }
             if (element instanceof RobotKeywordCall found) {
                 keywordCall = found;
+            } else {
+                RobotTemplateArguments templateArguments = PsiTreeUtil.getParentOfType(element, RobotTemplateArguments.class);
+                if (templateArguments != null) {
+                    Project project = psiFile.getProject();
+                    keywordCall = KeywordUtil.getInstance(project).findTemplateKeywordCall(templateArguments);
+                }
             }
         }
         return keywordCall;
@@ -90,6 +104,7 @@ public class RobotParameterInfoHandler implements ParameterInfoHandler<RobotKeyw
     @Override
     public void updateParameterInfo(@NotNull RobotKeywordCall keywordCall, @NotNull UpdateParameterInfoContext context) {
         int offset = context.getEditor().getCaretModel().getOffset();
+        PsiElement traverserElement = keywordCall;
         if (!keywordCall.getTextRange().containsOffset(offset)) {
             PsiElement element = context.getFile().findElementAt(offset);
             if (element instanceof PsiWhiteSpace) {
@@ -98,15 +113,25 @@ public class RobotParameterInfoHandler implements ParameterInfoHandler<RobotKeyw
                 } while (element instanceof PsiWhiteSpace);
             }
             if (element != keywordCall) {
-                context.removeHint();
-                return;
+                traverserElement = PsiTreeUtil.getParentOfType(element, RobotTemplateArguments.class);
+                if (traverserElement == null) {
+                    context.removeHint();
+                    return;
+                }
             }
         }
 
-        SyntaxTraverser<PsiElement> syntaxTraverser = SyntaxTraverser.psiTraverser(keywordCall).expandAndSkip(Conditions.is(keywordCall));
-        int parameterIndex = ParameterInfoHandlerUtil.getCurrentParameterIndex(syntaxTraverser, offset, RobotTypes.PARAMETER, RobotTypes.POSITIONAL_ARGUMENT);
+        SyntaxTraverser<PsiElement> syntaxTraverser = SyntaxTraverser.psiTraverser(traverserElement).expandAndSkip(Conditions.is(traverserElement));
+        int parameterIndex = ParameterInfoHandlerUtil.getCurrentParameterIndex(syntaxTraverser,
+                                                                               offset,
+                                                                               RobotTypes.PARAMETER,
+                                                                               RobotTypes.POSITIONAL_ARGUMENT,
+                                                                               RobotTypes.TEMPLATE_PARAMETER,
+                                                                               RobotTypes.TEMPLATE_ARGUMENT);
         parameterIndex = parameterIndex - 1;
         context.setCurrentParameter(parameterIndex);
+        // Need to reassign the owner because the traverserElement can be a RobotTemplateArguments
+        context.setParameterOwner(traverserElement);
     }
 
     @Override

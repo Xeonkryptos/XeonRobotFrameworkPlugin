@@ -17,6 +17,7 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotResourceImportG
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotSettingsSection;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTaskStatement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTasksSection;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTemplateParameter;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTestCaseStatement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTestCasesSection;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotUserKeywordStatement;
@@ -33,12 +34,18 @@ public class RobotCompletionContributor extends CompletionContributor {
     public RobotCompletionContributor() {
         extend(CompletionType.BASIC, psiElement().andNot(psiComment()).inFile(psiElement(RobotFile.class)), new SectionCompletionProvider());
         extend(CompletionType.BASIC,
-               psiElement().andNot(or(psiComment(), psiElement(RobotTypes.LITERAL_CONSTANT), psiElement(RobotTypes.VARIABLE_BODY)))
+               psiElement().andNot(or(psiComment(),
+                                      psiElement(RobotTypes.LITERAL_CONSTANT),
+                                      psiElement(RobotTypes.VARIABLE_BODY),
+                                      psiElement(RobotTypes.TEMPLATE_ARGUMENT_VALUE)))
                            .inside(true, instanceOf(RobotSettingsSection.class))
                            .inFile(psiElement(RobotFile.class)),
                new SettingsKeywordCompletionProvider());
         extend(CompletionType.BASIC,
-               psiElement().andNot(or(psiComment(), psiElement(RobotTypes.LITERAL_CONSTANT), psiElement(RobotTypes.VARIABLE_BODY)))
+               psiElement().andNot(or(psiComment(),
+                                      psiElement(RobotTypes.LITERAL_CONSTANT),
+                                      psiElement(RobotTypes.VARIABLE_BODY),
+                                      psiElement(RobotTypes.TEMPLATE_ARGUMENT_VALUE)))
                            .inside(true, or(instanceOf(RobotTestCaseStatement.class), instanceOf(RobotTaskStatement.class)))
                            .inFile(psiElement(RobotFile.class)),
                new LocalSettingsCompletionProvider());
@@ -49,12 +56,18 @@ public class RobotCompletionContributor extends CompletionContributor {
                            .inFile(psiElement(RobotFile.class)),
                new ImportCompletionProvider());
         extend(CompletionType.BASIC,
-               psiElement().andNot(or(psiComment(), psiElement(RobotTypes.LITERAL_CONSTANT), psiElement(RobotTypes.VARIABLE_BODY)))
+               psiElement().andNot(or(psiComment(),
+                                      psiElement(RobotTypes.LITERAL_CONSTANT),
+                                      psiElement(RobotTypes.VARIABLE_BODY),
+                                      psiElement(RobotTypes.TEMPLATE_ARGUMENT_VALUE)))
                            .inside(true, instanceOf(RobotTestCaseStatement.class))
                            .inFile(psiElement(RobotFile.class)),
                new GherkinCompletionProvider());
         extend(CompletionType.BASIC,
-               psiElement().andNot(or(psiComment(), psiElement(RobotTypes.LITERAL_CONSTANT), psiElement(RobotTypes.VARIABLE_BODY)))
+               psiElement().andNot(or(psiComment(),
+                                      psiElement(RobotTypes.LITERAL_CONSTANT),
+                                      psiElement(RobotTypes.VARIABLE_BODY),
+                                      psiElement(RobotTypes.TEMPLATE_ARGUMENT_VALUE)))
                            .inside(true,
                                    or(instanceOf(RobotTestCaseStatement.class),
                                       instanceOf(RobotUserKeywordStatement.class),
@@ -64,17 +77,23 @@ public class RobotCompletionContributor extends CompletionContributor {
         extend(CompletionType.BASIC,
                // TODO: There are keywords executing other keywords. Keywords are provided as arguments to those keywords.
                //  Extend code completion to support those keywords and provide code completion for keywords in argument list.
-               psiElement().andNot(or(psiComment(), psiElement(RobotTypes.LITERAL_CONSTANT), psiElement(RobotTypes.VARIABLE_BODY)))
+               psiElement().andNot(or(psiComment(),
+                                      psiElement(RobotTypes.LITERAL_CONSTANT),
+                                      psiElement(RobotTypes.VARIABLE_BODY),
+                                      psiElement(RobotTypes.TEMPLATE_ARGUMENT_VALUE)))
                            .inside(true,
                                    or(instanceOf(RobotTestCasesSection.class), instanceOf(RobotTasksSection.class), instanceOf(RobotKeywordsSection.class)))
                            .inFile(psiElement(RobotFile.class)), new KeywordCompletionProvider());
         // Provide parameter completions in context of keyword statements
         extend(CompletionType.BASIC,
-               psiElement(RobotTypes.LITERAL_CONSTANT).andNot(psiElement().inside(true, instanceOf(RobotParameter.class))).inFile(psiElement(RobotFile.class)),
+               psiElement().andOr(psiElement(RobotTypes.LITERAL_CONSTANT), psiElement(RobotTypes.TEMPLATE_ARGUMENT_VALUE))
+                           .andNot(psiElement().inside(true, or(instanceOf(RobotParameter.class), instanceOf(RobotTemplateParameter.class))))
+                           .inFile(psiElement(RobotFile.class)),
                new KeywordParametersCompletionProvider());
         // Provide completions in context of variables or arguments
         extend(CompletionType.BASIC,
-               psiElement().andOr(psiElement(RobotTypes.LITERAL_CONSTANT), psiElement(RobotTypes.VARIABLE_BODY)).inFile(psiElement(RobotFile.class)),
+               psiElement().andOr(psiElement(RobotTypes.LITERAL_CONSTANT), psiElement(RobotTypes.VARIABLE_BODY), psiElement(RobotTypes.TEMPLATE_ARGUMENT_VALUE))
+                           .inFile(psiElement(RobotFile.class)),
                new VariableCompletionProvider());
         extend(CompletionType.BASIC,
                psiElement(RobotTypes.LITERAL_CONSTANT).inside(true, withElementInLocalSetting("[Tags]")).inFile(psiElement(RobotFile.class)),

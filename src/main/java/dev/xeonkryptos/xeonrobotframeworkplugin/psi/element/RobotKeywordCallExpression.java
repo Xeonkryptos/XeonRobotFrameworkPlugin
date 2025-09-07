@@ -1,21 +1,15 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.psi.element;
 
+import com.intellij.psi.PsiElement;
+
 import java.util.Collection;
 import java.util.OptionalInt;
 
 public interface RobotKeywordCallExpression {
 
-    default boolean allRequiredParametersArePresent() {
-        return computeMissingRequiredParameters().isEmpty();
-    }
-
-    Collection<String> computeMissingRequiredParameters();
-
-    Collection<DefinedParameter> computeMissingParameters();
-
     Collection<DefinedParameter> getAvailableParameters();
 
-    Collection<RobotArgument> getAllCallArguments();
-
     OptionalInt getStartOfKeywordsOnlyIndex();
+
+    PsiElement findParameterReference(String parameterName);
 }

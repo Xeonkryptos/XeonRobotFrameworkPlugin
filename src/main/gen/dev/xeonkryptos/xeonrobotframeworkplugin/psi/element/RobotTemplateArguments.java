@@ -5,15 +5,12 @@ import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 
-public interface RobotTemplateArguments extends RobotStatement {
+public interface RobotTemplateArguments extends RobotTemplateArgumentsExpression, RobotCallArgumentsContainer, RobotStatement {
 
   @NotNull
   List<RobotTemplateArgument> getTemplateArgumentList();
 
   @NotNull
   List<RobotTemplateParameter> getTemplateParameterList();
-
-  @NotNull
-  List<RobotVariable> getVariableList();
 
 }

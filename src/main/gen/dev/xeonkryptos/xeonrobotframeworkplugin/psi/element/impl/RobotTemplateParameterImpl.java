@@ -45,4 +45,9 @@ public class RobotTemplateParameterImpl extends RobotPsiElementBase implements R
     return PsiTreeUtil.getChildOfType(this, RobotVariable.class);
   }
 
+  @Override
+  public @NotNull String getParameterName() {
+    return RobotPsiImplUtil.getParameterName(this);
+  }
+
 }

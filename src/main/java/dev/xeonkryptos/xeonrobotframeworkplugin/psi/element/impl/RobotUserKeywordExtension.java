@@ -6,7 +6,6 @@ import com.intellij.psi.stubs.IStubElementType;
 import com.intellij.util.IncorrectOperationException;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.DefinedParameter;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLocalArgumentsSetting;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLocalSetting;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotUserKeywordStatement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotUserKeywordStatementId;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotStubPsiElementBase;
@@ -22,6 +21,8 @@ import java.util.Optional;
 public abstract class RobotUserKeywordExtension extends RobotStubPsiElementBase<RobotUserKeywordStub, RobotUserKeywordStatement>
         implements RobotUserKeywordStatement {
 
+    private Collection<DefinedParameter> inputParameters;
+
     public RobotUserKeywordExtension(@NotNull ASTNode node) {
         super(node);
     }
@@ -31,15 +32,26 @@ public abstract class RobotUserKeywordExtension extends RobotStubPsiElementBase<
     }
 
     @Override
+    public void subtreeChanged() {
+        super.subtreeChanged();
+
+        inputParameters = null;
+    }
+
+    @Override
     public Collection<DefinedParameter> getInputParameters() {
-        Optional<RobotLocalArgumentsSetting> argumentsSetting = getLocalArgumentsSettingList().stream().findFirst();
-        if (argumentsSetting.isPresent()) {
-            RobotLocalArgumentsSetting robotLocalSetting = argumentsSetting.get();
-            RobotUserKeywordInputArgumentCollector inputArgumentCollector = new RobotUserKeywordInputArgumentCollector();
-            robotLocalSetting.acceptChildren(inputArgumentCollector);
-            return inputArgumentCollector.getInputArguments();
+        if (inputParameters == null) {
+            Optional<RobotLocalArgumentsSetting> argumentsSetting = getLocalArgumentsSettingList().stream().findFirst();
+            if (argumentsSetting.isPresent()) {
+                RobotLocalArgumentsSetting robotLocalSetting = argumentsSetting.get();
+                RobotUserKeywordInputArgumentCollector inputArgumentCollector = new RobotUserKeywordInputArgumentCollector();
+                robotLocalSetting.acceptChildren(inputArgumentCollector);
+                inputParameters = inputArgumentCollector.getInputArguments();
+            } else {
+                inputParameters = List.of();
+            }
         }
-        return List.of();
+        return inputParameters;
     }
 
     @Override

@@ -11,7 +11,7 @@ import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.*;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.*;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotPsiImplUtil;
 
-public class RobotTemplateArgumentsImpl extends RobotPsiElementBase implements RobotTemplateArguments {
+public class RobotTemplateArgumentsImpl extends RobotTemplateArgumentsExtension implements RobotTemplateArguments {
 
   public RobotTemplateArgumentsImpl(@NotNull ASTNode node) {
     super(node);
@@ -37,12 +37,6 @@ public class RobotTemplateArgumentsImpl extends RobotPsiElementBase implements R
   @NotNull
   public List<RobotTemplateParameter> getTemplateParameterList() {
     return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotTemplateParameter.class);
-  }
-
-  @Override
-  @NotNull
-  public List<RobotVariable> getVariableList() {
-    return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotVariable.class);
   }
 
 }

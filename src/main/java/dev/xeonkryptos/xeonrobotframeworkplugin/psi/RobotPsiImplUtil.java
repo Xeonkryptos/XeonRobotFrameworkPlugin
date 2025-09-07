@@ -15,6 +15,8 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotParameterId;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotPositionalArgument;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTaskId;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTaskStatement;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTemplateParameter;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTemplateParameterId;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTestCaseId;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTestCaseStatement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotUserKeywordStatement;
@@ -29,6 +31,7 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.ref.RobotArgumentReference;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.ref.RobotKeywordCallLibraryReference;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.ref.RobotKeywordCallNameReference;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.ref.RobotParameterReference;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.ref.RobotTemplateParameterReference;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.ref.RobotVariableBodyReference;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.QualifiedNameBuilder;
 import org.jetbrains.annotations.NotNull;
@@ -106,6 +109,12 @@ public class RobotPsiImplUtil {
     }
 
     @NotNull
+    public static String getParameterName(@NotNull RobotTemplateParameter parameter) {
+        RobotTemplateParameterId parameterId = parameter.getTemplateParameterId();
+        return parameterId.getText();
+    }
+
+    @NotNull
     public static String getSettingName(@NotNull RobotLocalSetting localSetting) {
         RobotLocalSettingId localSettingId = localSetting.getLocalSettingId();
         return localSettingId.getText();
@@ -140,6 +149,11 @@ public class RobotPsiImplUtil {
     @NotNull
     public static PsiReference getReference(RobotPositionalArgument positionalArgument) {
         return new RobotArgumentReference(positionalArgument);
+    }
+
+    @NotNull
+    public static PsiReference getReference(RobotTemplateParameterId templateParameterId) {
+        return new RobotTemplateParameterReference(templateParameterId);
     }
 
     @NotNull

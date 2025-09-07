@@ -98,6 +98,7 @@ public class RobotVisitor extends PsiElementVisitor {
     // visitKeywordCallExpression(o);
     // visitPsiNameIdentifierOwner(o);
     // visitNavigationItem(o);
+    // visitCallArgumentsContainer(o);
     // visitStatement(o);
   }
 
@@ -241,15 +242,19 @@ public class RobotVisitor extends PsiElementVisitor {
   }
 
   public void visitTemplateArgument(@NotNull RobotTemplateArgument o) {
-    visitStatement(o);
+    visitArgument(o);
+    // visitStatement(o);
   }
 
   public void visitTemplateArguments(@NotNull RobotTemplateArguments o) {
-    visitStatement(o);
+    visitTemplateArgumentsExpression(o);
+    // visitCallArgumentsContainer(o);
+    // visitStatement(o);
   }
 
   public void visitTemplateParameter(@NotNull RobotTemplateParameter o) {
-    visitStatement(o);
+    visitArgument(o);
+    // visitStatement(o);
   }
 
   public void visitTemplateParameterArgument(@NotNull RobotTemplateParameterArgument o) {
@@ -357,6 +362,10 @@ public class RobotVisitor extends PsiElementVisitor {
   }
 
   public void visitStatement(@NotNull RobotStatement o) {
+    visitPsiElement(o);
+  }
+
+  public void visitTemplateArgumentsExpression(@NotNull RobotTemplateArgumentsExpression o) {
     visitPsiElement(o);
   }
 

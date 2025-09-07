@@ -7,7 +7,6 @@ import com.intellij.psi.stubs.IStubElementType;
 import com.intellij.psi.util.CachedValue;
 import com.intellij.psi.util.CachedValueProvider.Result;
 import com.intellij.psi.util.CachedValuesManager;
-import com.intellij.psi.util.ParameterizedCachedValue;
 import com.intellij.util.IncorrectOperationException;
 import com.jetbrains.python.psi.PyFunction;
 import com.jetbrains.python.psi.PyNamedParameter;
@@ -30,13 +29,14 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotStubPsiElementBase
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.QualifiedNameBuilder;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.RobotElementGenerator;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.visitor.RecursiveRobotVisitor;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.visitor.RobotKeywordCallArgumentsCollector;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.visitor.RobotCallArgumentsCollector;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import javax.swing.Icon;
 import java.text.Collator;
 import java.util.Collection;
-import java.util.Iterator;
+import java.util.Comparator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.OptionalInt;
@@ -45,11 +45,10 @@ import java.util.stream.Collectors;
 
 public abstract class RobotKeywordCallExtension extends RobotStubPsiElementBase<RobotKeywordCallStub, RobotKeywordCall> implements RobotKeywordCall {
 
-    private static final Key<ParameterizedCachedValue<Collection<DefinedParameter>, PsiElement>> AVAILABLE_KEYWORD_PARAMETERS_KEY = Key.create(
-            "AVAILABLE_KEYWORD_PARAMETERS_KEY");
     private static final Key<CachedValue<OptionalInt>> START_OF_KEYWORDS_ONLY_INDEX_KEY = Key.create("START_OF_KEYWORDS_ONLY_INDEX_KEY");
 
     private Collection<RobotArgument> allCallArguments;
+    private Set<String> definedParameterNames;
 
     public RobotKeywordCallExtension(@NotNull ASTNode node) {
         super(node);
@@ -63,19 +62,14 @@ public abstract class RobotKeywordCallExtension extends RobotStubPsiElementBase<
     public Collection<DefinedParameter> getAvailableParameters() {
         PsiElement psiElement = getKeywordCallName().getReference().resolve();
         if (psiElement != null) {
-            CachedValuesManager cachedValuesManager = CachedValuesManager.getManager(getProject());
-            return cachedValuesManager.getParameterizedCachedValue(this, AVAILABLE_KEYWORD_PARAMETERS_KEY, element -> {
-                if (element instanceof PyFunction pyFunction) {
-                    Set<DefinedParameter> results = new LinkedHashSet<>();
-                    PyParameter[] pyParameters = pyFunction.getParameterList().getParameters();
-                    inspectPythonFunctionStatically(pyParameters, results);
-                    return Result.create(results, pyFunction, this);
-                } else {
-                    RobotUserKeywordStatement keywordDefinition = (RobotUserKeywordStatement) element;
-                    Collection<DefinedParameter> parameters = keywordDefinition.getInputParameters();
-                    return Result.create(parameters, keywordDefinition, this);
-                }
-            }, false, psiElement);
+            if (psiElement instanceof PyFunction pyFunction) {
+                Set<DefinedParameter> results = new LinkedHashSet<>();
+                PyParameter[] pyParameters = pyFunction.getParameterList().getParameters();
+                inspectPythonFunctionStatically(pyParameters, results);
+                return results;
+            }
+            RobotUserKeywordStatement keywordDefinition = (RobotUserKeywordStatement) psiElement;
+            return keywordDefinition.getInputParameters();
         }
         return List.of();
     }
@@ -96,50 +90,47 @@ public abstract class RobotKeywordCallExtension extends RobotStubPsiElementBase<
 
     @Override
     public Collection<String> computeMissingRequiredParameters() {
-        Set<String> definedParameters = getParameterList().stream().map(RobotParameter::getParameterName).collect(Collectors.toCollection(LinkedHashSet::new));
-        Collection<DefinedParameter> requiredParameterNames = getAvailableParameters().stream()
-                                                                                      .filter(param -> !param.hasDefaultValue() && !param.isKeywordContainer())
-                                                                                      .collect(Collectors.toCollection(LinkedHashSet::new));
-        removeMatchingParameters(definedParameters, getAvailableParameters());
-        int missingParameterCount = requiredParameterNames.size() - getPositionalArgumentList().size();
-        if (missingParameterCount <= 0) {
-            return List.of();
-        }
-        return requiredParameterNames.stream().map(DefinedParameter::getLookup).collect(Collectors.toCollection(LinkedHashSet::new));
+        return KeywordParameterEvaluator.computeMissingRequiredParameters(this, this);
     }
 
     @Override
     public Collection<DefinedParameter> computeMissingParameters() {
-        Set<String> definedParameters = getParameterList().stream().map(RobotParameter::getParameterName).collect(Collectors.toCollection(LinkedHashSet::new));
-        Collection<DefinedParameter> availableParameters = new LinkedHashSet<>(getAvailableParameters());
-        removeMatchingParameters(definedParameters, getAvailableParameters());
-        return availableParameters;
+        return KeywordParameterEvaluator.computeMissingParameters(this, this);
     }
 
-    private void removeMatchingParameters(Set<String> definedParameters, Collection<? extends DefinedParameter> availableParameters) {
+    @Override
+    public Collection<String> getDefinedParameterNames() {
+        if (definedParameterNames == null) {
+            definedParameterNames = getParameterList().stream().map(RobotParameter::getParameterName).collect(Collectors.toCollection(LinkedHashSet::new));
+        }
+        return new LinkedHashSet<>(definedParameterNames);
+    }
+
+    @Nullable
+    @Override
+    public PsiElement findParameterReference(String parameterName) {
         RobotOptionsProvider robotOptionsProvider = RobotOptionsProvider.getInstance(getProject());
         Collator parameterNameCollator = robotOptionsProvider.getParameterNameCollator();
 
-        Iterator<String> definedParamsIterator = definedParameters.iterator();
-        while (definedParamsIterator.hasNext()) {
-            String definedParamName = definedParamsIterator.next();
-            Iterator<? extends DefinedParameter> availableParamsIterator = availableParameters.iterator();
-            while (availableParamsIterator.hasNext()) {
-                DefinedParameter availableParameter = availableParamsIterator.next();
-                String availableParameterName = availableParameter.getLookup();
-                if (parameterNameCollator.equals(definedParamName, availableParameterName)) {
-                    definedParamsIterator.remove();
-                    availableParamsIterator.remove();
-                    break;
-                }
-            }
+        PsiElement reference = getAvailableParameters().stream()
+                                                       .filter(param -> parameterNameCollator.equals(parameterName, param.getLookup())
+                                                                        || param.isKeywordContainer())
+                                                       .min(Comparator.comparing(DefinedParameter::isKeywordContainer,
+                                                                                 (kc1, kc2) -> kc1 == kc2 ? 0 : kc1 ? 1 : -1))
+                                                       .map(DefinedParameter::reference)
+                                                       .orElse(null);
+        if (reference == null) {
+            // Fall back to PyFunction element. The parameter itself couldn't be found
+            RobotKeywordCallName keywordCallName = getKeywordCallName();
+            reference = keywordCallName.getReference().resolve();
         }
+        return reference;
     }
 
     @Override
     public Collection<RobotArgument> getAllCallArguments() {
         if (allCallArguments == null) {
-            RobotKeywordCallArgumentsCollector callArgumentsCollector = new RobotKeywordCallArgumentsCollector();
+            RobotCallArgumentsCollector callArgumentsCollector = new RobotCallArgumentsCollector();
             acceptChildren(callArgumentsCollector);
             allCallArguments = callArgumentsCollector.getArguments();
         }
@@ -221,6 +212,7 @@ public abstract class RobotKeywordCallExtension extends RobotStubPsiElementBase<
         super.subtreeChanged();
 
         allCallArguments = null;
+        definedParameterNames = null;
     }
 
     @NotNull

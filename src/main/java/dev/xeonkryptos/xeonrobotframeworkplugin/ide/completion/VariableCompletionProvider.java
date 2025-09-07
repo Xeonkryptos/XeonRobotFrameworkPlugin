@@ -15,15 +15,18 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.ide.config.RobotOptionsProvider;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.dto.ImportType;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.DefinedVariable;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.KeywordFile;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotArgument;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotFile;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCall;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLocalSetting;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotParameter;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotPositionalArgument;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotStatement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTaskStatement;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTemplateArguments;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTemplateParameter;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTestCaseStatement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotUserKeywordStatement;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.KeywordUtil;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.visitor.RecursiveRobotVisitor;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.visitor.RobotInStatementVariableCollector;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.visitor.RobotSectionVariablesCollector;
@@ -40,14 +43,26 @@ class VariableCompletionProvider extends CompletionProvider<CompletionParameters
 
     @Override
     protected void addCompletions(@NotNull CompletionParameters parameters, @NotNull ProcessingContext context, @NotNull CompletionResultSet result) {
-        RobotLocalSetting localSettingElement = PsiTreeUtil.getParentOfType(parameters.getOriginalPosition(), RobotLocalSetting.class);
+        PsiElement psiElement = parameters.getPosition();
+        RobotLocalSetting localSettingElement = PsiTreeUtil.getParentOfType(psiElement, RobotLocalSetting.class);
         if (localSettingElement != null && RESTRICTED_VARIABLE_COMPLETION_LOCAL_SETTING_NAMES.contains(localSettingElement.getSettingName())) {
             return;
         }
 
-        PsiElement psiElement = parameters.getPosition();
-        RobotStatement parentOfInterest = PsiTreeUtil.getParentOfType(psiElement, RobotParameter.class, RobotKeywordCall.class);
-        if (parentOfInterest instanceof RobotKeywordCall keywordCall) {
+        RobotKeywordCall keywordCall = null;
+        RobotStatement parentOfInterest = PsiTreeUtil.getParentOfType(psiElement,
+                                                                      // Stop-gaps to ignore any of the real-interested parents
+                                                                      RobotParameter.class,
+                                                                      RobotTemplateParameter.class,
+                                                                      // Really interested in, but only when not one of the previous defined types are matching
+                                                                      RobotKeywordCall.class,
+                                                                      RobotTemplateArguments.class);
+        if (parentOfInterest instanceof RobotTemplateArguments templateArguments) {
+            keywordCall = KeywordUtil.getInstance(templateArguments.getProject()).findTemplateKeywordCall(templateArguments);
+        } else if (parentOfInterest instanceof RobotKeywordCall call) {
+            keywordCall = call;
+        }
+        if (keywordCall != null) {
             OptionalInt startOfKeywordsOnlyIndex = keywordCall.getStartOfKeywordsOnlyIndex();
             if (startOfKeywordsOnlyIndex.isPresent()) {
                 int keywordsOnlyStartIndex = startOfKeywordsOnlyIndex.getAsInt();
@@ -55,8 +70,9 @@ class VariableCompletionProvider extends CompletionProvider<CompletionParameters
                     // As easy as that. With keywords only starting at 0 means, no variables are allowed when a parameter is expected
                     return;
                 }
+
                 RobotKeywordCallLocationIdentifier locationIdentifier = new RobotKeywordCallLocationIdentifier(psiElement);
-                keywordCall.acceptChildren(locationIdentifier);
+                parentOfInterest.acceptChildren(locationIdentifier);
 
                 int elementIndex = locationIdentifier.getElementIndex();
                 if (elementIndex >= keywordsOnlyStartIndex) {
@@ -150,15 +166,7 @@ class VariableCompletionProvider extends CompletionProvider<CompletionParameters
         }
 
         @Override
-        public void visitParameter(@NotNull RobotParameter o) {
-            ++currentIndex;
-
-            int currentOffsetInParent = o.getStartOffsetInParent();
-            updateFoundElementIndex(currentOffsetInParent);
-        }
-
-        @Override
-        public void visitPositionalArgument(@NotNull RobotPositionalArgument o) {
+        public void visitArgument(@NotNull RobotArgument o) {
             ++currentIndex;
 
             int currentOffsetInParent = o.getStartOffsetInParent();

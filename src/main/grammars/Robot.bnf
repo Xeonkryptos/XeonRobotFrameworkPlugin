@@ -154,10 +154,21 @@ private testcase_task_statement ::= local_setting
     | executable_statement
     | template_arguments
 
-template_arguments ::= (template_argument | template_parameter | variable)+ eol_marker
-template_argument ::= TEMPLATE_ARGUMENT_VALUE
-template_parameter ::= template_parameter_id ASSIGNMENT (template_parameter_argument | variable) {pin=2}
-template_parameter_id ::= TEMPLATE_PARAMETER_NAME
+template_arguments ::= (template_argument | template_parameter)+ eol_marker {
+    implements=[
+        "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTemplateArgumentsExpression"
+        "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotCallArgumentsContainer"
+    ]
+    mixin="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotTemplateArgumentsExtension"
+}
+template_argument ::= TEMPLATE_ARGUMENT_VALUE | variable {implements="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotArgument"}
+
+template_parameter ::= template_parameter_id ASSIGNMENT (template_parameter_argument | variable) {
+    pin=2
+    methods=[getParameterName]
+    implements="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotArgument"
+}
+template_parameter_id ::= TEMPLATE_PARAMETER_NAME {methods=[getReference]}
 template_parameter_argument ::= TEMPLATE_ARGUMENT_VALUE
 
 bdd_statement ::= (
@@ -230,6 +241,7 @@ fake keyword_call ::= base_keyword_call {
         "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCallExpression"
         "com.intellij.psi.PsiNameIdentifierOwner"
         "com.intellij.navigation.NavigationItem"
+        "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotCallArgumentsContainer"
     ]
     methods = [getName getNameIdentifier]
     mixin = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotKeywordCallExtension"

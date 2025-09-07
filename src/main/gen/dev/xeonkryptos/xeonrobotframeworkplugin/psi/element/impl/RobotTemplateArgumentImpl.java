@@ -27,4 +27,10 @@ public class RobotTemplateArgumentImpl extends RobotPsiElementBase implements Ro
     else super.accept(visitor);
   }
 
+  @Override
+  @Nullable
+  public RobotVariable getVariable() {
+    return PsiTreeUtil.getChildOfType(this, RobotVariable.class);
+  }
+
 }

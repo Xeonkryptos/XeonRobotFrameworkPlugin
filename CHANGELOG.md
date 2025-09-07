@@ -10,6 +10,7 @@
 - Mark used keywords as deprecated when Robot's standard deprecation marker **\*DEPRECATED** in documentation is used; in user keywords and python functions
 - Exclude private keywords from code completion when those are imported ones
 - QuickFix to add missing mandatory parameters in keyword calls
+- Same functionality for template parameters as for normal parameters (code completion, parameter info, navigation to definition)
 
 ### Changed
 
@@ -22,6 +23,8 @@
 - Don't complain about missing keyword parameters when defined as a template
 - Added Tasks to the member structure view
 - Use the same Collator logic for parameter code completion as for parameter resolving
+- ParameterInfo popup not separating parameters when based on a user keyword correctly
+- Incorrectly marked variable definitions as unused
 
 ## 0.5.0
 

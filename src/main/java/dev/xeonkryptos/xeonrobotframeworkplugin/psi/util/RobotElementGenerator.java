@@ -16,6 +16,7 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotParameter;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotParameterId;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotPositionalArgument;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTaskId;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTemplateParameterId;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTestCaseId;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotUserKeywordStatementId;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableBodyId;
@@ -133,6 +134,23 @@ public record RobotElementGenerator(Project project) {
             return null;
         }
         RobotParameterIdFinder parameterIdFinder = new RobotParameterIdFinder();
+        psiFile.acceptChildren(parameterIdFinder);
+        return parameterIdFinder.parameterId;
+    }
+
+    public RobotTemplateParameterId createNewTemplateParameterId(String parameterId) {
+        String fileContent = """
+                             *** Test Case ***
+                             Dummy
+                                 [Template]  Keyword
+                                 %s=Dummy
+                             """.formatted(parameterId);
+
+        PsiFile psiFile = createDummyPsiFile(fileContent);
+        if (psiFile == null) {
+            return null;
+        }
+        RobotTemplateParameterIdFinder parameterIdFinder = new RobotTemplateParameterIdFinder();
         psiFile.acceptChildren(parameterIdFinder);
         return parameterIdFinder.parameterId;
     }
@@ -257,6 +275,16 @@ public record RobotElementGenerator(Project project) {
 
         @Override
         public void visitParameterId(@NotNull RobotParameterId o) {
+            parameterId = o;
+        }
+    }
+
+    private static final class RobotTemplateParameterIdFinder extends RecursiveRobotVisitor {
+
+        private RobotTemplateParameterId parameterId;
+
+        @Override
+        public void visitTemplateParameterId(@NotNull RobotTemplateParameterId o) {
             parameterId = o;
         }
     }

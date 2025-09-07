@@ -67,6 +67,8 @@
                                  implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.manipulator.RobotVariableBodyIdManipulator"/>
         <lang.elementManipulator forClass="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotParameterId"
                                  implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.manipulator.RobotParameterIdManipulator"/>
+        <lang.elementManipulator forClass="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTemplateParameterId"
+                                 implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.manipulator.RobotTemplateParameterIdManipulator"/>
 
         <!-- Annotations -->
         <annotator language="Robot" implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.ide.inspections.compilation.RobotParameterAnnotator"/>
@@ -82,6 +84,7 @@
         <annotator language="Robot"
                    implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.ide.inspections.compilation.RobotLocalArgumentsSettingAnnotator"/>
         <annotator language="Robot" implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.ide.inspections.compilation.RobotArgumentAnnotator"/>
+        <annotator language="Robot" implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.ide.inspections.compilation.RobotTemplateParameterAnnotator"/>
 
         <!-- Inspections -->
         <!-- TODO: inspection: error?: resource import is not a robot file -->

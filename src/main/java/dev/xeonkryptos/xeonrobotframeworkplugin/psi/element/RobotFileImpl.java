@@ -131,7 +131,6 @@ public class RobotFileImpl extends PsiFileBase implements KeywordFile, RobotFile
     }
 
     private Collection<DefinedVariable> getSectionVariables() {
-        Collection<DefinedVariable> sectionVariables = this.sectionVariables;
         if (sectionVariables == null) {
             RobotSectionVariablesCollector visitor = new RobotSectionVariablesCollector();
             acceptChildren(visitor);
@@ -149,13 +148,12 @@ public class RobotFileImpl extends PsiFileBase implements KeywordFile, RobotFile
     @NotNull
     @Override
     public final Collection<DefinedKeyword> getDefinedKeywords() {
-        Collection<DefinedKeyword> keywords = this.definedKeywords;
-        if (keywords == null) {
+        if (definedKeywords == null) {
             RobotUserKeywordsCollector userKeywordsCollector = new RobotUserKeywordsCollector();
             acceptChildren(userKeywordsCollector);
-            keywords = userKeywordsCollector.getKeywords();
+            definedKeywords = userKeywordsCollector.getKeywords();
         }
-        return keywords;
+        return definedKeywords;
     }
 
     @NotNull

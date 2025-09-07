@@ -2,6 +2,7 @@ package dev.xeonkryptos.xeonrobotframeworkplugin.ide.parameterinfo;
 
 import com.intellij.lang.parameterInfo.ParameterInfoUIContext;
 import com.intellij.lang.parameterInfo.ParameterInfoUIContextEx;
+import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Pair;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.SyntaxTraverser;
@@ -20,8 +21,8 @@ import com.jetbrains.python.psi.types.PyStructuralType;
 import com.jetbrains.python.psi.types.TypeEvalContext;
 import dev.xeonkryptos.xeonrobotframeworkplugin.ide.config.RobotOptionsProvider;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.DefinedParameter;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotCallArgumentsContainer;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotArgument;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCall;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotParameter;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotUserKeywordStatement;
 import org.jetbrains.annotations.NotNull;
@@ -73,9 +74,10 @@ public class ParameterInfoHandlerUtil {
                                                                                    @NotNull ParameterInfoUIContext context,
                                                                                    int currentParamIndex,
                                                                                    Map<Integer, EnumSet<ParameterInfoUIContextEx.Flag>> hintFlags) {
-        RobotKeywordCall keywordCall = (RobotKeywordCall) context.getParameterOwner();
-        RobotArgument[] arguments = keywordCall.getAllCallArguments().toArray(RobotArgument[]::new);
+        RobotCallArgumentsContainer allCallArgumentsContainer = (RobotCallArgumentsContainer) context.getParameterOwner();
+        RobotArgument[] arguments = allCallArgumentsContainer.getAllCallArguments().toArray(RobotArgument[]::new);
 
+        final Project project = callingFunction.getProject();
         final Pair<List<String>, List<String>> hintsAndAnnotations;
         if (callingFunction instanceof PyFunction pyFunction) {
             final Map<Integer, PyCallableParameter> indexToNamedParameter = new HashMap<>();
@@ -83,7 +85,7 @@ public class ParameterInfoHandlerUtil {
             // param -> hint index. indexes are not contiguous, because some hints are parentheses.
             final Map<PyCallableParameter, Integer> parameterToHintIndex = new HashMap<>();
 
-            final TypeEvalContext typeEvalContext = TypeEvalContext.codeAnalysis(keywordCall.getProject(), pyFunction.getContainingFile());
+            final TypeEvalContext typeEvalContext = TypeEvalContext.codeAnalysis(project, pyFunction.getContainingFile());
             final List<PyCallableParameter> parameters = pyFunction.getParameters(typeEvalContext);
             final PyCallableType callableType = (PyCallableType) typeEvalContext.getType(pyFunction);
             if (callableType == null) {
@@ -103,23 +105,28 @@ public class ParameterInfoHandlerUtil {
                                                          hintFlags,
                                                          currentParamIndex);
         } else {
-            // param -> hint index. indexes are not contiguous, because some hints are parentheses.
             final Map<DefinedParameter, Integer> parameterToHintIndex = new HashMap<>();
 
-            RobotUserKeywordStatement keyword = (RobotUserKeywordStatement) callingFunction;
-            Collection<DefinedParameter> parameters = keyword.getInputParameters();
+            RobotUserKeywordStatement userKeyword = (RobotUserKeywordStatement) callingFunction;
+            Collection<DefinedParameter> parameters = userKeyword.getInputParameters();
             List<String> hints = new ArrayList<>();
             List<String> annotations = new ArrayList<>();
+            int index = 0;
+            int size = parameters.size();
             for (DefinedParameter parameter : parameters) {
                 String hint = parameter.getLookup();
                 if (parameter.hasDefaultValue()) {
                     hint += " = " + parameter.getDefaultValue();
+                }
+                if (index + 1 < size) {
+                    hint += ", ";
                 }
                 final int hintIndex = hints.size();
                 hintFlags.put(hintIndex, EnumSet.noneOf(ParameterInfoUIContextEx.Flag.class));
                 parameterToHintIndex.put(parameter, hintIndex);
                 hints.add(hint);
                 annotations.add("");
+                ++index;
             }
             hintsAndAnnotations = Pair.create(hints, annotations);
             ParameterInfoHandlerUtil.highlightParameters(List.copyOf(parameters), parameterToHintIndex, hintFlags, Arrays.asList(arguments), currentParamIndex);

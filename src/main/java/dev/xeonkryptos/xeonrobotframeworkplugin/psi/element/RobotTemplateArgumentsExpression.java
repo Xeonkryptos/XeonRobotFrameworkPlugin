@@ -1,0 +1,5 @@
+package dev.xeonkryptos.xeonrobotframeworkplugin.psi.element;
+
+import com.intellij.psi.PsiElement;
+
+public interface RobotTemplateArgumentsExpression extends PsiElement {}

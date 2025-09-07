@@ -1887,19 +1887,19 @@ public class RobotParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // TEMPLATE_ARGUMENT_VALUE
+  // TEMPLATE_ARGUMENT_VALUE | variable
   public static boolean template_argument(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "template_argument")) return false;
-    if (!nextTokenIs(b, TEMPLATE_ARGUMENT_VALUE)) return false;
     boolean r;
-    Marker m = enter_section_(b);
+    Marker m = enter_section_(b, l, _NONE_, TEMPLATE_ARGUMENT, "<template argument>");
     r = consumeToken(b, TEMPLATE_ARGUMENT_VALUE);
-    exit_section_(b, m, TEMPLATE_ARGUMENT, r);
+    if (!r) r = variable(b, l + 1);
+    exit_section_(b, l, m, r, false, null);
     return r;
   }
 
   /* ********************************************************** */
-  // (template_argument | template_parameter | variable)+ eol_marker
+  // (template_argument | template_parameter)+ eol_marker
   public static boolean template_arguments(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "template_arguments")) return false;
     boolean r;
@@ -1910,7 +1910,7 @@ public class RobotParser implements PsiParser, LightPsiParser {
     return r;
   }
 
-  // (template_argument | template_parameter | variable)+
+  // (template_argument | template_parameter)+
   private static boolean template_arguments_0(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "template_arguments_0")) return false;
     boolean r;
@@ -1925,13 +1925,12 @@ public class RobotParser implements PsiParser, LightPsiParser {
     return r;
   }
 
-  // template_argument | template_parameter | variable
+  // template_argument | template_parameter
   private static boolean template_arguments_0_0(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "template_arguments_0_0")) return false;
     boolean r;
     r = template_argument(b, l + 1);
     if (!r) r = template_parameter(b, l + 1);
-    if (!r) r = variable(b, l + 1);
     return r;
   }
 
