@@ -27,7 +27,7 @@ class KeywordParameterEvaluator {
                                                                          .filter(param -> !param.hasDefaultValue() && !param.isKeywordContainer())
                                                                          .collect(Collectors.toCollection(LinkedHashSet::new));
         removeMatchingParameters(definedParameters, requiredParameterNames, project);
-        int missingParameterCount = requiredParameterNames.size() - keywordCall.getPositionalArgumentList().size();
+        int missingParameterCount = requiredParameterNames.size() - container.getPositionalArguments().size();
         if (missingParameterCount <= 0) {
             return List.of();
         }

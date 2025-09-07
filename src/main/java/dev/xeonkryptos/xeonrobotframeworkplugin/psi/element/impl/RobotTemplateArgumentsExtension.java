@@ -42,6 +42,11 @@ public abstract class RobotTemplateArgumentsExtension extends RobotPsiElementBas
     }
 
     @Override
+    public Collection<RobotArgument> getPositionalArguments() {
+        return getTemplateArgumentList().stream().map(argument -> (RobotArgument) argument).collect(Collectors.toList());
+    }
+
+    @Override
     public Collection<DefinedParameter> computeMissingParameters() {
         Project project = getProject();
         RobotKeywordCall templateKeywordCall = KeywordUtil.getInstance(project).findTemplateKeywordCall(this);

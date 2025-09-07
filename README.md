@@ -59,7 +59,7 @@ and keywords.
 
 ## Credits
 
-Credits go to the plugin Jnhyperion and its plugin [Hyper Robot Framework](https://github.com/jnhyperion/HyperRobotFrameworkPlugin). This plugin is a fork of
+Credits go to the Jnhyperion and their plugin [Hyper Robot Framework](https://github.com/jnhyperion/HyperRobotFrameworkPlugin). This plugin is a fork of
 it and make some changes and improvements.
 
 Credits also go to [RobotCodeDev](https://github.com/robotcodedev/robotcode) for the toolsets to make working with the Robot Framework easier.

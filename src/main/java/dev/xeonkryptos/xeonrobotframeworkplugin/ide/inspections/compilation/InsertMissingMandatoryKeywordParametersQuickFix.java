@@ -12,6 +12,7 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.RobotBundle;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCall;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCallName;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotParameter;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTemplateArguments;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.RobotElementGenerator;
 import org.jetbrains.annotations.NotNull;
 
@@ -29,23 +30,33 @@ class InsertMissingMandatoryKeywordParametersQuickFix extends PsiElementBaseInte
     @Override
     public void invoke(@NotNull Project project, Editor editor, @NotNull PsiElement element) throws IncorrectOperationException {
         RobotElementGenerator robotElementGenerator = RobotElementGenerator.getInstance(project);
-        RobotKeywordCall keywordCall = PsiTreeUtil.getParentOfType(element, RobotKeywordCall.class, false);
-        assert keywordCall != null;
-
-        RobotKeywordCallName keywordCallName = keywordCall.getKeywordCallName();
-        PsiElement whiteSpace = project.getService(PsiParserFacade.class).createWhiteSpaceFromText("  ");
-        for (String missingRequiredParameter : missingRequiredParameters) {
-            RobotParameter newParameter = robotElementGenerator.createNewParameter(missingRequiredParameter);
-            if (newParameter != null) {
-                keywordCall.addAfter(newParameter, keywordCallName);
-                keywordCall.addAfter(whiteSpace, keywordCallName);
+        PsiElement foundElement = PsiTreeUtil.getParentOfType(element, false, RobotKeywordCall.class, RobotTemplateArguments.class);
+        if (foundElement instanceof RobotKeywordCall keywordCall) {
+            RobotKeywordCallName keywordCallName = keywordCall.getKeywordCallName();
+            PsiElement whiteSpace = project.getService(PsiParserFacade.class).createWhiteSpaceFromText("  ");
+            for (String missingRequiredParameter : missingRequiredParameters) {
+                RobotParameter newParameter = robotElementGenerator.createNewParameter(missingRequiredParameter);
+                if (newParameter != null) {
+                    keywordCall.addAfter(newParameter, keywordCallName);
+                    keywordCall.addAfter(whiteSpace, keywordCallName);
+                }
+            }
+        } else if (foundElement instanceof RobotTemplateArguments templateArguments) {
+            PsiElement whiteSpace = project.getService(PsiParserFacade.class).createWhiteSpaceFromText("  ");
+            for (String missingRequiredParameter : missingRequiredParameters) {
+                RobotParameter newParameter = robotElementGenerator.createNewParameter(missingRequiredParameter);
+                if (newParameter != null) {
+                    PsiElement eolMarker = templateArguments.getLastChild();
+                    templateArguments.addBefore(whiteSpace, eolMarker);
+                    templateArguments.addBefore(newParameter, eolMarker);
+                }
             }
         }
     }
 
     @Override
     public boolean isAvailable(@NotNull Project project, Editor editor, @NotNull PsiElement element) {
-        return PsiTreeUtil.getParentOfType(element, RobotKeywordCall.class, false) != null;
+        return PsiTreeUtil.getParentOfType(element, false, RobotKeywordCall.class, RobotTemplateArguments.class) != null;
     }
 
     @NotNull
