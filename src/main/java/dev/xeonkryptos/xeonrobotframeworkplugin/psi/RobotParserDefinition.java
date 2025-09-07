@@ -1,5 +1,6 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.psi;
 
+import com.intellij.extapi.psi.ASTWrapperPsiElement;
 import com.intellij.lang.ASTNode;
 import com.intellij.lang.ParserDefinition;
 import com.intellij.lang.PsiParser;
@@ -57,7 +58,11 @@ public class RobotParserDefinition implements ParserDefinition {
    @NotNull
    @Override
    public PsiElement createElement(ASTNode node) {
-      return RobotTypes.Factory.createElement(node);
+       try {
+           return RobotTypes.Factory.createElement(node);
+       } catch (AssertionError ignored) {
+           return new ASTWrapperPsiElement(node);
+       }
    }
 
    @NotNull
