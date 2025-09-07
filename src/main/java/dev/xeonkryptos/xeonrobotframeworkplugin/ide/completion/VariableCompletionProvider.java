@@ -18,6 +18,7 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.KeywordFile;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotArgument;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotFile;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCall;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLocalArgumentsSetting;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLocalSetting;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotParameter;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotStatement;
@@ -39,24 +40,23 @@ import java.util.Set;
 
 class VariableCompletionProvider extends CompletionProvider<CompletionParameters> {
 
-    private static final Set<String> RESTRICTED_VARIABLE_COMPLETION_LOCAL_SETTING_NAMES = Set.of("[Arguments]", "[Documentation]", "[Tags]");
+    private static final Set<String> RESTRICTED_VARIABLE_COMPLETION_LOCAL_SETTING_NAMES = Set.of("[Documentation]", "[Tags]");
 
     @Override
     protected void addCompletions(@NotNull CompletionParameters parameters, @NotNull ProcessingContext context, @NotNull CompletionResultSet result) {
         PsiElement psiElement = parameters.getPosition();
-        RobotLocalSetting localSettingElement = PsiTreeUtil.getParentOfType(psiElement, RobotLocalSetting.class);
-        if (localSettingElement != null && RESTRICTED_VARIABLE_COMPLETION_LOCAL_SETTING_NAMES.contains(localSettingElement.getSettingName())) {
+        PsiElement localSettingElement = PsiTreeUtil.getParentOfType(psiElement, RobotLocalSetting.class, RobotLocalArgumentsSetting.class);
+        if (localSettingElement instanceof RobotLocalArgumentsSetting || localSettingElement != null
+                                                                         && RESTRICTED_VARIABLE_COMPLETION_LOCAL_SETTING_NAMES.contains(((RobotLocalSetting) localSettingElement).getSettingName())) {
             return;
         }
 
         RobotKeywordCall keywordCall = null;
         RobotStatement parentOfInterest = PsiTreeUtil.getParentOfType(psiElement,
                                                                       // Stop-gaps to ignore any of the real-interested parents
-                                                                      RobotParameter.class,
-                                                                      RobotTemplateParameter.class,
+                                                                      RobotParameter.class, RobotTemplateParameter.class,
                                                                       // Really interested in, but only when not one of the previous defined types are matching
-                                                                      RobotKeywordCall.class,
-                                                                      RobotTemplateArguments.class);
+                                                                      RobotKeywordCall.class, RobotTemplateArguments.class);
         if (parentOfInterest instanceof RobotTemplateArguments templateArguments) {
             keywordCall = KeywordUtil.getInstance(templateArguments.getProject()).findTemplateKeywordCall(templateArguments);
         } else if (parentOfInterest instanceof RobotKeywordCall call) {
@@ -162,14 +162,14 @@ class VariableCompletionProvider extends CompletionProvider<CompletionParameters
         private int elementIndex = -1;
 
         private RobotKeywordCallLocationIdentifier(PsiElement sourceElement) {
-            startOffsetInParent = sourceElement.getStartOffsetInParent();
+            startOffsetInParent = sourceElement.getTextOffset();
         }
 
         @Override
         public void visitArgument(@NotNull RobotArgument o) {
             ++currentIndex;
 
-            int currentOffsetInParent = o.getStartOffsetInParent();
+            int currentOffsetInParent = o.getTextOffset();
             updateFoundElementIndex(currentOffsetInParent);
         }
 

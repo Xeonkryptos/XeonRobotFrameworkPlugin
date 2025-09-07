@@ -28,6 +28,7 @@
 - ParameterInfo popup not separating parameters when based on a user keyword correctly
 - Incorrectly marked variable definitions as unused
 - Added multiline support for \[Arguments] settings
+- Keyword only detection and reaction in code completion
 
 ## 0.5.0
 

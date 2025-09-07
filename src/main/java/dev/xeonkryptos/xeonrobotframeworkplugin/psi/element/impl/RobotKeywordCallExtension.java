@@ -7,6 +7,7 @@ import com.intellij.psi.stubs.IStubElementType;
 import com.intellij.psi.util.CachedValue;
 import com.intellij.psi.util.CachedValueProvider.Result;
 import com.intellij.psi.util.CachedValuesManager;
+import com.intellij.psi.util.PsiModificationTracker;
 import com.intellij.util.IncorrectOperationException;
 import com.jetbrains.python.psi.PyFunction;
 import com.jetbrains.python.psi.PyNamedParameter;
@@ -143,12 +144,12 @@ public abstract class RobotKeywordCallExtension extends RobotStubPsiElementBase<
         if (reference instanceof RobotUserKeywordStatement userKeywordStatement) {
             return CachedValuesManager.getCachedValue(userKeywordStatement, START_OF_KEYWORDS_ONLY_INDEX_KEY, () -> {
                 OptionalInt startOfKeywordsOnlyIndexOpt = computeKeywordsOnlyStartIndexFor(userKeywordStatement);
-                return Result.createSingleDependency(startOfKeywordsOnlyIndexOpt, userKeywordStatement);
+                return Result.createSingleDependency(startOfKeywordsOnlyIndexOpt, PsiModificationTracker.MODIFICATION_COUNT);
             });
         } else if (reference instanceof PyFunction pyFunction) {
             return CachedValuesManager.getCachedValue(reference, START_OF_KEYWORDS_ONLY_INDEX_KEY, () -> {
                 OptionalInt startOfKeywordsOnlyIndexOpt = computeKeywordsOnlyStartIndexFor(pyFunction);
-                return Result.createSingleDependency(startOfKeywordsOnlyIndexOpt, pyFunction);
+                return Result.createSingleDependency(startOfKeywordsOnlyIndexOpt, PsiModificationTracker.MODIFICATION_COUNT);
             });
         }
         return OptionalInt.empty();
@@ -232,7 +233,7 @@ public abstract class RobotKeywordCallExtension extends RobotStubPsiElementBase<
             ++currentIndex;
 
             String parameterName = o.getName();
-            if (parameterName != null && parameterName.isEmpty()) {
+            if (parameterName == null || parameterName.isBlank()) {
                 keywordsOnlyIndex = currentIndex;
             }
         }

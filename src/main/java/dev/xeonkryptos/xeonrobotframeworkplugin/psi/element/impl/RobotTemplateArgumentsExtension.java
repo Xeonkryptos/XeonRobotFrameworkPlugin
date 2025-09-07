@@ -19,7 +19,6 @@ import java.util.stream.Collectors;
 public abstract class RobotTemplateArgumentsExtension extends RobotPsiElementBase implements RobotTemplateArguments {
 
     private Collection<RobotArgument> allTemplateArguments;
-    private Collection<String> definedParameterNames;
 
     public RobotTemplateArgumentsExtension(@NotNull ASTNode node) {
         super(node);
@@ -30,7 +29,6 @@ public abstract class RobotTemplateArgumentsExtension extends RobotPsiElementBas
         super.subtreeChanged();
 
         allTemplateArguments = null;
-        definedParameterNames = null;
     }
 
     @Override
@@ -65,11 +63,6 @@ public abstract class RobotTemplateArgumentsExtension extends RobotPsiElementBas
 
     @Override
     public Collection<String> getDefinedParameterNames() {
-        if (definedParameterNames == null) {
-            definedParameterNames = getTemplateParameterList().stream()
-                                                              .map(RobotTemplateParameter::getParameterName)
-                                                              .collect(Collectors.toCollection(LinkedHashSet::new));
-        }
-        return definedParameterNames;
+        return getTemplateParameterList().stream().map(RobotTemplateParameter::getParameterName).collect(Collectors.toCollection(LinkedHashSet::new));
     }
 }

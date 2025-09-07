@@ -14,6 +14,8 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableDefinit
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVisitor;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class RobotUnusedKeywordOnlyMarkerInspection extends LocalInspectionTool implements DumbAware {
@@ -44,6 +46,7 @@ public class RobotUnusedKeywordOnlyMarkerInspection extends LocalInspectionTool 
     private static class RobotKeywordOnlyMarkerVisitor extends RobotVisitor {
 
         private final AtomicBoolean argumentWithDefaultValueFound = new AtomicBoolean();
+        private final Set<Integer> argumentsWithDefaultValueTextOffsets = ConcurrentHashMap.newKeySet();
 
         private volatile RobotVariableDefinition keywordOnlyMarker;
 
@@ -53,15 +56,28 @@ public class RobotUnusedKeywordOnlyMarkerInspection extends LocalInspectionTool 
             String name = o.getName();
             if (name == null && o.getParent() instanceof RobotLocalArgumentsSetting) {
                 keywordOnlyMarker = o;
+                for (Integer argumentsWithDefaultValueTextOffset : argumentsWithDefaultValueTextOffsets) {
+                    if (isAfterKeywordOnlyMarker(o, argumentsWithDefaultValueTextOffset)) {
+                        argumentWithDefaultValueFound.set(true);
+                        break;
+                    }
+                }
             }
         }
 
         @Override
         public void visitLocalArgumentsSettingArgument(@NotNull RobotLocalArgumentsSettingArgument o) {
             super.visitLocalArgumentsSettingArgument(o);
-            if (keywordOnlyMarker != null) {
+            RobotVariableDefinition keywordOnlyMarker = this.keywordOnlyMarker;
+            if (keywordOnlyMarker != null && isAfterKeywordOnlyMarker(keywordOnlyMarker, o.getTextOffset())) {
                 argumentWithDefaultValueFound.set(true);
+            } else if (keywordOnlyMarker == null) {
+                argumentsWithDefaultValueTextOffsets.add(o.getTextOffset());
             }
+        }
+
+        private boolean isAfterKeywordOnlyMarker(RobotVariableDefinition keywordOnlyMarker, int textOffset) {
+            return keywordOnlyMarker.getTextOffset() + keywordOnlyMarker.getTextLength() < textOffset;
         }
     }
 }
