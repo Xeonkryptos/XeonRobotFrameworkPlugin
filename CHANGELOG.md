@@ -4,6 +4,12 @@
 
 ## Unreleased
 
+## 0.5.2
+
+### Fixed
+
+- Don't mark every python keyword as deprecated when in the same file another python function with the deprecation marking exists
+
 ## 0.5.1
 
 ### Added

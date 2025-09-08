@@ -23,7 +23,7 @@ public final class DeprecationInspector {
     }
 
     private static boolean isPyFunctionDeprecated(PyFunction pyFunction) {
-        PyElementDeprecatedVisitor deprecationVisitor = new PyElementDeprecatedVisitor();
+        PyElementDeprecatedVisitor deprecationVisitor = new PyElementDeprecatedVisitor(pyFunction);
         PyElementVisitor pyElementParentTraversalVisitor = new PyElementParentTraversalVisitor(deprecationVisitor);
         pyFunction.accept(pyElementParentTraversalVisitor);
         return deprecationVisitor.isDeprecated();

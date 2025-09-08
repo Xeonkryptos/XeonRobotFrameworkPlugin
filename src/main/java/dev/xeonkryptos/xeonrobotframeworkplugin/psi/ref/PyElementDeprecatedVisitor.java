@@ -13,7 +13,13 @@ import org.jetbrains.annotations.NotNull;
 
 public class PyElementDeprecatedVisitor extends PyElementVisitor {
 
+    private final PyFunction pyFunction;
+
     private boolean deprecated = false;
+
+    public PyElementDeprecatedVisitor(PyFunction pyFunction) {
+        this.pyFunction = pyFunction;
+    }
 
     @Override
     public void visitPyClass(@NotNull PyClass node) {
@@ -24,7 +30,9 @@ public class PyElementDeprecatedVisitor extends PyElementVisitor {
     @Override
     public void visitPyFunction(@NotNull PyFunction node) {
         super.visitPyFunction(node);
-        node.acceptChildren(this);
+        if (node == pyFunction) {
+            node.acceptChildren(this);
+        }
     }
 
     @Override

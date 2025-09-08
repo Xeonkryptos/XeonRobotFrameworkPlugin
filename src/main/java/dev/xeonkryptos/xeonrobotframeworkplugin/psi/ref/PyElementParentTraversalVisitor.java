@@ -3,6 +3,7 @@ package dev.xeonkryptos.xeonrobotframeworkplugin.psi.ref;
 import com.intellij.psi.PsiElement;
 import com.jetbrains.python.psi.PyElement;
 import com.jetbrains.python.psi.PyElementVisitor;
+import com.jetbrains.python.psi.PyFile;
 import org.jetbrains.annotations.NotNull;
 
 public class PyElementParentTraversalVisitor extends PyElementVisitor {
@@ -19,7 +20,7 @@ public class PyElementParentTraversalVisitor extends PyElementVisitor {
         node.accept(targetVisitor);
 
         PsiElement parent = node.getParent();
-        if (parent != null) {
+        if (parent != null && !(parent instanceof PyFile)) {
             parent.accept(this);
         }
     }
