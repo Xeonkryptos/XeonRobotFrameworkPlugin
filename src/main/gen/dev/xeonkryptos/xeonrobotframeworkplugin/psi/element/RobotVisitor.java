@@ -1,11 +1,10 @@
 // This is a generated file. Not intended for manual editing.
 package dev.xeonkryptos.xeonrobotframeworkplugin.psi.element;
 
-import org.jetbrains.annotations.*;
-import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.PsiNameIdentifierOwner;
-import com.intellij.navigation.NavigationItem;
+import org.jetbrains.annotations.NotNull;
 
 public class RobotVisitor extends PsiElementVisitor {
 
@@ -255,10 +254,6 @@ public class RobotVisitor extends PsiElementVisitor {
   public void visitTemplateParameter(@NotNull RobotTemplateParameter o) {
     visitArgument(o);
     // visitStatement(o);
-  }
-
-  public void visitTemplateParameterArgument(@NotNull RobotTemplateParameterArgument o) {
-    visitStatement(o);
   }
 
   public void visitTemplateParameterId(@NotNull RobotTemplateParameterId o) {

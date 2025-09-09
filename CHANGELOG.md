@@ -4,6 +4,10 @@
 
 ## Unreleased
 
+### Fixed
+
+- Provide user keyword arguments in code suggestions
+
 ## 0.5.2
 
 ### Fixed

@@ -127,6 +127,9 @@ public class RobotStructureViewElement implements StructureViewTreeElement {
             if (name != null) {
                 return name;
             }
+        } else if (element instanceof RobotSection section) {
+
+            return section.getText();
         }
         return "Unknown";
     }

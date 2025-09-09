@@ -34,6 +34,7 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.visitor.RobotSectionVariable
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.Set;
@@ -84,7 +85,7 @@ class VariableCompletionProvider extends CompletionProvider<CompletionParameters
 
         addDefinedVariablesFromImportedFiles(result, parameters.getOriginalFile(), psiElement);
         addDefinedVariablesFromOwnSection(result, psiElement);
-        addDefinedVariablesFromKeyword(result, psiElement);
+        addArgumentsFromUserKeyword(result, psiElement);
     }
 
     private void addDefinedVariablesFromImportedFiles(@NotNull CompletionResultSet resultSet, @NotNull PsiFile file, @NotNull PsiElement element) {
@@ -121,17 +122,21 @@ class VariableCompletionProvider extends CompletionProvider<CompletionParameters
         }
     }
 
-    private void addDefinedVariablesFromKeyword(@NotNull CompletionResultSet resultSet, @NotNull PsiElement element) {
+    private void addArgumentsFromUserKeyword(@NotNull CompletionResultSet resultSet, @NotNull PsiElement element) {
         RobotUserKeywordStatement userKeywordStatement = PsiTreeUtil.getParentOfType(element, RobotUserKeywordStatement.class);
         if (userKeywordStatement != null) {
-            RobotSectionVariablesCollector variablesCollector = new RobotSectionVariablesCollector();
-            userKeywordStatement.accept(variablesCollector);
-            Collection<DefinedVariable> definedVariables = variablesCollector.getVariables();
-            for (DefinedVariable variable : definedVariables) {
-                CompletionProviderUtils.addLookupElement(variable, Nodes.Variable, false, TailTypes.noneType(), resultSet).ifPresent(lookupElement -> {
-                    lookupElement.putUserData(CompletionKeys.ROBOT_LOOKUP_CONTEXT, RobotLookupContext.WITHIN_KEYWORD_STATEMENT);
-                    lookupElement.putUserData(CompletionKeys.ROBOT_LOOKUP_ELEMENT_TYPE, RobotLookupElementType.VARIABLE);
-                });
+            List<RobotLocalArgumentsSetting> localArgumentsSettingList = userKeywordStatement.getLocalArgumentsSettingList();
+            if (!localArgumentsSettingList.isEmpty()) {
+                RobotSectionVariablesCollector variablesCollector = new RobotSectionVariablesCollector();
+                RobotLocalArgumentsSetting localArgumentsSetting = localArgumentsSettingList.getFirst();
+                localArgumentsSetting.acceptChildren(variablesCollector);
+                Collection<DefinedVariable> definedVariables = variablesCollector.getVariables();
+                for (DefinedVariable variable : definedVariables) {
+                    CompletionProviderUtils.addLookupElement(variable, Nodes.Variable, false, TailTypes.noneType(), resultSet).ifPresent(lookupElement -> {
+                        lookupElement.putUserData(CompletionKeys.ROBOT_LOOKUP_CONTEXT, RobotLookupContext.WITHIN_KEYWORD_STATEMENT);
+                        lookupElement.putUserData(CompletionKeys.ROBOT_LOOKUP_ELEMENT_TYPE, RobotLookupElementType.VARIABLE);
+                    });
+                }
             }
         }
     }

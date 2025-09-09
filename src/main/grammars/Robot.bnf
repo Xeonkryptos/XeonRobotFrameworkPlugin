@@ -161,15 +161,14 @@ template_arguments ::= (template_argument | template_parameter)+ eol_marker {
     ]
     mixin="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotTemplateArgumentsExtension"
 }
-template_argument ::= TEMPLATE_ARGUMENT_VALUE | variable {implements="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotArgument"}
 
-template_parameter ::= template_parameter_id ASSIGNMENT (template_parameter_argument | variable) {
+template_parameter ::= template_parameter_id ASSIGNMENT template_argument {
     pin=2
     methods=[getParameterName]
     implements="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotArgument"
 }
 template_parameter_id ::= TEMPLATE_PARAMETER_NAME {methods=[getReference]}
-template_parameter_argument ::= TEMPLATE_ARGUMENT_VALUE
+template_argument ::= TEMPLATE_ARGUMENT_VALUE | variable {implements="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotArgument"}
 
 bdd_statement ::= (
         GIVEN eol_based_keyword_call WHEN eol_based_keyword_call

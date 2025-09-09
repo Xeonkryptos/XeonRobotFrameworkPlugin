@@ -1,9 +1,81 @@
 // This is a generated file. Not intended for manual editing.
 package dev.xeonkryptos.xeonrobotframeworkplugin.psi;
 
-import com.intellij.psi.tree.IElementType;
-import com.intellij.psi.PsiElement;
 import com.intellij.lang.ASTNode;
+import com.intellij.psi.PsiElement;
+import com.intellij.psi.tree.IElementType;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotBddStatementImpl;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotCommentsSectionImpl;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotDictVariableImpl;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotDocumentationStatementGlobalSettingImpl;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotElseIfStructureImpl;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotEnvironmentVariableImpl;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotExceptStructureImpl;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotExecutableStatementImpl;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotExtendedVariableIndexAccessImpl;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotExtendedVariableKeyAccessImpl;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotExtendedVariableNestedAccessImpl;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotExtendedVariableSliceAccessImpl;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotFinallyStructureImpl;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotForLoopStructureImpl;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotGroupStructureImpl;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotIfElseStructureImpl;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotIfStructureImpl;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotInlineVariableStatementImpl;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotKeywordCallImpl;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotKeywordCallLibraryImpl;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotKeywordCallLibraryNameImpl;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotKeywordCallNameImpl;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotKeywordVariableStatementImpl;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotKeywordsSectionImpl;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotLanguageIdImpl;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotLanguageImpl;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotLibraryImportGlobalSettingImpl;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotListVariableImpl;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotLiteralConstantValueImpl;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotLocalArgumentsSettingArgumentImpl;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotLocalArgumentsSettingIdImpl;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotLocalArgumentsSettingImpl;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotLocalSettingIdImpl;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotLocalSettingImpl;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotMetadataStatementGlobalSettingImpl;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotNewLibraryNameImpl;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotParameterIdImpl;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotParameterImpl;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotPositionalArgumentImpl;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotPythonExpressionImpl;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotResourceImportGlobalSettingImpl;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotRootImpl;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotScalarVariableImpl;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotSettingsSectionImpl;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotSetupTeardownStatementsGlobalSettingImpl;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotSingleVariableStatementImpl;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotSuiteNameStatementGlobalSettingImpl;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotTagsStatementGlobalSettingImpl;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotTaskIdImpl;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotTaskStatementImpl;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotTasksSectionImpl;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotTemplateArgumentImpl;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotTemplateArgumentsImpl;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotTemplateParameterIdImpl;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotTemplateParameterImpl;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotTemplateStatementsGlobalSettingImpl;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotTestCaseIdImpl;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotTestCaseStatementImpl;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotTestCasesSectionImpl;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotTimeoutStatementsGlobalSettingImpl;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotTryElseStructureImpl;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotTryStructureImpl;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotUnknownSettingStatementsGlobalSettingImpl;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotUserKeywordStatementIdImpl;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotUserKeywordStatementImpl;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotVariableBodyIdImpl;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotVariableContentImpl;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotVariableDefinitionImpl;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotVariableValueImpl;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotVariablesImportGlobalSettingImpl;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotVariablesSectionImpl;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotWhileLoopStructureImpl;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotDictVariableStubElement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotKeywordCallStubElement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotListVariableStubElement;
@@ -13,7 +85,6 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotTaskStatementStubE
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotTestCaseStatementStubElement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotUserKeywordStubElement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotVariableDefinitionStubElement;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.*;
 
 public interface RobotTypes {
 
@@ -73,7 +144,6 @@ public interface RobotTypes {
   IElementType TEMPLATE_ARGUMENT = new RobotElementType("TEMPLATE_ARGUMENT");
   IElementType TEMPLATE_ARGUMENTS = new RobotElementType("TEMPLATE_ARGUMENTS");
   IElementType TEMPLATE_PARAMETER = new RobotElementType("TEMPLATE_PARAMETER");
-  IElementType TEMPLATE_PARAMETER_ARGUMENT = new RobotElementType("TEMPLATE_PARAMETER_ARGUMENT");
   IElementType TEMPLATE_PARAMETER_ID = new RobotElementType("TEMPLATE_PARAMETER_ID");
   IElementType TEMPLATE_STATEMENTS_GLOBAL_SETTING = new RobotElementType("TEMPLATE_STATEMENTS_GLOBAL_SETTING");
   IElementType TEST_CASES_SECTION = new RobotElementType("TEST_CASES_SECTION");
@@ -329,9 +399,6 @@ public interface RobotTypes {
       }
       else if (type == TEMPLATE_PARAMETER) {
         return new RobotTemplateParameterImpl(node);
-      }
-      else if (type == TEMPLATE_PARAMETER_ARGUMENT) {
-        return new RobotTemplateParameterArgumentImpl(node);
       }
       else if (type == TEMPLATE_PARAMETER_ID) {
         return new RobotTemplateParameterIdImpl(node);
