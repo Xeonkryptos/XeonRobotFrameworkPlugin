@@ -7,6 +7,7 @@
 ### Fixed
 
 - Provide user keyword arguments in code suggestions
+- Allow local settings in test case templates
 
 ## 0.5.2
 

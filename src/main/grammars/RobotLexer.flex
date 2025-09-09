@@ -356,28 +356,32 @@ LineComment = {LineCommentSign} {NON_EOL}*
     {RestrictedLiteralValue}       { enterNewState(KEYWORD_CALL); yypushback(yylength()); break; }
 }
 <TESTCASE_DEFINITION, TASK_DEFINITION> {
-    {LocalTemplateKeyword} (\s{2} \s* | \s* {MultiLine}) "NONE"   {
-          yypushback(yylength() - "NONE".length());
-          enterNewState(SETTING);
-          localTemplateEnabled = false;
-          return LOCAL_SETTING_NAME;
-      }
-    {LocalTemplateKeyword} \s* (\R \s* !{Ellipsis} | {MultiLine} \R)      {
-          yypushback(yylength() - indexOf(']'));
-          localTemplateEnabled = false;
-          return LOCAL_SETTING_NAME;
-      }
-    {LocalTemplateKeyword} \s*              {
-          enterNewState(SETTING_TEMPLATE_START);
-          pushBackTrailingWhitespace();
-          localTemplateEnabled = true;
-          return LOCAL_SETTING_NAME;
-      }
+    <TEMPLATE_DEFINITION> {
+        {LocalTemplateKeyword} (\s{2} \s* | \s* {MultiLine}) "NONE"   {
+              yypushback(yylength() - "NONE".length());
+              enterNewState(SETTING);
+              localTemplateEnabled = false;
+              return LOCAL_SETTING_NAME;
+          }
+        {LocalTemplateKeyword} \s* (\R \s* !{Ellipsis} | {MultiLine} \R)      {
+              yypushback(yylength() - indexOf(']'));
+              localTemplateEnabled = false;
+              return LOCAL_SETTING_NAME;
+          }
+        {LocalTemplateKeyword} \s*              {
+              enterNewState(SETTING_TEMPLATE_START);
+              pushBackTrailingWhitespace();
+              localTemplateEnabled = true;
+              return LOCAL_SETTING_NAME;
+          }
+    }
 
     <USER_KEYWORD_DEFINITION> {
-        {LocalSetupTeardownKeywords} \s+          { enterNewState(KEYWORD_CALL); pushBackTrailingWhitespace(); return LOCAL_SETTING_NAME; }
-        {LocalArgumentsSettingKeyword} \s+        { enterNewState(SETTING); pushBackTrailingWhitespace(); return ARGUMENTS_SETTING_NAME; }
-        {LocalSettingKeyword} \s*                 { enterNewState(SETTING); pushBackTrailingWhitespace(); return LOCAL_SETTING_NAME; }
+        <TEMPLATE_DEFINITION> {
+            {LocalSetupTeardownKeywords} \s+          { enterNewState(KEYWORD_CALL); pushBackTrailingWhitespace(); return LOCAL_SETTING_NAME; }
+            {LocalArgumentsSettingKeyword} \s+        { enterNewState(SETTING); pushBackTrailingWhitespace(); return ARGUMENTS_SETTING_NAME; }
+            {LocalSettingKeyword} \s*                 { enterNewState(SETTING); pushBackTrailingWhitespace(); return LOCAL_SETTING_NAME; }
+        }
 
         "FOR" \s{2}\s* {LiteralValue}             { yypushback(yylength() - "FOR".length()); return FOR; }
         "IN" \s{2}\s* {LiteralValue}              { yypushback(yylength() - "IN".length()); enterNewState(CONTROL_STRUCTURE_START); return FOR_IN; }
