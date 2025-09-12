@@ -68,17 +68,20 @@ public class RobotFoldingBuilder extends CustomFoldingBuilder {
 
     private static TextRange computeTextRangeWithoutCommentsInDifferentLines(PsiElement elementAt, TextRange textRange, Document document) {
         PsiElement prevSibling = elementAt.getPrevSibling();
-        ASTNode prevSiblingNode = prevSibling.getNode();
-        while (prevSiblingNode.getElementType() == RobotTypes.EOL || prevSiblingNode.getElementType() == TokenType.WHITE_SPACE) {
-            prevSibling = prevSibling.getPrevSibling();
-            prevSiblingNode = prevSibling.getNode();
+        if (prevSibling != null) {
+            ASTNode prevSiblingNode = prevSibling.getNode();
+            while (prevSiblingNode.getElementType() == RobotTypes.EOL || prevSiblingNode.getElementType() == TokenType.WHITE_SPACE) {
+                prevSibling = prevSibling.getPrevSibling();
+                prevSiblingNode = prevSibling.getNode();
+            }
+            int newEndOffset = prevSibling.getTextRange().getEndOffset();
+            // Look for the end offset of the current line identified as the relevant line to stop the folding region at. That way, any comment in the same line
+            // as the last relevant element is also included in the folding region. Any other comments in different lines are excluded.
+            int lineNumber = document.getLineNumber(newEndOffset);
+            newEndOffset = document.getLineEndOffset(lineNumber);
+            return new TextRange(textRange.getStartOffset(), newEndOffset);
         }
-        int newEndOffset = prevSibling.getTextRange().getEndOffset();
-        // Look for the end offset of the current line identified as the relevant line to stop the folding region at. That way, any comment in the same line
-        // as the last relevant element is also included in the folding region. Any other comments in different lines are excluded.
-        int lineNumber = document.getLineNumber(newEndOffset);
-        newEndOffset = document.getLineEndOffset(lineNumber);
-        return new TextRange(textRange.getStartOffset(), newEndOffset);
+        return textRange;
     }
 
     @Override
