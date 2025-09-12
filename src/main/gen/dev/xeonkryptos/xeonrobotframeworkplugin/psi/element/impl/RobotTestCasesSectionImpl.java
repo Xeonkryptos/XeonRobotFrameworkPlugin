@@ -1,15 +1,19 @@
 // This is a generated file. Not intended for manual editing.
 package dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl;
 
-import java.util.List;
-import org.jetbrains.annotations.*;
 import com.intellij.lang.ASTNode;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.*;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.*;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotPsiImplUtil;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTestCaseStatement;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTestCasesSection;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVisitor;
+import org.jetbrains.annotations.NotNull;
+
+import java.util.List;
+
+import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.TEST_CASES_HEADER;
 
 public class RobotTestCasesSectionImpl extends RobotSectionImpl implements RobotTestCasesSection {
 
@@ -38,6 +42,11 @@ public class RobotTestCasesSectionImpl extends RobotSectionImpl implements Robot
   @NotNull
   public PsiElement getNameIdentifier() {
     return notNullChild(findChildByType(TEST_CASES_HEADER));
+  }
+
+  @Override
+  public @NotNull String getSectionName() {
+    return RobotPsiImplUtil.getSectionName(this);
   }
 
 }

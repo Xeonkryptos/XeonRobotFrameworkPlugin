@@ -18,6 +18,7 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotExtendedVa
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotExtendedVariableSliceAccessImpl;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotFinallyStructureImpl;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotForLoopStructureImpl;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotGlobalSettingStatementImpl;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotGroupStructureImpl;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotIfElseStructureImpl;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotIfStructureImpl;

@@ -18,7 +18,6 @@ import org.apache.commons.text.WordUtils;
 import org.jetbrains.annotations.NotNull;
 
 @Service(Level.PROJECT)
-@SuppressWarnings("ApplicationServiceAsStaticFinalFieldOrProperty")
 public record KeywordUtil(Project project) {
 
     private static final String SPACE = " ";
@@ -50,7 +49,7 @@ public record KeywordUtil(Project project) {
         }
         RobotTestCaseStatement testCaseStatement = PsiTreeUtil.getParentOfType(element, RobotTestCaseStatement.class);
         if (testCaseStatement != null) {
-            for (RobotLocalSetting localSetting : testCaseStatement.getLocalSettingList()) {
+            for (RobotLocalSetting localSetting : testCaseStatement.getLocalSettings()) {
                 if ("[Template]".equalsIgnoreCase(localSetting.getSettingName())) {
                     return PsiTreeUtil.getChildOfType(localSetting, RobotKeywordCall.class);
                 }

@@ -3,9 +3,11 @@ package dev.xeonkryptos.xeonrobotframeworkplugin.psi;
 import com.intellij.psi.PsiReference;
 import com.intellij.psi.util.PsiTreeUtil;
 import dev.xeonkryptos.xeonrobotframeworkplugin.ide.icons.RobotIcons;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotCommentsSection;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCall;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCallLibraryName;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCallName;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordsSection;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLocalArgumentsSetting;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLocalArgumentsSettingId;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLocalSetting;
@@ -13,12 +15,16 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLocalSettingId;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotParameter;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotParameterId;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotPositionalArgument;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotSection;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotSettingsSection;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTaskId;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTaskStatement;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTasksSection;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTemplateParameter;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTemplateParameterId;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTestCaseId;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTestCaseStatement;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTestCasesSection;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotUserKeywordStatement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotUserKeywordStatementId;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariable;
@@ -26,6 +32,7 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableBodyId;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableContent;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableDefinition;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableStatement;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariablesSection;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotTestCaseExtension;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.ref.RobotArgumentReference;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.ref.RobotKeywordCallLibraryReference;
@@ -38,6 +45,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.Icon;
+import java.util.List;
 
 public class RobotPsiImplUtil {
 
@@ -207,5 +215,51 @@ public class RobotPsiImplUtil {
             return PsiTreeUtil.getChildOfType(variableContent, RobotVariableBodyId.class);
         }
         return null;
+    }
+
+    @NotNull
+    public static List<RobotLocalSetting> getLocalSettings(@NotNull RobotTestCaseStatement element) {
+        return PsiTreeUtil.getChildrenOfTypeAsList(element, RobotLocalSetting.class);
+    }
+
+    @NotNull
+    public static List<RobotLocalSetting> getLocalSettings(@NotNull RobotTaskStatement element) {
+        return PsiTreeUtil.getChildrenOfTypeAsList(element, RobotLocalSetting.class);
+    }
+
+    @NotNull
+    @SuppressWarnings("unused")
+    public static String getSectionName(@NotNull RobotSection section) {
+        return "Unknown";
+    }
+
+    @NotNull
+    public static String getSectionName(@NotNull RobotSettingsSection section) {
+        return section.getNameIdentifier().getText();
+    }
+
+    @NotNull
+    public static String getSectionName(@NotNull RobotCommentsSection section) {
+        return section.getNameIdentifier().getText();
+    }
+
+    @NotNull
+    public static String getSectionName(@NotNull RobotVariablesSection section) {
+        return section.getNameIdentifier().getText();
+    }
+
+    @NotNull
+    public static String getSectionName(@NotNull RobotTestCasesSection section) {
+        return section.getNameIdentifier().getText();
+    }
+
+    @NotNull
+    public static String getSectionName(@NotNull RobotTasksSection section) {
+        return section.getNameIdentifier().getText();
+    }
+
+    @NotNull
+    public static String getSectionName(@NotNull RobotKeywordsSection section) {
+        return section.getNameIdentifier().getText();
     }
 }

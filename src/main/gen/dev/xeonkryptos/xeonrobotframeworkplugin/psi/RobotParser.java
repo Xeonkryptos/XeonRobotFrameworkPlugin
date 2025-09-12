@@ -25,6 +25,8 @@ import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotParserUtil.eof;
 import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotParserUtil.exit_section_;
 import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotParserUtil.nextTokenIs;
 import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotParserUtil.parsePositionalArgument;
+import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotParserUtil.parseTemplateStatementsGlobalSetting;
+import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotParserUtil.parseTestcaseTaskStatement;
 import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotParserUtil.recursion_guard_;
 import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotParserUtil.report_error_;
 import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.AND;
