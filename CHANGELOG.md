@@ -10,6 +10,7 @@
 - Allow local settings in test case templates
 - Fixed lexing of <code>[Template]  NONE</code>
 - Fixed template parsing starting with variables
+- Fixed foldability of all elements leading to more clicks than necessary to unfold after recursive collapse
 
 ## 0.5.2
 

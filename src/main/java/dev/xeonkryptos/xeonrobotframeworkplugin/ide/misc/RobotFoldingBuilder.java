@@ -10,7 +10,7 @@ import com.intellij.openapi.util.TextRange;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.TokenType;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotStatement;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotFoldable;
 import dev.xeonkryptos.xeonrobotframeworkplugin.util.GlobalConstants;
 import org.jetbrains.annotations.NotNull;
 
@@ -24,11 +24,20 @@ public class RobotFoldingBuilder extends CustomFoldingBuilder {
     }
 
     private void appendDescriptors(PsiElement element, Document document, List<FoldingDescriptor> descriptors) {
-        if (element instanceof RobotStatement) {
+        if (element instanceof RobotFoldable) {
             TextRange textRange = element.getTextRange();
             textRange = computeOptimizedTextRange(element, textRange, document);
-            if (textRange.getLength() > 0) {
-                descriptors.add(new FoldingDescriptor(element, textRange));
+            if (!textRange.isEmpty()) {
+                int startOffset = textRange.getStartOffset();
+                int endOffset = textRange.getEndOffset();
+
+                int startLineNumber = document.getLineNumber(startOffset);
+                int endLineNumber = document.getLineNumber(endOffset);
+
+                // Only add folding regions that span more than one line
+                if (startLineNumber != endLineNumber) {
+                    descriptors.add(new FoldingDescriptor(element, textRange));
+                }
             }
         }
 

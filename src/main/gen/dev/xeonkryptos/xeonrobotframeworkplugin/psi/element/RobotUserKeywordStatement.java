@@ -1,15 +1,15 @@
 // This is a generated file. Not intended for manual editing.
 package dev.xeonkryptos.xeonrobotframeworkplugin.psi.element;
 
-import java.util.List;
-import org.jetbrains.annotations.*;
-import com.intellij.psi.PsiElement;
-import com.intellij.psi.PsiNameIdentifierOwner;
 import com.intellij.navigation.NavigationItem;
+import com.intellij.psi.PsiNameIdentifierOwner;
 import com.intellij.psi.StubBasedPsiElement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotUserKeywordStub;
+import org.jetbrains.annotations.NotNull;
 
-public interface RobotUserKeywordStatement extends RobotQualifiedNameOwner, RobotUserKeywordStatementExpression, PsiNameIdentifierOwner, NavigationItem, RobotStatement, StubBasedPsiElement<RobotUserKeywordStub> {
+import java.util.List;
+
+public interface RobotUserKeywordStatement extends RobotQualifiedNameOwner, RobotUserKeywordStatementExpression, PsiNameIdentifierOwner, NavigationItem, RobotFoldable, RobotStatement, StubBasedPsiElement<RobotUserKeywordStub> {
 
   @NotNull
   List<RobotExecutableStatement> getExecutableStatementList();

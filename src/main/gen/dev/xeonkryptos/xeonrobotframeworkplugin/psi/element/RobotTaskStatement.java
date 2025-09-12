@@ -10,7 +10,7 @@ import org.jetbrains.annotations.NotNull;
 import javax.swing.Icon;
 import java.util.List;
 
-public interface RobotTaskStatement extends RobotQualifiedNameOwner, PsiNameIdentifierOwner, NavigationItem, RobotStatement, StubBasedPsiElement<RobotTaskStatementStub> {
+public interface RobotTaskStatement extends RobotQualifiedNameOwner, PsiNameIdentifierOwner, NavigationItem, RobotFoldable, RobotStatement, StubBasedPsiElement<RobotTaskStatementStub> {
 
   @NotNull
   RobotTaskId getTaskId();

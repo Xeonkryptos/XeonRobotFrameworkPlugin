@@ -3,7 +3,7 @@ package dev.xeonkryptos.xeonrobotframeworkplugin.psi.element;
 
 import org.jetbrains.annotations.NotNull;
 
-public interface RobotSection extends RobotStatement {
+public interface RobotSection extends RobotFoldable, RobotStatement {
 
   @NotNull String getSectionName();
 
