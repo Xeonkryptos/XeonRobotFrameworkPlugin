@@ -950,7 +950,7 @@ public class RobotParser implements PsiParser, LightPsiParser {
   //     | suite_name_statement_global_setting
   //     | setup_teardown_statements_global_setting
   //     | tags_statement_global_setting
-  //     | template_statements_global_setting
+  //     | template_statements_global_setting_wrapper
   //     | timeout_statements_global_setting
   //     | unknown_setting_statements_global_setting
   public static boolean global_setting_statement(PsiBuilder b, int l) {
@@ -965,7 +965,7 @@ public class RobotParser implements PsiParser, LightPsiParser {
     if (!r) r = suite_name_statement_global_setting(b, l + 1);
     if (!r) r = setup_teardown_statements_global_setting(b, l + 1);
     if (!r) r = tags_statement_global_setting(b, l + 1);
-    if (!r) r = template_statements_global_setting(b, l + 1);
+    if (!r) r = parseTemplateStatementsGlobalSetting(b, l + 1, RobotParser::template_statements_global_setting);
     if (!r) r = timeout_statements_global_setting(b, l + 1);
     if (!r) r = unknown_setting_statements_global_setting(b, l + 1);
     exit_section_(b, l, m, r, false, null);
@@ -2239,18 +2239,9 @@ public class RobotParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // local_setting
-  //     | bdd_statement
-  //     | executable_statement
-  //     | template_arguments
+  // <<parseTestcaseTaskStatement local_setting template_arguments bdd_statement executable_statement>>
   static boolean testcase_task_statement(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "testcase_task_statement")) return false;
-    boolean r;
-    r = local_setting(b, l + 1);
-    if (!r) r = bdd_statement(b, l + 1);
-    if (!r) r = executable_statement(b, l + 1);
-    if (!r) r = template_arguments(b, l + 1);
-    return r;
+    return parseTestcaseTaskStatement(b, l + 1, RobotParser::local_setting, RobotParser::template_arguments, RobotParser::bdd_statement, RobotParser::executable_statement);
   }
 
   /* ********************************************************** */

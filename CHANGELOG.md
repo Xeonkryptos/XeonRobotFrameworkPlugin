@@ -8,6 +8,8 @@
 
 - Provide user keyword arguments in code suggestions
 - Allow local settings in test case templates
+- Fixed lexing of <code>[Template]  NONE</code>
+- Fixed template parsing starting with variables
 
 ## 0.5.2
 

@@ -6463,7 +6463,8 @@ public class RobotLexer implements FlexLexer {
           // fall through
           case 245: break;
           case 123:
-            { yypushback(yylength() - "NONE".length());
+            { yypushback("NONE".length());
+              pushBackTrailingWhitespace();
               enterNewState(SETTING);
               localTemplateEnabled = false;
               return LOCAL_SETTING_NAME;

@@ -1,15 +1,24 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.psi;
 
+import com.intellij.lang.LighterASTNode;
 import com.intellij.lang.PsiBuilder;
 import com.intellij.lang.PsiBuilder.Marker;
+import com.intellij.lang.SyntaxTreeBuilder.Production;
 import com.intellij.lang.WhitespaceSkippedCallback;
 import com.intellij.lang.parser.GeneratedParserUtilBase;
+import com.intellij.openapi.util.Key;
 import com.intellij.psi.tree.IElementType;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.ReservedVariable;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class RobotParserUtil extends GeneratedParserUtilBase {
+
+    private static final Key<Boolean> GLOBAL_TEMPLATE_SETTING_KEY = Key.create("GLOBAL_TEMPLATE_SETTING_KEY");
+    private static final Key<Boolean> LOCAL_TEMPLATE_SETTING_KEY = Key.create("LOCAL_TEMPLATE_SETTING_KEY");
+
+    private static final String TEMPLATE_LOCAL_SETTING_NAME = "[Template]";
 
     /**
      * Custom parser to correctly detect and parse positional arguments in Robot Framework. In the space-based format of Robot files you need to separate arguments
@@ -19,8 +28,8 @@ public class RobotParserUtil extends GeneratedParserUtilBase {
      * This custom parser implementation is taking care of the whitespace separation detection needed to end a positional argument, especially when the positional
      * argument consists of multiple variables and literal constants.
      *
-     * @param builder current PsiBuilder
-     * @param level current parser level
+     * @param builder                  current PsiBuilder
+     * @param level                    current parser level
      * @param positionalArgumentParser parser for positional arguments, e.g. {@link RobotParser#positional_argument_content(PsiBuilder, int)}
      *
      * @return true if a positional argument could be parsed (was detected), false otherwise
@@ -52,6 +61,77 @@ public class RobotParserUtil extends GeneratedParserUtilBase {
         builder.setWhitespaceSkippedCallback(null);
         exit_section_(builder, m, null, r);
         return r;
+    }
+
+    public static boolean parseTemplateStatementsGlobalSetting(PsiBuilder builder, int level, Parser templateStatementsParser) {
+        boolean result = templateStatementsParser.parse(builder, level);
+        if (result) {
+            builder.putUserData(GLOBAL_TEMPLATE_SETTING_KEY, true);
+        }
+        return result;
+    }
+
+    public static boolean parseTestcaseTaskStatement(PsiBuilder builder,
+                                                     int level,
+                                                     Parser localSettingsParser,
+                                                     Parser templateArgumentsParser,
+                                                     Parser... parsers) {
+        if (!recursion_guard_(builder, level, "parse_testcase_task_statement")) {
+            return false;
+        }
+        Boolean globalTemplateDefined = builder.getUserData(GLOBAL_TEMPLATE_SETTING_KEY);
+        if (Boolean.TRUE.equals(globalTemplateDefined)) {
+            builder.putUserData(LOCAL_TEMPLATE_SETTING_KEY, true);
+        }
+        boolean result = localSettingsParser.parse(builder, level + 1);
+        if (result) {
+            LighterASTNode latestDoneMarker = builder.getLatestDoneMarker();
+            assert latestDoneMarker != null; // should never be null here as we just finished a successful parse of local setting
+
+            CharSequence originalText = builder.getOriginalText();
+            int originalTextLength = originalText.length();
+
+            int settingStartOffset = latestDoneMarker.getStartOffset();
+            int settingEndOffset = Math.min(originalTextLength, settingStartOffset + TEMPLATE_LOCAL_SETTING_NAME.length());
+
+            String localSettingName = originalText.subSequence(settingStartOffset, settingEndOffset).toString();
+            if (TEMPLATE_LOCAL_SETTING_NAME.equalsIgnoreCase(localSettingName)) {
+                updateLocalTemplateState(builder, settingStartOffset, originalText);
+            }
+            return true;
+        }
+        Boolean localTemplateDefined = builder.getUserData(LOCAL_TEMPLATE_SETTING_KEY);
+        if (Boolean.TRUE.equals(localTemplateDefined)) {
+            return templateArgumentsParser.parse(builder, level + 1);
+        }
+        for (Parser parser : parsers) {
+            result = parser.parse(builder, level + 1);
+            if (result) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static void updateLocalTemplateState(PsiBuilder builder, int settingStartOffset, CharSequence originalText) {
+        builder.putUserData(LOCAL_TEMPLATE_SETTING_KEY, false);
+        for (Production production : builder.getProductions()) {
+            int productionStartOffset = production.getStartOffset();
+            if (productionStartOffset >= settingStartOffset) {
+                IElementType tokenType = production.getTokenType();
+                if (tokenType == RobotTypes.KEYWORD_CALL || tokenType == RobotTypes.VARIABLE) {
+                    if (tokenType == RobotTypes.KEYWORD_CALL) {
+                        builder.putUserData(LOCAL_TEMPLATE_SETTING_KEY, true);
+                    } else {
+                        int productionEndOffset = production.getEndOffset();
+                        String variableText = originalText.subSequence(productionStartOffset, productionEndOffset).toString();
+                        boolean localTemplateDetected = !variableText.equals(ReservedVariable.EMPTY.getVariable());
+                        builder.putUserData(LOCAL_TEMPLATE_SETTING_KEY, localTemplateDetected);
+                    }
+                    break;
+                }
+            }
+        }
     }
 
     private static class WhitespaceSkippedMemory implements WhitespaceSkippedCallback {

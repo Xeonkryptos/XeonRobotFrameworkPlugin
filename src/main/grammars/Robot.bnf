@@ -69,7 +69,7 @@ global_setting_statement ::= library_import_global_setting
     | suite_name_statement_global_setting
     | setup_teardown_statements_global_setting
     | tags_statement_global_setting
-    | template_statements_global_setting
+    | template_statements_global_setting_wrapper
     | timeout_statements_global_setting
     | unknown_setting_statements_global_setting
 
@@ -105,6 +105,7 @@ tags_statement_global_setting ::= TAGS_KEYWORDS positional_argument* eol_marker 
     pin=3
     methods = [nameElement="TAGS_KEYWORDS"]
 }
+private external template_statements_global_setting_wrapper ::= parseTemplateStatementsGlobalSetting template_statements_global_setting
 template_statements_global_setting ::= TEMPLATE_KEYWORDS eol_based_keyword_call {
     pin=3
     methods = [nameElement="TEMPLATE_KEYWORDS"]
@@ -126,7 +127,7 @@ test_case_statement ::= test_case_id eol_marker? testcase_task_statement* {
         "com.intellij.navigation.NavigationItem"
     ]
     extends = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotTestCaseExtension"
-    methods = [getName getNameIdentifier getIcon getQualifiedName]
+    methods = [getName getNameIdentifier getIcon getQualifiedName getLocalSettings]
     stubClass = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotTestCaseStatementStub"
     elementTypeFactory = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotTestCaseStatementStubElement.create"
     recoverWhile=test_case_statement_recover
@@ -141,7 +142,7 @@ task_statement ::= task_id eol_marker? testcase_task_statement* {
         "com.intellij.navigation.NavigationItem"
     ]
     extends = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotTaskExtension"
-    methods = [getName getNameIdentifier getIcon getQualifiedName]
+    methods = [getName getNameIdentifier getIcon getQualifiedName getLocalSettings]
     stubClass = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotTaskStatementStub"
     elementTypeFactory = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotTaskStatementStubElement.create"
     recoverWhile=task_statement_recover
@@ -149,10 +150,7 @@ task_statement ::= task_id eol_marker? testcase_task_statement* {
 task_id ::= TASK_NAME
 private task_statement_recover ::= !task_id & section_recover
 
-private testcase_task_statement ::= local_setting
-    | bdd_statement
-    | executable_statement
-    | template_arguments
+private testcase_task_statement ::= <<parseTestcaseTaskStatement local_setting template_arguments bdd_statement executable_statement>>
 
 template_arguments ::= (template_argument | template_parameter)+ eol_marker {
     implements=[

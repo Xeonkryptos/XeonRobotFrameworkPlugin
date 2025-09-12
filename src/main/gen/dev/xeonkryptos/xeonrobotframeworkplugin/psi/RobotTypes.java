@@ -281,6 +281,9 @@ public interface RobotTypes {
       else if (type == FOR_LOOP_STRUCTURE) {
         return new RobotForLoopStructureImpl(node);
       }
+      else if (type == GLOBAL_SETTING_STATEMENT) {
+        return new RobotGlobalSettingStatementImpl(node);
+      }
       else if (type == GROUP_STRUCTURE) {
         return new RobotGroupStructureImpl(node);
       }

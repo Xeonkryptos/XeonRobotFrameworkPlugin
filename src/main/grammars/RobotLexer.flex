@@ -358,7 +358,8 @@ LineComment = {LineCommentSign} {NON_EOL}*
 <TESTCASE_DEFINITION, TASK_DEFINITION> {
     <TEMPLATE_DEFINITION> {
         {LocalTemplateKeyword} (\s{2} \s* | \s* {MultiLine}) "NONE"   {
-              yypushback(yylength() - "NONE".length());
+              yypushback("NONE".length());
+              pushBackTrailingWhitespace();
               enterNewState(SETTING);
               localTemplateEnabled = false;
               return LOCAL_SETTING_NAME;
