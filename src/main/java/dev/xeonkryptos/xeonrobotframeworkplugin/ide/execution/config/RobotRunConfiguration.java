@@ -23,15 +23,22 @@ import java.util.List;
 
 public class RobotRunConfiguration extends LocatableConfigurationBase<Element> implements EnvFilesOptions {
 
-    private PythonRunConfigurationExt pythonRunConfiguration = new PythonRunConfigurationExt(getProject());
+    private PythonRunConfigurationExt pythonRunConfiguration;
 
     public RobotRunConfiguration(Project project, ConfigurationFactory configurationFactory) {
         super(project, configurationFactory);
 
+        pythonRunConfiguration = new PythonRunConfigurationExt(project);
         pythonRunConfiguration.setUseModuleSdk(true);
         pythonRunConfiguration.setModuleMode(true);
         pythonRunConfiguration.setScriptName("robotcode");
         pythonRunConfiguration.setEmulateTerminal(false);
+    }
+
+    public RobotRunConfiguration(Project project, ConfigurationFactory configurationFactory, PythonRunConfigurationExt pythonRunConfiguration) {
+        super(project, configurationFactory);
+
+        this.pythonRunConfiguration = pythonRunConfiguration;
     }
 
     @NotNull
@@ -83,7 +90,7 @@ public class RobotRunConfiguration extends LocatableConfigurationBase<Element> i
     @Override
     public RobotRunConfiguration clone() {
         RobotRunConfiguration config = (RobotRunConfiguration) super.clone();
-        config.pythonRunConfiguration = (PythonRunConfigurationExt) pythonRunConfiguration.clone();
+        config.pythonRunConfiguration = pythonRunConfiguration.clone();
         return config;
     }
 

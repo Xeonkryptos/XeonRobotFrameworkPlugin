@@ -72,7 +72,7 @@ public class RobotRunConfigurationProducer extends LazyRunConfigurationProducer<
         return false;
     }
 
-    private String getWorkingDirectoryToUse(@NotNull RobotRunConfiguration runConfig) {
+    static String getWorkingDirectoryToUse(@NotNull RobotRunConfiguration runConfig) {
         String workingDirectory = runConfig.getPythonRunConfiguration().getWorkingDirectory();
         if (workingDirectory == null || workingDirectory.isEmpty()) {
             workingDirectory = runConfig.getPythonRunConfiguration().getWorkingDirectorySafe();
@@ -178,7 +178,7 @@ public class RobotRunConfigurationProducer extends LazyRunConfigurationProducer<
     }
 
     @NotNull
-    private static String relativizePath(String basePath, String targetPath) {
+    static String relativizePath(String basePath, String targetPath) {
         Path targetFile = Path.of(targetPath);
         try {
             Path relativePath = Path.of(basePath).relativize(targetFile);

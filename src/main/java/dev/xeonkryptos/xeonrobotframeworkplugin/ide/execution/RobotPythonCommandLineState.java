@@ -1,8 +1,6 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.ide.execution;
 
-import dev.xeonkryptos.xeonrobotframeworkplugin.MyLogger;
-import dev.xeonkryptos.xeonrobotframeworkplugin.ide.execution.config.RobotRunConfiguration;
-import dev.xeonkryptos.xeonrobotframeworkplugin.ide.execution.ui.RobotTestRunnerFactory;
+import com.intellij.execution.DefaultExecutionResult;
 import com.intellij.execution.ExecutionException;
 import com.intellij.execution.ExecutionResult;
 import com.intellij.execution.Executor;
@@ -13,6 +11,8 @@ import com.intellij.execution.process.ProcessHandler;
 import com.intellij.execution.runners.ExecutionEnvironment;
 import com.intellij.execution.target.TargetEnvironment;
 import com.intellij.execution.target.value.TargetEnvironmentFunctions;
+import com.intellij.execution.testframework.autotest.ToggleAutoTestAction;
+import com.intellij.execution.testframework.sm.runner.ui.SMTRunnerConsoleView;
 import com.intellij.execution.ui.ConsoleView;
 import com.intellij.openapi.application.PathManager;
 import com.intellij.openapi.project.Project;
@@ -30,6 +30,10 @@ import com.jetbrains.python.run.PythonScriptCommandLineState;
 import com.jetbrains.python.run.PythonScriptExecution;
 import com.jetbrains.python.run.PythonScriptTargetedCommandLineBuilder;
 import com.jetbrains.python.run.target.HelpersAwareTargetEnvironmentRequest;
+import dev.xeonkryptos.xeonrobotframeworkplugin.MyLogger;
+import dev.xeonkryptos.xeonrobotframeworkplugin.ide.execution.config.RobotRunConfiguration;
+import dev.xeonkryptos.xeonrobotframeworkplugin.ide.execution.config.RobotRerunFailedTestsAction;
+import dev.xeonkryptos.xeonrobotframeworkplugin.ide.execution.ui.RobotTestRunnerFactory;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -153,6 +157,15 @@ public class RobotPythonCommandLineState extends PythonScriptCommandLineState {
         if (runConfiguration.getPythonRunConfiguration().emulateTerminal() && executionResult != null
             && executionResult.getExecutionConsole() instanceof ConsoleView consoleView) {
             consoleView.addMessageFilter(new RobotReportsFilter());
+        }
+        if (executionResult != null && executionResult.getExecutionConsole() instanceof SMTRunnerConsoleView consoleView) {
+            RobotRerunFailedTestsAction rerunFailedTestsAction = new RobotRerunFailedTestsAction(consoleView);
+            rerunFailedTestsAction.init(consoleView.getProperties());
+            rerunFailedTestsAction.setModelProvider(consoleView::getResultsViewer);
+
+            if (executionResult instanceof DefaultExecutionResult defaultExecutionResult) {
+                defaultExecutionResult.setRestartActions(rerunFailedTestsAction, new ToggleAutoTestAction());
+            }
         }
     }
 

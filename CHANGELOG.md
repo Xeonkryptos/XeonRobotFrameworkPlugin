@@ -7,6 +7,7 @@
 ### Added
 
 - Show executed keywords as a separate layer in the SMT view on test/task execution
+- Support for rerun failed tests in SMT view
 
 ### Fixed
 

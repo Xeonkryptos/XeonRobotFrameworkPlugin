@@ -41,10 +41,10 @@ public class RobotRunConfigurationType implements ConfigurationType, DumbAware {
 
     @Override
     public ConfigurationFactory[] getConfigurationFactories() {
-        return new ConfigurationFactory[] { new RobotConfigurationFactory(this) };
+        return new ConfigurationFactory[] { configurationFactory };
     }
 
     public final RobotConfigurationFactory getConfigurationFactory() {
-        return this.configurationFactory;
+        return configurationFactory;
     }
 }
