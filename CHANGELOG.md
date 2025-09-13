@@ -4,6 +4,10 @@
 
 ## Unreleased
 
+### Added
+
+- Show executed keywords as a separate layer in the SMT view on test/task execution
+
 ### Fixed
 
 - Provide user keyword arguments in code suggestions
