@@ -1,4 +1,4 @@
-package dev.xeonkryptos.xeonrobotframeworkplugin.ide.execution.config;
+package dev.xeonkryptos.xeonrobotframeworkplugin.ide.execution.ui;
 
 import com.intellij.execution.Executor;
 import com.intellij.execution.Location;
@@ -11,6 +11,11 @@ import com.intellij.execution.testframework.actions.AbstractRerunFailedTestsActi
 import com.intellij.openapi.ui.ComponentContainer;
 import com.intellij.openapi.vfs.VirtualFile;
 import dev.xeonkryptos.xeonrobotframeworkplugin.ide.execution.RobotCommandLineState;
+import dev.xeonkryptos.xeonrobotframeworkplugin.ide.execution.config.FileUtils;
+import dev.xeonkryptos.xeonrobotframeworkplugin.ide.execution.config.PythonRunConfigurationExt;
+import dev.xeonkryptos.xeonrobotframeworkplugin.ide.execution.config.RobotConfigurationFactory;
+import dev.xeonkryptos.xeonrobotframeworkplugin.ide.execution.config.RobotRunConfiguration;
+import dev.xeonkryptos.xeonrobotframeworkplugin.ide.execution.config.RobotRunConfigurationType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -63,12 +68,12 @@ public class RobotRerunFailedTestsAction extends AbstractRerunFailedTestsAction 
 
             RobotConfigurationFactory configurationFactory = RobotRunConfigurationType.getRobotRunConfigurationType().getConfigurationFactory();
             RobotRunConfiguration robotRunConfiguration = new RobotRunConfiguration(getProject(), configurationFactory, getPeer());
-            String workingDirectoryToUse = RobotRunConfigurationProducer.getWorkingDirectoryToUse(robotRunConfiguration);
+            String workingDirectoryToUse = FileUtils.getWorkingDirectoryToUse(robotRunConfiguration);
 
             String testExecutionCommand = testNames.stream().collect(Collectors.joining("\" --test \"", "--test \"", "\""));
             testExecutionCommand += " " + testFiles.stream()
                                                    .map(VirtualFile::getPath)
-                                                   .map(path -> RobotRunConfigurationProducer.relativizePath(workingDirectoryToUse, path))
+                                                   .map(path -> FileUtils.relativizePath(workingDirectoryToUse, path))
                                                    .collect(Collectors.joining("\" \"", "\"", "\""));
             robotRunConfiguration.getPythonRunConfiguration().setScriptParameters(testExecutionCommand);
 

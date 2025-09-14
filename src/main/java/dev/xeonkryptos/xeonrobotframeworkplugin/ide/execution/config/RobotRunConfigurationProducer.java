@@ -22,7 +22,6 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTaskStatement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTestCaseStatement;
 import org.jetbrains.annotations.NotNull;
 
-import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
@@ -45,7 +44,7 @@ public class RobotRunConfigurationProducer extends LazyRunConfigurationProducer<
                                                     @NotNull ConfigurationContext context,
                                                     @NotNull Ref<PsiElement> sourceElement) {
         if (isValidRobotExecutableScript(context)) {
-            String workingDirectory = getWorkingDirectoryToUse(runConfig);
+            String workingDirectory = FileUtils.getWorkingDirectoryToUse(runConfig);
             String runParam = getRunParametersForMultiSelection(context, workingDirectory);
             runConfig.getPythonRunConfiguration().setScriptParameters(runParam);
             Sdk sdk = ProjectRootManager.getInstance(context.getProject()).getProjectSdk();
@@ -61,7 +60,7 @@ public class RobotRunConfigurationProducer extends LazyRunConfigurationProducer<
     @Override
     public boolean isConfigurationFromContext(@NotNull RobotRunConfiguration runConfig, @NotNull ConfigurationContext context) {
         if (isValidRobotExecutableScript(context)) {
-            String workingDirectory = getWorkingDirectoryToUse(runConfig);
+            String workingDirectory = FileUtils.getWorkingDirectoryToUse(runConfig);
             String runParam = getRunParametersForMultiSelection(context, workingDirectory);
             boolean ret = runParam.trim().equals(runConfig.getPythonRunConfiguration().getScriptParameters().trim());
             if (ret) {
@@ -70,14 +69,6 @@ public class RobotRunConfigurationProducer extends LazyRunConfigurationProducer<
             return ret;
         }
         return false;
-    }
-
-    static String getWorkingDirectoryToUse(@NotNull RobotRunConfiguration runConfig) {
-        String workingDirectory = runConfig.getPythonRunConfiguration().getWorkingDirectory();
-        if (workingDirectory == null || workingDirectory.isEmpty()) {
-            workingDirectory = runConfig.getPythonRunConfiguration().getWorkingDirectorySafe();
-        }
-        return workingDirectory;
     }
 
     @NotNull
@@ -108,7 +99,7 @@ public class RobotRunConfigurationProducer extends LazyRunConfigurationProducer<
         if (parameters.isEmpty()) {
             for (VirtualFile virtualFile : virtualFiles) {
                 String filePath = virtualFile.getPath();
-                String relativePath = relativizePath(basePath, filePath);
+                String relativePath = FileUtils.relativizePath(basePath, filePath);
                 parameters.append(" \"").append(relativePath.replace("\"", "\\\"")).append("\"");
             }
         } else {
@@ -133,7 +124,7 @@ public class RobotRunConfigurationProducer extends LazyRunConfigurationProducer<
 
         assert commonAncestor != null;
         String filePath = commonAncestor.getPath();
-        return relativizePath(basePath, filePath);
+        return FileUtils.relativizePath(basePath, filePath);
     }
 
     private static boolean containsTasksOnly(PsiElement element) {
@@ -167,7 +158,7 @@ public class RobotRunConfigurationProducer extends LazyRunConfigurationProducer<
             runParameters = "--test \"" + testCaseName + "\"";
         }
         String filePath = virtualFile.getPath();
-        basePath = relativizePath(basePath, filePath);
+        basePath = FileUtils.relativizePath(basePath, filePath);
         runParameters += " \"" + basePath.replace("\"", "\\\"") + "\"";
 
         PsiElement element = context.getPsiLocation();
@@ -175,17 +166,6 @@ public class RobotRunConfigurationProducer extends LazyRunConfigurationProducer<
             runParameters = "--rpa " + runParameters;
         }
         return runParameters;
-    }
-
-    @NotNull
-    static String relativizePath(String basePath, String targetPath) {
-        Path targetFile = Path.of(targetPath);
-        try {
-            Path relativePath = Path.of(basePath).relativize(targetFile);
-            return relativePath.toString();
-        } catch (IllegalArgumentException e) {
-            return targetPath;
-        }
     }
 
     @NotNull
