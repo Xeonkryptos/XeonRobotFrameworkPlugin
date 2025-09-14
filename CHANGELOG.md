@@ -16,6 +16,7 @@
 - Fixed lexing of <code>[Template]  NONE</code>
 - Fixed template parsing starting with variables
 - Fixed foldability of all elements leading to more clicks than necessary to unfold after recursive collapse
+- Automatically adding of ellipsis and indentation and the correct removal on a second enter without anything typed
 
 ## 0.5.2
 

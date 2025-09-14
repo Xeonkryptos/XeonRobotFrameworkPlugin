@@ -48,7 +48,7 @@ public abstract class AbstractRobotSmartMultilineEnterActionHandler<T extends Ps
                 return Result.Continue;
             }
             int previousLine = document.getLineNumber(caretOffset) - 1;
-            T element = getExpectedElement(currentElement, previousLine, document);
+            T element = getExpectedElement(currentElement, previousLine, file, document);
             if (element != null) {
                 handleSmartMultilineIndentation(file, editor, element);
                 return Result.Stop;
@@ -58,11 +58,16 @@ public abstract class AbstractRobotSmartMultilineEnterActionHandler<T extends Ps
     }
 
     @Nullable
-    protected T getExpectedElement(@Nullable PsiElement element, int previousLine, Document document) {
+    protected T getExpectedElement(@Nullable PsiElement element, int previousLine, @NotNull PsiFile file, Document document) {
         if (expectedElementClass.isInstance(element)) {
             return expectedElementClass.cast(element);
         }
         T foundElement = PsiTreeUtil.getParentOfType(element, expectedElementClass);
+        if (foundElement == null && element != null) {
+            int textOffset = element.getTextOffset() - 1;
+            PsiElement currentFoundElement = file.findElementAt(textOffset);
+            foundElement = PsiTreeUtil.getParentOfType(currentFoundElement, expectedElementClass);
+        }
         if (foundElement != null) {
             int textOffset = foundElement.getTextOffset();
             int keywordCallLineNumber = document.getLineNumber(textOffset);
