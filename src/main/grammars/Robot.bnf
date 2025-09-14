@@ -1,6 +1,10 @@
 {
   parserClass="dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotParser"
   parserUtilClass="dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotParserUtil"
+  parserImports=[
+    "static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotParserUtil.*"
+    "static com.intellij.lang.WhitespacesBinders.*"
+  ]
   extends="com.intellij.extapi.psi.ASTWrapperPsiElement"
 
   psiClassPrefix="Robot"
@@ -122,7 +126,7 @@ unknown_setting_statements_global_setting ::= UNKNOWN_SETTING_KEYWORD (parameter
 }
 
 test_case_statement ::= test_case_id eol_marker? testcase_task_statement* {
-    pin=2
+    pin=1
     implements = [
         "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotQualifiedNameOwner"
         "com.intellij.psi.PsiNameIdentifierOwner"
@@ -134,11 +138,12 @@ test_case_statement ::= test_case_id eol_marker? testcase_task_statement* {
     stubClass = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotTestCaseStatementStub"
     elementTypeFactory = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotTestCaseStatementStubElement.create"
     recoverWhile=test_case_statement_recover
+    hooks=[clearTemplateStateHook]
 }
 test_case_id ::= TEST_CASE_NAME
 private test_case_statement_recover ::= !test_case_id & section_recover
 task_statement ::= task_id eol_marker? testcase_task_statement* {
-    pin=2
+    pin=1
     implements = [
         "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotQualifiedNameOwner"
         "com.intellij.psi.PsiNameIdentifierOwner"
@@ -150,13 +155,18 @@ task_statement ::= task_id eol_marker? testcase_task_statement* {
     stubClass = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotTaskStatementStub"
     elementTypeFactory = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotTaskStatementStubElement.create"
     recoverWhile=task_statement_recover
+    hooks=[clearTemplateStateHook]
 }
 task_id ::= TASK_NAME
 private task_statement_recover ::= !task_id & section_recover
 
-private testcase_task_statement ::= <<parseTestcaseTaskStatement local_setting template_arguments bdd_statement executable_statement>>
+private testcase_task_statement ::= local_setting | <<parseTestcaseTaskStatement template_arguments bdd_statement executable_statement>> {
+    recoverWhile=testcase_task_statement_recover
+}
+private testcase_task_statement_recover ::= !(local_setting_id | TEMPLATE_ARGUMENT_VALUE | template_parameter_id | GIVEN | WHEN | task_id | test_case_id) & section_recover & executable_statement_recover
 
 template_arguments ::= (template_argument | template_parameter)+ eol_marker {
+    pin=1
     implements=[
         "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTemplateArgumentsExpression"
         "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotCallArgumentsContainer"
@@ -177,7 +187,9 @@ bdd_statement ::= (
         | GIVEN eol_based_keyword_call
         | WHEN eol_based_keyword_call
     )
-    THEN eol_based_keyword_call (AND eol_based_keyword_call)* (BUT eol_based_keyword_call)*
+    THEN eol_based_keyword_call (AND eol_based_keyword_call)* (BUT eol_based_keyword_call)* {
+        pin=1
+}
 
 user_keyword_statement ::= user_keyword_statement_id eol_marker (local_setting | local_arguments_setting | executable_statement)* {
     pin=1
@@ -198,8 +210,10 @@ user_keyword_statement_id ::= USER_KEYWORD_NAME
 private user_keyword_statement_recover ::= !user_keyword_statement_id & section_recover
 
 local_setting ::= local_setting_id (positional_argument | parameter | eol_free_keyword_call | ASSIGNMENT)* eol_marker {
+    pin=1
     methods=[getSettingName]
     implements=foldable
+    hooks=[localTemplateDefinitionHook]
 }
 local_setting_id ::= LOCAL_SETTING_NAME
 
@@ -212,8 +226,10 @@ local_arguments_setting_id ::= ARGUMENTS_SETTING_NAME
 local_arguments_setting_argument ::= variable_definition "=" positional_argument
 
 executable_statement ::= loop_structure | loop_control_structure | control_structure | call_structure | return_structure {
+    pin=1
     implements=foldable
 }
+private executable_statement_recover ::= !(FOR | WHILE | IF | ELSE_IF | ELSE | TRY | GROUP | RETURN | BREAK | CONTINUE | VAR | keyword_call_name | variable_definition) & section_recover
 
 fake block_opening_structure ::= loop_structure | control_structure {implements=foldable}
 private control_structure ::= conditional_structure | exception_handling_structure | group_structure {
@@ -222,7 +238,7 @@ private control_structure ::= conditional_structure | exception_handling_structu
 private loop_structure ::= for_loop_structure | while_loop_structure {
     implements = "block_opening_structure"
 }
-private call_structure ::= eol_based_keyword_call | inline_variable_statement | keyword_variable_statement | single_variable_statement
+private call_structure ::= eol_based_keyword_call | inline_variable_statement | keyword_variable_statement
 private loop_control_structure ::= (BREAK | CONTINUE) eol_marker?
 private return_structure ::= RETURN positional_argument* eol_marker? {pin=1}
 
@@ -292,9 +308,9 @@ parameter ::= parameter_id ASSIGNMENT positional_argument? {methods=[getParamete
 parameter_id ::= PARAMETER_NAME {methods = [getReference]}
 
 fake variable_statement ::= DUMMY {methods = [getIcon] implements=foldable}
-inline_variable_statement ::= VAR variable_definition ASSIGNMENT? variable_value+ eol_marker?
-single_variable_statement ::= variable_definition ASSIGNMENT? variable_value* eol_marker?
-keyword_variable_statement ::= variable_definition+ ASSIGNMENT? eol_based_keyword_call // Without EOL as it is handled at a lower level
+inline_variable_statement ::= VAR variable_definition ASSIGNMENT? variable_value+ eol_marker? {pin=1}
+single_variable_statement ::= variable_definition ASSIGNMENT? variable_value* eol_marker? {pin=3}
+keyword_variable_statement ::= variable_definition+ ASSIGNMENT? eol_marker? eol_based_keyword_call {pin=2} // Without EOL as it is handled at a lower level
 variable_value ::= variable | positional_argument | parameter
 
 positional_argument ::= external_positional_argument {

@@ -29,9 +29,9 @@ public class RobotKeywordVariableStatementImpl extends RobotVariableStatementImp
   }
 
   @Override
-  @NotNull
+  @Nullable
   public RobotKeywordCall getKeywordCall() {
-    return notNullChild(PsiTreeUtil.getChildOfType(this, RobotKeywordCall.class));
+    return PsiTreeUtil.getChildOfType(this, RobotKeywordCall.class);
   }
 
   @Override

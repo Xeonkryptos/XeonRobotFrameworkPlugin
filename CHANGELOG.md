@@ -17,6 +17,7 @@
 - Fixed template parsing starting with variables
 - Fixed foldability of all elements leading to more clicks than necessary to unfold after recursive collapse
 - Automatically adding of ellipsis and indentation and the correct removal on a second enter without anything typed
+- Fixed some parsing issues
 
 ## 0.5.2
 

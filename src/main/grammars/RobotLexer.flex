@@ -365,7 +365,7 @@ LineComment = {LineCommentSign} {NON_EOL}*
               return LOCAL_SETTING_NAME;
           }
         {LocalTemplateKeyword} \s* (\R \s* !{Ellipsis} | {MultiLine} \R)      {
-              yypushback(yylength() - indexOf(']'));
+              yypushback(yylength() - indexOf(']') - 1);
               localTemplateEnabled = false;
               return LOCAL_SETTING_NAME;
           }

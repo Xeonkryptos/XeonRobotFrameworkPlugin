@@ -17,8 +17,31 @@ public class RobotParserUtil extends GeneratedParserUtilBase {
 
     private static final Key<Boolean> GLOBAL_TEMPLATE_SETTING_KEY = Key.create("GLOBAL_TEMPLATE_SETTING_KEY");
     private static final Key<Boolean> LOCAL_TEMPLATE_SETTING_KEY = Key.create("LOCAL_TEMPLATE_SETTING_KEY");
+    private static final Key<Boolean> LOCAL_TEMPLATE_SETTING_RESET_OVERRIDE_KEY = Key.create("LOCAL_TEMPLATE_SETTING_RESET_OVERRIDE_KEY");
 
     private static final String TEMPLATE_LOCAL_SETTING_NAME = "[Template]";
+
+    public static final Hook<Void> CLEAR_TEMPLATE_STATE_HOOK = (builder, marker, param) -> {
+        builder.putUserData(LOCAL_TEMPLATE_SETTING_KEY, false);
+        return marker;
+    };
+    public static final Hook<Void> LOCAL_TEMPLATE_DEFINITION_HOOK = (builder, marker, param) -> {
+        LighterASTNode latestDoneMarker = builder.getLatestDoneMarker();
+        assert latestDoneMarker != null; // should never be null here as we just finished a successful parse of local setting
+
+        CharSequence originalText = builder.getOriginalText();
+        int originalTextLength = originalText.length();
+
+        int settingStartOffset = latestDoneMarker.getStartOffset();
+        int settingEndOffset = latestDoneMarker.getEndOffset();
+        int settingNameEndOffset = Math.min(originalTextLength, settingStartOffset + TEMPLATE_LOCAL_SETTING_NAME.length());
+
+        String localSettingName = originalText.subSequence(settingStartOffset, settingNameEndOffset).toString();
+        if (TEMPLATE_LOCAL_SETTING_NAME.equalsIgnoreCase(localSettingName)) {
+            updateLocalTemplateState(builder, settingStartOffset, settingEndOffset, originalText);
+        }
+        return marker;
+    };
 
     /**
      * Custom parser to correctly detect and parse positional arguments in Robot Framework. In the space-based format of Robot files you need to separate arguments
@@ -71,41 +94,21 @@ public class RobotParserUtil extends GeneratedParserUtilBase {
         return result;
     }
 
-    public static boolean parseTestcaseTaskStatement(PsiBuilder builder,
-                                                     int level,
-                                                     Parser localSettingsParser,
-                                                     Parser templateArgumentsParser,
-                                                     Parser... parsers) {
+    public static boolean parseTestcaseTaskStatement(PsiBuilder builder, int level, Parser templateArgumentsParser, Parser... parsers) {
         if (!recursion_guard_(builder, level, "parse_testcase_task_statement")) {
             return false;
         }
         Boolean globalTemplateDefined = builder.getUserData(GLOBAL_TEMPLATE_SETTING_KEY);
-        if (Boolean.TRUE.equals(globalTemplateDefined)) {
+        Boolean localTemplateResetOverride = builder.getUserData(LOCAL_TEMPLATE_SETTING_RESET_OVERRIDE_KEY);
+        if (Boolean.TRUE.equals(globalTemplateDefined) && !Boolean.TRUE.equals(localTemplateResetOverride)) {
             builder.putUserData(LOCAL_TEMPLATE_SETTING_KEY, true);
-        }
-        boolean result = localSettingsParser.parse(builder, level + 1);
-        if (result) {
-            LighterASTNode latestDoneMarker = builder.getLatestDoneMarker();
-            assert latestDoneMarker != null; // should never be null here as we just finished a successful parse of local setting
-
-            CharSequence originalText = builder.getOriginalText();
-            int originalTextLength = originalText.length();
-
-            int settingStartOffset = latestDoneMarker.getStartOffset();
-            int settingEndOffset = Math.min(originalTextLength, settingStartOffset + TEMPLATE_LOCAL_SETTING_NAME.length());
-
-            String localSettingName = originalText.subSequence(settingStartOffset, settingEndOffset).toString();
-            if (TEMPLATE_LOCAL_SETTING_NAME.equalsIgnoreCase(localSettingName)) {
-                updateLocalTemplateState(builder, settingStartOffset, originalText);
-            }
-            return true;
         }
         Boolean localTemplateDefined = builder.getUserData(LOCAL_TEMPLATE_SETTING_KEY);
         if (Boolean.TRUE.equals(localTemplateDefined)) {
             return templateArgumentsParser.parse(builder, level + 1);
         }
         for (Parser parser : parsers) {
-            result = parser.parse(builder, level + 1);
+            boolean result = parser.parse(builder, level + 1);
             if (result) {
                 return true;
             }
@@ -113,22 +116,26 @@ public class RobotParserUtil extends GeneratedParserUtilBase {
         return false;
     }
 
-    private static void updateLocalTemplateState(PsiBuilder builder, int settingStartOffset, CharSequence originalText) {
+    private static void updateLocalTemplateState(PsiBuilder builder, int settingStartOffset, int settingEndOffset, CharSequence originalText) {
         builder.putUserData(LOCAL_TEMPLATE_SETTING_KEY, false);
+        builder.putUserData(LOCAL_TEMPLATE_SETTING_RESET_OVERRIDE_KEY, true);
         for (Production production : builder.getProductions()) {
             int productionStartOffset = production.getStartOffset();
             if (productionStartOffset >= settingStartOffset) {
                 IElementType tokenType = production.getTokenType();
                 if (tokenType == RobotTypes.KEYWORD_CALL || tokenType == RobotTypes.VARIABLE) {
-                    if (tokenType == RobotTypes.KEYWORD_CALL) {
-                        builder.putUserData(LOCAL_TEMPLATE_SETTING_KEY, true);
-                    } else {
-                        int productionEndOffset = production.getEndOffset();
-                        String variableText = originalText.subSequence(productionStartOffset, productionEndOffset).toString();
-                        boolean localTemplateDetected = !variableText.equals(ReservedVariable.EMPTY.getVariable());
-                        builder.putUserData(LOCAL_TEMPLATE_SETTING_KEY, localTemplateDetected);
+                    int productionEndOffset = production.getEndOffset();
+                    if (productionEndOffset <= settingEndOffset) {
+                        builder.putUserData(LOCAL_TEMPLATE_SETTING_RESET_OVERRIDE_KEY, false);
+                        if (tokenType == RobotTypes.KEYWORD_CALL) {
+                            builder.putUserData(LOCAL_TEMPLATE_SETTING_KEY, true);
+                        } else {
+                            String variableText = originalText.subSequence(productionStartOffset, productionEndOffset).toString();
+                            boolean localTemplateDetected = !variableText.equals(ReservedVariable.EMPTY.getVariable());
+                            builder.putUserData(LOCAL_TEMPLATE_SETTING_KEY, localTemplateDetected);
+                        }
+                        break;
                     }
-                    break;
                 }
             }
         }

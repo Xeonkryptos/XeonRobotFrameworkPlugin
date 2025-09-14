@@ -29,9 +29,9 @@ public class RobotInlineVariableStatementImpl extends RobotVariableStatementImpl
   }
 
   @Override
-  @NotNull
+  @Nullable
   public RobotVariableDefinition getVariableDefinition() {
-    return notNullChild(PsiTreeUtil.getChildOfType(this, RobotVariableDefinition.class));
+    return PsiTreeUtil.getChildOfType(this, RobotVariableDefinition.class);
   }
 
   @Override

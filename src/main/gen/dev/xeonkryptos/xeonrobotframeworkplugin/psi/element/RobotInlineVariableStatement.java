@@ -7,7 +7,7 @@ import com.intellij.psi.PsiElement;
 
 public interface RobotInlineVariableStatement extends RobotVariableStatement {
 
-  @NotNull
+  @Nullable
   RobotVariableDefinition getVariableDefinition();
 
   @NotNull

@@ -1,179 +1,16 @@
 // This is a generated file. Not intended for manual editing.
 package dev.xeonkryptos.xeonrobotframeworkplugin.psi;
 
-import com.intellij.lang.ASTNode;
-import com.intellij.lang.LightPsiParser;
 import com.intellij.lang.PsiBuilder;
 import com.intellij.lang.PsiBuilder.Marker;
-import com.intellij.lang.PsiParser;
+import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.*;
+import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotParserUtil.*;
 import com.intellij.psi.tree.IElementType;
+import com.intellij.lang.ASTNode;
 import com.intellij.psi.tree.TokenSet;
-
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotParserUtil.TRUE_CONDITION;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotParserUtil._AND_;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotParserUtil._COLLAPSE_;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotParserUtil._NONE_;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotParserUtil._NOT_;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotParserUtil.adapt_builder_;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotParserUtil.consumeToken;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotParserUtil.consumeTokens;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotParserUtil.create_token_set_;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotParserUtil.current_position_;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotParserUtil.empty_element_parsed_guard_;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotParserUtil.enter_section_;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotParserUtil.eof;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotParserUtil.exit_section_;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotParserUtil.nextTokenIs;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotParserUtil.parsePositionalArgument;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotParserUtil.parseTemplateStatementsGlobalSetting;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotParserUtil.parseTestcaseTaskStatement;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotParserUtil.recursion_guard_;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotParserUtil.report_error_;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.AND;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.ARGUMENTS_SETTING_NAME;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.ASSIGNMENT;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.BDD_STATEMENT;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.BREAK;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.BUT;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.COMMENT;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.COMMENTS_HEADER;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.COMMENTS_SECTION;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.CONTINUE;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.DICT_VARIABLE;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.DICT_VARIABLE_START;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.DOCUMENTATION_KEYWORD;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.DOCUMENTATION_STATEMENT_GLOBAL_SETTING;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.ELSE;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.ELSE_IF;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.ELSE_IF_STRUCTURE;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.END;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.ENVIRONMENT_VARIABLE;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.ENV_VARIABLE_START;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.EOL;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.EXCEPT;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.EXCEPT_STRUCTURE;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.EXECUTABLE_STATEMENT;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.EXTENDED_VARIABLE_INDEX_ACCESS;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.EXTENDED_VARIABLE_KEY_ACCESS;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.EXTENDED_VARIABLE_NESTED_ACCESS;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.EXTENDED_VARIABLE_SLICE_ACCESS;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.FINALLY;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.FINALLY_STRUCTURE;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.FOR;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.FOR_IN;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.FOR_LOOP_STRUCTURE;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.GIVEN;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.GLOBAL_SETTING_STATEMENT;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.GROUP;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.GROUP_STRUCTURE;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.IF;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.IF_ELSE_STRUCTURE;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.IF_STRUCTURE;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.INLINE_VARIABLE_STATEMENT;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.KEYWORDS_SECTION;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.KEYWORD_CALL;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.KEYWORD_CALL_LIBRARY;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.KEYWORD_CALL_LIBRARY_NAME;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.KEYWORD_CALL_NAME;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.KEYWORD_LIBRARY_NAME;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.KEYWORD_LIBRARY_SEPARATOR;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.KEYWORD_NAME;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.KEYWORD_VARIABLE_STATEMENT;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.LANGUAGE;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.LANGUAGE_ID;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.LANGUAGE_KEYWORD;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.LANGUAGE_NAME;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.LIBRARY_IMPORT_GLOBAL_SETTING;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.LIBRARY_IMPORT_KEYWORD;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.LIST_VARIABLE;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.LIST_VARIABLE_START;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.LITERAL_CONSTANT;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.LITERAL_CONSTANT_VALUE;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.LOCAL_ARGUMENTS_SETTING;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.LOCAL_ARGUMENTS_SETTING_ARGUMENT;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.LOCAL_ARGUMENTS_SETTING_ID;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.LOCAL_SETTING;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.LOCAL_SETTING_ID;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.LOCAL_SETTING_NAME;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.METADATA_KEYWORD;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.METADATA_STATEMENT_GLOBAL_SETTING;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.NEW_LIBRARY_NAME;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.PARAMETER;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.PARAMETER_ID;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.PARAMETER_NAME;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.POSITIONAL_ARGUMENT;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.PYTHON_EXPRESSION;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.PYTHON_EXPRESSION_CONTENT;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.PYTHON_EXPRESSION_END;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.PYTHON_EXPRESSION_START;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.RESOURCE_IMPORT_GLOBAL_SETTING;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.RESOURCE_IMPORT_KEYWORD;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.RETURN;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.ROOT;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.SCALAR_VARIABLE;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.SCALAR_VARIABLE_START;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.SECTION;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.SETTINGS_HEADER;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.SETTINGS_SECTION;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.SETUP_TEARDOWN_STATEMENTS_GLOBAL_SETTING;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.SETUP_TEARDOWN_STATEMENT_KEYWORDS;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.SINGLE_VARIABLE_STATEMENT;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.SUITE_NAME_KEYWORD;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.SUITE_NAME_STATEMENT_GLOBAL_SETTING;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.TAGS_KEYWORDS;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.TAGS_STATEMENT_GLOBAL_SETTING;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.TASKS_HEADER;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.TASKS_SECTION;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.TASK_ID;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.TASK_NAME;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.TASK_STATEMENT;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.TEMPLATE_ARGUMENT;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.TEMPLATE_ARGUMENTS;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.TEMPLATE_ARGUMENT_VALUE;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.TEMPLATE_KEYWORDS;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.TEMPLATE_PARAMETER;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.TEMPLATE_PARAMETER_ID;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.TEMPLATE_PARAMETER_NAME;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.TEMPLATE_STATEMENTS_GLOBAL_SETTING;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.TEST_CASES_HEADER;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.TEST_CASES_SECTION;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.TEST_CASE_ID;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.TEST_CASE_NAME;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.TEST_CASE_STATEMENT;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.THEN;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.TIMEOUT_KEYWORDS;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.TIMEOUT_STATEMENTS_GLOBAL_SETTING;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.TRY;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.TRY_ELSE_STRUCTURE;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.TRY_STRUCTURE;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.UNKNOWN_SETTING_KEYWORD;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.UNKNOWN_SETTING_STATEMENTS_GLOBAL_SETTING;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.USER_KEYWORDS_HEADER;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.USER_KEYWORD_NAME;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.USER_KEYWORD_STATEMENT;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.USER_KEYWORD_STATEMENT_ID;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.VAR;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.VARIABLE;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.VARIABLES_HEADER;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.VARIABLES_IMPORT_GLOBAL_SETTING;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.VARIABLES_IMPORT_KEYWORD;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.VARIABLES_SECTION;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.VARIABLE_ACCESS_END;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.VARIABLE_ACCESS_START;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.VARIABLE_BODY;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.VARIABLE_BODY_EXTENSION;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.VARIABLE_BODY_ID;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.VARIABLE_CONTENT;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.VARIABLE_DEFINITION;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.VARIABLE_END;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.VARIABLE_INDEX_ACCESS;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.VARIABLE_KEY_ACCESS;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.VARIABLE_SLICE_ACCESS;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.VARIABLE_VALUE;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.WHEN;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.WHILE;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.WHILE_LOOP_STRUCTURE;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.WITH_NAME;
+import com.intellij.lang.PsiParser;
+import com.intellij.lang.LightPsiParser;
+import static com.intellij.lang.WhitespacesBinders.*;
 
 @SuppressWarnings({"SimplifiableIfStatement", "UnusedAssignment"})
 public class RobotParser implements PsiParser, LightPsiParser {
@@ -258,15 +95,16 @@ public class RobotParser implements PsiParser, LightPsiParser {
   public static boolean bdd_statement(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "bdd_statement")) return false;
     if (!nextTokenIs(b, "<bdd statement>", GIVEN, WHEN)) return false;
-    boolean r;
+    boolean r, p;
     Marker m = enter_section_(b, l, _NONE_, BDD_STATEMENT, "<bdd statement>");
     r = bdd_statement_0(b, l + 1);
-    r = r && consumeToken(b, THEN);
-    r = r && eol_based_keyword_call(b, l + 1);
-    r = r && bdd_statement_3(b, l + 1);
-    r = r && bdd_statement_4(b, l + 1);
-    exit_section_(b, l, m, r, false, null);
-    return r;
+    p = r; // pin = 1
+    r = r && report_error_(b, consumeToken(b, THEN));
+    r = p && report_error_(b, eol_based_keyword_call(b, l + 1)) && r;
+    r = p && report_error_(b, bdd_statement_3(b, l + 1)) && r;
+    r = p && bdd_statement_4(b, l + 1) && r;
+    exit_section_(b, l, m, r, p, null);
+    return r || p;
   }
 
   // GIVEN eol_based_keyword_call WHEN eol_based_keyword_call
@@ -363,14 +201,13 @@ public class RobotParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // eol_based_keyword_call | inline_variable_statement | keyword_variable_statement | single_variable_statement
+  // eol_based_keyword_call | inline_variable_statement | keyword_variable_statement
   static boolean call_structure(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "call_structure")) return false;
     boolean r;
     r = eol_based_keyword_call(b, l + 1);
     if (!r) r = inline_variable_statement(b, l + 1);
     if (!r) r = keyword_variable_statement(b, l + 1);
-    if (!r) r = single_variable_statement(b, l + 1);
     return r;
   }
 
@@ -769,6 +606,58 @@ public class RobotParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
+  // !(FOR | WHILE | IF | ELSE_IF | ELSE | TRY | GROUP | RETURN | BREAK | CONTINUE | VAR | keyword_call_name | variable_definition) & section_recover
+  static boolean executable_statement_recover(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "executable_statement_recover")) return false;
+    boolean r;
+    Marker m = enter_section_(b);
+    r = executable_statement_recover_0(b, l + 1);
+    r = r && executable_statement_recover_1(b, l + 1);
+    exit_section_(b, m, null, r);
+    return r;
+  }
+
+  // !(FOR | WHILE | IF | ELSE_IF | ELSE | TRY | GROUP | RETURN | BREAK | CONTINUE | VAR | keyword_call_name | variable_definition)
+  private static boolean executable_statement_recover_0(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "executable_statement_recover_0")) return false;
+    boolean r;
+    Marker m = enter_section_(b, l, _NOT_);
+    r = !executable_statement_recover_0_0(b, l + 1);
+    exit_section_(b, l, m, r, false, null);
+    return r;
+  }
+
+  // FOR | WHILE | IF | ELSE_IF | ELSE | TRY | GROUP | RETURN | BREAK | CONTINUE | VAR | keyword_call_name | variable_definition
+  private static boolean executable_statement_recover_0_0(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "executable_statement_recover_0_0")) return false;
+    boolean r;
+    r = consumeToken(b, FOR);
+    if (!r) r = consumeToken(b, WHILE);
+    if (!r) r = consumeToken(b, IF);
+    if (!r) r = consumeToken(b, ELSE_IF);
+    if (!r) r = consumeToken(b, ELSE);
+    if (!r) r = consumeToken(b, TRY);
+    if (!r) r = consumeToken(b, GROUP);
+    if (!r) r = consumeToken(b, RETURN);
+    if (!r) r = consumeToken(b, BREAK);
+    if (!r) r = consumeToken(b, CONTINUE);
+    if (!r) r = consumeToken(b, VAR);
+    if (!r) r = keyword_call_name(b, l + 1);
+    if (!r) r = variable_definition(b, l + 1);
+    return r;
+  }
+
+  // & section_recover
+  private static boolean executable_statement_recover_1(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "executable_statement_recover_1")) return false;
+    boolean r;
+    Marker m = enter_section_(b, l, _AND_);
+    r = section_recover(b, l + 1);
+    exit_section_(b, l, m, r, false, null);
+    return r;
+  }
+
+  /* ********************************************************** */
   // VARIABLE_INDEX_ACCESS
   public static boolean extended_variable_index_access(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "extended_variable_index_access")) return false;
@@ -1093,15 +982,16 @@ public class RobotParser implements PsiParser, LightPsiParser {
   public static boolean inline_variable_statement(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "inline_variable_statement")) return false;
     if (!nextTokenIs(b, VAR)) return false;
-    boolean r;
-    Marker m = enter_section_(b);
+    boolean r, p;
+    Marker m = enter_section_(b, l, _NONE_, INLINE_VARIABLE_STATEMENT, null);
     r = consumeToken(b, VAR);
-    r = r && variable_definition(b, l + 1);
-    r = r && inline_variable_statement_2(b, l + 1);
-    r = r && inline_variable_statement_3(b, l + 1);
-    r = r && inline_variable_statement_4(b, l + 1);
-    exit_section_(b, m, INLINE_VARIABLE_STATEMENT, r);
-    return r;
+    p = r; // pin = 1
+    r = r && report_error_(b, variable_definition(b, l + 1));
+    r = p && report_error_(b, inline_variable_statement_2(b, l + 1)) && r;
+    r = p && report_error_(b, inline_variable_statement_3(b, l + 1)) && r;
+    r = p && inline_variable_statement_4(b, l + 1) && r;
+    exit_section_(b, l, m, r, p, null);
+    return r || p;
   }
 
   // ASSIGNMENT?
@@ -1201,16 +1091,18 @@ public class RobotParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // variable_definition+ ASSIGNMENT? eol_based_keyword_call
+  // variable_definition+ ASSIGNMENT? eol_marker? eol_based_keyword_call
   public static boolean keyword_variable_statement(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "keyword_variable_statement")) return false;
-    boolean r;
+    boolean r, p;
     Marker m = enter_section_(b, l, _NONE_, KEYWORD_VARIABLE_STATEMENT, "<keyword variable statement>");
     r = keyword_variable_statement_0(b, l + 1);
     r = r && keyword_variable_statement_1(b, l + 1);
-    r = r && eol_based_keyword_call(b, l + 1);
-    exit_section_(b, l, m, r, false, null);
-    return r;
+    p = r; // pin = 2
+    r = r && report_error_(b, keyword_variable_statement_2(b, l + 1));
+    r = p && eol_based_keyword_call(b, l + 1) && r;
+    exit_section_(b, l, m, r, p, null);
+    return r || p;
   }
 
   // variable_definition+
@@ -1232,6 +1124,13 @@ public class RobotParser implements PsiParser, LightPsiParser {
   private static boolean keyword_variable_statement_1(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "keyword_variable_statement_1")) return false;
     consumeToken(b, ASSIGNMENT);
+    return true;
+  }
+
+  // eol_marker?
+  private static boolean keyword_variable_statement_2(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "keyword_variable_statement_2")) return false;
+    eol_marker(b, l + 1);
     return true;
   }
 
@@ -1461,13 +1360,15 @@ public class RobotParser implements PsiParser, LightPsiParser {
   public static boolean local_setting(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "local_setting")) return false;
     if (!nextTokenIs(b, LOCAL_SETTING_NAME)) return false;
-    boolean r;
-    Marker m = enter_section_(b);
+    boolean r, p;
+    Marker m = enter_section_(b, l, _NONE_, LOCAL_SETTING, null);
     r = local_setting_id(b, l + 1);
-    r = r && local_setting_1(b, l + 1);
-    r = r && eol_marker(b, l + 1);
-    exit_section_(b, m, LOCAL_SETTING, r);
-    return r;
+    p = r; // pin = 1
+    r = r && report_error_(b, local_setting_1(b, l + 1));
+    r = p && eol_marker(b, l + 1) && r;
+    register_hook_(b, LOCAL_TEMPLATE_DEFINITION_HOOK, null);
+    exit_section_(b, l, m, r, p, null);
+    return r || p;
   }
 
   // (positional_argument | parameter | eol_free_keyword_call | ASSIGNMENT)*
@@ -1876,14 +1777,15 @@ public class RobotParser implements PsiParser, LightPsiParser {
   // variable_definition ASSIGNMENT? variable_value* eol_marker?
   public static boolean single_variable_statement(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "single_variable_statement")) return false;
-    boolean r;
+    boolean r, p;
     Marker m = enter_section_(b, l, _NONE_, SINGLE_VARIABLE_STATEMENT, "<single variable statement>");
     r = variable_definition(b, l + 1);
     r = r && single_variable_statement_1(b, l + 1);
     r = r && single_variable_statement_2(b, l + 1);
+    p = r; // pin = 3
     r = r && single_variable_statement_3(b, l + 1);
-    exit_section_(b, l, m, r, false, null);
-    return r;
+    exit_section_(b, l, m, r, p, null);
+    return r || p;
   }
 
   // ASSIGNMENT?
@@ -1969,9 +1871,10 @@ public class RobotParser implements PsiParser, LightPsiParser {
     boolean r, p;
     Marker m = enter_section_(b, l, _NONE_, TASK_STATEMENT, "<task statement>");
     r = task_id(b, l + 1);
-    r = r && task_statement_1(b, l + 1);
-    p = r; // pin = 2
-    r = r && task_statement_2(b, l + 1);
+    p = r; // pin = 1
+    r = r && report_error_(b, task_statement_1(b, l + 1));
+    r = p && task_statement_2(b, l + 1) && r;
+    register_hook_(b, CLEAR_TEMPLATE_STATE_HOOK, null);
     exit_section_(b, l, m, r, p, RobotParser::task_statement_recover);
     return r || p;
   }
@@ -2066,12 +1969,13 @@ public class RobotParser implements PsiParser, LightPsiParser {
   // (template_argument | template_parameter)+ eol_marker
   public static boolean template_arguments(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "template_arguments")) return false;
-    boolean r;
+    boolean r, p;
     Marker m = enter_section_(b, l, _NONE_, TEMPLATE_ARGUMENTS, "<template arguments>");
     r = template_arguments_0(b, l + 1);
+    p = r; // pin = 1
     r = r && eol_marker(b, l + 1);
-    exit_section_(b, l, m, r, false, null);
-    return r;
+    exit_section_(b, l, m, r, p, null);
+    return r || p;
   }
 
   // (template_argument | template_parameter)+
@@ -2157,9 +2061,10 @@ public class RobotParser implements PsiParser, LightPsiParser {
     boolean r, p;
     Marker m = enter_section_(b, l, _NONE_, TEST_CASE_STATEMENT, "<test case statement>");
     r = test_case_id(b, l + 1);
-    r = r && test_case_statement_1(b, l + 1);
-    p = r; // pin = 2
-    r = r && test_case_statement_2(b, l + 1);
+    p = r; // pin = 1
+    r = r && report_error_(b, test_case_statement_1(b, l + 1));
+    r = p && test_case_statement_2(b, l + 1) && r;
+    register_hook_(b, CLEAR_TEMPLATE_STATE_HOOK, null);
     exit_section_(b, l, m, r, p, RobotParser::test_case_statement_recover);
     return r || p;
   }
@@ -2239,9 +2144,72 @@ public class RobotParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // <<parseTestcaseTaskStatement local_setting template_arguments bdd_statement executable_statement>>
+  // local_setting | <<parseTestcaseTaskStatement template_arguments bdd_statement executable_statement>>
   static boolean testcase_task_statement(PsiBuilder b, int l) {
-    return parseTestcaseTaskStatement(b, l + 1, RobotParser::local_setting, RobotParser::template_arguments, RobotParser::bdd_statement, RobotParser::executable_statement);
+    if (!recursion_guard_(b, l, "testcase_task_statement")) return false;
+    boolean r;
+    Marker m = enter_section_(b, l, _NONE_);
+    r = local_setting(b, l + 1);
+    if (!r) r = parseTestcaseTaskStatement(b, l + 1, RobotParser::template_arguments, RobotParser::bdd_statement, RobotParser::executable_statement);
+    exit_section_(b, l, m, r, false, RobotParser::testcase_task_statement_recover);
+    return r;
+  }
+
+  /* ********************************************************** */
+  // !(local_setting_id | TEMPLATE_ARGUMENT_VALUE | template_parameter_id | GIVEN | WHEN | task_id | test_case_id) & section_recover & executable_statement_recover
+  static boolean testcase_task_statement_recover(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "testcase_task_statement_recover")) return false;
+    boolean r;
+    Marker m = enter_section_(b);
+    r = testcase_task_statement_recover_0(b, l + 1);
+    r = r && testcase_task_statement_recover_1(b, l + 1);
+    r = r && testcase_task_statement_recover_2(b, l + 1);
+    exit_section_(b, m, null, r);
+    return r;
+  }
+
+  // !(local_setting_id | TEMPLATE_ARGUMENT_VALUE | template_parameter_id | GIVEN | WHEN | task_id | test_case_id)
+  private static boolean testcase_task_statement_recover_0(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "testcase_task_statement_recover_0")) return false;
+    boolean r;
+    Marker m = enter_section_(b, l, _NOT_);
+    r = !testcase_task_statement_recover_0_0(b, l + 1);
+    exit_section_(b, l, m, r, false, null);
+    return r;
+  }
+
+  // local_setting_id | TEMPLATE_ARGUMENT_VALUE | template_parameter_id | GIVEN | WHEN | task_id | test_case_id
+  private static boolean testcase_task_statement_recover_0_0(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "testcase_task_statement_recover_0_0")) return false;
+    boolean r;
+    r = local_setting_id(b, l + 1);
+    if (!r) r = consumeToken(b, TEMPLATE_ARGUMENT_VALUE);
+    if (!r) r = template_parameter_id(b, l + 1);
+    if (!r) r = consumeToken(b, GIVEN);
+    if (!r) r = consumeToken(b, WHEN);
+    if (!r) r = task_id(b, l + 1);
+    if (!r) r = test_case_id(b, l + 1);
+    return r;
+  }
+
+  // & section_recover
+  private static boolean testcase_task_statement_recover_1(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "testcase_task_statement_recover_1")) return false;
+    boolean r;
+    Marker m = enter_section_(b, l, _AND_);
+    r = section_recover(b, l + 1);
+    exit_section_(b, l, m, r, false, null);
+    return r;
+  }
+
+  // & executable_statement_recover
+  private static boolean testcase_task_statement_recover_2(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "testcase_task_statement_recover_2")) return false;
+    boolean r;
+    Marker m = enter_section_(b, l, _AND_);
+    r = executable_statement_recover(b, l + 1);
+    exit_section_(b, l, m, r, false, null);
+    return r;
   }
 
   /* ********************************************************** */
@@ -2376,9 +2344,11 @@ public class RobotParser implements PsiParser, LightPsiParser {
   private static boolean user_keyword_statement_2_0(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "user_keyword_statement_2_0")) return false;
     boolean r;
+    Marker m = enter_section_(b);
     r = local_setting(b, l + 1);
     if (!r) r = local_arguments_setting(b, l + 1);
     if (!r) r = executable_statement(b, l + 1);
+    exit_section_(b, m, null, r);
     return r;
   }
 

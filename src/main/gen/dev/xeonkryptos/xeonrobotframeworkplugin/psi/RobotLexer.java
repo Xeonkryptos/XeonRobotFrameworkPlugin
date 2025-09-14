@@ -8,78 +8,8 @@ import com.intellij.psi.tree.IElementType;
 
 import java.util.Stack;
 
-import static com.intellij.psi.TokenType.BAD_CHARACTER;
-import static com.intellij.psi.TokenType.WHITE_SPACE;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.AND;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.ARGUMENTS_SETTING_NAME;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.ASSIGNMENT;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.BREAK;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.BUT;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.COMMENT;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.COMMENTS_HEADER;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.CONTINUE;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.DICT_VARIABLE_START;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.DOCUMENTATION_KEYWORD;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.ELSE;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.ELSE_IF;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.END;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.ENV_VARIABLE_START;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.EOL;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.EXCEPT;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.FINALLY;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.FOR;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.FOR_IN;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.GIVEN;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.GROUP;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.IF;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.KEYWORD_LIBRARY_NAME;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.KEYWORD_LIBRARY_SEPARATOR;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.KEYWORD_NAME;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.LANGUAGE_KEYWORD;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.LANGUAGE_NAME;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.LIBRARY_IMPORT_KEYWORD;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.LIST_VARIABLE_START;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.LITERAL_CONSTANT;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.LOCAL_SETTING_NAME;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.METADATA_KEYWORD;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.PARAMETER_NAME;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.PYTHON_EXPRESSION_CONTENT;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.PYTHON_EXPRESSION_END;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.PYTHON_EXPRESSION_START;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.RESOURCE_IMPORT_KEYWORD;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.RETURN;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.SCALAR_VARIABLE_START;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.SETTINGS_HEADER;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.SETUP_TEARDOWN_STATEMENT_KEYWORDS;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.SUITE_NAME_KEYWORD;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.TAGS_KEYWORDS;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.TASKS_HEADER;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.TASK_NAME;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.TEMPLATE_ARGUMENT_VALUE;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.TEMPLATE_KEYWORDS;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.TEMPLATE_PARAMETER_NAME;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.TEST_CASES_HEADER;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.TEST_CASE_NAME;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.THEN;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.TIMEOUT_KEYWORDS;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.TRY;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.UNKNOWN_SETTING_KEYWORD;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.USER_KEYWORDS_HEADER;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.USER_KEYWORD_NAME;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.VAR;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.VARIABLES_HEADER;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.VARIABLES_IMPORT_KEYWORD;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.VARIABLE_ACCESS_END;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.VARIABLE_ACCESS_START;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.VARIABLE_BODY;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.VARIABLE_BODY_EXTENSION;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.VARIABLE_END;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.VARIABLE_INDEX_ACCESS;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.VARIABLE_KEY_ACCESS;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.VARIABLE_SLICE_ACCESS;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.WHEN;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.WHILE;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.WITH_NAME;
+import static com.intellij.psi.TokenType.*;
+import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.*;
 
 
 public class RobotLexer implements FlexLexer {
@@ -6426,7 +6356,7 @@ public class RobotLexer implements FlexLexer {
           // fall through
           case 239: break;
           case 117:
-            { yypushback(yylength() - indexOf(']'));
+            { yypushback(yylength() - indexOf(']') - 1);
               localTemplateEnabled = false;
               return LOCAL_SETTING_NAME;
             }

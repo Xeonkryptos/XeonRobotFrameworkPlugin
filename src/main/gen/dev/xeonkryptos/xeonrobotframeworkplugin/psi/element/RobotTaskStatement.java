@@ -1,16 +1,19 @@
 // This is a generated file. Not intended for manual editing.
 package dev.xeonkryptos.xeonrobotframeworkplugin.psi.element;
 
-import com.intellij.navigation.NavigationItem;
+import java.util.List;
+import org.jetbrains.annotations.*;
+import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiNameIdentifierOwner;
+import com.intellij.navigation.NavigationItem;
 import com.intellij.psi.StubBasedPsiElement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotTaskStatementStub;
-import org.jetbrains.annotations.NotNull;
-
 import javax.swing.Icon;
-import java.util.List;
 
 public interface RobotTaskStatement extends RobotQualifiedNameOwner, PsiNameIdentifierOwner, NavigationItem, RobotFoldable, RobotStatement, StubBasedPsiElement<RobotTaskStatementStub> {
+
+  @NotNull
+  List<RobotLocalSetting> getLocalSettingList();
 
   @NotNull
   RobotTaskId getTaskId();
