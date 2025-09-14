@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+## 0.5.3
+
 ### Added
 
 - Show executed keywords as a separate layer in the SMT view on test/task execution
