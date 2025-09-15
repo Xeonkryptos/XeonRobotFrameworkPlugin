@@ -4,6 +4,10 @@
 
 ## Unreleased
 
+### Fixed
+
+- Fixed wrong newlines in console output on test execution
+
 ## 0.5.3
 
 ### Added

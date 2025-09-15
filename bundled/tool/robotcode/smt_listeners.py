@@ -63,7 +63,6 @@ class RobotIntellijListener:
             print_teamcity_message(f"testSuiteFinished name='{teamcity_name}' nodeId='{node_id}' parentNodeId='{self.keyword_parent_id}'")
             self.keyword_id += 1
 
-
 def escape_name(name):
     # Escape special characters for TeamCity service messages
     return name.replace('|', '||').replace("'", "|'").replace("\n", "|n").replace("\r", "|r")
@@ -74,4 +73,4 @@ def escape_message(message):
 
 
 def print_teamcity_message(message):
-    print(f"##teamcity[{message}]\n")
+    print(f"##teamcity[{message}]")
