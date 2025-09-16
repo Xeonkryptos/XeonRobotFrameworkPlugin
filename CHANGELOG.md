@@ -8,6 +8,7 @@
 
 - Reference resolve of variables in the same file (jump to the closest variable definition even when another testcase/task provides a variable definition with
   the same name)
+- Fixed variable definition marked as unused because of different casing of variable names
 
 ## 0.5.4
 
