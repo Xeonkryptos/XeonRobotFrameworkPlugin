@@ -13,7 +13,7 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotHighlighter;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotPsiImplUtil;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.DefinedVariable;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotEnvironmentVariable;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLocalSetting;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLocalArgumentsSetting;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotPythonExpression;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariable;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableBodyId;
@@ -22,6 +22,7 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVisitor;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.ref.RobotFileManager;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.regex.Pattern;
 
@@ -42,8 +43,8 @@ public class RobotVariableAnnotator implements Annotator, DumbAware {
         if (globalVariables.stream().anyMatch(globalVariable -> globalVariable.matches(variableName))) {
             return;
         }
-        RobotLocalSetting localSetting = PsiTreeUtil.getParentOfType(element, RobotLocalSetting.class);
-        if (localSetting != null && "[Arguments]".equalsIgnoreCase(localSetting.getLocalSettingId().getText())) {
+        RobotLocalArgumentsSetting localArgumentsSetting = PsiTreeUtil.getParentOfType(element, RobotLocalArgumentsSetting.class);
+        if (localArgumentsSetting != null) {
             return;
         }
 
@@ -52,11 +53,15 @@ public class RobotVariableAnnotator implements Annotator, DumbAware {
         if (((PsiPolyVariantReference) variableBodyId.getReference()).multiResolve(false).length > 0) {
             ResolveResult[] resolveResults = ((PsiPolyVariantReference) variableBodyId.getReference()).multiResolve(false);
             if (resolveResults.length > 0) {
-                if (resolveResults.length > 1) {
+                if (resolveResults.length > 1 && Arrays.stream(resolveResults)
+                                                       .filter(ResolveResult::isValidResult)
+                                                       .map(ResolveResult::getElement)
+                                                       .filter(result -> result instanceof RobotVariableDefinition)
+                                                       .count() > 1) {
                     holder.newSilentAnnotation(HighlightSeverity.TEXT_ATTRIBUTES)
                           .textAttributes(RobotHighlighter.REASSIGNED_VARIABLE)
                           .tooltip(RobotBundle.getMessage("annotation.variable.reassigned"))
-                          .range(element)
+                          .range(variable)
                           .create();
                 }
                 return;
