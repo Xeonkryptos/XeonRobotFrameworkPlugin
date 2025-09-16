@@ -10,6 +10,7 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotResourceFileType;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotQualifiedNameOwner;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTaskStatement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTestCaseStatement;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotUserKeywordStatement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableBodyId;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableDefinition;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableStatement;
@@ -42,9 +43,15 @@ public abstract class RobotVariableDefinitionExtension extends RobotStubPsiEleme
         if (variablesSection == null || variablesSection.getContainingFile().getFileType() != RobotResourceFileType.getInstance()) {
             return getContainingFile() == element.getContainingFile();
         }
-        RobotQualifiedNameOwner statementParent = PsiTreeUtil.getParentOfType(this, RobotTestCaseStatement.class, RobotTaskStatement.class);
+        RobotQualifiedNameOwner statementParent = PsiTreeUtil.getParentOfType(this,
+                                                                              RobotTestCaseStatement.class,
+                                                                              RobotTaskStatement.class,
+                                                                              RobotUserKeywordStatement.class);
         if (statementParent != null) {
-            RobotQualifiedNameOwner statementParentOfVariable = PsiTreeUtil.getParentOfType(element, RobotTestCaseStatement.class, RobotTaskStatement.class);
+            RobotQualifiedNameOwner statementParentOfVariable = PsiTreeUtil.getParentOfType(element,
+                                                                                            RobotTestCaseStatement.class,
+                                                                                            RobotTaskStatement.class,
+                                                                                            RobotUserKeywordStatement.class);
             return statementParent == statementParentOfVariable;
         }
         return true;
