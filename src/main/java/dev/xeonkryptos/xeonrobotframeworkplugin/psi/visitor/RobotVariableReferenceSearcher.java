@@ -132,7 +132,7 @@ public class RobotVariableReferenceSearcher extends RecursiveRobotVisitor {
     @Override
     public void visitVariable(@NotNull RobotVariable o) {
         String variableName = o.getVariableName();
-        if (variableName != null && variableName.equalsIgnoreCase(variableName.trim())) {
+        if (variableName != null && this.variableName.equalsIgnoreCase(variableName.trim())) {
             foundElements.add(o);
         }
     }
