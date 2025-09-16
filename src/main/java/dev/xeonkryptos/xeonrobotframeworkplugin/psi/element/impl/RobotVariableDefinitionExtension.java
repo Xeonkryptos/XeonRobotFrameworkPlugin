@@ -7,6 +7,9 @@ import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.util.IncorrectOperationException;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotPsiImplUtil;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotResourceFileType;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotQualifiedNameOwner;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTaskStatement;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTestCaseStatement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableBodyId;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableDefinition;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableStatement;
@@ -38,6 +41,11 @@ public abstract class RobotVariableDefinitionExtension extends RobotStubPsiEleme
         RobotVariablesSection variablesSection = PsiTreeUtil.getParentOfType(this, RobotVariablesSection.class);
         if (variablesSection == null || variablesSection.getContainingFile().getFileType() != RobotResourceFileType.getInstance()) {
             return getContainingFile() == element.getContainingFile();
+        }
+        RobotQualifiedNameOwner statementParent = PsiTreeUtil.getParentOfType(this, RobotTestCaseStatement.class, RobotTaskStatement.class);
+        if (statementParent != null) {
+            RobotQualifiedNameOwner statementParentOfVariable = PsiTreeUtil.getParentOfType(element, RobotTestCaseStatement.class, RobotTaskStatement.class);
+            return statementParent == statementParentOfVariable;
         }
         return true;
     }

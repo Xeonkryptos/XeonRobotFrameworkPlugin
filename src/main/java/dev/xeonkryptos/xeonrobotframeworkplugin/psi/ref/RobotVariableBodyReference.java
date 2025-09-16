@@ -47,7 +47,7 @@ public class RobotVariableBodyReference extends PsiPolyVariantReferenceBase<Robo
                 Collection<PsiElement> resolvedElements = variableReferenceSearcher.getFoundElements();
                 foundElements.addAll(resolvedElements);
             }
-            if (foundElements.isEmpty() || !variableReferenceSearcher.isOvershadowing()) {
+            if (foundElements.isEmpty()) {
                 PsiFile containingFile = variableBodyId.getContainingFile();
                 PsiElement foundElement = ResolverUtils.findVariableElement(variableName, containingFile);
                 if (foundElement != null) {
