@@ -43,7 +43,7 @@ public class RobotVariableBodyReference extends PsiPolyVariantReferenceBase<Robo
             RobotRoot rootElement = PsiTreeUtil.getParentOfType(variableBodyId, RobotRoot.class);
             RobotVariableReferenceSearcher variableReferenceSearcher = new RobotVariableReferenceSearcher(variableBodyId);
             if (rootElement != null) {
-                rootElement.accept(variableReferenceSearcher);
+                rootElement.acceptChildren(variableReferenceSearcher);
                 Collection<PsiElement> resolvedElements = variableReferenceSearcher.getFoundElements();
                 foundElements.addAll(resolvedElements);
             }
@@ -51,10 +51,7 @@ public class RobotVariableBodyReference extends PsiPolyVariantReferenceBase<Robo
                 PsiFile containingFile = variableBodyId.getContainingFile();
                 PsiElement foundElement = ResolverUtils.findVariableElement(variableName, containingFile);
                 if (foundElement != null) {
-                    Collection<PsiElement> previousElements = foundElements;
-                    foundElements = new LinkedHashSet<>();
                     foundElements.add(foundElement);
-                    foundElements.addAll(previousElements);
                 }
             }
             if (foundElements.isEmpty()) {

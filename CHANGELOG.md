@@ -4,6 +4,11 @@
 
 ## Unreleased
 
+### Fixed
+
+- Reference resolve of variables in the same file (jump to the closest variable definition even when another testcase/task provides a variable definition with
+  the same name)
+
 ## 0.5.4
 
 ### Fixed
