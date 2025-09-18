@@ -11,6 +11,7 @@
 - Fixed variable definition marked as unused because of different casing of variable names
 - Look for variable usages only in the current scope (test case) if defined in it
 - Fixed detection for reassigned variable definitions
+- Executed keywords in SMT view are now tests instead of suites to assign console output, state and duration correctly to it
 
 ## 0.5.4
 
