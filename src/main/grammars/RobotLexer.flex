@@ -159,9 +159,6 @@ AllowedKeywordLibraryNameSeq = {AllowedKeywordLibraryNameChar}+
 AllowedKeywordChar = [^\s$@%&.] | [$@%&] [^{]
 AllowedKeywordSeq = {AllowedKeywordChar}+
 
-AllowedVarChar = [\p{L}\p{N}_\s]
-AllowedVarSeq = {AllowedVarChar}+
-
 AllowedExtendedVarChar = [^$@%&}] | [$@%&] [^{]
 AllowedExtendedVarSeq = {AllowedExtendedVarChar}+
 
@@ -171,7 +168,7 @@ AllowedParamSeq = {AllowedParamChar}+
 RestrictedLiteralValue = {AllowedSeq} ({Space} {AllowedSeq})*
 KeywordLibraryNameLiteralValue = [/*]? {AllowedKeywordLibraryNameSeq}+ "."
 KeywordLiteralValue = {AllowedKeywordSeq} ({Space} {AllowedKeywordSeq})*
-VariableLiteralValue =   {AllowedVarSeq} ({Space} {AllowedVarSeq})*
+VariableLiteralValue =   [^}]+
 ExtendedVariableLiteralValue =   {AllowedExtendedVarSeq}
 ParamLiteralValue =      {AllowedParamSeq} ({Space} {AllowedParamSeq})*
 LiteralValue =           [^\s]+([ ][^\s]+)*[ ]?
