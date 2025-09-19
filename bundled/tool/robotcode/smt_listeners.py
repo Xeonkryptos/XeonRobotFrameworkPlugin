@@ -49,17 +49,25 @@ class RobotIntellijListener:
             print_teamcity_message(f"testStarted name='{escape_name(attributes['kwname'])}' nodeId='{self.keyword_parent_id}-k{self.keyword_id}' parentNodeId='{self.keyword_parent_id}' locationHint='{location}'")
 
     def end_keyword(self, name: str, attributes: Dict[str, Any]):
-        if attributes['type'] == 'KEYWORD':
-            duration = int(attributes['elapsedtime'])
-            teamcity_name = escape_name(attributes['kwname'])
+        duration = int(attributes['elapsedtime'])
+        teamcity_name = escape_name(attributes['kwname'])
+        if attributes['type'] == 'KEYWORD' and attributes['lineno'] is not None:
             node_id = f"{self.keyword_parent_id}-k{self.keyword_id}"
             if attributes['status'] == 'FAIL':
                 message = escape_message(attributes.get('message', ''))
                 print_teamcity_message(f"testFailed name='{teamcity_name}' nodeId='{node_id}' parentNodeId='{self.keyword_parent_id}' message='{message}'")
-            elif attributes['status'] == 'SKIP':
+            elif attributes['status'] == 'SKIP' or attributes['status'] == 'NOT RUN':
                 print_teamcity_message(f"testIgnored name='{teamcity_name}' nodeId='{node_id}' parentNodeId='{self.keyword_parent_id}'")
             print_teamcity_message(f"testFinished name='{teamcity_name}' nodeId='{node_id}' parentNodeId='{self.keyword_parent_id}' duration='{duration}'")
             self.keyword_id += 1
+        elif attributes['status'] == 'FAIL' and attributes['lineno'] is not None:
+            node_id = f"{self.keyword_parent_id}-c1"
+            message = escape_message(attributes.get('message', ''))
+            location = f"file://{attributes['source']}:{attributes['lineno']}"
+            print_teamcity_message(f"testStarted name='{teamcity_name}' nodeId='{node_id}' parentNodeId='{self.keyword_parent_id}' locationHint='{location}'")
+            print_teamcity_message(f"testFailed name='{teamcity_name}' nodeId='{node_id}' parentNodeId='{self.keyword_parent_id}' message='{message}'")
+            print_teamcity_message(f"testFinished name='{teamcity_name}' nodeId='{node_id}' parentNodeId='{self.keyword_parent_id}' duration='{duration}'")
+
 
 def escape_name(name):
     # Escape special characters for TeamCity service messages
