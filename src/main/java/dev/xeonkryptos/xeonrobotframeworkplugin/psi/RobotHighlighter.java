@@ -24,8 +24,6 @@ public class RobotHighlighter extends SyntaxHighlighterBase {
                                                                                              DefaultLanguageHighlighterColors.DOC_COMMENT_TAG_VALUE);
     public static final TextAttributesKey IMPORT_ARGUMENT = TextAttributesKey.createTextAttributesKey("Import Argument",
                                                                                                       DefaultLanguageHighlighterColors.HIGHLIGHTED_REFERENCE);
-    public static final TextAttributesKey REASSIGNED_VARIABLE = TextAttributesKey.createTextAttributesKey("Reassigned Variable",
-                                                                                                          DefaultLanguageHighlighterColors.HIGHLIGHTED_REFERENCE);
     public static final TextAttributesKey KEYWORD_DEFINITION = TextAttributesKey.createTextAttributesKey("User Keyword Definition",
                                                                                                          DefaultLanguageHighlighterColors.KEYWORD);
     public static final TextAttributesKey KEYWORD = TextAttributesKey.createTextAttributesKey("Keyword Usage",

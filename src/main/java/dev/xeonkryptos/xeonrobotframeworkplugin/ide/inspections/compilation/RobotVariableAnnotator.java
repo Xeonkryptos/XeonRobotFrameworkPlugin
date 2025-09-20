@@ -3,13 +3,13 @@ package dev.xeonkryptos.xeonrobotframeworkplugin.ide.inspections.compilation;
 import com.intellij.lang.annotation.AnnotationHolder;
 import com.intellij.lang.annotation.Annotator;
 import com.intellij.lang.annotation.HighlightSeverity;
+import com.intellij.openapi.editor.DefaultLanguageHighlighterColors;
 import com.intellij.openapi.project.DumbAware;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiPolyVariantReference;
 import com.intellij.psi.ResolveResult;
 import com.intellij.psi.util.PsiTreeUtil;
 import dev.xeonkryptos.xeonrobotframeworkplugin.RobotBundle;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotHighlighter;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotPsiImplUtil;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.DefinedVariable;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotEnvironmentVariable;
@@ -59,7 +59,7 @@ public class RobotVariableAnnotator implements Annotator, DumbAware {
                                                        .filter(result -> result instanceof RobotVariableDefinition)
                                                        .count() > 1) {
                     holder.newSilentAnnotation(HighlightSeverity.TEXT_ATTRIBUTES)
-                          .textAttributes(RobotHighlighter.REASSIGNED_VARIABLE)
+                          .textAttributes(DefaultLanguageHighlighterColors.REASSIGNED_LOCAL_VARIABLE)
                           .tooltip(RobotBundle.getMessage("annotation.variable.reassigned"))
                           .range(variable)
                           .create();

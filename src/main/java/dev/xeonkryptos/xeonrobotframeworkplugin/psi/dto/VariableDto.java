@@ -7,20 +7,23 @@ import com.intellij.openapi.util.TextRange;
 import com.intellij.psi.PsiElement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.DefinedVariable;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.ReservedVariableScope;
+import dev.xeonkryptos.xeonrobotframeworkplugin.util.VariableNameUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class VariableDto implements DefinedVariable {
+import java.util.Set;
 
-    private static final String SCALAR_VARIABLE_FORMAT = "${%s}";
+public class VariableDto implements DefinedVariable {
 
     private final PsiElement reference;
     private final String name;
     private final String matchingVariableName;
     private final ReservedVariableScope scope;
 
+    private final Set<String> variableNameVariants;
+
     public VariableDto(@NotNull PsiElement reference, @NotNull String name, @Nullable ReservedVariableScope scope) {
-        this(reference, SCALAR_VARIABLE_FORMAT.formatted(name.trim()), name, scope);
+        this(reference, "${%s}".formatted(name.trim()), name, scope);
     }
 
     public VariableDto(@NotNull PsiElement reference, @NotNull String name, @NotNull String matchingVariableName, @Nullable ReservedVariableScope scope) {
@@ -28,6 +31,8 @@ public class VariableDto implements DefinedVariable {
         this.name = name.trim();
         this.matchingVariableName = matchingVariableName.trim();
         this.scope = scope;
+
+        this.variableNameVariants = VariableNameUtil.INSTANCE.computeVariableNameVariants(this.matchingVariableName);
     }
 
     @Override
@@ -35,7 +40,7 @@ public class VariableDto implements DefinedVariable {
         if (text == null) {
             return false;
         }
-        return matchingVariableName.equalsIgnoreCase(text.trim());
+        return VariableNameUtil.INSTANCE.matchesVariableName(text, variableNameVariants);
     }
 
     @Override

@@ -13,6 +13,7 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.RobotBundle;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariable;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableDefinition;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVisitor;
+import dev.xeonkryptos.xeonrobotframeworkplugin.util.VariableNameUtil;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
@@ -60,9 +61,9 @@ public class RobotUnusedVariableInspection extends LocalInspectionTool implement
             super.visitVariableDefinition(o);
             String name = o.getName();
             if (name != null) {
-                name = name.toLowerCase();
-                if (!laterSeenVariableNames.contains(name) && definedVariableNames.add(name)) {
-                    unusedVariables.put(name.toLowerCase(), o);
+                Set<@NotNull String> variableNameVariants = VariableNameUtil.INSTANCE.computeVariableNameVariants(name);
+                if (!VariableNameUtil.INSTANCE.matchesVariableName(name, laterSeenVariableNames) && definedVariableNames.addAll(variableNameVariants)) {
+                    variableNameVariants.forEach(v -> unusedVariables.put(v, o));
                 }
             }
         }
@@ -72,11 +73,13 @@ public class RobotUnusedVariableInspection extends LocalInspectionTool implement
             super.visitVariable(o);
             String variableName = o.getVariableName();
             if (variableName != null) {
-                variableName = variableName.toLowerCase();
                 ReadWriteAccessDetector detector = ReadWriteAccessDetector.findDetector(o);
                 if (detector != null && detector.getExpressionAccess(o) == Access.Read) {
-                    if (unusedVariables.remove(variableName) == null) {
-                        laterSeenVariableNames.add(variableName);
+                    Set<@NotNull String> variableNameVariants = VariableNameUtil.INSTANCE.computeVariableNameVariants(variableName);
+                    if (!VariableNameUtil.INSTANCE.matchesVariableName(variableName, unusedVariables.keySet())) {
+                        laterSeenVariableNames.addAll(variableNameVariants);
+                    } else {
+                        variableNameVariants.forEach(unusedVariables::remove);
                     }
                 }
             }

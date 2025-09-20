@@ -15,6 +15,7 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariable;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableBodyId;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableDefinition;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariablesSection;
+import dev.xeonkryptos.xeonrobotframeworkplugin.util.VariableNameUtil;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
@@ -26,6 +27,7 @@ public class RobotVariableReferenceSearcher extends RecursiveRobotVisitor {
 
     private final Set<PsiElement> parents;
     private final String variableName;
+    private final Set<String> variableNameVariants;
 
     private final Set<PsiElement> foundElements = new LinkedHashSet<>();
 
@@ -33,7 +35,8 @@ public class RobotVariableReferenceSearcher extends RecursiveRobotVisitor {
     private boolean overshadows = false;
 
     public RobotVariableReferenceSearcher(RobotVariableBodyId variableBodyId) {
-        this.variableName = variableBodyId.getText().trim();
+        this.variableName = variableBodyId.getText();
+        this.variableNameVariants = VariableNameUtil.INSTANCE.computeVariableNameVariants(variableName);
         this.parents = collectParentsOf(variableBodyId);
     }
 
@@ -106,8 +109,7 @@ public class RobotVariableReferenceSearcher extends RecursiveRobotVisitor {
     @Override
     public void visitLocalArgumentsSettingArgument(@NotNull RobotLocalArgumentsSettingArgument o) {
         RobotVariableDefinition variableDefinition = o.getVariableDefinition();
-        String name = variableDefinition.getName();
-        if (name != null && variableName.equalsIgnoreCase(name.trim())) {
+        if (variableDefinition.matches(variableName)) {
             overshadows = true;
             foundElements.add(variableDefinition);
         }
@@ -122,8 +124,7 @@ public class RobotVariableReferenceSearcher extends RecursiveRobotVisitor {
 
     @Override
     public void visitVariableDefinition(@NotNull RobotVariableDefinition o) {
-        String definedVariableName = o.getName();
-        if (definedVariableName != null && variableName.equalsIgnoreCase(definedVariableName.trim())) {
+        if (o.matches(variableName)) {
             foundElements.add(o);
             overshadows |= inOvershadowingContext;
         }
@@ -132,7 +133,7 @@ public class RobotVariableReferenceSearcher extends RecursiveRobotVisitor {
     @Override
     public void visitVariable(@NotNull RobotVariable o) {
         String variableName = o.getVariableName();
-        if (variableName != null && this.variableName.equalsIgnoreCase(variableName.trim())) {
+        if (VariableNameUtil.INSTANCE.matchesVariableName(variableName, variableNameVariants)) {
             foundElements.add(o);
         }
     }

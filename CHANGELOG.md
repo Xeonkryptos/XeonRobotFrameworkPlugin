@@ -4,11 +4,16 @@
 
 ## Unreleased
 
+### Added
+
+- Check for invalid usage of the keyword-only marker ${} for \[Arguments] settings
+
 ### Changed
 
 - Executed keywords in SMT view are now tests instead of suites to assign console output, state and duration correctly to it
 - Made showing up of keywords in SMT view configurable. Decide for yourself if you want them to be listed separately or not. Default is to not show them.
 - Lexing and parsing of variables and variable definitions to allow special characters in variable names
+- Lookup of variables based on the concrete name defined and the basename as fallback
 
 ### Fixed
 

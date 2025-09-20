@@ -19,11 +19,16 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotStubPsiElementBase
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotVariableDefinitionStub;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.ReservedVariableScope;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.RobotElementGenerator;
+import dev.xeonkryptos.xeonrobotframeworkplugin.util.VariableNameUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Set;
+
 public abstract class RobotVariableDefinitionExtension extends RobotStubPsiElementBase<RobotVariableDefinitionStub, RobotVariableDefinition>
         implements RobotVariableDefinition {
+
+    private Set<String> variableNameVariants;
 
     public RobotVariableDefinitionExtension(@NotNull ASTNode node) {
         super(node);
@@ -31,6 +36,13 @@ public abstract class RobotVariableDefinitionExtension extends RobotStubPsiEleme
 
     public RobotVariableDefinitionExtension(RobotVariableDefinitionStub stub, IStubElementType<RobotVariableDefinitionStub, RobotVariableDefinition> nodeType) {
         super(stub, nodeType);
+    }
+
+    @Override
+    public void subtreeChanged() {
+        super.subtreeChanged();
+
+        variableNameVariants = null;
     }
 
     @Override
@@ -62,8 +74,16 @@ public abstract class RobotVariableDefinitionExtension extends RobotStubPsiEleme
         if (text == null) {
             return false;
         }
-        String variableName = getName();
-        return text.equalsIgnoreCase(variableName);
+        if (variableNameVariants == null) {
+            String variableName = getName();
+            variableNameVariants = VariableNameUtil.INSTANCE.computeVariableNameVariants(variableName);
+        }
+        return VariableNameUtil.INSTANCE.matchesVariableName(text, variableNameVariants);
+    }
+
+    @Override
+    public int getTextOffset() {
+        return super.getTextOffset() + 2; // to skip the ${, @%, &% or %% at the beginning of the variable
     }
 
     @Override
