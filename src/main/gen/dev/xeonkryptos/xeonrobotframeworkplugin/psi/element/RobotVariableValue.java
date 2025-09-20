@@ -8,9 +8,6 @@ import com.intellij.psi.PsiElement;
 public interface RobotVariableValue extends RobotStatement {
 
   @Nullable
-  RobotParameter getParameter();
-
-  @Nullable
   RobotPositionalArgument getPositionalArgument();
 
   @Nullable

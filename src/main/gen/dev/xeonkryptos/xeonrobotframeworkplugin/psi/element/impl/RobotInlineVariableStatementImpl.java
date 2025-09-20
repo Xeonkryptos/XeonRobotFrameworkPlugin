@@ -30,6 +30,12 @@ public class RobotInlineVariableStatementImpl extends RobotVariableStatementImpl
 
   @Override
   @Nullable
+  public RobotParameter getParameter() {
+    return PsiTreeUtil.getChildOfType(this, RobotParameter.class);
+  }
+
+  @Override
+  @Nullable
   public RobotVariableDefinition getVariableDefinition() {
     return PsiTreeUtil.getChildOfType(this, RobotVariableDefinition.class);
   }

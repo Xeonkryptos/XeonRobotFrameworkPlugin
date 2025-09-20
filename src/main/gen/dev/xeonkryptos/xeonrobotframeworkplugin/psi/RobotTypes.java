@@ -22,6 +22,7 @@ public interface RobotTypes {
   IElementType DICT_VARIABLE = RobotDictVariableStubElement.create("DICT_VARIABLE");
   IElementType DOCUMENTATION_STATEMENT_GLOBAL_SETTING = new RobotElementType("DOCUMENTATION_STATEMENT_GLOBAL_SETTING");
   IElementType ELSE_IF_STRUCTURE = new RobotElementType("ELSE_IF_STRUCTURE");
+  IElementType EMPTY_VARIABLE_STATEMENT = new RobotElementType("EMPTY_VARIABLE_STATEMENT");
   IElementType ENVIRONMENT_VARIABLE = new RobotElementType("ENVIRONMENT_VARIABLE");
   IElementType EXCEPT_STRUCTURE = new RobotElementType("EXCEPT_STRUCTURE");
   IElementType EXECUTABLE_STATEMENT = new RobotElementType("EXECUTABLE_STATEMENT");
@@ -155,7 +156,6 @@ public interface RobotTypes {
   IElementType VARIABLE_ACCESS_END = new RobotTokenType("VARIABLE_ACCESS_END");
   IElementType VARIABLE_ACCESS_START = new RobotTokenType("VARIABLE_ACCESS_START");
   IElementType VARIABLE_BODY = new RobotTokenType("VARIABLE_BODY");
-  IElementType VARIABLE_BODY_EXTENSION = new RobotTokenType("VARIABLE_BODY_EXTENSION");
   IElementType VARIABLE_END = new RobotTokenType("VARIABLE_END");
   IElementType VARIABLE_INDEX_ACCESS = new RobotTokenType("VARIABLE_INDEX_ACCESS");
   IElementType VARIABLE_KEY_ACCESS = new RobotTokenType("VARIABLE_KEY_ACCESS");
@@ -181,6 +181,9 @@ public interface RobotTypes {
       }
       else if (type == ELSE_IF_STRUCTURE) {
         return new RobotElseIfStructureImpl(node);
+      }
+      else if (type == EMPTY_VARIABLE_STATEMENT) {
+        return new RobotEmptyVariableStatementImpl(node);
       }
       else if (type == ENVIRONMENT_VARIABLE) {
         return new RobotEnvironmentVariableImpl(node);

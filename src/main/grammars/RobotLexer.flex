@@ -104,6 +104,7 @@ EqualSign = "="
 Ellipsis = "..."
 LineCommentSign = "#"
 
+Escape = \\(.|\R)
 EmptyValue = \\ {Space}
 
 Whitespace = {Space} | {Tab} | {NBSP}
@@ -159,17 +160,13 @@ AllowedKeywordLibraryNameSeq = {AllowedKeywordLibraryNameChar}+
 AllowedKeywordChar = [^\s$@%&.] | [$@%&] [^{]
 AllowedKeywordSeq = {AllowedKeywordChar}+
 
-AllowedExtendedVarChar = [^$@%&}] | [$@%&] [^{]
-AllowedExtendedVarSeq = {AllowedExtendedVarChar}+
-
 AllowedParamChar = [^\s$@%&] | [$@%&] [^{]
 AllowedParamSeq = {AllowedParamChar}+
 
 RestrictedLiteralValue = {AllowedSeq} ({Space} {AllowedSeq})*
 KeywordLibraryNameLiteralValue = [/*]? {AllowedKeywordLibraryNameSeq}+ "."
 KeywordLiteralValue = {AllowedKeywordSeq} ({Space} {AllowedKeywordSeq})*
-VariableLiteralValue =   [^}]+
-ExtendedVariableLiteralValue =   {AllowedExtendedVarSeq}
+VariableLiteralValue =   ({Escape} | [^}$@&%] | [\$@&%] [^{] | {OpeningVariable})+
 ParamLiteralValue =      {AllowedParamSeq} ({Space} {AllowedParamSeq})*
 LiteralValue =           [^\s]+([ ][^\s]+)*[ ]?
 
@@ -196,7 +193,7 @@ LineComment = {LineCommentSign} {NON_EOL}*
 %state USER_KEYWORD_NAME_DEFINITION, USER_KEYWORD_DEFINITION, USER_KEYWORD_RETURN_STATEMENT
 %state SETTING, SETTING_TEMPLATE_START, TEMPLATE_DEFINITION
 %state KEYWORD_CALL, KEYWORD_ARGUMENTS
-%state INLINE_VARIABLE_DEFINITION, VARIABLE_DEFINITION, VARIABLE_DEFINITION_ARGUMENTS, VARIABLE_USAGE, EXTENDED_VARIABLE_ACCESS, PYTHON_EXPRESSION, EXTENDED_VARIABLE_BODY
+%state INLINE_VARIABLE_DEFINITION, VARIABLE_DEFINITION, VARIABLE_DEFINITION_ARGUMENTS, VARIABLE_USAGE, EXTENDED_VARIABLE_ACCESS, PYTHON_EXPRESSION
 %state PARAMETER_ASSIGNMENT, PARAMETER_VALUE, TEMPLATE_PARAMETER_ASSIGNMENT, TEMPLATE_PARAMETER_VALUE
 %state FOR_STRUCTURE, SIMPLE_CONTROL_STRUCTURE_START, CONTROL_STRUCTURE_START, SIMPLE_CONTROL_STRUCTURE, CONTROL_STRUCTURE
 
@@ -237,19 +234,14 @@ LineComment = {LineCommentSign} {NON_EOL}*
 
 <VARIABLE_DEFINITION> {
     {ClosingVariable}                        { yybegin(VARIABLE_DEFINITION_ARGUMENTS); return VARIABLE_END; }
-    {ClosingVariable} \s* {EqualSign} \s*    { yypushback(yylength() - 1); return VARIABLE_END; }
+    {ClosingVariable} \s* {EqualSign} \s*    { yybegin(VARIABLE_DEFINITION_ARGUMENTS); yypushback(yylength() - 1); return VARIABLE_END; }
     {ClosingVariable} "["                    { enterNewState(EXTENDED_VARIABLE_ACCESS); yypushback(1); return VARIABLE_END; }
     {ClosingVariable} "]"                    { yybegin(VARIABLE_DEFINITION_ARGUMENTS); yypushback(1); return VARIABLE_END; }
     {EqualSign} \s*                          { yybegin(VARIABLE_DEFINITION_ARGUMENTS); pushBackTrailingWhitespace(); return ASSIGNMENT; }
-    <VARIABLE_USAGE> {VariableLiteralValue}  {
-          if (yycharat(yylength() - 1) != '}') {
-              enterNewState(EXTENDED_VARIABLE_BODY);
-          }
-          return VARIABLE_BODY;
-      }
 }
 
 <VARIABLE_DEFINITION_ARGUMENTS> {
+    {EqualSign} \s*                                       { pushBackTrailingWhitespace(); return ASSIGNMENT; }
     "scope" {EqualSign} !({SpaceBasedEndMarker} | {EOL})  { yypushback(yylength() - "scope".length()); enterNewState(PARAMETER_ASSIGNMENT); return PARAMETER_NAME; }
     {ParamLiteralValue}                                   { pushBackTrailingWhitespace(); return LITERAL_CONSTANT; }
 }
@@ -261,10 +253,7 @@ LineComment = {LineCommentSign} {NON_EOL}*
     {OpeningVariable} ( ! {ClosingVariable}{2} )+     { enterNewState(PYTHON_EXPRESSION); yypushback(yylength() - 1); return PYTHON_EXPRESSION_START; }
 }
 
-<EXTENDED_VARIABLE_BODY> {
-    {ExtendedVariableLiteralValue}            { return VARIABLE_BODY_EXTENSION; }
-    {ClosingVariable}                         { leaveState(); yypushback(yylength()); break; }
-}
+<VARIABLE_DEFINITION, VARIABLE_USAGE> {VariableLiteralValue}  { return VARIABLE_BODY; }
 
 <EXTENDED_VARIABLE_ACCESS> {
     {VariableSliceAccess}        { return VARIABLE_SLICE_ACCESS; }

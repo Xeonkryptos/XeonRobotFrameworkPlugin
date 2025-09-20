@@ -8,6 +8,9 @@ import com.intellij.psi.PsiElement;
 public interface RobotInlineVariableStatement extends RobotVariableStatement {
 
   @Nullable
+  RobotParameter getParameter();
+
+  @Nullable
   RobotVariableDefinition getVariableDefinition();
 
   @NotNull

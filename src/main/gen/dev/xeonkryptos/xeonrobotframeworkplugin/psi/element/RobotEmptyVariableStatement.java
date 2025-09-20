@@ -5,12 +5,9 @@ import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 
-public interface RobotKeywordVariableStatement extends RobotVariableStatement {
+public interface RobotEmptyVariableStatement extends RobotVariableStatement {
 
   @NotNull
-  RobotKeywordCall getKeywordCall();
-
-  @NotNull
-  List<RobotVariableDefinition> getVariableDefinitionList();
+  RobotVariableDefinition getVariableDefinition();
 
 }

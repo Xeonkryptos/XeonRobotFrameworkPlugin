@@ -13,7 +13,10 @@ public class RobotPairedBraceMatcher implements PairedBraceMatcher {
     private static final BracePair[] BRACE_PAIRS = new BracePair[] { new BracePair(RobotTypes.SCALAR_VARIABLE_START, RobotTypes.VARIABLE_END, false),
                                                                      new BracePair(RobotTypes.LIST_VARIABLE_START, RobotTypes.VARIABLE_END, false),
                                                                      new BracePair(RobotTypes.DICT_VARIABLE_START, RobotTypes.VARIABLE_END, false),
-                                                                     new BracePair(RobotTypes.ENV_VARIABLE_START, RobotTypes.VARIABLE_END, false) };
+                                                                     new BracePair(RobotTypes.ENV_VARIABLE_START, RobotTypes.VARIABLE_END, false),
+                                                                     new BracePair(RobotTypes.PYTHON_EXPRESSION_START,
+                                                                                   RobotTypes.PYTHON_EXPRESSION_END,
+                                                                                   false) };
 
     @Override
     public BracePair @NotNull [] getPairs() {

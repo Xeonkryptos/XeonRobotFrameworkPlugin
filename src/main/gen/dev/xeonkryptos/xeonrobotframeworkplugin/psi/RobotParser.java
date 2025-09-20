@@ -37,7 +37,7 @@ public class RobotParser implements PsiParser, LightPsiParser {
   }
 
   public static final TokenSet[] EXTENDS_SETS_ = new TokenSet[] {
-    create_token_set_(INLINE_VARIABLE_STATEMENT, KEYWORD_VARIABLE_STATEMENT, SINGLE_VARIABLE_STATEMENT),
+    create_token_set_(EMPTY_VARIABLE_STATEMENT, INLINE_VARIABLE_STATEMENT, KEYWORD_VARIABLE_STATEMENT, SINGLE_VARIABLE_STATEMENT),
     create_token_set_(DICT_VARIABLE, ENVIRONMENT_VARIABLE, LIST_VARIABLE, SCALAR_VARIABLE,
       VARIABLE),
     create_token_set_(COMMENTS_SECTION, KEYWORDS_SECTION, SECTION, SETTINGS_SECTION,
@@ -201,13 +201,14 @@ public class RobotParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // eol_based_keyword_call | inline_variable_statement | keyword_variable_statement
+  // eol_based_keyword_call | inline_variable_statement | keyword_variable_statement | empty_variable_statement
   static boolean call_structure(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "call_structure")) return false;
     boolean r;
     r = eol_based_keyword_call(b, l + 1);
     if (!r) r = inline_variable_statement(b, l + 1);
     if (!r) r = keyword_variable_statement(b, l + 1);
+    if (!r) r = empty_variable_statement(b, l + 1);
     return r;
   }
 
@@ -412,6 +413,35 @@ public class RobotParser implements PsiParser, LightPsiParser {
       if (!executable_statement(b, l + 1)) break;
       if (!empty_element_parsed_guard_(b, "else_if_structure_3", c)) break;
     }
+    return true;
+  }
+
+  /* ********************************************************** */
+  // variable_definition ASSIGNMENT? "${EMPTY}" eol_marker?
+  public static boolean empty_variable_statement(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "empty_variable_statement")) return false;
+    boolean r, p;
+    Marker m = enter_section_(b, l, _NONE_, EMPTY_VARIABLE_STATEMENT, "<empty variable statement>");
+    r = variable_definition(b, l + 1);
+    r = r && empty_variable_statement_1(b, l + 1);
+    r = r && consumeToken(b, "${EMPTY}");
+    p = r; // pin = 3
+    r = r && empty_variable_statement_3(b, l + 1);
+    exit_section_(b, l, m, r, p, null);
+    return r || p;
+  }
+
+  // ASSIGNMENT?
+  private static boolean empty_variable_statement_1(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "empty_variable_statement_1")) return false;
+    consumeToken(b, ASSIGNMENT);
+    return true;
+  }
+
+  // eol_marker?
+  private static boolean empty_variable_statement_3(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "empty_variable_statement_3")) return false;
+    eol_marker(b, l + 1);
     return true;
   }
 
@@ -682,7 +712,7 @@ public class RobotParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // VARIABLE_ACCESS_START (variable | literal_constant_value | variable_body_id | VARIABLE_BODY_EXTENSION)+ VARIABLE_ACCESS_END
+  // VARIABLE_ACCESS_START (variable | literal_constant_value | variable_body_id)+ VARIABLE_ACCESS_END
   public static boolean extended_variable_nested_access(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "extended_variable_nested_access")) return false;
     if (!nextTokenIs(b, VARIABLE_ACCESS_START)) return false;
@@ -695,7 +725,7 @@ public class RobotParser implements PsiParser, LightPsiParser {
     return r;
   }
 
-  // (variable | literal_constant_value | variable_body_id | VARIABLE_BODY_EXTENSION)+
+  // (variable | literal_constant_value | variable_body_id)+
   private static boolean extended_variable_nested_access_1(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "extended_variable_nested_access_1")) return false;
     boolean r;
@@ -710,14 +740,13 @@ public class RobotParser implements PsiParser, LightPsiParser {
     return r;
   }
 
-  // variable | literal_constant_value | variable_body_id | VARIABLE_BODY_EXTENSION
+  // variable | literal_constant_value | variable_body_id
   private static boolean extended_variable_nested_access_1_0(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "extended_variable_nested_access_1_0")) return false;
     boolean r;
     r = variable(b, l + 1);
     if (!r) r = literal_constant_value(b, l + 1);
     if (!r) r = variable_body_id(b, l + 1);
-    if (!r) r = consumeToken(b, VARIABLE_BODY_EXTENSION);
     return r;
   }
 
@@ -978,7 +1007,7 @@ public class RobotParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // VAR variable_definition ASSIGNMENT? variable_value+ eol_marker?
+  // VAR variable_definition ASSIGNMENT? variable_value+ parameter? eol_marker?
   public static boolean inline_variable_statement(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "inline_variable_statement")) return false;
     if (!nextTokenIs(b, VAR)) return false;
@@ -989,7 +1018,8 @@ public class RobotParser implements PsiParser, LightPsiParser {
     r = r && report_error_(b, variable_definition(b, l + 1));
     r = p && report_error_(b, inline_variable_statement_2(b, l + 1)) && r;
     r = p && report_error_(b, inline_variable_statement_3(b, l + 1)) && r;
-    r = p && inline_variable_statement_4(b, l + 1) && r;
+    r = p && report_error_(b, inline_variable_statement_4(b, l + 1)) && r;
+    r = p && inline_variable_statement_5(b, l + 1) && r;
     exit_section_(b, l, m, r, p, null);
     return r || p;
   }
@@ -1016,9 +1046,16 @@ public class RobotParser implements PsiParser, LightPsiParser {
     return r;
   }
 
-  // eol_marker?
+  // parameter?
   private static boolean inline_variable_statement_4(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "inline_variable_statement_4")) return false;
+    parameter(b, l + 1);
+    return true;
+  }
+
+  // eol_marker?
+  private static boolean inline_variable_statement_5(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "inline_variable_statement_5")) return false;
     eol_marker(b, l + 1);
     return true;
   }
@@ -1091,18 +1128,16 @@ public class RobotParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // variable_definition+ ASSIGNMENT? eol_marker? eol_based_keyword_call
+  // variable_definition+ ASSIGNMENT? eol_based_keyword_call
   public static boolean keyword_variable_statement(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "keyword_variable_statement")) return false;
-    boolean r, p;
+    boolean r;
     Marker m = enter_section_(b, l, _NONE_, KEYWORD_VARIABLE_STATEMENT, "<keyword variable statement>");
     r = keyword_variable_statement_0(b, l + 1);
     r = r && keyword_variable_statement_1(b, l + 1);
-    p = r; // pin = 2
-    r = r && report_error_(b, keyword_variable_statement_2(b, l + 1));
-    r = p && eol_based_keyword_call(b, l + 1) && r;
-    exit_section_(b, l, m, r, p, null);
-    return r || p;
+    r = r && eol_based_keyword_call(b, l + 1);
+    exit_section_(b, l, m, r, false, null);
+    return r;
   }
 
   // variable_definition+
@@ -1124,13 +1159,6 @@ public class RobotParser implements PsiParser, LightPsiParser {
   private static boolean keyword_variable_statement_1(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "keyword_variable_statement_1")) return false;
     consumeToken(b, ASSIGNMENT);
-    return true;
-  }
-
-  // eol_marker?
-  private static boolean keyword_variable_statement_2(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "keyword_variable_statement_2")) return false;
-    eol_marker(b, l + 1);
     return true;
   }
 
@@ -1774,7 +1802,7 @@ public class RobotParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // variable_definition ASSIGNMENT? variable_value* eol_marker?
+  // variable_definition ASSIGNMENT? variable_value* parameter? eol_marker?
   public static boolean single_variable_statement(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "single_variable_statement")) return false;
     boolean r, p;
@@ -1783,7 +1811,8 @@ public class RobotParser implements PsiParser, LightPsiParser {
     r = r && single_variable_statement_1(b, l + 1);
     r = r && single_variable_statement_2(b, l + 1);
     p = r; // pin = 3
-    r = r && single_variable_statement_3(b, l + 1);
+    r = r && report_error_(b, single_variable_statement_3(b, l + 1));
+    r = p && single_variable_statement_4(b, l + 1) && r;
     exit_section_(b, l, m, r, p, null);
     return r || p;
   }
@@ -1806,9 +1835,16 @@ public class RobotParser implements PsiParser, LightPsiParser {
     return true;
   }
 
-  // eol_marker?
+  // parameter?
   private static boolean single_variable_statement_3(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "single_variable_statement_3")) return false;
+    parameter(b, l + 1);
+    return true;
+  }
+
+  // eol_marker?
+  private static boolean single_variable_statement_4(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "single_variable_statement_4")) return false;
     eol_marker(b, l + 1);
     return true;
   }
@@ -2423,7 +2459,7 @@ public class RobotParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // (variable | variable_body_id | VARIABLE_BODY_EXTENSION | extended_variable_nested_access)+
+  // (variable | variable_body_id | extended_variable_nested_access)+
   public static boolean variable_content(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "variable_content")) return false;
     boolean r;
@@ -2438,13 +2474,12 @@ public class RobotParser implements PsiParser, LightPsiParser {
     return r;
   }
 
-  // variable | variable_body_id | VARIABLE_BODY_EXTENSION | extended_variable_nested_access
+  // variable | variable_body_id | extended_variable_nested_access
   private static boolean variable_content_0(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "variable_content_0")) return false;
     boolean r;
     r = variable(b, l + 1);
     if (!r) r = variable_body_id(b, l + 1);
-    if (!r) r = consumeToken(b, VARIABLE_BODY_EXTENSION);
     if (!r) r = extended_variable_nested_access(b, l + 1);
     return r;
   }
@@ -2461,14 +2496,13 @@ public class RobotParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // variable | positional_argument | parameter
+  // variable | positional_argument
   public static boolean variable_value(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "variable_value")) return false;
     boolean r;
     Marker m = enter_section_(b, l, _NONE_, VARIABLE_VALUE, "<variable value>");
     r = variable(b, l + 1);
     if (!r) r = positional_argument(b, l + 1);
-    if (!r) r = parameter(b, l + 1);
     exit_section_(b, l, m, r, false, null);
     return r;
   }

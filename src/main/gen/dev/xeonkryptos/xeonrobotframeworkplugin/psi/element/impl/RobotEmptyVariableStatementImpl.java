@@ -11,15 +11,15 @@ import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.*;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.*;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotPsiImplUtil;
 
-public class RobotKeywordVariableStatementImpl extends RobotVariableStatementImpl implements RobotKeywordVariableStatement {
+public class RobotEmptyVariableStatementImpl extends RobotVariableStatementImpl implements RobotEmptyVariableStatement {
 
-  public RobotKeywordVariableStatementImpl(@NotNull ASTNode node) {
+  public RobotEmptyVariableStatementImpl(@NotNull ASTNode node) {
     super(node);
   }
 
   @Override
   public void accept(@NotNull RobotVisitor visitor) {
-    visitor.visitKeywordVariableStatement(this);
+    visitor.visitEmptyVariableStatement(this);
   }
 
   @Override
@@ -30,14 +30,8 @@ public class RobotKeywordVariableStatementImpl extends RobotVariableStatementImp
 
   @Override
   @NotNull
-  public RobotKeywordCall getKeywordCall() {
-    return notNullChild(PsiTreeUtil.getChildOfType(this, RobotKeywordCall.class));
-  }
-
-  @Override
-  @NotNull
-  public List<RobotVariableDefinition> getVariableDefinitionList() {
-    return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotVariableDefinition.class);
+  public RobotVariableDefinition getVariableDefinition() {
+    return notNullChild(PsiTreeUtil.getChildOfType(this, RobotVariableDefinition.class));
   }
 
 }

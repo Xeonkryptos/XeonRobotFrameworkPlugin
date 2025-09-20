@@ -238,7 +238,7 @@ private control_structure ::= conditional_structure | exception_handling_structu
 private loop_structure ::= for_loop_structure | while_loop_structure {
     implements = "block_opening_structure"
 }
-private call_structure ::= eol_based_keyword_call | inline_variable_statement | keyword_variable_statement
+private call_structure ::= eol_based_keyword_call | inline_variable_statement | keyword_variable_statement | empty_variable_statement
 private loop_control_structure ::= (BREAK | CONTINUE) eol_marker?
 private return_structure ::= RETURN positional_argument* eol_marker? {pin=1}
 
@@ -308,10 +308,11 @@ parameter ::= parameter_id ASSIGNMENT positional_argument? {methods=[getParamete
 parameter_id ::= PARAMETER_NAME {methods = [getReference]}
 
 fake variable_statement ::= DUMMY {methods = [getIcon] implements=foldable}
-inline_variable_statement ::= VAR variable_definition ASSIGNMENT? variable_value+ eol_marker? {pin=1}
-single_variable_statement ::= variable_definition ASSIGNMENT? variable_value* eol_marker? {pin=3}
-keyword_variable_statement ::= variable_definition+ ASSIGNMENT? eol_marker? eol_based_keyword_call {pin=2} // Without EOL as it is handled at a lower level
-variable_value ::= variable | positional_argument | parameter
+inline_variable_statement ::= VAR variable_definition ASSIGNMENT? variable_value+ parameter? eol_marker? {pin=1}
+single_variable_statement ::= variable_definition ASSIGNMENT? variable_value* parameter? eol_marker? {pin=3}
+empty_variable_statement ::= variable_definition ASSIGNMENT? "${EMPTY}" eol_marker? {pin=3}
+keyword_variable_statement ::= variable_definition+ ASSIGNMENT? eol_based_keyword_call {pin=3} // Without EOL as it is handled at a lower level
+variable_value ::= variable | positional_argument
 
 positional_argument ::= external_positional_argument {
     mixin = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotPositionalArgumentExtension"
@@ -356,7 +357,7 @@ dict_variable ::= DICT_VARIABLE_START (variable_content | python_expression) VAR
 }
 environment_variable ::= ENV_VARIABLE_START variable_content VARIABLE_END
 
-variable_content ::= (variable | variable_body_id | VARIABLE_BODY_EXTENSION | extended_variable_nested_access)+ {
+variable_content ::= (variable | variable_body_id | extended_variable_nested_access)+ {
     methods=[content="/variable_body_id[0]"]
 }
 variable_body_id ::= VARIABLE_BODY {
@@ -367,7 +368,7 @@ python_expression ::= PYTHON_EXPRESSION_START PYTHON_EXPRESSION_CONTENT PYTHON_E
 extended_variable_slice_access ::= VARIABLE_SLICE_ACCESS
 extended_variable_index_access ::= VARIABLE_INDEX_ACCESS
 extended_variable_key_access ::= VARIABLE_KEY_ACCESS
-extended_variable_nested_access ::= VARIABLE_ACCESS_START (variable | literal_constant_value | variable_body_id | VARIABLE_BODY_EXTENSION)+ VARIABLE_ACCESS_END
+extended_variable_nested_access ::= VARIABLE_ACCESS_START (variable | literal_constant_value | variable_body_id)+ VARIABLE_ACCESS_END
 
 literal_constant_value ::= LITERAL_CONSTANT
 
