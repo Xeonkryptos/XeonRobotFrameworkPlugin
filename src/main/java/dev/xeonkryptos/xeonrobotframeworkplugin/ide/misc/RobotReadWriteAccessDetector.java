@@ -38,28 +38,17 @@ public class RobotReadWriteAccessDetector extends ReadWriteAccessDetector {
     @NotNull
     @Override
     public Access getReferenceAccess(@NotNull PsiElement referencedElement, @NotNull PsiReference reference) {
-        PsiElement parentElement = PsiTreeUtil.getParentOfType(referencedElement, RobotVariable.class, RobotVariableDefinition.class);
-        if (parentElement instanceof RobotVariable && parentElement.getParent() instanceof RobotVariableDefinition
-            || parentElement instanceof RobotVariableDefinition) {
-            return Access.Write;
-        }
-        return Access.Read;
+        return getExpressionAccess(referencedElement);
     }
 
     @NotNull
     @Override
     public Access getExpressionAccess(@NotNull PsiElement expression) {
-        if (expression instanceof RobotVariableDefinition) {
+        PsiElement parentElement = PsiTreeUtil.getParentOfType(expression, false, RobotVariable.class, RobotVariableDefinition.class);
+        if (parentElement instanceof RobotVariable && parentElement.getParent() instanceof RobotVariableDefinition
+            || parentElement instanceof RobotVariableDefinition) {
             return Access.Write;
         }
-
-        if (expression instanceof RobotVariable) {
-            if (expression.getParent() instanceof RobotVariableDefinition) {
-                return Access.Write;
-            }
-            return Access.Read;
-        }
-
         return Access.Read;
     }
 }

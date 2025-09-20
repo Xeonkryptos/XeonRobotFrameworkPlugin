@@ -11,6 +11,7 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotLanguage;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableDefinition;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotVariableDefinitionImpl;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.index.VariableDefinitionNameIndex;
+import dev.xeonkryptos.xeonrobotframeworkplugin.util.VariableNameUtil;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
 
@@ -62,7 +63,7 @@ public class RobotVariableDefinitionStubElement extends IStubElementType<RobotVa
 
     @Override
     public void indexStub(@NotNull RobotVariableDefinitionStub stub, @NotNull IndexSink sink) {
-        String variableNameInLowerCase = stub.getName().toLowerCase();
-        sink.occurrence(VariableDefinitionNameIndex.KEY, variableNameInLowerCase);
+        String variableName = stub.getName();
+        VariableNameUtil.INSTANCE.computeVariableNameVariants(variableName).forEach(variant -> sink.occurrence(VariableDefinitionNameIndex.KEY, variant));
     }
 }

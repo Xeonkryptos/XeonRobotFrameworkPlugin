@@ -13,14 +13,13 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.RobotBundle;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariable;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableDefinition;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVisitor;
-import dev.xeonkryptos.xeonrobotframeworkplugin.util.VariableNameUtil;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Map;
+import java.util.Iterator;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class RobotUnusedVariableInspection extends LocalInspectionTool implements DumbAware {
+public class RobotUnusedVariableDefinitionInspection extends LocalInspectionTool implements DumbAware {
 
     private static final Key<RobotVariableUsageVisitor> VARIABLE_USAGE_VISITOR_KEY = Key.create("ROBOT_VARIABLE_USAGE_VISITOR");
 
@@ -36,7 +35,21 @@ public class RobotUnusedVariableInspection extends LocalInspectionTool implement
     public void inspectionFinished(@NotNull LocalInspectionToolSession session, @NotNull ProblemsHolder problemsHolder) {
         RobotVariableUsageVisitor variableUsageVisitor = session.getUserData(VARIABLE_USAGE_VISITOR_KEY);
         if (variableUsageVisitor != null) {
-            for (RobotVariableDefinition unusedVariableDefinition : variableUsageVisitor.unusedVariables.values()) {
+            Iterator<RobotVariableDefinition> definitionsIterator = variableUsageVisitor.foundVariableDefinitions.iterator();
+            while (definitionsIterator.hasNext()) {
+                RobotVariableDefinition variableDefinition = definitionsIterator.next();
+                Iterator<RobotVariable> variableIterator = variableUsageVisitor.foundVariableUsages.iterator();
+                while (variableIterator.hasNext()) {
+                    RobotVariable variable = variableIterator.next();
+                    String variableName = variable.getVariableName();
+                    if (variableDefinition.matches(variableName)) {
+                        variableIterator.remove();
+                        definitionsIterator.remove();
+                        break;
+                    }
+                }
+            }
+            for (RobotVariableDefinition unusedVariableDefinition : variableUsageVisitor.foundVariableDefinitions) {
                 problemsHolder.registerProblem(unusedVariableDefinition,
                                                RobotBundle.getMessage("INSP.variable.unused"),
                                                ProblemHighlightType.LIKE_UNUSED_SYMBOL,
@@ -52,19 +65,15 @@ public class RobotUnusedVariableInspection extends LocalInspectionTool implement
 
     private static class RobotVariableUsageVisitor extends RobotVisitor {
 
-        private final Set<String> definedVariableNames = ConcurrentHashMap.newKeySet();
-        private final Map<String, RobotVariableDefinition> unusedVariables = new ConcurrentHashMap<>();
-        private final Set<String> laterSeenVariableNames = ConcurrentHashMap.newKeySet();
+        private final Set<RobotVariableDefinition> foundVariableDefinitions = ConcurrentHashMap.newKeySet();
+        private final Set<RobotVariable> foundVariableUsages = ConcurrentHashMap.newKeySet();
 
         @Override
         public void visitVariableDefinition(@NotNull RobotVariableDefinition o) {
             super.visitVariableDefinition(o);
             String name = o.getName();
             if (name != null) {
-                Set<@NotNull String> variableNameVariants = VariableNameUtil.INSTANCE.computeVariableNameVariants(name);
-                if (!VariableNameUtil.INSTANCE.matchesVariableName(name, laterSeenVariableNames) && definedVariableNames.addAll(variableNameVariants)) {
-                    variableNameVariants.forEach(v -> unusedVariables.put(v, o));
-                }
+                foundVariableDefinitions.add(o);
             }
         }
 
@@ -75,12 +84,7 @@ public class RobotUnusedVariableInspection extends LocalInspectionTool implement
             if (variableName != null) {
                 ReadWriteAccessDetector detector = ReadWriteAccessDetector.findDetector(o);
                 if (detector != null && detector.getExpressionAccess(o) == Access.Read) {
-                    Set<@NotNull String> variableNameVariants = VariableNameUtil.INSTANCE.computeVariableNameVariants(variableName);
-                    if (!VariableNameUtil.INSTANCE.matchesVariableName(variableName, unusedVariables.keySet())) {
-                        laterSeenVariableNames.addAll(variableNameVariants);
-                    } else {
-                        variableNameVariants.forEach(unusedVariables::remove);
-                    }
+                    foundVariableUsages.add(o);
                 }
             }
         }

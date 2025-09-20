@@ -22,6 +22,7 @@
 - Fixed variable definition marked as unused because of different casing of variable names
 - Look for variable usages only in the current scope (test case) if defined in it
 - Fixed detection for reassigned variable definitions
+- Fixed unstable usage inspection of variables (to mark them as unused)
 
 ## 0.5.4
 

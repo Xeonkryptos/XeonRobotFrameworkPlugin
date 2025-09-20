@@ -13,6 +13,7 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotDictVariable;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableBodyId;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotDictVariableImpl;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.index.VariableNameIndex;
+import dev.xeonkryptos.xeonrobotframeworkplugin.util.VariableNameUtil;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
 
@@ -68,8 +69,7 @@ public class RobotDictVariableStubElement extends IStubElementType<RobotDictVari
     public void indexStub(@NotNull RobotDictVariableStub stub, @NotNull IndexSink sink) {
         String variableName = stub.getVariableName();
         if (variableName != null) {
-            String variableNameInLowerCase = variableName.toLowerCase();
-            sink.occurrence(VariableNameIndex.KEY, variableNameInLowerCase);
+            VariableNameUtil.INSTANCE.computeVariableNameVariants(variableName).forEach(variant -> sink.occurrence(VariableNameIndex.KEY, variant));
         }
     }
 }

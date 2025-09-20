@@ -96,9 +96,9 @@
         <localInspection language="Robot" shortName="RobotImportNotUsed" bundle="messages.RobotBundle" key="INSP.NAME.import.unused" groupPath="Robot"
                          groupKey="INSP.GROUP.cleanup" enabledByDefault="true" level="WARNING" dumbAware="true"
                          implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.ide.inspections.cleanup.RobotImportNotUsed"/>
-        <localInspection language="Robot" shortName="RobotVariableNotUsed" bundle="messages.RobotBundle" key="INSP.NAME.variable.unused" groupPath="Robot"
+        <localInspection language="Robot" shortName="RobotUnusedVariableDefinition" bundle="messages.RobotBundle" key="INSP.NAME.variable.unused" groupPath="Robot"
                          groupKey="INSP.GROUP.cleanup" enabledByDefault="true" level="WARNING" dumbAware="false"
-                         implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.ide.inspections.cleanup.RobotUnusedVariableInspection"/>
+                         implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.ide.inspections.cleanup.RobotUnusedVariableDefinitionInspection"/>
         <localInspection language="Robot" shortName="RobotKeywordOnlyMarkerNotUsed" bundle="messages.RobotBundle" key="INSP.NAME.keyword-only-marker.unused"
                          groupPath="Robot" groupKey="INSP.GROUP.cleanup" enabledByDefault="true" level="WARNING" dumbAware="true"
                          implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.ide.inspections.cleanup.RobotUnusedKeywordOnlyMarkerInspection"/>
