@@ -4,7 +4,6 @@ import com.intellij.psi.PsiElement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotExecutableStatement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordsSection;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLocalArgumentsSetting;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLocalArgumentsSettingArgument;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotRoot;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTaskStatement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTasksSection;
@@ -104,15 +103,6 @@ public class RobotVariableReferenceSearcher extends RecursiveRobotVisitor {
         inOvershadowingContext = true;
         super.visitLocalArgumentsSetting(o);
         inOvershadowingContext = false;
-    }
-
-    @Override
-    public void visitLocalArgumentsSettingArgument(@NotNull RobotLocalArgumentsSettingArgument o) {
-        RobotVariableDefinition variableDefinition = o.getVariableDefinition();
-        if (variableDefinition.matches(variableName)) {
-            overshadows = true;
-            foundElements.add(variableDefinition);
-        }
     }
 
     @Override

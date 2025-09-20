@@ -8,13 +8,10 @@ import com.intellij.psi.PsiElement;
 public interface RobotLocalArgumentsSetting extends RobotFoldable, RobotStatement {
 
   @NotNull
-  List<RobotLocalArgumentsSettingArgument> getLocalArgumentsSettingArgumentList();
-
-  @NotNull
   RobotLocalArgumentsSettingId getLocalArgumentsSettingId();
 
   @NotNull
-  List<RobotVariableDefinition> getVariableDefinitionList();
+  List<RobotLocalArgumentsSettingParameter> getLocalArgumentsSettingParameterList();
 
   @NotNull String getSettingName();
 

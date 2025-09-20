@@ -217,13 +217,15 @@ local_setting ::= local_setting_id (positional_argument | parameter | eol_free_k
 }
 local_setting_id ::= LOCAL_SETTING_NAME
 
-local_arguments_setting ::= local_arguments_setting_id (local_arguments_setting_argument | variable_definition)* eol_marker {
+local_arguments_setting ::= local_arguments_setting_id local_arguments_setting_parameter* eol_marker {
     pin=1
     methods=[getSettingName]
     implements=foldable
 }
 local_arguments_setting_id ::= ARGUMENTS_SETTING_NAME
-local_arguments_setting_argument ::= variable_definition "=" positional_argument
+local_arguments_setting_parameter ::= local_arguments_setting_parameter_optional | local_arguments_setting_parameter_mandatory
+local_arguments_setting_parameter_mandatory ::= variable_definition
+local_arguments_setting_parameter_optional ::= variable_definition "=" positional_argument {pin=3}
 
 executable_statement ::= loop_structure | loop_control_structure | control_structure | call_structure | return_structure {
     pin=1

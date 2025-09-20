@@ -1324,7 +1324,7 @@ public class RobotParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // local_arguments_setting_id (local_arguments_setting_argument | variable_definition)* eol_marker
+  // local_arguments_setting_id local_arguments_setting_parameter* eol_marker
   public static boolean local_arguments_setting(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "local_arguments_setting")) return false;
     if (!nextTokenIs(b, ARGUMENTS_SETTING_NAME)) return false;
@@ -1338,37 +1338,15 @@ public class RobotParser implements PsiParser, LightPsiParser {
     return r || p;
   }
 
-  // (local_arguments_setting_argument | variable_definition)*
+  // local_arguments_setting_parameter*
   private static boolean local_arguments_setting_1(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "local_arguments_setting_1")) return false;
     while (true) {
       int c = current_position_(b);
-      if (!local_arguments_setting_1_0(b, l + 1)) break;
+      if (!local_arguments_setting_parameter(b, l + 1)) break;
       if (!empty_element_parsed_guard_(b, "local_arguments_setting_1", c)) break;
     }
     return true;
-  }
-
-  // local_arguments_setting_argument | variable_definition
-  private static boolean local_arguments_setting_1_0(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "local_arguments_setting_1_0")) return false;
-    boolean r;
-    r = local_arguments_setting_argument(b, l + 1);
-    if (!r) r = variable_definition(b, l + 1);
-    return r;
-  }
-
-  /* ********************************************************** */
-  // variable_definition "=" positional_argument
-  public static boolean local_arguments_setting_argument(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "local_arguments_setting_argument")) return false;
-    boolean r;
-    Marker m = enter_section_(b, l, _NONE_, LOCAL_ARGUMENTS_SETTING_ARGUMENT, "<local arguments setting argument>");
-    r = variable_definition(b, l + 1);
-    r = r && consumeToken(b, "=");
-    r = r && positional_argument(b, l + 1);
-    exit_section_(b, l, m, r, false, null);
-    return r;
   }
 
   /* ********************************************************** */
@@ -1380,6 +1358,42 @@ public class RobotParser implements PsiParser, LightPsiParser {
     Marker m = enter_section_(b);
     r = consumeToken(b, ARGUMENTS_SETTING_NAME);
     exit_section_(b, m, LOCAL_ARGUMENTS_SETTING_ID, r);
+    return r;
+  }
+
+  /* ********************************************************** */
+  // local_arguments_setting_parameter_optional | local_arguments_setting_parameter_mandatory
+  public static boolean local_arguments_setting_parameter(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "local_arguments_setting_parameter")) return false;
+    boolean r;
+    Marker m = enter_section_(b, l, _NONE_, LOCAL_ARGUMENTS_SETTING_PARAMETER, "<local arguments setting parameter>");
+    r = local_arguments_setting_parameter_optional(b, l + 1);
+    if (!r) r = local_arguments_setting_parameter_mandatory(b, l + 1);
+    exit_section_(b, l, m, r, false, null);
+    return r;
+  }
+
+  /* ********************************************************** */
+  // variable_definition
+  public static boolean local_arguments_setting_parameter_mandatory(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "local_arguments_setting_parameter_mandatory")) return false;
+    boolean r;
+    Marker m = enter_section_(b, l, _NONE_, LOCAL_ARGUMENTS_SETTING_PARAMETER_MANDATORY, "<local arguments setting parameter mandatory>");
+    r = variable_definition(b, l + 1);
+    exit_section_(b, l, m, r, false, null);
+    return r;
+  }
+
+  /* ********************************************************** */
+  // variable_definition "=" positional_argument
+  public static boolean local_arguments_setting_parameter_optional(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "local_arguments_setting_parameter_optional")) return false;
+    boolean r;
+    Marker m = enter_section_(b, l, _NONE_, LOCAL_ARGUMENTS_SETTING_PARAMETER_OPTIONAL, "<local arguments setting parameter optional>");
+    r = variable_definition(b, l + 1);
+    r = r && consumeToken(b, "=");
+    r = r && positional_argument(b, l + 1);
+    exit_section_(b, l, m, r, false, null);
     return r;
   }
 

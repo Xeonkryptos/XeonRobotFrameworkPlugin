@@ -11,14 +11,14 @@ import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.*;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.*;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotPsiImplUtil;
 
-public class RobotLocalArgumentsSettingImpl extends RobotPsiElementBase implements RobotLocalArgumentsSetting {
+public class RobotLocalArgumentsSettingParameterImpl extends RobotPsiElementBase implements RobotLocalArgumentsSettingParameter {
 
-  public RobotLocalArgumentsSettingImpl(@NotNull ASTNode node) {
+  public RobotLocalArgumentsSettingParameterImpl(@NotNull ASTNode node) {
     super(node);
   }
 
   public void accept(@NotNull RobotVisitor visitor) {
-    visitor.visitLocalArgumentsSetting(this);
+    visitor.visitLocalArgumentsSettingParameter(this);
   }
 
   @Override
@@ -28,20 +28,15 @@ public class RobotLocalArgumentsSettingImpl extends RobotPsiElementBase implemen
   }
 
   @Override
-  @NotNull
-  public RobotLocalArgumentsSettingId getLocalArgumentsSettingId() {
-    return notNullChild(PsiTreeUtil.getChildOfType(this, RobotLocalArgumentsSettingId.class));
+  @Nullable
+  public RobotLocalArgumentsSettingParameterMandatory getLocalArgumentsSettingParameterMandatory() {
+    return PsiTreeUtil.getChildOfType(this, RobotLocalArgumentsSettingParameterMandatory.class);
   }
 
   @Override
-  @NotNull
-  public List<RobotLocalArgumentsSettingParameter> getLocalArgumentsSettingParameterList() {
-    return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotLocalArgumentsSettingParameter.class);
-  }
-
-  @Override
-  public @NotNull String getSettingName() {
-    return RobotPsiImplUtil.getSettingName(this);
+  @Nullable
+  public RobotLocalArgumentsSettingParameterOptional getLocalArgumentsSettingParameterOptional() {
+    return PsiTreeUtil.getChildOfType(this, RobotLocalArgumentsSettingParameterOptional.class);
   }
 
 }

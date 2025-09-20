@@ -167,11 +167,19 @@ public class RobotVisitor extends PsiElementVisitor {
     // visitStatement(o);
   }
 
-  public void visitLocalArgumentsSettingArgument(@NotNull RobotLocalArgumentsSettingArgument o) {
+  public void visitLocalArgumentsSettingId(@NotNull RobotLocalArgumentsSettingId o) {
     visitStatement(o);
   }
 
-  public void visitLocalArgumentsSettingId(@NotNull RobotLocalArgumentsSettingId o) {
+  public void visitLocalArgumentsSettingParameter(@NotNull RobotLocalArgumentsSettingParameter o) {
+    visitStatement(o);
+  }
+
+  public void visitLocalArgumentsSettingParameterMandatory(@NotNull RobotLocalArgumentsSettingParameterMandatory o) {
+    visitStatement(o);
+  }
+
+  public void visitLocalArgumentsSettingParameterOptional(@NotNull RobotLocalArgumentsSettingParameterOptional o) {
     visitStatement(o);
   }
 

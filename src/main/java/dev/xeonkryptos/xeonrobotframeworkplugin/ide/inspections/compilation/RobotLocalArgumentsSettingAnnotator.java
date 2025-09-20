@@ -9,7 +9,9 @@ import com.intellij.openapi.project.DumbAware;
 import com.intellij.psi.PsiElement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.RobotBundle;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLocalArgumentsSetting;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLocalArgumentsSettingArgument;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLocalArgumentsSettingParameter;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLocalArgumentsSettingParameterMandatory;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLocalArgumentsSettingParameterOptional;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableDefinition;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.visitor.RecursiveRobotVisitor;
 import org.jetbrains.annotations.NotNull;
@@ -25,18 +27,22 @@ public class RobotLocalArgumentsSettingAnnotator implements Annotator, DumbAware
             return;
         }
         boolean keywordOnlyMarkerFound = false;
-        for (RobotVariableDefinition variableDefinition : argumentsSetting.getVariableDefinitionList()) {
-            String name = variableDefinition.getName();
-            if (name == null) {
-                if (!keywordOnlyMarkerFound) {
-                    keywordOnlyMarkerFound = true;
-                } else {
-                    holder.newAnnotation(HighlightSeverity.ERROR,
-                                         RobotBundle.getMessage("annotation.user-keyword.settings.argument.keyword-only-marker-more-than-once"))
-                          .highlightType(ProblemHighlightType.GENERIC_ERROR)
-                          .range(variableDefinition)
-                          .withFix(new RemoveMoreThanOnceDefinedKeywordOnlyMarkersQuickFix())
-                          .create();
+        for (RobotLocalArgumentsSettingParameter localArgumentsSettingParameter : argumentsSetting.getLocalArgumentsSettingParameterList()) {
+            RobotLocalArgumentsSettingParameterMandatory parameterMandatory = localArgumentsSettingParameter.getLocalArgumentsSettingParameterMandatory();
+            if (parameterMandatory != null) {
+                RobotVariableDefinition variableDefinition = parameterMandatory.getVariableDefinition();
+                String name = variableDefinition.getName();
+                if (name == null) {
+                    if (!keywordOnlyMarkerFound) {
+                        keywordOnlyMarkerFound = true;
+                    } else {
+                        holder.newAnnotation(HighlightSeverity.ERROR,
+                                             RobotBundle.getMessage("annotation.user-keyword.settings.argument.keyword-only-marker-more-than-once"))
+                              .highlightType(ProblemHighlightType.GENERIC_ERROR)
+                              .range(variableDefinition)
+                              .withFix(new RemoveMoreThanOnceDefinedKeywordOnlyMarkersQuickFix())
+                              .create();
+                    }
                 }
             }
         }
@@ -61,7 +67,7 @@ public class RobotLocalArgumentsSettingAnnotator implements Annotator, DumbAware
         private boolean keywordOnlyMarkerFound = false;
 
         @Override
-        public void visitLocalArgumentsSettingArgument(@NotNull RobotLocalArgumentsSettingArgument o) {
+        public void visitLocalArgumentsSettingParameterOptional(@NotNull RobotLocalArgumentsSettingParameterOptional o) {
             // Avoid visiting any children of this kind. We will find other variable definitions and those we don't have to take a look at
         }
 

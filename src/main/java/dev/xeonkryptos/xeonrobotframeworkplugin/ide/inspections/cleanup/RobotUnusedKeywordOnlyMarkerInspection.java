@@ -6,17 +6,19 @@ import com.intellij.codeInspection.ProblemHighlightType;
 import com.intellij.codeInspection.ProblemsHolder;
 import com.intellij.openapi.project.DumbAware;
 import com.intellij.openapi.util.Key;
+import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiElementVisitor;
 import dev.xeonkryptos.xeonrobotframeworkplugin.RobotBundle;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLocalArgumentsSetting;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLocalArgumentsSettingArgument;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLocalArgumentsSettingParameter;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLocalArgumentsSettingParameterMandatory;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLocalArgumentsSettingParameterOptional;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableDefinition;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVisitor;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 public class RobotUnusedKeywordOnlyMarkerInspection extends LocalInspectionTool implements DumbAware {
 
@@ -33,20 +35,21 @@ public class RobotUnusedKeywordOnlyMarkerInspection extends LocalInspectionTool 
     @Override
     public void inspectionFinished(@NotNull LocalInspectionToolSession session, @NotNull ProblemsHolder problemsHolder) {
         RobotKeywordOnlyMarkerVisitor robotKeywordOnlyMarkerVisitor = session.getUserData(KEYWORD_ONLY_USAGE_MARKER_VISITOR_KEY);
-        if (robotKeywordOnlyMarkerVisitor != null) {
-            if (robotKeywordOnlyMarkerVisitor.keywordOnlyMarker != null && !robotKeywordOnlyMarkerVisitor.argumentWithDefaultValueFound.get()) {
-                problemsHolder.registerProblem(robotKeywordOnlyMarkerVisitor.keywordOnlyMarker,
+        if (robotKeywordOnlyMarkerVisitor != null && robotKeywordOnlyMarkerVisitor.keywordOnlyMarker != null) {
+            RobotVariableDefinition localKeywordOnlyMarker = robotKeywordOnlyMarkerVisitor.keywordOnlyMarker;
+            int keywordOnlyTextOffset = localKeywordOnlyMarker.getTextOffset();
+            if (robotKeywordOnlyMarkerVisitor.argumentParameters.stream().noneMatch(param -> keywordOnlyTextOffset < param.getTextOffset())) {
+                problemsHolder.registerProblem(localKeywordOnlyMarker,
                                                RobotBundle.getMessage("INSP.keyword-only-marker.unused"),
                                                ProblemHighlightType.LIKE_UNUSED_SYMBOL,
-                                               new RemoveUnusedKeywordOnlyMarkerQuickFix(robotKeywordOnlyMarkerVisitor.keywordOnlyMarker));
+                                               new RemoveUnusedKeywordOnlyMarkerQuickFix(localKeywordOnlyMarker));
             }
         }
     }
 
     private static class RobotKeywordOnlyMarkerVisitor extends RobotVisitor {
 
-        private final AtomicBoolean argumentWithDefaultValueFound = new AtomicBoolean();
-        private final Set<Integer> argumentsWithDefaultValueTextOffsets = ConcurrentHashMap.newKeySet();
+        private final Set<PsiElement> argumentParameters = ConcurrentHashMap.newKeySet();
 
         private volatile RobotVariableDefinition keywordOnlyMarker;
 
@@ -56,28 +59,22 @@ public class RobotUnusedKeywordOnlyMarkerInspection extends LocalInspectionTool 
             String name = o.getName();
             if (name == null && o.getParent() instanceof RobotLocalArgumentsSetting) {
                 keywordOnlyMarker = o;
-                for (Integer argumentsWithDefaultValueTextOffset : argumentsWithDefaultValueTextOffsets) {
-                    if (isAfterKeywordOnlyMarker(o, argumentsWithDefaultValueTextOffset)) {
-                        argumentWithDefaultValueFound.set(true);
-                        break;
-                    }
-                }
             }
         }
 
         @Override
-        public void visitLocalArgumentsSettingArgument(@NotNull RobotLocalArgumentsSettingArgument o) {
-            super.visitLocalArgumentsSettingArgument(o);
-            RobotVariableDefinition keywordOnlyMarker = this.keywordOnlyMarker;
-            if (keywordOnlyMarker != null && isAfterKeywordOnlyMarker(keywordOnlyMarker, o.getTextOffset())) {
-                argumentWithDefaultValueFound.set(true);
-            } else if (keywordOnlyMarker == null) {
-                argumentsWithDefaultValueTextOffsets.add(o.getTextOffset());
-            }
-        }
+        public void visitLocalArgumentsSettingParameter(@NotNull RobotLocalArgumentsSettingParameter o) {
+            super.visitLocalArgumentsSettingParameter(o);
+            RobotLocalArgumentsSettingParameterMandatory parameterMandatory = o.getLocalArgumentsSettingParameterMandatory();
+            RobotLocalArgumentsSettingParameterOptional parameterOptional = o.getLocalArgumentsSettingParameterOptional();
 
-        private boolean isAfterKeywordOnlyMarker(RobotVariableDefinition keywordOnlyMarker, int textOffset) {
-            return keywordOnlyMarker.getTextOffset() + keywordOnlyMarker.getTextLength() < textOffset;
+            if (parameterMandatory != null && parameterMandatory.getVariableDefinition().getName() == null) {
+                keywordOnlyMarker = parameterMandatory.getVariableDefinition();
+            } else if (parameterMandatory != null) {
+                argumentParameters.add(parameterMandatory);
+            } else {
+                argumentParameters.add(parameterOptional);
+            }
         }
     }
 }

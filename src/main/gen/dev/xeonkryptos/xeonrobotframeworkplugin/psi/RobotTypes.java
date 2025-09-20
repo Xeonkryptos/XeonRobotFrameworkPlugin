@@ -49,8 +49,10 @@ public interface RobotTypes {
   IElementType LIST_VARIABLE = RobotListVariableStubElement.create("LIST_VARIABLE");
   IElementType LITERAL_CONSTANT_VALUE = new RobotElementType("LITERAL_CONSTANT_VALUE");
   IElementType LOCAL_ARGUMENTS_SETTING = new RobotElementType("LOCAL_ARGUMENTS_SETTING");
-  IElementType LOCAL_ARGUMENTS_SETTING_ARGUMENT = new RobotElementType("LOCAL_ARGUMENTS_SETTING_ARGUMENT");
   IElementType LOCAL_ARGUMENTS_SETTING_ID = new RobotElementType("LOCAL_ARGUMENTS_SETTING_ID");
+  IElementType LOCAL_ARGUMENTS_SETTING_PARAMETER = new RobotElementType("LOCAL_ARGUMENTS_SETTING_PARAMETER");
+  IElementType LOCAL_ARGUMENTS_SETTING_PARAMETER_MANDATORY = new RobotElementType("LOCAL_ARGUMENTS_SETTING_PARAMETER_MANDATORY");
+  IElementType LOCAL_ARGUMENTS_SETTING_PARAMETER_OPTIONAL = new RobotElementType("LOCAL_ARGUMENTS_SETTING_PARAMETER_OPTIONAL");
   IElementType LOCAL_SETTING = new RobotElementType("LOCAL_SETTING");
   IElementType LOCAL_SETTING_ID = new RobotElementType("LOCAL_SETTING_ID");
   IElementType METADATA_STATEMENT_GLOBAL_SETTING = new RobotElementType("METADATA_STATEMENT_GLOBAL_SETTING");
@@ -263,11 +265,17 @@ public interface RobotTypes {
       else if (type == LOCAL_ARGUMENTS_SETTING) {
         return new RobotLocalArgumentsSettingImpl(node);
       }
-      else if (type == LOCAL_ARGUMENTS_SETTING_ARGUMENT) {
-        return new RobotLocalArgumentsSettingArgumentImpl(node);
-      }
       else if (type == LOCAL_ARGUMENTS_SETTING_ID) {
         return new RobotLocalArgumentsSettingIdImpl(node);
+      }
+      else if (type == LOCAL_ARGUMENTS_SETTING_PARAMETER) {
+        return new RobotLocalArgumentsSettingParameterImpl(node);
+      }
+      else if (type == LOCAL_ARGUMENTS_SETTING_PARAMETER_MANDATORY) {
+        return new RobotLocalArgumentsSettingParameterMandatoryImpl(node);
+      }
+      else if (type == LOCAL_ARGUMENTS_SETTING_PARAMETER_OPTIONAL) {
+        return new RobotLocalArgumentsSettingParameterOptionalImpl(node);
       }
       else if (type == LOCAL_SETTING) {
         return new RobotLocalSettingImpl(node);

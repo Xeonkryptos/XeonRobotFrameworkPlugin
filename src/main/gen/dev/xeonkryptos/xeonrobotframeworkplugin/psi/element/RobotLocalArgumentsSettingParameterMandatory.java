@@ -5,10 +5,7 @@ import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 
-public interface RobotLocalArgumentsSettingArgument extends RobotStatement {
-
-  @NotNull
-  RobotPositionalArgument getPositionalArgument();
+public interface RobotLocalArgumentsSettingParameterMandatory extends RobotStatement {
 
   @NotNull
   RobotVariableDefinition getVariableDefinition();
