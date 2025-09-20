@@ -58,6 +58,14 @@ public class RobotOptionsProvider implements PersistentStateComponent<RobotOptio
         state.multilineIndentation = multilineIndentation;
     }
 
+    public final boolean testsOnlyMode() {
+        return state.testsOnlyMode;
+    }
+
+    public final void setTestsOnlyMode(boolean testsOnlyMode) {
+        state.testsOnlyMode = testsOnlyMode;
+    }
+
     public final Collator getParameterNameCollator() {
         if (parameterNameCollator == null) {
             updateParameterNameCollator();
@@ -163,6 +171,7 @@ public class RobotOptionsProvider implements PersistentStateComponent<RobotOptio
         this.state.capitalizeKeywords = state.capitalizeKeywords;
         this.state.smartAutoEncloseVariable = state.smartAutoEncloseVariable;
         this.state.multilineIndentation = state.multilineIndentation;
+        this.state.testsOnlyMode = state.testsOnlyMode;
         this.state.parameterNameCollationRules = state.parameterNameCollationRules;
         this.state.pythonLiveInspection = state.pythonLiveInspection;
         this.state.pythonLiveInspectionAdditionalArguments = state.pythonLiveInspectionAdditionalArguments;
@@ -174,6 +183,7 @@ public class RobotOptionsProvider implements PersistentStateComponent<RobotOptio
         public boolean capitalizeKeywords = true;
         public boolean smartAutoEncloseVariable = true;
         public boolean multilineIndentation = true;
+        public boolean testsOnlyMode = true;
         public String parameterNameCollationRules = "& A < Ä = Ae & a < ä = ae & O < Ö = Oe & o < ö = oe & U < Ü = Ue & u < ü = ue & S < ß = Ss & s < ß = ss";
         public boolean pythonLiveInspection = false;
         public String pythonLiveInspectionAdditionalArguments = "-m robot.libdoc .robotframework-ls";

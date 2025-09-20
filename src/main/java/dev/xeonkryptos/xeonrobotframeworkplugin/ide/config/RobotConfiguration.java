@@ -36,6 +36,7 @@ public class RobotConfiguration implements NoScroll, SearchableConfigurable {
     private final JBCheckBox capitalizeKeywords;
     private final JBCheckBox smartAutoEncloseVariable;
     private final JBCheckBox multilineIndentation;
+    private final JBCheckBox testsOnlyMode;
     private final JBTextField parameterNameCollationRulesTextField;
     private final JBCheckBox pythonLiveInspection;
     private final JBTextField pythonLiveInspectionCustomArgumentsTextField;
@@ -48,7 +49,7 @@ public class RobotConfiguration implements NoScroll, SearchableConfigurable {
 
         int mainPanelRow = 0;
         JBPanel<?> checkBoxPanel = new JBPanel<>();
-        checkBoxPanel.setLayout(new GridLayoutManager(8, 1, JBUI.emptyInsets(), -1, -1, false, false));
+        checkBoxPanel.setLayout(new GridLayoutManager(9, 1, JBUI.emptyInsets(), -1, -1, false, false));
         mainPanel.add(checkBoxPanel, new GridConstraints(mainPanelRow++, 0, 1, 2, 0, 3, 3, 3, null, null, null));
 
         int checkBoxPanelRow = 0;
@@ -71,6 +72,12 @@ public class RobotConfiguration implements NoScroll, SearchableConfigurable {
         this.multilineIndentation = multilineIndentationCheckBox;
         multilineIndentationCheckBox.setText("Smart Multiline Indentation");
         checkBoxPanel.add(multilineIndentationCheckBox, new GridConstraints(checkBoxPanelRow++, 0, 1, 1, 8, 0, 3, 0, null, null, null));
+
+        JBCheckBox testsOnlyModeCheckBox = new JBCheckBox();
+        this.testsOnlyMode = testsOnlyModeCheckBox;
+        testsOnlyModeCheckBox.setText(RobotBundle.getMessage("options.tests-only-mode.title"));
+        testsOnlyModeCheckBox.setToolTipText(RobotBundle.getMessage("options.tests-only-mode.tooltip"));
+        checkBoxPanel.add(testsOnlyModeCheckBox, new GridConstraints(checkBoxPanelRow++, 0, 1, 1, 8, 0, 3, 0, null, null, null));
 
         JBPanel<?> parameterNameCollationRulesForDecoratorsPanel = new JBPanel<>();
         parameterNameCollationRulesForDecoratorsPanel.setLayout(new BoxLayout(parameterNameCollationRulesForDecoratorsPanel, BoxLayout.LINE_AXIS));
@@ -189,8 +196,9 @@ public class RobotConfiguration implements NoScroll, SearchableConfigurable {
         return provider != null && (provider.allowTransitiveImports() != this.allowTransitiveImports.isSelected()
                                     || provider.capitalizeKeywords() != this.capitalizeKeywords.isSelected()
                                     || provider.smartAutoEncloseVariable() != this.smartAutoEncloseVariable.isSelected()
-                                    || provider.multilineIndentation() != this.multilineIndentation.isSelected() || provider.parameterNameCollationRules()
-                                                                                                                            .equals(this.parameterNameCollationRulesTextField.getText())
+                                    || provider.multilineIndentation() != this.multilineIndentation.isSelected()
+                                    || provider.testsOnlyMode() != this.testsOnlyMode.isSelected() || provider.parameterNameCollationRules()
+                                                                                                              .equals(this.parameterNameCollationRulesTextField.getText())
                                     || provider.pythonLiveInspection() != this.pythonLiveInspection.isSelected() || provider.pythonLiveInspection() && (
                 !provider.getPythonLiveInspectionAdditionalArguments().equals(this.pythonLiveInspectionCustomArgumentsTextField.getText())
                 || !provider.getPythonLiveInspectionDecorators().equals(convertToDecoratorNames())));
@@ -204,6 +212,7 @@ public class RobotConfiguration implements NoScroll, SearchableConfigurable {
             provider.setCapitalizeKeywords(this.capitalizeKeywords.isSelected());
             provider.setSmartAutoEncloseVariable(this.smartAutoEncloseVariable.isSelected());
             provider.setMultilineIndentation(this.multilineIndentation.isSelected());
+            provider.setTestsOnlyMode(this.testsOnlyMode.isSelected());
             provider.setParameterNameCollationRules(this.parameterNameCollationRulesTextField.getText());
             provider.setPythonLiveInspection(this.pythonLiveInspection.isSelected());
             provider.setPythonLiveInspectionAdditionalArguments(this.pythonLiveInspectionCustomArgumentsTextField.getText());
@@ -227,6 +236,7 @@ public class RobotConfiguration implements NoScroll, SearchableConfigurable {
             this.allowTransitiveImports.setSelected(provider.allowTransitiveImports());
             this.capitalizeKeywords.setSelected(provider.capitalizeKeywords());
             this.smartAutoEncloseVariable.setSelected(provider.smartAutoEncloseVariable());
+            this.testsOnlyMode.setSelected(provider.testsOnlyMode());
             this.multilineIndentation.setSelected(provider.multilineIndentation());
             this.parameterNameCollationRulesTextField.setText(provider.parameterNameCollationRules());
             this.pythonLiveInspection.setSelected(provider.pythonLiveInspection());

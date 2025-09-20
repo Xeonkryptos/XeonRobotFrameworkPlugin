@@ -1,5 +1,6 @@
-# For Listener API version 3
+# For Listener API version 2
 from typing import Dict, Any
+import os
 
 
 def extract_ids(attributes: Dict[str, Any]):
@@ -13,9 +14,10 @@ class RobotIntellijListener:
     ROBOT_LISTENER_API_VERSION = "2"
 
     def __init__(self):
-        self.keyword_parent_id = 's1-t1'
+        self.test_id = 's1-t1'
         self.keyword_id = 1
         self.tests_count = 0
+        self.tests_only_mode = os.getenv('ROBOT_TESTS_ONLY_MODE', '1') == '1'
 
     def start_suite(self, name: str, attributes: Dict[str, Any]):
         location = f"file://{attributes['source']}"
@@ -29,44 +31,56 @@ class RobotIntellijListener:
         print_teamcity_message(f"testSuiteFinished name='{escape_name(name)}' nodeId='{current_id}' parentNodeId='{parent_id}'")
 
     def start_test(self, name: str, attributes: Dict[str, Any]):
-        self.keyword_parent_id = attributes['id']
+        self.test_id = attributes['id']
         location = f"file://{attributes['source']}:{attributes['lineno']}"
         parent_id, current_id = extract_ids(attributes)
-        print_teamcity_message(f"testSuiteStarted name='{escape_name(name)}' nodeId='{current_id}' parentNodeId='{parent_id}' locationHint='{location}'")
+        if self.tests_only_mode:
+            print_teamcity_message(f"testStarted name='{escape_name(name)}' nodeId='{current_id}' parentNodeId='{parent_id}' locationHint='{location}'")
+        else:
+            print_teamcity_message(f"testSuiteStarted name='{escape_name(name)}' nodeId='{current_id}' parentNodeId='{parent_id}' locationHint='{location}'")
 
     def end_test(self, name: str, attributes: Dict[str, Any]):
         duration = int(attributes['elapsedtime'])
         parent_id, current_id = extract_ids(attributes)
         teamcity_name = escape_name(name)
-        print_teamcity_message(f"testSuiteFinished name='{teamcity_name}' nodeId='{current_id}' parentNodeId='{parent_id}' duration='{duration}'")
-
-        self.keyword_parent_id = 's1-t1'
-        self.keyword_id = 1
-
-    def start_keyword(self, name: str, attributes: Dict[str, Any]):
-        if attributes['type'] == 'KEYWORD':
-            location = f"file://{attributes['source']}:{attributes['lineno']}"
-            print_teamcity_message(f"testStarted name='{escape_name(attributes['kwname'])}' nodeId='{self.keyword_parent_id}-k{self.keyword_id}' parentNodeId='{self.keyword_parent_id}' locationHint='{location}'")
-
-    def end_keyword(self, name: str, attributes: Dict[str, Any]):
-        duration = int(attributes['elapsedtime'])
-        teamcity_name = escape_name(attributes['kwname'])
-        if attributes['type'] == 'KEYWORD' and attributes['lineno'] is not None:
-            node_id = f"{self.keyword_parent_id}-k{self.keyword_id}"
+        if self.tests_only_mode:
             if attributes['status'] == 'FAIL':
                 message = escape_message(attributes.get('message', ''))
-                print_teamcity_message(f"testFailed name='{teamcity_name}' nodeId='{node_id}' parentNodeId='{self.keyword_parent_id}' message='{message}'")
-            elif attributes['status'] == 'SKIP' or attributes['status'] == 'NOT RUN':
-                print_teamcity_message(f"testIgnored name='{teamcity_name}' nodeId='{node_id}' parentNodeId='{self.keyword_parent_id}'")
-            print_teamcity_message(f"testFinished name='{teamcity_name}' nodeId='{node_id}' parentNodeId='{self.keyword_parent_id}' duration='{duration}'")
-            self.keyword_id += 1
-        elif attributes['status'] == 'FAIL' and attributes['lineno'] is not None:
-            node_id = f"{self.keyword_parent_id}-c1"
-            message = escape_message(attributes.get('message', ''))
+                print_teamcity_message(f"testFailed name='{teamcity_name}' nodeId='{current_id}' parentNodeId='{parent_id}' message='{message}'")
+            elif attributes['status'] in ('SKIP', 'NOT RUN'):
+                print_teamcity_message(f"testIgnored name='{teamcity_name}' nodeId='{current_id}' parentNodeId='{parent_id}'")
+            print_teamcity_message(f"testFinished name='{teamcity_name}' nodeId='{current_id}' parentNodeId='{parent_id}' duration='{duration}'")
+        else:
+            print_teamcity_message(f"testSuiteFinished name='{teamcity_name}' nodeId='{current_id}' parentNodeId='{parent_id}' duration='{duration}'")
+
+            self.test_id = 's1-t1'
+            self.keyword_id = 1
+
+    def start_keyword(self, name: str, attributes: Dict[str, Any]):
+        if not self.tests_only_mode and attributes['type'] == 'KEYWORD':
             location = f"file://{attributes['source']}:{attributes['lineno']}"
-            print_teamcity_message(f"testStarted name='{teamcity_name}' nodeId='{node_id}' parentNodeId='{self.keyword_parent_id}' locationHint='{location}'")
-            print_teamcity_message(f"testFailed name='{teamcity_name}' nodeId='{node_id}' parentNodeId='{self.keyword_parent_id}' message='{message}'")
-            print_teamcity_message(f"testFinished name='{teamcity_name}' nodeId='{node_id}' parentNodeId='{self.keyword_parent_id}' duration='{duration}'")
+            print_teamcity_message(f"testStarted name='{escape_name(attributes['kwname'])}' nodeId='{self.test_id}-k{self.keyword_id}' parentNodeId='{self.test_id}' locationHint='{location}'")
+
+    def end_keyword(self, name: str, attributes: Dict[str, Any]):
+        if not self.tests_only_mode:
+            duration = int(attributes['elapsedtime'])
+            teamcity_name = escape_name(attributes['kwname'])
+            if attributes['type'] == 'KEYWORD' and attributes['lineno'] is not None:
+                node_id = f"{self.test_id}-k{self.keyword_id}"
+                if attributes['status'] == 'FAIL':
+                    message = escape_message(attributes.get('message', ''))
+                    print_teamcity_message(f"testFailed name='{teamcity_name}' nodeId='{node_id}' parentNodeId='{self.test_id}' message='{message}'")
+                elif attributes['status'] in ('SKIP', 'NOT RUN'):
+                    print_teamcity_message(f"testIgnored name='{teamcity_name}' nodeId='{node_id}' parentNodeId='{self.test_id}'")
+                print_teamcity_message(f"testFinished name='{teamcity_name}' nodeId='{node_id}' parentNodeId='{self.test_id}' duration='{duration}'")
+                self.keyword_id += 1
+            elif attributes['status'] == 'FAIL' and attributes['lineno'] is not None:
+                node_id = f"{self.test_id}-c1"
+                message = escape_message(attributes.get('message', ''))
+                location = f"file://{attributes['source']}:{attributes['lineno']}"
+                print_teamcity_message(f"testStarted name='{teamcity_name}' nodeId='{node_id}' parentNodeId='{self.test_id}' locationHint='{location}'")
+                print_teamcity_message(f"testFailed name='{teamcity_name}' nodeId='{node_id}' parentNodeId='{self.test_id}' message='{message}'")
+                print_teamcity_message(f"testFinished name='{teamcity_name}' nodeId='{node_id}' parentNodeId='{self.test_id}' duration='{duration}'")
 
 
 def escape_name(name):

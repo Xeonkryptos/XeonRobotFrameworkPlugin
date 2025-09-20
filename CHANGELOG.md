@@ -4,6 +4,11 @@
 
 ## Unreleased
 
+## Changed
+
+- Executed keywords in SMT view are now tests instead of suites to assign console output, state and duration correctly to it
+- Made showing up of keywords in SMT view configurable. Decide for yourself if you want them to be listed separately or not. Default is to not show them.
+
 ### Fixed
 
 - Reference resolve of variables in the same file (jump to the closest variable definition even when another testcase/task provides a variable definition with
@@ -11,7 +16,6 @@
 - Fixed variable definition marked as unused because of different casing of variable names
 - Look for variable usages only in the current scope (test case) if defined in it
 - Fixed detection for reassigned variable definitions
-- Executed keywords in SMT view are now tests instead of suites to assign console output, state and duration correctly to it
 
 ## 0.5.4
 

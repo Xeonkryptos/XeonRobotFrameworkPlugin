@@ -31,6 +31,7 @@ import com.jetbrains.python.run.PythonScriptExecution;
 import com.jetbrains.python.run.PythonScriptTargetedCommandLineBuilder;
 import com.jetbrains.python.run.target.HelpersAwareTargetEnvironmentRequest;
 import dev.xeonkryptos.xeonrobotframeworkplugin.MyLogger;
+import dev.xeonkryptos.xeonrobotframeworkplugin.ide.config.RobotOptionsProvider;
 import dev.xeonkryptos.xeonrobotframeworkplugin.ide.execution.config.RobotRunConfiguration;
 import dev.xeonkryptos.xeonrobotframeworkplugin.ide.execution.ui.RobotRerunFailedTestsAction;
 import dev.xeonkryptos.xeonrobotframeworkplugin.ide.execution.ui.RobotTestRunnerFactory;
@@ -201,6 +202,9 @@ public class RobotPythonCommandLineState extends PythonScriptCommandLineState {
             if (configuration.getPythonRunConfiguration().emulateTerminal()) {
                 delegateExecution.addEnvironmentVariable("NO_TEAMCITY", "1");
             }
+            boolean testsOnlyMode = RobotOptionsProvider.getInstance(configuration.getProject()).testsOnlyMode();
+            String testsOnlyModeEnvironmentValue = testsOnlyMode ? "1" : "0";
+            delegateExecution.addEnvironmentVariable("ROBOT_TESTS_ONLY_MODE", testsOnlyModeEnvironmentValue);
 
             return parentBuilder.build(helpersAwareTargetEnvironmentRequest, delegateExecution);
         }
