@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+## 0.5.5
+
 ### Added
 
 - Check for invalid usage of the keyword-only marker ${} for \[Arguments] settings
