@@ -5,7 +5,7 @@ import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 
-public interface RobotElseIfStructure extends RobotExecutableStatement, RobotFoldable {
+public interface RobotElseIfStructure extends RobotExecutableStatement, RobotBlockOpeningStructure {
 
   @NotNull
   List<RobotPositionalArgument> getPositionalArgumentList();

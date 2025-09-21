@@ -5,7 +5,7 @@ import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 
-public interface RobotTasksSection extends RobotSection {
+public interface RobotTasksSection extends RobotSection, RobotScopeOwner {
 
   @NotNull
   List<RobotTaskStatement> getTaskStatementList();

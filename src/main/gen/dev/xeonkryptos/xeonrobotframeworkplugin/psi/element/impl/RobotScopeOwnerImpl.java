@@ -11,15 +11,14 @@ import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.*;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.*;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotPsiImplUtil;
 
-public class RobotBlockOpeningStructureImpl extends RobotExecutableStatementImpl implements RobotBlockOpeningStructure {
+public class RobotScopeOwnerImpl extends RobotPsiElementBase implements RobotScopeOwner {
 
-  public RobotBlockOpeningStructureImpl(@NotNull ASTNode node) {
+  public RobotScopeOwnerImpl(@NotNull ASTNode node) {
     super(node);
   }
 
-  @Override
   public void accept(@NotNull RobotVisitor visitor) {
-    visitor.visitBlockOpeningStructure(this);
+    visitor.visitScopeOwner(this);
   }
 
   @Override

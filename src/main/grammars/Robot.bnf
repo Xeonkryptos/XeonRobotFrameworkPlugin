@@ -48,6 +48,7 @@ internal_root ::= !<<eof>> root
 root ::= language* section*
 
 fake foldable ::= DUMMY
+fake scopeOwner ::= DUMMY
 
 language ::= LANGUAGE_KEYWORD language_id {methods=[nameIdentifier="language_id"]}
 language_id ::= LANGUAGE_NAME
@@ -61,9 +62,9 @@ section ::= settings_section
 
 settings_section ::= SETTINGS_HEADER global_setting_statement* {methods=[nameIdentifier="SETTINGS_HEADER" getSectionName]}
 variables_section ::= VARIABLES_HEADER single_variable_statement* {methods=[nameIdentifier="VARIABLES_HEADER" getSectionName]}
-test_cases_section ::= TEST_CASES_HEADER test_case_statement* {methods=[nameIdentifier="TEST_CASES_HEADER" getSectionName]}
-tasks_section ::= TASKS_HEADER task_statement* {methods=[nameIdentifier="TASKS_HEADER" getSectionName]}
-keywords_section ::= USER_KEYWORDS_HEADER user_keyword_statement* {methods=[nameIdentifier="USER_KEYWORDS_HEADER" getSectionName]}
+test_cases_section ::= TEST_CASES_HEADER test_case_statement* {methods=[nameIdentifier="TEST_CASES_HEADER" getSectionName] implements=scopeOwner}
+tasks_section ::= TASKS_HEADER task_statement* {methods=[nameIdentifier="TASKS_HEADER" getSectionName] implements=scopeOwner}
+keywords_section ::= USER_KEYWORDS_HEADER user_keyword_statement* {methods=[nameIdentifier="USER_KEYWORDS_HEADER" getSectionName] implements=scopeOwner}
 comments_section ::= COMMENTS_HEADER COMMENT* {methods=[nameIdentifier="COMMENTS_HEADER" getSectionName]}
 private section_recover ::= !(SETTINGS_HEADER | VARIABLES_HEADER | TEST_CASES_HEADER | TASKS_HEADER | USER_KEYWORDS_HEADER | COMMENTS_HEADER)
 
@@ -233,34 +234,30 @@ executable_statement ::= loop_structure | loop_control_structure | control_struc
 }
 private executable_statement_recover ::= !(FOR | WHILE | IF | ELSE_IF | ELSE | TRY | GROUP | RETURN | BREAK | CONTINUE | VAR | keyword_call_name | variable_definition) & section_recover
 
-fake block_opening_structure ::= loop_structure | control_structure {implements=foldable}
-private control_structure ::= conditional_structure | exception_handling_structure | group_structure {
-    implements = "block_opening_structure"
-}
-private loop_structure ::= for_loop_structure | while_loop_structure {
-    implements = "block_opening_structure"
-}
+fake block_opening_structure ::= DUMMY {implements=[foldable scopeOwner]}
+private control_structure ::= conditional_structure | exception_handling_structure | group_structure
+private loop_structure ::= for_loop_structure | while_loop_structure
 private call_structure ::= eol_based_keyword_call | inline_variable_statement | keyword_variable_statement | empty_variable_statement
 private loop_control_structure ::= (BREAK | CONTINUE) eol_marker?
 private return_structure ::= RETURN positional_argument* eol_marker? {pin=1}
 
-for_loop_structure ::= FOR variable+ FOR_IN positional_argument+ parameter* eol_marker executable_statement* END eol_marker {
+for_loop_structure ::= FOR variable_definition+ FOR_IN positional_argument+ parameter* eol_marker executable_statement* END eol_marker {
     pin=1
-    implements=foldable
+    implements=block_opening_structure
 }
 while_loop_structure ::= WHILE positional_argument+ eol_marker (parameter+ eol_marker)? executable_statement* END eol_marker {
     pin=1
-    implements=foldable
+    implements=block_opening_structure
 }
 private conditional_structure ::= if_structure else_if_structure* if_else_structure? (END eol_marker)? {pin=1}
 if_structure ::= IF positional_argument+ eol_marker? executable_statement* {
-    implements=foldable
+    implements=block_opening_structure
 }
 else_if_structure ::= ELSE_IF positional_argument+ eol_marker? executable_statement* {
-    implements=foldable
+    implements=block_opening_structure
 }
 if_else_structure ::= ELSE eol_marker? executable_statement* {
-    implements=foldable
+    implements=block_opening_structure
 }
 private exception_handling_structure ::= try_structure
     except_structure*
@@ -268,20 +265,20 @@ private exception_handling_structure ::= try_structure
     finally_structure?
     END eol_marker {pin=1}
 try_structure ::= TRY eol_marker executable_statement+ {
-    implements=foldable
+    implements=block_opening_structure
 }
 except_structure ::= EXCEPT (positional_argument | parameter*)? eol_marker executable_statement* {
-    implements=foldable
+    implements=block_opening_structure
 }
 try_else_structure ::= ELSE eol_marker executable_statement* {
-    implements=foldable
+    implements=block_opening_structure
 }
 finally_structure ::= FINALLY executable_statement* {
-    implements=foldable
+    implements=block_opening_structure
 }
 group_structure ::= GROUP positional_argument? eol_marker executable_statement* END eol_marker {
     pin=1
-    implements=foldable
+    implements=block_opening_structure
 }
 
 fake keyword_call ::= base_keyword_call {
@@ -310,9 +307,9 @@ parameter ::= parameter_id ASSIGNMENT positional_argument? {methods=[getParamete
 parameter_id ::= PARAMETER_NAME {methods = [getReference]}
 
 fake variable_statement ::= DUMMY {methods = [getIcon] implements=foldable}
-inline_variable_statement ::= VAR variable_definition ASSIGNMENT? variable_value+ parameter? eol_marker? {pin=1}
 single_variable_statement ::= variable_definition ASSIGNMENT? variable_value* parameter? eol_marker? {pin=3}
 empty_variable_statement ::= variable_definition ASSIGNMENT? "${EMPTY}" eol_marker? {pin=3}
+inline_variable_statement ::= VAR variable_definition ASSIGNMENT? variable_value+ parameter? eol_marker? {pin=1}
 keyword_variable_statement ::= variable_definition+ ASSIGNMENT? eol_based_keyword_call {pin=3} // Without EOL as it is handled at a lower level
 variable_value ::= variable | positional_argument
 
@@ -336,7 +333,7 @@ variable_definition ::= variable {
     mixin = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotVariableDefinitionExtension"
     stubClass = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotVariableDefinitionStub"
     elementTypeFactory = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotVariableDefinitionStubElement.create"
-    methods = [getNameIdentifier getName getIcon getQualifiedName]
+    methods = [getNameIdentifier getName getIcon getQualifiedName getScope]
 }
 
 variable ::= scalar_variable | list_variable | dict_variable | environment_variable {

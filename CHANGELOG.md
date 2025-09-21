@@ -7,6 +7,7 @@
 ### Added
 
 - Check for invalid usage of the keyword-only marker ${} for \[Arguments] settings
+- Variable scoping support (local, test case, task, suite, global)
 
 ### Changed
 

@@ -787,7 +787,7 @@ public class RobotParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // FOR variable+ FOR_IN positional_argument+ parameter* eol_marker executable_statement* END eol_marker
+  // FOR variable_definition+ FOR_IN positional_argument+ parameter* eol_marker executable_statement* END eol_marker
   public static boolean for_loop_structure(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "for_loop_structure")) return false;
     if (!nextTokenIs(b, FOR)) return false;
@@ -807,15 +807,15 @@ public class RobotParser implements PsiParser, LightPsiParser {
     return r || p;
   }
 
-  // variable+
+  // variable_definition+
   private static boolean for_loop_structure_1(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "for_loop_structure_1")) return false;
     boolean r;
     Marker m = enter_section_(b);
-    r = variable(b, l + 1);
+    r = variable_definition(b, l + 1);
     while (r) {
       int c = current_position_(b);
-      if (!variable(b, l + 1)) break;
+      if (!variable_definition(b, l + 1)) break;
       if (!empty_element_parsed_guard_(b, "for_loop_structure_1", c)) break;
     }
     exit_section_(b, m, null, r);

@@ -78,7 +78,7 @@
         <annotator language="Robot"
                    implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.ide.inspections.compilation.RobotMissingMandatoryKeywordParametersAnnotator"/>
         <annotator language="Robot" implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.ide.inspections.compilation.RobotImportAnnotator"/>
-        <annotator language="Robot" implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.ide.inspections.compilation.RobotVariableAnnotator"/>
+        <annotator language="Robot" implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.ide.inspections.compilation.RobotVariableDefinitionNotFoundAnnotator"/>
         <annotator language="Robot"
                    implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.ide.inspections.compilation.RobotUserKeywordStatementAnnotator"/>
         <annotator language="Robot"
@@ -88,6 +88,8 @@
         <annotator language="Robot" implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.ide.inspections.compilation.RobotTemplateArgumentsAnnotator"/>
         <annotator language="Robot"
                    implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.ide.inspections.compilation.RobotInvalidKeywordOnlyMarkerAnnotation"/>
+        <annotator language="Robot"
+                   implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.ide.inspections.compilation.ReassignedRobotVariableAnnotator"/>
 
         <!-- Inspections -->
         <!-- TODO: inspection: error?: resource import is not a robot file -->
@@ -96,7 +98,8 @@
         <localInspection language="Robot" shortName="RobotImportNotUsed" bundle="messages.RobotBundle" key="INSP.NAME.import.unused" groupPath="Robot"
                          groupKey="INSP.GROUP.cleanup" enabledByDefault="true" level="WARNING" dumbAware="true"
                          implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.ide.inspections.cleanup.RobotImportNotUsed"/>
-        <localInspection language="Robot" shortName="RobotUnusedVariableDefinition" bundle="messages.RobotBundle" key="INSP.NAME.variable.unused" groupPath="Robot"
+        <localInspection language="Robot" shortName="RobotUnusedVariableDefinition" bundle="messages.RobotBundle" key="INSP.NAME.variable.unused"
+                         groupPath="Robot"
                          groupKey="INSP.GROUP.cleanup" enabledByDefault="true" level="WARNING" dumbAware="false"
                          implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.ide.inspections.cleanup.RobotUnusedVariableDefinitionInspection"/>
         <localInspection language="Robot" shortName="RobotKeywordOnlyMarkerNotUsed" bundle="messages.RobotBundle" key="INSP.NAME.keyword-only-marker.unused"

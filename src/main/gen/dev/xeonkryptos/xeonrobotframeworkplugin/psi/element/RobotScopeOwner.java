@@ -5,9 +5,6 @@ import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 
-public interface RobotWhileLoopStructure extends RobotExecutableStatement, RobotBlockOpeningStructure {
-
-  @NotNull
-  List<RobotParameter> getParameterList();
+public interface RobotScopeOwner extends RobotStatement {
 
 }

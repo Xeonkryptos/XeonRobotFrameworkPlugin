@@ -2,12 +2,14 @@ package dev.xeonkryptos.xeonrobotframeworkplugin.psi.util;
 
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiElement;
-import com.intellij.psi.PsiWhiteSpace;
+import com.intellij.psi.PsiFile;
 import com.intellij.psi.util.PsiTreeUtil;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.DefinedVariable;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotFile;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCall;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordsSection;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLocalSetting;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotPositionalArgument;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotScopeOwner;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotSettingsSection;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotSetupTeardownStatementsGlobalSetting;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTestCaseStatement;
@@ -17,51 +19,56 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.ref.PythonResolver;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public enum ReservedVariableScope {
+public enum VariableScope {
     Global {
         @Override
         public boolean isInScope(@NotNull PsiElement sourceElement, @NotNull PsiElement element) {
-            // everywhere
             return true;
+        }
+    }, TestSuite {
+        @Override
+        public boolean isInScope(@NotNull PsiElement sourceElement, @NotNull PsiElement element) {
+            PsiFile containingFile = element.getContainingFile();
+            if (containingFile instanceof RobotFile robotFile) {
+                RobotVariable variable = PsiTreeUtil.getParentOfType(element, RobotVariable.class, false);
+                if (variable != null) {
+                    String variableName = variable.getVariableName();
+                    for (DefinedVariable definedVariable : robotFile.getDefinedVariables()) {
+                        if (definedVariable.matches(variableName)) {
+                            return true;
+                        }
+                    }
+                }
+            }
+            return false;
         }
     }, TestCase {
         @Override
         public final boolean isInScope(@NotNull PsiElement sourceElement, @NotNull PsiElement element) {
-            // only in test cases
-            return (isArgument(element) || isVariable(element)) && isInSameTestCase(sourceElement, element) || TestTeardown.isInScope(sourceElement, element);
+            return isInSameTestCase(sourceElement, element) || TestTeardown.isInScope(sourceElement, element);
+        }
+    }, Local {
+        @Override
+        public boolean isInScope(@NotNull PsiElement sourceElement, @NotNull PsiElement element) {
+            RobotScopeOwner scopeOwner = PsiTreeUtil.getParentOfType(sourceElement, RobotScopeOwner.class);
+            return PsiTreeUtil.isAncestor(scopeOwner, element, false);
         }
     }, KeywordTeardown {
         @Override
         public final boolean isInScope(@NotNull PsiElement sourceElement, @NotNull PsiElement element) {
-            // only in teardown for keywords
-            return (isArgument(element) || isVariable(element)) && isInKeywordTeardown(element);
+            return isInKeywordTeardown(element);
         }
     }, TestTeardown {
         @Override
         public boolean isInScope(@NotNull PsiElement sourceElement, @NotNull PsiElement element) {
-            // only in teardown for test cases
-            return (isArgument(element) || isVariable(element)) && isInTestTeardown(element);
+            return isInTestTeardown(element);
         }
     }, SuiteTeardown {
         @Override
         public boolean isInScope(@NotNull PsiElement sourceElement, @NotNull PsiElement element) {
-            // only in teardown for suites
-            return (isArgument(element) || isVariable(element)) && isInSuiteTeardown(element);
-        }
-    }, KeywordStatement {
-        @Override
-        public boolean isInScope(@NotNull PsiElement sourceElement, @NotNull PsiElement element) {
-            return isArgument(element) && isInKeywordStatement(element);
+            return isInSuiteTeardown(element);
         }
     };
-
-    private static boolean isArgument(@NotNull PsiElement position) {
-        return PsiTreeUtil.getParentOfType(position, RobotPositionalArgument.class, false) != null;
-    }
-
-    private static boolean isVariable(@NotNull PsiElement position) {
-        return PsiTreeUtil.getParentOfType(position, RobotVariable.class, false) != null;
-    }
 
     /**
      * Determines if the given element is a part of the Settings header.
@@ -75,8 +82,7 @@ public enum ReservedVariableScope {
         if (keyword == null) {
             return false;
         }
-        RobotSettingsSection settingsSection = PsiTreeUtil.getParentOfType(keyword, RobotSettingsSection.class);
-        return settingsSection != null;
+        return PsiTreeUtil.getParentOfType(keyword, RobotSettingsSection.class) != null;
     }
 
     /**
@@ -87,8 +93,8 @@ public enum ReservedVariableScope {
      * @return true if this or one of its parents is the Test Cases header.
      */
     private static boolean isInSameTestCase(@NotNull PsiElement sourceElement, @NotNull PsiElement position) {
-        RobotTestCaseStatement sourceTestCaseStatement = getTestCaseStatement(sourceElement);
-        RobotTestCaseStatement targetTestCaseStatement = getTestCaseStatement(position);
+        RobotTestCaseStatement sourceTestCaseStatement = PsiTreeUtil.getParentOfType(sourceElement, RobotTestCaseStatement.class, false);
+        RobotTestCaseStatement targetTestCaseStatement = PsiTreeUtil.getParentOfType(position, RobotTestCaseStatement.class, false);
         return sourceTestCaseStatement == targetTestCaseStatement;
     }
 
@@ -104,9 +110,7 @@ public enum ReservedVariableScope {
         if (keyword == null) {
             return false;
         }
-        // and that keyword is in the test cases heading
-        RobotTestCasesSection testCasesSection = PsiTreeUtil.getParentOfType(keyword, RobotTestCasesSection.class);
-        return testCasesSection != null;
+        return PsiTreeUtil.getParentOfType(keyword, RobotTestCasesSection.class) != null;
     }
 
     /**
@@ -118,15 +122,12 @@ public enum ReservedVariableScope {
      */
     private static boolean isInSuiteTeardown(@NotNull PsiElement position) {
         if (isInSettings(position)) {
-            // check that we are next to a suite teardown setting
             RobotKeywordCall keyword = getKeywordCall(position);
             if (keyword == null) {
                 return false;
             }
-            PsiElement sibling = getPreviousStatement(keyword);
-            if (sibling instanceof RobotSetupTeardownStatementsGlobalSetting globalSetting) {
-                return globalSetting.getText().equalsIgnoreCase("[Suite Teardown]");
-            }
+            RobotSetupTeardownStatementsGlobalSetting globalSetting = PsiTreeUtil.getParentOfType(keyword, RobotSetupTeardownStatementsGlobalSetting.class);
+            return globalSetting != null && "[Suite Teardown]".equalsIgnoreCase(globalSetting.getNameElement().getText());
         }
         return false;
     }
@@ -146,49 +147,18 @@ public enum ReservedVariableScope {
             if (keyword == null) {
                 return false;
             }
-            PsiElement sibling = getPreviousStatement(keyword);
-            if (sibling instanceof RobotSetupTeardownStatementsGlobalSetting) {
-                return sibling.getText().equalsIgnoreCase("[Test Teardown]");
-            }
+            RobotSetupTeardownStatementsGlobalSetting globalSetting = PsiTreeUtil.getParentOfType(keyword, RobotSetupTeardownStatementsGlobalSetting.class);
+            return globalSetting != null && "[Test Teardown]".equalsIgnoreCase(globalSetting.getNameElement().getText());
         } else if (isInTestCase(position)) {
             // check that we are next to a teardown bracket setting
             RobotKeywordCall keyword = getKeywordCall(position);
             if (keyword == null) {
                 return false;
             }
-            PsiElement sibling = getPreviousStatement(keyword);
-            if (sibling instanceof RobotLocalSetting localSetting) {
-                return localSetting.getLocalSettingId().getText().equalsIgnoreCase("[Teardown]");
-            }
+            RobotLocalSetting localSetting = PsiTreeUtil.getParentOfType(keyword, RobotLocalSetting.class);
+            return localSetting != null && "[Teardown]".equalsIgnoreCase(localSetting.getSettingName());
         }
         return false;
-    }
-
-    private static boolean isInKeywordStatement(@NotNull PsiElement position) {
-        if (isInSettings(position)) {
-            RobotKeywordCall keyword = getKeywordCall(position);
-            return keyword != null;
-        } else if (isInTestCase(position)) {
-            RobotKeywordCall keyword = getKeywordCall(position);
-            return keyword != null;
-        }
-        return false;
-    }
-
-    /**
-     * Gets the previous statement of the given element ignoring whitespace.
-     *
-     * @param position the element in question.
-     *
-     * @return the previous statement (sibling) of the element or null if there not one.
-     */
-    @Nullable
-    private static PsiElement getPreviousStatement(@NotNull PsiElement position) {
-        PsiElement sibling = position.getPrevSibling();
-        if (sibling instanceof PsiWhiteSpace) {
-            sibling = sibling.getPrevSibling();
-        }
-        return sibling;
     }
 
     /**
@@ -206,10 +176,8 @@ public enum ReservedVariableScope {
         }
         RobotKeywordsSection keywordsSection = PsiTreeUtil.getParentOfType(keyword, RobotKeywordsSection.class);
         if (keywordsSection != null) {
-            PsiElement sibling = getPreviousStatement(keyword);
-            if (sibling instanceof RobotLocalSetting localSetting) {
-                return localSetting.getLocalSettingId().getText().equalsIgnoreCase("[Teardown]");
-            }
+            RobotLocalSetting localSetting = PsiTreeUtil.getParentOfType(keyword, RobotLocalSetting.class);
+            return localSetting != null && "[Teardown]".equalsIgnoreCase(localSetting.getSettingName());
         }
         return false;
     }
@@ -225,18 +193,6 @@ public enum ReservedVariableScope {
     private static RobotKeywordCall getKeywordCall(@NotNull PsiElement position) {
         // either we are a keyword or we have a parent that is
         return PsiTreeUtil.getParentOfType(position, RobotKeywordCall.class, false);
-    }
-
-    /**
-     * Gets the test case definition element associated with this element.
-     *
-     * @param position the element in question.
-     *
-     * @return either this element or one of its parents that is a test case definition; else null.
-     */
-    @Nullable
-    private static RobotTestCaseStatement getTestCaseStatement(@NotNull PsiElement position) {
-        return PsiTreeUtil.getParentOfType(position, RobotTestCaseStatement.class, false);
     }
 
     @Nullable

@@ -42,7 +42,7 @@ public class RobotUnusedVariableDefinitionInspection extends LocalInspectionTool
                 while (variableIterator.hasNext()) {
                     RobotVariable variable = variableIterator.next();
                     String variableName = variable.getVariableName();
-                    if (variableDefinition.matches(variableName)) {
+                    if (variableDefinition.isInScope(variable) && variableDefinition.matches(variableName)) {
                         variableIterator.remove();
                         definitionsIterator.remove();
                         break;

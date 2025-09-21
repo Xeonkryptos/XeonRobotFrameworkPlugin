@@ -106,7 +106,10 @@ class VariableCompletionProvider extends CompletionProvider<CompletionParameters
     }
 
     private void addDefinedVariablesFromOwnSection(@NotNull CompletionResultSet resultSet, @NotNull PsiElement element) {
-        PsiElement robotStatement = PsiTreeUtil.getParentOfType(element, RobotTestCaseStatement.class, RobotTaskStatement.class);
+        PsiElement robotStatement = PsiTreeUtil.getParentOfType(element,
+                                                                RobotTestCaseStatement.class,
+                                                                RobotTaskStatement.class,
+                                                                RobotUserKeywordStatement.class);
         if (robotStatement == null) {
             return;
         }

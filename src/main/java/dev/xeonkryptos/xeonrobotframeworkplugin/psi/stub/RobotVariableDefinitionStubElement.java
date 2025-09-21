@@ -11,6 +11,7 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotLanguage;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableDefinition;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotVariableDefinitionImpl;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.index.VariableDefinitionNameIndex;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.VariableScope;
 import dev.xeonkryptos.xeonrobotframeworkplugin.util.VariableNameUtil;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
@@ -35,13 +36,14 @@ public class RobotVariableDefinitionStubElement extends IStubElementType<RobotVa
     @NotNull
     @Override
     public RobotVariableDefinitionStub createStub(@NotNull RobotVariableDefinition psi, StubElement<? extends PsiElement> parentStub) {
-        return new RobotVariableDefinitionStubImpl(parentStub, psi.getName());
+        String variableName = psi.getName();
+        VariableScope variableScope = psi.getScope();
+        return new RobotVariableDefinitionStubImpl(parentStub, variableName, variableScope);
     }
 
     @Override
     public boolean shouldCreateStub(ASTNode node) {
-        return node.getPsi() instanceof RobotVariableDefinition variableDefinition && variableDefinition.getName() != null && !variableDefinition.getName()
-                                                                                                                                                 .isBlank();
+        return node.getPsi() instanceof RobotVariableDefinition variableDefinition && variableDefinition.getName() != null;
     }
 
     @NotNull
@@ -52,13 +54,21 @@ public class RobotVariableDefinitionStubElement extends IStubElementType<RobotVa
 
     @Override
     public void serialize(@NotNull RobotVariableDefinitionStub stub, @NotNull StubOutputStream dataStream) throws IOException {
-        dataStream.writeName(stub.getName());
+        String variableName = stub.getName();
+        VariableScope variableScope = stub.getScope();
+        String scopeName = variableScope.name();
+
+        dataStream.writeName(variableName);
+        dataStream.writeName(scopeName);
     }
 
     @NotNull
     @Override
     public RobotVariableDefinitionStub deserialize(@NotNull StubInputStream dataStream, StubElement parentStub) throws IOException {
-        return new RobotVariableDefinitionStubImpl(parentStub, dataStream.readNameString());
+        String variableName = dataStream.readNameString();
+        String scopeName = dataStream.readNameString();
+        VariableScope variableScope = VariableScope.valueOf(scopeName);
+        return new RobotVariableDefinitionStubImpl(parentStub, variableName, variableScope);
     }
 
     @Override

@@ -5,12 +5,12 @@ import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 
-public interface RobotForLoopStructure extends RobotExecutableStatement, RobotFoldable {
+public interface RobotForLoopStructure extends RobotExecutableStatement, RobotBlockOpeningStructure {
 
   @NotNull
   List<RobotParameter> getParameterList();
 
   @NotNull
-  List<RobotVariable> getVariableList();
+  List<RobotVariableDefinition> getVariableDefinitionList();
 
 }

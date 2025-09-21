@@ -22,7 +22,7 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.dto.KeywordDto;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.dto.VariableDto;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.DefinedKeyword;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.DefinedVariable;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.ReservedVariableScope;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.VariableScope;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.RobotPyUtil;
 import dev.xeonkryptos.xeonrobotframeworkplugin.util.PythonInspector;
 import org.jetbrains.annotations.NotNull;
@@ -97,7 +97,7 @@ class RobotKeywordFileResolver {
         for (PyTargetExpression attribute : pyFile.getTopLevelAttributes()) {
             String attributeName = attribute.getName();
             if (attributeName != null) {
-                definedVariables.add(new VariableDto(attribute, attributeName, ReservedVariableScope.Global));
+                definedVariables.add(new VariableDto(attribute, attributeName, VariableScope.Global));
             }
         }
         for (PyClass pyClass : pyFile.getTopLevelClasses()) {
@@ -116,7 +116,7 @@ class RobotKeywordFileResolver {
         for (PyTargetExpression attribute : attributes) {
             String attributeName = attribute.getName();
             if (attributeName != null && isNotReservedName(attributeName)) {
-                definedVariables.add(new VariableDto(attribute, attributeName, ReservedVariableScope.Global));
+                definedVariables.add(new VariableDto(attribute, attributeName, VariableScope.Global));
             }
         }
 
@@ -124,7 +124,7 @@ class RobotKeywordFileResolver {
             String propertyName = entry.getKey();
             PyFunction propertyFunction = pyClass.findMethodByName(propertyName, false, context);
             if (propertyName != null && isNotReservedName(propertyName) && propertyFunction != null) {
-                definedVariables.add(new VariableDto(propertyFunction, propertyName, ReservedVariableScope.Global));
+                definedVariables.add(new VariableDto(propertyFunction, propertyName, VariableScope.Global));
             }
         }
 

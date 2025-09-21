@@ -11,7 +11,6 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTestCaseStateme
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariable;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableDefinition;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVisitor;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.ReservedVariableScope;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.HashSet;
@@ -64,7 +63,7 @@ public class RobotInStatementVariableCollector extends RobotVisitor {
             String wrappedVariableName = variable.getText();
             String variableName = variable.getVariableName();
             if (variableName != null) {
-                VariableDto variableDto = new VariableDto(o, wrappedVariableName, variableName, ReservedVariableScope.TestCase);
+                VariableDto variableDto = new VariableDto(o, wrappedVariableName, variableName, o.getScope());
                 availableVariables.add(variableDto);
             }
         }

@@ -10,6 +10,7 @@ import com.intellij.psi.util.PsiTreeUtil;
 import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.*;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.*;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotPsiImplUtil;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.VariableScope;
 import javax.swing.Icon;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotVariableDefinitionStub;
 import com.intellij.psi.stubs.IStubElementType;
@@ -58,6 +59,11 @@ public class RobotVariableDefinitionImpl extends RobotVariableDefinitionExtensio
   @Override
   public @NotNull String getQualifiedName() {
     return RobotPsiImplUtil.getQualifiedName(this);
+  }
+
+  @Override
+  public @NotNull VariableScope getScope() {
+    return RobotPsiImplUtil.getScope(this);
   }
 
 }

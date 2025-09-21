@@ -8,6 +8,7 @@ import com.intellij.psi.PsiNameIdentifierOwner;
 import com.intellij.navigation.NavigationItem;
 import com.intellij.psi.StubBasedPsiElement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotVariableDefinitionStub;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.VariableScope;
 import javax.swing.Icon;
 
 public interface RobotVariableDefinition extends PsiNameIdentifierOwner, NavigationItem, DefinedVariable, RobotQualifiedNameOwner, RobotFoldable, RobotStatement, StubBasedPsiElement<RobotVariableDefinitionStub> {
@@ -22,5 +23,7 @@ public interface RobotVariableDefinition extends PsiNameIdentifierOwner, Navigat
   @NotNull Icon getIcon(int flags);
 
   @NotNull String getQualifiedName();
+
+  @NotNull VariableScope getScope();
 
 }

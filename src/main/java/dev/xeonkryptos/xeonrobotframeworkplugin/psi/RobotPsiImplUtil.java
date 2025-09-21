@@ -1,12 +1,16 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.psi;
 
+import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiReference;
 import com.intellij.psi.util.PsiTreeUtil;
 import dev.xeonkryptos.xeonrobotframeworkplugin.ide.icons.RobotIcons;
+import dev.xeonkryptos.xeonrobotframeworkplugin.ide.misc.RobotReadWriteAccessDetector;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotCommentsSection;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotInlineVariableStatement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCall;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCallLibraryName;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCallName;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordVariableStatement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordsSection;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLocalArgumentsSetting;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLocalArgumentsSettingId;
@@ -41,11 +45,13 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.ref.RobotParameterReference;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.ref.RobotTemplateParameterReference;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.ref.RobotVariableBodyReference;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.QualifiedNameBuilder;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.VariableScope;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.Icon;
 import java.util.List;
+import java.util.Optional;
 
 public class RobotPsiImplUtil {
 
@@ -261,5 +267,40 @@ public class RobotPsiImplUtil {
     @NotNull
     public static String getSectionName(@NotNull RobotKeywordsSection section) {
         return section.getNameIdentifier().getText();
+    }
+
+    @NotNull
+    public static VariableScope getScope(@NotNull RobotVariableDefinition variableDefinition) {
+        RobotInlineVariableStatement inlineVariableStatement = PsiTreeUtil.getParentOfType(variableDefinition, RobotInlineVariableStatement.class, true);
+        Optional<VariableScope> variableScopeOpt = Optional.ofNullable(inlineVariableStatement)
+                                                           .map(RobotInlineVariableStatement::getParameter)
+                                                           .map(RobotParameter::getPositionalArgument)
+                                                           .map(PsiElement::getText)
+                                                           .map(scope -> switch (scope.toUpperCase()) {
+                                                               case "LOCAL" -> VariableScope.Local;
+                                                               case "TEST", "TASK" -> VariableScope.TestCase;
+                                                               case "SUITE", "SUITES" -> VariableScope.TestSuite;
+                                                               case "GLOBAL" -> VariableScope.Global;
+                                                               default -> null;
+                                                           })
+                                                           .or(() -> {
+                                                               RobotVariablesSection variablesSection = PsiTreeUtil.getParentOfType(variableDefinition,
+                                                                                                                                    RobotVariablesSection.class,
+                                                                                                                                    true);
+                                                               return Optional.ofNullable(variablesSection).map(ignored -> VariableScope.TestSuite);
+                                                           })
+                                                           .or(() -> {
+                                                               RobotKeywordVariableStatement keywordVariableStatement = PsiTreeUtil.getParentOfType(
+                                                                       variableDefinition,
+                                                                       RobotKeywordVariableStatement.class,
+                                                                       true);
+                                                               return Optional.ofNullable(keywordVariableStatement)
+                                                                              .map(RobotKeywordVariableStatement::getKeywordCall)
+                                                                              .map(RobotKeywordCall::getKeywordCallName)
+                                                                              .map(PsiElement::getText)
+                                                                              .filter(RobotReadWriteAccessDetector::isVariableSetterKeyword)
+                                                                              .map(RobotReadWriteAccessDetector::getVariableSetterScope);
+                                                           });
+        return variableScopeOpt.orElse(VariableScope.Local);
     }
 }

@@ -6,23 +6,34 @@ import com.intellij.psi.PsiReference;
 import com.intellij.psi.util.PsiTreeUtil;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariable;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableDefinition;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.VariableScope;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Collection;
-import java.util.Set;
+import java.util.Map;
 
 public class RobotReadWriteAccessDetector extends ReadWriteAccessDetector {
 
-    private static final Collection<String> VARIABLE_SETTERS = Set.of("set variable",
-                                                                      "set global variable",
-                                                                      "set local variable",
-                                                                      "set test variable",
-                                                                      "set task variable",
-                                                                      "set suite variable",
-                                                                      "set variable if");
+    private static final Map<String, VariableScope> VARIABLE_SETTERS = Map.of("set variable",
+                                                                              VariableScope.Local,
+                                                                              "set global variable",
+                                                                              VariableScope.Global,
+                                                                              "set local variable",
+                                                                              VariableScope.Local,
+                                                                              "set test variable",
+                                                                              VariableScope.TestCase,
+                                                                              "set task variable",
+                                                                              VariableScope.TestCase,
+                                                                              "set suite variable",
+                                                                              VariableScope.TestSuite,
+                                                                              "set variable if",
+                                                                              VariableScope.Local);
 
     public static boolean isVariableSetterKeyword(@NotNull String keywordName) {
-        return VARIABLE_SETTERS.contains(keywordName.toLowerCase());
+        return VARIABLE_SETTERS.containsKey(keywordName.toLowerCase());
+    }
+
+    public static VariableScope getVariableSetterScope(@NotNull String keywordName) {
+        return VARIABLE_SETTERS.getOrDefault(keywordName.toLowerCase(), VariableScope.Local);
     }
 
     @Override

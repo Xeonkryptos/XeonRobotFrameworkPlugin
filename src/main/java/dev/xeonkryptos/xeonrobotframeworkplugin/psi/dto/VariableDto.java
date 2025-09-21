@@ -6,7 +6,7 @@ import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.util.TextRange;
 import com.intellij.psi.PsiElement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.DefinedVariable;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.ReservedVariableScope;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.VariableScope;
 import dev.xeonkryptos.xeonrobotframeworkplugin.util.VariableNameUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -18,15 +18,15 @@ public class VariableDto implements DefinedVariable {
     private final PsiElement reference;
     private final String name;
     private final String matchingVariableName;
-    private final ReservedVariableScope scope;
+    private final VariableScope scope;
 
     private final Set<String> variableNameVariants;
 
-    public VariableDto(@NotNull PsiElement reference, @NotNull String name, @Nullable ReservedVariableScope scope) {
+    public VariableDto(@NotNull PsiElement reference, @NotNull String name, @Nullable VariableScope scope) {
         this(reference, "${%s}".formatted(name.trim()), name, scope);
     }
 
-    public VariableDto(@NotNull PsiElement reference, @NotNull String name, @NotNull String matchingVariableName, @Nullable ReservedVariableScope scope) {
+    public VariableDto(@NotNull PsiElement reference, @NotNull String name, @NotNull String matchingVariableName, @Nullable VariableScope scope) {
         this.reference = reference;
         this.name = name.trim();
         this.matchingVariableName = matchingVariableName.trim();

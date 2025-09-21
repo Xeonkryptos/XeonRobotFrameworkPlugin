@@ -11,6 +11,7 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.KeywordFile;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotFile;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCallLibrary;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCallName;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariable;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.visitor.RobotLibraryNamesCollector;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -93,12 +94,12 @@ public class ResolverUtils {
     }
 
     @Nullable
-    public static PsiElement findVariableElement(@Nullable String variableName, @Nullable PsiFile psiFile) {
-        if (variableName == null || !(psiFile instanceof RobotFile robotFile)) {
+    public static PsiElement findVariableElement(RobotVariable variable, String variableName, @Nullable PsiFile psiFile) {
+        if (!(psiFile instanceof RobotFile robotFile)) {
             return null;
         }
         for (DefinedVariable definedVariable : robotFile.getDefinedVariables()) {
-            if (definedVariable.matches(variableName)) {
+            if (definedVariable.matches(variableName) && definedVariable.isInScope(variable)) {
                 return definedVariable.reference();
             }
         }
@@ -106,7 +107,7 @@ public class ResolverUtils {
         boolean includeTransitive = RobotOptionsProvider.getInstance(psiFile.getProject()).allowTransitiveImports();
         for (KeywordFile keywordFile : robotFile.collectImportedFiles(includeTransitive)) {
             for (DefinedVariable definedVariable : keywordFile.getDefinedVariables()) {
-                if (definedVariable.matches(variableName)) {
+                if (definedVariable.matches(variableName) && definedVariable.isInScope(variable)) {
                     return definedVariable.reference();
                 }
             }
