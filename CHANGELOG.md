@@ -4,6 +4,10 @@
 
 ## Unreleased
 
+### Changed
+
+- Preparations for the new PyCharm version
+
 ## 0.5.5
 
 ### Added

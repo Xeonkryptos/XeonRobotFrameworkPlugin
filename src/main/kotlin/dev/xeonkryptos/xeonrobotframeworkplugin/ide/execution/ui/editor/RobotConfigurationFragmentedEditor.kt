@@ -1,9 +1,15 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.ide.execution.ui.editor
 
-import dev.xeonkryptos.xeonrobotframeworkplugin.ide.execution.config.RobotRunConfiguration
 import com.intellij.diagnostic.logging.LogsGroupFragment
 import com.intellij.execution.ExecutionBundle
-import com.intellij.execution.ui.*
+import com.intellij.execution.ui.BeforeRunComponent
+import com.intellij.execution.ui.BeforeRunFragment
+import com.intellij.execution.ui.CommandLinePanel
+import com.intellij.execution.ui.CommonParameterFragments
+import com.intellij.execution.ui.CommonTags
+import com.intellij.execution.ui.RunConfigurationFragmentedEditor
+import com.intellij.execution.ui.SettingsEditorFragment
+import com.intellij.execution.ui.SettingsEditorFragmentType
 import com.intellij.ide.macro.MacrosDialog
 import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory
 import com.intellij.openapi.ui.LabeledComponent
@@ -12,12 +18,15 @@ import com.intellij.openapi.ui.TextFieldWithBrowseButton
 import com.intellij.openapi.util.text.StringUtil
 import com.intellij.ui.RawCommandLineEditor
 import com.intellij.ui.components.TextComponentEmptyText
-import com.jetbrains.python.PyBundle
+import dev.xeonkryptos.xeonrobotframeworkplugin.RobotBundle
+import dev.xeonkryptos.xeonrobotframeworkplugin.ide.execution.config.RobotRunConfiguration
 import java.awt.BorderLayout
 import java.awt.event.ComponentAdapter
 import java.awt.event.ComponentEvent
 
-class RobotConfigurationFragmentedEditor(private val runConfiguration: RobotRunConfiguration) : RunConfigurationFragmentedEditor<RobotRunConfiguration>(runConfiguration) {
+class RobotConfigurationFragmentedEditor(private val runConfiguration: RobotRunConfiguration) : RunConfigurationFragmentedEditor<RobotRunConfiguration>(
+    runConfiguration
+) {
 
     override fun createRunFragments(): MutableList<SettingsEditorFragment<RobotRunConfiguration, *>> {
         val fragments: MutableList<SettingsEditorFragment<RobotRunConfiguration, *>> = ArrayList()
@@ -49,36 +58,36 @@ class RobotConfigurationFragmentedEditor(private val runConfiguration: RobotRunC
         val scriptParametersFragment: SettingsEditorFragment<RobotRunConfiguration, RawCommandLineEditor> =
             SettingsEditorFragment<RobotRunConfiguration, RawCommandLineEditor>(
                 "py.script.parameters",
-                PyBundle.message("python.run.configuration.fragments.script.parameters"),
-                PyBundle.message("python.run.configuration.fragments.python.group"),
+                RobotBundle.getMessage("python.run.configuration.fragments.script.parameters"),
+                RobotBundle.getMessage("python.run.configuration.fragments.python.group"),
                 parametersEditor,
                 SettingsEditorFragmentType.COMMAND_LINE,
                 { config: RobotRunConfiguration, field: RawCommandLineEditor -> field.text = config.pythonRunConfiguration.scriptParameters },
                 { config: RobotRunConfiguration, field: RawCommandLineEditor -> config.pythonRunConfiguration.scriptParameters = field.text.trim() },
                 { true })
         MacrosDialog.addMacroSupport(parametersEditor.editorField, MacrosDialog.Filters.ALL) { false }
-        parametersEditor.editorField.emptyText.text = PyBundle.message("python.run.configuration.fragments.script.parameters.hint")
+        parametersEditor.editorField.emptyText.text = RobotBundle.getMessage("python.run.configuration.fragments.script.parameters.hint")
         TextComponentEmptyText.setupPlaceholderVisibility(parametersEditor.editorField)
-        scriptParametersFragment.setHint(PyBundle.message("python.run.configuration.fragments.script.parameters.hint"))
-        scriptParametersFragment.actionHint = PyBundle.message("python.run.configuration.fragments.script.parameters.hint")
+        scriptParametersFragment.setHint(RobotBundle.getMessage("python.run.configuration.fragments.script.parameters.hint"))
+        scriptParametersFragment.actionHint = RobotBundle.getMessage("python.run.configuration.fragments.script.parameters.hint")
         fragments.add(scriptParametersFragment)
 
         val runWithConsole = SettingsEditorFragment.createTag<RobotRunConfiguration>(
             "py.run.with.python.console",
-            PyBundle.message("python.run.configuration.fragments.run.with.python.console"),
-            PyBundle.message("python.run.configuration.fragments.python.group"),
+            RobotBundle.getMessage("python.run.configuration.fragments.run.with.python.console"),
+            RobotBundle.getMessage("python.run.configuration.fragments.python.group"),
             { it.pythonRunConfiguration.showCommandLineAfterwards() },
             { config, value -> config.pythonRunConfiguration.setShowCommandLineAfterwards(value) })
-        runWithConsole.actionHint = PyBundle.message("python.run.configuration.fragments.run.with.python.console.hint")
+        runWithConsole.actionHint = RobotBundle.getMessage("python.run.configuration.fragments.run.with.python.console.hint")
         fragments.add(runWithConsole)
 
         val emulateTerminal = SettingsEditorFragment.createTag<RobotRunConfiguration>(
             "py.emulate.terminal",
-            PyBundle.message("python.run.configuration.fragments.emulate.terminal"),
-            PyBundle.message("python.run.configuration.fragments.python.group"),
+            RobotBundle.getMessage("python.run.configuration.fragments.emulate.terminal"),
+            RobotBundle.getMessage("python.run.configuration.fragments.python.group"),
             { it.pythonRunConfiguration.emulateTerminal() },
             { config, value -> config.pythonRunConfiguration.setEmulateTerminal(value) })
-        emulateTerminal.actionHint = PyBundle.message("python.run.configuration.fragments.emulate.terminal.hint")
+        emulateTerminal.actionHint = RobotBundle.getMessage("python.run.configuration.fragments.emulate.terminal.hint")
         fragments.add(emulateTerminal)
 
         val inputFile = TextFieldWithBrowseButton()
@@ -120,39 +129,39 @@ class RobotConfigurationFragmentedEditor(private val runConfiguration: RobotRunC
         val interpreterOptionsFragment: SettingsEditorFragment<RobotRunConfiguration, RawCommandLineEditor> =
             SettingsEditorFragment<RobotRunConfiguration, RawCommandLineEditor>(
                 "py.interpreter.options",
-                PyBundle.message("python.run.configuration.fragments.interpreter.options"),
-                PyBundle.message("python.run.configuration.fragments.python.group"),
+                RobotBundle.getMessage("python.run.configuration.fragments.interpreter.options"),
+                RobotBundle.getMessage("python.run.configuration.fragments.python.group"),
                 interpreterOptionsField,
                 SettingsEditorFragmentType.COMMAND_LINE,
                 { config: RobotRunConfiguration, field: RawCommandLineEditor -> field.text = config.pythonRunConfiguration.interpreterOptions },
                 { config: RobotRunConfiguration, field: RawCommandLineEditor -> config.pythonRunConfiguration.interpreterOptions = field.text.trim() },
                 { config: RobotRunConfiguration -> !config.pythonRunConfiguration.interpreterOptions.trim().isEmpty() })
-        interpreterOptionsField.editorField.emptyText.setText(PyBundle.message("python.run.configuration.fragments.interpreter.options.placeholder"))
+        interpreterOptionsField.editorField.emptyText.setText(RobotBundle.getMessage("python.run.configuration.fragments.interpreter.options.placeholder"))
         TextComponentEmptyText.setupPlaceholderVisibility(interpreterOptionsField.editorField)
-        interpreterOptionsFragment.setHint(PyBundle.message("python.run.configuration.fragments.interpreter.options.hint"))
-        interpreterOptionsFragment.actionHint = PyBundle.message("python.run.configuration.fragments.interpreter.options.hint")
+        interpreterOptionsFragment.setHint(RobotBundle.getMessage("python.run.configuration.fragments.interpreter.options.hint"))
+        interpreterOptionsFragment.actionHint = RobotBundle.getMessage("python.run.configuration.fragments.interpreter.options.hint")
         fragments.add(interpreterOptionsFragment)
     }
 
     private fun addContentSourceRoots(fragments: MutableList<SettingsEditorFragment<RobotRunConfiguration, *>>) {
         val addContentRoots = SettingsEditorFragment.createTag<RobotRunConfiguration>(
             "py.add.content.roots",
-            PyBundle.message("python.run.configuration.fragments.content.roots"),
-            PyBundle.message("python.run.configuration.fragments.python.group"),
+            RobotBundle.getMessage("python.run.configuration.fragments.content.roots"),
+            RobotBundle.getMessage("python.run.configuration.fragments.python.group"),
             { it.pythonRunConfiguration.shouldAddContentRoots() },
             { config, value -> config.pythonRunConfiguration.setAddContentRoots(value) })
 
-        addContentRoots.actionHint = PyBundle.message("python.run.configuration.fragments.content.roots.hint")
+        addContentRoots.actionHint = RobotBundle.getMessage("python.run.configuration.fragments.content.roots.hint")
         fragments.add(addContentRoots)
 
         val addSourceRoots = SettingsEditorFragment.createTag<RobotRunConfiguration>(
             "py.add.source.roots",
-            PyBundle.message("python.run.configuration.fragments.source.roots"),
-            PyBundle.message("python.run.configuration.fragments.python.group"),
+            RobotBundle.getMessage("python.run.configuration.fragments.source.roots"),
+            RobotBundle.getMessage("python.run.configuration.fragments.python.group"),
             { it.pythonRunConfiguration.shouldAddSourceRoots() },
             { config, value -> config.pythonRunConfiguration.setAddSourceRoots(value) })
 
-        addSourceRoots.actionHint = PyBundle.message("python.run.configuration.fragments.source.roots.hint")
+        addSourceRoots.actionHint = RobotBundle.getMessage("python.run.configuration.fragments.source.roots.hint")
         fragments.add(addSourceRoots)
     }
 

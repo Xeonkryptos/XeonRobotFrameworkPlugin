@@ -19,7 +19,6 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Key;
 import com.intellij.util.ArrayUtil;
 import com.intellij.util.net.NetUtils;
-import com.jetbrains.python.PyBundle;
 import com.jetbrains.python.run.AbstractPythonRunConfiguration;
 import com.jetbrains.python.run.CommandLinePatcher;
 import com.jetbrains.python.run.PythonCommandLineState;
@@ -31,6 +30,7 @@ import com.jetbrains.python.run.PythonScriptExecution;
 import com.jetbrains.python.run.PythonScriptTargetedCommandLineBuilder;
 import com.jetbrains.python.run.target.HelpersAwareTargetEnvironmentRequest;
 import dev.xeonkryptos.xeonrobotframeworkplugin.MyLogger;
+import dev.xeonkryptos.xeonrobotframeworkplugin.RobotBundle;
 import dev.xeonkryptos.xeonrobotframeworkplugin.ide.config.RobotOptionsProvider;
 import dev.xeonkryptos.xeonrobotframeworkplugin.ide.execution.config.RobotRunConfiguration;
 import dev.xeonkryptos.xeonrobotframeworkplugin.ide.execution.ui.RobotRerunFailedTestsAction;
@@ -254,7 +254,7 @@ public class RobotPythonCommandLineState extends PythonScriptCommandLineState {
         try {
             return NetUtils.findAvailableSocketPort();
         } catch (IOException e) {
-            throw new RuntimeException(PyBundle.message("runcfg.error.message.failed.to.find.free.socket.port"), e);
+            throw new RuntimeException(RobotBundle.getMessage("runcfg.error.message.failed.to.find.free.socket.port"), e);
         }
     }
 

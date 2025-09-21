@@ -5,9 +5,9 @@ import com.intellij.openapi.project.DumbService.DumbModeListener;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiManager;
 import com.intellij.psi.impl.source.resolve.ResolveCache;
-import com.jetbrains.python.PythonPluginDisposable;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotKeywordReferenceUpdater;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.ref.ProjectFileCache;
+import dev.xeonkryptos.xeonrobotframeworkplugin.util.RobotPluginDisposable;
 
 public class RobotListenerMgr {
 
@@ -30,6 +30,6 @@ public class RobotListenerMgr {
                 resolveCache.clearCache(true);
             }
         });
-        PsiManager.getInstance(project).addPsiTreeChangeListener(new RobotKeywordReferenceUpdater(), PythonPluginDisposable.getInstance(project));
+        PsiManager.getInstance(project).addPsiTreeChangeListener(new RobotKeywordReferenceUpdater(), project.getService(RobotPluginDisposable.class));
     }
 }

@@ -1,14 +1,15 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.util;
 
-import dev.xeonkryptos.xeonrobotframeworkplugin.ide.icons.RobotIcons;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotFeatureFileType;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotResourceFileType;
 import com.intellij.codeInsight.lookup.LookupElementBuilder;
 import com.intellij.openapi.fileTypes.FileType;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiElement;
-import com.jetbrains.python.PythonFileType;
-import com.jetbrains.python.pyi.PyiFileType;
+import com.intellij.psi.PsiFile;
+import com.jetbrains.python.psi.PyFile;
+import com.jetbrains.python.pyi.PyiFile;
+import dev.xeonkryptos.xeonrobotframeworkplugin.ide.icons.RobotIcons;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotFeatureFileType;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotResourceFileType;
 
 public final class LookupElementUtil {
 
@@ -17,18 +18,19 @@ public final class LookupElementUtil {
     }
 
     public static LookupElementBuilder addReferenceType(PsiElement element, LookupElementBuilder builder) {
-        VirtualFile virtualFile = element.getContainingFile().getVirtualFile();
+        PsiFile containingFile = element.getContainingFile();
+        VirtualFile virtualFile = containingFile.getVirtualFile();
         if (virtualFile != null) {
             FileType fileType = virtualFile.getFileType();
             if (fileType == RobotResourceFileType.getInstance()) {
                 builder = builder.withTypeText(getBaseName(virtualFile), RobotIcons.RESOURCE, true);
             } else if (fileType == RobotFeatureFileType.getInstance()) {
                 builder = builder.withTypeText(getBaseName(virtualFile), RobotIcons.FILE, true);
-            } else if (fileType == PythonFileType.INSTANCE) {
-                builder = builder.withTypeText(getBaseName(virtualFile), RobotIcons.PYTHON, true);
-            } else if (fileType == PyiFileType.INSTANCE) {
-                String directoryName = element.getContainingFile().getContainingDirectory().getName();
+            } else if (containingFile instanceof PyiFile pyiFile && pyiFile.getContainingDirectory() != null) {
+                String directoryName = pyiFile.getContainingDirectory().getName();
                 builder = builder.withTypeText(directoryName, RobotIcons.PYTHON, true);
+            } else if (containingFile instanceof PyFile) {
+                builder = builder.withTypeText(getBaseName(virtualFile), RobotIcons.PYTHON, true);
             } else {
                 builder = builder.withTypeText(getBaseName(virtualFile), true);
             }
