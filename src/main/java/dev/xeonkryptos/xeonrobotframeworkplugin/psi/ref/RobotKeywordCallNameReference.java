@@ -22,10 +22,12 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCallName
 import dev.xeonkryptos.xeonrobotframeworkplugin.util.LookupElementUtil;
 import org.apache.commons.text.WordUtils;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.LinkedHashSet;
 import java.util.List;
 
 public class RobotKeywordCallNameReference extends PsiPolyVariantReferenceBase<RobotKeywordCallName> {
@@ -40,11 +42,57 @@ public class RobotKeywordCallNameReference extends PsiPolyVariantReferenceBase<R
         ResolveCache resolveCache = ResolveCache.getInstance(keywordCallName.getProject());
         return resolveCache.resolveWithCaching(this, (robotKeywordReference, incompCode) -> {
             PsiFile containingFile = keywordCallName.getContainingFile();
-            PsiElement[] keywordReferences = ResolverUtils.findKeywordReferences(keywordCallName, containingFile);
-            return Arrays.stream(keywordReferences)
-                         .map(PsiElementResolveResult::new)
-                         .toArray(ResolveResult[]::new);
+            PsiElement[] keywordReferences = findKeywordReferences(keywordCallName, containingFile);
+            return Arrays.stream(keywordReferences).map(PsiElementResolveResult::new).toArray(ResolveResult[]::new);
         }, false, false);
+    }
+
+    @NotNull
+    private PsiElement[] findKeywordReferences(@NotNull RobotKeywordCallName keywordCallName, @Nullable PsiFile psiFile) {
+        RobotKeywordCallLibrary keywordCallLibrary = keywordCallName.getKeywordCallLibrary();
+        String libraryName = keywordCallLibrary != null ? keywordCallLibrary.getText() : null;
+        String keywordName = keywordCallName.getText();
+        if (KeywordCompletionModification.isKeywordStartsWithModifier(libraryName)) {
+            libraryName = libraryName.substring(1);
+        } else if (libraryName == null && KeywordCompletionModification.isKeywordStartsWithModifier(keywordName)) {
+            keywordName = keywordName.substring(1);
+        }
+        if (libraryName != null) {
+            int libraryNameLength = libraryName.length();
+            keywordName = keywordName.substring(libraryNameLength + 1);
+        }
+        return findKeywordReferences(libraryName, keywordName, psiFile);
+    }
+
+    @NotNull
+    private PsiElement[] findKeywordReferences(@Nullable String libraryName, @NotNull String keyword, @Nullable PsiFile psiFile) {
+        if (!(psiFile instanceof RobotFile robotFile)) {
+            return null;
+        }
+
+        Collection<PsiElement> keywordElements = new LinkedHashSet<>();
+        for (DefinedKeyword definedKeyword : robotFile.getDefinedKeywords()) {
+            if (definedKeyword.matches(keyword)) {
+                keywordElements.add(definedKeyword.reference());
+            }
+        }
+
+        Collection<KeywordFile> importedFiles;
+        if (libraryName != null) {
+            importedFiles = robotFile.findImportedFilesWithLibraryName(libraryName);
+        } else {
+            boolean includeTransitive = RobotOptionsProvider.getInstance(psiFile.getProject()).allowTransitiveImports();
+            importedFiles = robotFile.collectImportedFiles(includeTransitive);
+        }
+
+        for (KeywordFile keywordFile : importedFiles) {
+            for (DefinedKeyword definedKeyword : keywordFile.getDefinedKeywords()) {
+                if (definedKeyword.matches(keyword)) {
+                    keywordElements.add(definedKeyword.reference());
+                }
+            }
+        }
+        return keywordElements.toArray(PsiElement[]::new);
     }
 
     @Override

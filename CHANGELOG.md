@@ -15,6 +15,8 @@
 - Made showing up of keywords in SMT view configurable. Decide for yourself if you want them to be listed separately or not. Default is to not show them.
 - Lexing and parsing of variables and variable definitions to allow special characters in variable names
 - Lookup of variables based on the concrete name defined and the basename as fallback
+- Extended unused variable lookup to files in test suite scope. Variables defined in imported files (i.e. resource files) are now considered as long as the
+  scope matches the expected one
 
 ### Fixed
 

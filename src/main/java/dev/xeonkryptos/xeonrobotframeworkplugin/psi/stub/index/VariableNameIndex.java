@@ -6,6 +6,7 @@ import com.intellij.psi.stubs.StringStubIndexExtension;
 import com.intellij.psi.stubs.StubIndex;
 import com.intellij.psi.stubs.StubIndexKey;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariable;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotStubFileElementType;
 import dev.xeonkryptos.xeonrobotframeworkplugin.util.VariableNameUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -35,5 +36,10 @@ public class VariableNameIndex extends StringStubIndexExtension<RobotVariable> {
                                         .flatMap(variant -> StubIndex.getElements(stubIndexKey, variant, project, scope, RobotVariable.class).stream())
                                         .distinct()
                                         .toList();
+    }
+
+    @Override
+    public int getVersion() {
+        return RobotStubFileElementType.STUB_FILE_VERSION + super.getVersion() + 1;
     }
 }

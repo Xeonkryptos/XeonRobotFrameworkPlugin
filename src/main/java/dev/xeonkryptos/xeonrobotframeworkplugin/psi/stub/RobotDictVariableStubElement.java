@@ -11,6 +11,7 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotLanguage;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotPsiImplUtil;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotDictVariable;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableBodyId;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableDefinition;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotDictVariableImpl;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.index.VariableNameIndex;
 import dev.xeonkryptos.xeonrobotframeworkplugin.util.VariableNameUtil;
@@ -44,7 +45,8 @@ public class RobotDictVariableStubElement extends IStubElementType<RobotDictVari
 
     @Override
     public boolean shouldCreateStub(ASTNode node) {
-        return node.getPsi() instanceof RobotDictVariable;
+        return node.getPsi() instanceof RobotDictVariable variable && variable.getVariableName() != null
+               && !(variable.getParent() instanceof RobotVariableDefinition);
     }
 
     @NotNull

@@ -3,6 +3,7 @@ package dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.index;
 import com.intellij.psi.stubs.StringStubIndexExtension;
 import com.intellij.psi.stubs.StubIndexKey;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotUserKeywordStatement;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotStubFileElementType;
 import org.jetbrains.annotations.NotNull;
 
 public class KeywordDefinitionNameIndex extends StringStubIndexExtension<RobotUserKeywordStatement> {
@@ -19,5 +20,10 @@ public class KeywordDefinitionNameIndex extends StringStubIndexExtension<RobotUs
     @Override
     public StubIndexKey<String, RobotUserKeywordStatement> getKey() {
         return KEY;
+    }
+
+    @Override
+    public int getVersion() {
+        return RobotStubFileElementType.STUB_FILE_VERSION + super.getVersion() + 1;
     }
 }

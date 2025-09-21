@@ -7,15 +7,11 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiReference;
 import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.psi.search.searches.ReferencesSearch.SearchParameters;
-import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.util.Processor;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotPsiImplUtil;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotResourceFileType;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotUserKeywordStatement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariable;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableBodyId;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableDefinition;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariablesSection;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.index.VariableNameIndex;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -42,14 +38,6 @@ public class RobotVariableReferenceSearch extends QueryExecutorBase<PsiReference
             if (variableName == null) {
                 return;
             }
-
-            RobotUserKeywordStatement keywordDefinition = PsiTreeUtil.getParentOfType(variableDefinition, RobotUserKeywordStatement.class);
-            RobotVariablesSection variablesSection = PsiTreeUtil.getParentOfType(variableDefinition, RobotVariablesSection.class);
-            if (keywordDefinition != null || variablesSection == null
-                || variablesSection.getContainingFile().getFileType() != RobotResourceFileType.getInstance()) {
-                globalSearchScope = GlobalSearchScope.fileScope(variableDefinition.getContainingFile());
-            }
-
             searchForVariablesInIndex(variableDefinition, variableName, project, globalSearchScope, consumer);
         }
     }
@@ -63,10 +51,12 @@ public class RobotVariableReferenceSearch extends QueryExecutorBase<PsiReference
         Collection<RobotVariable> variables = ReadAction.compute(() -> variableNameIndex.getVariables(variableName, project, globalSearchScope));
         for (RobotVariable variable : variables) {
             RobotVariableBodyId variableBodyId = RobotPsiImplUtil.getVariableBodyId(variable);
-            if (variableBodyId != null && variableDefinition.isInScope(variable)) {
+            if (variableBodyId != null && !(variable.getParent() instanceof RobotVariableDefinition)) {
                 PsiReference reference = variableBodyId.getReference();
-                if (!consumer.process(reference)) {
-                    break;
+                if (reference.isReferenceTo(variableDefinition)) {
+                    if (!consumer.process(reference)) {
+                        break;
+                    }
                 }
             }
         }

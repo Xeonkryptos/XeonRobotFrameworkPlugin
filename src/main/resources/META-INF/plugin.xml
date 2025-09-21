@@ -74,11 +74,11 @@
         <annotator language="Robot" implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.ide.inspections.compilation.RobotParameterAnnotator"/>
         <annotator language="Robot" implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.ide.inspections.compilation.RobotUnresolvedKeywordAnnotator"/>
         <annotator language="Robot"
-                   implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.ide.inspections.compilation.RobotKeywordDeprecationAnnotator"/>
+                   implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.ide.inspections.highlight.RobotKeywordDeprecationAnnotator"/>
         <annotator language="Robot"
                    implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.ide.inspections.compilation.RobotMissingMandatoryKeywordParametersAnnotator"/>
         <annotator language="Robot" implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.ide.inspections.compilation.RobotImportAnnotator"/>
-        <annotator language="Robot" implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.ide.inspections.compilation.RobotVariableDefinitionNotFoundAnnotator"/>
+        <annotator language="Robot" implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.ide.inspections.highlight.RobotVariableDefinitionNotFoundAnnotator"/>
         <annotator language="Robot"
                    implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.ide.inspections.compilation.RobotUserKeywordStatementAnnotator"/>
         <annotator language="Robot"
@@ -89,7 +89,7 @@
         <annotator language="Robot"
                    implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.ide.inspections.compilation.RobotInvalidKeywordOnlyMarkerAnnotation"/>
         <annotator language="Robot"
-                   implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.ide.inspections.compilation.ReassignedRobotVariableAnnotator"/>
+                   implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.ide.inspections.highlight.ReassignedRobotVariableAnnotator"/>
 
         <!-- Inspections -->
         <!-- TODO: inspection: error?: resource import is not a robot file -->

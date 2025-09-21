@@ -44,6 +44,7 @@ public class RobotFileImpl extends PsiFileBase implements KeywordFile, RobotFile
     private static final Key<ParameterizedCachedValue<Collection<VirtualFile>, Boolean>> IMPORTED_VIRTUAL_FILES_CACHE_KEY = Key.create(
             "IMPORTED_VIRTUAL_FILES_CACHE");
     private static final Key<CachedValue<Collection<DefinedVariable>>> ROBOT_INIT_VARIABLES_CACHE_KEY = Key.create("ROBOT_INIT_VARIABLES_CACHE");
+    private static final Key<CachedValue<Collection<DefinedVariable>>> TEST_SUITE_VARIABLES_CACHE_KEY = Key.create("TEST_SUITE_VARIABLES_CACHE");
 
     private final FileType fileType;
 
@@ -73,7 +74,10 @@ public class RobotFileImpl extends PsiFileBase implements KeywordFile, RobotFile
     @NotNull
     @Override
     public final Collection<DefinedVariable> getDefinedVariables() {
-        return getDefinedVariables(new LinkedHashSet<>());
+        return CachedValuesManager.getCachedValue(this,
+                                                  TEST_SUITE_VARIABLES_CACHE_KEY,
+                                                  () -> Result.createSingleDependency(getDefinedVariables(new LinkedHashSet<>()),
+                                                                                      PsiModificationTracker.MODIFICATION_COUNT));
     }
 
     @NotNull

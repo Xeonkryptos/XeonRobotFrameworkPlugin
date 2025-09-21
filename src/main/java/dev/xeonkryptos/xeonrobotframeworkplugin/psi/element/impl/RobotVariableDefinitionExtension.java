@@ -88,7 +88,8 @@ public abstract class RobotVariableDefinitionExtension extends RobotStubPsiEleme
             RobotVariableDefinitionStub stub = getStub();
             if (stub != null) {
                 scope = stub.getScope();
-            } else {
+            }
+            if (scope == null) {
                 scope = RobotPsiImplUtil.getScope(this);
             }
         }

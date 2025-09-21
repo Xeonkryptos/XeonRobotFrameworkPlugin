@@ -11,6 +11,7 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotLanguage;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotPsiImplUtil;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotScalarVariable;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableBodyId;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableDefinition;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotScalarVariableImpl;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.index.VariableNameIndex;
 import dev.xeonkryptos.xeonrobotframeworkplugin.util.VariableNameUtil;
@@ -44,7 +45,8 @@ public class RobotScalarVariableStubElement extends IStubElementType<RobotScalar
 
     @Override
     public boolean shouldCreateStub(ASTNode node) {
-        return node.getPsi() instanceof RobotScalarVariable;
+        return node.getPsi() instanceof RobotScalarVariable variable && variable.getVariableName() != null
+               && !(variable.getParent() instanceof RobotVariableDefinition);
     }
 
     @NotNull

@@ -6,9 +6,12 @@ import com.intellij.codeInspection.LocalInspectionTool;
 import com.intellij.codeInspection.LocalInspectionToolSession;
 import com.intellij.codeInspection.ProblemHighlightType;
 import com.intellij.codeInspection.ProblemsHolder;
-import com.intellij.openapi.project.DumbAware;
 import com.intellij.openapi.util.Key;
 import com.intellij.psi.PsiElementVisitor;
+import com.intellij.psi.search.GlobalSearchScope;
+import com.intellij.psi.search.SearchScope;
+import com.intellij.psi.search.searches.ReferencesSearch;
+import com.intellij.psi.util.PsiTreeUtil;
 import dev.xeonkryptos.xeonrobotframeworkplugin.RobotBundle;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariable;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableDefinition;
@@ -16,10 +19,11 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVisitor;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Iterator;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class RobotUnusedVariableDefinitionInspection extends LocalInspectionTool implements DumbAware {
+public class RobotUnusedVariableDefinitionInspection extends LocalInspectionTool {
 
     private static final Key<RobotVariableUsageVisitor> VARIABLE_USAGE_VISITOR_KEY = Key.create("ROBOT_VARIABLE_USAGE_VISITOR");
 
@@ -49,11 +53,26 @@ public class RobotUnusedVariableDefinitionInspection extends LocalInspectionTool
                     }
                 }
             }
+            SearchScope scope = GlobalSearchScope.projectScope(problemsHolder.getProject());
             for (RobotVariableDefinition unusedVariableDefinition : variableUsageVisitor.foundVariableDefinitions) {
-                problemsHolder.registerProblem(unusedVariableDefinition,
-                                               RobotBundle.getMessage("INSP.variable.unused"),
-                                               ProblemHighlightType.LIKE_UNUSED_SYMBOL,
-                                               new RemoveUnusedVariableDefinitionQuickFix(unusedVariableDefinition));
+                @SuppressWarnings("UnstableApiUsage")
+                boolean problemDetected = ReferencesSearch.search(unusedVariableDefinition, scope)
+                                                          .allowParallelProcessing()
+                                                          .mapping(ref -> PsiTreeUtil.getParentOfType(ref.getElement(),
+                                                                                                      RobotVariable.class,
+                                                                                                      RobotVariableDefinition.class))
+                                                          .filtering(Objects::nonNull)
+                                                          .filtering(element -> {
+                                                              ReadWriteAccessDetector detector = ReadWriteAccessDetector.findDetector(element);
+                                                              return detector != null && !detector.isDeclarationWriteAccess(element);
+                                                          })
+                                                          .findFirst() == null;
+                if (problemDetected) {
+                    problemsHolder.registerProblem(unusedVariableDefinition,
+                                                   RobotBundle.getMessage("INSP.variable.unused"),
+                                                   ProblemHighlightType.LIKE_UNUSED_SYMBOL,
+                                                   new RemoveUnusedVariableDefinitionQuickFix(unusedVariableDefinition));
+                }
             }
         }
     }

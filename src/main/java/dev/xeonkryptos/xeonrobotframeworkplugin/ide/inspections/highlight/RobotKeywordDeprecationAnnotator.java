@@ -1,4 +1,4 @@
-package dev.xeonkryptos.xeonrobotframeworkplugin.ide.inspections.compilation;
+package dev.xeonkryptos.xeonrobotframeworkplugin.ide.inspections.highlight;
 
 import com.intellij.codeInspection.ProblemHighlightType;
 import com.intellij.lang.annotation.AnnotationHolder;

@@ -6,12 +6,14 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotLanguage;
 
 public class RobotStubFileElementType extends IStubFileElementType<PsiFileStub<?>> {
 
+    public static final int STUB_FILE_VERSION = 12;
+
     public RobotStubFileElementType() {
         super("ROBOT_FILE", RobotLanguage.INSTANCE);
     }
 
     @Override
     public int getStubVersion() {
-        return 11;
+        return STUB_FILE_VERSION;
     }
 }

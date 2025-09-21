@@ -6,6 +6,7 @@ import com.intellij.psi.stubs.StringStubIndexExtension;
 import com.intellij.psi.stubs.StubIndex;
 import com.intellij.psi.stubs.StubIndexKey;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotPositionalArgument;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotStubFileElementType;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
@@ -32,5 +33,10 @@ public class PositionalArgumentImportIndex extends StringStubIndexExtension<Robo
         StubIndexKey<String, RobotPositionalArgument> stubIndexKey = getKey();
         value = value.replace('/', '.').toLowerCase();
         return StubIndex.getElements(stubIndexKey, value, project, scope, RobotPositionalArgument.class);
+    }
+
+    @Override
+    public int getVersion() {
+        return RobotStubFileElementType.STUB_FILE_VERSION + super.getVersion() + 1;
     }
 }
