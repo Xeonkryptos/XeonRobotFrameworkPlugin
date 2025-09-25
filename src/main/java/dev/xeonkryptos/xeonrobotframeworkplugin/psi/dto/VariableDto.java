@@ -85,6 +85,8 @@ public class VariableDto implements DefinedVariable {
             String text = document.getText(new TextRange(targetStartOffset, targetEndOffset));
             if (text.startsWith("${") || text.startsWith("%{") || text.startsWith("@{") || text.startsWith("&{")) {
                 startOffset -= 2;
+            } else if (text.startsWith("$") || text.startsWith("%") || text.startsWith("@") || text.startsWith("&")) {
+                startOffset -= 1;
             }
             if (text.endsWith("}")) {
                 selectionEndOffset += 1;

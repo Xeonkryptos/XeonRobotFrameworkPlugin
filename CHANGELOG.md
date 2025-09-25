@@ -7,6 +7,7 @@
 ### Changed
 
 - Preparations for the new PyCharm version
+- Provide variable code completion when location represents a keyword
 
 ## 0.5.5
 

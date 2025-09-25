@@ -92,8 +92,10 @@ public class RobotCompletionContributor extends CompletionContributor {
                new KeywordParametersCompletionProvider());
         // Provide completions in context of variables or arguments
         extend(CompletionType.BASIC,
-               psiElement().andOr(psiElement(RobotTypes.LITERAL_CONSTANT), psiElement(RobotTypes.VARIABLE_BODY), psiElement(RobotTypes.TEMPLATE_ARGUMENT_VALUE))
-                           .inFile(psiElement(RobotFile.class)),
+               psiElement().andOr(psiElement(RobotTypes.LITERAL_CONSTANT),
+                                  psiElement(RobotTypes.VARIABLE_BODY),
+                                  psiElement(RobotTypes.TEMPLATE_ARGUMENT_VALUE),
+                                  psiElement(RobotTypes.KEYWORD_NAME)).inFile(psiElement(RobotFile.class)),
                new VariableCompletionProvider());
         extend(CompletionType.BASIC,
                psiElement(RobotTypes.LITERAL_CONSTANT).inside(true, withElementInLocalSetting("[Tags]")).inFile(psiElement(RobotFile.class)),
