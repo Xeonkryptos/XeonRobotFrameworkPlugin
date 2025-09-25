@@ -9,6 +9,10 @@
 - Preparations for the new PyCharm version
 - Provide variable code completion when location represents a keyword
 
+### Fixed
+
+- Fixed scoping issue with variables leading to incorrectly marked variables as reassigned
+
 ## 0.5.5
 
 ### Added

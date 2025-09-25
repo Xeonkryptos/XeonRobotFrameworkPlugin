@@ -133,6 +133,7 @@ test_case_statement ::= test_case_id eol_marker? testcase_task_statement* {
         "com.intellij.psi.PsiNameIdentifierOwner"
         "com.intellij.navigation.NavigationItem"
         foldable
+        scopeOwner
     ]
     extends = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotTestCaseExtension"
     methods = [getName getNameIdentifier getIcon getQualifiedName getLocalSettings]
@@ -149,6 +150,7 @@ task_statement ::= task_id eol_marker? testcase_task_statement* {
         "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotQualifiedNameOwner"
         "com.intellij.psi.PsiNameIdentifierOwner"
         "com.intellij.navigation.NavigationItem"
+        scopeOwner
         foldable
     ]
     extends = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotTaskExtension"
@@ -199,6 +201,7 @@ user_keyword_statement ::= user_keyword_statement_id eol_marker (local_setting |
         "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotUserKeywordStatementExpression"
         "com.intellij.psi.PsiNameIdentifierOwner"
         "com.intellij.navigation.NavigationItem"
+        scopeOwner
         foldable
     ]
     mixin = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotUserKeywordExtension"
@@ -333,7 +336,7 @@ variable_definition ::= variable {
     mixin = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotVariableDefinitionExtension"
     stubClass = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotVariableDefinitionStub"
     elementTypeFactory = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotVariableDefinitionStubElement.create"
-    methods = [getNameIdentifier getName getIcon getQualifiedName getScope]
+    methods = [getNameIdentifier getName getIcon getQualifiedName]
 }
 
 variable ::= scalar_variable | list_variable | dict_variable | environment_variable {

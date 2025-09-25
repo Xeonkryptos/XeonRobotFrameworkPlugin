@@ -1,11 +1,10 @@
 // This is a generated file. Not intended for manual editing.
 package dev.xeonkryptos.xeonrobotframeworkplugin.psi.element;
 
-import org.jetbrains.annotations.*;
-import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.PsiNameIdentifierOwner;
-import com.intellij.navigation.NavigationItem;
+import org.jetbrains.annotations.NotNull;
 
 public class RobotVisitor extends PsiElementVisitor {
 
@@ -270,6 +269,7 @@ public class RobotVisitor extends PsiElementVisitor {
     visitQualifiedNameOwner(o);
     // visitPsiNameIdentifierOwner(o);
     // visitNavigationItem(o);
+    // visitScopeOwner(o);
     // visitFoldable(o);
     // visitStatement(o);
   }
@@ -312,6 +312,7 @@ public class RobotVisitor extends PsiElementVisitor {
     // visitPsiNameIdentifierOwner(o);
     // visitNavigationItem(o);
     // visitFoldable(o);
+    // visitScopeOwner(o);
     // visitStatement(o);
   }
 
@@ -343,6 +344,7 @@ public class RobotVisitor extends PsiElementVisitor {
     // visitUserKeywordStatementExpression(o);
     // visitPsiNameIdentifierOwner(o);
     // visitNavigationItem(o);
+    // visitScopeOwner(o);
     // visitFoldable(o);
     // visitStatement(o);
   }
