@@ -71,6 +71,8 @@ public class RobotKeywordCallNameReference extends PsiPolyVariantReferenceBase<R
         }
 
         Collection<PsiElement> keywordElements = new LinkedHashSet<>();
+        //KeywordDefinitionNameIndex.getInstance().getUserKeywordStatements(keyword, myElement.getProject(), )
+        // TODO: Replace that complicated and cost-intensive logic via index lookup and filtering
         for (DefinedKeyword definedKeyword : robotFile.getDefinedKeywords()) {
             if (definedKeyword.matches(keyword)) {
                 keywordElements.add(definedKeyword.reference());

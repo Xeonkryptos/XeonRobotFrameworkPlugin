@@ -32,7 +32,7 @@ public class KeywordDto implements DefinedKeyword {
     private final PsiElement reference;
     private final String libraryName;
     private final String name;
-    private final String keywordFunctionName;
+    private final String reducedKeywordName;
     private final boolean args;
     private final Collection<DefinedParameter> parameters;
     private final boolean deprecated;
@@ -56,7 +56,7 @@ public class KeywordDto implements DefinedKeyword {
         this.libraryName = libraryName;
         Project project = reference.getProject();
         this.name = KeywordUtil.getInstance(project).functionToKeyword(name).trim();
-        this.keywordFunctionName = KeywordUtil.getInstance(project).keywordToFunction(name).trim();
+        this.reducedKeywordName = name.toLowerCase().replaceAll("[_\\s]", "");
         this.args = parameters != null && !parameters.isEmpty();
         this.parameters = parameters;
         this.deprecated = DeprecationInspector.isDeprecated(reference);
@@ -126,9 +126,8 @@ public class KeywordDto implements DefinedKeyword {
         if (text == null) {
             return false;
         }
-        Project project = reference.getProject();
-        String keywordToFunction = KeywordUtil.getInstance(project).keywordToFunction(text).trim();
-        return keywordFunctionName.equalsIgnoreCase(keywordToFunction);
+        String keywordToFunction = text.toLowerCase().replaceAll("[_\\s]", "");
+        return reducedKeywordName.equalsIgnoreCase(keywordToFunction);
     }
 
     @NotNull

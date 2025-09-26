@@ -23,6 +23,8 @@ object VariableNameUtil {
         if (matcher.find()) {
             val baseVariableName = matcher.group()
             variableNameVariants.add(baseVariableName.lowercase().trim())
+            val reducedVariableName = baseVariableName.lowercase().replace(Regex("[_\\s]"), "")
+            variableNameVariants.add(reducedVariableName)
         }
         return variableNameVariants
     }

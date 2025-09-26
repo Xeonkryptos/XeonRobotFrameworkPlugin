@@ -80,5 +80,6 @@ public class RobotKeywordCallStubElement extends IStubElementType<RobotKeywordCa
         }
         sink.occurrence(KeywordCallNameIndex.KEY, keywordName);
         sink.occurrence(KeywordCallNameIndex.KEY, keywordName.toLowerCase());
+        sink.occurrence(KeywordCallNameIndex.KEY, keywordName.toLowerCase().replaceAll("[_\\s]", ""));
     }
 }

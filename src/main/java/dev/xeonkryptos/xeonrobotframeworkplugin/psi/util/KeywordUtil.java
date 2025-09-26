@@ -38,11 +38,6 @@ public record KeywordUtil(Project project) {
         return keyword;
     }
 
-    @NotNull
-    public String keywordToFunction(@NotNull String keyword) {
-        return keyword.toLowerCase().replaceAll(SPACE, UNDERSCORE).trim();
-    }
-
     public RobotKeywordCall findTemplateKeywordCall(@NotNull PsiElement element) {
         if (!(element.getContainingFile() instanceof RobotFile robotFile)) {
             return null;

@@ -64,5 +64,6 @@ public class RobotUserKeywordStubElement extends IStubElementType<RobotUserKeywo
         String name = stub.getName();
         sink.occurrence(KeywordDefinitionNameIndex.KEY, name.toLowerCase());
         sink.occurrence(KeywordDefinitionNameIndex.KEY, name);
+        sink.occurrence(KeywordDefinitionNameIndex.KEY, name.toLowerCase().replaceAll("[_\\s]", ""));
     }
 }
