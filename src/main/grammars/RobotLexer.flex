@@ -370,11 +370,7 @@ LineComment = {LineCommentSign} {NON_EOL}*
             {LocalSettingKeyword} \s*                 { enterNewState(SETTING); pushBackTrailingWhitespace(); return LOCAL_SETTING_NAME; }
         }
 
-        "FOR" \s{2}\s* {LiteralValue}             { yypushback(yylength() - "FOR".length()); return FOR; }
-        "IN" \s{2}\s* {LiteralValue}              { yypushback(yylength() - "IN".length()); enterNewState(CONTROL_STRUCTURE_START); return FOR_IN; }
-        "IN ENUMERATE" \s{2}\s* {LiteralValue}    { yypushback(yylength() - "IN ENUMERATE".length()); enterNewState(CONTROL_STRUCTURE_START); return FOR_IN; }
-        "IN RANGE" \s{2}\s* {LiteralValue}        { yypushback(yylength() - "IN RANGE".length()); enterNewState(CONTROL_STRUCTURE_START); return FOR_IN; }
-        "IN ZIP" \s{2}\s* {LiteralValue}          { yypushback(yylength() - "IN ZIP".length()); enterNewState(CONTROL_STRUCTURE_START); return FOR_IN; }
+        "FOR" \s{2}\s* {LiteralValue}             { yypushback(yylength() - "FOR".length()); enterNewState(FOR_STRUCTURE); return FOR; }
         "WHILE" \s{2}\s* {LiteralValue}?          { yypushback(yylength() - "WHILE".length()); enterNewState(CONTROL_STRUCTURE_START); return WHILE; }
         "IF" \s{2}\s* {LiteralValue}              { yypushback(yylength() - "IF".length()); enterNewState(CONTROL_STRUCTURE_START); return IF; }
         "ELSE IF" \s{2}\s* {LiteralValue}         { yypushback(yylength() - "ELSE IF".length()); enterNewState(CONTROL_STRUCTURE_START); return ELSE_IF; }
@@ -428,6 +424,14 @@ LineComment = {LineCommentSign} {NON_EOL}*
       }
 }
 
+<FOR_STRUCTURE>  {
+    "IN" \s{2}\s* {LiteralValue}              { yypushback(yylength() - "IN".length()); yybegin(CONTROL_STRUCTURE_START); return FOR_IN; }
+    "IN ENUMERATE" \s{2}\s* {LiteralValue}    { yypushback(yylength() - "IN ENUMERATE".length()); yybegin(CONTROL_STRUCTURE_START); return FOR_IN; }
+    "IN RANGE" \s{2}\s* {LiteralValue}        { yypushback(yylength() - "IN RANGE".length()); yybegin(CONTROL_STRUCTURE_START); return FOR_IN; }
+    "IN ZIP" \s{2}\s* {LiteralValue}          { yypushback(yylength() - "IN ZIP".length()); yybegin(CONTROL_STRUCTURE_START); return FOR_IN; }
+    "END" \s*                                 { pushBackTrailingWhitespace(); leaveState(); return END; }
+}
+
 <SIMPLE_CONTROL_STRUCTURE_START>  {SpaceBasedEndMarker}     { yybegin(SIMPLE_CONTROL_STRUCTURE); return WHITE_SPACE; }
 <CONTROL_STRUCTURE_START>         {SpaceBasedEndMarker}     { yybegin(CONTROL_STRUCTURE); return WHITE_SPACE; }
 
@@ -449,7 +453,7 @@ LineComment = {LineCommentSign} {NON_EOL}*
 
 <KEYWORD_ARGUMENTS, TESTCASE_DEFINITION, TASK_DEFINITION, USER_KEYWORD_DEFINITION, VARIABLE_DEFINITION> {
     <SETTINGS_SECTION> {
-        <SETTING> {ParameterName} {EqualSign}        {
+        <SETTING, FOR_STRUCTURE> {ParameterName} {EqualSign}        {
               pushBackTrailingWhitespace();
               yypushback(1);
               enterNewState(PARAMETER_ASSIGNMENT);
