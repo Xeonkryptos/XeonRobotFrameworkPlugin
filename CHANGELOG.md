@@ -13,6 +13,7 @@
 ### Fixed
 
 - Fixed scoping issue with variables leading to incorrectly marked variables as reassigned
+- Multiline handling extended to allow new lines between ellipses
 
 ## 0.5.5
 

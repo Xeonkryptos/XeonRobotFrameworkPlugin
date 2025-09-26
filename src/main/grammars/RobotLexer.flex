@@ -183,7 +183,7 @@ VariableSliceAccess = "[" \s* (-?\d+)? \s* : \s* (-?\d+)? (\s* : \s* (-?\d+))? \
 VariableIndexAccess = "[" \s* \d+ \s* "]"
 VariableKeyAccess = "[" \s* ([^$@%&] | [$@%&][^{])[^\]]* \s* "]"
 
-MultiLine = {EOL}+ \s* {Ellipsis} \s*
+MultiLine = {EOL}+ \s* {Ellipsis} \s* {EOL}*
 
 LineComment = {LineCommentSign} {NON_EOL}*
 
