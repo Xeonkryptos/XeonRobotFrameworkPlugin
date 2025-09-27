@@ -28,4 +28,13 @@ object VariableNameUtil {
         }
         return variableNameVariants
     }
+
+    fun computeBaseVariableName(variableName: String): String {
+        val matcher = VARIABLE_BASENAME_PATTERN.matcher(variableName)
+        return if (matcher.find()) {
+            matcher.group().trim()
+        } else {
+            variableName.trim()
+        }
+    }
 }

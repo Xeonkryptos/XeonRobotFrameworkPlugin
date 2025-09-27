@@ -1,0 +1,58 @@
+<html lang="en">
+    <body>
+        <p>Reports keyword calls and variable usages whose name (case-insensitive) deviates from the declared name by adding, removing or replacing underscores or spaces.</p>
+
+        <p>
+            The inspection compares for keyword calls the actually declared name of a user-defined Robot Framework keyword or a Python keyword (respecting a custom @keyword decorator) with the spelling used in the test. Differences caused solely by inserting, deleting, collapsing or expanding segments via underscores (_) or spaces are highlighted. For variables a cleaned base name (without syntactic wrapper) is compared so that inconsistent underscore/space formatting becomes visible.
+        </p>
+
+        <p>
+            Typical triggers:<br/>
+            - Added or removed underscores.<br/>
+            - Replaced underscores with spaces (or vice versa).<br/>
+            - Condensed or split parts of a name.<br/>
+            - Mixing spaces and underscores differing from the declaration.
+        </p>
+
+        <p>
+            Pure differences in letter case are ignored. No quick fix is provided; names must be adjusted manually.
+        </p>
+
+        <p>Examples:</p>
+        <pre><code>*** Keywords ***
+My Sample Keyword
+    Log    Hello World
+
+*** Variables ***
+${API_TOKEN_VALUE}    secret123
+
+*** Test Cases ***
+Demo
+    # Keyword call with extra underscores -> warning, expected: My Sample Keyword
+    My_Sample_Keyword
+
+    # Keyword call with multiple spaces -> warning
+    My  Sample   Keyword
+
+    # Variable with spaces instead of underscores -> warning, expected: ${API_TOKEN_VALUE}
+    Log    ${API TOKEN VALUE}
+
+    # Variable with removed underscore -> warning
+    Log    ${API_TOKENVALUE}
+</code></pre>
+
+        <!-- tooltip end -->
+
+        <p>
+            This check helps detect typos and inconsistent naming early and improves readability and maintainability of Robot Framework files.
+        </p>
+
+        <p>
+            Notes:<br/>
+            - Python keywords with a custom decorator name are validated against the decorator value.<br/>
+            - Python keywords without a custom decorator name are validated against their own name.<br/>
+            - User-defined Robot keywords are validated against their name.<br/>
+            - Variables are compared via their base name (without syntactic markers).
+        </p>
+    </body>
+</html>

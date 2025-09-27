@@ -78,7 +78,8 @@
         <annotator language="Robot"
                    implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.ide.inspections.compilation.RobotMissingMandatoryKeywordParametersAnnotator"/>
         <annotator language="Robot" implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.ide.inspections.compilation.RobotImportAnnotator"/>
-        <annotator language="Robot" implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.ide.inspections.highlight.RobotVariableDefinitionNotFoundAnnotator"/>
+        <annotator language="Robot"
+                   implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.ide.inspections.highlight.RobotVariableDefinitionNotFoundAnnotator"/>
         <annotator language="Robot"
                    implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.ide.inspections.compilation.RobotUserKeywordStatementAnnotator"/>
         <annotator language="Robot"
@@ -106,6 +107,9 @@
                          groupPath="Robot" groupKey="INSP.GROUP.cleanup" enabledByDefault="true" level="WARNING" dumbAware="true"
                          implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.ide.inspections.cleanup.RobotUnusedKeywordOnlyMarkerInspection"/>
         <!-- Inspections: Readability -->
+        <localInspection language="Robot" shortName="WeirdlyNamedElements" bundle="messages.RobotBundle"
+                         key="INSP.NAME.weird.naming" groupPath="Robot" groupKey="INSP.GROUP.readability" enabledByDefault="true" level="WARNING"
+                         implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.ide.inspections.maintainability.WeirdlyNamedElementsInspection"/>
         <!-- TODO: inspection: warn: use of I in keyword; decreased readability -->
         <!-- TODO: inspection: warn: scenario step does not start with gherkin; decreased readability -->
         <!-- TODO: inspection: warn: scenario step is not a keyword (ie variable); decreased readability -->

@@ -4,6 +4,11 @@
 
 ## Unreleased
 
+### Added
+
+- Added inspection for name mismatches of variables and keyword calls to their referenced element (added/removed spaces or underscores) with quick fix to rename
+  them to the expected value
+
 ### Changed
 
 - Preparations for the new PyCharm version
