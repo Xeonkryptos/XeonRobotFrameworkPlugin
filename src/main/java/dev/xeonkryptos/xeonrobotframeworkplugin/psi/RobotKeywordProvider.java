@@ -1,13 +1,12 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.psi;
 
 import com.intellij.psi.tree.IElementType;
-import dev.xeonkryptos.xeonrobotframeworkplugin.ide.RobotTailTypes;
+import dev.xeonkryptos.xeonrobotframeworkplugin.util.RobotTailTypes;
 import com.intellij.codeInsight.TailType;
 import com.intellij.codeInsight.TailTypes;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.HashSet;
 import java.util.Set;
 
 public class RobotKeywordProvider {

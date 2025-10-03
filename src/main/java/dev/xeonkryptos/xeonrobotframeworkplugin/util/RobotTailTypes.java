@@ -1,4 +1,4 @@
-package dev.xeonkryptos.xeonrobotframeworkplugin.ide;
+package dev.xeonkryptos.xeonrobotframeworkplugin.util;
 
 import com.intellij.codeInsight.TailType;
 import com.intellij.openapi.editor.Editor;

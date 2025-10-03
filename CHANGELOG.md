@@ -14,6 +14,7 @@
 - Preparations for the new PyCharm version
 - Provide variable code completion when location represents a keyword
 - Resolve variables and keywords like Robot (ignore underscores and spaces in variable names)
+- Don't provide run actions for test cases and tasks when they are defined in a resource file
 
 ### Fixed
 
