@@ -24,6 +24,7 @@
 - Don't mark Robot Python variables as a failure
 - Fixed inspection of nested variables
 - Fixed incorrect resolve of parameters defined in user keywords
+- Freeze of UI for some time on rare circumstances when starting a robot debug process
 
 ## 0.5.5
 

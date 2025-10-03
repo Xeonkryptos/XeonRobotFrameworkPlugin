@@ -2,6 +2,7 @@ package dev.xeonkryptos.xeonrobotframeworkplugin.ide.debugger.dap;
 
 import com.intellij.execution.process.ProcessEvent;
 import com.intellij.execution.process.ProcessListener;
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.progress.ProcessCanceledException;
 import com.jetbrains.rd.util.reactive.Signal;
 import dev.xeonkryptos.xeonrobotframeworkplugin.MyLogger;
@@ -15,13 +16,11 @@ import org.eclipse.lsp4j.jsonrpc.Launcher;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.net.Socket;
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static com.intellij.openapi.progress.util.ProgressIndicatorUtils.withTimeout;
 
@@ -33,7 +32,7 @@ public class RobotDebugAdapterProtocolCommunicator implements ProcessListener {
 
     private final Signal<Void> afterInitialize = new Signal<>();
 
-    private Socket socket;
+    private final AtomicReference<Socket> socketRef = new AtomicReference<>();
     private IDebugProtocolServer robotDebugServer;
 
     private boolean initialized;
@@ -45,49 +44,53 @@ public class RobotDebugAdapterProtocolCommunicator implements ProcessListener {
 
     @Override
     public void startNotified(@NotNull ProcessEvent event) {
-        try {
-            if (socket != null) {
-                return;
+        if (socketRef.get() != null) {
+            return;
+        }
+        ApplicationManager.getApplication().executeOnPooledThread(this::connect);
+    }
+
+    private void connect() {
+        Socket socket = tryConnectToServerWithTimeout(robotDebugPort);
+        if (socket == null) {
+            MyLogger.logger.error("Couldn't connect to Robot debug server at port %d".formatted(robotDebugPort));
+        } else {
+            socketRef.set(socket);
+            try {
+                Launcher<IDebugProtocolServer> clientLauncher = DSPLauncher.createClientLauncher(robotDebugClient,
+                                                                                                 socket.getInputStream(),
+                                                                                                 socket.getOutputStream());
+                clientLauncher.startListening();
+
+                robotDebugServer = clientLauncher.getRemoteProxy();
+
+                InitializeRequestArguments arguments = new InitializeRequestArguments();
+                arguments.setClientID(UUID.randomUUID().toString());
+                arguments.setAdapterID(UUID.randomUUID().toString());
+                arguments.setClientName("XeonkryptosRobotFramework");
+                arguments.setLocale("en_US");
+                arguments.setLinesStartAt1(true);
+                arguments.setColumnsStartAt1(true);
+                arguments.setSupportsVariableType(true);
+                arguments.setSupportsVariablePaging(false);
+                arguments.setPathFormat("path");
+                arguments.setSupportsRunInTerminalRequest(false);
+                arguments.setSupportsStartDebuggingRequest(false);
+
+                Capabilities initializeResponse = robotDebugServer.initialize(arguments).get(5L, TimeUnit.SECONDS);
+                initialized = true;
+                afterInitialize.fire(null);
+
+                if (initializeResponse.getSupportsConfigurationDoneRequest()) {
+                    robotDebugServer.configurationDone(new ConfigurationDoneArguments()).get();
+                }
+
+                robotDebugServer.attach(Map.of()).get();
+
+                MyLogger.logger.info("Connected to Robot debug server at port %d".formatted(robotDebugPort));
+            } catch (Exception e) {
+                MyLogger.logger.error("Failed to connect to Robot debug server at port %d".formatted(robotDebugPort), e);
             }
-            socket = tryConnectToServerWithTimeout(robotDebugPort);
-            if (socket == null) {
-                throw new RuntimeException("Failed to connect to debug server");
-            }
-            Launcher<IDebugProtocolServer> clientLauncher = DSPLauncher.createClientLauncher(robotDebugClient,
-                                                                                             socket.getInputStream(),
-                                                                                             socket.getOutputStream());
-            clientLauncher.startListening();
-
-            robotDebugServer = clientLauncher.getRemoteProxy();
-
-            InitializeRequestArguments arguments = new InitializeRequestArguments();
-            arguments.setClientID(UUID.randomUUID().toString());
-            arguments.setAdapterID(UUID.randomUUID().toString());
-            arguments.setClientName("HyperRobotFramework");
-            arguments.setLocale("en_US");
-            arguments.setLinesStartAt1(true);
-            arguments.setColumnsStartAt1(true);
-            arguments.setSupportsVariableType(true);
-            arguments.setSupportsVariablePaging(false);
-            arguments.setPathFormat("path");
-            arguments.setSupportsRunInTerminalRequest(false);
-            arguments.setSupportsStartDebuggingRequest(false);
-
-            Capabilities initializeResponse = robotDebugServer.initialize(arguments).get(5L, TimeUnit.SECONDS);
-            initialized = true;
-            afterInitialize.fire(null);
-
-            if (initializeResponse.getSupportsConfigurationDoneRequest()) {
-                robotDebugServer.configurationDone(new ConfigurationDoneArguments()).get();
-            }
-
-            robotDebugServer.attach(Map.of()).get();
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        } catch (ExecutionException | InterruptedException e) {
-            throw new RuntimeException(e);
-        } catch (TimeoutException e) {
-            throw new RuntimeException("Failed to connect to debug server", e);
         }
     }
 
@@ -99,10 +102,10 @@ public class RobotDebugAdapterProtocolCommunicator implements ProcessListener {
     @Override
     public void processTerminated(@NotNull ProcessEvent event) {
         event.getProcessHandler().removeProcessListener(this);
-        if (socket != null) {
+        Socket localSocket = socketRef.getAndSet(null);
+        if (localSocket != null) {
             try {
-                socket.close();
-                socket = null;
+                localSocket.close();
             } catch (IOException ignore) {
             }
         }
@@ -143,7 +146,7 @@ public class RobotDebugAdapterProtocolCommunicator implements ProcessListener {
                 return socket;
             });
         } catch (TimeoutCancellationException e) {
-            MyLogger.logger.warn("Couldn't connect to debug process in the expected time", e);
+            MyLogger.logger.error("Couldn't connect to debug process in the expected time", e);
         }
         return null;
     }
