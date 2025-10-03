@@ -91,6 +91,8 @@
                    implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.ide.inspections.compilation.RobotInvalidKeywordOnlyMarkerAnnotation"/>
         <annotator language="Robot"
                    implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.ide.inspections.highlight.ReassignedRobotVariableAnnotator"/>
+        <annotator language="Robot"
+                   implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.ide.inspections.compilation.KeywordCallWithInvalidParameterOrderAnnotator"/>
 
         <!-- Inspections -->
         <!-- TODO: inspection: error?: resource import is not a robot file -->
