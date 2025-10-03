@@ -22,6 +22,7 @@
 - Detection/Parsing of IN keywords of FOR loops in other contexts fixed
 - Don't mark Robot Python variables as a failure
 - Fixed inspection of nested variables
+- Fixed incorrect resolve of parameters defined in user keywords
 
 ## 0.5.5
 
