@@ -2473,7 +2473,7 @@ public class RobotParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // (variable | variable_body_id | extended_variable_nested_access)+
+  // (variable | variable_body_id)+
   public static boolean variable_content(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "variable_content")) return false;
     boolean r;
@@ -2488,13 +2488,12 @@ public class RobotParser implements PsiParser, LightPsiParser {
     return r;
   }
 
-  // variable | variable_body_id | extended_variable_nested_access
+  // variable | variable_body_id
   private static boolean variable_content_0(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "variable_content_0")) return false;
     boolean r;
     r = variable(b, l + 1);
     if (!r) r = variable_body_id(b, l + 1);
-    if (!r) r = extended_variable_nested_access(b, l + 1);
     return r;
   }
 

@@ -359,7 +359,7 @@ dict_variable ::= DICT_VARIABLE_START (variable_content | python_expression) VAR
 }
 environment_variable ::= ENV_VARIABLE_START variable_content VARIABLE_END
 
-variable_content ::= (variable | variable_body_id | extended_variable_nested_access)+ {
+variable_content ::= (variable | variable_body_id)+ {
     methods=[content="/variable_body_id[0]"]
 }
 variable_body_id ::= VARIABLE_BODY {

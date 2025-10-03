@@ -29,12 +29,6 @@ public class RobotVariableContentImpl extends RobotPsiElementBase implements Rob
 
   @Override
   @NotNull
-  public List<RobotExtendedVariableNestedAccess> getExtendedVariableNestedAccessList() {
-    return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotExtendedVariableNestedAccess.class);
-  }
-
-  @Override
-  @NotNull
   public List<RobotVariable> getVariableList() {
     return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotVariable.class);
   }

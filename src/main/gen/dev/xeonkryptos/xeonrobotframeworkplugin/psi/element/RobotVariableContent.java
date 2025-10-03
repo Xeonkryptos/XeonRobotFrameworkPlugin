@@ -8,9 +8,6 @@ import com.intellij.psi.PsiElement;
 public interface RobotVariableContent extends RobotStatement {
 
   @NotNull
-  List<RobotExtendedVariableNestedAccess> getExtendedVariableNestedAccessList();
-
-  @NotNull
   List<RobotVariable> getVariableList();
 
   @NotNull

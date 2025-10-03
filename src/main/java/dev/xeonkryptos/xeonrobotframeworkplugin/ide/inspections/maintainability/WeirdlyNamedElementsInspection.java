@@ -75,6 +75,12 @@ public class WeirdlyNamedElementsInspection extends LocalInspectionTool {
                     PsiElement element = o.getReference().resolve();
                     if (element instanceof RobotVariableDefinition definition) {
                         String definedName = definition.getName();
+                        int variableBodyTextOffset = o.getTextOffset();
+                        int variableTextOffset = variable.getTextOffset() + 2; // account for variable start
+                        if (variableBodyTextOffset != variableTextOffset) {
+                            // only check the first body id of the variable
+                            return;
+                        }
                         String usedName = o.getText().trim();
                         if (definedName != null && !definedName.equalsIgnoreCase(usedName)) {
                             String definedBaseVariableName = VariableNameUtil.INSTANCE.computeBaseVariableName(definedName);

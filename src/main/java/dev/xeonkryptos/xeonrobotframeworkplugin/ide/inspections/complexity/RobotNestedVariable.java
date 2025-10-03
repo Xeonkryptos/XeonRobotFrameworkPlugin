@@ -5,6 +5,7 @@ import com.intellij.codeInspection.ProblemsHolder;
 import com.intellij.openapi.project.DumbAware;
 import com.intellij.psi.PsiElementVisitor;
 import dev.xeonkryptos.xeonrobotframeworkplugin.RobotBundle;
+import dev.xeonkryptos.xeonrobotframeworkplugin.ide.psi.visitor.EmptyVariableDetector;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariable;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVisitor;
 import org.jetbrains.annotations.NotNull;
@@ -18,8 +19,9 @@ public class RobotNestedVariable extends LocalInspectionTool implements DumbAwar
             @Override
             public void visitVariable(@NotNull RobotVariable o) {
                 super.visitVariable(o);
-                String variableName = o.getVariableName();
-                if (variableName == null && o.getTextLength() > 3) {
+                EmptyVariableDetector emptyVariableDetector = new EmptyVariableDetector();
+                o.accept(emptyVariableDetector);
+                if (emptyVariableDetector.getEmptyVariable()) {
                     // Without a variable name identifiable in Robot code, it means a nested variable construct is used
                     holder.registerProblem(o, RobotBundle.getMessage("INSP.variable.nested"));
                 }
