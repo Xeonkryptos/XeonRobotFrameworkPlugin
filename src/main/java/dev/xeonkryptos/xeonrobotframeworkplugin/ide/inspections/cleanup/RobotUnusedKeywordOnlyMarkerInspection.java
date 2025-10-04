@@ -40,7 +40,7 @@ public class RobotUnusedKeywordOnlyMarkerInspection extends LocalInspectionTool 
             int keywordOnlyTextOffset = localKeywordOnlyMarker.getTextOffset();
             if (robotKeywordOnlyMarkerVisitor.argumentParameters.stream().noneMatch(param -> keywordOnlyTextOffset < param.getTextOffset())) {
                 problemsHolder.registerProblem(localKeywordOnlyMarker,
-                                               RobotBundle.getMessage("INSP.keyword-only-marker.unused"),
+                                               RobotBundle.message("INSP.keyword-only-marker.unused"),
                                                ProblemHighlightType.LIKE_UNUSED_SYMBOL,
                                                new RemoveUnusedKeywordOnlyMarkerQuickFix(localKeywordOnlyMarker));
             }

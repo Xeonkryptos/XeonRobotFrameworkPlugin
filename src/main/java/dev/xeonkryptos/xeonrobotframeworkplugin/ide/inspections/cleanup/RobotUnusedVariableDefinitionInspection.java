@@ -69,7 +69,7 @@ public class RobotUnusedVariableDefinitionInspection extends LocalInspectionTool
                                                           .findFirst() == null;
                 if (problemDetected) {
                     problemsHolder.registerProblem(unusedVariableDefinition,
-                                                   RobotBundle.getMessage("INSP.variable.unused"),
+                                                   RobotBundle.message("INSP.variable.unused"),
                                                    ProblemHighlightType.LIKE_UNUSED_SYMBOL,
                                                    new RemoveUnusedVariableDefinitionQuickFix(unusedVariableDefinition));
                 }

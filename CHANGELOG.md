@@ -8,6 +8,7 @@
 
 - Added inspection for name mismatches of variables and keyword calls to their referenced element (added/removed spaces or underscores) with quick fix to rename
   them to the expected value
+- Added comment suppression for inspections in Robot files: `# noinspection InspectionName1 InspectionName2`
 
 ### Changed
 

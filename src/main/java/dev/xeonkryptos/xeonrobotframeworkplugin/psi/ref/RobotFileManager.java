@@ -23,7 +23,6 @@ import org.jetbrains.annotations.Nullable;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
@@ -41,7 +40,7 @@ public class RobotFileManager {
     }
 
     @Nullable
-    public static synchronized PsiElement findElementInContext(@Nullable String elementName, @NotNull Project project, @NotNull PsiElement contextElement) {
+    public static PsiElement findElementInContext(@Nullable String elementName, @NotNull Project project, @NotNull PsiElement contextElement) {
         if (elementName == null) {
             return null;
         }
@@ -123,30 +122,28 @@ public class RobotFileManager {
         return null;
     }
 
-    public static synchronized Map<String, PsiFile> getCachedRobotSystemFiles(Project project) {
+    public static Map<String, PsiFile> getCachedRobotSystemFiles(Project project) {
         Map<String, PsiFile> cachedFiles = ProjectFileCache.getCachedRobotSystemFiles(project);
-        if (!cachedFiles.isEmpty()) {
-            return cachedFiles;
-        }
+        synchronized (cachedFiles) {
+            if (!cachedFiles.isEmpty()) {
+                return cachedFiles;
+            }
 
-        Map<String, PsiFile> result = new HashMap<>();
-        Collection<PyFile> pyFiles = PyModuleNameIndex.findByQualifiedName(QualifiedName.fromDottedString("robot.libraries"),
-                                                                           project,
-                                                                           PySearchUtilBase.excludeSdkTestsScope(project));
-
-        for (PyFile pyFile : pyFiles) {
-            PsiFile[] files = pyFile.getContainingDirectory().getFiles();
-            for (PsiFile file : files) {
-                String fileName = file.getName();
-                if (!"__init__.py".equals(fileName) && Character.isUpperCase(fileName.charAt(0))) {
-                    String key = fileName.replace(".py", "");
-                    result.put(key, file);
-                    cachedFiles.put(key, file);
+            Collection<PyFile> pyFiles = PyModuleNameIndex.findByQualifiedName(QualifiedName.fromDottedString("robot.libraries"),
+                                                                               project,
+                                                                               PySearchUtilBase.excludeSdkTestsScope(project));
+            for (PyFile pyFile : pyFiles) {
+                PsiFile[] files = pyFile.getContainingDirectory().getFiles();
+                for (PsiFile file : files) {
+                    String fileName = file.getName();
+                    if (!"__init__.py".equals(fileName) && Character.isUpperCase(fileName.charAt(0))) {
+                        String key = fileName.replace(".py", "");
+                        cachedFiles.put(key, file);
+                    }
                 }
             }
+            return cachedFiles;
         }
-
-        return result;
     }
 
     public static Collection<DefinedVariable> getGlobalVariables(Project project) {

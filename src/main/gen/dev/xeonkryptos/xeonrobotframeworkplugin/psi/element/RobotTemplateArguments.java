@@ -5,7 +5,7 @@ import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 
-public interface RobotTemplateArguments extends RobotTemplateArgumentsExpression, RobotCallArgumentsContainer, RobotStatement {
+public interface RobotTemplateArguments extends RobotTemplateArgumentsExpression, RobotCallArgumentsContainer, RobotElement {
 
   @NotNull
   List<RobotTemplateArgument> getTemplateArgumentList();

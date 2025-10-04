@@ -15,7 +15,7 @@ import org.jetbrains.annotations.NotNull;
 class RemoveMoreThanOnceDefinedKeywordOnlyMarkersQuickFix extends PsiElementBaseIntentionAction {
 
     public RemoveMoreThanOnceDefinedKeywordOnlyMarkersQuickFix() {
-        setText(RobotBundle.getMessage("intention.family.remove.text.illegal-arguments-setting.keyword-only-markers"));
+        setText(RobotBundle.message("intention.family.remove.text.illegal-arguments-setting.keyword-only-markers"));
     }
 
     @Override
@@ -39,6 +39,6 @@ class RemoveMoreThanOnceDefinedKeywordOnlyMarkersQuickFix extends PsiElementBase
     @Override
     @IntentionFamilyName
     public String getFamilyName() {
-        return RobotBundle.getMessage("intention.family.remove.name.illegal-arguments-setting.keyword-only-markers");
+        return RobotBundle.message("intention.family.remove.name.illegal-arguments-setting.keyword-only-markers");
     }
 }

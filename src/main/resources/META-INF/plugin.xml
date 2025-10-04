@@ -99,18 +99,18 @@
         <!-- TODO: inspection: warn: import python file vs class -->
         <!-- Inspections: Cleanup -->
         <localInspection language="Robot" shortName="RobotImportNotUsed" bundle="messages.RobotBundle" key="INSP.NAME.import.unused" groupPath="Robot"
-                         groupKey="INSP.GROUP.cleanup" enabledByDefault="true" level="WARNING" dumbAware="true"
+                         groupKey="INSP.GROUP.robot" enabledByDefault="true" level="WARNING" dumbAware="true"
                          implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.ide.inspections.cleanup.RobotImportNotUsed"/>
         <localInspection language="Robot" shortName="RobotUnusedVariableDefinition" bundle="messages.RobotBundle" key="INSP.NAME.variable.unused"
                          groupPath="Robot"
-                         groupKey="INSP.GROUP.cleanup" enabledByDefault="true" level="WARNING" dumbAware="false"
+                         groupKey="INSP.GROUP.robot" enabledByDefault="true" level="WARNING" dumbAware="false"
                          implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.ide.inspections.cleanup.RobotUnusedVariableDefinitionInspection"/>
         <localInspection language="Robot" shortName="RobotKeywordOnlyMarkerNotUsed" bundle="messages.RobotBundle" key="INSP.NAME.keyword-only-marker.unused"
-                         groupPath="Robot" groupKey="INSP.GROUP.cleanup" enabledByDefault="true" level="WARNING" dumbAware="true"
+                         groupPath="Robot" groupKey="INSP.GROUP.robot" enabledByDefault="true" level="WARNING" dumbAware="true"
                          implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.ide.inspections.cleanup.RobotUnusedKeywordOnlyMarkerInspection"/>
         <!-- Inspections: Readability -->
         <localInspection language="Robot" shortName="WeirdlyNamedElements" bundle="messages.RobotBundle"
-                         key="INSP.NAME.weird.naming" groupPath="Robot" groupKey="INSP.GROUP.readability" enabledByDefault="true" level="WARNING"
+                         key="INSP.NAME.weird.naming" groupPath="Robot" groupKey="INSP.GROUP.robot" enabledByDefault="true" level="WARNING"
                          implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.ide.inspections.maintainability.WeirdlyNamedElementsInspection"/>
         <!-- TODO: inspection: warn: use of I in keyword; decreased readability -->
         <!-- TODO: inspection: warn: scenario step does not start with gherkin; decreased readability -->
@@ -118,23 +118,24 @@
         <!-- TODO: inspection: warn: scenario step contains arguments; decreased readability -->
         <!-- Inspections: Complexity -->
         <!-- TODO: inspection: warn: keyword definitions that contain gherkin; trying to do too much -->
-        <localInspection language="Robot" shortName="RobotNestedVariable" bundle="messages.RobotBundle" key="INSP.NAME.variable.nested" groupPath="Robot"
-                         groupKey="INSP.GROUP.complexity" enabledByDefault="true" level="WARNING" dumbAware="true"
-                         implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.ide.inspections.complexity.RobotNestedVariable"/>
+        <localInspection language="Robot" shortName="RobotNestedVariable" bundle="messages.RobotBundle" key="INSP.NAME.variable.nested"
+                         groupKey="INSP.GROUP.robot" enabledByDefault="true" level="WARNING" dumbAware="true"
+                         implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.ide.inspections.complexity.RobotNestedVariableInspection"/>
         <!-- Inspections: Deprecated -->
         <localInspection language="Robot" shortName="RobotDeprecatedSectionsNaming" bundle="messages.RobotBundle" key="INSP.NAME.deprecated.sections.naming"
-                         groupPath="Robot" groupKey="INSP.GROUP.deprecated" enabledByDefault="true" level="WARNING" dumbAware="true"
+                         groupKey="INSP.GROUP.robot" enabledByDefault="true" level="WARNING" dumbAware="true"
                          implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.ide.inspections.deprecation.RobotDeprecatedSectionsNamingInspection"/>
         <localInspection language="Robot" shortName="RobotDeprecatedGlobalSettingsNaming" bundle="messages.RobotBundle"
                          key="INSP.NAME.deprecated.settings.global"
-                         groupPath="Robot" groupKey="INSP.GROUP.deprecated" enabledByDefault="true" level="WARNING" dumbAware="true"
+                         groupKey="INSP.GROUP.robot" enabledByDefault="true" level="WARNING" dumbAware="true"
                          implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.ide.inspections.deprecation.RobotDeprecatedGlobalSettingsInspection"/>
         <localInspection language="Robot" shortName="RobotDeprecatedWithName" bundle="messages.RobotBundle" key="INSP.NAME.deprecated.import.with-name"
-                         groupPath="Robot" groupKey="INSP.GROUP.deprecated" enabledByDefault="true" level="WARNING" dumbAware="true"
+                         groupKey="INSP.GROUP.robot" enabledByDefault="true" level="WARNING" dumbAware="true"
                          implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.ide.inspections.deprecation.RobotDeprecatedWithNameInspection"/>
         <localInspection language="Robot" shortName="RobotDeprecatedKeywordSettings" bundle="messages.RobotBundle" key="INSP.NAME.deprecated.settings.local"
-                         groupPath="Robot" groupKey="INSP.GROUP.deprecated" enabledByDefault="true" level="WARNING" dumbAware="true"
+                         groupKey="INSP.GROUP.robot" enabledByDefault="true" level="WARNING" dumbAware="true"
                          implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.ide.inspections.deprecation.RobotDeprecatedKeywordSettingsInspection"/>
+        <lang.inspectionSuppressor language="Robot" implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.ide.inspections.RobotInspectionSuppressor"/>
 
         <runConfigurationProducer implementation="dev.xeonkryptos.xeonrobotframeworkplugin.ide.execution.config.RobotRunConfigurationProducer"/>
         <runLineMarkerContributor language="Robot" id="gradleGroovyRunLineMarkerProvider"

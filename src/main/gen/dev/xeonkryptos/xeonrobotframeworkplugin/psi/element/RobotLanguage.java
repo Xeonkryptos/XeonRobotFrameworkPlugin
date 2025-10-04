@@ -5,7 +5,7 @@ import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 
-public interface RobotLanguage extends RobotStatement {
+public interface RobotLanguage extends RobotElement {
 
   @Nullable
   RobotLanguageId getNameIdentifier();

@@ -65,7 +65,7 @@ public class RobotParameterAnnotator implements Annotator {
     }
 
     private static void highlightParameterAsNotFound(RobotParameter parameter, String keywordName, AnnotationHolder holder) {
-        holder.newAnnotation(HighlightSeverity.WARNING, RobotBundle.getMessage("annotation.keyword.parameter.not-found", keywordName))
+        holder.newAnnotation(HighlightSeverity.WARNING, RobotBundle.message("annotation.keyword.parameter.not-found", keywordName))
               .highlightType(ProblemHighlightType.WARNING)
               .range(parameter.getParameterId())
               .create();

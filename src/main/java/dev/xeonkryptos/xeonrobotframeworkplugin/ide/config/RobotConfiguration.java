@@ -75,8 +75,8 @@ public class RobotConfiguration implements NoScroll, SearchableConfigurable {
 
         JBCheckBox testsOnlyModeCheckBox = new JBCheckBox();
         this.testsOnlyMode = testsOnlyModeCheckBox;
-        testsOnlyModeCheckBox.setText(RobotBundle.getMessage("options.tests-only-mode.title"));
-        testsOnlyModeCheckBox.setToolTipText(RobotBundle.getMessage("options.tests-only-mode.tooltip"));
+        testsOnlyModeCheckBox.setText(RobotBundle.message("options.tests-only-mode.title"));
+        testsOnlyModeCheckBox.setToolTipText(RobotBundle.message("options.tests-only-mode.tooltip"));
         checkBoxPanel.add(testsOnlyModeCheckBox, new GridConstraints(checkBoxPanelRow++, 0, 1, 1, 8, 0, 3, 0, null, null, null));
 
         JBPanel<?> parameterNameCollationRulesForDecoratorsPanel = new JBPanel<>();
@@ -122,7 +122,7 @@ public class RobotConfiguration implements NoScroll, SearchableConfigurable {
         JBLabel customArgumentsLabel = new JBLabel();
         customArgumentsLabel.setText("Python inspection custom arguments: ");
         //        customArgumentsPanel.add(customArgumentsLabel);
-        customArgumentsLabel.setToolTipText(RobotBundle.getMessage("options.inspection.custom.arguments.tooltip"));
+        customArgumentsLabel.setToolTipText(RobotBundle.message("options.inspection.custom.arguments.tooltip"));
 
         JBTextField pythonLiveInspectionCustomArgumentsTextField = new JBTextField();
         this.pythonLiveInspectionCustomArgumentsTextField = pythonLiveInspectionCustomArgumentsTextField;
@@ -135,7 +135,7 @@ public class RobotConfiguration implements NoScroll, SearchableConfigurable {
 
         JBLabel pythonLiveInspectionForDecoratorsLabel = new JBLabel();
         pythonLiveInspectionForDecoratorsLabel.setText("Python inspection for decorators: ");
-        pythonLiveInspectionForDecoratorsLabel.setToolTipText(RobotBundle.getMessage("options.inspection.decorators.tooltip"));
+        pythonLiveInspectionForDecoratorsLabel.setToolTipText(RobotBundle.message("options.inspection.decorators.tooltip"));
         pythonLiveInspectionForDecoratorsPanel.add(pythonLiveInspectionForDecoratorsLabel);
 
         JBTextField pythonLiveInspectionForDecoratorsTextField = new JBTextField();
@@ -175,7 +175,7 @@ public class RobotConfiguration implements NoScroll, SearchableConfigurable {
     @Nls
     @Override
     public String getDisplayName() {
-        return RobotBundle.getMessage("options.entrypoint");
+        return RobotBundle.message("options.entrypoint");
     }
 
     @NotNull

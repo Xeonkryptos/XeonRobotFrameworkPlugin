@@ -43,14 +43,14 @@ public class RobotDryRunExecutor extends Executor {
     @Override
     @NlsActions.ActionDescription
     public String getDescription() {
-        return RobotBundle.getMessage("run.selected.configuration.with.dryrun.enabled");
+        return RobotBundle.message("run.selected.configuration.with.dryrun.enabled");
     }
 
     @NotNull
     @Override
     @NlsActions.ActionText
     public String getActionName() {
-        return RobotBundle.getMessage("action.name.dryrun");
+        return RobotBundle.message("action.name.dryrun");
     }
 
     @NotNull
@@ -63,7 +63,7 @@ public class RobotDryRunExecutor extends Executor {
     @Override
     @NotNull
     public String getStartActionText() {
-        return RobotBundle.getMessage("run.with.dryrun");
+        return RobotBundle.message("run.with.dryrun");
     }
 
     @NotNull
@@ -73,7 +73,7 @@ public class RobotDryRunExecutor extends Executor {
             return getStartActionText();
         }
         String configName = shortenNameIfNeeded(configurationName);
-        return TextWithMnemonic.parse(RobotBundle.getMessage("run.with.dryrun.mnemonic")).replaceFirst("%s", configName).toString();
+        return TextWithMnemonic.parse(RobotBundle.message("run.with.dryrun.mnemonic")).replaceFirst("%s", configName).toString();
     }
 
     @NonNls

@@ -6,7 +6,7 @@ import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiReference;
 
-public interface RobotParameterId extends RobotStatement {
+public interface RobotParameterId extends RobotElement {
 
   @NotNull PsiReference getReference();
 

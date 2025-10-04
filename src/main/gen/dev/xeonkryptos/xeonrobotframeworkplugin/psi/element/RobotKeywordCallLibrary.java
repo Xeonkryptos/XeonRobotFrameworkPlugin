@@ -5,7 +5,7 @@ import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 
-public interface RobotKeywordCallLibrary extends RobotStatement {
+public interface RobotKeywordCallLibrary extends RobotElement {
 
   @NotNull
   RobotKeywordCallLibraryName getKeywordCallLibraryName();

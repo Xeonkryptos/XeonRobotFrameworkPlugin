@@ -10,7 +10,7 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.RobotBundle;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCall;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCallName;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLocalSetting;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotStatement;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotElement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTemplateStatementsGlobalSetting;
 import org.jetbrains.annotations.NotNull;
 
@@ -26,14 +26,14 @@ public class RobotMissingMandatoryKeywordParametersAnnotator implements Annotato
 
         RobotKeywordCall keywordCall = PsiTreeUtil.getParentOfType(robotKeywordCallName, RobotKeywordCall.class);
         if (keywordCall != null && !keywordCall.allRequiredParametersArePresent()) {
-            RobotStatement ignoringParameterCheckParent = PsiTreeUtil.getParentOfType(keywordCall,
-                                                                                      true,
-                                                                                      RobotLocalSetting.class,
-                                                                                      RobotTemplateStatementsGlobalSetting.class);
+            RobotElement ignoringParameterCheckParent = PsiTreeUtil.getParentOfType(keywordCall,
+                                                                                    true,
+                                                                                    RobotLocalSetting.class,
+                                                                                    RobotTemplateStatementsGlobalSetting.class);
             if (ignoringParameterCheckParent == null) {
                 Collection<String> missingParameters = keywordCall.computeMissingRequiredParameters();
                 String missingRequiredParameters = String.join(", ", missingParameters);
-                holder.newAnnotation(HighlightSeverity.ERROR, RobotBundle.getMessage("annotation.keyword.parameters.missing", missingRequiredParameters))
+                holder.newAnnotation(HighlightSeverity.ERROR, RobotBundle.message("annotation.keyword.parameters.missing", missingRequiredParameters))
                       .highlightType(ProblemHighlightType.GENERIC_ERROR)
                       .range(element)
                       .withFix(new InsertMissingMandatoryKeywordParametersQuickFix(missingParameters))

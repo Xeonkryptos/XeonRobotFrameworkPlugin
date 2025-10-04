@@ -6,7 +6,7 @@ import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiReference;
 
-public interface RobotKeywordCallName extends RobotStatement {
+public interface RobotKeywordCallName extends RobotElement {
 
   @Nullable
   RobotKeywordCallLibrary getKeywordCallLibrary();

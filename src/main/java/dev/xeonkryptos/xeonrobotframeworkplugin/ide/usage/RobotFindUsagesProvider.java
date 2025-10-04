@@ -44,19 +44,19 @@ public class RobotFindUsagesProvider implements FindUsagesProvider {
     @NotNull
     @Override
     public String getType(@NotNull PsiElement element) {
-        return RobotBundle.getMessage("usage.declaration");
+        return RobotBundle.message("usage.declaration");
     }
 
     @NotNull
     @Override
     public String getDescriptiveName(@NotNull PsiElement element) {
         return switch (element) {
-            case RobotUserKeywordStatement ignored -> RobotBundle.getMessage("usage.descriptive.keyword");
-            case RobotVariableStatement ignored -> RobotBundle.getMessage("usage.descriptive.variable");
-            case RobotVariableDefinition ignored -> RobotBundle.getMessage("usage.descriptive.variable");
-            case RobotFile ignored -> RobotBundle.getMessage("usage.descriptive.import");
-            case RobotParameter ignored -> RobotBundle.getMessage("usage.descriptive.parameter");
-            case RobotPositionalArgument ignored -> RobotBundle.getMessage("usage.descriptive.argument");
+            case RobotUserKeywordStatement ignored -> RobotBundle.message("usage.descriptive.keyword");
+            case RobotVariableStatement ignored -> RobotBundle.message("usage.descriptive.variable");
+            case RobotVariableDefinition ignored -> RobotBundle.message("usage.descriptive.variable");
+            case RobotFile ignored -> RobotBundle.message("usage.descriptive.import");
+            case RobotParameter ignored -> RobotBundle.message("usage.descriptive.parameter");
+            case RobotPositionalArgument ignored -> RobotBundle.message("usage.descriptive.argument");
             default -> "";
         };
     }

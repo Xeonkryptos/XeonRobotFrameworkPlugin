@@ -5,6 +5,6 @@ import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 
-public interface RobotArgument extends RobotStatement {
+public interface RobotArgument extends RobotElement {
 
 }

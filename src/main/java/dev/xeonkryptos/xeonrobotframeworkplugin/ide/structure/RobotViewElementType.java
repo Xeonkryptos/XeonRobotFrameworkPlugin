@@ -19,7 +19,7 @@ public enum RobotViewElementType {
         @NotNull
         @Override
         protected String getMessage() {
-            return RobotBundle.getMessage("action.structureView.show.files");
+            return RobotBundle.message("action.structureView.show.files");
         }
     }, Section {
         @Override
@@ -30,7 +30,7 @@ public enum RobotViewElementType {
         @NotNull
         @Override
         protected String getMessage() {
-            return RobotBundle.getMessage("action.structureView.show.headings");
+            return RobotBundle.message("action.structureView.show.headings");
         }
     }, Settings {
         @Override
@@ -41,7 +41,7 @@ public enum RobotViewElementType {
         @NotNull
         @Override
         protected String getMessage() {
-            return RobotBundle.getMessage("action.structureView.show.settings");
+            return RobotBundle.message("action.structureView.show.settings");
         }
     }, TestCase {
         @Override
@@ -52,7 +52,7 @@ public enum RobotViewElementType {
         @NotNull
         @Override
         protected String getMessage() {
-            return RobotBundle.getMessage("action.structureView.show.testCases");
+            return RobotBundle.message("action.structureView.show.testCases");
         }
     }, Task {
         @Override
@@ -63,7 +63,7 @@ public enum RobotViewElementType {
         @NotNull
         @Override
         protected String getMessage() {
-            return RobotBundle.getMessage("action.structureView.show.tasks");
+            return RobotBundle.message("action.structureView.show.tasks");
         }
     }, Keyword {
         @Override
@@ -74,7 +74,7 @@ public enum RobotViewElementType {
         @NotNull
         @Override
         protected String getMessage() {
-            return RobotBundle.getMessage("action.structureView.show.keywords");
+            return RobotBundle.message("action.structureView.show.keywords");
         }
     }, Variable {
         @Override
@@ -85,7 +85,7 @@ public enum RobotViewElementType {
         @NotNull
         @Override
         protected String getMessage() {
-            return RobotBundle.getMessage("action.structureView.show.variables");
+            return RobotBundle.message("action.structureView.show.variables");
         }
     };
 

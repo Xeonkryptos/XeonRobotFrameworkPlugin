@@ -8,7 +8,7 @@ import com.intellij.psi.StubBasedPsiElement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotPositionalArgumentStub;
 import com.intellij.psi.PsiReference;
 
-public interface RobotPositionalArgument extends RobotArgument, RobotStatement, StubBasedPsiElement<RobotPositionalArgumentStub> {
+public interface RobotPositionalArgument extends RobotArgument, RobotElement, StubBasedPsiElement<RobotPositionalArgumentStub> {
 
   @NotNull PsiReference getReference();
 

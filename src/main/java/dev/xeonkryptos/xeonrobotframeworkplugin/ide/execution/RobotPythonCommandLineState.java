@@ -254,7 +254,7 @@ public class RobotPythonCommandLineState extends PythonScriptCommandLineState {
         try {
             return NetUtils.findAvailableSocketPort();
         } catch (IOException e) {
-            throw new RuntimeException(RobotBundle.getMessage("runcfg.error.message.failed.to.find.free.socket.port"), e);
+            throw new RuntimeException(RobotBundle.message("runcfg.error.message.failed.to.find.free.socket.port"), e);
         }
     }
 

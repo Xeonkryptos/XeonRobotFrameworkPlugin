@@ -5,7 +5,7 @@ import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 
-public interface RobotPythonExpression extends RobotStatement {
+public interface RobotPythonExpression extends RobotElement {
 
   @NotNull
   PsiElement getExpressionContent();

@@ -20,7 +20,7 @@ class EmptyVariableDetector : RobotVisitor() {
 
     override fun visitVariableContent(o: RobotVariableContent) {
         super.visitVariableContent(o)
-        emptyVariable = false
+        emptyVariable = o.variableBodyIdList.isEmpty() && o.variableList.isEmpty()
     }
 
     override fun visitPythonExpression(o: RobotPythonExpression) {

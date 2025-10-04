@@ -34,7 +34,7 @@
 
   extends(".*_structure")="executable_statement"
 
-  implements(".*")="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotStatement"
+  implements(".*")="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotElement"
   extends(".*")="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotPsiElementBase"
 
   pin("language")=1

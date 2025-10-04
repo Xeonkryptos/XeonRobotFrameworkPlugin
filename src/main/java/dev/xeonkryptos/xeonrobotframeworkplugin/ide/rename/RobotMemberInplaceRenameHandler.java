@@ -19,7 +19,7 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotFeatureFileType;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotResourceFileType;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCall;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCallName;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotStatement;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotElement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableDefinition;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.RobotPyUtil;
 import org.jetbrains.annotations.NotNull;
@@ -57,7 +57,7 @@ public class RobotMemberInplaceRenameHandler extends MemberInplaceRenameHandler 
                 return editor.getSettings().isVariableInplaceRenameEnabled();
             }
         }
-        return editor.getSettings().isVariableInplaceRenameEnabled() && element instanceof PsiNameIdentifierOwner && element instanceof RobotStatement
+        return editor.getSettings().isVariableInplaceRenameEnabled() && element instanceof PsiNameIdentifierOwner && element instanceof RobotElement
                // There is currently an issue with variable definitions. When a variable definition itself is target of the rename, two versions are in the template
                // that is internally created, leading to an issue and an exception suppressing the inplace-rename
                && !(element instanceof RobotVariableDefinition);

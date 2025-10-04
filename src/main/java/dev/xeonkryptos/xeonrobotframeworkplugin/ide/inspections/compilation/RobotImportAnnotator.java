@@ -24,7 +24,7 @@ public class RobotImportAnnotator implements Annotator {
         RobotPositionalArgument positionalArgument = importElementIdentifier.getPositionalArgument();
         PsiReference reference = positionalArgument.getReference();
         if (reference.resolve() == null) {
-            holder.newAnnotation(HighlightSeverity.ERROR, RobotBundle.getMessage("annotation.import.not-found")).range(positionalArgument).create();
+            holder.newAnnotation(HighlightSeverity.ERROR, RobotBundle.message("annotation.import.not-found")).range(positionalArgument).create();
         } else {
             holder.newSilentAnnotation(HighlightSeverity.TEXT_ATTRIBUTES).textAttributes(RobotHighlighter.IMPORT_ARGUMENT).range(positionalArgument).create();
         }

@@ -5,7 +5,7 @@ import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 
-public interface RobotExecutableStatement extends RobotFoldable, RobotStatement {
+public interface RobotExecutableStatement extends RobotFoldable, RobotElement {
 
   @NotNull
   List<RobotExecutableStatement> getExecutableStatementList();

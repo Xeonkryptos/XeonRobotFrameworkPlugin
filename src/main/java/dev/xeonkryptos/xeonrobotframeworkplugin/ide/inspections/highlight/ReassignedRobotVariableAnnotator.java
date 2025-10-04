@@ -31,7 +31,7 @@ public class ReassignedRobotVariableAnnotator extends AbstractRobotVariableAnnot
                           .count() > 1) {
                     holder.newSilentAnnotation(HighlightSeverity.TEXT_ATTRIBUTES)
                           .textAttributes(DefaultLanguageHighlighterColors.REASSIGNED_LOCAL_VARIABLE)
-                          .tooltip(RobotBundle.getMessage("annotation.variable.reassigned"))
+                          .tooltip(RobotBundle.message("annotation.variable.reassigned"))
                           .range(variable)
                           .create();
                 }

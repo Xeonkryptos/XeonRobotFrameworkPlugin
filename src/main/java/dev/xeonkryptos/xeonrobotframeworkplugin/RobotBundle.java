@@ -1,29 +1,25 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin;
 
-import com.intellij.AbstractBundle;
+import com.intellij.DynamicBundle;
+import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NonNls;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.PropertyKey;
 
 import java.lang.ref.Reference;
-import java.lang.ref.SoftReference;
 import java.util.ResourceBundle;
 
-public class RobotBundle {
+public final class RobotBundle extends DynamicBundle {
 
     @NonNls
     private static final String BUNDLE = "messages.RobotBundle";
-
-    private static Reference<ResourceBundle> instance;
+    private static final RobotBundle INSTANCE = new RobotBundle();
 
     private RobotBundle() {
+        super(BUNDLE);
     }
 
-    public static String getMessage(@NonNls @PropertyKey(resourceBundle = BUNDLE) String key, Object... params) {
-        ResourceBundle bundle = instance != null ? instance.get() : null;
-        if (bundle == null) {
-            bundle = ResourceBundle.getBundle(BUNDLE);
-            instance = new SoftReference<>(bundle);
-        }
-        return AbstractBundle.message(bundle, key, params);
+    public static @NotNull @Nls String message(@NonNls @PropertyKey(resourceBundle = BUNDLE) String key, Object... params) {
+        return INSTANCE.getMessage(key, params);
     }
 }

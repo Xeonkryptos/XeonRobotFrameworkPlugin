@@ -35,7 +35,7 @@ public class RobotTypeSorter implements Sorter {
     @NotNull
     @Override
     public ActionPresentation getPresentation() {
-        return new ActionPresentationData(RobotBundle.getMessage("action.structureView.sort.type"), null, ObjectBrowser.SortByType);
+        return new ActionPresentationData(RobotBundle.message("action.structureView.sort.type"), null, ObjectBrowser.SortByType);
     }
 
     @NotNull

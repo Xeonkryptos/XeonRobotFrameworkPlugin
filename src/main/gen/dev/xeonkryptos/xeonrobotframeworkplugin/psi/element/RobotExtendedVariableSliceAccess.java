@@ -5,6 +5,6 @@ import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 
-public interface RobotExtendedVariableSliceAccess extends RobotStatement {
+public interface RobotExtendedVariableSliceAccess extends RobotElement {
 
 }

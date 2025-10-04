@@ -9,7 +9,7 @@ import com.intellij.navigation.NavigationItem;
 import com.intellij.psi.StubBasedPsiElement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotKeywordCallStub;
 
-public interface RobotKeywordCall extends RobotQualifiedNameOwner, RobotKeywordCallExpression, PsiNameIdentifierOwner, NavigationItem, RobotCallArgumentsContainer, RobotFoldable, RobotStatement, StubBasedPsiElement<RobotKeywordCallStub> {
+public interface RobotKeywordCall extends RobotQualifiedNameOwner, RobotKeywordCallExpression, PsiNameIdentifierOwner, NavigationItem, RobotCallArgumentsContainer, RobotFoldable, RobotElement, StubBasedPsiElement<RobotKeywordCallStub> {
 
   @NotNull
   RobotKeywordCallName getKeywordCallName();

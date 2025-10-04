@@ -38,7 +38,7 @@ public class RobotVariableDefinitionNotFoundAnnotator extends AbstractRobotVaria
 
                 if (!robotVariableAnalyser.variableDefinitionAsParent && !robotVariableAnalyser.pythonExpressionVariableBodyFound && !NUMBERS_PATTERN.matcher(
                         variableName).matches()) {
-                    holder.newAnnotation(HighlightSeverity.WEAK_WARNING, RobotBundle.getMessage("annotation.variable.not-found")).range(element).create();
+                    holder.newAnnotation(HighlightSeverity.WEAK_WARNING, RobotBundle.message("annotation.variable.not-found")).range(element).create();
                 }
             }
         }

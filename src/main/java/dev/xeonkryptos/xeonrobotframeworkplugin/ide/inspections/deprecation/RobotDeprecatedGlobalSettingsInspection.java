@@ -27,11 +27,11 @@ public class RobotDeprecatedGlobalSettingsInspection extends RobotVersionBasedIn
                     String settingName = o.getNameElement().getText();
                     if (settingName.equalsIgnoreCase("Default Tags")) {
                         holder.registerProblem(o.getNameElement(),
-                                               RobotBundle.getMessage("INSP.setting.global.default-tags.deprecated"),
+                                               RobotBundle.message("INSP.setting.global.default-tags.deprecated"),
                                                ProblemHighlightType.LIKE_DEPRECATED);
                     } else if (settingName.equalsIgnoreCase("Force Tags")) {
                         holder.registerProblem(o.getNameElement(),
-                                               RobotBundle.getMessage("INSP.setting.global.force-tags.deprecated"),
+                                               RobotBundle.message("INSP.setting.global.force-tags.deprecated"),
                                                ProblemHighlightType.LIKE_DEPRECATED);
                     }
                 }

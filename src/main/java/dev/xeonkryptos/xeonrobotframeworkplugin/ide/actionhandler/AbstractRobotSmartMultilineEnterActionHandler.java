@@ -6,6 +6,7 @@ import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.fileTypes.FileType;
 import com.intellij.openapi.util.TextRange;
+import com.intellij.psi.PsiComment;
 import com.intellij.psi.PsiDocumentManager;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
@@ -139,16 +140,18 @@ public abstract class AbstractRobotSmartMultilineEnterActionHandler<T extends Ps
     private String evaluateCustomIndentationBasedOnFirstNonWhitespaceElement(@NotNull PsiFile file, int lineStartOffset, int lineEndOffset) {
         String whitespacesToInsert = GlobalConstants.DEFAULT_INDENTATION;
         PsiElement elementForIndentation = file.findElementAt(lineStartOffset);
-        while (elementForIndentation instanceof PsiWhiteSpace && elementForIndentation.getTextOffset() <= lineEndOffset) {
+        while ((elementForIndentation instanceof PsiWhiteSpace || elementForIndentation instanceof PsiComment)
+               && elementForIndentation.getTextOffset() <= lineEndOffset) {
             elementForIndentation = elementForIndentation.getNextSibling();
         }
 
-        if (elementForIndentation != null && !(elementForIndentation instanceof PsiWhiteSpace)) {
+        if (elementForIndentation != null && !(elementForIndentation instanceof PsiWhiteSpace || elementForIndentation instanceof PsiComment)) {
             int argumentForIndentationOffset = elementForIndentation.getTextOffset();
             PsiElement ellipsisElement = elementForIndentation;
             do {
                 ellipsisElement = ellipsisElement.getPrevSibling();
-            } while (ellipsisElement instanceof PsiWhiteSpace && !ellipsisElement.textMatches(GlobalConstants.ELLIPSIS));
+            } while (ellipsisElement instanceof PsiWhiteSpace && !ellipsisElement.textMatches(GlobalConstants.ELLIPSIS)
+                     || ellipsisElement instanceof PsiComment);
 
             if (ellipsisElement != null && ellipsisElement.textMatches(GlobalConstants.ELLIPSIS)) {
                 int ellipsesEndOffset = ellipsisElement.getTextOffset() + ellipsisElement.getTextLength();

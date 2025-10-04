@@ -62,7 +62,7 @@ public class WeirdlyNamedElementsInspection extends LocalInspectionTool {
                 }
                 if (expectedName != null) {
                     holder.registerProblem(o,
-                                           RobotBundle.getMessage("INSP.weird.naming", expectedName),
+                                           RobotBundle.message("INSP.weird.naming", expectedName),
                                            ProblemHighlightType.WARNING,
                                            new WeirdlyNamedKeywordCallQuickFix(o, expectedName));
                 }
@@ -87,7 +87,7 @@ public class WeirdlyNamedElementsInspection extends LocalInspectionTool {
                             String usedBaseVariableName = VariableNameUtil.INSTANCE.computeBaseVariableName(usedName);
                             if (!definedBaseVariableName.trim().equalsIgnoreCase(usedBaseVariableName)) {
                                 holder.registerProblem(variable,
-                                                       RobotBundle.getMessage("INSP.weird.naming", definedBaseVariableName),
+                                                       RobotBundle.message("INSP.weird.naming", definedBaseVariableName),
                                                        ProblemHighlightType.WARNING,
                                                        new WeirdlyNamedVariableElementQuickFix(o, definedName));
                             }

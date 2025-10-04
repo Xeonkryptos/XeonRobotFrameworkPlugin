@@ -28,7 +28,7 @@ public class RobotDeprecatedWithNameInspection extends RobotVersionBasedInspecti
                                                                                                                                                        0,
                                                                                                                                                        0))) {
                     holder.registerProblem(libraryNameElement,
-                                           RobotBundle.getMessage("INSP.library.import.with-name.deprecated"),
+                                           RobotBundle.message("INSP.library.import.with-name.deprecated"),
                                            ProblemHighlightType.LIKE_DEPRECATED);
                 }
             }

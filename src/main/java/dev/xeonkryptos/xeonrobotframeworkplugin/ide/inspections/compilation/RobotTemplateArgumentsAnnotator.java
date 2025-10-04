@@ -29,8 +29,8 @@ public class RobotTemplateArgumentsAnnotator implements Annotator {
             Collection<String> missingRequiredParameters = templateArguments.computeMissingRequiredParameters();
             if (!missingRequiredParameters.isEmpty()) {
                 holder.newAnnotation(HighlightSeverity.ERROR,
-                                     RobotBundle.getMessage("annotation.template.arguments.missing-required-parameters",
-                                                            String.join(", ", missingRequiredParameters)))
+                                     RobotBundle.message("annotation.template.arguments.missing-required-parameters",
+                                                         String.join(", ", missingRequiredParameters)))
                       .range(templateArguments)
                       .highlightType(ProblemHighlightType.GENERIC_ERROR)
                       .withFix(new InsertMissingMandatoryKeywordParametersQuickFix(missingRequiredParameters))

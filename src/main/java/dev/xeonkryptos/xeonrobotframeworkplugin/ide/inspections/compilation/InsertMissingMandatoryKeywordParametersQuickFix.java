@@ -24,7 +24,7 @@ class InsertMissingMandatoryKeywordParametersQuickFix extends PsiElementBaseInte
 
     public InsertMissingMandatoryKeywordParametersQuickFix(Collection<String> missingRequiredParameters) {
         this.missingRequiredParameters = missingRequiredParameters;
-        setText(RobotBundle.getMessage("intention.family.insert.text.keyword.missing-required-parameters"));
+        setText(RobotBundle.message("intention.family.insert.text.keyword.missing-required-parameters"));
     }
 
     @Override
@@ -63,6 +63,6 @@ class InsertMissingMandatoryKeywordParametersQuickFix extends PsiElementBaseInte
     @Override
     @IntentionFamilyName
     public String getFamilyName() {
-        return RobotBundle.getMessage("intention.family.insert.name.keyword.missing-required-parameters");
+        return RobotBundle.message("intention.family.insert.name.keyword.missing-required-parameters");
     }
 }

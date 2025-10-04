@@ -25,7 +25,7 @@ public class WeirdlyNamedKeywordCallQuickFix extends LocalQuickFixOnPsiElement {
     @Override
     @IntentionName
     public String getText() {
-        return RobotBundle.getMessage("intention.family.weird-naming.text", newName);
+        return RobotBundle.message("intention.family.weird-naming.text", newName);
     }
 
     @Override
@@ -45,6 +45,6 @@ public class WeirdlyNamedKeywordCallQuickFix extends LocalQuickFixOnPsiElement {
     @Override
     @IntentionFamilyName
     public String getFamilyName() {
-        return RobotBundle.getMessage("intention.family.weird-naming.name");
+        return RobotBundle.message("intention.family.weird-naming.name");
     }
 }

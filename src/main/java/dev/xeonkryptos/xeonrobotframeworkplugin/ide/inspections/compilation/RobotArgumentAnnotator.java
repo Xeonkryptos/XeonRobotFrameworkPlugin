@@ -11,7 +11,7 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotArgument;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCall;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotParameter;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotPositionalArgument;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotStatement;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotElement;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
@@ -23,8 +23,8 @@ public class RobotArgumentAnnotator implements Annotator {
         if (!(element instanceof RobotPositionalArgument positionalArgument)) {
             return;
         }
-        RobotStatement robotStatement = PsiTreeUtil.getParentOfType(element, RobotParameter.class, RobotKeywordCall.class);
-        if (robotStatement instanceof RobotKeywordCall keywordCall) {
+        RobotElement robotElement = PsiTreeUtil.getParentOfType(element, RobotParameter.class, RobotKeywordCall.class);
+        if (robotElement instanceof RobotKeywordCall keywordCall) {
             keywordCall.getStartOfKeywordsOnlyIndex()
                        .ifPresent(keywordsOnlyIndex -> handlePositionalArgumentWithinKeywordOnlyKeywordCall(keywordsOnlyIndex,
                                                                                                             positionalArgument,
@@ -55,7 +55,7 @@ public class RobotArgumentAnnotator implements Annotator {
     }
 
     private static void highlightPositionalArgumentAsInvalidlyPlaced(RobotPositionalArgument positionalArgument, AnnotationHolder holder) {
-        holder.newAnnotation(HighlightSeverity.GENERIC_SERVER_ERROR_OR_WARNING, RobotBundle.getMessage("annotation.keyword.positional-arguments.keyword-only.misplaced"))
+        holder.newAnnotation(HighlightSeverity.GENERIC_SERVER_ERROR_OR_WARNING, RobotBundle.message("annotation.keyword.positional-arguments.keyword-only.misplaced"))
               .highlightType(ProblemHighlightType.GENERIC_ERROR_OR_WARNING)
               .range(positionalArgument)
               .create();

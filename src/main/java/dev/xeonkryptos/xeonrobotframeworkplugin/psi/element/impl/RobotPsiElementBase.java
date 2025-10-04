@@ -3,13 +3,13 @@ package dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl;
 import com.intellij.extapi.psi.ASTWrapperPsiElement;
 import com.intellij.lang.ASTNode;
 import com.intellij.navigation.ItemPresentation;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotStatement;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotElement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.QualifiedNameBuilder;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.Icon;
 
-public abstract class RobotPsiElementBase extends ASTWrapperPsiElement implements RobotStatement {
+public abstract class RobotPsiElementBase extends ASTWrapperPsiElement implements RobotElement {
 
     public RobotPsiElementBase(@NotNull ASTNode node) {
         super(node);

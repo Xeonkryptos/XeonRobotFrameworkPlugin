@@ -8,7 +8,7 @@ import com.intellij.psi.search.searches.ReferencesSearch;
 import com.jetbrains.python.psi.PyFunction;
 import com.jetbrains.python.refactoring.rename.RenamePyElementProcessor;
 import com.jetbrains.python.refactoring.rename.RenamePyFunctionProcessor;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotStatement;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotElement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.RobotPyUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -63,7 +63,7 @@ public class RenameRobotPyFunctionProcessor extends RenamePyElementProcessor {
     public Collection<PsiReference> findReferences(@NotNull PsiElement element, @NotNull SearchScope searchScope, boolean searchInCommentsAndStrings) {
         boolean customKeywordName = RobotPyUtil.findCustomKeywordNameDecoratorExpression((PyFunction) element).isPresent();
         if (customKeywordName) {
-            return ReferencesSearch.search(element, searchScope).filtering(reference -> !(reference.getElement() instanceof RobotStatement)).findAll();
+            return ReferencesSearch.search(element, searchScope).filtering(reference -> !(reference.getElement() instanceof RobotElement)).findAll();
         }
         return super.findReferences(element, searchScope, searchInCommentsAndStrings);
     }

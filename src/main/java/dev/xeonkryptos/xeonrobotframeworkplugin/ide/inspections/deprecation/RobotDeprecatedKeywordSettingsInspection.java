@@ -30,7 +30,7 @@ public class RobotDeprecatedKeywordSettingsInspection extends RobotVersionBasedI
                 if (settingName.equalsIgnoreCase("[Return]") && userKeywordStatement != null && robotVersion.supports(new RobotVersion(7, 0, 0))) {
                     RobotLocalSettingId localSettingId = o.getLocalSettingId();
                     holder.registerProblem(localSettingId,
-                                           RobotBundle.getMessage("INSP.setting.local.return.deprecated"),
+                                           RobotBundle.message("INSP.setting.local.return.deprecated"),
                                            ProblemHighlightType.LIKE_DEPRECATED);
 
                 }

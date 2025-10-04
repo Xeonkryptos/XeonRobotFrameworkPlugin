@@ -21,7 +21,7 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCall;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLocalArgumentsSetting;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLocalSetting;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotParameter;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotStatement;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotElement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTaskStatement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTemplateArguments;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTemplateParameter;
@@ -53,11 +53,11 @@ class VariableCompletionProvider extends CompletionProvider<CompletionParameters
         }
 
         RobotKeywordCall keywordCall = null;
-        RobotStatement parentOfInterest = PsiTreeUtil.getParentOfType(psiElement,
-                                                                      // Stop-gaps to ignore any of the real-interested parents
-                                                                      RobotParameter.class, RobotTemplateParameter.class,
-                                                                      // Really interested in, but only when not one of the previous defined types are matching
-                                                                      RobotKeywordCall.class, RobotTemplateArguments.class);
+        RobotElement parentOfInterest = PsiTreeUtil.getParentOfType(psiElement,
+                                                                    // Stop-gaps to ignore any of the real-interested parents
+                                                                    RobotParameter.class, RobotTemplateParameter.class,
+                                                                    // Really interested in, but only when not one of the previous defined types are matching
+                                                                    RobotKeywordCall.class, RobotTemplateArguments.class);
         if (parentOfInterest instanceof RobotTemplateArguments templateArguments) {
             keywordCall = KeywordUtil.getInstance(templateArguments.getProject()).findTemplateKeywordCall(templateArguments);
         } else if (parentOfInterest instanceof RobotKeywordCall call) {

@@ -10,7 +10,7 @@ import com.intellij.psi.StubBasedPsiElement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotTestCaseStatementStub;
 import javax.swing.Icon;
 
-public interface RobotTestCaseStatement extends RobotQualifiedNameOwner, PsiNameIdentifierOwner, NavigationItem, RobotFoldable, RobotScopeOwner, RobotStatement, StubBasedPsiElement<RobotTestCaseStatementStub> {
+public interface RobotTestCaseStatement extends RobotQualifiedNameOwner, PsiNameIdentifierOwner, NavigationItem, RobotFoldable, RobotScopeOwner, RobotElement, StubBasedPsiElement<RobotTestCaseStatementStub> {
 
   @NotNull
   List<RobotLocalSetting> getLocalSettingList();

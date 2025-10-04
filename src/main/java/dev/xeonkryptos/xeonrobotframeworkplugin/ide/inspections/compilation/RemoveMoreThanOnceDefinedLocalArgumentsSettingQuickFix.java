@@ -18,7 +18,7 @@ import org.jetbrains.annotations.NotNull;
 class RemoveMoreThanOnceDefinedLocalArgumentsSettingQuickFix extends PsiElementBaseIntentionAction {
 
     public RemoveMoreThanOnceDefinedLocalArgumentsSettingQuickFix() {
-        setText(RobotBundle.getMessage("intention.family.remove.text.illegal-arguments-setting"));
+        setText(RobotBundle.message("intention.family.remove.text.illegal-arguments-setting"));
     }
 
     @Override
@@ -63,6 +63,6 @@ class RemoveMoreThanOnceDefinedLocalArgumentsSettingQuickFix extends PsiElementB
     @Override
     @IntentionFamilyName
     public String getFamilyName() {
-        return RobotBundle.getMessage("intention.family.remove.name.illegal-arguments-setting");
+        return RobotBundle.message("intention.family.remove.name.illegal-arguments-setting");
     }
 }

@@ -21,7 +21,7 @@ public class RobotUnresolvedKeywordAnnotator implements Annotator {
         PsiElement resolvedElement = reference.resolve();
         boolean isResolved = resolvedElement != null;
         if (!isResolved) {
-            holder.newAnnotation(HighlightSeverity.ERROR, RobotBundle.getMessage("annotation.keyword.not-found")).range(element).create();
+            holder.newAnnotation(HighlightSeverity.ERROR, RobotBundle.message("annotation.keyword.not-found")).range(element).create();
         }
     }
 }

@@ -25,7 +25,7 @@ public class RobotUserKeywordStatementAnnotator implements Annotator, DumbAware 
         if (argumentsSettings.size() >= 2) {
             for (int i = 1; i < argumentsSettings.size(); i++) {
                 PsiElement argument = argumentsSettings.get(i);
-                holder.newAnnotation(HighlightSeverity.ERROR, RobotBundle.getMessage("annotation.user-keyword.settings.argument.defined-more-than-once"))
+                holder.newAnnotation(HighlightSeverity.ERROR, RobotBundle.message("annotation.user-keyword.settings.argument.defined-more-than-once"))
                       .highlightType(ProblemHighlightType.GENERIC_ERROR)
                       .range(argument)
                       .withFix(new RemoveMoreThanOnceDefinedLocalArgumentsSettingQuickFix())

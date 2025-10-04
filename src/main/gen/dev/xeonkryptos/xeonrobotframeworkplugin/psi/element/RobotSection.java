@@ -5,7 +5,7 @@ import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 
-public interface RobotSection extends RobotFoldable, RobotStatement {
+public interface RobotSection extends RobotFoldable, RobotElement {
 
   @NotNull String getSectionName();
 

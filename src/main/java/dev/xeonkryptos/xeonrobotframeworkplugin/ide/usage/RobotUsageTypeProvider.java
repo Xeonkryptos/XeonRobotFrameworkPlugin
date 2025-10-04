@@ -12,7 +12,7 @@ import org.jetbrains.annotations.Nullable;
 
 public class RobotUsageTypeProvider implements UsageTypeProviderEx {
 
-    private static final UsageType KEYWORD_USAGE_TYPE = new UsageType(() -> RobotBundle.getMessage("usage.type.keyword"));
+    private static final UsageType KEYWORD_USAGE_TYPE = new UsageType(() -> RobotBundle.message("usage.type.keyword"));
 
     @Nullable
     @Override

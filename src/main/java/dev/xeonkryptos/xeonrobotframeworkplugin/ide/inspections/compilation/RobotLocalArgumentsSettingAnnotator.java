@@ -37,7 +37,7 @@ public class RobotLocalArgumentsSettingAnnotator implements Annotator, DumbAware
                         keywordOnlyMarkerFound = true;
                     } else {
                         holder.newAnnotation(HighlightSeverity.ERROR,
-                                             RobotBundle.getMessage("annotation.user-keyword.settings.argument.keyword-only-marker-more-than-once"))
+                                             RobotBundle.message("annotation.user-keyword.settings.argument.keyword-only-marker-more-than-once"))
                               .highlightType(ProblemHighlightType.GENERIC_ERROR)
                               .range(variableDefinition)
                               .withFix(new RemoveMoreThanOnceDefinedKeywordOnlyMarkersQuickFix())
@@ -52,7 +52,7 @@ public class RobotLocalArgumentsSettingAnnotator implements Annotator, DumbAware
             argumentsSetting.acceptChildren(visitor);
             for (PsiElement invalidVariableDefinition : visitor.invalidVariableDefinitions) {
                 holder.newAnnotation(HighlightSeverity.ERROR,
-                                     RobotBundle.getMessage("annotation.user-keyword.settings.argument.variable-defined-after-keyword-only-marker"))
+                                     RobotBundle.message("annotation.user-keyword.settings.argument.variable-defined-after-keyword-only-marker"))
                       .highlightType(ProblemHighlightType.GENERIC_ERROR)
                       .range(invalidVariableDefinition)
                       .create();

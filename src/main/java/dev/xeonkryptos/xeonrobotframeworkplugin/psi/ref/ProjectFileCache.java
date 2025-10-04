@@ -8,18 +8,14 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class ProjectFileCache {
 
-   private static final Map<Project, Cache> CACHE = new HashMap<>();
+   private static final Map<Project, Cache> CACHE = new ConcurrentHashMap<>();
 
-   private static synchronized Cache getCache(Project project) {
-       Cache cache = CACHE.get(project);
-       if (cache == null) {
-           cache = new Cache();
-           CACHE.put(project, cache);
-       }
-       return cache;
+   private static Cache getCache(Project project) {
+       return CACHE.computeIfAbsent(project, k -> new Cache());
    }
 
    public static Map<String, PsiFile> getCachedRobotSystemFiles(Project project) {

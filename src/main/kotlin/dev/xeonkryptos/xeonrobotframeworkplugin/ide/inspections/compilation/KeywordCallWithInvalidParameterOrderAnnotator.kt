@@ -24,7 +24,7 @@ class KeywordCallWithInvalidParameterOrderAnnotator : Annotator, DumbAware {
             if (argument is RobotParameter) {
                 parameterFound = true
             } else if (parameterFound) {
-                holder.newAnnotation(HighlightSeverity.ERROR, RobotBundle.getMessage("annotation.keyword.arguments.mixed"))
+                holder.newAnnotation(HighlightSeverity.ERROR, RobotBundle.message("annotation.keyword.arguments.mixed"))
                     .highlightType(ProblemHighlightType.GENERIC_ERROR)
                     .range(argument)
                     .create()

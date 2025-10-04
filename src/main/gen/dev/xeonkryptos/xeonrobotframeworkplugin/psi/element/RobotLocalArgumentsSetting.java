@@ -5,7 +5,7 @@ import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 
-public interface RobotLocalArgumentsSetting extends RobotFoldable, RobotStatement {
+public interface RobotLocalArgumentsSetting extends RobotFoldable, RobotElement {
 
   @NotNull
   RobotLocalArgumentsSettingId getLocalArgumentsSettingId();

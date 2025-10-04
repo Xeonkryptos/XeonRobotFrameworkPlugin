@@ -22,7 +22,7 @@ class RobotInvalidKeywordOnlyMarkerAnnotation : Annotator {
             val detector = EmptyVariableDetector()
             element.accept(detector)
             if (detector.emptyVariable) {
-                holder.newAnnotation(HighlightSeverity.ERROR, RobotBundle.getMessage("annotation.variable.blank.invalid"))
+                holder.newAnnotation(HighlightSeverity.ERROR, RobotBundle.message("annotation.variable.blank.invalid"))
                     .highlightType(ProblemHighlightType.GENERIC_ERROR)
                     .range(element)
                     .create()

@@ -27,8 +27,8 @@ class RobotPluginSdkFragment : SettingsEditorFragment<RobotRunConfiguration, JPa
   "py.plugin.interpreter", null, null, JPanel(GridBagLayout()), SettingsEditorFragmentType.COMMAND_LINE, null, null,
   { true }), PyInterpreterModeNotifier {
 
-  private val typeNames = listOf(RobotBundle.getMessage("python.run.configuration.fragments.plugin.sdk.of.module"),
-                                 RobotBundle.getMessage("python.run.configuration.fragments.plugin.specified.interpreter"))
+  private val typeNames = listOf(RobotBundle.message("python.run.configuration.fragments.plugin.sdk.of.module"),
+                                 RobotBundle.message("python.run.configuration.fragments.plugin.specified.interpreter"))
   private val SDK_OF_MODULE = 0
   private val SDK_FROM_LIST = 1
   private var currentMode: Int? = null
@@ -47,7 +47,7 @@ class RobotPluginSdkFragment : SettingsEditorFragment<RobotRunConfiguration, JPa
     sdkChooser.addItem(typeNames[SDK_FROM_LIST])
     CommandLinePanel.setMinimumWidth(sdkChooser, 200)
     component().add(sdkChooser, GridBagConstraints())
-    hints[sdkChooser] = RobotBundle.getMessage("python.run.configuration.fragments.plugin.sdk.chooser.hint")
+    hints[sdkChooser] = RobotBundle.message("python.run.configuration.fragments.plugin.sdk.chooser.hint")
 
     sdkChooser.addItemListener { e ->
       if (e?.stateChange == ItemEvent.SELECTED) {
@@ -93,7 +93,7 @@ class RobotPluginSdkFragment : SettingsEditorFragment<RobotRunConfiguration, JPa
     fields[SDK_OF_MODULE] = modulesComponent
     modulesCombo = modulesComponent
     CommandLinePanel.setMinimumWidth(modulesCombo, 400)
-    hints[modulesComponent] = RobotBundle.getMessage("python.run.configuration.fragments.plugin.sdk.of.module.hint")
+    hints[modulesComponent] = RobotBundle.message("python.run.configuration.fragments.plugin.sdk.of.module.hint")
     modulesCombo?.addActionListener { updateRemoteInterpreterMode() }
 
     val interpreterComponent = PySdkComboBox(false) { modulesComponent.selectedModule }
@@ -102,7 +102,7 @@ class RobotPluginSdkFragment : SettingsEditorFragment<RobotRunConfiguration, JPa
     fields[SDK_FROM_LIST] = interpreterComponent
     interpreterCombo = interpreterComponent
     CommandLinePanel.setMinimumWidth(interpreterCombo, 400)
-    hints[interpreterComponent] = RobotBundle.getMessage("python.run.configuration.fragments.plugin.specified.interpreter.hint")
+    hints[interpreterComponent] = RobotBundle.message("python.run.configuration.fragments.plugin.specified.interpreter.hint")
     interpreterCombo?.addActionListener { updateRemoteInterpreterMode() }
   }
 

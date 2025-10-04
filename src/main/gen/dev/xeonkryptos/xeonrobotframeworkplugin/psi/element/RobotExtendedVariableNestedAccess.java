@@ -5,7 +5,7 @@ import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 
-public interface RobotExtendedVariableNestedAccess extends RobotStatement {
+public interface RobotExtendedVariableNestedAccess extends RobotElement {
 
   @NotNull
   List<RobotLiteralConstantValue> getLiteralConstantValueList();

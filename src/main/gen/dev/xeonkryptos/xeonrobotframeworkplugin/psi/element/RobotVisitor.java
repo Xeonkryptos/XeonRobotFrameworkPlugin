@@ -10,11 +10,11 @@ import com.intellij.navigation.NavigationItem;
 public class RobotVisitor extends PsiElementVisitor {
 
   public void visitArgument(@NotNull RobotArgument o) {
-    visitStatement(o);
+    visitElement(o);
   }
 
   public void visitBddStatement(@NotNull RobotBddStatement o) {
-    visitStatement(o);
+    visitElement(o);
   }
 
   public void visitBlockOpeningStructure(@NotNull RobotBlockOpeningStructure o) {
@@ -55,23 +55,23 @@ public class RobotVisitor extends PsiElementVisitor {
 
   public void visitExecutableStatement(@NotNull RobotExecutableStatement o) {
     visitFoldable(o);
-    // visitStatement(o);
+    // visitElement(o);
   }
 
   public void visitExtendedVariableIndexAccess(@NotNull RobotExtendedVariableIndexAccess o) {
-    visitStatement(o);
+    visitElement(o);
   }
 
   public void visitExtendedVariableKeyAccess(@NotNull RobotExtendedVariableKeyAccess o) {
-    visitStatement(o);
+    visitElement(o);
   }
 
   public void visitExtendedVariableNestedAccess(@NotNull RobotExtendedVariableNestedAccess o) {
-    visitStatement(o);
+    visitElement(o);
   }
 
   public void visitExtendedVariableSliceAccess(@NotNull RobotExtendedVariableSliceAccess o) {
-    visitStatement(o);
+    visitElement(o);
   }
 
   public void visitFinallyStructure(@NotNull RobotFinallyStructure o) {
@@ -80,7 +80,7 @@ public class RobotVisitor extends PsiElementVisitor {
   }
 
   public void visitFoldable(@NotNull RobotFoldable o) {
-    visitStatement(o);
+    visitElement(o);
   }
 
   public void visitForLoopStructure(@NotNull RobotForLoopStructure o) {
@@ -90,7 +90,7 @@ public class RobotVisitor extends PsiElementVisitor {
 
   public void visitGlobalSettingStatement(@NotNull RobotGlobalSettingStatement o) {
     visitFoldable(o);
-    // visitStatement(o);
+    // visitElement(o);
   }
 
   public void visitGroupStructure(@NotNull RobotGroupStructure o) {
@@ -119,19 +119,19 @@ public class RobotVisitor extends PsiElementVisitor {
     // visitNavigationItem(o);
     // visitCallArgumentsContainer(o);
     // visitFoldable(o);
-    // visitStatement(o);
+    // visitElement(o);
   }
 
   public void visitKeywordCallLibrary(@NotNull RobotKeywordCallLibrary o) {
-    visitStatement(o);
+    visitElement(o);
   }
 
   public void visitKeywordCallLibraryName(@NotNull RobotKeywordCallLibraryName o) {
-    visitStatement(o);
+    visitElement(o);
   }
 
   public void visitKeywordCallName(@NotNull RobotKeywordCallName o) {
-    visitStatement(o);
+    visitElement(o);
   }
 
   public void visitKeywordVariableStatement(@NotNull RobotKeywordVariableStatement o) {
@@ -144,11 +144,11 @@ public class RobotVisitor extends PsiElementVisitor {
   }
 
   public void visitLanguage(@NotNull RobotLanguage o) {
-    visitStatement(o);
+    visitElement(o);
   }
 
   public void visitLanguageId(@NotNull RobotLanguageId o) {
-    visitStatement(o);
+    visitElement(o);
   }
 
   public void visitLibraryImportGlobalSetting(@NotNull RobotLibraryImportGlobalSetting o) {
@@ -161,37 +161,37 @@ public class RobotVisitor extends PsiElementVisitor {
   }
 
   public void visitLiteralConstantValue(@NotNull RobotLiteralConstantValue o) {
-    visitStatement(o);
+    visitElement(o);
   }
 
   public void visitLocalArgumentsSetting(@NotNull RobotLocalArgumentsSetting o) {
     visitFoldable(o);
-    // visitStatement(o);
+    // visitElement(o);
   }
 
   public void visitLocalArgumentsSettingId(@NotNull RobotLocalArgumentsSettingId o) {
-    visitStatement(o);
+    visitElement(o);
   }
 
   public void visitLocalArgumentsSettingParameter(@NotNull RobotLocalArgumentsSettingParameter o) {
-    visitStatement(o);
+    visitElement(o);
   }
 
   public void visitLocalArgumentsSettingParameterMandatory(@NotNull RobotLocalArgumentsSettingParameterMandatory o) {
-    visitStatement(o);
+    visitElement(o);
   }
 
   public void visitLocalArgumentsSettingParameterOptional(@NotNull RobotLocalArgumentsSettingParameterOptional o) {
-    visitStatement(o);
+    visitElement(o);
   }
 
   public void visitLocalSetting(@NotNull RobotLocalSetting o) {
     visitFoldable(o);
-    // visitStatement(o);
+    // visitElement(o);
   }
 
   public void visitLocalSettingId(@NotNull RobotLocalSettingId o) {
-    visitStatement(o);
+    visitElement(o);
   }
 
   public void visitMetadataStatementGlobalSetting(@NotNull RobotMetadataStatementGlobalSetting o) {
@@ -199,25 +199,25 @@ public class RobotVisitor extends PsiElementVisitor {
   }
 
   public void visitNewLibraryName(@NotNull RobotNewLibraryName o) {
-    visitStatement(o);
+    visitElement(o);
   }
 
   public void visitParameter(@NotNull RobotParameter o) {
     visitArgument(o);
-    // visitStatement(o);
+    // visitElement(o);
   }
 
   public void visitParameterId(@NotNull RobotParameterId o) {
-    visitStatement(o);
+    visitElement(o);
   }
 
   public void visitPositionalArgument(@NotNull RobotPositionalArgument o) {
     visitArgument(o);
-    // visitStatement(o);
+    // visitElement(o);
   }
 
   public void visitPythonExpression(@NotNull RobotPythonExpression o) {
-    visitStatement(o);
+    visitElement(o);
   }
 
   public void visitResourceImportGlobalSetting(@NotNull RobotResourceImportGlobalSetting o) {
@@ -226,7 +226,7 @@ public class RobotVisitor extends PsiElementVisitor {
   }
 
   public void visitRoot(@NotNull RobotRoot o) {
-    visitStatement(o);
+    visitElement(o);
   }
 
   public void visitScalarVariable(@NotNull RobotScalarVariable o) {
@@ -234,12 +234,12 @@ public class RobotVisitor extends PsiElementVisitor {
   }
 
   public void visitScopeOwner(@NotNull RobotScopeOwner o) {
-    visitStatement(o);
+    visitElement(o);
   }
 
   public void visitSection(@NotNull RobotSection o) {
     visitFoldable(o);
-    // visitStatement(o);
+    // visitElement(o);
   }
 
   public void visitSettingsSection(@NotNull RobotSettingsSection o) {
@@ -263,7 +263,7 @@ public class RobotVisitor extends PsiElementVisitor {
   }
 
   public void visitTaskId(@NotNull RobotTaskId o) {
-    visitStatement(o);
+    visitElement(o);
   }
 
   public void visitTaskStatement(@NotNull RobotTaskStatement o) {
@@ -272,7 +272,7 @@ public class RobotVisitor extends PsiElementVisitor {
     // visitNavigationItem(o);
     // visitScopeOwner(o);
     // visitFoldable(o);
-    // visitStatement(o);
+    // visitElement(o);
   }
 
   public void visitTasksSection(@NotNull RobotTasksSection o) {
@@ -282,22 +282,22 @@ public class RobotVisitor extends PsiElementVisitor {
 
   public void visitTemplateArgument(@NotNull RobotTemplateArgument o) {
     visitArgument(o);
-    // visitStatement(o);
+    // visitElement(o);
   }
 
   public void visitTemplateArguments(@NotNull RobotTemplateArguments o) {
     visitTemplateArgumentsExpression(o);
     // visitCallArgumentsContainer(o);
-    // visitStatement(o);
+    // visitElement(o);
   }
 
   public void visitTemplateParameter(@NotNull RobotTemplateParameter o) {
     visitArgument(o);
-    // visitStatement(o);
+    // visitElement(o);
   }
 
   public void visitTemplateParameterId(@NotNull RobotTemplateParameterId o) {
-    visitStatement(o);
+    visitElement(o);
   }
 
   public void visitTemplateStatementsGlobalSetting(@NotNull RobotTemplateStatementsGlobalSetting o) {
@@ -305,7 +305,7 @@ public class RobotVisitor extends PsiElementVisitor {
   }
 
   public void visitTestCaseId(@NotNull RobotTestCaseId o) {
-    visitStatement(o);
+    visitElement(o);
   }
 
   public void visitTestCaseStatement(@NotNull RobotTestCaseStatement o) {
@@ -314,7 +314,7 @@ public class RobotVisitor extends PsiElementVisitor {
     // visitNavigationItem(o);
     // visitFoldable(o);
     // visitScopeOwner(o);
-    // visitStatement(o);
+    // visitElement(o);
   }
 
   public void visitTestCasesSection(@NotNull RobotTestCasesSection o) {
@@ -347,23 +347,23 @@ public class RobotVisitor extends PsiElementVisitor {
     // visitNavigationItem(o);
     // visitScopeOwner(o);
     // visitFoldable(o);
-    // visitStatement(o);
+    // visitElement(o);
   }
 
   public void visitUserKeywordStatementId(@NotNull RobotUserKeywordStatementId o) {
-    visitStatement(o);
+    visitElement(o);
   }
 
   public void visitVariable(@NotNull RobotVariable o) {
-    visitStatement(o);
+    visitElement(o);
   }
 
   public void visitVariableBodyId(@NotNull RobotVariableBodyId o) {
-    visitStatement(o);
+    visitElement(o);
   }
 
   public void visitVariableContent(@NotNull RobotVariableContent o) {
-    visitStatement(o);
+    visitElement(o);
   }
 
   public void visitVariableDefinition(@NotNull RobotVariableDefinition o) {
@@ -372,16 +372,16 @@ public class RobotVisitor extends PsiElementVisitor {
     // visitDefinedVariable(o);
     // visitQualifiedNameOwner(o);
     // visitFoldable(o);
-    // visitStatement(o);
+    // visitElement(o);
   }
 
   public void visitVariableStatement(@NotNull RobotVariableStatement o) {
     visitFoldable(o);
-    // visitStatement(o);
+    // visitElement(o);
   }
 
   public void visitVariableValue(@NotNull RobotVariableValue o) {
-    visitStatement(o);
+    visitElement(o);
   }
 
   public void visitVariablesImportGlobalSetting(@NotNull RobotVariablesImportGlobalSetting o) {
@@ -402,11 +402,11 @@ public class RobotVisitor extends PsiElementVisitor {
     visitElement(o);
   }
 
-  public void visitQualifiedNameOwner(@NotNull RobotQualifiedNameOwner o) {
+  public void visitElement(@NotNull RobotElement o) {
     visitPsiElement(o);
   }
 
-  public void visitStatement(@NotNull RobotStatement o) {
+  public void visitQualifiedNameOwner(@NotNull RobotQualifiedNameOwner o) {
     visitPsiElement(o);
   }
 

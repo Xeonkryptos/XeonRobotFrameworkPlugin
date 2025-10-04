@@ -27,7 +27,7 @@ public class RobotDeprecatedSectionsNamingInspection extends RobotVersionBasedIn
                     String sectionName = o.getText().replace("*", "").trim();
                     if ("Test Case".equalsIgnoreCase(sectionName) || "Keyword".equalsIgnoreCase(sectionName) || "Setting".equalsIgnoreCase(sectionName)
                         || "Variable".equalsIgnoreCase(sectionName) || "Comment".equalsIgnoreCase(sectionName) || "Task".equalsIgnoreCase(sectionName)) {
-                        holder.registerProblem(o, RobotBundle.getMessage("INSP.section.single-section-name.deprecated"), ProblemHighlightType.LIKE_DEPRECATED);
+                        holder.registerProblem(o, RobotBundle.message("INSP.section.single-section-name.deprecated"), ProblemHighlightType.LIKE_DEPRECATED);
                     }
                 }
             }

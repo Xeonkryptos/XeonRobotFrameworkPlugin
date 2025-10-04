@@ -39,12 +39,12 @@ public class RobotImportNotUsed extends LocalInspectionTool {
                     int lastOccurrenceIndex = importIdentifiers.lastIndexOf(importText);
 
                     if (firstOccurrenceIndex != lastOccurrenceIndex && collector.getImportElements().indexOf(o) != firstOccurrenceIndex) {
-                        holder.registerProblem(o, RobotBundle.getMessage("INSP.import.unused"), ProblemHighlightType.LIKE_UNUSED_SYMBOL);
+                        holder.registerProblem(o, RobotBundle.message("INSP.import.unused"), ProblemHighlightType.LIKE_UNUSED_SYMBOL);
                     } else {
                         Collection<PsiFile> filesFromInvokedKeywordsAndVariables = ((RobotFile) positionalArgument.getContainingFile()).getFilesFromInvokedKeywordsAndVariables();
                         PsiFile importedFile = resolvedElement.getContainingFile();
                         if (!filesFromInvokedKeywordsAndVariables.contains(importedFile)) {
-                            holder.registerProblem(o, RobotBundle.getMessage("INSP.import.unused"), ProblemHighlightType.LIKE_UNUSED_SYMBOL);
+                            holder.registerProblem(o, RobotBundle.message("INSP.import.unused"), ProblemHighlightType.LIKE_UNUSED_SYMBOL);
                         }
                     }
                 }
