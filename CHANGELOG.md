@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+## 0.5.6
+
 ### Added
 
 - Added inspection for name mismatches of variables and keyword calls to their referenced element (added/removed spaces or underscores) with quick fix to rename
