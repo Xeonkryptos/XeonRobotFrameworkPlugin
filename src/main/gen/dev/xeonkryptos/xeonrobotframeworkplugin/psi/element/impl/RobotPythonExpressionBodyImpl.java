@@ -11,26 +11,20 @@ import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.*;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.*;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotPsiImplUtil;
 
-public class RobotPythonExpressionImpl extends RobotPsiElementBase implements RobotPythonExpression {
+public class RobotPythonExpressionBodyImpl extends RobotPsiElementBase implements RobotPythonExpressionBody {
 
-  public RobotPythonExpressionImpl(@NotNull ASTNode node) {
+  public RobotPythonExpressionBodyImpl(@NotNull ASTNode node) {
     super(node);
   }
 
   public void accept(@NotNull RobotVisitor visitor) {
-    visitor.visitPythonExpression(this);
+    visitor.visitPythonExpressionBody(this);
   }
 
   @Override
   public void accept(@NotNull PsiElementVisitor visitor) {
     if (visitor instanceof RobotVisitor) accept((RobotVisitor)visitor);
     else super.accept(visitor);
-  }
-
-  @Override
-  @NotNull
-  public RobotPythonExpressionBody getPythonExpressionBody() {
-    return notNullChild(PsiTreeUtil.getChildOfType(this, RobotPythonExpressionBody.class));
   }
 
 }

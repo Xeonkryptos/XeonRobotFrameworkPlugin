@@ -27,7 +27,7 @@ import static com.intellij.patterns.PlatformPatterns.psiComment;
 import static com.intellij.patterns.PlatformPatterns.psiElement;
 import static com.intellij.patterns.StandardPatterns.instanceOf;
 import static com.intellij.patterns.StandardPatterns.or;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.ide.completion.RobotPatterns.atFirstPositionOf;
+import static dev.xeonkryptos.xeonrobotframeworkplugin.ide.patterns.RobotPatterns.atFirstPositionOf;
 
 public class RobotCompletionContributor extends CompletionContributor {
 

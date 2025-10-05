@@ -365,7 +365,8 @@ variable_content ::= (variable | variable_body_id)+ {
 variable_body_id ::= VARIABLE_BODY {
     methods = [getReference]
 }
-python_expression ::= PYTHON_EXPRESSION_START PYTHON_EXPRESSION_CONTENT PYTHON_EXPRESSION_END { methods = [expressionContent="PYTHON_EXPRESSION_CONTENT"] }
+python_expression ::= PYTHON_EXPRESSION_START python_expression_body PYTHON_EXPRESSION_END
+python_expression_body ::= PYTHON_EXPRESSION_CONTENT { implements="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotPythonExpressionBodyExtension"}
 
 extended_variable_slice_access ::= VARIABLE_SLICE_ACCESS
 extended_variable_index_access ::= VARIABLE_INDEX_ACCESS

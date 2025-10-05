@@ -8,6 +8,7 @@
     <depends>com.intellij.modules.lang</depends>
 
     <depends>PythonCore</depends>
+    <depends optional="true" config-file="robot-injections.xml">org.intellij.intelliLang</depends>
 
     <extensions defaultExtensionNs="com.intellij">
         <projectConfigurable groupId="language" instance="dev.xeonkryptos.xeonrobotframeworkplugin.ide.config.RobotConfiguration" key="options.entrypoint"
@@ -98,19 +99,18 @@
         <!-- TODO: inspection: error?: resource import is not a robot file -->
         <!-- TODO: inspection: warn: import python file vs class -->
         <!-- Inspections: Cleanup -->
-        <localInspection language="Robot" shortName="RobotImportNotUsed" bundle="messages.RobotBundle" key="INSP.NAME.import.unused" groupPath="Robot"
+        <localInspection language="Robot" shortName="RobotImportNotUsed" bundle="messages.RobotBundle" key="INSP.NAME.import.unused"
                          groupKey="INSP.GROUP.robot" enabledByDefault="true" level="WARNING" dumbAware="true"
                          implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.ide.inspections.cleanup.RobotImportNotUsed"/>
         <localInspection language="Robot" shortName="RobotUnusedVariableDefinition" bundle="messages.RobotBundle" key="INSP.NAME.variable.unused"
-                         groupPath="Robot"
                          groupKey="INSP.GROUP.robot" enabledByDefault="true" level="WARNING" dumbAware="false"
                          implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.ide.inspections.cleanup.RobotUnusedVariableDefinitionInspection"/>
         <localInspection language="Robot" shortName="RobotKeywordOnlyMarkerNotUsed" bundle="messages.RobotBundle" key="INSP.NAME.keyword-only-marker.unused"
-                         groupPath="Robot" groupKey="INSP.GROUP.robot" enabledByDefault="true" level="WARNING" dumbAware="true"
+                         groupKey="INSP.GROUP.robot" enabledByDefault="true" level="WARNING" dumbAware="true"
                          implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.ide.inspections.cleanup.RobotUnusedKeywordOnlyMarkerInspection"/>
         <!-- Inspections: Readability -->
         <localInspection language="Robot" shortName="WeirdlyNamedElements" bundle="messages.RobotBundle"
-                         key="INSP.NAME.weird.naming" groupPath="Robot" groupKey="INSP.GROUP.robot" enabledByDefault="true" level="WARNING"
+                         key="INSP.NAME.weird.naming" groupKey="INSP.GROUP.robot" enabledByDefault="true" level="WARNING"
                          implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.ide.inspections.maintainability.WeirdlyNamedElementsInspection"/>
         <!-- TODO: inspection: warn: use of I in keyword; decreased readability -->
         <!-- TODO: inspection: warn: scenario step does not start with gherkin; decreased readability -->

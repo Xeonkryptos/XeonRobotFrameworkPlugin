@@ -1,0 +1,7 @@
+<idea-plugin>
+    <depends>org.intellij.intelliLang</depends>
+    <extensions defaultExtensionNs="org.intellij.intelliLang">
+        <languageSupport implementation="dev.xeonkryptos.xeonrobotframeworkplugin.ide.RobotLanguageInjectionSupport"/>
+        <injectionConfig config="robotInjections.xml"/>
+    </extensions>
+</idea-plugin>

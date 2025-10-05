@@ -1579,14 +1579,28 @@ public class RobotParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // PYTHON_EXPRESSION_START PYTHON_EXPRESSION_CONTENT PYTHON_EXPRESSION_END
+  // PYTHON_EXPRESSION_START python_expression_body PYTHON_EXPRESSION_END
   public static boolean python_expression(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "python_expression")) return false;
     if (!nextTokenIs(b, PYTHON_EXPRESSION_START)) return false;
     boolean r;
     Marker m = enter_section_(b);
-    r = consumeTokens(b, 0, PYTHON_EXPRESSION_START, PYTHON_EXPRESSION_CONTENT, PYTHON_EXPRESSION_END);
+    r = consumeToken(b, PYTHON_EXPRESSION_START);
+    r = r && python_expression_body(b, l + 1);
+    r = r && consumeToken(b, PYTHON_EXPRESSION_END);
     exit_section_(b, m, PYTHON_EXPRESSION, r);
+    return r;
+  }
+
+  /* ********************************************************** */
+  // PYTHON_EXPRESSION_CONTENT
+  public static boolean python_expression_body(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "python_expression_body")) return false;
+    if (!nextTokenIs(b, PYTHON_EXPRESSION_CONTENT)) return false;
+    boolean r;
+    Marker m = enter_section_(b);
+    r = consumeToken(b, PYTHON_EXPRESSION_CONTENT);
+    exit_section_(b, m, PYTHON_EXPRESSION_BODY, r);
     return r;
   }
 

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component name="LanguageInjectionConfiguration">
+    <injection language="Python" injector-id="Robot">
+        <display-name>Inline Python In RobotFramework</display-name>
+        <place><![CDATA[psiInlinePythonExpression()]]></place>
+    </injection>
+</component>
