@@ -9,6 +9,10 @@
 - New action to create robot directories with `__init__.robot` file included
 - Mark directories with a `__init__.robot` file as a robot package in project explorer
 
+### Changed
+
+- Handle variable rename depending on the name match (rename only the basename or the entire variable name)
+
 ### Fixed
 
 - Fixed global setting elements shown as `Unknown` in structural view

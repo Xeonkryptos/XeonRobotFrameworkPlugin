@@ -6,6 +6,7 @@
     <depends>com.intellij.modules.platform</depends>
     <depends>com.intellij.modules.xdebugger</depends>
     <depends>com.intellij.modules.lang</depends>
+    <depends>com.intellij.modules.json</depends>
 
     <depends>PythonCore</depends>
 
@@ -177,6 +178,7 @@
 
         <statementUpDownMover implementation="dev.xeonkryptos.xeonrobotframeworkplugin.ide.misc.RobotStatementUpDownMover"/>
         <breadcrumbsInfoProvider implementation="dev.xeonkryptos.xeonrobotframeworkplugin.ide.misc.RobotBreadcrumbsInfoProvider"/>
+        <navbar implementation="dev.xeonkryptos.xeonrobotframeworkplugin.ide.structure.RobotStructureAwareNavBarModelExtension"/>
 
         <gotoClassContributor implementation="dev.xeonkryptos.xeonrobotframeworkplugin.ide.gotocontributor.RobotGotoClassContributor"/>
         <gotoSymbolContributor implementation="dev.xeonkryptos.xeonrobotframeworkplugin.ide.gotocontributor.RobotGotoSymbolContributor"/>
@@ -188,6 +190,7 @@
                                    order="first, before pyvar"/>
         <renamePsiElementProcessor implementation="dev.xeonkryptos.xeonrobotframeworkplugin.ide.rename.RenameRobotKeywordCallElementProcessor"
                                    order="first, before pyvar"/>
+        <renamePsiElementProcessor implementation="dev.xeonkryptos.xeonrobotframeworkplugin.ide.rename.RobotVariableDefinitionRenameElementProcessor"/>
         <renameHandler implementation="dev.xeonkryptos.xeonrobotframeworkplugin.ide.rename.RobotMemberInplaceRenameHandler"/>
     </extensions>
     <actions>
