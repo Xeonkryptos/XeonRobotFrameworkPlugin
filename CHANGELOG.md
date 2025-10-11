@@ -4,6 +4,10 @@
 
 ## Unreleased
 
+### Fixed
+
+- Fixed global setting elements shown as `Unknown` in structural view
+
 ## 0.5.6
 
 ### Added

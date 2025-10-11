@@ -19,6 +19,7 @@
 
   implements("parameter|positional_argument")="argument"
 
+  implements(".*_global_setting")="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.GlobalSettingStatementExpression"
   extends(".*_global_setting")="global_setting_statement"
 
   implements(".*_import_global_setting")="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotImportGlobalSettingExpression"
@@ -84,6 +85,7 @@ library_import_global_setting ::= LIBRARY_IMPORT_KEYWORD positional_argument (pa
     methods=[importedFile="/positional_argument[0]" nameElement="LIBRARY_IMPORT_KEYWORD" libraryNameElement="WITH_NAME"]
 }
 new_library_name ::= LITERAL_CONSTANT
+
 resource_import_global_setting ::= RESOURCE_IMPORT_KEYWORD positional_argument eol_marker {
     pin=3
     methods=[importedFile="positional_argument" nameElement="RESOURCE_IMPORT_KEYWORD"]

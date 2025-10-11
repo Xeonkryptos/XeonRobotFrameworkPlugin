@@ -5,7 +5,7 @@ import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 
-public interface RobotUnknownSettingStatementsGlobalSetting extends RobotGlobalSettingStatement {
+public interface RobotUnknownSettingStatementsGlobalSetting extends RobotGlobalSettingStatement, GlobalSettingStatementExpression {
 
   @NotNull
   List<RobotParameter> getParameterList();

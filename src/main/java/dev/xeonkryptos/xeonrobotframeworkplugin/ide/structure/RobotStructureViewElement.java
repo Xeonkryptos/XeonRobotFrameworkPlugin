@@ -8,6 +8,7 @@ import com.intellij.openapi.editor.colors.TextAttributesKey;
 import com.intellij.pom.Navigatable;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiNamedElement;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.GlobalSettingStatementExpression;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotFile;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotGlobalSettingStatement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCall;
@@ -129,6 +130,8 @@ public class RobotStructureViewElement implements StructureViewTreeElement {
             }
         } else if (element instanceof RobotSection section) {
             return section.getSectionName();
+        } else if (element instanceof GlobalSettingStatementExpression expression) {
+            return expression.getSettingName();
         }
         return "Unknown";
     }

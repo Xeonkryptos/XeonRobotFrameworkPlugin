@@ -5,7 +5,7 @@ import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 
-public interface RobotDocumentationStatementGlobalSetting extends RobotGlobalSettingStatement {
+public interface RobotDocumentationStatementGlobalSetting extends RobotGlobalSettingStatement, GlobalSettingStatementExpression {
 
   @NotNull
   List<RobotPositionalArgument> getPositionalArgumentList();

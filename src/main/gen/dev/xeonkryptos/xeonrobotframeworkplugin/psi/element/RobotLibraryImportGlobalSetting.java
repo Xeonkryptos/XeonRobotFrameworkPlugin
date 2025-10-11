@@ -5,7 +5,7 @@ import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 
-public interface RobotLibraryImportGlobalSetting extends RobotGlobalSettingStatement, RobotImportGlobalSettingExpression {
+public interface RobotLibraryImportGlobalSetting extends RobotGlobalSettingStatement, GlobalSettingStatementExpression, RobotImportGlobalSettingExpression {
 
   @Nullable
   RobotNewLibraryName getNewLibraryName();
