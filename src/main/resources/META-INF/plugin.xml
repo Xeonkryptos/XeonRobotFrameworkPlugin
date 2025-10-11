@@ -20,6 +20,8 @@
                   language="Robot" extensions="resource"/>
 
         <colorSettingsPage implementation="dev.xeonkryptos.xeonrobotframeworkplugin.ide.config.RobotColorsPage"/>
+        <lang.syntaxHighlighterFactory language="Robot"
+                                       implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotSyntaxHighlightingFactory"/>
 
         <!-- IDE Hooks -->
         <completion.contributor language="Robot"
@@ -37,8 +39,6 @@
         <lang.psiStructureViewFactory language="Robot"
                                       implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.ide.structure.RobotStructureViewFactory"/>
 
-        <lang.syntaxHighlighterFactory language="Robot"
-                                       implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotSyntaxHighlightingFactory"/>
         <lang.commenter language="Robot" implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.ide.misc.RobotCommenter"/>
         <lang.foldingBuilder language="Robot" implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.ide.misc.RobotFoldingBuilder"/>
         <lang.parserDefinition language="Robot" implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotParserDefinition"/>
@@ -86,7 +86,7 @@
                    implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.ide.inspections.compilation.RobotLocalArgumentsSettingAnnotator"/>
         <annotator language="Robot" implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.ide.inspections.compilation.RobotArgumentAnnotator"/>
         <annotator language="Robot" implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.ide.inspections.compilation.RobotTemplateParameterAnnotator"/>
-        <annotator language="Robot" implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.ide.inspections.compilation.RobotTemplateArgumentsAnnotator"/>
+        <annotator language="Robot" implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.ide.inspections.compilation.RobotMissingMandatoryTemplateArgumentsAnnotator"/>
         <annotator language="Robot"
                    implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.ide.inspections.compilation.RobotInvalidKeywordOnlyMarkerAnnotation"/>
         <annotator language="Robot"

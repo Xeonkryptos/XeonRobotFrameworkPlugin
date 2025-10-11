@@ -2,11 +2,14 @@ package dev.xeonkryptos.xeonrobotframeworkplugin.ide.inspections.highlight;
 
 import com.intellij.lang.annotation.AnnotationHolder;
 import com.intellij.lang.annotation.HighlightSeverity;
-import com.intellij.openapi.editor.DefaultLanguageHighlighterColors;
+import com.intellij.openapi.editor.colors.EditorColorsManager;
+import com.intellij.openapi.editor.markup.EffectType;
+import com.intellij.openapi.editor.markup.TextAttributes;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiPolyVariantReference;
 import com.intellij.psi.ResolveResult;
 import dev.xeonkryptos.xeonrobotframeworkplugin.RobotBundle;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotHighlighter;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotPsiImplUtil;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariable;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableBodyId;
@@ -29,8 +32,11 @@ public class ReassignedRobotVariableAnnotator extends AbstractRobotVariableAnnot
                           .map(ResolveResult::getElement)
                           .filter(result -> result instanceof RobotVariableDefinition)
                           .count() > 1) {
+                    TextAttributes base = EditorColorsManager.getInstance().getGlobalScheme().getAttributes(RobotHighlighter.VARIABLE);
+                    TextAttributes merged = base.clone();
+                    merged.setEffectType(EffectType.LINE_UNDERSCORE);
                     holder.newSilentAnnotation(HighlightSeverity.TEXT_ATTRIBUTES)
-                          .textAttributes(DefaultLanguageHighlighterColors.REASSIGNED_LOCAL_VARIABLE)
+                          .enforcedTextAttributes(merged)
                           .tooltip(RobotBundle.message("annotation.variable.reassigned"))
                           .range(variable)
                           .create();

@@ -7,6 +7,7 @@
 ### Fixed
 
 - Fixed global setting elements shown as `Unknown` in structural view
+- Fixed radically changed highlighting for reassigned variables
 
 ## 0.5.6
 

@@ -17,35 +17,36 @@ import java.util.Map;
 public class RobotColorsPage implements ColorSettingsPage {
 
     private static final ColorDescriptor[] COLORS = ColorDescriptor.EMPTY_ARRAY;
-    private static final AttributesDescriptor[] ATTRIBUTES = new AttributesDescriptor[] { new AttributesDescriptor(RobotBundle.message(
-            "color.settings.heading"), RobotHighlighter.HEADING),
-                                                                                          new AttributesDescriptor(RobotBundle.message(
-                                                                                                  "color.settings.comment"), RobotHighlighter.COMMENT),
+    private static final AttributesDescriptor[] ATTRIBUTES = new AttributesDescriptor[] { new AttributesDescriptor(RobotBundle.message("color.settings.heading"),
+                                                                                                                   RobotHighlighter.SECTION_TITLE),
+                                                                                          new AttributesDescriptor(RobotBundle.message("color.settings.comment"),
+                                                                                                                   RobotHighlighter.COMMENT),
                                                                                           new AttributesDescriptor(RobotBundle.message(
                                                                                                   "color.settings.parameter"), RobotHighlighter.PARAMETER),
-                                                                                          new AttributesDescriptor(RobotBundle.message(
-                                                                                                  "color.settings.argument"), RobotHighlighter.ARGUMENT),
-                                                                                          new AttributesDescriptor(RobotBundle.message(
-                                                                                                  "color.settings.gherkin"), RobotHighlighter.GHERKIN),
+                                                                                          new AttributesDescriptor(RobotBundle.message("color.settings.argument"),
+                                                                                                                   RobotHighlighter.ARGUMENT),
+                                                                                          new AttributesDescriptor(RobotBundle.message("color.settings.gherkin"),
+                                                                                                                   RobotHighlighter.GHERKIN),
                                                                                           new AttributesDescriptor(RobotBundle.message(
                                                                                                   "color.settings.syntaxMarker"),
-                                                                                                                   RobotHighlighter.SYNTAX_MARKER),
+                                                                                                                   RobotHighlighter.STRUCTURAL_KEYWORDS),
+                                                                                          new AttributesDescriptor(RobotBundle.message("color.settings.variable"),
+                                                                                                                   RobotHighlighter.VARIABLE),
                                                                                           new AttributesDescriptor(RobotBundle.message(
-                                                                                                  "color.settings.variable"), RobotHighlighter.VARIABLE),
-                                                                                          new AttributesDescriptor(RobotBundle.message(
-                                                                                                  "color.settings.variableDefinition"), RobotHighlighter.VARIABLE_DEFINITION),
-                                                                                          new AttributesDescriptor(RobotBundle.message(
-                                                                                                  "color.settings.keyword"), RobotHighlighter.KEYWORD),
+                                                                                                  "color.settings.variableDefinition"),
+                                                                                                                   RobotHighlighter.VARIABLE_DEFINITION),
+                                                                                          new AttributesDescriptor(RobotBundle.message("color.settings.keyword"),
+                                                                                                                   RobotHighlighter.KEYWORD),
                                                                                           new AttributesDescriptor(RobotBundle.message(
                                                                                                   "color.settings.keywordDefinition"),
                                                                                                                    RobotHighlighter.KEYWORD_DEFINITION),
                                                                                           new AttributesDescriptor(RobotBundle.message(
                                                                                                   "color.settings.bracketSetting"),
-                                                                                                                   RobotHighlighter.LOCAL_SETTING),
-                                                                                          new AttributesDescriptor(RobotBundle.message(
-                                                                                                  "color.settings.setting"), RobotHighlighter.SETTING),
-                                                                                          new AttributesDescriptor(RobotBundle.message(
-                                                                                                  "color.settings.import"), RobotHighlighter.IMPORT) };
+                                                                                                                   RobotHighlighter.LOCAL_SETTING_OPTION),
+                                                                                          new AttributesDescriptor(RobotBundle.message("color.settings.setting"),
+                                                                                                                   RobotHighlighter.GLOBAL_SETTING_OPTION),
+                                                                                          new AttributesDescriptor(RobotBundle.message("color.settings.import"),
+                                                                                                                   RobotHighlighter.IMPORT) };
 
     @Nullable
     @Override

@@ -14,7 +14,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
 
-public class RobotTemplateArgumentsAnnotator implements Annotator {
+public class RobotMissingMandatoryTemplateArgumentsAnnotator implements Annotator {
 
     @Override
     public void annotate(@NotNull PsiElement element, @NotNull AnnotationHolder holder) {
