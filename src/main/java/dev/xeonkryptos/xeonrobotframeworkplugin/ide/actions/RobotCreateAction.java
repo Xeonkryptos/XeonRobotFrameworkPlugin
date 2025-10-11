@@ -1,5 +1,6 @@
-package dev.xeonkryptos.xeonrobotframeworkplugin.ide;
+package dev.xeonkryptos.xeonrobotframeworkplugin.ide.actions;
 
+import dev.xeonkryptos.xeonrobotframeworkplugin.RobotBundle;
 import dev.xeonkryptos.xeonrobotframeworkplugin.ide.icons.RobotIcons;
 import com.intellij.ide.actions.CreateFileFromTemplateAction;
 import com.intellij.ide.actions.CreateFileFromTemplateDialog.Builder;
@@ -10,7 +11,7 @@ import org.jetbrains.annotations.NotNull;
 public class RobotCreateAction extends CreateFileFromTemplateAction {
 
     public RobotCreateAction() {
-        super("Robot File", "Creates new robot file", RobotIcons.FILE);
+        super(RobotBundle.message("command.name.create.new.file"), RobotBundle.message("command.name.create.new.file.description"), RobotIcons.FILE);
     }
 
     @Override

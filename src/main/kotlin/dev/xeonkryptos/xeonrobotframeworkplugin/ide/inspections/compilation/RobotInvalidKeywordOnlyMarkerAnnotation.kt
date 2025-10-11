@@ -7,7 +7,7 @@ import com.intellij.lang.annotation.HighlightSeverity
 import com.intellij.psi.PsiElement
 import com.intellij.psi.util.PsiTreeUtil
 import dev.xeonkryptos.xeonrobotframeworkplugin.RobotBundle
-import dev.xeonkryptos.xeonrobotframeworkplugin.ide.psi.visitor.EmptyVariableDetector
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.visitor.EmptyVariableDetector
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLocalArgumentsSetting
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariable
 

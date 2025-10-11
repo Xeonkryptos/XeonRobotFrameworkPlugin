@@ -4,6 +4,10 @@
 
 ## Unreleased
 
+### Added
+
+- New action to create robot directories with `__init__.robot` file included
+
 ### Fixed
 
 - Fixed global setting elements shown as `Unknown` in structural view

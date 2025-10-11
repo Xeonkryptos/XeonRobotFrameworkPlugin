@@ -86,7 +86,8 @@
                    implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.ide.inspections.compilation.RobotLocalArgumentsSettingAnnotator"/>
         <annotator language="Robot" implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.ide.inspections.compilation.RobotArgumentAnnotator"/>
         <annotator language="Robot" implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.ide.inspections.compilation.RobotTemplateParameterAnnotator"/>
-        <annotator language="Robot" implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.ide.inspections.compilation.RobotMissingMandatoryTemplateArgumentsAnnotator"/>
+        <annotator language="Robot"
+                   implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.ide.inspections.compilation.RobotMissingMandatoryTemplateArgumentsAnnotator"/>
         <annotator language="Robot"
                    implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.ide.inspections.compilation.RobotInvalidKeywordOnlyMarkerAnnotation"/>
         <annotator language="Robot"
@@ -187,8 +188,12 @@
         <renameHandler implementation="dev.xeonkryptos.xeonrobotframeworkplugin.ide.rename.RobotMemberInplaceRenameHandler"/>
     </extensions>
     <actions>
-        <action id="XeonRobotFrameworkPlugin.CreateNew" class="dev.xeonkryptos.xeonrobotframeworkplugin.ide.RobotCreateAction">
+        <action id="XeonRobotFrameworkPlugin.CreateNew" class="dev.xeonkryptos.xeonrobotframeworkplugin.ide.actions.RobotCreateAction">
             <add-to-group group-id="NewGroup"/>
+        </action>
+        <action id="XeonRobotFrameworkPlugin.NewRobotPackage" class="dev.xeonkryptos.xeonrobotframeworkplugin.ide.actions.CreatePackageAction"
+                icon="AllIcons.Nodes.Package">
+            <add-to-group group-id="NewGroup" anchor="after" relative-to-action="NewDir"/>
         </action>
     </actions>
 </idea-plugin>

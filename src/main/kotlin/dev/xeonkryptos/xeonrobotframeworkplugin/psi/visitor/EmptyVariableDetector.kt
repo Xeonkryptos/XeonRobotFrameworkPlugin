@@ -1,4 +1,4 @@
-package dev.xeonkryptos.xeonrobotframeworkplugin.ide.psi.visitor
+package dev.xeonkryptos.xeonrobotframeworkplugin.psi.visitor
 
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotPythonExpression
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariable
