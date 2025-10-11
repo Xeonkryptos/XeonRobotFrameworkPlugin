@@ -28,6 +28,7 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.visitor.RobotSectionVariable
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.visitor.RobotUsedFilesCollector;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.visitor.RobotUserKeywordsCollector;
 import dev.xeonkryptos.xeonrobotframeworkplugin.util.GlobalConstants;
+import dev.xeonkryptos.xeonrobotframeworkplugin.util.RobotNames;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -114,7 +115,7 @@ public class RobotFileImpl extends PsiFileBase implements KeywordFile, RobotFile
                 if (importedFile instanceof RobotFile robotFile) {
                     VirtualFile virtualRobotFile = robotFile.getVirtualFile();
                     VirtualFile virtualRobotFileDir = virtualRobotFile.getParent();
-                    VirtualFile initFile = virtualRobotFileDir.findChild("__init__.robot");
+                    VirtualFile initFile = virtualRobotFileDir.findChild(RobotNames.INIT_DOT_ROBOT);
                     if (initFile != null) {
                         virtualFiles.add(initFile);
                     }

@@ -20,6 +20,7 @@ import com.intellij.psi.PsiFileSystemItem
 import com.intellij.psi.SmartPointerManager
 import com.intellij.psi.SmartPsiElementPointer
 import dev.xeonkryptos.xeonrobotframeworkplugin.RobotBundle
+import dev.xeonkryptos.xeonrobotframeworkplugin.util.RobotNames
 import org.jetbrains.annotations.NonNls
 import java.util.function.Consumer
 
@@ -34,7 +35,6 @@ class CreatePackageAction : DumbAwareAction(
         private val LOG = Logger.getInstance(CreatePackageAction::class.java)
 
         private const val ORDINARY_PACKAGE_TYPE: @NonNls String = "Package"
-        private const val INIT_DOT_ROBOT = "__init__.robot"
     }
 
     override fun actionPerformed(e: AnActionEvent) {
@@ -117,9 +117,9 @@ class CreatePackageAction : DumbAwareAction(
     private fun createInitRobot(directory: PsiDirectory) {
         val fileTemplateManager = FileTemplateManager.getInstance(directory.project)
         val template = fileTemplateManager.getInternalTemplate("Robot Script")
-        if (directory.findFile(INIT_DOT_ROBOT) == null) {
+        if (directory.findFile(RobotNames.INIT_DOT_ROBOT) == null) {
             try {
-                FileTemplateUtil.createFromTemplate(template, INIT_DOT_ROBOT, fileTemplateManager.defaultProperties, directory)
+                FileTemplateUtil.createFromTemplate(template, RobotNames.INIT_DOT_ROBOT, fileTemplateManager.defaultProperties, directory)
             } catch (e: Exception) {
                 LOG.error(e)
             }

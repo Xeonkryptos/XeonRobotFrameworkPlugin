@@ -146,6 +146,9 @@
 
         <internalFileTemplate name="Robot Feature File"/>
         <internalFileTemplate name="Robot Resource File"/>
+        <internalFileTemplate name="Robot Script"/>
+
+        <iconProvider implementation="dev.xeonkryptos.xeonrobotframeworkplugin.ide.RobotDirectoryIconProvider"/>
 
         <enterHandlerDelegate implementation="dev.xeonkryptos.xeonrobotframeworkplugin.ide.actionhandler.RobotKeywordIndentationActionHandler"/>
         <enterHandlerDelegate implementation="dev.xeonkryptos.xeonrobotframeworkplugin.ide.actionhandler.RobotLocalSettingEnterActionHandler"/>
