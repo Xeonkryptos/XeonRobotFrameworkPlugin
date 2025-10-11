@@ -6,7 +6,7 @@ import com.intellij.lang.annotation.HighlightSeverity;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiReference;
 import dev.xeonkryptos.xeonrobotframeworkplugin.RobotBundle;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotHighlighter;
+import dev.xeonkryptos.xeonrobotframeworkplugin.ide.config.RobotHighlighter;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotPositionalArgument;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.visitor.RobotImportElementIdentifier;
 import org.jetbrains.annotations.NotNull;

@@ -1,4 +1,4 @@
-package dev.xeonkryptos.xeonrobotframeworkplugin.psi;
+package dev.xeonkryptos.xeonrobotframeworkplugin.ide.config;
 
 import com.intellij.openapi.fileTypes.SyntaxHighlighter;
 import com.intellij.openapi.fileTypes.SyntaxHighlighterFactory;

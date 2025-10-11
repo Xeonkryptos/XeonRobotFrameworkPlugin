@@ -21,7 +21,7 @@
 
         <colorSettingsPage implementation="dev.xeonkryptos.xeonrobotframeworkplugin.ide.config.RobotColorsPage"/>
         <lang.syntaxHighlighterFactory language="Robot"
-                                       implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotSyntaxHighlightingFactory"/>
+                                       implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.ide.config.RobotSyntaxHighlightingFactory"/>
 
         <!-- IDE Hooks -->
         <completion.contributor language="Robot"
