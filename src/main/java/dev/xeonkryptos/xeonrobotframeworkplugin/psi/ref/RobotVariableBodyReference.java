@@ -9,7 +9,6 @@ import com.intellij.psi.ResolveResult;
 import com.intellij.psi.impl.source.resolve.ResolveCache;
 import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.psi.util.PsiTreeUtil;
-import dev.xeonkryptos.xeonrobotframeworkplugin.ide.config.RobotOptionsProvider;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotFeatureFileType;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotResourceFileType;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.KeywordFile;
@@ -104,10 +103,9 @@ public class RobotVariableBodyReference extends PsiPolyVariantReferenceBase<Robo
             }
         }
 
-        boolean allowTransitiveImports = RobotOptionsProvider.getInstance(project).allowTransitiveImports();
         Set<PsiElement> inScopeElements = new LinkedHashSet<>();
         RobotFile robotFile = (RobotFile) variable.getContainingFile();
-        for (KeywordFile importedFile : robotFile.collectImportedFiles(allowTransitiveImports)) {
+        for (KeywordFile importedFile : robotFile.collectImportedFiles(true)) {
             PsiFile importedPsiFile = importedFile.getPsiFile();
             if ((importedPsiFile.getFileType() == RobotFeatureFileType.getInstance() || importedPsiFile.getFileType() == RobotResourceFileType.getInstance())
                 && fileToElements.containsKey((RobotFile) importedPsiFile)) {

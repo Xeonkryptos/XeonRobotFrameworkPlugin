@@ -32,7 +32,6 @@ import java.util.List;
 public class RobotConfiguration implements NoScroll, SearchableConfigurable {
 
     private final JBPanel<?> panel;
-    private final JBCheckBox allowTransitiveImports;
     private final JBCheckBox capitalizeKeywords;
     private final JBCheckBox smartAutoEncloseVariable;
     private final JBCheckBox multilineIndentation;
@@ -53,11 +52,6 @@ public class RobotConfiguration implements NoScroll, SearchableConfigurable {
         mainPanel.add(checkBoxPanel, new GridConstraints(mainPanelRow++, 0, 1, 2, 0, 3, 3, 3, null, null, null));
 
         int checkBoxPanelRow = 0;
-        JBCheckBox transitiveImportsCheckBox = new JBCheckBox();
-        this.allowTransitiveImports = transitiveImportsCheckBox;
-        transitiveImportsCheckBox.setText("Allow Transitive Imports");
-        checkBoxPanel.add(transitiveImportsCheckBox, new GridConstraints(checkBoxPanelRow++, 0, 1, 1, 8, 0, 3, 3, null, null, null));
-
         JBCheckBox capitalizeKeywordsCheckBox = new JBCheckBox();
         this.capitalizeKeywords = capitalizeKeywordsCheckBox;
         capitalizeKeywordsCheckBox.setText("Capitalize Keywords");
@@ -193,8 +187,7 @@ public class RobotConfiguration implements NoScroll, SearchableConfigurable {
     @Override
     public boolean isModified() {
         RobotOptionsProvider provider = getOptionProvider();
-        return provider != null && (provider.allowTransitiveImports() != this.allowTransitiveImports.isSelected()
-                                    || provider.capitalizeKeywords() != this.capitalizeKeywords.isSelected()
+        return provider != null && (provider.capitalizeKeywords() != this.capitalizeKeywords.isSelected()
                                     || provider.smartAutoEncloseVariable() != this.smartAutoEncloseVariable.isSelected()
                                     || provider.multilineIndentation() != this.multilineIndentation.isSelected()
                                     || provider.testsOnlyMode() != this.testsOnlyMode.isSelected() || provider.parameterNameCollationRules()
@@ -208,7 +201,6 @@ public class RobotConfiguration implements NoScroll, SearchableConfigurable {
     public void apply() {
         RobotOptionsProvider provider = getOptionProvider();
         if (provider != null) {
-            provider.setAllowTransitiveImports(this.allowTransitiveImports.isSelected());
             provider.setCapitalizeKeywords(this.capitalizeKeywords.isSelected());
             provider.setSmartAutoEncloseVariable(this.smartAutoEncloseVariable.isSelected());
             provider.setMultilineIndentation(this.multilineIndentation.isSelected());
@@ -233,7 +225,6 @@ public class RobotConfiguration implements NoScroll, SearchableConfigurable {
     public void reset() {
         RobotOptionsProvider provider = getOptionProvider();
         if (provider != null) {
-            this.allowTransitiveImports.setSelected(provider.allowTransitiveImports());
             this.capitalizeKeywords.setSelected(provider.capitalizeKeywords());
             this.smartAutoEncloseVariable.setSelected(provider.smartAutoEncloseVariable());
             this.testsOnlyMode.setSelected(provider.testsOnlyMode());

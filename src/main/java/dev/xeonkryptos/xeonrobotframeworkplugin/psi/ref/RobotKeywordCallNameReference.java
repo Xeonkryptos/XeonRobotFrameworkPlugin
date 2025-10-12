@@ -1,34 +1,31 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.psi.ref;
 
-import com.intellij.codeInsight.TailTypes;
-import com.intellij.codeInsight.lookup.LookupElementBuilder;
-import com.intellij.codeInsight.lookup.TailTypeDecorator;
-import com.intellij.icons.AllIcons.Nodes;
+import com.intellij.openapi.project.Project;
+import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiElementResolveResult;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiPolyVariantReferenceBase;
 import com.intellij.psi.ResolveResult;
 import com.intellij.psi.impl.source.resolve.ResolveCache;
-import dev.xeonkryptos.xeonrobotframeworkplugin.util.RobotTailTypes;
+import com.intellij.psi.search.GlobalSearchScope;
+import com.jetbrains.python.psi.PyFunction;
 import dev.xeonkryptos.xeonrobotframeworkplugin.ide.completion.KeywordCompletionModification;
-import dev.xeonkryptos.xeonrobotframeworkplugin.ide.config.RobotOptionsProvider;
+import dev.xeonkryptos.xeonrobotframeworkplugin.ide.index.PyRobotKeywordDefinitionIndex.Util;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.dto.ImportType;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.DefinedKeyword;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.KeywordFile;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotFile;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCallLibrary;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCallName;
-import dev.xeonkryptos.xeonrobotframeworkplugin.util.LookupElementUtil;
-import org.apache.commons.text.WordUtils;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotUserKeywordStatement;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.index.KeywordDefinitionNameIndex;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedHashSet;
-import java.util.List;
+import java.util.stream.Collectors;
 
 public class RobotKeywordCallNameReference extends PsiPolyVariantReferenceBase<RobotKeywordCallName> {
 
@@ -70,86 +67,29 @@ public class RobotKeywordCallNameReference extends PsiPolyVariantReferenceBase<R
             return null;
         }
 
-        Collection<PsiElement> keywordElements = new LinkedHashSet<>();
-        //KeywordDefinitionNameIndex.getInstance().getUserKeywordStatements(keyword, myElement.getProject(), )
-        // TODO: Replace that complicated and cost-intensive logic via index lookup and filtering
-        for (DefinedKeyword definedKeyword : robotFile.getDefinedKeywords()) {
-            if (definedKeyword.matches(keyword)) {
-                keywordElements.add(definedKeyword.reference());
-            }
-        }
+        Collection<VirtualFile> importedFiles = collectImportedVirtualFilesOneselfIncluded(robotFile, libraryName);
 
-        Collection<KeywordFile> importedFiles;
-        if (libraryName != null) {
-            importedFiles = robotFile.findImportedFilesWithLibraryName(libraryName);
-        } else {
-            boolean includeTransitive = RobotOptionsProvider.getInstance(psiFile.getProject()).allowTransitiveImports();
-            importedFiles = robotFile.collectImportedFiles(includeTransitive);
-        }
+        Project project = myElement.getProject();
+        GlobalSearchScope searchScope = GlobalSearchScope.filesWithLibrariesScope(project, importedFiles);
 
-        for (KeywordFile keywordFile : importedFiles) {
-            for (DefinedKeyword definedKeyword : keywordFile.getDefinedKeywords()) {
-                if (definedKeyword.matches(keyword)) {
-                    keywordElements.add(definedKeyword.reference());
-                }
-            }
-        }
+        Collection<RobotUserKeywordStatement> userKeywordStatements = KeywordDefinitionNameIndex.getUserKeywordStatements(keyword, project, searchScope);
+        Collection<PyFunction> pythonKeywordFunctions = Util.findKeywordFunctions(keyword, psiFile.getProject(), searchScope);
+        Collection<PsiElement> keywordElements = new LinkedHashSet<>(userKeywordStatements.size() + pythonKeywordFunctions.size());
+        keywordElements.addAll(userKeywordStatements);
+        keywordElements.addAll(pythonKeywordFunctions);
+
         return keywordElements.toArray(PsiElement[]::new);
     }
 
-    @Override
-    public Object @NotNull [] getVariants() {
-        RobotKeywordCallName keywordCallName = getElement();
-        RobotKeywordCallLibrary keywordCallLibrary = keywordCallName.getKeywordCallLibrary();
-        String libraryName = keywordCallLibrary != null ? keywordCallLibrary.getText() : null;
-        PsiFile containingFile = keywordCallName.getContainingFile();
-        if (containingFile instanceof RobotFile robotFile) {
-            if (KeywordCompletionModification.isKeywordStartsWithModifier(libraryName)) {
-                libraryName = libraryName.substring(1);
-            }
-            RobotOptionsProvider optionsProvider = RobotOptionsProvider.getInstance(containingFile.getProject());
-            boolean capitalizeKeywords = optionsProvider.capitalizeKeywords();
-            boolean transitiveImports = optionsProvider.allowTransitiveImports();
-            for (KeywordFile keywordFile : robotFile.collectImportedFiles(transitiveImports)) {
-                if (keywordFile.getImportType() == ImportType.LIBRARY) {
-                    String currentLibraryName = keywordFile.getLibraryName();
-                    if (libraryName == null || libraryName.equalsIgnoreCase(currentLibraryName)) {
-                        Collection<DefinedKeyword> definedKeywords = keywordFile.getDefinedKeywords();
-                        List<TailTypeDecorator<LookupElementBuilder>> tailTypeDecorators = new ArrayList<>();
-
-                        for (DefinedKeyword definedKeyword : definedKeywords) {
-                            String keywordName = capitalizeKeywords ? WordUtils.capitalize(definedKeyword.getKeywordName()) : definedKeyword.getKeywordName();
-                            String fullKeywordName = (capitalizeKeywords ? WordUtils.capitalize(currentLibraryName) : currentLibraryName) + "." + keywordName;
-                            String[] lookupStrings = { fullKeywordName,
-                                                       WordUtils.capitalize(fullKeywordName),
-                                                       fullKeywordName.toLowerCase(),
-                                                       fullKeywordName.toUpperCase() };
-
-                            LookupElementBuilder lookupElement = LookupElementBuilder.create(fullKeywordName)
-                                                                                     .withLookupStrings(Arrays.asList(lookupStrings))
-                                                                                     .withPresentableText(keywordName)
-                                                                                     .withCaseSensitivity(true)
-                                                                                     .withIcon(Nodes.Function);
-
-                            lookupElement = LookupElementUtil.addReferenceType(definedKeyword.reference(), lookupElement);
-
-                            String keywordArguments = definedKeyword.getArgumentsDisplayable();
-                            if (keywordArguments != null) {
-                                lookupElement = lookupElement.withTailText(keywordArguments);
-                            }
-
-                            TailTypeDecorator<LookupElementBuilder> tailTypeDecorator = TailTypeDecorator.withTail(lookupElement,
-                                                                                                                   definedKeyword.hasParameters() ?
-                                                                                                                   RobotTailTypes.TAB :
-                                                                                                                   TailTypes.noneType());
-                            tailTypeDecorators.add(tailTypeDecorator);
-                        }
-
-                        return tailTypeDecorators.toArray();
-                    }
-                }
-            }
-        }
-        return EMPTY_ARRAY;
+    private static @NotNull Collection<VirtualFile> collectImportedVirtualFilesOneselfIncluded(RobotFile robotFile, String libraryName) {
+        Collection<VirtualFile> importedFiles = libraryName != null ?
+                                                robotFile.findImportedFilesWithLibraryName(libraryName) :
+                                                robotFile.collectImportedFiles(true)
+                                                         .stream()
+                                                         .filter(keywordFile -> keywordFile.getImportType() != ImportType.VARIABLES)
+                                                         .map(KeywordFile::getVirtualFile)
+                                                         .collect(Collectors.toSet());
+        importedFiles.add(robotFile.getViewProvider().getVirtualFile());
+        return importedFiles;
     }
 }

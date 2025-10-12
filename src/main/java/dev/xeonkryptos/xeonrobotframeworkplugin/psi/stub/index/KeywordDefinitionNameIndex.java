@@ -7,6 +7,7 @@ import com.intellij.psi.stubs.StubIndex;
 import com.intellij.psi.stubs.StubIndexKey;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotUserKeywordStatement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotStubFileElementType;
+import dev.xeonkryptos.xeonrobotframeworkplugin.util.KeywordNameUtil;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
@@ -15,22 +16,17 @@ public class KeywordDefinitionNameIndex extends StringStubIndexExtension<RobotUs
 
     public static final StubIndexKey<String, RobotUserKeywordStatement> KEY = StubIndexKey.createIndexKey("robot.keywordDefinition");
 
-    private static final KeywordDefinitionNameIndex ourInstance = new KeywordDefinitionNameIndex();
-
-    public static KeywordDefinitionNameIndex getInstance() {
-        return ourInstance;
-    }
-
     @NotNull
     @Override
     public StubIndexKey<String, RobotUserKeywordStatement> getKey() {
         return KEY;
     }
 
-    public Collection<RobotUserKeywordStatement> getUserKeywordStatements(@NotNull String keywordName, @NotNull Project project, @NotNull GlobalSearchScope scope) {
-        StubIndexKey<String, RobotUserKeywordStatement> stubIndexKey = getKey();
-        String keywordNameInLowerCase = keywordName.toLowerCase();
-        return StubIndex.getElements(stubIndexKey, keywordNameInLowerCase, project, scope, RobotUserKeywordStatement.class);
+    public static Collection<RobotUserKeywordStatement> getUserKeywordStatements(@NotNull String keywordName,
+                                                                                 @NotNull Project project,
+                                                                                 @NotNull GlobalSearchScope scope) {
+        String normalizedKeywordName = KeywordNameUtil.normalizeKeywordName(keywordName);
+        return StubIndex.getElements(KEY, normalizedKeywordName, project, scope, RobotUserKeywordStatement.class);
     }
 
     @Override

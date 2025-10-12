@@ -54,6 +54,8 @@
         <stubIndex implementation="dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.index.TestCaseNameIndex"/>
         <stubIndex implementation="dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.index.TaskNameIndex"/>
 
+        <fileBasedIndex implementation="dev.xeonkryptos.xeonrobotframeworkplugin.ide.index.PyRobotKeywordDefinitionIndex"/>
+
         <codeInsight.parameterInfo language="Robot"
                                    implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.ide.parameterinfo.RobotParameterInfoHandler"/>
 

@@ -11,17 +11,16 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.util.ProcessingContext;
-import dev.xeonkryptos.xeonrobotframeworkplugin.ide.config.RobotOptionsProvider;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.dto.ImportType;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.DefinedVariable;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.KeywordFile;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotArgument;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotElement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotFile;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCall;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLocalArgumentsSetting;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLocalSetting;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotParameter;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotElement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTaskStatement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTemplateArguments;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTemplateParameter;
@@ -94,8 +93,7 @@ class VariableCompletionProvider extends CompletionProvider<CompletionParameters
                             resultSet,
                             element).forEach(lookupElement -> lookupElement.putUserData(CompletionKeys.ROBOT_LOOKUP_ELEMENT_TYPE,
                                                                                         RobotLookupElementType.VARIABLE));
-        boolean allowTransitiveImports = RobotOptionsProvider.getInstance(file.getProject()).allowTransitiveImports();
-        for (KeywordFile importedFile : robotFile.collectImportedFiles(allowTransitiveImports)) {
+        for (KeywordFile importedFile : robotFile.collectImportedFiles(true)) {
             if (importedFile.getImportType() == ImportType.VARIABLES || importedFile.getImportType() == ImportType.RESOURCE) {
                 addDefinedVariables(importedFile.getDefinedVariables(),
                                     resultSet,

@@ -12,6 +12,7 @@
 ### Changed
 
 - Handle variable rename depending on the name match (rename only the basename or the entire variable name)
+- Added a new index to find robot keywords defined in robot files and python files to speed up keyword lookup
 
 ### Fixed
 

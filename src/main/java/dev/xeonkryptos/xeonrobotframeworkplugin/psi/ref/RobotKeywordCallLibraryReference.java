@@ -7,7 +7,6 @@ import com.intellij.psi.PsiPolyVariantReferenceBase;
 import com.intellij.psi.ResolveResult;
 import com.intellij.psi.impl.source.resolve.ResolveCache;
 import dev.xeonkryptos.xeonrobotframeworkplugin.ide.completion.KeywordCompletionModification;
-import dev.xeonkryptos.xeonrobotframeworkplugin.ide.config.RobotOptionsProvider;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.dto.ImportType;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotFile;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCallLibraryName;
@@ -43,8 +42,7 @@ public class RobotKeywordCallLibraryReference extends PsiPolyVariantReferenceBas
         if (!(psiFile instanceof RobotFile robotFile)) {
             return PsiElement.EMPTY_ARRAY;
         }
-        boolean includeTransitive = RobotOptionsProvider.getInstance(psiFile.getProject()).allowTransitiveImports();
-        return robotFile.collectImportedFiles(includeTransitive)
+        return robotFile.collectImportedFiles(true)
                         .stream()
                         .filter(keywordFile -> keywordFile.getImportType() == ImportType.RESOURCE)
                         .flatMap(keywordFile -> {

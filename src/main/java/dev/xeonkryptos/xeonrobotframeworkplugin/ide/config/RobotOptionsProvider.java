@@ -4,9 +4,6 @@ import com.intellij.openapi.components.PersistentStateComponent;
 import com.intellij.openapi.components.State;
 import com.intellij.openapi.components.Storage;
 import com.intellij.openapi.project.Project;
-import com.jetbrains.python.psi.PyDecorator;
-import com.jetbrains.python.psi.PyDecoratorList;
-import com.jetbrains.python.psi.PyFunction;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -24,14 +21,6 @@ public class RobotOptionsProvider implements PersistentStateComponent<RobotOptio
 
     public static RobotOptionsProvider getInstance(Project project) {
         return project.getService(RobotOptionsProvider.class);
-    }
-
-    public final boolean allowTransitiveImports() {
-        return state.transitiveImports;
-    }
-
-    public final void setAllowTransitiveImports(boolean transitiveImports) {
-        state.transitiveImports = transitiveImports;
     }
 
     public final boolean capitalizeKeywords() {
@@ -143,23 +132,6 @@ public class RobotOptionsProvider implements PersistentStateComponent<RobotOptio
         state.pythonLiveInspectionDecorators = pythonLiveInspectionDecorators;
     }
 
-    @SuppressWarnings("UnstableApiUsage")
-    public final boolean analyzeViaPythonLiveInspection(PyFunction function) {
-        if (state.pythonLiveInspection) {
-            PyDecoratorList decoratorList = function.getDecoratorList();
-            if (decoratorList != null) {
-                for (PyDecorator decorator : decoratorList.getDecorators()) {
-                    String decoratorName = decorator.getName();
-                    if (!"keyword".equals(decoratorName) && (state.pythonLiveInspectionDecorators.isEmpty() || state.pythonLiveInspectionDecorators.contains(
-                            decoratorName))) {
-                        return true;
-                    }
-                }
-            }
-        }
-        return false;
-    }
-
     @Override
     public @Nullable State getState() {
         return state;
@@ -167,7 +139,6 @@ public class RobotOptionsProvider implements PersistentStateComponent<RobotOptio
 
     @Override
     public void loadState(@NotNull State state) {
-        this.state.transitiveImports = state.transitiveImports;
         this.state.capitalizeKeywords = state.capitalizeKeywords;
         this.state.smartAutoEncloseVariable = state.smartAutoEncloseVariable;
         this.state.multilineIndentation = state.multilineIndentation;
@@ -179,7 +150,6 @@ public class RobotOptionsProvider implements PersistentStateComponent<RobotOptio
     }
 
     public static class State {
-        public boolean transitiveImports = true;
         public boolean capitalizeKeywords = true;
         public boolean smartAutoEncloseVariable = true;
         public boolean multilineIndentation = true;

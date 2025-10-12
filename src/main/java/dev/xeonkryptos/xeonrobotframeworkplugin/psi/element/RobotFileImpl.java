@@ -17,7 +17,6 @@ import com.intellij.psi.util.CachedValuesManager;
 import com.intellij.psi.util.ParameterizedCachedValue;
 import com.intellij.psi.util.PsiModificationTracker;
 import com.jetbrains.python.psi.PyClass;
-import dev.xeonkryptos.xeonrobotframeworkplugin.ide.config.RobotOptionsProvider;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotLanguage;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.dto.ImportType;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.ref.PythonResolver;
@@ -26,7 +25,6 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.ref.RobotPythonClass;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.visitor.RobotImportFilesCollector;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.visitor.RobotSectionVariablesCollector;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.visitor.RobotUsedFilesCollector;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.visitor.RobotUserKeywordsCollector;
 import dev.xeonkryptos.xeonrobotframeworkplugin.util.GlobalConstants;
 import dev.xeonkryptos.xeonrobotframeworkplugin.util.RobotNames;
 import org.jetbrains.annotations.NotNull;
@@ -50,7 +48,6 @@ public class RobotFileImpl extends PsiFileBase implements KeywordFile, RobotFile
     private final FileType fileType;
 
     private Collection<DefinedVariable> sectionVariables;
-    private Collection<DefinedKeyword> definedKeywords;
 
     public RobotFileImpl(FileViewProvider fileViewProvider) {
         super(fileViewProvider, RobotLanguage.INSTANCE);
@@ -63,7 +60,6 @@ public class RobotFileImpl extends PsiFileBase implements KeywordFile, RobotFile
         super.subtreeChanged();
 
         sectionVariables = null;
-        definedKeywords = null;
     }
 
     @NotNull
@@ -152,17 +148,6 @@ public class RobotFileImpl extends PsiFileBase implements KeywordFile, RobotFile
 
     @NotNull
     @Override
-    public final Collection<DefinedKeyword> getDefinedKeywords() {
-        if (definedKeywords == null) {
-            RobotUserKeywordsCollector userKeywordsCollector = new RobotUserKeywordsCollector();
-            acceptChildren(userKeywordsCollector);
-            definedKeywords = userKeywordsCollector.getKeywords();
-        }
-        return definedKeywords;
-    }
-
-    @NotNull
-    @Override
     public final Collection<PsiFile> getFilesFromInvokedKeywordsAndVariables() {
         return CachedValuesManager.getCachedValue(this, () -> {
             RobotUsedFilesCollector robotUsedFilesCollector = new RobotUsedFilesCollector();
@@ -204,11 +189,11 @@ public class RobotFileImpl extends PsiFileBase implements KeywordFile, RobotFile
 
     @NotNull
     @Override
-    public Collection<KeywordFile> findImportedFilesWithLibraryName(@NotNull String libraryName) {
-        boolean includeTransitive = RobotOptionsProvider.getInstance(getProject()).allowTransitiveImports();
-        return getImportedFiles(includeTransitive).stream()
-                                                  .filter(importedFile -> libraryName.equals(importedFile.getLibraryName()))
-                                                  .collect(Collectors.toCollection(LinkedHashSet::new));
+    public Collection<VirtualFile> findImportedFilesWithLibraryName(@NotNull String libraryName) {
+        return getImportedFiles(true).stream()
+                                     .filter(importedFile -> libraryName.equals(importedFile.getLibraryName()))
+                                     .map(KeywordFile::getVirtualFile)
+                                     .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
     @NotNull
