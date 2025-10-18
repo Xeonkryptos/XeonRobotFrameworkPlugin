@@ -112,6 +112,12 @@
         <localInspection language="Robot" shortName="RobotKeywordOnlyMarkerNotUsed" bundle="messages.RobotBundle" key="INSP.NAME.keyword-only-marker.unused"
                          groupPath="Robot" groupKey="INSP.GROUP.robot" enabledByDefault="true" level="WARNING" dumbAware="true"
                          implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.ide.inspections.cleanup.RobotUnusedKeywordOnlyMarkerInspection"/>
+        <localInspection language="Robot" shortName="ConcurrentlyDefinedSections" bundle="messages.RobotBundle" key="INSP.NAME.concurrently.defined.sections"
+                         groupPath="Robot" groupKey="INSP.GROUP.robot" enabledByDefault="true" level="ERROR" dumbAware="true"
+                         implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.ide.inspections.compilation.ConcurrentlyDefinedSectionsInspection"/>
+        <localInspection language="Robot" shortName="DuplicatedSections" bundle="messages.RobotBundle" key="INSP.NAME.duplicated.section"
+                         groupPath="Robot" groupKey="INSP.GROUP.robot" enabledByDefault="true" level="ERROR" dumbAware="true"
+                         implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.ide.inspections.compilation.DuplicatedSectionsInspection"/>
         <!-- Inspections: Readability -->
         <localInspection language="Robot" shortName="WeirdlyNamedElements" bundle="messages.RobotBundle"
                          key="INSP.NAME.weird.naming" groupPath="Robot" groupKey="INSP.GROUP.robot" enabledByDefault="true" level="WARNING"

@@ -25,6 +25,7 @@ public class RobotVisitor extends PsiElementVisitor {
 
   public void visitCommentsSection(@NotNull RobotCommentsSection o) {
     visitSection(o);
+    // visitNameIdentifierHolder(o);
   }
 
   public void visitDictVariable(@NotNull RobotDictVariable o) {
@@ -142,6 +143,7 @@ public class RobotVisitor extends PsiElementVisitor {
   public void visitKeywordsSection(@NotNull RobotKeywordsSection o) {
     visitSection(o);
     // visitScopeOwner(o);
+    // visitNameIdentifierHolder(o);
   }
 
   public void visitLanguage(@NotNull RobotLanguage o) {
@@ -248,6 +250,7 @@ public class RobotVisitor extends PsiElementVisitor {
 
   public void visitSettingsSection(@NotNull RobotSettingsSection o) {
     visitSection(o);
+    // visitNameIdentifierHolder(o);
   }
 
   public void visitSetupTeardownStatementsGlobalSetting(@NotNull RobotSetupTeardownStatementsGlobalSetting o) {
@@ -285,6 +288,7 @@ public class RobotVisitor extends PsiElementVisitor {
   public void visitTasksSection(@NotNull RobotTasksSection o) {
     visitSection(o);
     // visitScopeOwner(o);
+    // visitNameIdentifierHolder(o);
   }
 
   public void visitTemplateArgument(@NotNull RobotTemplateArgument o) {
@@ -328,6 +332,7 @@ public class RobotVisitor extends PsiElementVisitor {
   public void visitTestCasesSection(@NotNull RobotTestCasesSection o) {
     visitSection(o);
     // visitScopeOwner(o);
+    // visitNameIdentifierHolder(o);
   }
 
   public void visitTimeoutStatementsGlobalSetting(@NotNull RobotTimeoutStatementsGlobalSetting o) {
@@ -402,6 +407,7 @@ public class RobotVisitor extends PsiElementVisitor {
 
   public void visitVariablesSection(@NotNull RobotVariablesSection o) {
     visitSection(o);
+    // visitNameIdentifierHolder(o);
   }
 
   public void visitWhileLoopStructure(@NotNull RobotWhileLoopStructure o) {

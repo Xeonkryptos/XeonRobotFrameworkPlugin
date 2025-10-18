@@ -1,0 +1,39 @@
+<html lang="en">
+    <body>
+        <p>Reports concurrent definition of <code>*** Tasks ***</code> and <code>*** Test Cases ***</code> sections in the same Robot Framework file.</p>
+
+        <p>Robot Framework permits only one executable section per file: either tasks or test cases. Defining both makes the file invalid; tools may raise parse errors or ignore one section.</p>
+
+        <p><strong>Why this matters:</strong> Mixing task and test semantics in a single file is ambiguous and not supported by the Robot Framework parser.</p>
+
+        <p><strong>How to fix:</strong></p>
+        <ul>
+            <li>Keep only the section that matches the file's purpose.</li>
+            <li>Rename the header if you used the wrong one (e.g. change <code>*** Tasks ***</code> to <code>*** Test Cases ***</code>).</li>
+            <li>Split tasks and test cases into separate files.</li>
+        </ul>
+
+        <p><strong>Valid examples:</strong></p>
+        <pre><code>*** Tasks ***
+Daily Cleanup
+    Log    Cleaned
+</code></pre>
+        <pre><code>*** Test Cases ***
+Login Succeeds
+    Log    Logged in
+</code></pre>
+
+        <p><strong>Invalid (reported) example:</strong></p>
+        <pre><code>*** Tasks ***
+Daily Cleanup
+    Log    Cleaned
+
+*** Test Cases ***
+Login Succeeds
+    Log    Logged in
+</code></pre>
+
+        <!-- tooltip end -->
+        <p>Both section headers are highlighted as errors. Remove one to resolve the problem.</p>
+    </body>
+</html>

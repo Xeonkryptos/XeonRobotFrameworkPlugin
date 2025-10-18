@@ -26,6 +26,7 @@
 
   name(".*section")="Section"
   extends(".*_section")="section"
+  implements(".*_section")="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.NameIdentifierHolder"
 
   extends(".*_variable")="variable"
 

@@ -42,7 +42,7 @@ public class RobotKeywordReferenceSearch extends QueryExecutorBase<PsiReference,
             if (functionName != null) {
                 possibleKeywordName = KeywordUtil.getInstance(project).functionToKeyword(functionName);
             }
-            if (pyFunction.isValid() && searchForKeywordsInIndex(possibleKeywordName, project, globalSearchScope, consumer)) {
+            if (possibleKeywordName == null || pyFunction.isValid() && searchForKeywordsInIndex(possibleKeywordName, project, globalSearchScope, consumer)) {
                 return;
             }
             Optional<String> customKeywordNameOpt = RobotPyUtil.findCustomKeywordNameDecoratorExpression(pyFunction)
