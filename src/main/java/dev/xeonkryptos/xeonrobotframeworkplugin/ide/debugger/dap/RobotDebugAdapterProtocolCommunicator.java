@@ -20,7 +20,7 @@ import java.net.Socket;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static com.intellij.openapi.progress.util.ProgressIndicatorUtils.withTimeout;
 
@@ -32,10 +32,12 @@ public class RobotDebugAdapterProtocolCommunicator implements ProcessListener {
 
     private final Signal<Void> afterInitialize = new Signal<>();
 
-    private final AtomicReference<Socket> socketRef = new AtomicReference<>();
+    private final AtomicBoolean initializing = new AtomicBoolean(false);
+
+    private volatile Socket socket;
     private IDebugProtocolServer robotDebugServer;
 
-    private boolean initialized;
+    private volatile boolean initialized;
 
     public RobotDebugAdapterProtocolCommunicator(int robotDebugPort) {
         this.robotDebugPort = robotDebugPort;
@@ -44,22 +46,23 @@ public class RobotDebugAdapterProtocolCommunicator implements ProcessListener {
 
     @Override
     public void startNotified(@NotNull ProcessEvent event) {
-        if (socketRef.get() != null) {
+        if (!initializing.getAndSet(true)) {
             return;
         }
         ApplicationManager.getApplication().executeOnPooledThread(this::connect);
     }
 
     private void connect() {
-        Socket socket = tryConnectToServerWithTimeout(robotDebugPort);
-        if (socket == null) {
+        Socket localSocket = tryConnectToServerWithTimeout(robotDebugPort);
+        socket = localSocket;
+        if (localSocket == null) {
             MyLogger.logger.error("Couldn't connect to Robot debug server at port %d".formatted(robotDebugPort));
+            initializing.set(false);
         } else {
-            socketRef.set(socket);
             try {
                 Launcher<IDebugProtocolServer> clientLauncher = DSPLauncher.createClientLauncher(robotDebugClient,
-                                                                                                 socket.getInputStream(),
-                                                                                                 socket.getOutputStream());
+                                                                                                 localSocket.getInputStream(),
+                                                                                                 localSocket.getOutputStream());
                 clientLauncher.startListening();
 
                 robotDebugServer = clientLauncher.getRemoteProxy();
@@ -102,7 +105,8 @@ public class RobotDebugAdapterProtocolCommunicator implements ProcessListener {
     @Override
     public void processTerminated(@NotNull ProcessEvent event) {
         event.getProcessHandler().removeProcessListener(this);
-        Socket localSocket = socketRef.getAndSet(null);
+        Socket localSocket = socket;
+        socket = null;
         if (localSocket != null) {
             try {
                 localSocket.close();
@@ -129,7 +133,7 @@ public class RobotDebugAdapterProtocolCommunicator implements ProcessListener {
 
     private Socket tryConnectToServerWithTimeout(int port) {
         try {
-            return withTimeout(10000L, () -> {
+            return withTimeout(10_000L, () -> {
                 Socket socket = null;
                 while (socket == null || !socket.isConnected()) {
                     socket = null;
