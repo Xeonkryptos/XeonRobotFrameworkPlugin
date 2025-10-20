@@ -47,9 +47,8 @@ public class RobotDebugAdapterProtocolCommunicator implements ProcessListener {
     @Override
     public void startNotified(@NotNull ProcessEvent event) {
         if (!initializing.getAndSet(true)) {
-            return;
+            ApplicationManager.getApplication().executeOnPooledThread(this::connect);
         }
-        ApplicationManager.getApplication().executeOnPooledThread(this::connect);
     }
 
     private void connect() {
