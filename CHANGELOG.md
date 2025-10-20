@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+## 0.5.7
+
 ### Added
 
 - New action to create robot directories with `__init__.robot` file included
