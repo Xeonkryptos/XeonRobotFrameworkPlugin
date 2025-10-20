@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+## 0.5.8
+
 ### Fixed
 
 - Issue with the debugger being unable to connect to the robot process breaking the complete process in the end
