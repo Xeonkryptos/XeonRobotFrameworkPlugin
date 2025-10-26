@@ -10,6 +10,8 @@
 
     <depends>PythonCore</depends>
 
+    <resource-bundle>messages.RobotBundle</resource-bundle>
+
     <extensions defaultExtensionNs="com.intellij">
         <projectConfigurable groupId="language" instance="dev.xeonkryptos.xeonrobotframeworkplugin.ide.config.RobotConfiguration" key="options.entrypoint"
                              bundle="messages.RobotBundle"/>

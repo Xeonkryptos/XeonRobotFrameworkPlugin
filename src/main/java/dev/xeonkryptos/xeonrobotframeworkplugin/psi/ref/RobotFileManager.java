@@ -11,6 +11,7 @@ import com.intellij.psi.search.FilenameIndex;
 import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.psi.search.ProjectScope;
 import com.intellij.psi.util.QualifiedName;
+import com.jetbrains.python.PyNames;
 import com.jetbrains.python.psi.PyFile;
 import com.jetbrains.python.psi.search.PySearchUtilBase;
 import com.jetbrains.python.psi.stubs.PyModuleNameIndex;
@@ -136,8 +137,8 @@ public class RobotFileManager {
                 PsiFile[] files = pyFile.getContainingDirectory().getFiles();
                 for (PsiFile file : files) {
                     String fileName = file.getName();
-                    if (!"__init__.py".equals(fileName) && Character.isUpperCase(fileName.charAt(0))) {
-                        String key = fileName.replace(".py", "");
+                    if (!PyNames.INIT_DOT_PY.equals(fileName) && Character.isUpperCase(fileName.charAt(0))) {
+                        String key = fileName.replace(PyNames.DOT_PY, "");
                         cachedFiles.put(key, file);
                     }
                 }

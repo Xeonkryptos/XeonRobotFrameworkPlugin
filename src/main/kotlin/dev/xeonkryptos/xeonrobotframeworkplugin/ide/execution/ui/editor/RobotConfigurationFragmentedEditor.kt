@@ -12,6 +12,7 @@ import com.intellij.execution.ui.SettingsEditorFragment
 import com.intellij.execution.ui.SettingsEditorFragmentType
 import com.intellij.ide.macro.MacrosDialog
 import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory
+import com.intellij.openapi.ui.DialogPanel
 import com.intellij.openapi.ui.LabeledComponent
 import com.intellij.openapi.ui.TextBrowseFolderListener
 import com.intellij.openapi.ui.TextFieldWithBrowseButton
@@ -28,6 +29,10 @@ class RobotConfigurationFragmentedEditor(private val runConfiguration: RobotRunC
     runConfiguration
 ) {
 
+    companion object {
+        private const val MIN_FRAGMENT_WIDTH = 500
+    }
+
     override fun createRunFragments(): MutableList<SettingsEditorFragment<RobotRunConfiguration, *>> {
         val fragments: MutableList<SettingsEditorFragment<RobotRunConfiguration, *>> = ArrayList()
         val beforeRunComponent = BeforeRunComponent(this)
@@ -40,8 +45,7 @@ class RobotConfigurationFragmentedEditor(private val runConfiguration: RobotRunC
         addInterpreterOptions(fragments)
         addContentSourceRoots(fragments)
 
-        customizeFragments(fragments)
-//        fragments.add(PyEditorExtensionFragment())
+        customizeFragments(fragments, runConfiguration)
         fragments.add(LogsGroupFragment())
         return fragments
     }
@@ -52,19 +56,30 @@ class RobotConfigurationFragmentedEditor(private val runConfiguration: RobotRunC
         RobotPluginCommonFragmentsBuilder().createEnvironmentFragments(fragments, runConfiguration)
     }
 
-    fun customizeFragments(fragments: MutableList<SettingsEditorFragment<RobotRunConfiguration, *>>) {
+    fun customizeFragments(fragments: MutableList<SettingsEditorFragment<RobotRunConfiguration, *>>, configuration: RobotRunConfiguration) {
+        val factory = RobotExecutableUnitFactory(configuration)
+        val robotExecutionUnits = SettingsEditorFragment<RobotRunConfiguration, DialogPanel>(
+            "robot.execution.units",
+            null,
+            null,
+            factory.dialogPanel,
+            SettingsEditorFragmentType.COMMAND_LINE,
+            { _, component -> component.reset() },
+            { _, component -> component.apply() },
+            { true }).apply { isRemovable = false }
+        fragments.add(robotExecutionUnits)
+
         val parametersEditor = RawCommandLineEditor()
         CommandLinePanel.setMinimumWidth(parametersEditor, MIN_FRAGMENT_WIDTH)
-        val scriptParametersFragment: SettingsEditorFragment<RobotRunConfiguration, RawCommandLineEditor> =
-            SettingsEditorFragment<RobotRunConfiguration, RawCommandLineEditor>(
-                "py.script.parameters",
-                RobotBundle.message("python.run.configuration.fragments.script.parameters"),
-                RobotBundle.message("python.run.configuration.fragments.python.group"),
-                parametersEditor,
-                SettingsEditorFragmentType.COMMAND_LINE,
-                { config: RobotRunConfiguration, field: RawCommandLineEditor -> field.text = config.pythonRunConfiguration.scriptParameters },
-                { config: RobotRunConfiguration, field: RawCommandLineEditor -> config.pythonRunConfiguration.scriptParameters = field.text.trim() },
-                { true })
+        val scriptParametersFragment = SettingsEditorFragment(
+            "py.script.parameters",
+            RobotBundle.message("python.run.configuration.fragments.script.parameters"),
+            RobotBundle.message("python.run.configuration.fragments.python.group"),
+            parametersEditor,
+            SettingsEditorFragmentType.COMMAND_LINE,
+            { config: RobotRunConfiguration, field: RawCommandLineEditor -> field.text = config.pythonRunConfiguration.scriptParameters },
+            { config: RobotRunConfiguration, field: RawCommandLineEditor -> config.pythonRunConfiguration.scriptParameters = field.text.trim() },
+            { true })
         MacrosDialog.addMacroSupport(parametersEditor.editorField, MacrosDialog.Filters.ALL) { false }
         parametersEditor.editorField.emptyText.text = RobotBundle.message("python.run.configuration.fragments.script.parameters.hint")
         TextComponentEmptyText.setupPlaceholderVisibility(parametersEditor.editorField)
@@ -136,7 +151,7 @@ class RobotConfigurationFragmentedEditor(private val runConfiguration: RobotRunC
                 { config: RobotRunConfiguration, field: RawCommandLineEditor -> field.text = config.pythonRunConfiguration.interpreterOptions },
                 { config: RobotRunConfiguration, field: RawCommandLineEditor -> config.pythonRunConfiguration.interpreterOptions = field.text.trim() },
                 { config: RobotRunConfiguration -> !config.pythonRunConfiguration.interpreterOptions.trim().isEmpty() })
-        interpreterOptionsField.editorField.emptyText.setText(RobotBundle.message("python.run.configuration.fragments.interpreter.options.placeholder"))
+        interpreterOptionsField.editorField.emptyText.text = RobotBundle.message("python.run.configuration.fragments.interpreter.options.placeholder")
         TextComponentEmptyText.setupPlaceholderVisibility(interpreterOptionsField.editorField)
         interpreterOptionsFragment.setHint(RobotBundle.message("python.run.configuration.fragments.interpreter.options.hint"))
         interpreterOptionsFragment.actionHint = RobotBundle.message("python.run.configuration.fragments.interpreter.options.hint")
@@ -189,9 +204,5 @@ class RobotConfigurationFragmentedEditor(private val runConfiguration: RobotRunC
         } else {
             fragments.add(index, newFragment)
         }
-    }
-
-    companion object {
-        const val MIN_FRAGMENT_WIDTH = 500
     }
 }
