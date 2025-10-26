@@ -1,4 +1,4 @@
-package dev.xeonkryptos.xeonrobotframeworkplugin.ide.execution.ui;
+package dev.xeonkryptos.xeonrobotframeworkplugin.ide.execution;
 
 import com.intellij.execution.Executor;
 import com.intellij.execution.configurations.RunConfiguration;

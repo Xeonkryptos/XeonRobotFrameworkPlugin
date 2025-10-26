@@ -8,6 +8,10 @@
 
 - Run configuration dialog and settings to differentiate between test cases, tasks and directory executions
 
+### Fixed
+
+- Fixed re-run failed tests failing in tests-only mode
+
 ## 0.5.8
 
 ### Fixed

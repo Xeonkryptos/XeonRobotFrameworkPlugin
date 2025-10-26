@@ -35,7 +35,6 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.ide.config.RobotOptionsProvider;
 import dev.xeonkryptos.xeonrobotframeworkplugin.ide.execution.config.RobotRunConfiguration;
 import dev.xeonkryptos.xeonrobotframeworkplugin.ide.execution.config.RobotRunConfiguration.RobotRunnableUnitExecutionInfo;
 import dev.xeonkryptos.xeonrobotframeworkplugin.ide.execution.ui.RobotRerunFailedTestsAction;
-import dev.xeonkryptos.xeonrobotframeworkplugin.ide.execution.ui.RobotTestRunnerFactory;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotFeatureFileType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -155,7 +154,13 @@ public class RobotPythonCommandLineState extends PythonScriptCommandLineState {
 
     @NotNull
     @Override
-    protected ConsoleView createAndAttachConsole(Project project, ProcessHandler processHandler, Executor executor) {
+    protected ConsoleView createAndAttachConsole(Project project, ProcessHandler processHandler, Executor executor) throws ExecutionException {
+        if (!runConfiguration.getTasks().isEmpty()) {
+            // With existing tasks to execute, don't show the SMT view. Tasks aren't tests.
+            ConsoleView consoleView = super.createAndAttachConsole(project, processHandler, executor);
+            consoleView.addMessageFilter(new RobotReportsFilter());
+            return consoleView;
+        }
         AbstractPythonRunConfiguration<?> config = getConfig();
         ConsoleView smtRunnerConsoleView = RobotTestRunnerFactory.createConsoleView(config, executor);
         smtRunnerConsoleView.attachToProcess(processHandler);
@@ -173,7 +178,8 @@ public class RobotPythonCommandLineState extends PythonScriptCommandLineState {
     @SuppressWarnings("UnstableApiUsage") // Might be unstable at the moment, but is an important extension point
     public ExecutionResult execute(@NotNull Executor executor, @NotNull PythonScriptTargetedCommandLineBuilder converter) throws ExecutionException {
         final RobotExecutionMode executionMode = computeRobotExecutionMode(executor);
-        var wrappedConverter = new MyPythonScriptTargetedCommandLineBuilder(converter, runConfiguration, executionMode);
+        ExecutionEnvironment environment = getEnvironment();
+        var wrappedConverter = new MyPythonScriptTargetedCommandLineBuilder(converter, runConfiguration, executionMode, environment);
         try {
             ExecutionResult executionResult = super.execute(executor, wrappedConverter);
             enrichExecutionResult(executionResult);
@@ -205,7 +211,8 @@ public class RobotPythonCommandLineState extends PythonScriptCommandLineState {
     @SuppressWarnings("UnstableApiUsage") // Might be unstable at the moment, but is an important extension point
     private record MyPythonScriptTargetedCommandLineBuilder(@NotNull PythonScriptTargetedCommandLineBuilder parentBuilder,
                                                             RobotRunConfiguration configuration,
-                                                            RobotExecutionMode executionMode) implements PythonScriptTargetedCommandLineBuilder {
+                                                            RobotExecutionMode executionMode,
+                                                            ExecutionEnvironment environment) implements PythonScriptTargetedCommandLineBuilder {
 
         @NotNull
         @Override
@@ -265,6 +272,7 @@ public class RobotPythonCommandLineState extends PythonScriptCommandLineState {
             boolean testsOnlyMode = RobotOptionsProvider.getInstance(configuration.getProject()).testsOnlyMode();
             String testsOnlyModeEnvironmentValue = testsOnlyMode ? "1" : "0";
             delegateExecution.addEnvironmentVariable("ROBOT_TESTS_ONLY_MODE", testsOnlyModeEnvironmentValue);
+            environment.putUserData(ExecutionKeys.TESTS_ONLY_MODE_KEY, testsOnlyMode);
 
             return parentBuilder.build(helpersAwareTargetEnvironmentRequest, delegateExecution);
         }
