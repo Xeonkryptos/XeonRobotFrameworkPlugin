@@ -36,6 +36,7 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTaskStatement
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTestCaseStatement
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.index.TaskNameIndex
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.index.TestCaseNameIndex
+import java.awt.event.ActionListener
 import javax.swing.tree.DefaultMutableTreeNode
 
 class RobotTextFieldWithDirectoryBrowseButton(contextAnchor: ContextAnchor) : TextFieldWithBrowseButton() {
@@ -75,34 +76,35 @@ class RobotExecutableUnitWithBrowseButton(
         }
     }.installOn(childComponent)
 
-    init {
-        childComponent.document.addDocumentListener(object : DocumentListener {
-            override fun documentChanged(event: DocumentEvent) {
-                validator.revalidate()
-            }
-        })
-
-        childComponent.border = JBUI.Borders.empty(2)
-
-        addActionListener {
-            val dialog = RobotSymbolChooserDialog(contextAnchor.project, contextAnchor.scope) { element ->
-                when (unitModeProvider()) {
-                    RobotTestExecutionMode.TEST_CASES -> element is RobotTestCaseStatement
-                    RobotTestExecutionMode.TASKS -> element is RobotTaskStatement
-                    else -> false
-                }
-            }
-            dialog.showDialog()
-            when (val element = dialog.selected) {
-                is RobotQualifiedNameOwner -> {
-                    setText(element.qualifiedName)
-                }
-
-                is RobotFile -> {
-                    setText(element.getQName()?.toString())
-                }
+    private val actionListener = ActionListener {
+        val dialog = RobotSymbolChooserDialog(contextAnchor.project, contextAnchor.scope) { element ->
+            when (unitModeProvider()) {
+                RobotTestExecutionMode.TEST_CASES -> element is RobotTestCaseStatement
+                RobotTestExecutionMode.TASKS -> element is RobotTaskStatement
+                else -> false
             }
         }
+        dialog.showDialog()
+        when (val element = dialog.selected) {
+            is RobotQualifiedNameOwner -> {
+                setText(element.qualifiedName)
+            }
+
+            is RobotFile -> {
+                setText(element.getQName()?.toString())
+            }
+        }
+    }
+    private val documentListener = object : DocumentListener {
+        override fun documentChanged(event: DocumentEvent) {
+            validator.revalidate()
+        }
+    }
+
+    init {
+        addActionListener(actionListener)
+        childComponent.document.addDocumentListener(documentListener)
+        childComponent.border = JBUI.Borders.empty(2)
     }
 
     override fun getText(): String = childComponent.text
@@ -124,6 +126,12 @@ class RobotExecutableUnitWithBrowseButton(
     }
 
     private fun extractLeafName(fqName: String): String = fqName.substringAfterLast('.')
+
+    override fun dispose() {
+        super.dispose()
+        removeActionListener(actionListener)
+        childComponent.document.removeDocumentListener(documentListener)
+    }
 }
 
 private class RobotSymbolChooserDialog(

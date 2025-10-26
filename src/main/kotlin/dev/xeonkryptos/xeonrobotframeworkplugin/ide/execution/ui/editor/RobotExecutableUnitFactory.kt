@@ -2,10 +2,12 @@ package dev.xeonkryptos.xeonrobotframeworkplugin.ide.execution.ui.editor
 
 import ai.grazie.utils.applyIf
 import com.intellij.icons.AllIcons
+import com.intellij.openapi.Disposable
 import com.intellij.openapi.module.Module
 import com.intellij.openapi.ui.DialogPanel
 import com.intellij.openapi.ui.FixedSizeButton
 import com.intellij.openapi.ui.LabeledComponent
+import com.intellij.openapi.util.Disposer
 import com.intellij.ui.TextAccessor
 import com.intellij.ui.components.JBScrollPane
 import com.intellij.ui.dsl.builder.AlignX
@@ -18,6 +20,7 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.RobotBundle
 import dev.xeonkryptos.xeonrobotframeworkplugin.ide.execution.config.RobotRunConfiguration
 import java.awt.BorderLayout
 import java.awt.Dimension
+import java.awt.event.ActionListener
 import java.awt.event.ComponentAdapter
 import java.awt.event.ComponentEvent
 import java.awt.event.ContainerEvent
@@ -27,7 +30,7 @@ import javax.swing.JPanel
 import javax.swing.ScrollPaneConstants
 import javax.swing.UIManager
 
-class RobotExecutableUnitFactory(configuration: RobotRunConfiguration) {
+class RobotExecutableUnitFactory(configuration: RobotRunConfiguration) : Disposable {
 
     companion object {
         private const val MAXIMUM_VISIBLE_BROWSE_BUTTON_COUNT = 5
@@ -39,6 +42,23 @@ class RobotExecutableUnitFactory(configuration: RobotRunConfiguration) {
     private val browseButtonContainer: RobotBrowseButtonContainer
     private val scrollPane: JBScrollPane
 
+    private val browseButtonContainerContainerListener = object : ContainerListener {
+        override fun componentAdded(e: ContainerEvent?) {
+            updateScrollPaneHeight()
+            dialogPanel.revalidate()
+        }
+
+        override fun componentRemoved(e: ContainerEvent?) {
+            updateScrollPaneHeight()
+            dialogPanel.revalidate()
+        }
+    }
+    private val browseButtonContainerComponentListener = object : ComponentAdapter() {
+        override fun componentResized(e: ComponentEvent?) {
+            updateScrollPaneHeight()
+        }
+    }
+
     init {
         val project = configuration.pythonRunConfiguration.project
         val module: Module? = configuration.pythonRunConfiguration.module
@@ -46,22 +66,8 @@ class RobotExecutableUnitFactory(configuration: RobotRunConfiguration) {
 
         val contextAnchor = if (module == null) ProjectSdkContextAnchor(project, sdk) else ModuleBasedContextAnchor(module)
         browseButtonContainer = RobotBrowseButtonContainer(contextAnchor, mode).apply {
-            addContainerListener(object : ContainerListener {
-                override fun componentAdded(e: ContainerEvent?) {
-                    updateScrollPaneHeight()
-                    dialogPanel.revalidate()
-                }
-
-                override fun componentRemoved(e: ContainerEvent?) {
-                    updateScrollPaneHeight()
-                    dialogPanel.revalidate()
-                }
-            })
-            addComponentListener(object : ComponentAdapter() {
-                override fun componentResized(e: ComponentEvent?) {
-                    updateScrollPaneHeight()
-                }
-            })
+            addContainerListener(browseButtonContainerContainerListener)
+            addComponentListener(browseButtonContainerComponentListener)
         }
 
         scrollPane = JBScrollPane(browseButtonContainer).apply {
@@ -101,6 +107,7 @@ class RobotExecutableUnitFactory(configuration: RobotRunConfiguration) {
                 }
             }
         }.withPreferredWidth(Integer.MAX_VALUE)
+        Disposer.register(this, browseButtonContainer)
     }
 
     private fun onModeChanged(newMode: RobotTestExecutionMode) {
@@ -119,45 +126,53 @@ class RobotExecutableUnitFactory(configuration: RobotRunConfiguration) {
         scrollPane.maximumSize = Dimension(Int.MAX_VALUE, newHeight)
         scrollPane.revalidate()
     }
+
+    override fun dispose() {
+        browseButtonContainer.removeContainerListener(browseButtonContainerContainerListener)
+        browseButtonContainer.removeComponentListener(browseButtonContainerComponentListener)
+    }
 }
 
 private class RobotBrowseButtonContainer(private val contextAnchor: ContextAnchor, initialExecutionMode: RobotTestExecutionMode) : JPanel(),
-                                                                                                                                   RobotExecutionModeChangeListener {
+                                                                                                                                   RobotExecutionModeChangeListener,
+                                                                                                                                   Disposable {
+
+    private val containerListener = object : ContainerListener {
+        override fun componentAdded(e: ContainerEvent?) {
+            updateDeleteButtonsVisibility()
+        }
+
+        override fun componentRemoved(e: ContainerEvent?) {
+            updateDeleteButtonsVisibility()
+        }
+
+        private fun updateDeleteButtonsVisibility() {
+            if (components.size == 1) {
+                val component = components[0]
+                if (component is DeletableBrowseButtonPanel) {
+                    component.updateDeleteButtonVisibility(false)
+                }
+            } else if (components.size > 1) {
+                for (comp in components) {
+                    if (comp is DeletableBrowseButtonPanel) {
+                        comp.updateDeleteButtonVisibility(true)
+                    }
+                }
+            }
+        }
+    }
 
     private var executionMode = initialExecutionMode
 
     init {
         layout = BoxLayout(this, BoxLayout.Y_AXIS)
         addNewBrowseButton()
-
-        addContainerListener(object : ContainerListener {
-            override fun componentAdded(e: ContainerEvent?) {
-                updateDeleteButtonsVisibility()
-            }
-
-            override fun componentRemoved(e: ContainerEvent?) {
-                updateDeleteButtonsVisibility()
-            }
-
-            private fun updateDeleteButtonsVisibility() {
-                if (components.size == 1) {
-                    val component = components[0]
-                    if (component is DeletableBrowseButtonPanel) {
-                        component.updateDeleteButtonVisibility(false)
-                    }
-                } else if (components.size > 1) {
-                    for (comp in components) {
-                        if (comp is DeletableBrowseButtonPanel) {
-                            comp.updateDeleteButtonVisibility(true)
-                        }
-                    }
-                }
-            }
-        })
+        addContainerListener(containerListener)
     }
 
     fun addNewBrowseButton(initialText: String? = null) {
         val deletableBrowseButtonPanel = DeletableBrowseButtonPanel(contextAnchor, executionMode, initialText)
+        Disposer.register(this, deletableBrowseButtonPanel)
         add(deletableBrowseButtonPanel)
     }
 
@@ -200,10 +215,15 @@ private class RobotBrowseButtonContainer(private val contextAnchor: ContextAncho
         executionMode = newMode
         components.filterIsInstance<RobotExecutionModeChangeListener>().forEach { it.onModeChanged(newMode) }
     }
+
+    override fun dispose() {
+        removeContainerListener(containerListener)
+    }
 }
 
 private class DeletableBrowseButtonPanel(contextAnchor: ContextAnchor, initialExecutionMode: RobotTestExecutionMode, initialText: String? = null) : JPanel(),
-                                                                                                                                                    RobotExecutionModeChangeListener {
+                                                                                                                                                    RobotExecutionModeChangeListener,
+                                                                                                                                                    Disposable {
 
     private var executionMode = initialExecutionMode
 
@@ -218,10 +238,15 @@ private class DeletableBrowseButtonPanel(contextAnchor: ContextAnchor, initialEx
     private val symbolDeleteButton: FixedSizeButton
     private val directoryDeleteButton: FixedSizeButton
 
+    private val deleteButtonActionListener: ActionListener = ActionListener { parent.remove(this@DeletableBrowseButtonPanel) }
+
     private var visibleDeleteButton: Boolean = false
 
     init {
         layout = BoxLayout(this, BoxLayout.X_AXIS)
+
+        Disposer.register(this, newSymbolBrowseButton)
+        Disposer.register(this, newDirectoryBrowseButton)
 
         symbolLabel = LabeledComponent.create(
             newSymbolBrowseButton,
@@ -239,13 +264,13 @@ private class DeletableBrowseButtonPanel(contextAnchor: ContextAnchor, initialEx
             border = UIManager.getBorder("Button.border")
             icon = AllIcons.General.Remove
         }
-        symbolDeleteButton.addActionListener { parent.remove(this) }
+        symbolDeleteButton.addActionListener(deleteButtonActionListener)
         directoryDeleteButton = FixedSizeButton(directoryLabel).apply {
             isVisible = false
             border = UIManager.getBorder("Button.border")
             icon = AllIcons.General.Remove
         }
-        directoryDeleteButton.addActionListener { parent.remove(this) }
+        directoryDeleteButton.addActionListener(deleteButtonActionListener)
 
         add(symbolLabel)
         add(symbolDeleteButton)
@@ -281,6 +306,11 @@ private class DeletableBrowseButtonPanel(contextAnchor: ContextAnchor, initialEx
         symbolDeleteButton.isVisible = executionMode.unitExecutionMode && visibleDeleteButton
         directoryLabel.isVisible = !executionMode.unitExecutionMode
         directoryDeleteButton.isVisible = !executionMode.unitExecutionMode && visibleDeleteButton
+    }
+
+    override fun dispose() {
+        newSymbolBrowseButton.removeActionListener(deleteButtonActionListener)
+        newDirectoryBrowseButton.removeActionListener(deleteButtonActionListener)
     }
 }
 

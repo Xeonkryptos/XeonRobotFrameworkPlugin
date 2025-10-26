@@ -16,6 +16,7 @@ import com.intellij.openapi.ui.DialogPanel
 import com.intellij.openapi.ui.LabeledComponent
 import com.intellij.openapi.ui.TextBrowseFolderListener
 import com.intellij.openapi.ui.TextFieldWithBrowseButton
+import com.intellij.openapi.util.Disposer
 import com.intellij.openapi.util.text.StringUtil
 import com.intellij.ui.RawCommandLineEditor
 import com.intellij.ui.components.TextComponentEmptyText
@@ -68,6 +69,7 @@ class RobotConfigurationFragmentedEditor(private val runConfiguration: RobotRunC
             { _, component -> component.reset() },
             { _, component -> component.apply() },
             { true })
+        Disposer.register(robotExecutionUnits, factory)
         fragments.add(robotExecutionUnits)
 
         val parametersEditor = RawCommandLineEditor()
