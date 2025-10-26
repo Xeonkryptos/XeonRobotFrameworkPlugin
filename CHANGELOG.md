@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+## 0.5.9
+
 ### Changed
 
 - Run configuration dialog and settings to differentiate between test cases, tasks and directory executions
