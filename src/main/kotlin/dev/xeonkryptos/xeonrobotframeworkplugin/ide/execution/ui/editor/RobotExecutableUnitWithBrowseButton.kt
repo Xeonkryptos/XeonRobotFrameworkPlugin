@@ -29,6 +29,7 @@ import com.jetbrains.python.extensions.ContextAnchor
 import com.jetbrains.python.extensions.getQName
 import dev.xeonkryptos.xeonrobotframeworkplugin.RobotBundle
 import dev.xeonkryptos.xeonrobotframeworkplugin.ide.gotocontributor.RobotGotoClassContributor
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotFeatureFileType
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotFile
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotQualifiedNameOwner
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTaskStatement
@@ -37,25 +38,27 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.index.TaskNameIndex
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.index.TestCaseNameIndex
 import javax.swing.tree.DefaultMutableTreeNode
 
-class RobotTextFieldWithDirectoryBrowseButton(contextAnchor: ContextAnchor) : TextFieldWithBrowseButton(), TextAccessor {
+class RobotTextFieldWithDirectoryBrowseButton(contextAnchor: ContextAnchor) : TextFieldWithBrowseButton() {
     init {
         val textComponentAccessor = TextComponentAccessor.TEXT_FIELD_WHOLE_TEXT
         installFileCompletionAndBrowseDialog(
-            contextAnchor.project, this, textField, FileChooserDescriptorFactory.createSingleFolderDescriptor(), textComponentAccessor
+            contextAnchor.project,
+            this,
+            textField,
+            FileChooserDescriptorFactory.createSingleFileOrFolderDescriptor(RobotFeatureFileType.getInstance()),
+            textComponentAccessor
         )
     }
 }
 
 class RobotExecutableUnitWithBrowseButton(
-    private val contextAnchor: ContextAnchor,
-    unitModeProvider: () -> RobotTestExecutionMode
+    private val contextAnchor: ContextAnchor, unitModeProvider: () -> RobotTestExecutionMode
 ) : ComponentWithBrowseButton<TextFieldWithCompletion>(
     TextFieldWithCompletion(
         contextAnchor.project, RobotExecutionUnitCompletionProvider(
             contextAnchor, unitModeProvider
         ), "", true, true, true
-    ),
-    null
+    ), null
 ), TextAccessor {
 
     private val validator = ComponentValidator(this).withValidator {

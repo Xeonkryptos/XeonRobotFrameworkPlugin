@@ -35,8 +35,8 @@ public class RobotRunConfiguration extends LocatableConfigurationBase<Element> i
 
     private PythonRunConfigurationExt pythonRunConfiguration;
 
-    private List<RobotRunnableTestCaseExecutionInfo> testCases = List.of();
-    private List<RobotRunnableTestCaseExecutionInfo> tasks = List.of();
+    private List<RobotRunnableUnitExecutionInfo> testCases = List.of();
+    private List<RobotRunnableUnitExecutionInfo> tasks = List.of();
     private List<String> directories = List.of();
 
     public RobotRunConfiguration(Project project, ConfigurationFactory configurationFactory) {
@@ -89,16 +89,16 @@ public class RobotRunConfiguration extends LocatableConfigurationBase<Element> i
     }
 
     @NotNull
-    private List<RobotRunnableTestCaseExecutionInfo> deserializeList(Element parent, String name) {
+    private List<RobotRunnableUnitExecutionInfo> deserializeList(Element parent, String name) {
         return ContainerUtil.mapNotNull(parent.getChildren(name), e -> {
-            RobotRunnableTestCaseExecutionInfo info = new RobotRunnableTestCaseExecutionInfo();
+            RobotRunnableUnitExecutionInfo info = new RobotRunnableUnitExecutionInfo();
             info.readExternal(e);
             return info;
         });
     }
 
-    private void serializeList(Element parent, List<RobotRunnableTestCaseExecutionInfo> list, String name) throws WriteExternalException {
-        for (RobotRunnableTestCaseExecutionInfo item : list) {
+    private void serializeList(Element parent, List<RobotRunnableUnitExecutionInfo> list, String name) throws WriteExternalException {
+        for (RobotRunnableUnitExecutionInfo item : list) {
             if (item != null) {
                 Element itemElement = new Element(name);
                 item.writeExternal(itemElement);
@@ -128,32 +128,25 @@ public class RobotRunConfiguration extends LocatableConfigurationBase<Element> i
         pythonRunConfiguration.checkConfiguration();
     }
 
-    @Override
-    public RobotRunConfiguration clone() {
-        RobotRunConfiguration config = (RobotRunConfiguration) super.clone();
-        config.pythonRunConfiguration = pythonRunConfiguration.clone();
-        return config;
-    }
-
     @NotNull
     @Override
     protected LocatableRunConfigurationOptions getOptions() {
         return pythonRunConfiguration.getOptions();
     }
 
-    public List<RobotRunnableTestCaseExecutionInfo> getTestCases() {
+    public List<RobotRunnableUnitExecutionInfo> getTestCases() {
         return testCases;
     }
 
-    public void setTestCases(List<RobotRunnableTestCaseExecutionInfo> testCases) {
+    public void setTestCases(List<RobotRunnableUnitExecutionInfo> testCases) {
         this.testCases = Objects.requireNonNullElseGet(testCases, List::of);
     }
 
-    public List<RobotRunnableTestCaseExecutionInfo> getTasks() {
+    public List<RobotRunnableUnitExecutionInfo> getTasks() {
         return tasks;
     }
 
-    public void setTasks(List<RobotRunnableTestCaseExecutionInfo> tasks) {
+    public void setTasks(List<RobotRunnableUnitExecutionInfo> tasks) {
         this.tasks = Objects.requireNonNullElseGet(tasks, List::of);
     }
 
@@ -165,32 +158,79 @@ public class RobotRunConfiguration extends LocatableConfigurationBase<Element> i
         this.directories = Objects.requireNonNullElseGet(directories, List::of);
     }
 
-    public static class RobotRunnableTestCaseExecutionInfo {
+    @Override
+    public RobotRunConfiguration clone() {
+        RobotRunConfiguration config = (RobotRunConfiguration) super.clone();
+        config.pythonRunConfiguration = pythonRunConfiguration.clone();
+        config.setTestCases(testCases.stream().map(RobotRunnableUnitExecutionInfo::copy).toList());
+        config.setTasks(tasks.stream().map(RobotRunnableUnitExecutionInfo::copy).toList());
+        config.setDirectories(directories);
+        return config;
+    }
 
-        private String directory;
+    public static class RobotRunnableUnitExecutionInfo {
+
+        private String location;
         private String unitName;
 
-        protected RobotRunnableTestCaseExecutionInfo() {}
+        protected RobotRunnableUnitExecutionInfo() {}
 
-        public RobotRunnableTestCaseExecutionInfo(String fqdn) {
+        public RobotRunnableUnitExecutionInfo(String fqdn) {
             int unitNameStartIndex = fqdn.lastIndexOf('.');
             if (unitNameStartIndex == -1) {
-                directory = "";
+                location = "";
                 unitName = fqdn;
             } else {
-                directory = fqdn.substring(0, unitNameStartIndex);
+                location = fqdn.substring(0, unitNameStartIndex);
                 unitName = fqdn.substring(unitNameStartIndex + 1);
             }
         }
 
         public void readExternal(Element element) throws InvalidDataException {
-            directory = JDOMExternalizerUtil.readField(element, "directory");
-            unitName = JDOMExternalizerUtil.readField(element, "testCaseName");
+            location = JDOMExternalizerUtil.readField(element, "location");
+            unitName = JDOMExternalizerUtil.readField(element, "unitName");
         }
 
         public void writeExternal(Element element) throws WriteExternalException {
-            JDOMExternalizerUtil.writeField(element, "directory", directory);
-            JDOMExternalizerUtil.writeField(element, "testCaseName", unitName);
+            JDOMExternalizerUtil.writeField(element, "location", location);
+            JDOMExternalizerUtil.writeField(element, "unitName", unitName);
+        }
+
+        public RobotRunnableUnitExecutionInfo copy() {
+            RobotRunnableUnitExecutionInfo executionInfo = new RobotRunnableUnitExecutionInfo();
+            executionInfo.location = location;
+            executionInfo.unitName = unitName;
+            return executionInfo;
+        }
+
+        public String getLocation() {
+            return location;
+        }
+
+        public String getUnitName() {
+            return unitName;
+        }
+
+        public String getFqdn() {
+            return location + "." + unitName;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (!(o instanceof RobotRunnableUnitExecutionInfo that)) {
+                return false;
+            }
+            return Objects.equals(location, that.location) && Objects.equals(unitName, that.unitName);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(location, unitName);
+        }
+
+        @Override
+        public String toString() {
+            return "location='" + location + '\'' + ", unitName='" + unitName + '\'';
         }
     }
 }

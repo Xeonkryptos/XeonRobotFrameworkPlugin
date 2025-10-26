@@ -33,8 +33,10 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.MyLogger;
 import dev.xeonkryptos.xeonrobotframeworkplugin.RobotBundle;
 import dev.xeonkryptos.xeonrobotframeworkplugin.ide.config.RobotOptionsProvider;
 import dev.xeonkryptos.xeonrobotframeworkplugin.ide.execution.config.RobotRunConfiguration;
+import dev.xeonkryptos.xeonrobotframeworkplugin.ide.execution.config.RobotRunConfiguration.RobotRunnableUnitExecutionInfo;
 import dev.xeonkryptos.xeonrobotframeworkplugin.ide.execution.ui.RobotRerunFailedTestsAction;
 import dev.xeonkryptos.xeonrobotframeworkplugin.ide.execution.ui.RobotTestRunnerFactory;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotFeatureFileType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -44,8 +46,10 @@ import java.net.ServerSocket;
 import java.nio.charset.Charset;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 
 public class RobotPythonCommandLineState extends PythonScriptCommandLineState {
@@ -99,17 +103,45 @@ public class RobotPythonCommandLineState extends PythonScriptCommandLineState {
     }
 
     private void modifyCommandLine(ParamsGroup paramsGroup, RobotExecutionMode robotExecutionMode) {
-        paramsGroup.getParametersList().set(1, ROBOTCODE_DIR + "/robotcode");
+        ParametersList parametersList = paramsGroup.getParametersList();
+        parametersList.set(1, ROBOTCODE_DIR + "/robotcode");
         if (robotExecutionMode == RobotExecutionMode.DEBUG) {
             int robotDebugPort = findAvailableSocketPort();
             runConfiguration.putUserData(ROBOT_DEBUG_PORT, robotDebugPort);
 
-            paramsGroup.getParametersList().addAll("debug", "--tcp", String.valueOf(robotDebugPort));
+            parametersList.addAll("debug", "--tcp", String.valueOf(robotDebugPort));
         } else {
-            paramsGroup.getParametersList().add("robot");
+            parametersList.add("robot");
             if (robotExecutionMode == RobotExecutionMode.DRY_RUN) {
-                paramsGroup.getParametersList().add("--dryrun");
+                parametersList.add("--dryrun");
             }
+        }
+        List<RobotRunnableUnitExecutionInfo> testCases = runConfiguration.getTestCases();
+        List<RobotRunnableUnitExecutionInfo> tasks = runConfiguration.getTasks();
+        Set<String> directories = new LinkedHashSet<>(runConfiguration.getDirectories());
+
+        if (!testCases.isEmpty()) {
+            parametersList.add("--norpa");
+        }
+        if (!tasks.isEmpty()) {
+            parametersList.add("--rpa");
+        }
+        for (RobotRunnableUnitExecutionInfo testCaseInfo : testCases) {
+            parametersList.add("--test");
+            parametersList.add(testCaseInfo.getUnitName());
+
+            String fileLocation = computeFileLocation(testCaseInfo.getLocation());
+            directories.add(fileLocation);
+        }
+        for (RobotRunnableUnitExecutionInfo taskInfo : tasks) {
+            parametersList.add("--task");
+            parametersList.add(taskInfo.getUnitName());
+
+            String fileLocation = computeFileLocation(taskInfo.getLocation());
+            directories.add(fileLocation);
+        }
+        for (String directory : directories) {
+            parametersList.add(directory);
         }
     }
 
@@ -194,6 +226,34 @@ public class RobotPythonCommandLineState extends PythonScriptCommandLineState {
                 }
             }
 
+            List<RobotRunnableUnitExecutionInfo> testCases = configuration.getTestCases();
+            List<RobotRunnableUnitExecutionInfo> tasks = configuration.getTasks();
+            Set<String> directories = new LinkedHashSet<>(configuration.getDirectories());
+
+            if (!testCases.isEmpty()) {
+                additionalParameters.add(TargetEnvironmentFunctions.constant("--norpa"));
+            }
+            if (!tasks.isEmpty()) {
+                additionalParameters.add(TargetEnvironmentFunctions.constant("--rpa"));
+            }
+            for (RobotRunnableUnitExecutionInfo testCaseInfo : testCases) {
+                additionalParameters.add(TargetEnvironmentFunctions.constant("--test"));
+                additionalParameters.add(TargetEnvironmentFunctions.constant(testCaseInfo.getUnitName()));
+
+                String file = computeFileLocation(testCaseInfo.getLocation());
+                directories.add(file);
+            }
+            for (RobotRunnableUnitExecutionInfo taskInfo : tasks) {
+                additionalParameters.add(TargetEnvironmentFunctions.constant("--task"));
+                additionalParameters.add(TargetEnvironmentFunctions.constant(taskInfo.getUnitName()));
+
+                String file = computeFileLocation(taskInfo.getLocation());
+                directories.add(file);
+            }
+            for (String directory : directories) {
+                additionalParameters.add(TargetEnvironmentFunctions.constant(directory));
+            }
+
             PythonScriptExecution delegateExecution = createCopiedPythonScriptExecution(pythonExecution);
             delegateExecution.setPythonScriptPath(TargetEnvironmentFunctions.constant(ROBOTCODE_DIR.toString()));
             List<Function<TargetEnvironment, String>> parameters = delegateExecution.getParameters();
@@ -226,6 +286,10 @@ public class RobotPythonCommandLineState extends PythonScriptCommandLineState {
             delegateExecution.setWorkingDir(workingDir);
             return delegateExecution;
         }
+    }
+
+    private static String computeFileLocation(String location) {
+        return location.replace('.', '/') + "." + RobotFeatureFileType.getInstance().getDefaultExtension();
     }
 
     private static RobotExecutionMode computeRobotExecutionMode(Executor executor) {

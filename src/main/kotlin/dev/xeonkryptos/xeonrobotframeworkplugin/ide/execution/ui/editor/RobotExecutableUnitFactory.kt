@@ -1,8 +1,8 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.ide.execution.ui.editor
 
+import ai.grazie.utils.applyIf
 import com.intellij.icons.AllIcons
 import com.intellij.openapi.module.Module
-import com.intellij.openapi.project.DumbAwareAction
 import com.intellij.openapi.ui.DialogPanel
 import com.intellij.openapi.ui.FixedSizeButton
 import com.intellij.openapi.ui.LabeledComponent
@@ -10,7 +10,6 @@ import com.intellij.ui.TextAccessor
 import com.intellij.ui.components.JBScrollPane
 import com.intellij.ui.dsl.builder.AlignX
 import com.intellij.ui.dsl.builder.MutableProperty
-import com.intellij.ui.dsl.builder.actionButton
 import com.intellij.ui.dsl.builder.panel
 import com.jetbrains.python.extensions.ContextAnchor
 import com.jetbrains.python.extensions.ModuleBasedContextAnchor
@@ -84,16 +83,23 @@ class RobotExecutableUnitFactory(configuration: RobotRunConfiguration) {
                 }
             }.bind(MutableProperty({ mode }, { onModeChanged(it) }), RobotTestExecutionMode::class.java)
             row {
-                val addNewEntryAction = DumbAwareAction.create(AllIcons.General.Add) { browseButtonContainer.addNewBrowseButton() }
-                actionButton(addNewEntryAction).align(AlignX.FILL)
+                button("") {
+                    browseButtonContainer.addNewBrowseButton()
+                    updateScrollPaneHeight()
+                    dialogPanel.revalidate()
+                }.align(AlignX.FILL).applyToComponent { icon = AllIcons.General.Add }
             }
             row {
                 cell(scrollPane).align(AlignX.FILL).onApply {
-                    configuration.testCases = browseButtonContainer.getTestCases().map { RobotRunConfiguration.RobotRunnableTestCaseExecutionInfo(it) }
-                    configuration.tasks = browseButtonContainer.getTasks().map { RobotRunConfiguration.RobotRunnableTestCaseExecutionInfo(it) }
-                    configuration.directories = browseButtonContainer.getDirectories()
+                    configuration.testCases = browseButtonContainer.getTestCases().map { RobotRunConfiguration.RobotRunnableUnitExecutionInfo(it) }
+                    configuration.tasks = browseButtonContainer.getTasks().map { RobotRunConfiguration.RobotRunnableUnitExecutionInfo(it) }
+                    configuration.directories = browseButtonContainer.getDirectories().map { it }
+                }.onReset {
+                    mode = browseButtonContainer.reset(configuration.testCases, configuration.tasks, configuration.directories)
+                    updateScrollPaneHeight()
+                    dialogPanel.revalidate()
                 }
-            }.resizableRow()
+            }
         }.withPreferredWidth(Integer.MAX_VALUE)
     }
 
@@ -150,8 +156,8 @@ private class RobotBrowseButtonContainer(private val contextAnchor: ContextAncho
         })
     }
 
-    fun addNewBrowseButton() {
-        val deletableBrowseButtonPanel = DeletableBrowseButtonPanel(contextAnchor, executionMode)
+    fun addNewBrowseButton(initialText: String? = null) {
+        val deletableBrowseButtonPanel = DeletableBrowseButtonPanel(contextAnchor, executionMode, initialText)
         add(deletableBrowseButtonPanel)
     }
 
@@ -168,25 +174,51 @@ private class RobotBrowseButtonContainer(private val contextAnchor: ContextAncho
         return emptyList()
     }
 
+    fun reset(
+        testCases: List<RobotRunConfiguration.RobotRunnableUnitExecutionInfo>,
+        tasks: List<RobotRunConfiguration.RobotRunnableUnitExecutionInfo>,
+        directories: List<String>
+    ): RobotTestExecutionMode {
+        removeAll()
+
+        val newMode = if (testCases.isNotEmpty()) {
+            RobotTestExecutionMode.TEST_CASES
+        } else if (tasks.isNotEmpty()) {
+            RobotTestExecutionMode.TASKS
+        } else {
+            RobotTestExecutionMode.DIRECTORIES
+        }
+        onModeChanged(newMode)
+
+        testCases.forEach { addNewBrowseButton("${it.fqdn}") }
+        tasks.forEach { addNewBrowseButton("${it.fqdn}") }
+        directories.forEach { addNewBrowseButton(it) }
+        return newMode
+    }
+
     override fun onModeChanged(newMode: RobotTestExecutionMode) {
         executionMode = newMode
         components.filterIsInstance<RobotExecutionModeChangeListener>().forEach { it.onModeChanged(newMode) }
     }
 }
 
-private class DeletableBrowseButtonPanel(contextAnchor: ContextAnchor, initialExecutionMode: RobotTestExecutionMode) : JPanel(),
-                                                                                                                       RobotExecutionModeChangeListener {
+private class DeletableBrowseButtonPanel(contextAnchor: ContextAnchor, initialExecutionMode: RobotTestExecutionMode, initialText: String? = null) : JPanel(),
+                                                                                                                                                    RobotExecutionModeChangeListener {
 
     private var executionMode = initialExecutionMode
 
     private val symbolLabel: LabeledComponent<RobotExecutableUnitWithBrowseButton>
     private val directoryLabel: LabeledComponent<RobotTextFieldWithDirectoryBrowseButton>
 
-    private val newSymbolBrowseButton = RobotExecutableUnitWithBrowseButton(contextAnchor) { executionMode }
-    private val newDirectoryBrowseButton = RobotTextFieldWithDirectoryBrowseButton(contextAnchor)
+    private val newSymbolBrowseButton =
+        RobotExecutableUnitWithBrowseButton(contextAnchor) { executionMode }.applyIf(executionMode.unitExecutionMode) { text = initialText ?: "" }
+    private val newDirectoryBrowseButton =
+        RobotTextFieldWithDirectoryBrowseButton(contextAnchor).applyIf(!executionMode.unitExecutionMode) { text = initialText ?: "" }
 
     private val symbolDeleteButton: FixedSizeButton
     private val directoryDeleteButton: FixedSizeButton
+
+    private var visibleDeleteButton: Boolean = false
 
     init {
         layout = BoxLayout(this, BoxLayout.X_AXIS)
@@ -195,28 +227,31 @@ private class DeletableBrowseButtonPanel(contextAnchor: ContextAnchor, initialEx
             newSymbolBrowseButton,
             RobotBundle.message("robot.run.configuration.fragment.executable.unit.label.${executionMode.name.lowercase()}"),
             BorderLayout.WEST
-        )
+        ).apply { isVisible = false }
         directoryLabel = LabeledComponent.create(
             newDirectoryBrowseButton,
             RobotBundle.message("robot.run.configuration.fragment.executable.unit.label.${executionMode.name.lowercase()}"),
             BorderLayout.WEST
-        )
+        ).apply { isVisible = false }
 
         symbolDeleteButton = FixedSizeButton(symbolLabel).apply {
             isVisible = false
             border = UIManager.getBorder("Button.border")
             icon = AllIcons.General.Remove
-            addActionListener { parent.remove(this) }
         }
+        symbolDeleteButton.addActionListener { parent.remove(this) }
         directoryDeleteButton = FixedSizeButton(directoryLabel).apply {
             isVisible = false
             border = UIManager.getBorder("Button.border")
             icon = AllIcons.General.Remove
-            addActionListener { parent.remove(this) }
         }
+        directoryDeleteButton.addActionListener { parent.remove(this) }
 
-        if (executionMode.unitExecutionMode) add(symbolLabel) else add(directoryLabel)
+        add(symbolLabel)
         add(symbolDeleteButton)
+        add(directoryLabel)
+        add(directoryDeleteButton)
+        updateVisibilityState()
     }
 
     fun getText(): String {
@@ -225,8 +260,8 @@ private class DeletableBrowseButtonPanel(contextAnchor: ContextAnchor, initialEx
     }
 
     fun updateDeleteButtonVisibility(isVisible: Boolean) {
-        symbolDeleteButton.isVisible = isVisible
-        directoryDeleteButton.isVisible = isVisible
+        visibleDeleteButton = isVisible
+        updateVisibilityState()
     }
 
     override fun onModeChanged(newMode: RobotTestExecutionMode) {
@@ -235,19 +270,17 @@ private class DeletableBrowseButtonPanel(contextAnchor: ContextAnchor, initialEx
         } else {
             directoryLabel.text = RobotBundle.message("robot.run.configuration.fragment.executable.unit.label.${newMode.name.lowercase()}")
         }
-        if (newMode.unitExecutionMode != executionMode.unitExecutionMode) {
-            removeAll()
-            if (newMode.unitExecutionMode) {
-                add(symbolLabel)
-                add(symbolDeleteButton)
-            } else {
-                add(directoryLabel)
-                add(directoryDeleteButton)
-            }
-        }
         executionMode = newMode
+        updateVisibilityState()
         newSymbolBrowseButton.text = ""
         newDirectoryBrowseButton.text = ""
+    }
+
+    private fun updateVisibilityState() {
+        symbolLabel.isVisible = executionMode.unitExecutionMode
+        symbolDeleteButton.isVisible = executionMode.unitExecutionMode && visibleDeleteButton
+        directoryLabel.isVisible = !executionMode.unitExecutionMode
+        directoryDeleteButton.isVisible = !executionMode.unitExecutionMode && visibleDeleteButton
     }
 }
 

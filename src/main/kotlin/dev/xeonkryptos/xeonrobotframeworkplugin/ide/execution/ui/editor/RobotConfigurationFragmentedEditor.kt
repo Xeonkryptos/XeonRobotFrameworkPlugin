@@ -63,10 +63,11 @@ class RobotConfigurationFragmentedEditor(private val runConfiguration: RobotRunC
             null,
             null,
             factory.dialogPanel,
-            SettingsEditorFragmentType.COMMAND_LINE,
+            -4,
+            SettingsEditorFragmentType.EDITOR,
             { _, component -> component.reset() },
             { _, component -> component.apply() },
-            { true }).apply { isRemovable = false }
+            { true })
         fragments.add(robotExecutionUnits)
 
         val parametersEditor = RawCommandLineEditor()

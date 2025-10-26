@@ -12,19 +12,21 @@ import com.intellij.openapi.util.Ref;
 import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiElement;
-import com.intellij.psi.PsiNamedElement;
+import com.intellij.psi.PsiFile;
 import com.intellij.psi.util.PsiTreeUtil;
-import dev.xeonkryptos.xeonrobotframeworkplugin.MyLogger;
+import dev.xeonkryptos.xeonrobotframeworkplugin.ide.execution.config.RobotRunConfiguration.RobotRunnableUnitExecutionInfo;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotFeatureFileType;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotFile;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotQualifiedNameOwner;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotRoot;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTaskStatement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTestCaseStatement;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.List;
 
 public class RobotRunConfigurationProducer extends LazyRunConfigurationProducer<RobotRunConfiguration> {
 
@@ -45,8 +47,7 @@ public class RobotRunConfigurationProducer extends LazyRunConfigurationProducer<
                                                     @NotNull Ref<PsiElement> sourceElement) {
         if (isValidRobotExecutableScript(context)) {
             String workingDirectory = FileUtils.getWorkingDirectoryToUse(runConfig);
-            String runParam = getRunParametersForMultiSelection(context, workingDirectory);
-            runConfig.getPythonRunConfiguration().setScriptParameters(runParam);
+            addRunParametersForMultiSelection(context, workingDirectory, runConfig);
             Sdk sdk = ProjectRootManager.getInstance(context.getProject()).getProjectSdk();
             if (sdk != null) {
                 runConfig.getPythonRunConfiguration().setSdk(sdk);
@@ -61,8 +62,16 @@ public class RobotRunConfigurationProducer extends LazyRunConfigurationProducer<
     public boolean isConfigurationFromContext(@NotNull RobotRunConfiguration runConfig, @NotNull ConfigurationContext context) {
         if (isValidRobotExecutableScript(context)) {
             String workingDirectory = FileUtils.getWorkingDirectoryToUse(runConfig);
-            String runParam = getRunParametersForMultiSelection(context, workingDirectory);
-            boolean ret = runParam.trim().equals(runConfig.getPythonRunConfiguration().getScriptParameters().trim());
+            RobotRunConfiguration verificationConfiguration = (RobotRunConfiguration) RobotRunConfigurationType.getRobotRunConfigurationType()
+                                                                                                               .getConfigurationFactory()
+                                                                                                               .createTemplateConfiguration(context.getProject());
+            addRunParametersForMultiSelection(context, workingDirectory, verificationConfiguration);
+
+            List<RobotRunnableUnitExecutionInfo> verificationTestCasesInfo = verificationConfiguration.getTestCases();
+            List<RobotRunnableUnitExecutionInfo> verificationTasksInfo = verificationConfiguration.getTasks();
+            List<String> verificationDirectories = verificationConfiguration.getDirectories();
+            boolean ret = verificationTestCasesInfo.equals(runConfig.getTestCases()) && verificationTasksInfo.equals(runConfig.getTasks())
+                          && verificationDirectories.equals(runConfig.getDirectories());
             if (ret) {
                 runConfig.setName(getRunDisplayNameForMultiSelection(context));
             }
@@ -71,104 +80,63 @@ public class RobotRunConfigurationProducer extends LazyRunConfigurationProducer<
         return false;
     }
 
-    @NotNull
-    private String getRunParametersForMultiSelection(@NotNull ConfigurationContext context, String basePath) {
+    private void addRunParametersForMultiSelection(@NotNull ConfigurationContext context, String basePath, @NotNull RobotRunConfiguration runConfig) {
         PsiElement[] selectedElements = getSelectedPsiElements(context);
         if (selectedElements.length <= 1) {
-            // Verwende bisherige Logik für einzelne Selektion
-            return getRunParameters(context, basePath);
-        }
-
-        StringBuilder parameters = new StringBuilder();
-        boolean containsRpa = false;
-
-        Set<VirtualFile> virtualFiles = new HashSet<>(selectedElements.length);
-        for (PsiElement element : selectedElements) {
-            String testName = getTestCaseTaskNameFromAnyElement(element);
-            if (!testName.isEmpty()) {
-                if (!parameters.isEmpty()) {
-                    parameters.append(" ");
-                }
-                parameters.append("--test \"").append(testName.replace("\"", "\\\"")).append("\"");
-            }
-            containsRpa = containsTasksOnly(element);
-            VirtualFile virtualFile = element.getContainingFile().getVirtualFile();
-            virtualFiles.add(virtualFile);
-        }
-
-        if (parameters.isEmpty()) {
-            for (VirtualFile virtualFile : virtualFiles) {
-                String filePath = virtualFile.getPath();
-                String relativePath = FileUtils.relativizePath(basePath, filePath);
-                parameters.append(" \"").append(relativePath.replace("\"", "\\\"")).append("\"");
-            }
+            addRunParameters(context, basePath, runConfig);
         } else {
-            String relativePath = computeExecutionLocation(context, basePath, virtualFiles);
-            parameters.append(" \"").append(relativePath.replace("\"", "\\\"")).append("\"");
-        }
+            List<RobotRunnableUnitExecutionInfo> executionInfos = null;
+            for (PsiElement element : selectedElements) {
+                RobotQualifiedNameOwner executableElement = getTestCaseTaskFromAnyElement(element);
+                if (executableElement != null) {
+                    if (executionInfos == null) {
+                        executionInfos = executableElement instanceof RobotTestCaseStatement ? runConfig.getTestCases() : runConfig.getTasks();
+                    }
+                    String qualifiedName = executableElement.getQualifiedName();
+                    RobotRunnableUnitExecutionInfo executionInfo = new RobotRunnableUnitExecutionInfo(qualifiedName);
+                    executionInfos.add(executionInfo);
+                }
+            }
 
-        if (containsRpa) {
-            parameters.insert(0, "--rpa ");
+            if (executionInfos == null) {
+                List<String> directories = runConfig.getDirectories();
+                for (PsiElement selectedElement : selectedElements) {
+                    if (selectedElement instanceof PsiFile psiFile) {
+                        VirtualFile virtualFile = psiFile.getViewProvider().getVirtualFile();
+                        String filePath = virtualFile.getPath();
+                        String relativePath = FileUtils.relativizePath(basePath, filePath);
+                        directories.add(relativePath);
+                    }
+                }
+            }
         }
-
-        return parameters.toString();
     }
 
-    private static @NotNull String computeExecutionLocation(@NotNull ConfigurationContext context, String basePath, Set<VirtualFile> virtualFiles) {
-        VirtualFile commonAncestor = VfsUtil.getCommonAncestor(virtualFiles);
-        if (commonAncestor == null) {
-            assert context.getLocation() != null;
-            MyLogger.logger.warn("No common ancestor found for selected elements, using context location instead. %s".formatted(virtualFiles));
-            commonAncestor = context.getLocation().getVirtualFile();
+    private static void addRunParameters(ConfigurationContext context, String basePath, @NotNull RobotRunConfiguration runConfig) {
+        RobotQualifiedNameOwner element = getTestCaseTaskElement(context);
+        if (element != null) {
+            String qualifiedName = element.getQualifiedName().replace("\"", "\\\"");
+            List<RobotRunnableUnitExecutionInfo> executionInfos = new ArrayList<>();
+            if (element instanceof RobotTestCaseStatement) {
+                runConfig.setTestCases(executionInfos);
+            } else {
+                runConfig.setTasks(executionInfos);
+            }
+            RobotRunnableUnitExecutionInfo executionInfo = new RobotRunnableUnitExecutionInfo(qualifiedName);
+            executionInfos.add(executionInfo);
+        } else {
+            List<String> directories = new ArrayList<>();
+            runConfig.setDirectories(directories);
+            Location<PsiElement> location = context.getLocation();
+            assert location != null;
+            VirtualFile virtualFile = location.getVirtualFile();
+            assert virtualFile != null;
+            String filePath = virtualFile.getPath();
+            String relativePath = FileUtils.relativizePath(basePath, filePath);
+            directories.add(relativePath);
         }
-
-        assert commonAncestor != null;
-        String filePath = commonAncestor.getPath();
-        return FileUtils.relativizePath(basePath, filePath);
     }
 
-    private static boolean containsTasksOnly(PsiElement element) {
-        if (element == null) {
-            return false;
-        }
-        RobotRoot root = PsiTreeUtil.getParentOfType(element, RobotRoot.class);
-        if (root == null) {
-            return false;
-        }
-        RobotExecutableSectionSectionVerifier verifier = new RobotExecutableSectionSectionVerifier();
-        root.accept(verifier);
-        return verifier.hasOnlyTasksSection();
-    }
-
-    @NotNull
-    private static String getRunParameters(ConfigurationContext context, String basePath) {
-        String testCaseName = getTestCaseTaskName(context);
-        String projectBasePath = context.getProject().getBasePath();
-        assert projectBasePath != null;
-
-        Location<?> location = context.getLocation();
-        assert location != null;
-
-        VirtualFile virtualFile = location.getVirtualFile();
-        assert virtualFile != null;
-
-        testCaseName = testCaseName.replace("\"", "\\\"");
-        String runParameters = "";
-        if (!testCaseName.isEmpty()) {
-            runParameters = "--test \"" + testCaseName + "\"";
-        }
-        String filePath = virtualFile.getPath();
-        basePath = FileUtils.relativizePath(basePath, filePath);
-        runParameters += " \"" + basePath.replace("\"", "\\\"") + "\"";
-
-        PsiElement element = context.getPsiLocation();
-        if (containsTasksOnly(element)) {
-            runParameters = "--rpa " + runParameters;
-        }
-        return runParameters;
-    }
-
-    @NotNull
     private static String getTestCaseOrFileName(ConfigurationContext context) {
         Location<PsiElement> location = context.getLocation();
         assert location != null;
@@ -176,8 +144,8 @@ public class RobotRunConfigurationProducer extends LazyRunConfigurationProducer<
         VirtualFile virtualFile = location.getVirtualFile();
         assert virtualFile != null;
 
-        String testCaseName = getTestCaseTaskName(context);
-        return !testCaseName.isEmpty() ? testCaseName : virtualFile.getName();
+        RobotQualifiedNameOwner qualifiedNameOwner = getTestCaseTaskElement(context);
+        return qualifiedNameOwner != null ? qualifiedNameOwner.getName() : virtualFile.getName();
     }
 
     private static boolean isValidRobotExecutableScript(@NotNull ConfigurationContext context) {
@@ -225,13 +193,12 @@ public class RobotRunConfigurationProducer extends LazyRunConfigurationProducer<
         return verifier.isExecutable();
     }
 
-    @NotNull
-    private static String getTestCaseTaskName(@NotNull ConfigurationContext context) {
+    private static RobotQualifiedNameOwner getTestCaseTaskElement(@NotNull ConfigurationContext context) {
         Location<?> location = context.getLocation();
         if (location != null) {
-            return getTestCaseTaskNameFromAnyElement(location.getPsiElement());
+            return getTestCaseTaskFromAnyElement(location.getPsiElement());
         }
-        return "";
+        return null;
     }
 
     @NotNull
@@ -248,14 +215,9 @@ public class RobotRunConfigurationProducer extends LazyRunConfigurationProducer<
         return selectedElements.length + " Tests";
     }
 
-    @NotNull
-    private static String getTestCaseTaskNameFromAnyElement(PsiElement element) {
-        PsiNamedElement executableElement = PsiTreeUtil.getParentOfType(element, false, RobotTestCaseStatement.class, RobotTaskStatement.class);
-        if (executableElement == null) {
-            return "";
-        }
-        assert executableElement.getName() != null;
-        return executableElement.getName();
+    @Nullable
+    private static RobotQualifiedNameOwner getTestCaseTaskFromAnyElement(PsiElement element) {
+        return PsiTreeUtil.getParentOfType(element, false, RobotTestCaseStatement.class, RobotTaskStatement.class);
     }
 
     private PsiElement[] getSelectedPsiElements(@NotNull ConfigurationContext context) {
