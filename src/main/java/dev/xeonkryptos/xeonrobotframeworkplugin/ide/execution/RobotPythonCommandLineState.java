@@ -108,12 +108,14 @@ public class RobotPythonCommandLineState extends PythonScriptCommandLineState {
             int robotDebugPort = findAvailableSocketPort();
             runConfiguration.putUserData(ROBOT_DEBUG_PORT, robotDebugPort);
 
-            parametersList.addAll("debug", "--tcp", String.valueOf(robotDebugPort));
+            parametersList.addAt(2, String.valueOf(robotDebugPort));
+            parametersList.addAt(2, "--tcp");
+            parametersList.addAt(2, "debug");
         } else {
-            parametersList.add("robot");
             if (robotExecutionMode == RobotExecutionMode.DRY_RUN) {
-                parametersList.add("--dryrun");
+                parametersList.addAt(2, "--dryrun");
             }
+            parametersList.addAt(2, "robot");
         }
         List<RobotRunnableUnitExecutionInfo> testCases = runConfiguration.getTestCases();
         List<RobotRunnableUnitExecutionInfo> tasks = runConfiguration.getTasks();
@@ -121,8 +123,7 @@ public class RobotPythonCommandLineState extends PythonScriptCommandLineState {
 
         if (!testCases.isEmpty()) {
             parametersList.add("--norpa");
-        }
-        if (!tasks.isEmpty()) {
+        } else if (!tasks.isEmpty()) {
             parametersList.add("--rpa");
         }
         for (RobotRunnableUnitExecutionInfo testCaseInfo : testCases) {
@@ -218,6 +219,10 @@ public class RobotPythonCommandLineState extends PythonScriptCommandLineState {
         @Override
         public PythonExecution build(@NotNull HelpersAwareTargetEnvironmentRequest helpersAwareTargetEnvironmentRequest,
                                      @NotNull PythonExecution pythonExecution) {
+            PythonScriptExecution delegateExecution = createCopiedPythonScriptExecution(pythonExecution);
+            delegateExecution.setPythonScriptPath(TargetEnvironmentFunctions.constant(ROBOTCODE_DIR.toString()));
+            List<Function<TargetEnvironment, String>> parameters = delegateExecution.getParameters();
+
             List<Function<TargetEnvironment, String>> additionalParameters = new ArrayList<>();
             if (executionMode == RobotExecutionMode.DEBUG) {
                 int robotDebugPort = findAvailableSocketPort();
@@ -232,6 +237,8 @@ public class RobotPythonCommandLineState extends PythonScriptCommandLineState {
                     additionalParameters.add(TargetEnvironmentFunctions.constant("--dryrun"));
                 }
             }
+            parameters.addAll(0, additionalParameters);
+            additionalParameters.clear();
 
             List<RobotRunnableUnitExecutionInfo> testCases = configuration.getTestCases();
             List<RobotRunnableUnitExecutionInfo> tasks = configuration.getTasks();
@@ -260,11 +267,7 @@ public class RobotPythonCommandLineState extends PythonScriptCommandLineState {
             for (String directory : directories) {
                 additionalParameters.add(TargetEnvironmentFunctions.constant(directory));
             }
-
-            PythonScriptExecution delegateExecution = createCopiedPythonScriptExecution(pythonExecution);
-            delegateExecution.setPythonScriptPath(TargetEnvironmentFunctions.constant(ROBOTCODE_DIR.toString()));
-            List<Function<TargetEnvironment, String>> parameters = delegateExecution.getParameters();
-            parameters.addAll(0, additionalParameters);
+            parameters.addAll(additionalParameters);
 
             if (configuration.getPythonRunConfiguration().emulateTerminal()) {
                 delegateExecution.addEnvironmentVariable("NO_TEAMCITY", "1");
