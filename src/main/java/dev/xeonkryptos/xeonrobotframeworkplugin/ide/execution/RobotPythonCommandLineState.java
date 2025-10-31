@@ -7,6 +7,7 @@ import com.intellij.execution.Executor;
 import com.intellij.execution.configurations.ParametersList;
 import com.intellij.execution.configurations.ParamsGroup;
 import com.intellij.execution.executors.DefaultDebugExecutor;
+import com.intellij.execution.executors.DefaultRunExecutor;
 import com.intellij.execution.process.ProcessHandler;
 import com.intellij.execution.runners.ExecutionEnvironment;
 import com.intellij.execution.target.TargetEnvironment;
@@ -19,9 +20,13 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Key;
 import com.intellij.util.ArrayUtil;
 import com.intellij.util.net.NetUtils;
+import com.jetbrains.python.actions.PyExecuteInConsole;
+import com.jetbrains.python.actions.PyRunFileInConsoleAction;
+import com.jetbrains.python.console.PyConsoleOptions;
 import com.jetbrains.python.run.AbstractPythonRunConfiguration;
 import com.jetbrains.python.run.CommandLinePatcher;
 import com.jetbrains.python.run.PythonCommandLineState;
+import com.jetbrains.python.run.PythonConsoleScripts;
 import com.jetbrains.python.run.PythonExecution;
 import com.jetbrains.python.run.PythonImportErrorFilter;
 import com.jetbrains.python.run.PythonRunConfiguration;
@@ -49,6 +54,8 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.BooleanSupplier;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 public class RobotPythonCommandLineState extends PythonScriptCommandLineState {
@@ -117,38 +124,14 @@ public class RobotPythonCommandLineState extends PythonScriptCommandLineState {
             }
             parametersList.addAt(2, "robot");
         }
-        List<RobotRunnableUnitExecutionInfo> testCases = runConfiguration.getTestCases();
-        List<RobotRunnableUnitExecutionInfo> tasks = runConfiguration.getTasks();
-        Set<String> directories = new LinkedHashSet<>(runConfiguration.getDirectories());
 
-        if (!testCases.isEmpty()) {
-            parametersList.add("--norpa");
-        } else if (!tasks.isEmpty()) {
-            parametersList.add("--rpa");
-        }
-        for (RobotRunnableUnitExecutionInfo testCaseInfo : testCases) {
-            parametersList.add("--test");
-            parametersList.add(testCaseInfo.getUnitName());
-
-            String fileLocation = computeFileLocation(testCaseInfo.getLocation());
-            directories.add(fileLocation);
-        }
-        for (RobotRunnableUnitExecutionInfo taskInfo : tasks) {
-            parametersList.add("--task");
-            parametersList.add(taskInfo.getUnitName());
-
-            String fileLocation = computeFileLocation(taskInfo.getLocation());
-            directories.add(fileLocation);
-        }
-        for (String directory : directories) {
-            parametersList.add(directory);
-        }
+        enrichWithTestArguments(runConfiguration, parametersList::add);
     }
 
     @Override
     public void customizeEnvironmentVars(Map<String, String> envs, boolean passParentEnvs) {
         super.customizeEnvironmentVars(envs, passParentEnvs);
-        if (((PythonRunConfiguration) getConfig()).emulateTerminal()) {
+        if (disableTeamCityMessages()) {
             envs.put("NO_TEAMCITY", "1");
         }
     }
@@ -156,7 +139,7 @@ public class RobotPythonCommandLineState extends PythonScriptCommandLineState {
     @NotNull
     @Override
     protected ConsoleView createAndAttachConsole(Project project, ProcessHandler processHandler, Executor executor) throws ExecutionException {
-        if (!runConfiguration.getTasks().isEmpty()) {
+        if (!runConfiguration.getTasks().isEmpty() || disableTeamCityMessages()) {
             // With existing tasks to execute, don't show the SMT view. Tasks aren't tests.
             ConsoleView consoleView = super.createAndAttachConsole(project, processHandler, executor);
             consoleView.addMessageFilter(new RobotReportsFilter());
@@ -180,8 +163,43 @@ public class RobotPythonCommandLineState extends PythonScriptCommandLineState {
     public ExecutionResult execute(@NotNull Executor executor, @NotNull PythonScriptTargetedCommandLineBuilder converter) throws ExecutionException {
         final RobotExecutionMode executionMode = computeRobotExecutionMode(executor);
         ExecutionEnvironment environment = getEnvironment();
-        var wrappedConverter = new MyPythonScriptTargetedCommandLineBuilder(converter, runConfiguration, executionMode, environment);
+        var wrappedConverter = new MyPythonScriptTargetedCommandLineBuilder(converter,
+                                                                            runConfiguration,
+                                                                            executionMode,
+                                                                            environment,
+                                                                            this::disableTeamCityMessages);
         try {
+            if (showCommandLineAfterwards() && DefaultRunExecutor.EXECUTOR_ID.equals(executor.getId())) {
+                Project project = runConfiguration.getProject();
+                PythonRunConfiguration pythonRunConfiguration = (PythonRunConfiguration) runConfiguration.getPythonRunConfiguration().clone();
+                PyRunFileInConsoleAction.configExecuted(pythonRunConfiguration);
+
+                pythonRunConfiguration.getEnvs().put("NO_TEAMCITY", "1");
+
+                pythonRunConfiguration.setScriptName(ROBOTCODE_DIR + "/robotcode");
+
+                StringBuilder additionalTestArguments = new StringBuilder();
+                enrichWithTestArguments(runConfiguration, argument -> {
+                    boolean containsSpaces = argument.contains(" ");
+                    if (containsSpaces) {
+                        additionalTestArguments.append('"');
+                    }
+                    additionalTestArguments.append(argument);
+                    if (containsSpaces) {
+                        additionalTestArguments.append('"');
+                    }
+                    additionalTestArguments.append(" ");
+                });
+
+                String scriptParameters = "robot " + pythonRunConfiguration.getScriptParameters() + additionalTestArguments.toString().trim();
+                pythonRunConfiguration.setScriptParameters(scriptParameters);
+
+                Function<TargetEnvironment, String> runFileText = PythonConsoleScripts.buildScriptFunctionWithConsoleRun(pythonRunConfiguration);
+                boolean useExistingConsole = PyConsoleOptions.getInstance(project).isUseExistingConsole();
+                PyExecuteInConsole.executeCodeInConsole(project, runFileText, null, useExistingConsole, false, true, pythonRunConfiguration);
+
+                return null;
+            }
             ExecutionResult executionResult = super.execute(executor, wrappedConverter);
             enrichExecutionResult(executionResult);
             return executionResult;
@@ -209,11 +227,16 @@ public class RobotPythonCommandLineState extends PythonScriptCommandLineState {
         }
     }
 
+    private boolean disableTeamCityMessages() {
+        return runConfiguration.getPythonRunConfiguration().emulateTerminal() || showCommandLineAfterwards();
+    }
+
     @SuppressWarnings("UnstableApiUsage") // Might be unstable at the moment, but is an important extension point
     private record MyPythonScriptTargetedCommandLineBuilder(@NotNull PythonScriptTargetedCommandLineBuilder parentBuilder,
                                                             RobotRunConfiguration configuration,
                                                             RobotExecutionMode executionMode,
-                                                            ExecutionEnvironment environment) implements PythonScriptTargetedCommandLineBuilder {
+                                                            ExecutionEnvironment environment,
+                                                            BooleanSupplier teamCityMessageDisableInfo) implements PythonScriptTargetedCommandLineBuilder {
 
         @NotNull
         @Override
@@ -240,36 +263,10 @@ public class RobotPythonCommandLineState extends PythonScriptCommandLineState {
             parameters.addAll(0, additionalParameters);
             additionalParameters.clear();
 
-            List<RobotRunnableUnitExecutionInfo> testCases = configuration.getTestCases();
-            List<RobotRunnableUnitExecutionInfo> tasks = configuration.getTasks();
-            Set<String> directories = new LinkedHashSet<>(configuration.getDirectories());
-
-            if (!testCases.isEmpty()) {
-                additionalParameters.add(TargetEnvironmentFunctions.constant("--norpa"));
-            }
-            if (!tasks.isEmpty()) {
-                additionalParameters.add(TargetEnvironmentFunctions.constant("--rpa"));
-            }
-            for (RobotRunnableUnitExecutionInfo testCaseInfo : testCases) {
-                additionalParameters.add(TargetEnvironmentFunctions.constant("--test"));
-                additionalParameters.add(TargetEnvironmentFunctions.constant(testCaseInfo.getUnitName()));
-
-                String file = computeFileLocation(testCaseInfo.getLocation());
-                directories.add(file);
-            }
-            for (RobotRunnableUnitExecutionInfo taskInfo : tasks) {
-                additionalParameters.add(TargetEnvironmentFunctions.constant("--task"));
-                additionalParameters.add(TargetEnvironmentFunctions.constant(taskInfo.getUnitName()));
-
-                String file = computeFileLocation(taskInfo.getLocation());
-                directories.add(file);
-            }
-            for (String directory : directories) {
-                additionalParameters.add(TargetEnvironmentFunctions.constant(directory));
-            }
+            enrichWithTestArguments(configuration, argument -> additionalParameters.add(TargetEnvironmentFunctions.constant(argument)));
             parameters.addAll(additionalParameters);
 
-            if (configuration.getPythonRunConfiguration().emulateTerminal()) {
+            if (teamCityMessageDisableInfo.getAsBoolean()) {
                 delegateExecution.addEnvironmentVariable("NO_TEAMCITY", "1");
             }
             boolean testsOnlyMode = RobotOptionsProvider.getInstance(configuration.getProject()).testsOnlyMode();
@@ -296,6 +293,36 @@ public class RobotPythonCommandLineState extends PythonScriptCommandLineState {
             Function<TargetEnvironment, ? extends String> workingDir = pythonExecution.getWorkingDir();
             delegateExecution.setWorkingDir(workingDir);
             return delegateExecution;
+        }
+    }
+
+    private static void enrichWithTestArguments(RobotRunConfiguration configuration, Consumer<String> argumentConsumer) {
+        List<RobotRunnableUnitExecutionInfo> testCases = configuration.getTestCases();
+        List<RobotRunnableUnitExecutionInfo> tasks = configuration.getTasks();
+        Set<String> directories = new LinkedHashSet<>(configuration.getDirectories());
+
+        if (!testCases.isEmpty()) {
+            argumentConsumer.accept("--norpa");
+        }
+        if (!tasks.isEmpty()) {
+            argumentConsumer.accept("--rpa");
+        }
+        for (RobotRunnableUnitExecutionInfo testCaseInfo : testCases) {
+            argumentConsumer.accept("--test");
+            argumentConsumer.accept(testCaseInfo.getUnitName());
+
+            String file = computeFileLocation(testCaseInfo.getLocation());
+            directories.add(file);
+        }
+        for (RobotRunnableUnitExecutionInfo taskInfo : tasks) {
+            argumentConsumer.accept("--task");
+            argumentConsumer.accept(taskInfo.getUnitName());
+
+            String file = computeFileLocation(taskInfo.getLocation());
+            directories.add(file);
+        }
+        for (String directory : directories) {
+            argumentConsumer.accept(directory);
         }
     }
 
