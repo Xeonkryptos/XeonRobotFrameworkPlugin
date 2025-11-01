@@ -5,7 +5,7 @@ import com.intellij.openapi.components.Service.Level;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.util.PsiTreeUtil;
-import dev.xeonkryptos.xeonrobotframeworkplugin.ide.config.RobotOptionsProvider;
+import dev.xeonkryptos.xeonrobotframeworkplugin.config.RobotOptionsProvider;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotFile;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCall;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLocalSetting;
@@ -20,7 +20,9 @@ import org.jetbrains.annotations.NotNull;
 @Service(Level.PROJECT)
 public record KeywordUtil(Project project) {
 
+    @SuppressWarnings("ApplicationServiceAsStaticFinalFieldOrProperty")
     private static final String SPACE = " ";
+    @SuppressWarnings("ApplicationServiceAsStaticFinalFieldOrProperty")
     private static final String UNDERSCORE = "_";
 
     public static KeywordUtil getInstance(Project project) {

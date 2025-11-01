@@ -1,6 +1,6 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.psi.dto;
 
-import dev.xeonkryptos.xeonrobotframeworkplugin.ide.config.RobotOptionsProvider;
+import dev.xeonkryptos.xeonrobotframeworkplugin.config.RobotOptionsProvider;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.DefinedParameter;
 import com.intellij.psi.PsiElement;
 import org.jetbrains.annotations.NotNull;
