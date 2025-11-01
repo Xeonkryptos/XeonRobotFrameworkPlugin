@@ -7,6 +7,7 @@
 ### Fixed
 
 - Fixed construction of command line argument to run entries from run configuration with custom python script arguments
+- Fixed issues with keyword names containing special characters in non tests-only mode
 
 ## 0.5.9
 

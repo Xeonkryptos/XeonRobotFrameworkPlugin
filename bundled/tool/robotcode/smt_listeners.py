@@ -85,11 +85,18 @@ class RobotIntellijListener:
 
 def escape_name(name):
     # Escape special characters for TeamCity service messages
-    return name.replace('|', '||').replace("'", "|'").replace("\n", "|n").replace("\r", "|r")
+    return (name.replace('|', '||')
+            .replace("'", "|'")
+            .replace('"', '|"')
+            .replace("[", "|[")
+            .replace("]", "|]")
+            .replace('\t', '|t')
+            .replace("\n", "|n")
+            .replace("\r", "|r"))
 
 
 def escape_message(message):
-    return escape_name(message).replace('[', '|[').replace(']', '|]')
+    return escape_name(message)
 
 
 def print_teamcity_message(message):
