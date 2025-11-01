@@ -169,14 +169,19 @@ public class RobotPythonCommandLineState extends PythonScriptCommandLineState {
                                                                             environment,
                                                                             this::disableTeamCityMessages);
         try {
-            if (showCommandLineAfterwards() && DefaultRunExecutor.EXECUTOR_ID.equals(executor.getId())) {
+            String executorId = executor.getId();
+            if (showCommandLineAfterwards() && (DefaultRunExecutor.EXECUTOR_ID.equals(executorId) || RobotDryRunExecutor.EXECUTOR_ID.equals(executorId))) {
                 Project project = runConfiguration.getProject();
                 PythonRunConfiguration pythonRunConfiguration = (PythonRunConfiguration) runConfiguration.getPythonRunConfiguration().clone();
                 PyRunFileInConsoleAction.configExecuted(pythonRunConfiguration);
 
                 pythonRunConfiguration.getEnvs().put("NO_TEAMCITY", "1");
-
-                pythonRunConfiguration.setScriptName(ROBOTCODE_DIR + "/robotcode");
+                pythonRunConfiguration.setScriptName(ROBOTCODE_DIR + "/__main__.py");
+                pythonRunConfiguration.setModuleMode(false);
+                String workingDirectory = pythonRunConfiguration.getWorkingDirectory();
+                if (workingDirectory == null || workingDirectory.isBlank()) {
+                    pythonRunConfiguration.setWorkingDirectory(pythonRunConfiguration.getWorkingDirectorySafe());
+                }
 
                 StringBuilder additionalTestArguments = new StringBuilder();
                 enrichWithTestArguments(runConfiguration, argument -> {
