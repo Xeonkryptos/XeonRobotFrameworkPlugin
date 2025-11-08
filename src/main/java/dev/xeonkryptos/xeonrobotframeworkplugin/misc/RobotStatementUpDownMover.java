@@ -81,7 +81,6 @@ public class RobotStatementUpDownMover extends StatementUpDownMover {
             case RobotUserKeywordStatement keywordStatement -> keywordStatement;
             case RobotExecutableStatement executableStatement -> executableStatement;
             case RobotSection section -> section;
-            case RobotLanguage language -> language;
             case RobotGlobalSettingStatement globalSettingStatement -> globalSettingStatement;
             case RobotTestCaseStatement testCaseStatement -> testCaseStatement;
             case RobotTestCaseId testCaseId -> testCaseId.getParent();
