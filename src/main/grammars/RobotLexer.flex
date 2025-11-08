@@ -131,6 +131,8 @@ TasksSectionIdentifier = {Star} {SectionIdentifierParts} {SectionTasksWords} {NO
 KeywordsSectionIdentifier = {Star} {SectionIdentifierParts} {SectionKeywordsWords} {NON_EOL}*
 VariablesSectionIdentifier = {Star} {SectionIdentifierParts} {SectionVariablesWords} {NON_EOL}*
 
+SectionHeader = {SettingsSectionIdentifier} | {VariablesSectionIdentifier} | {KeywordsSectionIdentifier} | {TestcaseSectionIdentifier} | {TasksSectionIdentifier} | {CommentSectionIdentifier}
+
 OpeningVariable = "{"
 ClosingVariable = "}"
 
@@ -185,9 +187,8 @@ VariableKeyAccess = "[" \s* ([^$@%&] | [$@%&][^{])[^\]]* \s* "]"
 
 MultiLine = {EOL}+ \s* {Ellipsis} \s* {EOL}*
 
-LineComment = {LineCommentSign} {NON_EOL}*
+LineComment = ({SpaceBasedEndMarker} | {EOL}) {LineCommentSign} {NON_EOL}*
 
-%state LANGUAGE_SETTING
 %state SETTINGS_SECTION, VARIABLES_SECTION
 %state TESTCASE_NAME_DEFINITION, TESTCASE_DEFINITION, TASK_NAME_DEFINITION, TASK_DEFINITION
 %state USER_KEYWORD_NAME_DEFINITION, USER_KEYWORD_DEFINITION, USER_KEYWORD_RETURN_STATEMENT
@@ -202,12 +203,7 @@ LineComment = {LineCommentSign} {NON_EOL}*
 %%
 
 {Ellipsis} \s*                        { return WHITE_SPACE; }
-{LineComment}                         { return COMMENT; }
-
-<YYINITIAL, LANGUAGE_SETTING>        "Language:"   {
-          yybegin(LANGUAGE_SETTING);
-          return LANGUAGE_KEYWORD;
-      }
+{LineComment}                         { pushBackTrailingWhitespace(); return COMMENT; }
 
 {SettingsSectionIdentifier}   { resetInternalState(); yybegin(SETTINGS_SECTION); return SETTINGS_HEADER; }
 {VariablesSectionIdentifier}  { resetInternalState(); yybegin(VARIABLES_SECTION); return VARIABLES_HEADER; }
@@ -229,8 +225,6 @@ LineComment = {LineCommentSign} {NON_EOL}*
     {DictVariableStart}                      { yybegin(VARIABLE_DEFINITION); return DICT_VARIABLE_START; }
     {EnvVariableStart}                       { yybegin(VARIABLE_DEFINITION); return ENV_VARIABLE_START; }
 }
-
-<LANGUAGE_SETTING> {RestrictedLiteralValue}  { return LANGUAGE_NAME; }
 
 <VARIABLE_DEFINITION> {
     {ClosingVariable}                        { yybegin(VARIABLE_DEFINITION_ARGUMENTS); return VARIABLE_END; }
@@ -491,7 +485,7 @@ LineComment = {LineCommentSign} {NON_EOL}*
     {KeywordLiteralValue}                 { yybegin(KEYWORD_ARGUMENTS); pushBackTrailingWhitespace(); return KEYWORD_NAME; }
 }
 
-<SETTINGS_SECTION, SETTING, KEYWORD_ARGUMENTS, USER_KEYWORD_RETURN_STATEMENT> {RestrictedLiteralValue}        { pushBackTrailingWhitespace(); return LITERAL_CONSTANT; }
+<SETTINGS_SECTION, SETTING, KEYWORD_ARGUMENTS, USER_KEYWORD_RETURN_STATEMENT> {RestrictedLiteralValue} { pushBackTrailingWhitespace(); return LITERAL_CONSTANT; }
 
 <COMMENTS_SECTION> {
     {SettingsSectionIdentifier}            { resetInternalState(); yybegin(SETTINGS_SECTION); pushBackTrailingWhitespace(); return SETTINGS_HEADER; }
@@ -500,8 +494,10 @@ LineComment = {LineCommentSign} {NON_EOL}*
     {KeywordsSectionIdentifier}            { resetInternalState(); yybegin(USER_KEYWORD_NAME_DEFINITION); pushBackTrailingWhitespace(); return USER_KEYWORDS_HEADER; }
     {VariablesSectionIdentifier}           { resetInternalState(); yybegin(VARIABLES_SECTION); pushBackTrailingWhitespace(); return VARIABLES_HEADER; }
 
-    ({Whitespace} | {Ellipsis} | {EOL})+   { return WHITE_SPACE; }
-    {NON_EOL}+                             { return COMMENT; }
+    <YYINITIAL> {
+        ({Whitespace} | {Ellipsis} | {EOL})+   { return WHITE_SPACE; }
+        {NON_EOL}+                             { return COMMENT; }
+    }
 }
 
 {ScalarVariableStart}    { enterNewState(VARIABLE_USAGE); return SCALAR_VARIABLE_START; }

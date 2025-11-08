@@ -15,7 +15,6 @@
     <extensions defaultExtensionNs="com.intellij">
         <projectConfigurable groupId="language" instance="dev.xeonkryptos.xeonrobotframeworkplugin.config.RobotConfiguration" key="options.entrypoint"
                              bundle="messages.RobotBundle"/>
-        <projectService serviceImplementation="dev.xeonkryptos.xeonrobotframeworkplugin.config.RobotOptionsProvider"/>
 
         <fileType name="Robot Feature" implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotFeatureFileType" fieldName="INSTANCE"
                   language="Robot" extensions="robot"/>

@@ -146,14 +146,6 @@ public class RobotVisitor extends PsiElementVisitor {
     // visitNameIdentifierHolder(o);
   }
 
-  public void visitLanguage(@NotNull RobotLanguage o) {
-    visitElement(o);
-  }
-
-  public void visitLanguageId(@NotNull RobotLanguageId o) {
-    visitElement(o);
-  }
-
   public void visitLibraryImportGlobalSetting(@NotNull RobotLibraryImportGlobalSetting o) {
     visitGlobalSettingStatement(o);
     // visitGlobalSettingStatementExpression(o);

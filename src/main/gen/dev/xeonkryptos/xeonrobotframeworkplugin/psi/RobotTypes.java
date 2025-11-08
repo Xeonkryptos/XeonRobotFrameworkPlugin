@@ -43,8 +43,6 @@ public interface RobotTypes {
   IElementType KEYWORD_CALL_LIBRARY_NAME = new RobotElementType("KEYWORD_CALL_LIBRARY_NAME");
   IElementType KEYWORD_CALL_NAME = new RobotElementType("KEYWORD_CALL_NAME");
   IElementType KEYWORD_VARIABLE_STATEMENT = new RobotElementType("KEYWORD_VARIABLE_STATEMENT");
-  IElementType LANGUAGE = new RobotElementType("LANGUAGE");
-  IElementType LANGUAGE_ID = new RobotElementType("LANGUAGE_ID");
   IElementType LIBRARY_IMPORT_GLOBAL_SETTING = new RobotElementType("LIBRARY_IMPORT_GLOBAL_SETTING");
   IElementType LIST_VARIABLE = RobotListVariableStubElement.create("LIST_VARIABLE");
   IElementType LITERAL_CONSTANT_VALUE = new RobotElementType("LITERAL_CONSTANT_VALUE");
@@ -121,8 +119,6 @@ public interface RobotTypes {
   IElementType KEYWORD_LIBRARY_NAME = new RobotTokenType("KEYWORD_LIBRARY_NAME");
   IElementType KEYWORD_LIBRARY_SEPARATOR = new RobotTokenType("KEYWORD_LIBRARY_SEPARATOR");
   IElementType KEYWORD_NAME = new RobotTokenType("KEYWORD_NAME");
-  IElementType LANGUAGE_KEYWORD = new RobotTokenType("LANGUAGE_KEYWORD");
-  IElementType LANGUAGE_NAME = new RobotTokenType("LANGUAGE_NAME");
   IElementType LIBRARY_IMPORT_KEYWORD = new RobotTokenType("LIBRARY_IMPORT_KEYWORD");
   IElementType LIST_VARIABLE_START = new RobotTokenType("LIST_VARIABLE_START");
   IElementType LITERAL_CONSTANT = new RobotTokenType("LITERAL_CONSTANT");
@@ -246,12 +242,6 @@ public interface RobotTypes {
       }
       else if (type == KEYWORD_VARIABLE_STATEMENT) {
         return new RobotKeywordVariableStatementImpl(node);
-      }
-      else if (type == LANGUAGE) {
-        return new RobotLanguageImpl(node);
-      }
-      else if (type == LANGUAGE_ID) {
-        return new RobotLanguageIdImpl(node);
       }
       else if (type == LIBRARY_IMPORT_GLOBAL_SETTING) {
         return new RobotLibraryImportGlobalSettingImpl(node);

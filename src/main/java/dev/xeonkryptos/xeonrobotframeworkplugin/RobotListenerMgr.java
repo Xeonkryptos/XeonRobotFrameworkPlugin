@@ -1,24 +1,34 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin;
 
+import com.intellij.openapi.Disposable;
+import com.intellij.openapi.components.Service;
+import com.intellij.openapi.components.Service.Level;
 import com.intellij.openapi.project.DumbService;
 import com.intellij.openapi.project.DumbService.DumbModeListener;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.projectRoots.ProjectJdkTable;
 import com.intellij.psi.impl.source.resolve.ResolveCache;
+import com.intellij.util.messages.MessageBusConnection;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.ref.ProjectFileCache;
 
-public class RobotListenerMgr {
+@Service(Level.PROJECT)
+public final class RobotListenerMgr implements Disposable {
 
-    private static final RobotListenerMgr INSTANCE = new RobotListenerMgr();
+    private final Project project;
 
-    private RobotListenerMgr() {
+    private MessageBusConnection messageBusConnection;
+
+    public RobotListenerMgr(Project project) {
+        this.project = project;
     }
 
-    public static RobotListenerMgr getInstance() {
-        return INSTANCE;
+    public static RobotListenerMgr getInstance(Project project) {
+        return project.getService(RobotListenerMgr.class);
     }
 
-    public final void initializeListeners(Project project) {
-        project.getMessageBus().connect().subscribe(DumbService.DUMB_MODE, new DumbModeListener() {
+    public void initializeListeners() {
+        messageBusConnection = project.getMessageBus().connect();
+        messageBusConnection.subscribe(DumbService.DUMB_MODE, new DumbModeListener() {
             @Override
             public void exitDumbMode() {
                 // Clearing library references after re-index
@@ -27,5 +37,10 @@ public class RobotListenerMgr {
                 resolveCache.clearCache(true);
             }
         });
+    }
+
+    @Override
+    public void dispose() {
+        messageBusConnection.disconnect();
     }
 }

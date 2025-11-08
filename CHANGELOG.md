@@ -9,6 +9,7 @@
 - Fixed construction of command line argument to run entries from run configuration with custom python script arguments
 - Fixed issues with keyword names containing special characters in non tests-only mode
 - Fixed issue not allowing the run configuration to run in python console
+- Fixed comment detection
 
 ## 0.5.9
 

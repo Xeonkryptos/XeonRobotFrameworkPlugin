@@ -15,11 +15,9 @@ import com.intellij.execution.target.value.TargetEnvironmentFunctions;
 import com.intellij.execution.testframework.autotest.ToggleAutoTestAction;
 import com.intellij.execution.testframework.sm.runner.ui.SMTRunnerConsoleView;
 import com.intellij.execution.ui.ConsoleView;
-import com.intellij.openapi.application.PathManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Key;
 import com.intellij.util.ArrayUtil;
-import com.intellij.util.net.NetUtils;
 import com.jetbrains.python.actions.PyExecuteInConsole;
 import com.jetbrains.python.actions.PyRunFileInConsoleAction;
 import com.jetbrains.python.console.PyConsoleOptions;
@@ -35,20 +33,18 @@ import com.jetbrains.python.run.PythonScriptExecution;
 import com.jetbrains.python.run.PythonScriptTargetedCommandLineBuilder;
 import com.jetbrains.python.run.target.HelpersAwareTargetEnvironmentRequest;
 import dev.xeonkryptos.xeonrobotframeworkplugin.MyLogger;
-import dev.xeonkryptos.xeonrobotframeworkplugin.RobotBundle;
 import dev.xeonkryptos.xeonrobotframeworkplugin.config.RobotOptionsProvider;
 import dev.xeonkryptos.xeonrobotframeworkplugin.execution.config.RobotRunConfiguration;
 import dev.xeonkryptos.xeonrobotframeworkplugin.execution.config.RobotRunConfiguration.RobotRunnableUnitExecutionInfo;
 import dev.xeonkryptos.xeonrobotframeworkplugin.execution.ui.RobotRerunFailedTestsAction;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotFeatureFileType;
+import dev.xeonkryptos.xeonrobotframeworkplugin.util.BundleUtil;
+import dev.xeonkryptos.xeonrobotframeworkplugin.util.NetworkUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
-import java.io.IOException;
-import java.net.ServerSocket;
 import java.nio.charset.Charset;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -61,11 +57,6 @@ import java.util.function.Function;
 public class RobotPythonCommandLineState extends PythonScriptCommandLineState {
 
     public static final Key<Integer> ROBOT_DEBUG_PORT = Key.create("ROBOT_DEBUG_PORT");
-
-    private static final Path DATA_DIR = PathManager.getPluginsDir().resolve("Xeon RobotFramework Support").resolve("data");
-    private static final Path BUNDLED_DIR = DATA_DIR.resolve("bundled");
-    private static final Path TOOL_DIR = BUNDLED_DIR.resolve("tool");
-    private static final Path ROBOTCODE_DIR = TOOL_DIR.resolve("robotcode");
 
     private static final int DEBUGGER_DEFAULT_PORT = 6611;
 
@@ -110,9 +101,9 @@ public class RobotPythonCommandLineState extends PythonScriptCommandLineState {
 
     private void modifyCommandLine(ParamsGroup paramsGroup, RobotExecutionMode robotExecutionMode) {
         ParametersList parametersList = paramsGroup.getParametersList();
-        parametersList.set(1, ROBOTCODE_DIR + "/robotcode");
+        parametersList.set(1, BundleUtil.ROBOTCODE_DIR.resolve("robotcode").toString());
         if (robotExecutionMode == RobotExecutionMode.DEBUG) {
-            int robotDebugPort = findAvailableSocketPort();
+            int robotDebugPort = NetworkUtil.findAvailableSocketPort(DEBUGGER_DEFAULT_PORT);
             runConfiguration.putUserData(ROBOT_DEBUG_PORT, robotDebugPort);
 
             parametersList.addAt(2, String.valueOf(robotDebugPort));
@@ -159,7 +150,7 @@ public class RobotPythonCommandLineState extends PythonScriptCommandLineState {
 
     @Nullable
     @Override
-    @SuppressWarnings("UnstableApiUsage") // Might be unstable at the moment, but is an important extension point
+    @SuppressWarnings("UnstableApiUsage")
     public ExecutionResult execute(@NotNull Executor executor, @NotNull PythonScriptTargetedCommandLineBuilder converter) throws ExecutionException {
         final RobotExecutionMode executionMode = computeRobotExecutionMode(executor);
         ExecutionEnvironment environment = getEnvironment();
@@ -176,7 +167,7 @@ public class RobotPythonCommandLineState extends PythonScriptCommandLineState {
                 PyRunFileInConsoleAction.configExecuted(pythonRunConfiguration);
 
                 pythonRunConfiguration.getEnvs().put("NO_TEAMCITY", "1");
-                pythonRunConfiguration.setScriptName(ROBOTCODE_DIR + "/__main__.py");
+                pythonRunConfiguration.setScriptName(BundleUtil.ROBOTCODE_DIR.resolve("__main__.py").toString());
                 pythonRunConfiguration.setModuleMode(false);
                 String workingDirectory = pythonRunConfiguration.getWorkingDirectory();
                 if (workingDirectory == null || workingDirectory.isBlank()) {
@@ -236,7 +227,7 @@ public class RobotPythonCommandLineState extends PythonScriptCommandLineState {
         return runConfiguration.getPythonRunConfiguration().emulateTerminal() || showCommandLineAfterwards();
     }
 
-    @SuppressWarnings("UnstableApiUsage") // Might be unstable at the moment, but is an important extension point
+    @SuppressWarnings("UnstableApiUsage")
     private record MyPythonScriptTargetedCommandLineBuilder(@NotNull PythonScriptTargetedCommandLineBuilder parentBuilder,
                                                             RobotRunConfiguration configuration,
                                                             RobotExecutionMode executionMode,
@@ -248,12 +239,12 @@ public class RobotPythonCommandLineState extends PythonScriptCommandLineState {
         public PythonExecution build(@NotNull HelpersAwareTargetEnvironmentRequest helpersAwareTargetEnvironmentRequest,
                                      @NotNull PythonExecution pythonExecution) {
             PythonScriptExecution delegateExecution = createCopiedPythonScriptExecution(pythonExecution);
-            delegateExecution.setPythonScriptPath(TargetEnvironmentFunctions.constant(ROBOTCODE_DIR.toString()));
+            delegateExecution.setPythonScriptPath(TargetEnvironmentFunctions.constant(BundleUtil.ROBOTCODE_DIR.toString()));
             List<Function<TargetEnvironment, String>> parameters = delegateExecution.getParameters();
 
             List<Function<TargetEnvironment, String>> additionalParameters = new ArrayList<>();
             if (executionMode == RobotExecutionMode.DEBUG) {
-                int robotDebugPort = findAvailableSocketPort();
+                int robotDebugPort = NetworkUtil.findAvailableSocketPort(DEBUGGER_DEFAULT_PORT);
                 configuration.putUserData(ROBOT_DEBUG_PORT, robotDebugPort);
 
                 additionalParameters.add(TargetEnvironmentFunctions.constant("debug"));
@@ -341,28 +332,6 @@ public class RobotPythonCommandLineState extends PythonScriptCommandLineState {
             case RobotDryRunExecutor.EXECUTOR_ID -> RobotExecutionMode.DRY_RUN;
             default -> RobotExecutionMode.RUN;
         };
-    }
-
-    private static int findAvailableSocketPort() {
-        try (ServerSocket serverSocket = new ServerSocket(DEBUGGER_DEFAULT_PORT)) {
-            // workaround for linux : calling close() immediately after opening socket
-            // may result that socket is not closed
-            //noinspection SynchronizationOnLocalVariableOrMethodParameter
-            synchronized (serverSocket) {
-                try {
-                    //noinspection WaitNotInLoop
-                    serverSocket.wait(1);
-                } catch (InterruptedException ignored) {
-                }
-            }
-            return serverSocket.getLocalPort();
-        } catch (Exception ignored) {
-        }
-        try {
-            return NetUtils.findAvailableSocketPort();
-        } catch (IOException e) {
-            throw new RuntimeException(RobotBundle.message("runcfg.error.message.failed.to.find.free.socket.port"), e);
-        }
     }
 
     public Integer getRobotDebugPort() {

@@ -39,21 +39,16 @@
   implements(".*")="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotElement"
   extends(".*")="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotPsiElementBase"
 
-  pin("language")=1
-
   pin(".*_section")=1
   recoverWhile(".*_section")="section_recover"
 }
 
 internal_root ::= !<<eof>> root
 
-root ::= language* section*
+root ::= section*
 
 fake foldable ::= DUMMY
 fake scopeOwner ::= DUMMY
-
-language ::= LANGUAGE_KEYWORD language_id {methods=[nameIdentifier="language_id"]}
-language_id ::= LANGUAGE_NAME
 
 section ::= settings_section
     | variables_section

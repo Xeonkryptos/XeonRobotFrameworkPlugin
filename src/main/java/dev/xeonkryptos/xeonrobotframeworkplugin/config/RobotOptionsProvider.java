@@ -1,19 +1,22 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.config;
 
 import com.intellij.openapi.components.PersistentStateComponent;
+import com.intellij.openapi.components.RoamingType;
+import com.intellij.openapi.components.Service;
+import com.intellij.openapi.components.Service.Level;
 import com.intellij.openapi.components.State;
 import com.intellij.openapi.components.Storage;
 import com.intellij.openapi.project.Project;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.text.Collator;
 import java.text.ParseException;
 import java.text.RuleBasedCollator;
 import java.util.List;
 
-@State(name = "RobotOptionsProvider", storages = { @Storage("$WORKSPACE_FILE$") })
-public class RobotOptionsProvider implements PersistentStateComponent<RobotOptionsProvider.State> {
+@Service(Level.PROJECT)
+@State(name = "RobotOptionsProvider", storages = { @Storage(value = "$WORKSPACE_FILE$", roamingType = RoamingType.DISABLED) })
+public final class RobotOptionsProvider implements PersistentStateComponent<RobotOptionsProvider.State> {
 
     private final State state = new State();
 
@@ -23,50 +26,50 @@ public class RobotOptionsProvider implements PersistentStateComponent<RobotOptio
         return project.getService(RobotOptionsProvider.class);
     }
 
-    public final boolean capitalizeKeywords() {
+    public boolean capitalizeKeywords() {
         return state.capitalizeKeywords;
     }
 
-    public final void setCapitalizeKeywords(boolean capitalizeKeywords) {
+    public void setCapitalizeKeywords(boolean capitalizeKeywords) {
         state.capitalizeKeywords = capitalizeKeywords;
     }
 
-    public final boolean smartAutoEncloseVariable() {
+    public boolean smartAutoEncloseVariable() {
         return state.smartAutoEncloseVariable;
     }
 
-    public final void setSmartAutoEncloseVariable(boolean smartAutoEncloseVariable) {
+    public void setSmartAutoEncloseVariable(boolean smartAutoEncloseVariable) {
         state.smartAutoEncloseVariable = smartAutoEncloseVariable;
     }
 
-    public final boolean multilineIndentation() {
+    public boolean multilineIndentation() {
         return state.multilineIndentation;
     }
 
-    public final void setMultilineIndentation(boolean multilineIndentation) {
+    public void setMultilineIndentation(boolean multilineIndentation) {
         state.multilineIndentation = multilineIndentation;
     }
 
-    public final boolean testsOnlyMode() {
+    public boolean testsOnlyMode() {
         return state.testsOnlyMode;
     }
 
-    public final void setTestsOnlyMode(boolean testsOnlyMode) {
+    public void setTestsOnlyMode(boolean testsOnlyMode) {
         state.testsOnlyMode = testsOnlyMode;
     }
 
-    public final Collator getParameterNameCollator() {
+    public Collator getParameterNameCollator() {
         if (parameterNameCollator == null) {
             updateParameterNameCollator();
         }
         return parameterNameCollator;
     }
 
-    public final String parameterNameCollationRules() {
+    public String parameterNameCollationRules() {
         return state.parameterNameCollationRules;
     }
 
-    public final void setParameterNameCollationRules(String parameterNameCollationRules) {
+    public void setParameterNameCollationRules(String parameterNameCollationRules) {
         state.parameterNameCollationRules = parameterNameCollationRules;
         updateParameterNameCollator();
     }
@@ -95,7 +98,7 @@ public class RobotOptionsProvider implements PersistentStateComponent<RobotOptio
         }
     }
 
-    public final String canParseParameterNameCollationRules(String parameterNameCollationRules) {
+    public String canParseParameterNameCollationRules(String parameterNameCollationRules) {
         if (parameterNameCollationRules == null || parameterNameCollationRules.isBlank()) {
             return null;
         }
@@ -108,32 +111,32 @@ public class RobotOptionsProvider implements PersistentStateComponent<RobotOptio
         return null;
     }
 
-    public final boolean pythonLiveInspection() {
+    public boolean pythonLiveInspection() {
         return state.pythonLiveInspection;
     }
 
-    public final void setPythonLiveInspection(boolean pythonLiveInspection) {
+    public void setPythonLiveInspection(boolean pythonLiveInspection) {
         state.pythonLiveInspection = pythonLiveInspection;
     }
 
-    public final String getPythonLiveInspectionAdditionalArguments() {
+    public String getPythonLiveInspectionAdditionalArguments() {
         return state.pythonLiveInspectionAdditionalArguments;
     }
 
-    public final void setPythonLiveInspectionAdditionalArguments(String pythonLiveInspectionAdditionalArguments) {
+    public void setPythonLiveInspectionAdditionalArguments(String pythonLiveInspectionAdditionalArguments) {
         state.pythonLiveInspectionAdditionalArguments = pythonLiveInspectionAdditionalArguments;
     }
 
-    public final List<String> getPythonLiveInspectionDecorators() {
+    public List<String> getPythonLiveInspectionDecorators() {
         return state.pythonLiveInspectionDecorators;
     }
 
-    public final void setPythonLiveInspectionDecorators(List<String> pythonLiveInspectionDecorators) {
+    public void setPythonLiveInspectionDecorators(List<String> pythonLiveInspectionDecorators) {
         state.pythonLiveInspectionDecorators = pythonLiveInspectionDecorators;
     }
 
     @Override
-    public @Nullable State getState() {
+    public State getState() {
         return state;
     }
 

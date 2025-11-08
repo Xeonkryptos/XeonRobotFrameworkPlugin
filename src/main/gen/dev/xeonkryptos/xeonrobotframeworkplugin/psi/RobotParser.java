@@ -1187,32 +1187,6 @@ public class RobotParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // LANGUAGE_KEYWORD language_id
-  public static boolean language(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "language")) return false;
-    if (!nextTokenIs(b, LANGUAGE_KEYWORD)) return false;
-    boolean r, p;
-    Marker m = enter_section_(b, l, _NONE_, LANGUAGE, null);
-    r = consumeToken(b, LANGUAGE_KEYWORD);
-    p = r; // pin = 1
-    r = r && language_id(b, l + 1);
-    exit_section_(b, l, m, r, p, null);
-    return r || p;
-  }
-
-  /* ********************************************************** */
-  // LANGUAGE_NAME
-  public static boolean language_id(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "language_id")) return false;
-    if (!nextTokenIs(b, LANGUAGE_NAME)) return false;
-    boolean r;
-    Marker m = enter_section_(b);
-    r = consumeToken(b, LANGUAGE_NAME);
-    exit_section_(b, m, LANGUAGE_ID, r);
-    return r;
-  }
-
-  /* ********************************************************** */
   // LIBRARY_IMPORT_KEYWORD positional_argument (parameter | positional_argument)* (WITH_NAME new_library_name)? eol_marker
   public static boolean library_import_global_setting(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "library_import_global_setting")) return false;
@@ -1638,36 +1612,16 @@ public class RobotParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // language* section*
+  // section*
   public static boolean root(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "root")) return false;
-    boolean r;
     Marker m = enter_section_(b, l, _NONE_, ROOT, "<root>");
-    r = root_0(b, l + 1);
-    r = r && root_1(b, l + 1);
-    exit_section_(b, l, m, r, false, null);
-    return r;
-  }
-
-  // language*
-  private static boolean root_0(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "root_0")) return false;
-    while (true) {
-      int c = current_position_(b);
-      if (!language(b, l + 1)) break;
-      if (!empty_element_parsed_guard_(b, "root_0", c)) break;
-    }
-    return true;
-  }
-
-  // section*
-  private static boolean root_1(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "root_1")) return false;
     while (true) {
       int c = current_position_(b);
       if (!section(b, l + 1)) break;
-      if (!empty_element_parsed_guard_(b, "root_1", c)) break;
+      if (!empty_element_parsed_guard_(b, "root", c)) break;
     }
+    exit_section_(b, l, m, true, false, null);
     return true;
   }
 
