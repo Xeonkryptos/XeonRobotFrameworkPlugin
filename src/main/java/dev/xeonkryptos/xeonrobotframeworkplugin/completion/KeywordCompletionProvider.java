@@ -38,6 +38,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -75,11 +76,13 @@ class KeywordCompletionProvider extends CompletionProvider<CompletionParameters>
                                                                              .map(param -> new ParameterDto(param, param.getParameterName(), null))
                                                                              .collect(Collectors.toSet());
 
-            addDefinedKeywordsFromFile(result, parameters.getOriginalFile(), keywordCompletionModification, alreadyAddedParameters);
+            Collection<LookupElement> lookupElements = new LinkedList<>();
+            addDefinedKeywordsFromFile(lookupElements, parameters.getOriginalFile(), keywordCompletionModification, alreadyAddedParameters);
+            result.addAllElements(lookupElements);
         }
     }
 
-    private void addDefinedKeywordsFromFile(CompletionResultSet resultSet,
+    private void addDefinedKeywordsFromFile(Collection<LookupElement> lookupElements,
                                             PsiFile file,
                                             KeywordCompletionModification keywordCompletionModification,
                                             Collection<DefinedParameter> alreadyAddedParameters) {
@@ -88,10 +91,11 @@ class KeywordCompletionProvider extends CompletionProvider<CompletionParameters>
         boolean capitalizeKeywords = robotOptionsProvider.capitalizeKeywords();
 
         Collection<DefinedKeyword> definedKeywordsFromRobotFile = collectDefinedKeywords(robotFile);
-        addDefinedKeywords(definedKeywordsFromRobotFile, resultSet, capitalizeKeywords, keywordCompletionModification, alreadyAddedParameters).forEach(
+        addDefinedKeywords(definedKeywordsFromRobotFile, capitalizeKeywords, keywordCompletionModification, alreadyAddedParameters).forEach(
                 lookupElement -> {
                     lookupElement.putUserData(CompletionKeys.ROBOT_LOOKUP_CONTEXT, RobotLookupContext.KEYWORDS);
                     lookupElement.putUserData(CompletionKeys.ROBOT_LOOKUP_ELEMENT_TYPE, RobotLookupElementType.KEYWORD);
+                    lookupElements.add(lookupElement);
                 });
     }
 
@@ -135,11 +139,10 @@ class KeywordCompletionProvider extends CompletionProvider<CompletionParameters>
     }
 
     private Collection<LookupElement> addDefinedKeywords(Collection<DefinedKeyword> keywords,
-                                                         CompletionResultSet resultSet,
                                                          boolean capitalize,
                                                          KeywordCompletionModification keywordCompletionModification,
                                                          Collection<DefinedParameter> alreadyAddedParameters) {
-        List<LookupElement> lookupElements = new ArrayList<>();
+        List<LookupElement> lookupElementKeywords = new ArrayList<>();
         for (DefinedKeyword keyword : keywords) {
             String keywordName = keyword.getKeywordName();
             String displayName = capitalize ? WordUtils.capitalize(keywordName) : keywordName;
@@ -172,9 +175,8 @@ class KeywordCompletionProvider extends CompletionProvider<CompletionParameters>
             } else {
                 tailTypeDecorator = TailTypeDecorator.withTail(decoratedElement, TailTypes.noneType());
             }
-            resultSet.addElement(tailTypeDecorator);
-            lookupElements.add(tailTypeDecorator);
+            lookupElementKeywords.add(tailTypeDecorator);
         }
-        return lookupElements;
+        return lookupElementKeywords;
     }
 }

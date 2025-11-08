@@ -33,6 +33,7 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.visitor.RobotSectionVariable
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 import java.util.OptionalInt;
@@ -51,6 +52,7 @@ class VariableCompletionProvider extends CompletionProvider<CompletionParameters
             return;
         }
 
+        Collection<LookupElement> lookupElements = new LinkedList<>();
         RobotKeywordCall keywordCall = null;
         RobotElement parentOfInterest = PsiTreeUtil.getParentOfType(psiElement,
                                                                     // Stop-gaps to ignore any of the real-interested parents
@@ -82,28 +84,31 @@ class VariableCompletionProvider extends CompletionProvider<CompletionParameters
             }
         }
 
-        addDefinedVariablesFromImportedFiles(result, parameters.getOriginalFile(), psiElement);
-        addDefinedVariablesFromOwnSection(result, psiElement);
-        addArgumentsFromUserKeyword(result, psiElement);
+        addDefinedVariablesFromImportedFiles(lookupElements, parameters.getOriginalFile(), psiElement);
+        addDefinedVariablesFromOwnSection(lookupElements, psiElement);
+        addArgumentsFromUserKeyword(lookupElements, psiElement);
+
+        result.addAllElements(lookupElements);
     }
 
-    private void addDefinedVariablesFromImportedFiles(@NotNull CompletionResultSet resultSet, @NotNull PsiFile file, @NotNull PsiElement element) {
+    private void addDefinedVariablesFromImportedFiles(@NotNull Collection<LookupElement> lookupElements, @NotNull PsiFile file, @NotNull PsiElement element) {
         RobotFile robotFile = (RobotFile) file;
         addDefinedVariables(robotFile.getDefinedVariables(),
-                            resultSet,
-                            element).forEach(lookupElement -> lookupElement.putUserData(CompletionKeys.ROBOT_LOOKUP_ELEMENT_TYPE,
-                                                                                        RobotLookupElementType.VARIABLE));
+                            element).forEach(lookupElement -> {
+            lookupElement.putUserData(CompletionKeys.ROBOT_LOOKUP_ELEMENT_TYPE, RobotLookupElementType.VARIABLE);
+            lookupElements.add(lookupElement);
+        });
         for (KeywordFile importedFile : robotFile.collectImportedFiles(true)) {
             if (importedFile.getImportType() == ImportType.VARIABLES || importedFile.getImportType() == ImportType.RESOURCE) {
-                addDefinedVariables(importedFile.getDefinedVariables(),
-                                    resultSet,
-                                    element).forEach(lookupElement -> lookupElement.putUserData(CompletionKeys.ROBOT_LOOKUP_ELEMENT_TYPE,
-                                                                                                RobotLookupElementType.VARIABLE));
+                addDefinedVariables(importedFile.getDefinedVariables(), element).forEach(lookupElement -> {
+                    lookupElement.putUserData(CompletionKeys.ROBOT_LOOKUP_ELEMENT_TYPE, RobotLookupElementType.VARIABLE);
+                    lookupElements.add(lookupElement);
+                });
             }
         }
     }
 
-    private void addDefinedVariablesFromOwnSection(@NotNull CompletionResultSet resultSet, @NotNull PsiElement element) {
+    private void addDefinedVariablesFromOwnSection(@NotNull Collection<LookupElement> lookupElements, @NotNull PsiElement element) {
         PsiElement robotStatement = PsiTreeUtil.getParentOfType(element,
                                                                 RobotTestCaseStatement.class,
                                                                 RobotTaskStatement.class,
@@ -116,14 +121,14 @@ class VariableCompletionProvider extends CompletionProvider<CompletionParameters
         robotStatement.accept(variableCollector);
         Collection<DefinedVariable> definedVariables = variableCollector.getAvailableVariables();
         if (!definedVariables.isEmpty()) {
-            addDefinedVariables(definedVariables,
-                                resultSet,
-                                element).forEach(lookupElement -> lookupElement.putUserData(CompletionKeys.ROBOT_LOOKUP_ELEMENT_TYPE,
-                                                                                            RobotLookupElementType.VARIABLE));
+            addDefinedVariables(definedVariables, element).forEach(lookupElement -> {
+                lookupElement.putUserData(CompletionKeys.ROBOT_LOOKUP_ELEMENT_TYPE, RobotLookupElementType.VARIABLE);
+                lookupElements.add(lookupElement);
+            });
         }
     }
 
-    private void addArgumentsFromUserKeyword(@NotNull CompletionResultSet resultSet, @NotNull PsiElement element) {
+    private void addArgumentsFromUserKeyword(@NotNull Collection<LookupElement> lookupElements, @NotNull PsiElement element) {
         RobotUserKeywordStatement userKeywordStatement = PsiTreeUtil.getParentOfType(element, RobotUserKeywordStatement.class);
         if (userKeywordStatement != null) {
             List<RobotLocalArgumentsSetting> localArgumentsSettingList = userKeywordStatement.getLocalArgumentsSettingList();
@@ -133,28 +138,26 @@ class VariableCompletionProvider extends CompletionProvider<CompletionParameters
                 localArgumentsSetting.acceptChildren(variablesCollector);
                 Collection<DefinedVariable> definedVariables = variablesCollector.getVariables();
                 for (DefinedVariable variable : definedVariables) {
-                    CompletionProviderUtils.addLookupElement(variable, Nodes.Variable, false, TailTypes.noneType(), resultSet).ifPresent(lookupElement -> {
+                    CompletionProviderUtils.createLookupElement(variable, Nodes.Variable, false, TailTypes.noneType()).ifPresent(lookupElement -> {
                         lookupElement.putUserData(CompletionKeys.ROBOT_LOOKUP_CONTEXT, RobotLookupContext.WITHIN_KEYWORD_STATEMENT);
                         lookupElement.putUserData(CompletionKeys.ROBOT_LOOKUP_ELEMENT_TYPE, RobotLookupElementType.VARIABLE);
+                        lookupElements.add(lookupElement);
                     });
                 }
             }
         }
     }
 
-    private Collection<LookupElement> addDefinedVariables(@NotNull Collection<DefinedVariable> variables,
-                                                          @NotNull CompletionResultSet resultSet,
-                                                          @NotNull PsiElement element) {
-        return addDefinedVariables(variables, resultSet, element, TailTypes.noneType());
+    private Collection<LookupElement> addDefinedVariables(@NotNull Collection<DefinedVariable> variables, @NotNull PsiElement element) {
+        return addDefinedVariables(variables, element, TailTypes.noneType());
     }
 
     private Collection<LookupElement> addDefinedVariables(@NotNull Collection<DefinedVariable> variables,
-                                                          @NotNull CompletionResultSet resultSet,
                                                           @NotNull PsiElement element,
                                                           @NotNull TailType tailType) {
         return variables.stream()
                         .filter(variable -> variable.isInScope(element))
-                        .map(variable -> CompletionProviderUtils.addLookupElement(variable, Nodes.Variable, false, tailType, resultSet))
+                        .map(variable -> CompletionProviderUtils.createLookupElement(variable, Nodes.Variable, false, tailType))
                         .filter(Optional::isPresent)
                         .map(Optional::get)
                         .toList();

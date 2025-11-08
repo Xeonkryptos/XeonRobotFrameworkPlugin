@@ -19,6 +19,7 @@ import com.jetbrains.python.PythonFileType
 import com.jetbrains.python.psi.PyFile
 import com.jetbrains.python.psi.PyFunction
 import com.jetbrains.python.psi.PyParameter
+import com.jetbrains.python.psi.stubs.PyFunctionNameIndex
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.dto.KeywordDto
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.DefinedKeyword
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.RobotPyUtil
@@ -28,7 +29,6 @@ import java.io.DataInput
 import java.io.DataOutput
 import java.io.IOException
 import java.util.function.Consumer
-import kotlin.collections.iterator
 
 @Suppress("UnstableApiUsage")
 class PyRobotKeywordDefinitionIndex : FileBasedIndexExtension<String, PyRobotKeywordDefinitionIndex.IntArrayWrapper>() {
@@ -64,7 +64,12 @@ class PyRobotKeywordDefinitionIndex : FileBasedIndexExtension<String, PyRobotKey
                     }
                 }
             }
-            return result
+            return result.filterNot { pyFunc -> hasDuplicatedPythonFunctionInSameLocation(pyFunc, project, scope) }
+        }
+
+        private fun hasDuplicatedPythonFunctionInSameLocation(pyFunc: PyFunction, project: Project, searchScope: GlobalSearchScope): Boolean {
+            val qName = pyFunc.qualifiedName ?: return false
+            return PyFunctionNameIndex.findByQualifiedName(qName, project, searchScope).size > 1
         }
 
         @JvmStatic

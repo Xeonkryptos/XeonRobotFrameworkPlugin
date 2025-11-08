@@ -31,6 +31,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.LinkedList;
 import java.util.Map;
 import java.util.Objects;
 
@@ -38,13 +39,14 @@ class ImportCompletionProvider extends CompletionProvider<CompletionParameters> 
 
     @Override
     protected void addCompletions(@NotNull CompletionParameters parameters, @NotNull ProcessingContext context, @NotNull CompletionResultSet result) {
+        Collection<LookupElement> lookupElements = new LinkedList<>();
         RobotImportGlobalSettingExpression importElement = PsiTreeUtil.getParentOfType(parameters.getPosition(), RobotImportGlobalSettingExpression.class);
         if (importElement instanceof RobotLibraryImportGlobalSetting) {
-            addBuiltinLibraryCompletions(result, parameters.getOriginalFile());
+            addBuiltinLibraryCompletions(lookupElements, parameters.getOriginalFile());
             if (importElement.getChildren().length > 1) {
                 for (LookupElement lookupElement : CompletionProviderUtils.computeAdditionalSyntaxLookups(RobotKeywordProvider.SYNTAX_MARKER)) {
                     if ("AS".equals(lookupElement.getLookupString())) {
-                        result.addElement(lookupElement);
+                        lookupElements.add(lookupElement);
                     }
                 }
             }
@@ -56,18 +58,19 @@ class ImportCompletionProvider extends CompletionProvider<CompletionParameters> 
             GlobalSearchScope projectExcludedScope = GlobalSearchScope.notScope(projectScope);
             for (String classNameKey : classNameKeys) {
                 Collection<PyClass> projectPyClasses = PyClassNameIndex.find(classNameKey, project, projectScope);
-                addPythonClassCompletions(projectPyClasses, classNameKey, RobotLookupScope.PROJECT_SCOPE, result);
+                addPythonClassCompletions(projectPyClasses, classNameKey, RobotLookupScope.PROJECT_SCOPE, lookupElements);
 
                 Collection<PyClass> pyClasses = PyClassNameIndex.find(classNameKey, project, projectExcludedScope);
                 pyClasses.removeIf(RobotPyUtil::isSystemLibrary);
-                addPythonClassCompletions(pyClasses, classNameKey, RobotLookupScope.LIBRARY_SCOPE, result);
+                addPythonClassCompletions(pyClasses, classNameKey, RobotLookupScope.LIBRARY_SCOPE, lookupElements);
             }
         } else if (importElement instanceof RobotResourceImportGlobalSetting) {
             addResourceFilePaths(result, parameters.getOriginalFile());
         }
+        result.addAllElements(lookupElements);
     }
 
-    private void addBuiltinLibraryCompletions(CompletionResultSet resultSet, PsiFile file) {
+    private void addBuiltinLibraryCompletions(Collection<LookupElement> lookupElements, PsiFile file) {
         Map<String, ?> cachedFiles = RobotFileManager.getCachedRobotSystemFiles(file.getProject());
         for (String libraryName : cachedFiles.keySet()) {
             String[] lookupStrings = { libraryName, WordUtils.capitalize(libraryName), libraryName.toLowerCase() };
@@ -77,7 +80,7 @@ class ImportCompletionProvider extends CompletionProvider<CompletionParameters> 
                                                                       .withCaseSensitivity(true)
                                                                       .withIcon(AllIcons.Nodes.Package)
                                                                       .withTypeText(GlobalConstants.ROBOT_BUILT_IN);
-            resultSet.addElement(elementBuilder);
+            lookupElements.add(elementBuilder);
         }
     }
 
@@ -101,7 +104,10 @@ class ImportCompletionProvider extends CompletionProvider<CompletionParameters> 
         }).filter(Objects::nonNull).forEach(resultSet::addElement);
     }
 
-    private void addPythonClassCompletions(Collection<PyClass> pyClasses, String classNameKey, RobotLookupScope lookupScope, CompletionResultSet result) {
+    private void addPythonClassCompletions(Collection<PyClass> pyClasses,
+                                           String classNameKey,
+                                           RobotLookupScope lookupScope,
+                                           Collection<LookupElement> lookupElements) {
         if (classNameKey.startsWith("_")) { // Excluding as private indicated classes
             return;
         }
@@ -113,7 +119,7 @@ class ImportCompletionProvider extends CompletionProvider<CompletionParameters> 
                  .forEach(element -> {
                      element.putUserData(CompletionKeys.ROBOT_LOOKUP_CONTEXT, RobotLookupContext.IMPORT);
                      element.putUserData(CompletionKeys.ROBOT_LOOKUP_SCOPE, lookupScope);
-                     result.addElement(element);
+                     lookupElements.add(element);
                  });
     }
 

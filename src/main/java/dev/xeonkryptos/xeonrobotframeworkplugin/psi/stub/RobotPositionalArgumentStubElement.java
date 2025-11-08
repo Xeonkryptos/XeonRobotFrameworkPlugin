@@ -43,7 +43,13 @@ public class RobotPositionalArgumentStubElement extends IStubElementType<RobotPo
 
     @Override
     public boolean shouldCreateStub(ASTNode node) {
-        return node.getPsi() instanceof RobotPositionalArgument;
+        PsiElement psi = node.getPsi();
+        if (psi instanceof RobotPositionalArgument) {
+            RobotImportArgumentIdentifier robotImportArgumentIdentifier = new RobotImportArgumentIdentifier();
+            psi.accept(robotImportArgumentIdentifier);
+            return robotImportArgumentIdentifier.isImportArgument();
+        }
+        return false;
     }
 
     @NotNull

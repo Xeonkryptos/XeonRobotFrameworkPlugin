@@ -104,11 +104,7 @@ final class CompletionProviderUtils {
         return results;
     }
 
-    static Optional<LookupElement> addLookupElement(LookupElementMarker lookupElementMarker,
-                                                    @Nullable Icon icon,
-                                                    boolean bold,
-                                                    @NotNull TailType tailType,
-                                                    @NotNull CompletionResultSet resultSet) {
+    static Optional<LookupElement> createLookupElement(LookupElementMarker lookupElementMarker, @Nullable Icon icon, boolean bold, @NotNull TailType tailType) {
         String lookup = lookupElementMarker.getLookup();
         if (lookup != null) {
             String[] lookupWords = lookupElementMarker.getLookupWords();
@@ -138,7 +134,6 @@ final class CompletionProviderUtils {
                     super.putUserData(key, value);
                 }
             };
-            resultSet.addElement(lookupElement);
             return Optional.of(lookupElement);
         }
         return Optional.empty();

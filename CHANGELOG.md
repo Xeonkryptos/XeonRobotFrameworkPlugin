@@ -10,6 +10,12 @@
 - Fixed issues with keyword names containing special characters in non tests-only mode
 - Fixed issue not allowing the run configuration to run in python console
 - Fixed comment detection
+- Show keywords as unknown keywords when an overridden python function in the same place exists
+
+### Changed
+
+- Changed highlighting of unknown keywords to differentiate them from other error reasons
+- Optimized code completion provisioning to reduce pop in of suggestions
 
 ## 0.5.9
 

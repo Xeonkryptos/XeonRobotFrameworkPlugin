@@ -15,6 +15,8 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.util.RobotVersionProvider;
 import dev.xeonkryptos.xeonrobotframeworkplugin.util.RobotVersionProvider.RobotVersion;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Collection;
+import java.util.LinkedList;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -31,11 +33,13 @@ class StandardTagCompletionProvider extends CompletionProvider<CompletionParamet
         if (localSetting != null) {
             definedTags = localSetting.getPositionalArgumentList().stream().map(PsiElement::getText).collect(Collectors.toSet());
         }
+        Collection<LookupElement> lookupElements = new LinkedList<>();
         for (RobotTag robotTag : RobotTag.values()) {
             if (!definedTags.contains(robotTag.getTag()) && (robotVersion == null || robotVersion.supports(robotTag.getSinceVersion()))) {
                 LookupElement lookupElement = LookupElementBuilder.create(robotTag.getTag());
-                result.addElement(lookupElement);
+                lookupElements.add(lookupElement);
             }
         }
+        result.addAllElements(lookupElements);
     }
 }
