@@ -8,6 +8,7 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiElementResolveResult;
 import com.intellij.psi.PsiFile;
+import com.intellij.psi.PsiManager;
 import com.intellij.psi.PsiPolyVariantReferenceBase;
 import com.intellij.psi.ResolveResult;
 import com.intellij.psi.impl.source.resolve.ResolveCache;
@@ -30,6 +31,7 @@ import com.jetbrains.python.psi.PyTupleExpression;
 import dev.xeonkryptos.xeonrobotframeworkplugin.completion.CompletionKeys;
 import dev.xeonkryptos.xeonrobotframeworkplugin.completion.RobotLookupContext;
 import dev.xeonkryptos.xeonrobotframeworkplugin.completion.RobotLookupElementType;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotResourceFileType;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLibraryImportGlobalSetting;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotParameter;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotPositionalArgument;
@@ -64,14 +66,16 @@ public class RobotArgumentReference extends PsiPolyVariantReferenceBase<RobotPos
 
         Set<ResolveResult> results = new LinkedHashSet<>();
         if (parent instanceof RobotResourceImportGlobalSetting resourceImport) {
-            PsiElement result = RobotFileManager.findElement(argumentValue, project, resourceImport);
-            if (result != null) {
-                results.add(new PsiElementResolveResult(result));
-            }
-            VirtualFile virtualFile = resourceImport.getContainingFile().getVirtualFile();
-            PsiFile file = RobotFileManager.findPsiFiles(argumentValue, virtualFile, project);
-            if (file != null) {
-                results.add(new PsiElementResolveResult(file));
+            PsiFile containingFile = resourceImport.getContainingFile();
+            VirtualFile contentRootForFile = RobotFileManager.findContentRootForFile(containingFile);
+            if (contentRootForFile != null) {
+                VirtualFile fileByRelativePath = contentRootForFile.findFileByRelativePath(argumentValue);
+                if (fileByRelativePath != null) {
+                    PsiFile locatedResourceFile = PsiManager.getInstance(project).findFile(fileByRelativePath);
+                    if (locatedResourceFile != null && locatedResourceFile.getFileType() == RobotResourceFileType.getInstance()) {
+                        results.add(new PsiElementResolveResult(locatedResourceFile));
+                    }
+                }
             }
         } else if (parent instanceof RobotLibraryImportGlobalSetting || parent instanceof RobotVariablesImportGlobalSetting) {
             PsiElement result = RobotFileManager.findElementInContext(argumentValue, project, parent);

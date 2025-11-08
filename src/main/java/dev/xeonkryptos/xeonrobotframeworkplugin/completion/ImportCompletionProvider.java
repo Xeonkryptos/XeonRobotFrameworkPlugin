@@ -7,6 +7,8 @@ import com.intellij.codeInsight.lookup.LookupElement;
 import com.intellij.codeInsight.lookup.LookupElementBuilder;
 import com.intellij.icons.AllIcons;
 import com.intellij.icons.AllIcons.Nodes;
+import com.intellij.openapi.module.Module;
+import com.intellij.openapi.module.ModuleUtilCore;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.openapi.vfs.VirtualFile;
@@ -86,22 +88,24 @@ class ImportCompletionProvider extends CompletionProvider<CompletionParameters> 
 
     private void addResourceFilePaths(CompletionResultSet resultSet, PsiFile file) {
         Project project = file.getProject();
-        VirtualFile sourceFile = file.getVirtualFile();
-        Collection<VirtualFile> resourceFiles = FilenameIndex.getAllFilesByExt(project, "resource", GlobalSearchScope.projectScope(project));
-        resourceFiles.stream().filter(resourceFile -> !resourceFile.equals(sourceFile)).map(virtualFile -> {
-            VirtualFile commonAncestor = VfsUtil.getCommonAncestor(virtualFile, sourceFile);
-            if (commonAncestor == null) {
-                return null;
-            }
-            String relativePath = VfsUtil.getRelativePath(virtualFile, commonAncestor);
-            assert relativePath != null;
-            String[] lookupStrings = { relativePath, WordUtils.capitalize(relativePath), relativePath.toLowerCase() };
-            return LookupElementBuilder.create(relativePath)
-                                       .withIcon(RobotIcons.RESOURCE)
-                                       .withLookupStrings(Arrays.asList(lookupStrings))
-                                       .withCaseSensitivity(true)
-                                       .withPresentableText(relativePath);
-        }).filter(Objects::nonNull).forEach(resultSet::addElement);
+        Module moduleForFile = ModuleUtilCore.findModuleForFile(file);
+        VirtualFile contentRoot = RobotFileManager.findContentRootForFile(file);
+        if (moduleForFile != null && contentRoot != null) {
+            Collection<VirtualFile> resourceFiles = FilenameIndex.getAllFilesByExt(project, "resource", moduleForFile.getModuleContentScope());
+            resourceFiles.stream()
+                         .filter(resourceFile -> VfsUtil.isAncestor(contentRoot, resourceFile, true))
+                         .map(virtualFile -> VfsUtil.getRelativePath(virtualFile, contentRoot))
+                         .filter(Objects::nonNull)
+                         .map(relativePath -> {
+                             String[] lookupStrings = { relativePath, WordUtils.capitalize(relativePath), relativePath.toLowerCase() };
+                             return LookupElementBuilder.create(relativePath)
+                                                        .withIcon(RobotIcons.RESOURCE)
+                                                        .withLookupStrings(Arrays.asList(lookupStrings))
+                                                        .withCaseSensitivity(true)
+                                                        .withPresentableText(relativePath);
+                         })
+                         .forEach(resultSet::addElement);
+        }
     }
 
     private void addPythonClassCompletions(Collection<PyClass> pyClasses,

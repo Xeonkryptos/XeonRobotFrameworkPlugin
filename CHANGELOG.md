@@ -16,6 +16,7 @@
 
 - Changed highlighting of unknown keywords to differentiate them from other error reasons
 - Optimized code completion provisioning to reduce pop in of suggestions
+- Resolve imported resource files relative to the content root location only. Accordingly, provide code completion for resource files from content root only
 
 ## 0.5.9
 
@@ -39,7 +40,7 @@
 
 - New action to create robot directories with `__init__.robot` file included
 - Mark directories with a `__init__.robot` file as a robot package in project explorer
-- New inspections for duplicated sections 
+- New inspections for duplicated sections
 - New inspection for task and test case section defined in the same robot file
 
 ### Changed

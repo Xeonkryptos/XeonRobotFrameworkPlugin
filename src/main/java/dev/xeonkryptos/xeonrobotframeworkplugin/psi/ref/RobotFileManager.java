@@ -1,6 +1,9 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.psi.ref;
 
+import com.intellij.openapi.module.Module;
+import com.intellij.openapi.module.ModuleUtilCore;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.roots.ModuleRootManager;
 import com.intellij.openapi.util.SystemInfo;
 import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.openapi.vfs.VirtualFile;
@@ -33,11 +36,22 @@ public class RobotFileManager {
     }
 
     @Nullable
-    public static PsiElement findElement(@Nullable String elementName, @NotNull Project project, @NotNull PsiElement contextElement) {
-        if (elementName == null) {
-            return null;
+    public static VirtualFile findContentRootForFile(PsiFile file) {
+        VirtualFile sourceFile = file.getVirtualFile();
+        Module moduleForFile = ModuleUtilCore.findModuleForFile(file);
+        if (moduleForFile != null) {
+            ModuleRootManager moduleRootManager = ModuleRootManager.getInstance(moduleForFile);
+            VirtualFile[] contentRoots = moduleRootManager.getContentRoots();
+            VirtualFile relevantContentRoot = null;
+            for (VirtualFile contentRoot : contentRoots) {
+                if (VfsUtil.isAncestor(contentRoot, sourceFile, true)) {
+                    relevantContentRoot = contentRoot;
+                    break;
+                }
+            }
+            return relevantContentRoot;
         }
-        return findPsiFile(elementName, project, contextElement);
+        return null;
     }
 
     @Nullable
