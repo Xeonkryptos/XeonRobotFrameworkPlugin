@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+## 0.5.10
+
 ### Fixed
 
 - Fixed construction of command line argument to run entries from run configuration with custom python script arguments
