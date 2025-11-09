@@ -11,12 +11,14 @@
 - Fixed issue not allowing the run configuration to run in python console
 - Fixed comment detection
 - Show keywords as unknown keywords when an overridden python function in the same place exists
+- Fixed issue leading to a very slow robot code execution in debug mode
 
 ### Changed
 
 - Changed highlighting of unknown keywords to differentiate them from other error reasons
 - Optimized code completion provisioning to reduce pop in of suggestions
 - Resolve imported resource files relative to the content root location only. Accordingly, provide code completion for resource files from content root only
+- Optimized management of running and executed robot suites and tests
 
 ## 0.5.9
 

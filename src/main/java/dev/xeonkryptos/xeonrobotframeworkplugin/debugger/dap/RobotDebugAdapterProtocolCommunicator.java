@@ -10,9 +10,9 @@ import kotlinx.coroutines.TimeoutCancellationException;
 import org.eclipse.lsp4j.debug.Capabilities;
 import org.eclipse.lsp4j.debug.ConfigurationDoneArguments;
 import org.eclipse.lsp4j.debug.InitializeRequestArguments;
-import org.eclipse.lsp4j.debug.launch.DSPLauncher;
 import org.eclipse.lsp4j.debug.services.IDebugProtocolServer;
 import org.eclipse.lsp4j.jsonrpc.Launcher;
+import org.eclipse.lsp4j.jsonrpc.debug.DebugLauncher;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
@@ -35,7 +35,7 @@ public class RobotDebugAdapterProtocolCommunicator implements ProcessListener {
     private final AtomicBoolean initializing = new AtomicBoolean(false);
 
     private volatile Socket socket;
-    private IDebugProtocolServer robotDebugServer;
+    private RobotDebugProtocolServer robotDebugServer;
 
     private volatile boolean initialized;
 
@@ -59,12 +59,14 @@ public class RobotDebugAdapterProtocolCommunicator implements ProcessListener {
             initializing.set(false);
         } else {
             try {
-                Launcher<IDebugProtocolServer> clientLauncher = DSPLauncher.createClientLauncher(robotDebugClient,
-                                                                                                 localSocket.getInputStream(),
-                                                                                                 localSocket.getOutputStream());
-                clientLauncher.startListening();
+                Launcher<RobotDebugProtocolServer> launcher = DebugLauncher.createLauncher(robotDebugClient,
+                                                                                           RobotDebugProtocolServer.class,
+                                                                                           localSocket.getInputStream(),
+                                                                                           localSocket.getOutputStream());
+                launcher.startListening();
 
-                robotDebugServer = clientLauncher.getRemoteProxy();
+                robotDebugServer = launcher.getRemoteProxy();
+                robotDebugClient.setRobotDebugProcolSynchronizer(robotDebugServer);
 
                 InitializeRequestArguments arguments = new InitializeRequestArguments();
                 arguments.setClientID(UUID.randomUUID().toString());

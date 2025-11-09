@@ -26,6 +26,8 @@ public class RobotDebugAdapterProtocolClient implements IDebugProtocolClient {
     private final Signal<RobotLogMessageEventArguments> onRobotMessage = new Signal<>();
     private final Signal<OutputEventArguments> onOutput = new Signal<>();
 
+    private volatile RobotDebugProcolSynchronizer robotDebugProcolSynchronizer;
+
     @Override
     public void exited(ExitedEventArguments args) {
         onExited.fire(args);
@@ -44,36 +46,43 @@ public class RobotDebugAdapterProtocolClient implements IDebugProtocolClient {
     @JsonNotification("robotEnqueued")
     public void robotEnqueued(RobotEnqueuedArguments args) {
         onRobotEnqueued.fire(args);
+        synchronizeDebugServer();
     }
 
     @JsonNotification("robotStarted")
     public void robotStarted(RobotExecutionEventArguments args) {
         onRobotStarted.fire(args);
+        synchronizeDebugServer();
     }
 
     @JsonNotification("robotEnded")
     public void robotEnded(RobotExecutionEventArguments args) {
         onRobotEnded.fire(args);
+        synchronizeDebugServer();
     }
 
     @JsonNotification("robotSetFailed")
     public void robotSetFailed(RobotExecutionEventArguments args) {
         onRobotSetFailed.fire(args);
+        synchronizeDebugServer();
     }
 
     @JsonNotification("robotExited")
     public void robotExited(RobotExitedEventArguments args) {
         onRobotExited.fire(args);
+        synchronizeDebugServer();
     }
 
     @JsonNotification("robotLog")
     public void robotLog(RobotLogMessageEventArguments args) {
         onRobotLog.fire(args);
+        synchronizeDebugServer();
     }
 
     @JsonNotification("robotMessage")
     public void robotMessage(RobotLogMessageEventArguments args) {
         onRobotMessage.fire(args);
+        synchronizeDebugServer();
     }
 
     @Override
@@ -123,5 +132,16 @@ public class RobotDebugAdapterProtocolClient implements IDebugProtocolClient {
 
     public Signal<OutputEventArguments> getOnOutput() {
         return onOutput;
+    }
+
+    private void synchronizeDebugServer() {
+        RobotDebugProcolSynchronizer synchronizer = this.robotDebugProcolSynchronizer;
+        if (synchronizer != null) {
+            synchronizer.robotSync();
+        }
+    }
+
+    void setRobotDebugProcolSynchronizer(RobotDebugProcolSynchronizer robotDebugProcolSynchronizer) {
+        this.robotDebugProcolSynchronizer = robotDebugProcolSynchronizer;
     }
 }

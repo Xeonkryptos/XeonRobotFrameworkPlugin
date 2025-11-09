@@ -1,7 +1,6 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.debugger;
 
 import com.intellij.execution.ExecutionResult;
-import com.intellij.execution.process.ProcessEvent;
 import com.intellij.execution.process.ProcessHandler;
 import com.intellij.execution.ui.ExecutionConsole;
 import com.intellij.util.ArrayUtil;
@@ -10,7 +9,6 @@ import com.intellij.xdebugger.XSourcePosition;
 import com.intellij.xdebugger.breakpoints.XBreakpointHandler;
 import com.intellij.xdebugger.frame.XSuspendContext;
 import com.jetbrains.python.debugger.PyDebugProcess;
-import dev.xeonkryptos.xeonrobotframeworkplugin.debugger.dap.RobotDebugAdapterProtocolCommunicator;
 import dev.xeonkryptos.xeonrobotframeworkplugin.execution.RobotPythonCommandLineState;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -23,8 +21,6 @@ import java.net.ServerSocket;
  */
 class RobotPyDebugProcess extends PyDebugProcess {
 
-    private final RobotPythonCommandLineState robotPythonCommandLineState;
-
     private final RobotDebugProcess robotDebugProcess;
 
     public RobotPyDebugProcess(@NotNull XDebugSession session,
@@ -35,8 +31,8 @@ class RobotPyDebugProcess extends PyDebugProcess {
                                RobotPythonCommandLineState robotPythonCommandLineState) {
         super(session, serverSocket, executionConsole, processHandler, multiProcess);
 
-        this.robotPythonCommandLineState = robotPythonCommandLineState;
-        this.robotDebugProcess = initRobotProcess();
+        robotPythonCommandLineState.initRobotDebugCommunicatorProcess(getProcessHandler());
+        this.robotDebugProcess = new RobotDebugProcess(session, robotPythonCommandLineState.getDapCommunicator());
     }
 
     public RobotPyDebugProcess(@NotNull XDebugSession session,
@@ -45,23 +41,8 @@ class RobotPyDebugProcess extends PyDebugProcess {
                                RobotPythonCommandLineState robotPythonCommandLineState) {
         super(session, result.getExecutionConsole(), result.getProcessHandler(), "localhost", serverPort);
 
-        this.robotPythonCommandLineState = robotPythonCommandLineState;
-        this.robotDebugProcess = initRobotProcess();
-    }
-
-    private RobotDebugProcess initRobotProcess() {
-        Integer robotDebugPort = robotPythonCommandLineState.getRobotDebugPort();
-        RobotDebugAdapterProtocolCommunicator robotDebugAdapterProtocolCommunicator = new RobotDebugAdapterProtocolCommunicator(robotDebugPort);
-        RobotDebugProcess robotDebugProcess = new RobotDebugProcess(getSession(), robotDebugAdapterProtocolCommunicator);
-
-        ProcessHandler processHandler = getProcessHandler();
-        processHandler.addProcessListener(robotDebugAdapterProtocolCommunicator);
-        if (processHandler.isStartNotified()) {
-            // Usually, startNotified would be called by the ProcessHandler itself and in reality, it is called by it. Sadly, when we're reaching this point,
-            // the process is already running and the method called. Therefore, we have to emulate the call ourselves to connect to our debug server
-            robotDebugAdapterProtocolCommunicator.startNotified(new ProcessEvent(processHandler));
-        }
-        return robotDebugProcess;
+        robotPythonCommandLineState.initRobotDebugCommunicatorProcess(getProcessHandler());
+        this.robotDebugProcess = new RobotDebugProcess(session, robotPythonCommandLineState.getDapCommunicator());
     }
 
     @Override

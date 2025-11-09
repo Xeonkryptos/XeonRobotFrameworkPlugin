@@ -8,6 +8,7 @@ import com.intellij.execution.configurations.ParametersList;
 import com.intellij.execution.configurations.ParamsGroup;
 import com.intellij.execution.executors.DefaultDebugExecutor;
 import com.intellij.execution.executors.DefaultRunExecutor;
+import com.intellij.execution.process.ProcessEvent;
 import com.intellij.execution.process.ProcessHandler;
 import com.intellij.execution.runners.ExecutionEnvironment;
 import com.intellij.execution.target.TargetEnvironment;
@@ -16,12 +17,10 @@ import com.intellij.execution.testframework.autotest.ToggleAutoTestAction;
 import com.intellij.execution.testframework.sm.runner.ui.SMTRunnerConsoleView;
 import com.intellij.execution.ui.ConsoleView;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.util.Key;
 import com.intellij.util.ArrayUtil;
 import com.jetbrains.python.actions.PyExecuteInConsole;
 import com.jetbrains.python.actions.PyRunFileInConsoleAction;
 import com.jetbrains.python.console.PyConsoleOptions;
-import com.jetbrains.python.run.AbstractPythonRunConfiguration;
 import com.jetbrains.python.run.CommandLinePatcher;
 import com.jetbrains.python.run.PythonCommandLineState;
 import com.jetbrains.python.run.PythonConsoleScripts;
@@ -34,6 +33,7 @@ import com.jetbrains.python.run.PythonScriptTargetedCommandLineBuilder;
 import com.jetbrains.python.run.target.HelpersAwareTargetEnvironmentRequest;
 import dev.xeonkryptos.xeonrobotframeworkplugin.MyLogger;
 import dev.xeonkryptos.xeonrobotframeworkplugin.config.RobotOptionsProvider;
+import dev.xeonkryptos.xeonrobotframeworkplugin.debugger.dap.RobotDebugAdapterProtocolCommunicator;
 import dev.xeonkryptos.xeonrobotframeworkplugin.execution.config.RobotRunConfiguration;
 import dev.xeonkryptos.xeonrobotframeworkplugin.execution.config.RobotRunConfiguration.RobotRunnableUnitExecutionInfo;
 import dev.xeonkryptos.xeonrobotframeworkplugin.execution.ui.RobotRerunFailedTestsAction;
@@ -48,20 +48,18 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
-import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
 public class RobotPythonCommandLineState extends PythonScriptCommandLineState {
 
-    public static final Key<Integer> ROBOT_DEBUG_PORT = Key.create("ROBOT_DEBUG_PORT");
-
     private static final int DEBUGGER_DEFAULT_PORT = 6611;
 
     @NotNull
     private final RobotRunConfiguration runConfiguration;
+
+    private volatile RobotDebugAdapterProtocolCommunicator dapCommunicator;
 
     public RobotPythonCommandLineState(RobotRunConfiguration runConfiguration, ExecutionEnvironment env) {
         super(runConfiguration.getPythonRunConfiguration(), env);
@@ -102,42 +100,34 @@ public class RobotPythonCommandLineState extends PythonScriptCommandLineState {
     private void modifyCommandLine(ParamsGroup paramsGroup, RobotExecutionMode robotExecutionMode) {
         ParametersList parametersList = paramsGroup.getParametersList();
         parametersList.set(1, BundleUtil.ROBOTCODE_DIR.resolve("robotcode").toString());
-        if (robotExecutionMode == RobotExecutionMode.DEBUG) {
-            int robotDebugPort = NetworkUtil.findAvailableSocketPort(DEBUGGER_DEFAULT_PORT);
-            runConfiguration.putUserData(ROBOT_DEBUG_PORT, robotDebugPort);
 
-            parametersList.addAt(2, String.valueOf(robotDebugPort));
-            parametersList.addAt(2, "--tcp");
-            parametersList.addAt(2, "debug");
-        } else {
-            if (robotExecutionMode == RobotExecutionMode.DRY_RUN) {
-                parametersList.addAt(2, "--dryrun");
-            }
-            parametersList.addAt(2, "robot");
+        int robotDebugPort = NetworkUtil.findAvailableSocketPort(DEBUGGER_DEFAULT_PORT);
+        dapCommunicator = new RobotDebugAdapterProtocolCommunicator(robotDebugPort);
+
+        if (robotExecutionMode == RobotExecutionMode.DRY_RUN) {
+            parametersList.addAt(2, "--dryrun");
         }
+
+        if (robotExecutionMode != RobotExecutionMode.DEBUG) {
+            parametersList.addAt(2, "--no-debug");
+        }
+        parametersList.addAt(2, String.valueOf(robotDebugPort));
+        parametersList.addAt(2, "--tcp");
+        parametersList.addAt(2, "debug");
 
         enrichWithTestArguments(runConfiguration, parametersList::add);
-    }
-
-    @Override
-    public void customizeEnvironmentVars(Map<String, String> envs, boolean passParentEnvs) {
-        super.customizeEnvironmentVars(envs, passParentEnvs);
-        if (disableTeamCityMessages()) {
-            envs.put("NO_TEAMCITY", "1");
-        }
     }
 
     @NotNull
     @Override
     protected ConsoleView createAndAttachConsole(Project project, ProcessHandler processHandler, Executor executor) throws ExecutionException {
-        if (!runConfiguration.getTasks().isEmpty() || disableTeamCityMessages()) {
+        if (!runConfiguration.getTasks().isEmpty() || showCommandLineAfterwards()) {
             // With existing tasks to execute, don't show the SMT view. Tasks aren't tests.
             ConsoleView consoleView = super.createAndAttachConsole(project, processHandler, executor);
             consoleView.addMessageFilter(new RobotReportsFilter());
             return consoleView;
         }
-        AbstractPythonRunConfiguration<?> config = getConfig();
-        ConsoleView smtRunnerConsoleView = RobotTestRunnerFactory.createConsoleView(config, executor);
+        ConsoleView smtRunnerConsoleView = RobotTestRunnerFactory.createConsoleView(runConfiguration, executor, this);
         smtRunnerConsoleView.attachToProcess(processHandler);
 
         smtRunnerConsoleView.addMessageFilter(createUrlFilter(processHandler));
@@ -154,11 +144,7 @@ public class RobotPythonCommandLineState extends PythonScriptCommandLineState {
     public ExecutionResult execute(@NotNull Executor executor, @NotNull PythonScriptTargetedCommandLineBuilder converter) throws ExecutionException {
         final RobotExecutionMode executionMode = computeRobotExecutionMode(executor);
         ExecutionEnvironment environment = getEnvironment();
-        var wrappedConverter = new MyPythonScriptTargetedCommandLineBuilder(converter,
-                                                                            runConfiguration,
-                                                                            executionMode,
-                                                                            environment,
-                                                                            this::disableTeamCityMessages);
+        var wrappedConverter = new MyPythonScriptTargetedCommandLineBuilder(converter, runConfiguration, executionMode, environment);
         try {
             String executorId = executor.getId();
             if (showCommandLineAfterwards() && (DefaultRunExecutor.EXECUTOR_ID.equals(executorId) || RobotDryRunExecutor.EXECUTOR_ID.equals(executorId))) {
@@ -166,9 +152,8 @@ public class RobotPythonCommandLineState extends PythonScriptCommandLineState {
                 PythonRunConfiguration pythonRunConfiguration = (PythonRunConfiguration) runConfiguration.getPythonRunConfiguration().clone();
                 PyRunFileInConsoleAction.configExecuted(pythonRunConfiguration);
 
-                pythonRunConfiguration.getEnvs().put("NO_TEAMCITY", "1");
-                pythonRunConfiguration.setScriptName(BundleUtil.ROBOTCODE_DIR.resolve("__main__.py").toString());
-                pythonRunConfiguration.setModuleMode(false);
+                pythonRunConfiguration.setModuleMode(true);
+                pythonRunConfiguration.setScriptName("robot");
                 String workingDirectory = pythonRunConfiguration.getWorkingDirectory();
                 if (workingDirectory == null || workingDirectory.isBlank()) {
                     pythonRunConfiguration.setWorkingDirectory(pythonRunConfiguration.getWorkingDirectorySafe());
@@ -187,7 +172,7 @@ public class RobotPythonCommandLineState extends PythonScriptCommandLineState {
                     additionalTestArguments.append(" ");
                 });
 
-                String scriptParameters = "robot " + pythonRunConfiguration.getScriptParameters() + additionalTestArguments.toString().trim();
+                String scriptParameters = pythonRunConfiguration.getScriptParameters() + additionalTestArguments.toString().trim();
                 pythonRunConfiguration.setScriptParameters(scriptParameters);
 
                 Function<TargetEnvironment, String> runFileText = PythonConsoleScripts.buildScriptFunctionWithConsoleRun(pythonRunConfiguration);
@@ -223,16 +208,23 @@ public class RobotPythonCommandLineState extends PythonScriptCommandLineState {
         }
     }
 
-    private boolean disableTeamCityMessages() {
-        return runConfiguration.getPythonRunConfiguration().emulateTerminal() || showCommandLineAfterwards();
-    }
-
     @SuppressWarnings("UnstableApiUsage")
-    private record MyPythonScriptTargetedCommandLineBuilder(@NotNull PythonScriptTargetedCommandLineBuilder parentBuilder,
-                                                            RobotRunConfiguration configuration,
-                                                            RobotExecutionMode executionMode,
-                                                            ExecutionEnvironment environment,
-                                                            BooleanSupplier teamCityMessageDisableInfo) implements PythonScriptTargetedCommandLineBuilder {
+    private class MyPythonScriptTargetedCommandLineBuilder implements PythonScriptTargetedCommandLineBuilder {
+
+        private final PythonScriptTargetedCommandLineBuilder parentBuilder;
+        private final RobotRunConfiguration configuration;
+        private final RobotExecutionMode executionMode;
+        private final ExecutionEnvironment environment;
+
+        private MyPythonScriptTargetedCommandLineBuilder(@NotNull PythonScriptTargetedCommandLineBuilder parentBuilder,
+                                                         RobotRunConfiguration configuration,
+                                                         RobotExecutionMode executionMode,
+                                                         ExecutionEnvironment environment) {
+            this.parentBuilder = parentBuilder;
+            this.configuration = configuration;
+            this.executionMode = executionMode;
+            this.environment = environment;
+        }
 
         @NotNull
         @Override
@@ -243,18 +235,17 @@ public class RobotPythonCommandLineState extends PythonScriptCommandLineState {
             List<Function<TargetEnvironment, String>> parameters = delegateExecution.getParameters();
 
             List<Function<TargetEnvironment, String>> additionalParameters = new ArrayList<>();
-            if (executionMode == RobotExecutionMode.DEBUG) {
-                int robotDebugPort = NetworkUtil.findAvailableSocketPort(DEBUGGER_DEFAULT_PORT);
-                configuration.putUserData(ROBOT_DEBUG_PORT, robotDebugPort);
+            int robotDebugPort = NetworkUtil.findAvailableSocketPort(DEBUGGER_DEFAULT_PORT);
+            dapCommunicator = new RobotDebugAdapterProtocolCommunicator(robotDebugPort);
 
-                additionalParameters.add(TargetEnvironmentFunctions.constant("debug"));
-                additionalParameters.add(TargetEnvironmentFunctions.constant("--tcp"));
-                additionalParameters.add(TargetEnvironmentFunctions.constant(String.valueOf(robotDebugPort)));
-            } else {
-                additionalParameters.add(TargetEnvironmentFunctions.constant("robot"));
-                if (executionMode == RobotExecutionMode.DRY_RUN) {
-                    additionalParameters.add(TargetEnvironmentFunctions.constant("--dryrun"));
-                }
+            additionalParameters.add(TargetEnvironmentFunctions.constant("debug"));
+            additionalParameters.add(TargetEnvironmentFunctions.constant("--tcp"));
+            additionalParameters.add(TargetEnvironmentFunctions.constant(String.valueOf(robotDebugPort)));
+            if (executionMode != RobotExecutionMode.DEBUG) {
+                additionalParameters.add(TargetEnvironmentFunctions.constant("--no-debug"));
+            }
+            if (executionMode == RobotExecutionMode.DRY_RUN) {
+                additionalParameters.add(TargetEnvironmentFunctions.constant("--dryrun"));
             }
             parameters.addAll(0, additionalParameters);
             additionalParameters.clear();
@@ -262,12 +253,7 @@ public class RobotPythonCommandLineState extends PythonScriptCommandLineState {
             enrichWithTestArguments(configuration, argument -> additionalParameters.add(TargetEnvironmentFunctions.constant(argument)));
             parameters.addAll(additionalParameters);
 
-            if (teamCityMessageDisableInfo.getAsBoolean()) {
-                delegateExecution.addEnvironmentVariable("NO_TEAMCITY", "1");
-            }
             boolean testsOnlyMode = RobotOptionsProvider.getInstance(configuration.getProject()).testsOnlyMode();
-            String testsOnlyModeEnvironmentValue = testsOnlyMode ? "1" : "0";
-            delegateExecution.addEnvironmentVariable("ROBOT_TESTS_ONLY_MODE", testsOnlyModeEnvironmentValue);
             environment.putUserData(ExecutionKeys.TESTS_ONLY_MODE_KEY, testsOnlyMode);
 
             return parentBuilder.build(helpersAwareTargetEnvironmentRequest, delegateExecution);
@@ -334,8 +320,18 @@ public class RobotPythonCommandLineState extends PythonScriptCommandLineState {
         };
     }
 
-    public Integer getRobotDebugPort() {
-        return runConfiguration.getUserData(ROBOT_DEBUG_PORT);
+    public void initRobotDebugCommunicatorProcess(@NotNull ProcessHandler processHandler) {
+        RobotDebugAdapterProtocolCommunicator localDapCommunicator = dapCommunicator;
+        processHandler.addProcessListener(localDapCommunicator);
+        if (processHandler.isStartNotified()) {
+            // Usually, startNotified would be called by the ProcessHandler itself and in reality, it is called by it. Sadly, when we're reaching this point,
+            // the process is already running and the method called. Therefore, we have to emulate the call ourselves to connect to our debug server
+            localDapCommunicator.startNotified(new ProcessEvent(processHandler));
+        }
+    }
+
+    public RobotDebugAdapterProtocolCommunicator getDapCommunicator() {
+        return dapCommunicator;
     }
 
     private enum RobotExecutionMode {

@@ -9,6 +9,8 @@ import com.intellij.execution.configurations.RunConfiguration;
 import com.intellij.execution.configurations.RunProfileState;
 import com.intellij.execution.configurations.RuntimeConfigurationException;
 import com.intellij.execution.runners.ExecutionEnvironment;
+import com.intellij.execution.testframework.sm.runner.SMRunnerConsolePropertiesProvider;
+import com.intellij.execution.testframework.sm.runner.SMTRunnerConsoleProperties;
 import com.intellij.openapi.options.SettingsEditor;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.InvalidDataException;
@@ -17,6 +19,7 @@ import com.intellij.openapi.util.WriteExternalException;
 import com.intellij.util.containers.ContainerUtil;
 import com.jetbrains.python.run.PythonRunConfiguration;
 import dev.xeonkryptos.xeonrobotframeworkplugin.execution.RobotCommandLineState;
+import dev.xeonkryptos.xeonrobotframeworkplugin.execution.RobotConsoleProperties;
 import dev.xeonkryptos.xeonrobotframeworkplugin.execution.ui.editor.RobotConfigurationFragmentedEditor;
 import org.jdom.Element;
 import org.jetbrains.annotations.NotNull;
@@ -24,7 +27,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.List;
 import java.util.Objects;
 
-public class RobotRunConfiguration extends LocatableConfigurationBase<Element> implements EnvFilesOptions {
+public class RobotRunConfiguration extends LocatableConfigurationBase<Element> implements EnvFilesOptions, SMRunnerConsolePropertiesProvider {
 
     @SuppressWarnings("ApplicationServiceAsStaticFinalFieldOrProperty")
     private static final String TEST_CASE_NAME = "testCase";
@@ -105,6 +108,12 @@ public class RobotRunConfiguration extends LocatableConfigurationBase<Element> i
                 parent.addContent(itemElement);
             }
         }
+    }
+
+    @NotNull
+    @Override
+    public SMTRunnerConsoleProperties createTestConsoleProperties(@NotNull Executor executor) {
+        return new RobotConsoleProperties(this, executor);
     }
 
     @NotNull

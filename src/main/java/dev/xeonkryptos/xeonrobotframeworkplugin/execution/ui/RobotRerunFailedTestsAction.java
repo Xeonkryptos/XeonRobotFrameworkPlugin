@@ -16,13 +16,11 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.jetbrains.python.extensions.ContextAnchor;
 import com.jetbrains.python.extensions.ModuleBasedContextAnchor;
 import com.jetbrains.python.extensions.ProjectSdkContextAnchor;
+import com.jetbrains.python.run.PythonRunConfiguration;
 import dev.xeonkryptos.xeonrobotframeworkplugin.execution.ExecutionKeys;
 import dev.xeonkryptos.xeonrobotframeworkplugin.execution.RobotCommandLineState;
-import dev.xeonkryptos.xeonrobotframeworkplugin.execution.config.PythonRunConfigurationExt;
-import dev.xeonkryptos.xeonrobotframeworkplugin.execution.config.RobotConfigurationFactory;
 import dev.xeonkryptos.xeonrobotframeworkplugin.execution.config.RobotRunConfiguration;
 import dev.xeonkryptos.xeonrobotframeworkplugin.execution.config.RobotRunConfiguration.RobotRunnableUnitExecutionInfo;
-import dev.xeonkryptos.xeonrobotframeworkplugin.execution.config.RobotRunConfigurationType;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTestCaseStatement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.index.TestCaseNameIndex;
 import org.jetbrains.annotations.NotNull;
@@ -46,7 +44,7 @@ public class RobotRerunFailedTestsAction extends AbstractRerunFailedTestsAction 
         if (model == null) {
             return null;
         }
-        return new MyTestRunProfile((PythonRunConfigurationExt) model.getProperties().getConfiguration());
+        return new MyTestRunProfile((RobotRunConfiguration) model.getProperties().getConfiguration());
     }
 
     private class MyTestRunProfile extends MyRunProfile {
@@ -82,15 +80,13 @@ public class RobotRerunFailedTestsAction extends AbstractRerunFailedTestsAction 
                 return null;
             }
 
-            PythonRunConfigurationExt peer = getPeer();
-            RobotConfigurationFactory configurationFactory = RobotRunConfigurationType.getRobotRunConfigurationType().getConfigurationFactory();
-            RobotRunConfiguration robotRunConfiguration = new RobotRunConfiguration(project, configurationFactory, peer);
-
+            RobotRunConfiguration robotRunConfiguration = getPeer();
+            PythonRunConfiguration pythonRunConfiguration = robotRunConfiguration.getPythonRunConfiguration();
             List<RobotRunnableUnitExecutionInfo> testCaseInfos = new ArrayList<>();
             robotRunConfiguration.setTestCases(testCaseInfos);
 
-            Sdk sdk = peer.getSdk();
-            Module module = peer.getModule();
+            Sdk sdk = pythonRunConfiguration.getSdk();
+            Module module = pythonRunConfiguration.getModule();
             ContextAnchor contextAnchor = module == null ? new ProjectSdkContextAnchor(project, sdk) : new ModuleBasedContextAnchor(module);
             for (String testName : testNames) {
                 for (RobotTestCaseStatement statement : TestCaseNameIndex.find(testName, project, contextAnchor.getScope())) {
@@ -108,8 +104,8 @@ public class RobotRerunFailedTestsAction extends AbstractRerunFailedTestsAction 
 
         @NotNull
         @Override
-        public PythonRunConfigurationExt getPeer() {
-            return (PythonRunConfigurationExt) super.getPeer();
+        public RobotRunConfiguration getPeer() {
+            return (RobotRunConfiguration) super.getPeer();
         }
     }
 }

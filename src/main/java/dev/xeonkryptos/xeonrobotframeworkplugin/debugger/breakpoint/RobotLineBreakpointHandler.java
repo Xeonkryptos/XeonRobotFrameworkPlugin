@@ -1,8 +1,8 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.debugger.breakpoint;
 
-import dev.xeonkryptos.xeonrobotframeworkplugin.debugger.RobotDebugProcess;
 import com.intellij.xdebugger.breakpoints.XBreakpointHandler;
 import com.intellij.xdebugger.breakpoints.XLineBreakpoint;
+import dev.xeonkryptos.xeonrobotframeworkplugin.debugger.RobotDebugProcess;
 import org.jetbrains.annotations.NotNull;
 
 public class RobotLineBreakpointHandler extends XBreakpointHandler<XLineBreakpoint<RobotLineBreakpointProperties>> {

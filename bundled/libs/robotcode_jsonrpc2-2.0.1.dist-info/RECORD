@@ -1,0 +1,13 @@
+robotcode/jsonrpc2/__init__.py,sha256=47DEQpj8HBSa-_TImW-5JCeuQeRkm5NMpJWZG3hSuFU,0
+robotcode/jsonrpc2/__pycache__/__init__.cpython-311.pyc,,
+robotcode/jsonrpc2/__pycache__/__version__.cpython-311.pyc,,
+robotcode/jsonrpc2/__pycache__/protocol.cpython-311.pyc,,
+robotcode/jsonrpc2/__pycache__/server.cpython-311.pyc,,
+robotcode/jsonrpc2/__version__.py,sha256=wAxkK8w13vqoF47A8iqWdSlIgRRXmZiQ0R4wePZfzhs,22
+robotcode/jsonrpc2/protocol.py,sha256=A3XdF4bmqsq0HEW7DDKr6a_O61fzie_Dw29iEvWhYPs,33570
+robotcode/jsonrpc2/py.typed,sha256=bWew9mHgMy8LqMu7RuqQXFXLBxh2CRx0dUbSx-3wE48,27
+robotcode/jsonrpc2/server.py,sha256=gZdIQY5FanowZGZcHJ-y4Lg7H6uwbXLdmudiMi_0RjY,9836
+robotcode_jsonrpc2-2.0.1.dist-info/INSTALLER,sha256=zuuue4knoyJ-UwPPXg8fezS7VCrXJQrAP7zeNuwvFQg,4
+robotcode_jsonrpc2-2.0.1.dist-info/METADATA,sha256=2UDxkIiPboh9EgAa29DHsGdbG3LZpPwrHo-mvb3erhM,2752
+robotcode_jsonrpc2-2.0.1.dist-info/RECORD,,
+robotcode_jsonrpc2-2.0.1.dist-info/WHEEL,sha256=qtCwoSJWgHk21S1Kb4ihdzI2rlJ1ZKaIurTj_ngOhyQ,87

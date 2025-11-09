@@ -1,0 +1,67 @@
+Metadata-Version: 2.4
+Name: robotcode-core
+Version: 2.0.1
+Summary: Some core classes for RobotCode
+Project-URL: Homepage, https://robotcode.io
+Project-URL: Donate, https://opencollective.com/robotcode
+Project-URL: Documentation, https://github.com/robotcodedev/robotcode#readme
+Project-URL: Changelog, https://github.com/robotcodedev/robotcode/blob/main/CHANGELOG.md
+Project-URL: Issues, https://github.com/robotcodedev/robotcode/issues
+Project-URL: Source, https://github.com/robotcodedev/robotcode
+Author-email: Daniel Biehl <dbiehl@live.de>
+License: Apache-2.0
+Classifier: Development Status :: 5 - Production/Stable
+Classifier: Framework :: Robot Framework
+Classifier: Framework :: Robot Framework :: Tool
+Classifier: Operating System :: OS Independent
+Classifier: Programming Language :: Python
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Programming Language :: Python :: 3.13
+Classifier: Programming Language :: Python :: 3.14
+Classifier: Programming Language :: Python :: Implementation :: CPython
+Classifier: Programming Language :: Python :: Implementation :: PyPy
+Classifier: Topic :: Utilities
+Classifier: Typing :: Typed
+Requires-Python: >=3.10
+Requires-Dist: typing-extensions>=4.4.0
+Description-Content-Type: text/markdown
+
+# robotcode-core
+
+[![PyPI - Version](https://img.shields.io/pypi/v/robotcode-core.svg)](https://pypi.org/project/robotcode-core)
+[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/robotcode-core.svg)](https://pypi.org/project/robotcode-core)
+[![License](https://img.shields.io/github/license/robotcodedev/robotcode?style=flat&logo=apache)](https://github.com/robotcodedev/robotcode/blob/master/LICENSE.txt)
+
+-----
+
+## Introduction
+
+Core utilities and type definitions for [RobotCode](https://robotcode.io).
+
+This package is part of the [RobotCode](https://robotcode.io) project. The complete source code is available at [github.com/robotcodedev/robotcode](https://github.com/robotcodedev/robotcode).
+
+## Installation
+
+```console
+pip install robotcode-core
+```
+
+## Documentation
+
+For comprehensive documentation, please visit [robotcode.io](https://robotcode.io).
+
+## Security
+
+For security concerns, please refer to our [Security Policy](https://github.com/robotcodedev/robotcode/security/policy).
+
+## License
+
+`robotcode-core` is distributed under the terms of the [Apache-2.0](https://spdx.org/licenses/Apache-2.0.html) license.
+
+## Support
+
+- 📖 [Documentation](https://robotcode.io)
+- 💬 [Discussions](https://github.com/robotcodedev/robotcode/discussions)
+- 🐛 [Issues](https://github.com/robotcodedev/robotcode/issues)
