@@ -4,6 +4,10 @@
 
 ## Unreleased
 
+### Fixed
+
+- Fixed incorrect detection of comments when somewhere within the file with robot entries before them and at the beginning of a line
+
 ## 0.5.10
 
 ### Fixed

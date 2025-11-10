@@ -187,7 +187,7 @@ VariableKeyAccess = "[" \s* ([^$@%&] | [$@%&][^{])[^\]]* \s* "]"
 
 MultiLine = {EOL}+ \s* {Ellipsis} \s* {EOL}*
 
-LineComment = ({SpaceBasedEndMarker} | {EOL}) {LineCommentSign} {NON_EOL}*
+LineComment = {LineCommentSign} {NON_EOL}*
 
 %state SETTINGS_SECTION, VARIABLES_SECTION
 %state TESTCASE_NAME_DEFINITION, TESTCASE_DEFINITION, TASK_NAME_DEFINITION, TASK_DEFINITION
@@ -202,8 +202,11 @@ LineComment = ({SpaceBasedEndMarker} | {EOL}) {LineCommentSign} {NON_EOL}*
 
 %%
 
-{Ellipsis} \s*                        { return WHITE_SPACE; }
-{LineComment}                         { pushBackTrailingWhitespace(); return COMMENT; }
+{Ellipsis} \s*                                  { return WHITE_SPACE; }
+// Define a comment when it is the only thing on the line
+^ {LineComment}                                 { pushBackTrailingWhitespace(); return COMMENT; }
+// Define a comment when it comes after some content on the line
+({SpaceBasedEndMarker} | {EOL})  {LineComment}  { pushBackTrailingWhitespace(); return COMMENT; }
 
 {SettingsSectionIdentifier}   { resetInternalState(); yybegin(SETTINGS_SECTION); return SETTINGS_HEADER; }
 {VariablesSectionIdentifier}  { resetInternalState(); yybegin(VARIABLES_SECTION); return VARIABLES_HEADER; }
