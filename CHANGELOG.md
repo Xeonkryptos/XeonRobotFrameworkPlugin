@@ -2,7 +2,7 @@
 
 # XeonRobotFrameworkPlugin Changelog
 
-## Unreleased
+## 0.5.11
 
 ### Fixed
 
