@@ -7,23 +7,34 @@ import com.intellij.execution.configurations.LocatableConfigurationBase;
 import com.intellij.execution.configurations.LocatableRunConfigurationOptions;
 import com.intellij.execution.configurations.RunConfiguration;
 import com.intellij.execution.configurations.RunProfileState;
+import com.intellij.execution.configurations.RuntimeConfigurationError;
 import com.intellij.execution.configurations.RuntimeConfigurationException;
+import com.intellij.execution.configurations.RuntimeConfigurationWarning;
 import com.intellij.execution.runners.ExecutionEnvironment;
 import com.intellij.execution.testframework.sm.runner.SMRunnerConsolePropertiesProvider;
 import com.intellij.execution.testframework.sm.runner.SMTRunnerConsoleProperties;
+import com.intellij.openapi.module.Module;
 import com.intellij.openapi.options.SettingsEditor;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.roots.ModuleRootManager;
 import com.intellij.openapi.util.InvalidDataException;
 import com.intellij.openapi.util.JDOMExternalizerUtil;
 import com.intellij.openapi.util.WriteExternalException;
+import com.intellij.openapi.vfs.VfsUtil;
+import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.util.containers.ContainerUtil;
 import com.jetbrains.python.run.PythonRunConfiguration;
+import dev.xeonkryptos.xeonrobotframeworkplugin.RobotBundle;
 import dev.xeonkryptos.xeonrobotframeworkplugin.execution.RobotCommandLineState;
 import dev.xeonkryptos.xeonrobotframeworkplugin.execution.RobotConsoleProperties;
 import dev.xeonkryptos.xeonrobotframeworkplugin.execution.ui.editor.RobotConfigurationFragmentedEditor;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.index.TaskNameIndex;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.index.TestCaseNameIndex;
 import org.jdom.Element;
 import org.jetbrains.annotations.NotNull;
 
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Objects;
 
@@ -135,6 +146,51 @@ public class RobotRunConfiguration extends LocatableConfigurationBase<Element> i
     public void checkConfiguration() throws RuntimeConfigurationException {
         super.checkConfiguration();
         pythonRunConfiguration.checkConfiguration();
+        Project project = getProject();
+        GlobalSearchScope allScope = GlobalSearchScope.allScope(project);
+
+        Module module = pythonRunConfiguration.getModule();
+        if (module == null) {
+            throw new RuntimeConfigurationError(RobotBundle.message("robot.run.configuration.error.module.not.specified"));
+        }
+
+        long countOfResolvableTestCases = getTestCases().stream().filter(execInfo -> {
+            String fqdn = execInfo.getFqdn();
+            String unitName = execInfo.getUnitName();
+            return TestCaseNameIndex.find(unitName, project, allScope).stream().anyMatch(testCase -> fqdn.equals(testCase.getQualifiedName()));
+        }).count();
+        long countOfResolvableTasks = getTasks().stream().filter(execInfo -> {
+            String fqdn = execInfo.getFqdn();
+            String unitName = execInfo.getUnitName();
+            return TaskNameIndex.find(unitName, project, allScope).stream().anyMatch(task -> fqdn.equals(task.getQualifiedName()));
+        }).count();
+
+        int expectedTestCasesCount = getTestCases().size();
+        int expectedTasksCount = getTasks().size();
+        if (expectedTestCasesCount != countOfResolvableTestCases || expectedTasksCount != countOfResolvableTasks) {
+            throw new RuntimeConfigurationError(RobotBundle.message("robot.run.configuration.error.missing.testcases.or.tasks"));
+        }
+
+        VirtualFile[] contentRoots = ModuleRootManager.getInstance(module).getContentRoots();
+        long countOfResolvableDirectories = getDirectories().stream()
+                                                            .filter(dir -> doesFileOrDirectoryExistInRoots(contentRoots, dir)
+                                                                           || VfsUtil.findFile(Path.of(dir), false) != null)
+                                                            .count();
+        int expectedDirectoriesCount = getDirectories().size();
+        if (expectedDirectoriesCount != countOfResolvableDirectories) {
+            throw new RuntimeConfigurationWarning(RobotBundle.message("robot.run.configuration.warning.missing.files_directories"));
+        }
+    }
+
+    private static boolean doesFileOrDirectoryExistInRoots(VirtualFile[] roots, String path) {
+        String[] pathParts = path.split("[\\\\/]");
+        for (VirtualFile root : roots) {
+            VirtualFile file = VfsUtil.findRelativeFile(root, pathParts);
+            if (file != null) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @NotNull

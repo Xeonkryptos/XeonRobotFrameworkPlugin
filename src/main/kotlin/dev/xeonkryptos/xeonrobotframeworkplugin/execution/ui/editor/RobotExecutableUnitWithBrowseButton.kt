@@ -17,9 +17,11 @@ import com.intellij.openapi.ui.ComponentWithBrowseButton
 import com.intellij.openapi.ui.TextComponentAccessor
 import com.intellij.openapi.ui.TextFieldWithBrowseButton
 import com.intellij.openapi.ui.ValidationInfo
+import com.intellij.openapi.vfs.VfsUtil
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiNamedElement
 import com.intellij.psi.search.GlobalSearchScope
+import com.intellij.ui.DocumentAdapter
 import com.intellij.ui.TextAccessor
 import com.intellij.ui.components.installFileCompletionAndBrowseDialog
 import com.intellij.util.TextFieldCompletionProvider
@@ -27,6 +29,7 @@ import com.intellij.util.textCompletion.TextFieldWithCompletion
 import com.intellij.util.ui.JBUI
 import com.jetbrains.python.extensions.ContextAnchor
 import com.jetbrains.python.extensions.getQName
+import com.sun.java.accessibility.util.SwingEventMonitor.removeDocumentListener
 import dev.xeonkryptos.xeonrobotframeworkplugin.RobotBundle
 import dev.xeonkryptos.xeonrobotframeworkplugin.gotocontributor.RobotGotoClassContributor
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotFeatureFileType
@@ -38,8 +41,33 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.index.TaskNameIndex
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.index.TestCaseNameIndex
 import java.awt.event.ActionListener
 import javax.swing.tree.DefaultMutableTreeNode
+import kotlin.io.path.Path
+import javax.swing.event.DocumentEvent as SwingDocumentEvent
+import javax.swing.event.DocumentListener as SwingDocumentListener
 
 class RobotTextFieldWithDirectoryBrowseButton(contextAnchor: ContextAnchor) : TextFieldWithBrowseButton() {
+
+    private val validator = ComponentValidator(this).withValidator {
+        val txt = text.trim()
+        if (txt.isEmpty()) return@withValidator null
+
+        val pathParts = txt.split("\\", "/").toTypedArray()
+        val found = contextAnchor.getRoots().any { VfsUtil.findFile(Path(txt), false) != null || VfsUtil.findRelativeFile(it, *pathParts) != null }
+        return@withValidator if (!found) {
+            childComponent.putClientProperty("JComponent.outline", "error")
+            ValidationInfo(RobotBundle.message("robot.run.configuration.fragment.unit.directory.validation.invalid"), childComponent)
+        } else {
+            childComponent.putClientProperty("JComponent.outline", null)
+            null
+        }
+    }.installOn(childComponent)
+
+    private val documentListener: SwingDocumentListener = object : DocumentAdapter() {
+        override fun textChanged(e: SwingDocumentEvent) {
+            validator.revalidate()
+        }
+    }
+
     init {
         val textComponentAccessor = TextComponentAccessor.TEXT_FIELD_WHOLE_TEXT
         installFileCompletionAndBrowseDialog(
@@ -49,6 +77,12 @@ class RobotTextFieldWithDirectoryBrowseButton(contextAnchor: ContextAnchor) : Te
             FileChooserDescriptorFactory.createSingleFileOrFolderDescriptor(RobotFeatureFileType.getInstance()),
             textComponentAccessor
         )
+        addDocumentListener(documentListener)
+    }
+
+    override fun dispose() {
+        super.dispose()
+        removeDocumentListener(documentListener)
     }
 }
 
@@ -69,7 +103,7 @@ class RobotExecutableUnitWithBrowseButton(
         val mode = unitModeProvider()
         return@withValidator if (!isValidQualifiedName(txt, mode)) {
             childComponent.putClientProperty("JComponent.outline", "error")
-            ValidationInfo(RobotBundle.message("robot.symbol.validation.invalid"), childComponent)
+            ValidationInfo(RobotBundle.message("robot.run.configuration.fragment.unit.symbol.validation.invalid"), childComponent)
         } else {
             childComponent.putClientProperty("JComponent.outline", null)
             null

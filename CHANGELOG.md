@@ -2,6 +2,16 @@
 
 # XeonRobotFrameworkPlugin Changelog
 
+## Unreleased
+
+### Added
+
+- Added checks for run configuration's healthiness (does the provided test case / task still exist? can the directory / file be found?)
+
+### Fixed
+
+- Run configuration handling on making changes. Any changes made in the run configuration aren't safed directly; they are temporary until applied
+
 ## 0.5.11
 
 ### Fixed

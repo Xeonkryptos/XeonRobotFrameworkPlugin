@@ -12,11 +12,9 @@ import com.intellij.execution.ui.SettingsEditorFragment
 import com.intellij.execution.ui.SettingsEditorFragmentType
 import com.intellij.ide.macro.MacrosDialog
 import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory
-import com.intellij.openapi.ui.DialogPanel
 import com.intellij.openapi.ui.LabeledComponent
 import com.intellij.openapi.ui.TextBrowseFolderListener
 import com.intellij.openapi.ui.TextFieldWithBrowseButton
-import com.intellij.openapi.util.Disposer
 import com.intellij.openapi.util.text.StringUtil
 import com.intellij.ui.RawCommandLineEditor
 import com.intellij.ui.components.TextComponentEmptyText
@@ -58,18 +56,7 @@ class RobotConfigurationFragmentedEditor(private val runConfiguration: RobotRunC
     }
 
     fun customizeFragments(fragments: MutableList<SettingsEditorFragment<RobotRunConfiguration, *>>, configuration: RobotRunConfiguration) {
-        val factory = RobotExecutableUnitFactory(configuration)
-        val robotExecutionUnits = SettingsEditorFragment<RobotRunConfiguration, DialogPanel>(
-            "robot.execution.units",
-            null,
-            null,
-            factory.dialogPanel,
-            -4,
-            SettingsEditorFragmentType.EDITOR,
-            { _, component -> component.reset() },
-            { _, component -> component.apply() },
-            { true })
-        Disposer.register(robotExecutionUnits, factory)
+        val robotExecutionUnits = RobotExecutionUnitsFragment(configuration)
         fragments.add(robotExecutionUnits)
 
         val parametersEditor = RawCommandLineEditor()

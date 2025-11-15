@@ -1,13 +1,18 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.execution.ui.editor
 
 import ai.grazie.utils.applyIf
+import com.intellij.execution.ui.SettingsEditorFragment
+import com.intellij.execution.ui.SettingsEditorFragmentType
 import com.intellij.icons.AllIcons
 import com.intellij.openapi.Disposable
+import com.intellij.openapi.editor.event.DocumentListener
 import com.intellij.openapi.module.Module
+import com.intellij.openapi.observable.util.addDocumentListener
 import com.intellij.openapi.ui.DialogPanel
 import com.intellij.openapi.ui.FixedSizeButton
 import com.intellij.openapi.ui.LabeledComponent
 import com.intellij.openapi.util.Disposer
+import com.intellij.ui.DocumentAdapter
 import com.intellij.ui.TextAccessor
 import com.intellij.ui.components.JBScrollPane
 import com.intellij.ui.dsl.builder.AlignX
@@ -18,6 +23,7 @@ import com.jetbrains.python.extensions.ModuleBasedContextAnchor
 import com.jetbrains.python.extensions.ProjectSdkContextAnchor
 import dev.xeonkryptos.xeonrobotframeworkplugin.RobotBundle
 import dev.xeonkryptos.xeonrobotframeworkplugin.execution.config.RobotRunConfiguration
+import kotlinx.serialization.json.Json.Default.configuration
 import java.awt.BorderLayout
 import java.awt.Dimension
 import java.awt.event.ActionListener
@@ -29,18 +35,39 @@ import javax.swing.BoxLayout
 import javax.swing.JPanel
 import javax.swing.ScrollPaneConstants
 import javax.swing.UIManager
+import javax.swing.event.DocumentEvent
 
-class RobotExecutableUnitFactory(configuration: RobotRunConfiguration) : Disposable {
+class RobotExecutionUnitsFragment(configuration: RobotRunConfiguration) : SettingsEditorFragment<RobotRunConfiguration, RobotExecutableUnit>(
+    "robot.execution.units",
+    RobotBundle.message("robot.run.configuration.fragments.robot.execution.units"),
+    RobotBundle.message("robot.run.configuration.fragments.robot.group"),
+    RobotExecutableUnit(configuration),
+    -4,
+    SettingsEditorFragmentType.EDITOR,
+    { config, component -> component.reset(config) },
+    { config, component -> component.apply(config) },
+    { true }) {
+
+    init {
+        myComponent.change = { fireEditorStateChanged() }
+        Disposer.register(this, myComponent)
+    }
+}
+
+class RobotExecutableUnit(configuration: RobotRunConfiguration) : JPanel(BorderLayout()), Disposable {
 
     companion object {
         private const val MAXIMUM_VISIBLE_BROWSE_BUTTON_COUNT = 5
     }
 
-    val dialogPanel: DialogPanel
+    internal val dialogPanel: DialogPanel
 
-    private var mode: RobotTestExecutionMode = RobotTestExecutionMode.TEST_CASES
     private val browseButtonContainer: RobotBrowseButtonContainer
     private val scrollPane: JBScrollPane
+
+    internal var change: (() -> Unit)? = null
+
+    private var mode: RobotTestExecutionMode = RobotTestExecutionMode.TEST_CASES
 
     private val browseButtonContainerContainerListener = object : ContainerListener {
         override fun componentAdded(e: ContainerEvent?) {
@@ -90,24 +117,31 @@ class RobotExecutableUnitFactory(configuration: RobotRunConfiguration) : Disposa
             }.bind(MutableProperty({ mode }, { onModeChanged(it) }), RobotTestExecutionMode::class.java)
             row {
                 button("") {
-                    browseButtonContainer.addNewBrowseButton()
+                    browseButtonContainer.addNewBrowseButton(change = change)
                     updateScrollPaneHeight()
                     dialogPanel.revalidate()
                 }.align(AlignX.FILL).applyToComponent { icon = AllIcons.General.Add }
             }
             row {
-                cell(scrollPane).align(AlignX.FILL).onApply {
-                    configuration.testCases = browseButtonContainer.getTestCases().map { RobotRunConfiguration.RobotRunnableUnitExecutionInfo(it) }
-                    configuration.tasks = browseButtonContainer.getTasks().map { RobotRunConfiguration.RobotRunnableUnitExecutionInfo(it) }
-                    configuration.directories = browseButtonContainer.getDirectories().map { it }
-                }.onReset {
-                    mode = browseButtonContainer.reset(configuration.testCases, configuration.tasks, configuration.directories)
-                    updateScrollPaneHeight()
-                    dialogPanel.revalidate()
-                }
+                cell(scrollPane).align(AlignX.FILL)
             }
         }.withPreferredWidth(Integer.MAX_VALUE)
         Disposer.register(this, browseButtonContainer)
+
+        add(dialogPanel, BorderLayout.CENTER)
+    }
+
+    fun apply(configuration: RobotRunConfiguration) {
+        configuration.testCases = browseButtonContainer.getTestCases().map { RobotRunConfiguration.RobotRunnableUnitExecutionInfo(it) }
+        configuration.tasks = browseButtonContainer.getTasks().map { RobotRunConfiguration.RobotRunnableUnitExecutionInfo(it) }
+        configuration.directories = browseButtonContainer.getDirectories().map { it }
+    }
+
+    fun reset(configuration: RobotRunConfiguration) {
+        mode = browseButtonContainer.reset(configuration.testCases, configuration.tasks, configuration.directories, change)
+        updateScrollPaneHeight()
+        dialogPanel.revalidate()
+        change?.invoke()
     }
 
     private fun onModeChanged(newMode: RobotTestExecutionMode) {
@@ -115,6 +149,7 @@ class RobotExecutableUnitFactory(configuration: RobotRunConfiguration) : Disposa
         browseButtonContainer.onModeChanged(mode)
         updateScrollPaneHeight()
         dialogPanel.revalidate()
+        change?.invoke()
     }
 
     private fun updateScrollPaneHeight() {
@@ -133,9 +168,10 @@ class RobotExecutableUnitFactory(configuration: RobotRunConfiguration) : Disposa
     }
 }
 
-private class RobotBrowseButtonContainer(private val contextAnchor: ContextAnchor, initialExecutionMode: RobotTestExecutionMode) : JPanel(),
-                                                                                                                                   RobotExecutionModeChangeListener,
-                                                                                                                                   Disposable {
+private class RobotBrowseButtonContainer(
+    private val contextAnchor: ContextAnchor,
+    initialExecutionMode: RobotTestExecutionMode
+) : JPanel(), RobotExecutionModeChangeListener, Disposable {
 
     private val containerListener = object : ContainerListener {
         override fun componentAdded(e: ContainerEvent?) {
@@ -166,12 +202,11 @@ private class RobotBrowseButtonContainer(private val contextAnchor: ContextAncho
 
     init {
         layout = BoxLayout(this, BoxLayout.Y_AXIS)
-        addNewBrowseButton()
         addContainerListener(containerListener)
     }
 
-    fun addNewBrowseButton(initialText: String? = null) {
-        val deletableBrowseButtonPanel = DeletableBrowseButtonPanel(contextAnchor, executionMode, initialText)
+    fun addNewBrowseButton(initialText: String? = null, change: (() -> Unit)? = null) {
+        val deletableBrowseButtonPanel = DeletableBrowseButtonPanel(contextAnchor, executionMode, initialText, change)
         Disposer.register(this, deletableBrowseButtonPanel)
         add(deletableBrowseButtonPanel)
     }
@@ -192,7 +227,8 @@ private class RobotBrowseButtonContainer(private val contextAnchor: ContextAncho
     fun reset(
         testCases: List<RobotRunConfiguration.RobotRunnableUnitExecutionInfo>,
         tasks: List<RobotRunConfiguration.RobotRunnableUnitExecutionInfo>,
-        directories: List<String>
+        directories: List<String>,
+        change: (() -> Unit)? = null
     ): RobotTestExecutionMode {
         removeAll()
 
@@ -205,9 +241,9 @@ private class RobotBrowseButtonContainer(private val contextAnchor: ContextAncho
         }
         onModeChanged(newMode)
 
-        testCases.forEach { addNewBrowseButton("${it.fqdn}") }
-        tasks.forEach { addNewBrowseButton("${it.fqdn}") }
-        directories.forEach { addNewBrowseButton(it) }
+        testCases.forEach { addNewBrowseButton("${it.fqdn}", change) }
+        tasks.forEach { addNewBrowseButton("${it.fqdn}", change) }
+        directories.forEach { addNewBrowseButton(it, change) }
         return newMode
     }
 
@@ -221,19 +257,33 @@ private class RobotBrowseButtonContainer(private val contextAnchor: ContextAncho
     }
 }
 
-private class DeletableBrowseButtonPanel(contextAnchor: ContextAnchor, initialExecutionMode: RobotTestExecutionMode, initialText: String? = null) : JPanel(),
-                                                                                                                                                    RobotExecutionModeChangeListener,
-                                                                                                                                                    Disposable {
+private class DeletableBrowseButtonPanel(
+    contextAnchor: ContextAnchor, initialExecutionMode: RobotTestExecutionMode, initialText: String? = null, change: (() -> Unit)? = null
+) : JPanel(), RobotExecutionModeChangeListener, Disposable {
 
     private var executionMode = initialExecutionMode
 
     private val symbolLabel: LabeledComponent<RobotExecutableUnitWithBrowseButton>
     private val directoryLabel: LabeledComponent<RobotTextFieldWithDirectoryBrowseButton>
 
+    private val directoryDocumentListener: DocumentAdapter = object : DocumentAdapter() {
+        override fun textChanged(e: DocumentEvent) {
+            change?.invoke()
+        }
+    }
+
     private val newSymbolBrowseButton =
-        RobotExecutableUnitWithBrowseButton(contextAnchor) { executionMode }.applyIf(executionMode.unitExecutionMode) { text = initialText ?: "" }
+        RobotExecutableUnitWithBrowseButton(contextAnchor) { executionMode }.applyIf(executionMode.unitExecutionMode) { text = initialText ?: "" }.apply {
+            childComponent.addDocumentListener(this, object : DocumentListener {
+                override fun documentChanged(event: com.intellij.openapi.editor.event.DocumentEvent) {
+                    change?.invoke()
+                }
+            })
+        }
     private val newDirectoryBrowseButton =
-        RobotTextFieldWithDirectoryBrowseButton(contextAnchor).applyIf(!executionMode.unitExecutionMode) { text = initialText ?: "" }
+        RobotTextFieldWithDirectoryBrowseButton(contextAnchor).applyIf(!executionMode.unitExecutionMode) { text = initialText ?: "" }.apply {
+            addDocumentListener(directoryDocumentListener)
+        }
 
     private val symbolDeleteButton: FixedSizeButton
     private val directoryDeleteButton: FixedSizeButton
@@ -311,6 +361,7 @@ private class DeletableBrowseButtonPanel(contextAnchor: ContextAnchor, initialEx
     override fun dispose() {
         newSymbolBrowseButton.removeActionListener(deleteButtonActionListener)
         newDirectoryBrowseButton.removeActionListener(deleteButtonActionListener)
+        newDirectoryBrowseButton.textField.document.removeDocumentListener(directoryDocumentListener)
     }
 }
 
