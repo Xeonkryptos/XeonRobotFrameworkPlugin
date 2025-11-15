@@ -8,6 +8,7 @@ import com.intellij.codeInsight.lookup.LookupElementBuilder
 import com.intellij.ide.util.AbstractTreeClassChooserDialog
 import com.intellij.ide.util.TreeChooser
 import com.intellij.ide.util.gotoByName.GotoSymbolModel2
+import com.intellij.openapi.application.EDT
 import com.intellij.openapi.editor.event.DocumentEvent
 import com.intellij.openapi.editor.event.DocumentListener
 import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory
@@ -39,32 +40,33 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTaskStatement
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTestCaseStatement
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.index.TaskNameIndex
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.index.TestCaseNameIndex
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.awt.event.ActionListener
 import javax.swing.tree.DefaultMutableTreeNode
 import kotlin.io.path.Path
 import javax.swing.event.DocumentEvent as SwingDocumentEvent
 import javax.swing.event.DocumentListener as SwingDocumentListener
 
-class RobotTextFieldWithDirectoryBrowseButton(contextAnchor: ContextAnchor) : TextFieldWithBrowseButton() {
+class RobotTextFieldWithDirectoryBrowseButton(private val contextAnchor: ContextAnchor) : TextFieldWithBrowseButton() {
 
-    private val validator = ComponentValidator(this).withValidator {
-        val txt = text.trim()
-        if (txt.isEmpty()) return@withValidator null
-
-        val pathParts = txt.split("\\", "/").toTypedArray()
-        val found = contextAnchor.getRoots().any { VfsUtil.findFile(Path(txt), false) != null || VfsUtil.findRelativeFile(it, *pathParts) != null }
-        return@withValidator if (!found) {
-            childComponent.putClientProperty("JComponent.outline", "error")
-            ValidationInfo(RobotBundle.message("robot.run.configuration.fragment.unit.directory.validation.invalid"), childComponent)
-        } else {
-            childComponent.putClientProperty("JComponent.outline", null)
-            null
-        }
-    }.installOn(childComponent)
+    private val validator = ComponentValidator(this).installOn(childComponent)
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+    private val textChanges = MutableStateFlow("")
 
     private val documentListener: SwingDocumentListener = object : DocumentAdapter() {
         override fun textChanged(e: SwingDocumentEvent) {
-            validator.revalidate()
+            textChanges.value = textField.text
         }
     }
 
@@ -78,11 +80,49 @@ class RobotTextFieldWithDirectoryBrowseButton(contextAnchor: ContextAnchor) : Te
             textComponentAccessor
         )
         addDocumentListener(documentListener)
+
+        scope.launch {
+            @Suppress("OPT_IN_USAGE") textChanges.asStateFlow().map { it.trim() }.distinctUntilChanged().debounce(200L).collectLatest { raw ->
+                if (raw.isEmpty()) {
+                    withContext(Dispatchers.EDT) { applyValidationResult(null) }
+                    return@collectLatest
+                }
+
+                val pathParts = raw.split("\\", "/").toTypedArray()
+
+                val valid = withContext(Dispatchers.IO) {
+                    contextAnchor.getRoots().any { VfsUtil.findFile(Path(raw), false) != null || VfsUtil.findRelativeFile(it, *pathParts) != null }
+                }
+
+                withContext(Dispatchers.EDT) {
+                    if (valid) {
+                        applyValidationResult(null)
+                    } else {
+                        applyValidationResult(
+                            ValidationInfo(
+                                RobotBundle.message("robot.run.configuration.fragment.unit.directory.validation.invalid"), childComponent
+                            )
+                        )
+                    }
+                }
+            }
+        }
+    }
+
+    private fun applyValidationResult(info: ValidationInfo?) {
+        if (info == null) {
+            childComponent.putClientProperty("JComponent.outline", null)
+            validator.updateInfo(null)
+        } else {
+            childComponent.putClientProperty("JComponent.outline", "error")
+            validator.updateInfo(info)
+        }
     }
 
     override fun dispose() {
         super.dispose()
         removeDocumentListener(documentListener)
+        scope.cancel()
     }
 }
 

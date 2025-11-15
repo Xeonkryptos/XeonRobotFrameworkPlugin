@@ -18,7 +18,6 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.newSingleThreadContext
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
-import org.eclipse.lsp4j.debug.OutputEventArgumentsCategory
 
 class RobotOutputToGeneralTestEventsConverter(testFrameworkName: String, consoleProperties: RobotConsoleProperties) : OutputToGeneralTestEventsConverter(
     testFrameworkName, consoleProperties
@@ -46,7 +45,7 @@ class RobotOutputToGeneralTestEventsConverter(testFrameworkName: String, console
         val debugClient = dapCommunicator?.debugClient
         debugClient?.onRobotStarted?.advise(Lifetime.Eternal, this::robotStarted)
         debugClient?.onRobotEnded?.advise(Lifetime.Eternal, this::robotEnded)
-        debugClient?.onOutput?.advise(Lifetime.Eternal) { args ->
+        /*debugClient?.onOutput?.advise(Lifetime.Eternal) { args ->
             val msg = if (args.category == OutputEventArgumentsCategory.STDERR) ServiceMessageBuilder.testStdErr(args.category)
             else ServiceMessageBuilder.testStdOut(args.category)
 
@@ -54,7 +53,7 @@ class RobotOutputToGeneralTestEventsConverter(testFrameworkName: String, console
             msg.addAttribute("out", "\u001b[38;5;243m${args.output}\u001b[0m")
 
             processServiceMessageFromRobot(msg)
-        }
+        }*/
     }
 
     private fun robotStarted(args: RobotExecutionEventArguments) {

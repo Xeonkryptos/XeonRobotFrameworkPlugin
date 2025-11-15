@@ -7,6 +7,7 @@
 ### Added
 
 - Added checks for run configuration's healthiness (does the provided test case / task still exist? can the directory / file be found?)
+- Added refactoring listener to handle renames of robot files, directories and test cases / tasks to update run configurations accordingly
 
 ### Fixed
 

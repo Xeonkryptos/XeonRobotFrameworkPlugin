@@ -23,7 +23,6 @@ import com.jetbrains.python.extensions.ModuleBasedContextAnchor
 import com.jetbrains.python.extensions.ProjectSdkContextAnchor
 import dev.xeonkryptos.xeonrobotframeworkplugin.RobotBundle
 import dev.xeonkryptos.xeonrobotframeworkplugin.execution.config.RobotRunConfiguration
-import kotlinx.serialization.json.Json.Default.configuration
 import java.awt.BorderLayout
 import java.awt.Dimension
 import java.awt.event.ActionListener
@@ -135,10 +134,12 @@ class RobotExecutableUnit(configuration: RobotRunConfiguration) : JPanel(BorderL
         configuration.testCases = browseButtonContainer.getTestCases().map { RobotRunConfiguration.RobotRunnableUnitExecutionInfo(it) }
         configuration.tasks = browseButtonContainer.getTasks().map { RobotRunConfiguration.RobotRunnableUnitExecutionInfo(it) }
         configuration.directories = browseButtonContainer.getDirectories().map { it }
+        dialogPanel.apply()
     }
 
     fun reset(configuration: RobotRunConfiguration) {
         mode = browseButtonContainer.reset(configuration.testCases, configuration.tasks, configuration.directories, change)
+        dialogPanel.reset()
         updateScrollPaneHeight()
         dialogPanel.revalidate()
         change?.invoke()

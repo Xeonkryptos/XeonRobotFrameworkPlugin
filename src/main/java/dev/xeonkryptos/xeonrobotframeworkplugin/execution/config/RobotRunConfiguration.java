@@ -5,6 +5,7 @@ import com.intellij.execution.Executor;
 import com.intellij.execution.configurations.ConfigurationFactory;
 import com.intellij.execution.configurations.LocatableConfigurationBase;
 import com.intellij.execution.configurations.LocatableRunConfigurationOptions;
+import com.intellij.execution.configurations.RefactoringListenerProvider;
 import com.intellij.execution.configurations.RunConfiguration;
 import com.intellij.execution.configurations.RunProfileState;
 import com.intellij.execution.configurations.RuntimeConfigurationError;
@@ -22,7 +23,9 @@ import com.intellij.openapi.util.JDOMExternalizerUtil;
 import com.intellij.openapi.util.WriteExternalException;
 import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.psi.PsiElement;
 import com.intellij.psi.search.GlobalSearchScope;
+import com.intellij.refactoring.listeners.RefactoringElementListener;
 import com.intellij.util.containers.ContainerUtil;
 import com.jetbrains.python.run.PythonRunConfiguration;
 import dev.xeonkryptos.xeonrobotframeworkplugin.RobotBundle;
@@ -33,12 +36,14 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.index.TaskNameIndex;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.index.TestCaseNameIndex;
 import org.jdom.Element;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Objects;
 
-public class RobotRunConfiguration extends LocatableConfigurationBase<Element> implements EnvFilesOptions, SMRunnerConsolePropertiesProvider {
+public class RobotRunConfiguration extends LocatableConfigurationBase<Element>
+        implements EnvFilesOptions, SMRunnerConsolePropertiesProvider, RefactoringListenerProvider {
 
     @SuppressWarnings("ApplicationServiceAsStaticFinalFieldOrProperty")
     private static final String TEST_CASE_NAME = "testCase";
@@ -61,6 +66,8 @@ public class RobotRunConfiguration extends LocatableConfigurationBase<Element> i
         pythonRunConfiguration.setModuleMode(true);
         pythonRunConfiguration.setScriptName("robotcode");
         pythonRunConfiguration.setEmulateTerminal(false);
+        pythonRunConfiguration.setAddContentRoots(true);
+        pythonRunConfiguration.setAddSourceRoots(true);
     }
 
     public RobotRunConfiguration(Project project, ConfigurationFactory configurationFactory, PythonRunConfigurationExt pythonRunConfiguration) {
@@ -119,6 +126,12 @@ public class RobotRunConfiguration extends LocatableConfigurationBase<Element> i
                 parent.addContent(itemElement);
             }
         }
+    }
+
+    @Nullable
+    @Override
+    public RefactoringElementListener getRefactoringElementListener(PsiElement element) {
+        return new RobotRefactoringElementAdapterFactory(this).getRefactoringElementListener(element);
     }
 
     @NotNull
@@ -270,6 +283,10 @@ public class RobotRunConfiguration extends LocatableConfigurationBase<Element> i
 
         public String getLocation() {
             return location;
+        }
+
+        protected void setLocation(String location) {
+            this.location = location;
         }
 
         public String getUnitName() {
