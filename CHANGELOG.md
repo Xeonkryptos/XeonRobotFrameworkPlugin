@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+## 0.5.12
+
 ### Added
 
 - Added checks for run configuration's healthiness (does the provided test case / task still exist? can the directory / file be found?)
