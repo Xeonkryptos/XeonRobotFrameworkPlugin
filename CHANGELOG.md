@@ -12,6 +12,7 @@
 ### Fixed
 
 - Run configuration handling on making changes. Any changes made in the run configuration aren't safed directly; they are temporary until applied
+- Fixed reassigned variable highlighting
 
 ### Changed
 

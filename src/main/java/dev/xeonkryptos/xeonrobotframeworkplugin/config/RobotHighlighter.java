@@ -25,7 +25,11 @@ public class RobotHighlighter extends SyntaxHighlighterBase {
                                                                                              DefaultLanguageHighlighterColors.DOC_COMMENT_TAG_VALUE);
     public static final TextAttributesKey IMPORT_ARGUMENT = TextAttributesKey.createTextAttributesKey("ROBOT_IMPORT_ARGUMENT",
                                                                                                       DefaultLanguageHighlighterColors.HIGHLIGHTED_REFERENCE);
-    public static final TextAttributesKey KEYWORD_DEFINITION = TextAttributesKey.createTextAttributesKey("ROBOT_USER_KEYWORD_DEFINITION",
+    public static final TextAttributesKey USER_KEYWORD_NAME = TextAttributesKey.createTextAttributesKey("ROBOT_USER_KEYWORD_DEFINITION",
+                                                                                                        DefaultLanguageHighlighterColors.KEYWORD);
+    public static final TextAttributesKey TEST_CASE_NAME = TextAttributesKey.createTextAttributesKey("ROBOT_TEST_CASE_NAME",
+                                                                                                         DefaultLanguageHighlighterColors.KEYWORD);
+    public static final TextAttributesKey TASK_NAME = TextAttributesKey.createTextAttributesKey("ROBOT_TASK_NAME",
                                                                                                          DefaultLanguageHighlighterColors.KEYWORD);
     public static final TextAttributesKey KEYWORD = TextAttributesKey.createTextAttributesKey("ROBOT_KEYWORD_CALL",
                                                                                               DefaultLanguageHighlighterColors.FUNCTION_DECLARATION);
@@ -34,8 +38,7 @@ public class RobotHighlighter extends SyntaxHighlighterBase {
                                                                                                DefaultLanguageHighlighterColors.STATIC_FIELD);
     public static final TextAttributesKey VARIABLE = TextAttributesKey.createTextAttributesKey("ROBOT_VARIABLE",
                                                                                                DefaultLanguageHighlighterColors.DOC_COMMENT_MARKUP);
-    public static final TextAttributesKey VARIABLE_DEFINITION = TextAttributesKey.createTextAttributesKey("ROBOT_VARIABLE_DEFINITION",
-                                                                                                          DefaultLanguageHighlighterColors.DOC_COMMENT_MARKUP);
+    public static final TextAttributesKey REASSIGNED_VARIABLE = TextAttributesKey.createTextAttributesKey("ROBOT_REASSIGNED_VARIABLE", VARIABLE);
     public static final TextAttributesKey EXTENDED_VARIABLE_ACCESS_BRACKETS = TextAttributesKey.createTextAttributesKey(
             "ROBOT_EXTENDED_VARIABLE_ACCESS_BRACKETS",
             DefaultLanguageHighlighterColors.BRACKETS);
@@ -48,6 +51,7 @@ public class RobotHighlighter extends SyntaxHighlighterBase {
                                                                                             DefaultLanguageHighlighterColors.INVALID_STRING_ESCAPE);
 
     private static final Map<IElementType, TextAttributesKey> keys = new HashMap<>();
+
     static {
         keys.put(RobotTypes.SETTINGS_HEADER, SECTION_TITLE);
         keys.put(RobotTypes.VARIABLES_HEADER, SECTION_TITLE);
@@ -56,9 +60,9 @@ public class RobotHighlighter extends SyntaxHighlighterBase {
         keys.put(RobotTypes.TEST_CASES_HEADER, SECTION_TITLE);
         keys.put(RobotTypes.TASKS_HEADER, SECTION_TITLE);
 
-        keys.put(RobotTypes.USER_KEYWORD_NAME, KEYWORD_DEFINITION);
-        keys.put(RobotTypes.TEST_CASE_NAME, KEYWORD_DEFINITION);
-        keys.put(RobotTypes.TASK_NAME, KEYWORD_DEFINITION);
+        keys.put(RobotTypes.USER_KEYWORD_NAME, USER_KEYWORD_NAME);
+        keys.put(RobotTypes.TEST_CASE_NAME, TEST_CASE_NAME);
+        keys.put(RobotTypes.TASK_NAME, TASK_NAME);
 
         keys.put(RobotTypes.COMMENT, COMMENT);
         keys.put(RobotTypes.PARAMETER_NAME, PARAMETER);
@@ -88,7 +92,6 @@ public class RobotHighlighter extends SyntaxHighlighterBase {
         keys.put(RobotTypes.CONTINUE, STRUCTURAL_KEYWORDS);
         keys.put(RobotTypes.WITH_NAME, STRUCTURAL_KEYWORDS);
 
-        keys.put(RobotTypes.VARIABLE_DEFINITION, VARIABLE_DEFINITION);
         keys.put(RobotTypes.SCALAR_VARIABLE_START, VARIABLE);
         keys.put(RobotTypes.LIST_VARIABLE_START, VARIABLE);
         keys.put(RobotTypes.DICT_VARIABLE_START, VARIABLE);
@@ -100,7 +103,7 @@ public class RobotHighlighter extends SyntaxHighlighterBase {
         keys.put(RobotTypes.VARIABLE_INDEX_ACCESS, VARIABLE);
         keys.put(RobotTypes.VARIABLE_ACCESS_START, EXTENDED_VARIABLE_ACCESS_BRACKETS);
         keys.put(RobotTypes.VARIABLE_ACCESS_END, EXTENDED_VARIABLE_ACCESS_BRACKETS);
-        keys.put(RobotTypes.USER_KEYWORD_STATEMENT, KEYWORD_DEFINITION);
+        keys.put(RobotTypes.USER_KEYWORD_STATEMENT, USER_KEYWORD_NAME);
         keys.put(RobotTypes.KEYWORD_LIBRARY_NAME, KEYWORD);
         keys.put(RobotTypes.KEYWORD_LIBRARY_SEPARATOR, KEYWORD);
         keys.put(RobotTypes.KEYWORD_NAME, KEYWORD);

@@ -5,7 +5,6 @@ import com.intellij.openapi.fileTypes.SyntaxHighlighter;
 import com.intellij.openapi.options.colors.AttributesDescriptor;
 import com.intellij.openapi.options.colors.ColorDescriptor;
 import com.intellij.openapi.options.colors.ColorSettingsPage;
-import com.intellij.openapi.project.Project;
 import dev.xeonkryptos.xeonrobotframeworkplugin.RobotBundle;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotFeatureFileType;
 import org.jetbrains.annotations.NotNull;
@@ -17,7 +16,8 @@ import java.util.Map;
 public class RobotColorsPage implements ColorSettingsPage {
 
     private static final ColorDescriptor[] COLORS = ColorDescriptor.EMPTY_ARRAY;
-    private static final AttributesDescriptor[] ATTRIBUTES = new AttributesDescriptor[] { new AttributesDescriptor(RobotBundle.message("color.settings.heading"),
+    private static final AttributesDescriptor[] ATTRIBUTES = new AttributesDescriptor[] { new AttributesDescriptor(RobotBundle.message(
+            "color.settings.sectionHeader"),
                                                                                                                    RobotHighlighter.SECTION_TITLE),
                                                                                           new AttributesDescriptor(RobotBundle.message("color.settings.comment"),
                                                                                                                    RobotHighlighter.COMMENT),
@@ -32,14 +32,18 @@ public class RobotColorsPage implements ColorSettingsPage {
                                                                                                                    RobotHighlighter.STRUCTURAL_KEYWORDS),
                                                                                           new AttributesDescriptor(RobotBundle.message("color.settings.variable"),
                                                                                                                    RobotHighlighter.VARIABLE),
-                                                                                          new AttributesDescriptor(RobotBundle.message(
-                                                                                                  "color.settings.variableDefinition"),
-                                                                                                                   RobotHighlighter.VARIABLE_DEFINITION),
+                                                                                          new AttributesDescriptor(RobotBundle.message("color.settings.reassignedVariable"),
+                                                                                                                   RobotHighlighter.REASSIGNED_VARIABLE),
                                                                                           new AttributesDescriptor(RobotBundle.message("color.settings.keyword"),
                                                                                                                    RobotHighlighter.KEYWORD),
                                                                                           new AttributesDescriptor(RobotBundle.message(
-                                                                                                  "color.settings.keywordDefinition"),
-                                                                                                                   RobotHighlighter.KEYWORD_DEFINITION),
+                                                                                                  "color.settings.userKeywordName"),
+                                                                                                                   RobotHighlighter.USER_KEYWORD_NAME),
+                                                                                          new AttributesDescriptor(RobotBundle.message(
+                                                                                                  "color.settings.testCaseName"),
+                                                                                                                   RobotHighlighter.TEST_CASE_NAME),
+                                                                                          new AttributesDescriptor(RobotBundle.message("color.settings.taskName"),
+                                                                                                                   RobotHighlighter.TASK_NAME),
                                                                                           new AttributesDescriptor(RobotBundle.message(
                                                                                                   "color.settings.bracketSetting"),
                                                                                                                    RobotHighlighter.LOCAL_SETTING_OPTION),
@@ -64,7 +68,7 @@ public class RobotColorsPage implements ColorSettingsPage {
     @Override
     public String getDemoText() {
         return """
-               invalid
+               Ignored
                *** Settings ***
                Documentation     This is some demo text
                Library           CalculatorLibrary

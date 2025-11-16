@@ -36,13 +36,12 @@ public class ReassignedRobotVariableAnnotator extends AbstractRobotVariableAnnot
                     TextAttributes merged = base.clone();
                     merged.setEffectType(EffectType.LINE_UNDERSCORE);
                     holder.newSilentAnnotation(HighlightSeverity.TEXT_ATTRIBUTES)
-                          .enforcedTextAttributes(merged)
+                          .textAttributes(RobotHighlighter.REASSIGNED_VARIABLE)
                           .tooltip(RobotBundle.message("annotation.variable.reassigned"))
                           .range(variable)
                           .create();
                 }
             }
         }
-
     }
 }

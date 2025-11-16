@@ -25,6 +25,15 @@
         <lang.syntaxHighlighterFactory language="Robot"
                                        implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.config.RobotSyntaxHighlightingFactory"/>
 
+        <!--suppress PluginXmlValidity -->
+        <additionalTextAttributes scheme="Default" file="colorSchemes/RobotColorScheme.xml"/>
+        <!--suppress PluginXmlValidity -->
+        <additionalTextAttributes scheme="Dark" file="colorSchemes/RobotColorScheme.xml"/>
+        <!--suppress PluginXmlValidity -->
+        <additionalTextAttributes scheme="Light" file="colorSchemes/RobotColorScheme.xml"/>
+        <!--suppress PluginXmlValidity -->
+        <additionalTextAttributes scheme="Darcula" file="colorSchemes/RobotColorScheme.xml"/>
+
         <!-- IDE Hooks -->
         <completion.contributor language="Robot"
                                 implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.completion.RobotCompletionContributor"/>
