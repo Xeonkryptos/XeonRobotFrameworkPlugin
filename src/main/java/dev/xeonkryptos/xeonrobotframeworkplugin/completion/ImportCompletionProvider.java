@@ -5,7 +5,6 @@ import com.intellij.codeInsight.completion.CompletionProvider;
 import com.intellij.codeInsight.completion.CompletionResultSet;
 import com.intellij.codeInsight.lookup.LookupElement;
 import com.intellij.codeInsight.lookup.LookupElementBuilder;
-import com.intellij.icons.AllIcons;
 import com.intellij.icons.AllIcons.Nodes;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModuleUtilCore;
@@ -20,6 +19,7 @@ import com.intellij.util.ProcessingContext;
 import com.jetbrains.python.psi.PyClass;
 import com.jetbrains.python.psi.PyFile;
 import com.jetbrains.python.psi.stubs.PyClassNameIndex;
+import dev.xeonkryptos.xeonrobotframeworkplugin.completion.service.BuiltInImportCompletionService;
 import dev.xeonkryptos.xeonrobotframeworkplugin.icons.RobotIcons;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotKeywordProvider;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotImportGlobalSettingExpression;
@@ -27,14 +27,13 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLibraryImportGl
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotResourceImportGlobalSetting;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.ref.RobotFileManager;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.RobotPyUtil;
-import dev.xeonkryptos.xeonrobotframeworkplugin.util.GlobalConstants;
 import org.apache.commons.text.WordUtils;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedList;
-import java.util.Map;
+import java.util.List;
 import java.util.Objects;
 
 class ImportCompletionProvider extends CompletionProvider<CompletionParameters> {
@@ -44,7 +43,10 @@ class ImportCompletionProvider extends CompletionProvider<CompletionParameters> 
         Collection<LookupElement> lookupElements = new LinkedList<>();
         RobotImportGlobalSettingExpression importElement = PsiTreeUtil.getParentOfType(parameters.getPosition(), RobotImportGlobalSettingExpression.class);
         if (importElement instanceof RobotLibraryImportGlobalSetting) {
-            addBuiltinLibraryCompletions(lookupElements, parameters.getOriginalFile());
+            Project project = importElement.getProject();
+            List<LookupElement> builtInLibraryCompletions = BuiltInImportCompletionService.getInstance(project).getBuiltInLibraryCompletions();
+            lookupElements.addAll(builtInLibraryCompletions);
+
             if (importElement.getChildren().length > 1) {
                 for (LookupElement lookupElement : CompletionProviderUtils.computeAdditionalSyntaxLookups(RobotKeywordProvider.SYNTAX_MARKER)) {
                     if ("AS".equals(lookupElement.getLookupString())) {
@@ -53,7 +55,6 @@ class ImportCompletionProvider extends CompletionProvider<CompletionParameters> 
                 }
             }
 
-            Project project = importElement.getProject();
             Collection<String> classNameKeys = PyClassNameIndex.allKeys(project);
 
             GlobalSearchScope projectScope = GlobalSearchScope.projectScope(project);
@@ -70,20 +71,6 @@ class ImportCompletionProvider extends CompletionProvider<CompletionParameters> 
             addResourceFilePaths(result, parameters.getOriginalFile());
         }
         result.addAllElements(lookupElements);
-    }
-
-    private void addBuiltinLibraryCompletions(Collection<LookupElement> lookupElements, PsiFile file) {
-        Map<String, ?> cachedFiles = RobotFileManager.getCachedRobotSystemFiles(file.getProject());
-        for (String libraryName : cachedFiles.keySet()) {
-            String[] lookupStrings = { libraryName, WordUtils.capitalize(libraryName), libraryName.toLowerCase() };
-            LookupElementBuilder elementBuilder = LookupElementBuilder.create(libraryName)
-                                                                      .withPresentableText(libraryName)
-                                                                      .withLookupStrings(Arrays.asList(lookupStrings))
-                                                                      .withCaseSensitivity(true)
-                                                                      .withIcon(AllIcons.Nodes.Package)
-                                                                      .withTypeText(GlobalConstants.ROBOT_BUILT_IN);
-            lookupElements.add(elementBuilder);
-        }
     }
 
     private void addResourceFilePaths(CompletionResultSet resultSet, PsiFile file) {
@@ -112,7 +99,7 @@ class ImportCompletionProvider extends CompletionProvider<CompletionParameters> 
                                            String classNameKey,
                                            RobotLookupScope lookupScope,
                                            Collection<LookupElement> lookupElements) {
-        if (classNameKey.startsWith("_")) { // Excluding as private indicated classes
+        if (classNameKey.startsWith("_")) { // Excluding as protected/private indicated classes
             return;
         }
         pyClasses.stream()

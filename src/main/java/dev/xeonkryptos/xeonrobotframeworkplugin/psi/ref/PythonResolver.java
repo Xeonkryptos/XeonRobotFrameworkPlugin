@@ -1,7 +1,5 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.psi.ref;
 
-import com.intellij.notification.NotificationDisplayType;
-import com.intellij.notification.NotificationsConfiguration;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.SystemInfo;
 import com.intellij.psi.PsiElement;
@@ -27,10 +25,6 @@ import java.util.Objects;
 
 @SuppressWarnings("UnstableApiUsage")
 public class PythonResolver {
-
-    private PythonResolver() {
-        NotificationsConfiguration.getNotificationsConfiguration().register("intellibot.debug", NotificationDisplayType.NONE);
-    }
 
     @Nullable
     public static PsiElement resolveElement(@NotNull String elementName, @NotNull Project project) {

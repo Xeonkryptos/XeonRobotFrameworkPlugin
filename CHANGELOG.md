@@ -13,6 +13,14 @@
 
 - Run configuration handling on making changes. Any changes made in the run configuration aren't safed directly; they are temporary until applied
 
+### Changed
+
+- Changed import behaviour for imported files. Now, imported files are looked up the same way Robot does it internally:
+    - an absolute path is used directly
+    - a relative path is first looked up relative to the current file's location
+    - if not found, the imported file is looked up relative to the content root of the module search paths. In case of a library or variables import, the lookup
+      looks also for classes and modules
+
 ## 0.5.11
 
 ### Fixed

@@ -4,11 +4,9 @@ import com.intellij.codeInsight.lookup.LookupElement;
 import com.intellij.codeInsight.lookup.LookupElementBuilder;
 import com.intellij.icons.AllIcons.Nodes;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiElementResolveResult;
 import com.intellij.psi.PsiFile;
-import com.intellij.psi.PsiManager;
 import com.intellij.psi.PsiPolyVariantReferenceBase;
 import com.intellij.psi.ResolveResult;
 import com.intellij.psi.impl.source.resolve.ResolveCache;
@@ -64,29 +62,25 @@ public class RobotArgumentReference extends PsiPolyVariantReferenceBase<RobotPos
         PsiElement parent = positionalArgument.getParent();
         String argumentValue = positionalArgument.getText();
 
+
         Set<ResolveResult> results = new LinkedHashSet<>();
         if (parent instanceof RobotResourceImportGlobalSetting resourceImport) {
             PsiFile containingFile = resourceImport.getContainingFile();
-            VirtualFile contentRootForFile = RobotFileManager.findContentRootForFile(containingFile);
-            if (contentRootForFile != null) {
-                VirtualFile fileByRelativePath = contentRootForFile.findFileByRelativePath(argumentValue);
-                if (fileByRelativePath != null) {
-                    PsiFile locatedResourceFile = PsiManager.getInstance(project).findFile(fileByRelativePath);
-                    if (locatedResourceFile != null && locatedResourceFile.getFileType() == RobotResourceFileType.getInstance()) {
-                        results.add(new PsiElementResolveResult(locatedResourceFile));
-                    }
-                }
+            PsiFile resourceFile = ResourceFileImportFinder.getInstance(project)
+                                                           .findFileInFileSystem(argumentValue, containingFile, RobotResourceFileType.getInstance());
+            if (resourceFile != null) {
+                results.add(new PsiElementResolveResult(resourceFile));
             }
         } else if (parent instanceof RobotLibraryImportGlobalSetting || parent instanceof RobotVariablesImportGlobalSetting) {
-            PsiElement result = RobotFileManager.findElementInContext(argumentValue, project, parent);
-            if (result != null) {
-                results.add(new PsiElementResolveResult(result));
-            }
-            if (argumentValue.endsWith(".py")) {
-                VirtualFile virtualFile = parent.getContainingFile().getVirtualFile();
-                PsiFile file = RobotFileManager.findPsiFiles(argumentValue, virtualFile, project);
-                if (file != null) {
-                    results.add(new PsiElementResolveResult(file));
+            PsiFile containingFile = parent.getContainingFile();
+            PsiFile resourceFile = ResourceFileImportFinder.getInstance(project).findFileInFileSystem(argumentValue, containingFile);
+            if (resourceFile != null) {
+                results.add(new PsiElementResolveResult(resourceFile));
+            } else {
+                // File not directly found in file system. Try to find it in module search path (e.g. for classes or modules)
+                PsiElement result = PythonResolver.resolveElement(argumentValue, project);
+                if (result != null) {
+                    results.add(new PsiElementResolveResult(result));
                 }
             }
         }
