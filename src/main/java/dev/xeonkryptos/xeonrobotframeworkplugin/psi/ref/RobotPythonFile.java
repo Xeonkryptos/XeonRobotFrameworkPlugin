@@ -26,6 +26,14 @@ public class RobotPythonFile implements KeywordFile {
         this.importType = importType;
     }
 
+    @Override
+    public Collection<DefinedVariable> findDefinedVariable(@NotNull String variableName) {
+        if (importType == ImportType.VARIABLES) {
+            return RobotKeywordFileResolver.findVariable(pythonFile, variableName);
+        }
+        return List.of();
+    }
+
     @NotNull
     @Override
     public Collection<DefinedVariable> getDefinedVariables(Collection<KeywordFile> visitedFiles) {

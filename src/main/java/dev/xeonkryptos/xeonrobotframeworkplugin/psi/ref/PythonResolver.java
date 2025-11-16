@@ -8,17 +8,14 @@ import com.intellij.psi.util.QualifiedName;
 import com.jetbrains.python.psi.PyClass;
 import com.jetbrains.python.psi.PyFile;
 import com.jetbrains.python.psi.PyImportStatementBase;
-import com.jetbrains.python.psi.PyTargetExpression;
 import com.jetbrains.python.psi.search.PySearchUtilBase;
 import com.jetbrains.python.psi.stubs.PyClassNameIndex;
 import com.jetbrains.python.psi.stubs.PyModuleNameIndex;
-import com.jetbrains.python.psi.stubs.PyVariableNameIndex;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -57,7 +54,7 @@ public class PythonResolver {
         }
 
         String shortName = extractShortName(elementName);
-        Collection<PyClass> classes = safeFindClass(shortName, project);
+        Collection<PyClass> classes = PyClassNameIndex.find(shortName, project, true);
         List<PyClass> matchingClasses = new ArrayList<>();
 
         for (PyClass cls : classes) {
@@ -82,29 +79,12 @@ public class PythonResolver {
 
     @Nullable
     public static PyFile findModule(@NotNull String moduleName, @NotNull Project project) {
-        try {
-            List<PyFile> modules = safeFindModule(moduleName, project);
-            for (PyFile pyFile : modules) {
-                if (pyFile.isValid()) {
-                    return pyFile;
-                }
-            }
-        } catch (Throwable ignored) {
-        }
-        return null;
-    }
-
-    @Nullable
-    public static PyTargetExpression findVariable(@NotNull String name, @NotNull Project project) {
-        Collection<PyTargetExpression> variables = safeFindVariable(name, project);
-        for (PyTargetExpression variable : variables) {
-            String qName = variable.getQualifiedName();
-            if (qName != null && qName.equals(name)) {
-                return variable;
-            }
-            String vName = variable.getName();
-            if (vName != null && vName.equals(name)) {
-                return variable;
+        List<PyFile> modules = PyModuleNameIndex.findByQualifiedName(QualifiedName.fromDottedString(moduleName),
+                                                                     project,
+                                                                     PySearchUtilBase.excludeSdkTestsScope(project));
+        for (PyFile pyFile : modules) {
+            if (pyFile.isValid()) {
+                return pyFile;
             }
         }
         return null;
@@ -113,7 +93,7 @@ public class PythonResolver {
     @Nullable
     public static PyClass findClass(@NotNull String name, @NotNull Project project) {
         String shortName = extractShortName(name);
-        Collection<PyClass> classes = safeFindClass(shortName, project);
+        Collection<PyClass> classes = PyClassNameIndex.find(shortName, project, true);
 
         List<PyClass> matchedByNames = new ArrayList<>();
         for (PyClass pyClass : classes) {
@@ -144,32 +124,5 @@ public class PythonResolver {
     private static String extractShortName(@NotNull String name) {
         int pos = name.lastIndexOf(".");
         return pos > 0 ? name.substring(pos + 1) : name;
-    }
-
-    @NotNull
-    private static Collection<PyClass> safeFindClass(@NotNull String name, @NotNull Project project) {
-        try {
-            return PyClassNameIndex.find(name, project, true);
-        } catch (Throwable var2) {
-            return Collections.emptyList();
-        }
-    }
-
-    @NotNull
-    private static List<PyFile> safeFindModule(@NotNull String name, @NotNull Project project) {
-        try {
-            return PyModuleNameIndex.findByQualifiedName(QualifiedName.fromDottedString(name), project, PySearchUtilBase.excludeSdkTestsScope(project));
-        } catch (Throwable t) {
-            return Collections.emptyList();
-        }
-    }
-
-    @NotNull
-    private static Collection<PyTargetExpression> safeFindVariable(@NotNull String name, @NotNull Project project) {
-        try {
-            return PyVariableNameIndex.find(name, project, null);
-        } catch (Throwable t) {
-            return Collections.emptyList();
-        }
     }
 }

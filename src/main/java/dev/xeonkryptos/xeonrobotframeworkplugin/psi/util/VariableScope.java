@@ -197,13 +197,7 @@ public enum VariableScope {
 
     @Nullable
     public static PsiElement getReferencedPsiElement(@NotNull Project project) {
-        // Robot 2.x
-        PsiElement element = PythonResolver.findVariable("GLOBAL_VARIABLES", project);
-        if (element == null) {
-            // Robot 3.x
-            element = PythonResolver.findClass("robot.variables.scopes.GlobalVariables", project);
-        }
-        return element;
+        return PythonResolver.findClass("robot.variables.scopes.GlobalVariables", project);
     }
 
     public abstract boolean isInScope(@NotNull PsiElement sourceElement, @NotNull PsiElement element);

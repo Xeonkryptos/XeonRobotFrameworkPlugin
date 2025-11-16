@@ -9,8 +9,8 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.FileViewProvider;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
-import com.intellij.psi.PsiManager;
 import com.intellij.psi.PsiReference;
+import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.psi.util.CachedValue;
 import com.intellij.psi.util.CachedValueProvider.Result;
 import com.intellij.psi.util.CachedValuesManager;
@@ -22,11 +22,12 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.dto.ImportType;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.ref.PythonResolver;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.ref.RobotFileManager;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.ref.RobotPythonClass;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.index.VariableDefinitionNameIndex;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.VariableScope;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.visitor.RobotImportFilesCollector;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.visitor.RobotSectionVariablesCollector;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.visitor.RobotUsedFilesCollector;
 import dev.xeonkryptos.xeonrobotframeworkplugin.util.GlobalConstants;
-import dev.xeonkryptos.xeonrobotframeworkplugin.util.RobotNames;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -34,6 +35,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -42,7 +44,6 @@ public class RobotFileImpl extends PsiFileBase implements KeywordFile, RobotFile
 
     private static final Key<ParameterizedCachedValue<Collection<VirtualFile>, Boolean>> IMPORTED_VIRTUAL_FILES_CACHE_KEY = Key.create(
             "IMPORTED_VIRTUAL_FILES_CACHE");
-    private static final Key<CachedValue<Collection<DefinedVariable>>> ROBOT_INIT_VARIABLES_CACHE_KEY = Key.create("ROBOT_INIT_VARIABLES_CACHE");
     private static final Key<CachedValue<Collection<DefinedVariable>>> TEST_SUITE_VARIABLES_CACHE_KEY = Key.create("TEST_SUITE_VARIABLES_CACHE");
 
     private final FileType fileType;
@@ -68,6 +69,21 @@ public class RobotFileImpl extends PsiFileBase implements KeywordFile, RobotFile
         return fileType;
     }
 
+    @Override
+    public Collection<DefinedVariable> findDefinedVariable(@NotNull String variableName) {
+        if (getImportType() == ImportType.VARIABLES || getImportType() == ImportType.RESOURCE) {
+            Project project = getProject();
+            GlobalSearchScope currentFileSearchScope = GlobalSearchScope.fileScope(project, getVirtualFile());
+            return VariableDefinitionNameIndex.getInstance()
+                                              .getVariableDefinitions(variableName, project, currentFileSearchScope)
+                                              .stream()
+                                              .filter(variable -> variable.getScope() == VariableScope.Global || variable.getScope() == VariableScope.TestSuite)
+                                              .map(DefinedVariable.class::cast)
+                                              .toList();
+        }
+        return List.of();
+    }
+
     @NotNull
     @Override
     public final Collection<DefinedVariable> getDefinedVariables() {
@@ -82,7 +98,6 @@ public class RobotFileImpl extends PsiFileBase implements KeywordFile, RobotFile
     public Collection<DefinedVariable> getDefinedVariables(Collection<KeywordFile> visitedFiles) {
         Collection<DefinedVariable> sectionVariables = getSectionVariables();
         Collection<DefinedVariable> globalVariables = RobotFileManager.getGlobalVariables(getProject());
-        Collection<DefinedVariable> definedVariables = collectRobotInitVariables();
         Collection<KeywordFile> importedFiles = getImportedFiles(false);
         Set<DefinedVariable> importedVariables = new HashSet<>();
         for (KeywordFile keywordFile : importedFiles) {
@@ -93,42 +108,11 @@ public class RobotFileImpl extends PsiFileBase implements KeywordFile, RobotFile
             }
         }
 
-        Set<DefinedVariable> variables = new LinkedHashSet<>(
-                sectionVariables.size() + globalVariables.size() + definedVariables.size() + importedVariables.size());
+        Set<DefinedVariable> variables = new LinkedHashSet<>(sectionVariables.size() + globalVariables.size() + importedVariables.size());
         variables.addAll(sectionVariables);
         variables.addAll(globalVariables);
-        variables.addAll(definedVariables);
         variables.addAll(importedVariables);
         return variables;
-    }
-
-    @NotNull
-    public final Collection<DefinedVariable> collectRobotInitVariables() {
-        return CachedValuesManager.getCachedValue(this, ROBOT_INIT_VARIABLES_CACHE_KEY, () -> {
-            Set<VirtualFile> virtualFiles = new LinkedHashSet<>();
-            Collection<DefinedVariable> results = new LinkedHashSet<>();
-            for (KeywordFile importedFile : collectImportedFiles(true)) {
-                if (importedFile instanceof RobotFile robotFile) {
-                    VirtualFile virtualRobotFile = robotFile.getVirtualFile();
-                    VirtualFile virtualRobotFileDir = virtualRobotFile.getParent();
-                    VirtualFile initFile = virtualRobotFileDir.findChild(RobotNames.INIT_DOT_ROBOT);
-                    if (initFile != null) {
-                        virtualFiles.add(initFile);
-                    }
-                }
-            }
-
-            Project project = getProject();
-            PsiManager psiManager = PsiManager.getInstance(project);
-            for (VirtualFile virtualFile : virtualFiles) {
-                RobotFileImpl robotFile = (RobotFileImpl) psiManager.findFile(virtualFile);
-                if (robotFile != null) {
-                    Collection<DefinedVariable> definedVariables = robotFile.getSectionVariables();
-                    results.addAll(definedVariables);
-                }
-            }
-            return Result.createSingleDependency(results, PsiModificationTracker.MODIFICATION_COUNT);
-        });
     }
 
     private Collection<DefinedVariable> getSectionVariables() {

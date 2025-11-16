@@ -10,25 +10,21 @@ import java.util.Collection;
 
 public interface KeywordFile {
 
-   @NotNull
-   Collection<DefinedVariable> getDefinedVariables();
+    Collection<DefinedVariable> findDefinedVariable(@NotNull String variableName);
 
-   @NotNull
-   Collection<DefinedVariable> getDefinedVariables(Collection<KeywordFile> visitedFiles);
+    @NotNull Collection<DefinedVariable> getDefinedVariables();
 
-   @NotNull
-   ImportType getImportType();
+    @NotNull Collection<DefinedVariable> getDefinedVariables(Collection<KeywordFile> visitedFiles);
 
-   @NotNull
-   Collection<KeywordFile> getImportedFiles(boolean includeTransitive);
+    @NotNull ImportType getImportType();
 
-   @NotNull
-   Collection<VirtualFile> getVirtualFiles(boolean includeTransitive);
+    @NotNull Collection<KeywordFile> getImportedFiles(boolean includeTransitive);
 
-   VirtualFile getVirtualFile();
+    @NotNull Collection<VirtualFile> getVirtualFiles(boolean includeTransitive);
 
-   PsiFile getPsiFile();
+    VirtualFile getVirtualFile();
 
-   @Nullable
-   String getLibraryName();
+    PsiFile getPsiFile();
+
+    @Nullable String getLibraryName();
 }
