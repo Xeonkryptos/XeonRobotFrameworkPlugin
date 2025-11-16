@@ -20,6 +20,7 @@
     - a relative path is first looked up relative to the current file's location
     - if not found, the imported file is looked up relative to the content root of the module search paths. In case of a library or variables import, the lookup
       looks also for classes and modules
+- Use index lookup for finding referenced variable definitions in the same file to speed up the process
 
 ## 0.5.11
 

@@ -13,14 +13,12 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotFeatureFileType;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotResourceFileType;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.KeywordFile;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotFile;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotRoot;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariable;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableBodyId;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableDefinition;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.index.VariableDefinitionNameIndex;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.index.VariableNameIndex;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.VariableScope;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.visitor.RobotVariableReferenceSearcher;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -63,13 +61,13 @@ public class RobotVariableBodyReference extends PsiPolyVariantReferenceBase<Robo
             }
 
             Collection<PsiElement> foundElements = new LinkedHashSet<>();
-            RobotRoot rootElement = PsiTreeUtil.getParentOfType(variableBodyId, RobotRoot.class);
-            RobotVariableReferenceSearcher variableReferenceSearcher = new RobotVariableReferenceSearcher(variable, variableName);
-            if (rootElement != null) {
-                rootElement.acceptChildren(variableReferenceSearcher);
-                Collection<PsiElement> resolvedElements = variableReferenceSearcher.getFoundElements();
-                foundElements.addAll(resolvedElements);
-            }
+            VariableDefinitionNameIndex.getInstance()
+                                       .getVariableDefinitions(variableName,
+                                                               variableBodyId.getProject(),
+                                                               GlobalSearchScope.fileScope(variableBodyId.getContainingFile()))
+                                       .stream()
+                                       .filter(variableDefinition -> variableDefinition.isInScope(variable))
+                                       .forEach(foundElements::add);
             Collection<PsiElement> otherElements = findVariableElementsOutsideOfCurrentFile(variable, variableName);
             foundElements.addAll(otherElements);
             if (foundElements.isEmpty()) {
