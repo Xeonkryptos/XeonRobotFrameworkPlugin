@@ -31,7 +31,7 @@ class ResourceFileImportFinder(private val project: Project) {
         // First, try to resolve the resource file path relative to the location of the importing file.
         val virtualSourceFile = sourceFile.viewProvider.virtualFile
         val relevantDir = if (virtualSourceFile.isDirectory) virtualSourceFile else virtualSourceFile.parent
-        relevantDir.findFileByRelativePath(resourceFileValue)?.let {
+        relevantDir?.findFileByRelativePath(resourceFileValue)?.let {
             return PsiManager.getInstance(project).findFile(it)?.takeIf { psiFile -> expectedFileType == null || psiFile.fileType === expectedFileType }
         }
 
