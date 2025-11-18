@@ -7,6 +7,7 @@
 ### Fixed
 
 - Fixed NullPointerException when looking for importable files
+- Fixed evaluation for unresolvable variable. Don't mark resolved variables as unresolved when a target could be found in python files
 
 ## 0.5.12
 

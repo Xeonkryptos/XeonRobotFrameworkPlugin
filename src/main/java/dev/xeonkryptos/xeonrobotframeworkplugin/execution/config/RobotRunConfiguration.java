@@ -45,11 +45,8 @@ import java.util.Objects;
 public class RobotRunConfiguration extends LocatableConfigurationBase<Element>
         implements EnvFilesOptions, SMRunnerConsolePropertiesProvider, RefactoringListenerProvider {
 
-    @SuppressWarnings("ApplicationServiceAsStaticFinalFieldOrProperty")
     private static final String TEST_CASE_NAME = "testCase";
-    @SuppressWarnings("ApplicationServiceAsStaticFinalFieldOrProperty")
     private static final String TASK_NAME = "task";
-    @SuppressWarnings("ApplicationServiceAsStaticFinalFieldOrProperty")
     private static final String DIRECTORY_NAME = "directory";
 
     private PythonRunConfigurationExt pythonRunConfiguration;
@@ -62,18 +59,23 @@ public class RobotRunConfiguration extends LocatableConfigurationBase<Element>
         super(project, configurationFactory);
 
         pythonRunConfiguration = new PythonRunConfigurationExt(project);
-        pythonRunConfiguration.setUseModuleSdk(true);
-        pythonRunConfiguration.setModuleMode(true);
-        pythonRunConfiguration.setScriptName("robotcode");
-        pythonRunConfiguration.setEmulateTerminal(false);
-        pythonRunConfiguration.setAddContentRoots(true);
-        pythonRunConfiguration.setAddSourceRoots(true);
+        initializePythonRunConfiguration();
     }
 
     public RobotRunConfiguration(Project project, ConfigurationFactory configurationFactory, PythonRunConfigurationExt pythonRunConfiguration) {
         super(project, configurationFactory);
 
         this.pythonRunConfiguration = pythonRunConfiguration;
+        initializePythonRunConfiguration();
+    }
+
+    private void initializePythonRunConfiguration() {
+        pythonRunConfiguration.setUseModuleSdk(true);
+        pythonRunConfiguration.setModuleMode(true);
+        pythonRunConfiguration.setScriptName("robotcode");
+        pythonRunConfiguration.setEmulateTerminal(false);
+        pythonRunConfiguration.setAddContentRoots(true);
+        pythonRunConfiguration.setAddSourceRoots(true);
     }
 
     @NotNull
