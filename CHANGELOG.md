@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+## 0.5.13
+
 ### Fixed
 
 - Fixed NullPointerException when looking for importable files
