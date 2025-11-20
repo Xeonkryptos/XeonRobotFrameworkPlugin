@@ -119,7 +119,11 @@ class KeywordCompletionProvider extends CompletionProvider<CompletionParameters>
                                                          .filter(keywordFile -> keywordFile.getImportType() != ImportType.VARIABLES)
                                                          .map(KeywordFile::getVirtualFile)
                                                          .collect(Collectors.toSet());
-        importedFiles.add(robotFile.getViewProvider().getVirtualFile());
+        VirtualFile virtualFile = robotFile.getVirtualFile();
+        if (virtualFile == null) {
+            virtualFile = robotFile.getOriginalFile().getVirtualFile();
+        }
+        importedFiles.add(virtualFile);
         return importedFiles;
     }
 

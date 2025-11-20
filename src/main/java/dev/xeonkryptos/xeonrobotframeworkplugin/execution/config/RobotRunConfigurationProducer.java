@@ -102,7 +102,10 @@ public class RobotRunConfigurationProducer extends LazyRunConfigurationProducer<
                 List<String> directories = runConfig.getDirectories();
                 for (PsiElement selectedElement : selectedElements) {
                     if (selectedElement instanceof PsiFile psiFile) {
-                        VirtualFile virtualFile = psiFile.getViewProvider().getVirtualFile();
+                        VirtualFile virtualFile = psiFile.getVirtualFile();
+                        if (virtualFile == null) {
+                            virtualFile = psiFile.getOriginalFile().getVirtualFile();
+                        }
                         String filePath = virtualFile.getPath();
                         String relativePath = FileUtils.relativizePath(basePath, filePath);
                         directories.add(relativePath);

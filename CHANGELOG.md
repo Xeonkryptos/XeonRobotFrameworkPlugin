@@ -4,6 +4,14 @@
 
 ## Unreleased
 
+### Fixed
+
+- Fixed resolving issues especially for available keyword parameters
+
+### Changed
+
+- Handling with virtual files to get the expected results
+
 ## 0.5.13
 
 ### Fixed

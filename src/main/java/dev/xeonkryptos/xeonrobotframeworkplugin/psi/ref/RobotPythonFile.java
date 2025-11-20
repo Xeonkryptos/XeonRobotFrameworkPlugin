@@ -94,7 +94,8 @@ public class RobotPythonFile implements KeywordFile {
 
     @Override
     public VirtualFile getVirtualFile() {
-        return pythonFile.getViewProvider().getVirtualFile();
+        VirtualFile virtualFile = pythonFile.getVirtualFile();
+        return virtualFile != null ? virtualFile : pythonFile.getOriginalFile().getVirtualFile();
     }
 
     @Override

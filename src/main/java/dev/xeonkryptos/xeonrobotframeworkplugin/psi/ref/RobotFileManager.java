@@ -29,7 +29,11 @@ public class RobotFileManager {
 
     @Nullable
     public static VirtualFile findContentRootForFile(PsiFile file) {
-        VirtualFile sourceFile = file.getViewProvider().getVirtualFile();
+        VirtualFile sourceFile = file.getVirtualFile();
+        if (sourceFile == null) {
+            file = file.getOriginalFile();
+            sourceFile = file.getVirtualFile();
+        }
         Module moduleForFile = ModuleUtilCore.findModuleForFile(file);
         if (moduleForFile != null) {
             VirtualFile[] contentRoots = ModuleRootManager.getInstance(moduleForFile).getContentRoots();

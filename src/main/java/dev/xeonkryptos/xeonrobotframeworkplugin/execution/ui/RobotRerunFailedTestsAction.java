@@ -13,6 +13,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.projectRoots.Sdk;
 import com.intellij.openapi.ui.ComponentContainer;
 import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.psi.PsiFile;
 import com.jetbrains.python.extensions.ContextAnchor;
 import com.jetbrains.python.extensions.ModuleBasedContextAnchor;
 import com.jetbrains.python.extensions.ProjectSdkContextAnchor;
@@ -90,7 +91,11 @@ public class RobotRerunFailedTestsAction extends AbstractRerunFailedTestsAction 
             ContextAnchor contextAnchor = module == null ? new ProjectSdkContextAnchor(project, sdk) : new ModuleBasedContextAnchor(module);
             for (String testName : testNames) {
                 for (RobotTestCaseStatement statement : TestCaseNameIndex.find(testName, project, contextAnchor.getScope())) {
-                    VirtualFile virtualFile = statement.getContainingFile().getViewProvider().getVirtualFile();
+                    PsiFile containingFile = statement.getContainingFile();
+                    VirtualFile virtualFile = containingFile.getVirtualFile();
+                    if (virtualFile == null) {
+                        virtualFile = containingFile.getOriginalFile().getVirtualFile();
+                    }
                     if (testFiles.contains(virtualFile)) {
                         String qualifiedName = statement.getQualifiedName();
                         RobotRunnableUnitExecutionInfo testCaseInfo = new RobotRunnableUnitExecutionInfo(qualifiedName);
