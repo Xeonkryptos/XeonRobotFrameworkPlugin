@@ -1,5 +1,6 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.execution.config;
 
+import com.jetbrains.python.run.PythonScriptCommandLineState;
 import org.jetbrains.annotations.NotNull;
 
 import java.nio.file.Path;
@@ -11,11 +12,7 @@ final class FileUtils {
     }
 
     public static String getWorkingDirectoryToUse(@NotNull RobotRunConfiguration runConfig) {
-        String workingDirectory = runConfig.getPythonRunConfiguration().getWorkingDirectory();
-        if (workingDirectory == null || workingDirectory.isEmpty()) {
-            workingDirectory = runConfig.getPythonRunConfiguration().getWorkingDirectorySafe();
-        }
-        return workingDirectory;
+        return PythonScriptCommandLineState.getExpandedWorkingDir(runConfig.getPythonRunConfiguration());
     }
 
     @NotNull

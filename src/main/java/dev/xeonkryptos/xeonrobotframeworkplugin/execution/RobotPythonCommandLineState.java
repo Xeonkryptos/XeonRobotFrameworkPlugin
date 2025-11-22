@@ -16,11 +16,19 @@ import com.intellij.execution.target.value.TargetEnvironmentFunctions;
 import com.intellij.execution.testframework.autotest.ToggleAutoTestAction;
 import com.intellij.execution.testframework.sm.runner.ui.SMTRunnerConsoleView;
 import com.intellij.execution.ui.ConsoleView;
+import com.intellij.openapi.application.ReadAction;
+import com.intellij.openapi.module.Module;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.projectRoots.Sdk;
+import com.intellij.openapi.vfs.VfsUtil;
+import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.util.ArrayUtil;
 import com.jetbrains.python.actions.PyExecuteInConsole;
 import com.jetbrains.python.actions.PyRunFileInConsoleAction;
 import com.jetbrains.python.console.PyConsoleOptions;
+import com.jetbrains.python.extensions.ContextAnchor;
+import com.jetbrains.python.extensions.ModuleBasedContextAnchor;
+import com.jetbrains.python.extensions.ProjectSdkContextAnchor;
 import com.jetbrains.python.run.CommandLinePatcher;
 import com.jetbrains.python.run.PythonCommandLineState;
 import com.jetbrains.python.run.PythonConsoleScripts;
@@ -38,6 +46,9 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.execution.config.RobotRunConfigu
 import dev.xeonkryptos.xeonrobotframeworkplugin.execution.config.RobotRunConfiguration.RobotRunnableUnitExecutionInfo;
 import dev.xeonkryptos.xeonrobotframeworkplugin.execution.ui.RobotRerunFailedTestsAction;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotFeatureFileType;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotQualifiedNameOwner;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.index.TaskNameIndex;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.index.TestCaseNameIndex;
 import dev.xeonkryptos.xeonrobotframeworkplugin.util.BundleUtil;
 import dev.xeonkryptos.xeonrobotframeworkplugin.util.NetworkUtil;
 import org.jetbrains.annotations.NotNull;
@@ -45,12 +56,16 @@ import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.nio.charset.Charset;
+import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 public class RobotPythonCommandLineState extends PythonScriptCommandLineState {
 
@@ -282,6 +297,15 @@ public class RobotPythonCommandLineState extends PythonScriptCommandLineState {
         List<RobotRunnableUnitExecutionInfo> testCases = configuration.getTestCases();
         List<RobotRunnableUnitExecutionInfo> tasks = configuration.getTasks();
         Set<String> directories = new LinkedHashSet<>(configuration.getDirectories());
+        PythonRunConfiguration pythonRunConfiguration = configuration.getPythonRunConfiguration();
+        String expandedWorkingDir = PythonScriptCommandLineState.getExpandedWorkingDir(pythonRunConfiguration);
+        VirtualFile expandedWorkingDirVFile = VfsUtil.findFile(Path.of(expandedWorkingDir), true);
+        assert expandedWorkingDirVFile != null;
+
+        Project project = pythonRunConfiguration.getProject();
+        Sdk sdk = pythonRunConfiguration.getSdk();
+        Module module = pythonRunConfiguration.getModule();
+        ContextAnchor contextAnchor = module == null ? new ProjectSdkContextAnchor(project, sdk) : new ModuleBasedContextAnchor(module);
 
         if (!testCases.isEmpty()) {
             argumentConsumer.accept("--norpa");
@@ -290,17 +314,27 @@ public class RobotPythonCommandLineState extends PythonScriptCommandLineState {
             argumentConsumer.accept("--rpa");
         }
         for (RobotRunnableUnitExecutionInfo testCaseInfo : testCases) {
+            String unitName = testCaseInfo.getUnitName();
             argumentConsumer.accept("--test");
             argumentConsumer.accept(testCaseInfo.getUnitName());
 
-            String file = computeFileLocation(testCaseInfo.getLocation());
+            String file = computeFileLocation(testCaseInfo,
+                                              expandedWorkingDirVFile,
+                                              () -> ReadAction.nonBlocking(() -> TestCaseNameIndex.find(unitName, project, contextAnchor.getScope()))
+                                                              .inSmartMode(project)
+                                                              .executeSynchronously());
             directories.add(file);
         }
         for (RobotRunnableUnitExecutionInfo taskInfo : tasks) {
+            String unitName = taskInfo.getUnitName();
             argumentConsumer.accept("--task");
-            argumentConsumer.accept(taskInfo.getUnitName());
+            argumentConsumer.accept(unitName);
 
-            String file = computeFileLocation(taskInfo.getLocation());
+            String file = computeFileLocation(taskInfo,
+                                              expandedWorkingDirVFile,
+                                              () -> ReadAction.nonBlocking(() -> TaskNameIndex.find(unitName, project, contextAnchor.getScope()))
+                                                              .inSmartMode(project)
+                                                              .executeSynchronously());
             directories.add(file);
         }
         for (String directory : directories) {
@@ -308,8 +342,18 @@ public class RobotPythonCommandLineState extends PythonScriptCommandLineState {
         }
     }
 
-    private static String computeFileLocation(String location) {
-        return location.replace('.', '/') + "." + RobotFeatureFileType.getInstance().getDefaultExtension();
+    private static String computeFileLocation(RobotRunnableUnitExecutionInfo execInfo,
+                                              VirtualFile expandedWorkingDirVFile,
+                                              Supplier<Collection<? extends RobotQualifiedNameOwner>> qualifiedNameOwnerSupplier) {
+        Optional<VirtualFile> virtualFileStmtOptional = qualifiedNameOwnerSupplier.get()
+                                                                                  .stream()
+                                                                                  .filter(stmt -> execInfo.getFqdn().equals(stmt.getQualifiedName()))
+                                                                                  .findFirst()
+                                                                                  .map(stmt -> stmt.getContainingFile().getOriginalFile().getVirtualFile());
+        return virtualFileStmtOptional.map(vfile -> VfsUtil.getCommonAncestor(expandedWorkingDirVFile, vfile))
+                                      .map(vfile -> VfsUtil.getRelativePath(virtualFileStmtOptional.get(), vfile, '/'))
+                                      .orElseGet(() -> execInfo.getLocation().replace('.', '/') + "." + RobotFeatureFileType.getInstance()
+                                                                                                                            .getDefaultExtension());
     }
 
     private static RobotExecutionMode computeRobotExecutionMode(Executor executor) {

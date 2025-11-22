@@ -12,6 +12,10 @@
 
 - Improved detection for cases multiline should be applied
 
+### Fixed
+
+- Respect the working directory provided in run configuration to define relative path for the robot execution
+
 ## 0.5.14
 
 ### Fixed
