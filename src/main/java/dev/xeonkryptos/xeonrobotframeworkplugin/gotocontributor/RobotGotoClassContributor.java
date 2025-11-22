@@ -11,8 +11,10 @@ import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.psi.stubs.StubIndex;
 import com.intellij.util.Processor;
 import com.intellij.util.indexing.DumbModeAccessType;
+import com.intellij.util.indexing.FileBasedIndex;
 import com.intellij.util.indexing.FindSymbolParameters;
 import com.intellij.util.indexing.IdFilter;
+import dev.xeonkryptos.xeonrobotframeworkplugin.index.RobotFeatureFileNameIndex;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotLanguage;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotQualifiedNameOwner;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTaskStatement;
@@ -36,7 +38,10 @@ public class RobotGotoClassContributor implements GotoClassContributor, ChooseBy
             if (!stubIndex.processAllKeys(TaskNameIndex.KEY, processor, scope, filter)) {
                 return;
             }
-            stubIndex.processAllKeys(TestCaseNameIndex.KEY, processor, scope, filter);
+            if (!stubIndex.processAllKeys(TestCaseNameIndex.KEY, processor, scope, filter)) {
+                return;
+            }
+            FileBasedIndex.getInstance().processAllKeys(RobotFeatureFileNameIndex.NAME, processor, scope, filter);
         });
     }
 

@@ -4,6 +4,10 @@
 
 ## Unreleased
 
+### Added
+
+- Added robot feature files into Goto class name lookup
+
 ### Changed
 
 - Improved detection for cases multiline should be applied
