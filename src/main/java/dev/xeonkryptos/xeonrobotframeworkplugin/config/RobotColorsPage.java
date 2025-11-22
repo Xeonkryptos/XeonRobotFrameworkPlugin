@@ -17,8 +17,7 @@ public class RobotColorsPage implements ColorSettingsPage {
 
     private static final ColorDescriptor[] COLORS = ColorDescriptor.EMPTY_ARRAY;
     private static final AttributesDescriptor[] ATTRIBUTES = new AttributesDescriptor[] { new AttributesDescriptor(RobotBundle.message(
-            "color.settings.sectionHeader"),
-                                                                                                                   RobotHighlighter.SECTION_TITLE),
+            "color.settings.sectionHeader"), RobotHighlighter.SECTION_TITLE),
                                                                                           new AttributesDescriptor(RobotBundle.message("color.settings.comment"),
                                                                                                                    RobotHighlighter.COMMENT),
                                                                                           new AttributesDescriptor(RobotBundle.message(
@@ -32,8 +31,6 @@ public class RobotColorsPage implements ColorSettingsPage {
                                                                                                                    RobotHighlighter.STRUCTURAL_KEYWORDS),
                                                                                           new AttributesDescriptor(RobotBundle.message("color.settings.variable"),
                                                                                                                    RobotHighlighter.VARIABLE),
-                                                                                          new AttributesDescriptor(RobotBundle.message("color.settings.reassignedVariable"),
-                                                                                                                   RobotHighlighter.REASSIGNED_VARIABLE),
                                                                                           new AttributesDescriptor(RobotBundle.message("color.settings.keyword"),
                                                                                                                    RobotHighlighter.KEYWORD),
                                                                                           new AttributesDescriptor(RobotBundle.message(
@@ -50,7 +47,10 @@ public class RobotColorsPage implements ColorSettingsPage {
                                                                                           new AttributesDescriptor(RobotBundle.message("color.settings.setting"),
                                                                                                                    RobotHighlighter.GLOBAL_SETTING_OPTION),
                                                                                           new AttributesDescriptor(RobotBundle.message("color.settings.import"),
-                                                                                                                   RobotHighlighter.IMPORT) };
+                                                                                                                   RobotHighlighter.IMPORT),
+                                                                                          new AttributesDescriptor(RobotBundle.message(
+                                                                                                  "color.settings.pythonExpression"),
+                                                                                                                   RobotHighlighter.PYTHON_EXPRESSION_CONTENT) };
 
     @Nullable
     @Override
@@ -95,6 +95,10 @@ public class RobotColorsPage implements ColorSettingsPage {
                *** Keywords ***
                Calculator has been cleared
                    Push button    C
+               
+               IF  '${variable}' == 'B'
+                   Push Button    A
+               END
                
                User types "${expression}"
                    Push buttons    \

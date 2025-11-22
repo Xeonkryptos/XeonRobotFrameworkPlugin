@@ -11,15 +11,14 @@ import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.*;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.*;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotPsiImplUtil;
 
-public class RobotIfStructureImpl extends RobotExecutableStatementImpl implements RobotIfStructure {
+public class RobotConditionalContentImpl extends RobotPsiElementBase implements RobotConditionalContent {
 
-  public RobotIfStructureImpl(@NotNull ASTNode node) {
+  public RobotConditionalContentImpl(@NotNull ASTNode node) {
     super(node);
   }
 
-  @Override
   public void accept(@NotNull RobotVisitor visitor) {
-    visitor.visitIfStructure(this);
+    visitor.visitConditionalContent(this);
   }
 
   @Override
@@ -30,8 +29,8 @@ public class RobotIfStructureImpl extends RobotExecutableStatementImpl implement
 
   @Override
   @NotNull
-  public RobotConditionalContent getConditionalContent() {
-    return notNullChild(PsiTreeUtil.getChildOfType(this, RobotConditionalContent.class));
+  public List<RobotVariable> getVariableList() {
+    return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotVariable.class);
   }
 
 }

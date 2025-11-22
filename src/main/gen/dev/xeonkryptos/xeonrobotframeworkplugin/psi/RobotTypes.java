@@ -19,6 +19,7 @@ public interface RobotTypes {
 
   IElementType BDD_STATEMENT = new RobotElementType("BDD_STATEMENT");
   IElementType COMMENTS_SECTION = new RobotElementType("COMMENTS_SECTION");
+  IElementType CONDITIONAL_CONTENT = new RobotElementType("CONDITIONAL_CONTENT");
   IElementType DICT_VARIABLE = RobotDictVariableStubElement.create("DICT_VARIABLE");
   IElementType DOCUMENTATION_STATEMENT_GLOBAL_SETTING = new RobotElementType("DOCUMENTATION_STATEMENT_GLOBAL_SETTING");
   IElementType ELSE_IF_STRUCTURE = new RobotElementType("ELSE_IF_STRUCTURE");
@@ -170,6 +171,9 @@ public interface RobotTypes {
       }
       else if (type == COMMENTS_SECTION) {
         return new RobotCommentsSectionImpl(node);
+      }
+      else if (type == CONDITIONAL_CONTENT) {
+        return new RobotConditionalContentImpl(node);
       }
       else if (type == DICT_VARIABLE) {
         return new RobotDictVariableImpl(node);

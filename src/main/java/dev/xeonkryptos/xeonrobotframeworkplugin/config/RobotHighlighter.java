@@ -28,9 +28,8 @@ public class RobotHighlighter extends SyntaxHighlighterBase {
     public static final TextAttributesKey USER_KEYWORD_NAME = TextAttributesKey.createTextAttributesKey("ROBOT_USER_KEYWORD_DEFINITION",
                                                                                                         DefaultLanguageHighlighterColors.KEYWORD);
     public static final TextAttributesKey TEST_CASE_NAME = TextAttributesKey.createTextAttributesKey("ROBOT_TEST_CASE_NAME",
-                                                                                                         DefaultLanguageHighlighterColors.KEYWORD);
-    public static final TextAttributesKey TASK_NAME = TextAttributesKey.createTextAttributesKey("ROBOT_TASK_NAME",
-                                                                                                         DefaultLanguageHighlighterColors.KEYWORD);
+                                                                                                     DefaultLanguageHighlighterColors.KEYWORD);
+    public static final TextAttributesKey TASK_NAME = TextAttributesKey.createTextAttributesKey("ROBOT_TASK_NAME", DefaultLanguageHighlighterColors.KEYWORD);
     public static final TextAttributesKey KEYWORD = TextAttributesKey.createTextAttributesKey("ROBOT_KEYWORD_CALL",
                                                                                               DefaultLanguageHighlighterColors.FUNCTION_DECLARATION);
     public static final TextAttributesKey PARAMETER = TextAttributesKey.createTextAttributesKey("ROBOT_PARAMETER", DefaultLanguageHighlighterColors.PARAMETER);
@@ -47,6 +46,8 @@ public class RobotHighlighter extends SyntaxHighlighterBase {
                                                                                               DefaultLanguageHighlighterColors.METADATA);
     public static final TextAttributesKey STRUCTURAL_KEYWORDS = TextAttributesKey.createTextAttributesKey("ROBOT_STRUCTURAL_KEYWORD",
                                                                                                           DefaultLanguageHighlighterColors.METADATA);
+    public static final TextAttributesKey PYTHON_EXPRESSION_CONTENT = TextAttributesKey.createTextAttributesKey("ROBOT_PYTHON_EXPRESSION_CONTENT",
+                                                                                                                DefaultLanguageHighlighterColors.TEMPLATE_LANGUAGE_COLOR);
     public static final TextAttributesKey ERROR = TextAttributesKey.createTextAttributesKey(TokenType.BAD_CHARACTER.toString(),
                                                                                             DefaultLanguageHighlighterColors.INVALID_STRING_ESCAPE);
 
@@ -91,6 +92,8 @@ public class RobotHighlighter extends SyntaxHighlighterBase {
         keys.put(RobotTypes.BREAK, STRUCTURAL_KEYWORDS);
         keys.put(RobotTypes.CONTINUE, STRUCTURAL_KEYWORDS);
         keys.put(RobotTypes.WITH_NAME, STRUCTURAL_KEYWORDS);
+
+        keys.put(RobotTypes.PYTHON_EXPRESSION_CONTENT, PYTHON_EXPRESSION_CONTENT);
 
         keys.put(RobotTypes.SCALAR_VARIABLE_START, VARIABLE);
         keys.put(RobotTypes.LIST_VARIABLE_START, VARIABLE);

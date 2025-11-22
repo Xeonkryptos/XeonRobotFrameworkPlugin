@@ -251,15 +251,17 @@ while_loop_structure ::= WHILE positional_argument+ eol_marker (parameter+ eol_m
     implements=block_opening_structure
 }
 private conditional_structure ::= if_structure else_if_structure* if_else_structure? (END eol_marker)? {pin=1}
-if_structure ::= IF positional_argument+ eol_marker? executable_statement* {
+if_structure ::= IF conditional_content eol_marker? executable_statement* {
     implements=block_opening_structure
 }
-else_if_structure ::= ELSE_IF positional_argument+ eol_marker? executable_statement* {
+else_if_structure ::= ELSE_IF conditional_content eol_marker? executable_statement* {
     implements=block_opening_structure
 }
 if_else_structure ::= ELSE eol_marker? executable_statement* {
     implements=block_opening_structure
 }
+conditional_content ::= conditional_content_body+
+private conditional_content_body ::= PYTHON_EXPRESSION_CONTENT | variable
 private exception_handling_structure ::= try_structure
     except_structure*
     try_else_structure?
