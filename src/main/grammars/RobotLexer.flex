@@ -153,7 +153,10 @@ TemplateKeywords = ("Test Template" | "Task Template")
 TimeoutKeywords = ("Test Timeout" | "Task Timeout")
 GenericSettingsKeyword = [\p{L}\p{N}_]+([ ][\p{L}\p{N}_])*
 
-AllowedChar = [^\s$@%&=] | [<>!=] = | [$@%&] [^{]
+AllowedEverythingButVariableChar = [^\s$@%&] | [$@%&] [^{]
+AllowedEverythingButVariableSeq = {AllowedEverythingButVariableChar}+
+
+AllowedChar = [^\s$@%&=] | [$@%&] [^{]
 AllowedSeq = {AllowedChar}+
 
 AllowedKeywordLibraryNameChar = [\p{L}\p{N}_-]
@@ -168,6 +171,8 @@ AllowedParamSeq = {AllowedParamChar}+
 RestrictedLiteralValue = {AllowedSeq} ({Space} {AllowedSeq})*
 KeywordLibraryNameLiteralValue = [/*]? {AllowedKeywordLibraryNameSeq}+ "."
 KeywordLiteralValue = {AllowedKeywordSeq} ({Space} {AllowedKeywordSeq})*
+EverythingButVariableValue = {AllowedEverythingButVariableSeq} ({Space} {AllowedEverythingButVariableSeq})*
+
 VariableLiteralValue =   ({Escape} | [^}$@&%] | [\$@&%] [^{] | {OpeningVariable})+
 ParamLiteralValue =      {AllowedParamSeq} ({Space} {AllowedParamSeq})*
 LiteralValue =           [^\s]+([ ][^\s]+)*[ ]?
@@ -196,7 +201,7 @@ LineComment = {LineCommentSign} {NON_EOL}*
 %state KEYWORD_CALL, KEYWORD_ARGUMENTS
 %state INLINE_VARIABLE_DEFINITION, VARIABLE_DEFINITION, VARIABLE_DEFINITION_ARGUMENTS, VARIABLE_USAGE, EXTENDED_VARIABLE_ACCESS, PYTHON_EXPRESSION
 %state PARAMETER_ASSIGNMENT, PARAMETER_VALUE, TEMPLATE_PARAMETER_ASSIGNMENT, TEMPLATE_PARAMETER_VALUE
-%state FOR_STRUCTURE, SIMPLE_CONTROL_STRUCTURE_START, CONTROL_STRUCTURE_START, SIMPLE_CONTROL_STRUCTURE, CONTROL_STRUCTURE
+%state FOR_STRUCTURE, SIMPLE_CONTROL_STRUCTURE_START, CONTROL_STRUCTURE_START, PYTHON_EXECUTED_CONDITION, PYTHON_EVALUTED_CONTROL_STRUCTURE_START, SIMPLE_CONTROL_STRUCTURE, CONTROL_STRUCTURE
 
 %xstate COMMENTS_SECTION
 
@@ -369,8 +374,8 @@ LineComment = {LineCommentSign} {NON_EOL}*
 
         "FOR" \s{2}\s* {LiteralValue}             { yypushback(yylength() - "FOR".length()); enterNewState(FOR_STRUCTURE); return FOR; }
         "WHILE" \s{2}\s* {LiteralValue}?          { yypushback(yylength() - "WHILE".length()); enterNewState(CONTROL_STRUCTURE_START); return WHILE; }
-        "IF" \s{2}\s* {LiteralValue}              { yypushback(yylength() - "IF".length()); enterNewState(CONTROL_STRUCTURE_START); return IF; }
-        "ELSE IF" \s{2}\s* {LiteralValue}         { yypushback(yylength() - "ELSE IF".length()); enterNewState(CONTROL_STRUCTURE_START); return ELSE_IF; }
+        "IF" \s{2}\s*                             { pushBackTrailingWhitespace(); enterNewState(PYTHON_EVALUTED_CONTROL_STRUCTURE_START); return IF; }
+        "ELSE IF" \s{2}\s*                        { pushBackTrailingWhitespace(); enterNewState(PYTHON_EVALUTED_CONTROL_STRUCTURE_START); return ELSE_IF; }
         "ELSE" \s*                                { pushBackTrailingWhitespace(); return ELSE; }
         "TRY" \s*                                 { pushBackTrailingWhitespace(); return TRY; }
         "EXCEPT" \s{2}\s* {LiteralValue}          { yypushback(yylength() - "EXCEPT".length()); enterNewState(SIMPLE_CONTROL_STRUCTURE_START); return EXCEPT; }
@@ -429,8 +434,14 @@ LineComment = {LineCommentSign} {NON_EOL}*
     "END" \s*                                 { pushBackTrailingWhitespace(); leaveState(); return END; }
 }
 
-<SIMPLE_CONTROL_STRUCTURE_START>  {SpaceBasedEndMarker}     { yybegin(SIMPLE_CONTROL_STRUCTURE); return WHITE_SPACE; }
-<CONTROL_STRUCTURE_START>         {SpaceBasedEndMarker}     { yybegin(CONTROL_STRUCTURE); return WHITE_SPACE; }
+<SIMPLE_CONTROL_STRUCTURE_START>           {SpaceBasedEndMarker}     { yybegin(SIMPLE_CONTROL_STRUCTURE); return WHITE_SPACE; }
+<CONTROL_STRUCTURE_START>                  {SpaceBasedEndMarker}     { yybegin(CONTROL_STRUCTURE); return WHITE_SPACE; }
+
+<PYTHON_EVALUTED_CONTROL_STRUCTURE_START>  {SpaceBasedEndMarker}     { yybegin(PYTHON_EXECUTED_CONDITION); return WHITE_SPACE; }
+<PYTHON_EXECUTED_CONDITION>  {
+    {EverythingButVariableValue}                { pushBackTrailingWhitespace(); return PYTHON_EXPRESSION_CONTENT; }
+    {SpaceBasedEndMarker} | {EOL}+         { leaveState(); return EOL; }
+}
 
 <SIMPLE_CONTROL_STRUCTURE> {
     <SETTING, CONTROL_STRUCTURE> {RestrictedLiteralValue} | {EqualSign} { pushBackTrailingWhitespace(); return LITERAL_CONSTANT; }

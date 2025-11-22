@@ -5,9 +5,9 @@ import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 
-public interface RobotElseIfStructure extends RobotExecutableStatement, RobotBlockOpeningStructure {
+public interface RobotConditionalContent extends RobotElement {
 
   @NotNull
-  RobotConditionalContent getConditionalContent();
+  List<RobotVariable> getVariableList();
 
 }

@@ -28,6 +28,10 @@ public class RobotVisitor extends PsiElementVisitor {
     // visitNameIdentifierHolder(o);
   }
 
+  public void visitConditionalContent(@NotNull RobotConditionalContent o) {
+    visitElement(o);
+  }
+
   public void visitDictVariable(@NotNull RobotDictVariable o) {
     visitVariable(o);
   }
