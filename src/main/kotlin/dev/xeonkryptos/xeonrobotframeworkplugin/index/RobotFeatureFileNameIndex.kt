@@ -19,12 +19,10 @@ class RobotFeatureFileNameIndex : ScalarIndexExtension<String>() {
 
     companion object {
         @JvmField
-        val NAME = ID.create<String, Void?>("Py.module.name")
+        val NAME = ID.create<String, Void?>("Robot.module.name")
     }
 
-    override fun getName(): ID<String, Void?> {
-        return NAME
-    }
+    override fun getName(): ID<String, Void?> = NAME
 
     override fun getIndexer(): DataIndexer<String, Void?, FileContent?> {
         return object : DataIndexer<String, Void?, FileContent?> {
@@ -44,9 +42,7 @@ class RobotFeatureFileNameIndex : ScalarIndexExtension<String>() {
         }
     }
 
-    override fun getKeyDescriptor(): KeyDescriptor<String?> {
-        return EnumeratorStringDescriptor.INSTANCE
-    }
+    override fun getKeyDescriptor(): KeyDescriptor<String> = EnumeratorStringDescriptor.INSTANCE
 
     @Suppress("UnstableApiUsage")
     override fun getInputFilter(): FileBasedIndex.InputFilter {

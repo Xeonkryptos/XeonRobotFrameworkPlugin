@@ -65,6 +65,7 @@
         <stubIndex implementation="dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.index.TaskNameIndex"/>
 
         <fileBasedIndex implementation="dev.xeonkryptos.xeonrobotframeworkplugin.index.PyRobotKeywordDefinitionIndex"/>
+        <fileBasedIndex implementation="dev.xeonkryptos.xeonrobotframeworkplugin.index.RobotFeatureFileNameIndex"/>
 
         <codeInsight.parameterInfo language="Robot"
                                    implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.parameterinfo.RobotParameterInfoHandler"/>

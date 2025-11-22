@@ -7,13 +7,18 @@ import com.intellij.navigation.NavigationItem;
 import com.intellij.openapi.project.DumbAware;
 import com.intellij.openapi.project.PossiblyDumbAware;
 import com.intellij.openapi.project.Project;
+import com.intellij.psi.PsiFile;
+import com.intellij.psi.PsiManager;
 import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.psi.stubs.StubIndex;
 import com.intellij.util.Processor;
 import com.intellij.util.indexing.DumbModeAccessType;
+import com.intellij.util.indexing.FileBasedIndex;
 import com.intellij.util.indexing.FindSymbolParameters;
 import com.intellij.util.indexing.IdFilter;
+import dev.xeonkryptos.xeonrobotframeworkplugin.index.RobotFeatureFileNameIndex;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotLanguage;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotFile;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCall;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotQualifiedNameOwner;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTaskStatement;
@@ -27,6 +32,8 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.index.TestCaseNameIndex
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.index.VariableDefinitionNameIndex;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.Collections;
 
 public class RobotGotoSymbolContributor implements GotoClassContributor, ChooseByNameContributorEx, PossiblyDumbAware, DumbAware {
 
@@ -46,7 +53,10 @@ public class RobotGotoSymbolContributor implements GotoClassContributor, ChooseB
             if (!stubIndex.processAllKeys(KeywordCallNameIndex.KEY, processor, scope, filter)) {
                 return;
             }
-            stubIndex.processAllKeys(VariableDefinitionNameIndex.KEY, processor, scope, filter);
+            if (!stubIndex.processAllKeys(VariableDefinitionNameIndex.KEY, processor, scope, filter)) {
+                return;
+            }
+            FileBasedIndex.getInstance().processAllKeys(RobotFeatureFileNameIndex.NAME, processor, scope, filter);
         });
     }
 
@@ -56,6 +66,7 @@ public class RobotGotoSymbolContributor implements GotoClassContributor, ChooseB
         GlobalSearchScope scope = parameters.getSearchScope();
         IdFilter filter = parameters.getIdFilter();
         StubIndex stubIndex = StubIndex.getInstance();
+        PsiManager psiManager = PsiManager.getInstance(project);
         DumbModeAccessType.RELIABLE_DATA_ONLY.ignoreDumbMode(() -> {
             if (!stubIndex.processElements(KeywordDefinitionNameIndex.KEY, name, project, scope, filter, RobotUserKeywordStatement.class, processor)) {
                 return;
@@ -69,7 +80,13 @@ public class RobotGotoSymbolContributor implements GotoClassContributor, ChooseB
             if (!stubIndex.processElements(KeywordCallNameIndex.KEY, name, project, scope, filter, RobotKeywordCall.class, processor)) {
                 return;
             }
-            stubIndex.processElements(VariableDefinitionNameIndex.KEY, name, project, scope, filter, RobotVariableDefinition.class, processor);
+            if (!stubIndex.processElements(VariableDefinitionNameIndex.KEY, name, project, scope, filter, RobotVariableDefinition.class, processor)) {
+                return;
+            }
+            FileBasedIndex.getInstance().getFilesWithKey(RobotFeatureFileNameIndex.NAME, Collections.singleton(name), file -> {
+                PsiFile psiFile = psiManager.findFile(file);
+                return !(psiFile instanceof RobotFile) || processor.process(psiFile);
+            }, scope);
         });
     }
 
@@ -78,6 +95,9 @@ public class RobotGotoSymbolContributor implements GotoClassContributor, ChooseB
     public String getQualifiedName(@NotNull NavigationItem item) {
         if (item instanceof RobotQualifiedNameOwner qualifiedNameOwner) {
             return qualifiedNameOwner.getQualifiedName();
+        }
+        if (item instanceof RobotFile robotFile) {
+            return robotFile.getName();
         }
         return null;
     }
