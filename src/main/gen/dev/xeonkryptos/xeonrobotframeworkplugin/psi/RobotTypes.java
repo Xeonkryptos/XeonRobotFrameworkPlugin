@@ -37,6 +37,10 @@ public interface RobotTypes {
   IElementType GROUP_STRUCTURE = new RobotElementType("GROUP_STRUCTURE");
   IElementType IF_ELSE_STRUCTURE = new RobotElementType("IF_ELSE_STRUCTURE");
   IElementType IF_STRUCTURE = new RobotElementType("IF_STRUCTURE");
+  IElementType IF_VARIABLE_STATEMENT = new RobotElementType("IF_VARIABLE_STATEMENT");
+  IElementType INLINE_ELSE_IF_STRUCTURE = new RobotElementType("INLINE_ELSE_IF_STRUCTURE");
+  IElementType INLINE_IF_ELSE_STRUCTURE = new RobotElementType("INLINE_IF_ELSE_STRUCTURE");
+  IElementType INLINE_IF_STRUCTURE = new RobotElementType("INLINE_IF_STRUCTURE");
   IElementType INLINE_VARIABLE_STATEMENT = new RobotElementType("INLINE_VARIABLE_STATEMENT");
   IElementType KEYWORDS_SECTION = new RobotElementType("KEYWORDS_SECTION");
   IElementType KEYWORD_CALL = RobotKeywordCallStubElement.create("KEYWORD_CALL");
@@ -110,6 +114,7 @@ public interface RobotTypes {
   IElementType END = new RobotTokenType("END");
   IElementType ENV_VARIABLE_START = new RobotTokenType("ENV_VARIABLE_START");
   IElementType EOL = new RobotTokenType("EOL");
+  IElementType EOS = new RobotTokenType("EOS");
   IElementType EXCEPT = new RobotTokenType("EXCEPT");
   IElementType FINALLY = new RobotTokenType("FINALLY");
   IElementType FOR = new RobotTokenType("FOR");
@@ -225,6 +230,18 @@ public interface RobotTypes {
       }
       else if (type == IF_STRUCTURE) {
         return new RobotIfStructureImpl(node);
+      }
+      else if (type == IF_VARIABLE_STATEMENT) {
+        return new RobotIfVariableStatementImpl(node);
+      }
+      else if (type == INLINE_ELSE_IF_STRUCTURE) {
+        return new RobotInlineElseIfStructureImpl(node);
+      }
+      else if (type == INLINE_IF_ELSE_STRUCTURE) {
+        return new RobotInlineIfElseStructureImpl(node);
+      }
+      else if (type == INLINE_IF_STRUCTURE) {
+        return new RobotInlineIfStructureImpl(node);
       }
       else if (type == INLINE_VARIABLE_STATEMENT) {
         return new RobotInlineVariableStatementImpl(node);
