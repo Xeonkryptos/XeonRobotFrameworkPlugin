@@ -14,6 +14,7 @@ import com.intellij.execution.configurations.RuntimeConfigurationWarning;
 import com.intellij.execution.runners.ExecutionEnvironment;
 import com.intellij.execution.testframework.sm.runner.SMRunnerConsolePropertiesProvider;
 import com.intellij.execution.testframework.sm.runner.SMTRunnerConsoleProperties;
+import com.intellij.openapi.application.ReadAction;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.options.SettingsEditor;
 import com.intellij.openapi.project.Project;
@@ -172,12 +173,18 @@ public class RobotRunConfiguration extends LocatableConfigurationBase<Element>
         long countOfResolvableTestCases = getTestCases().stream().filter(execInfo -> {
             String fqdn = execInfo.getFqdn();
             String unitName = execInfo.getUnitName();
-            return TestCaseNameIndex.find(unitName, project, allScope).stream().anyMatch(testCase -> fqdn.equals(testCase.getQualifiedName()));
+            return ReadAction.nonBlocking(() -> TestCaseNameIndex.find(unitName, project, allScope)
+                                                                 .stream()
+                                                                 .anyMatch(testCase -> fqdn.equals(testCase.getQualifiedName())))
+                             .inSmartMode(project)
+                             .executeSynchronously();
         }).count();
         long countOfResolvableTasks = getTasks().stream().filter(execInfo -> {
             String fqdn = execInfo.getFqdn();
             String unitName = execInfo.getUnitName();
-            return TaskNameIndex.find(unitName, project, allScope).stream().anyMatch(task -> fqdn.equals(task.getQualifiedName()));
+            return ReadAction.nonBlocking(() -> TaskNameIndex.find(unitName, project, allScope).stream().anyMatch(task -> fqdn.equals(task.getQualifiedName())))
+                             .inSmartMode(project)
+                             .executeSynchronously();
         }).count();
 
         int expectedTestCasesCount = getTestCases().size();
