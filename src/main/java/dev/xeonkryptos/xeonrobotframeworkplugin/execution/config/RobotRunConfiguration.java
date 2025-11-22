@@ -28,6 +28,7 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.refactoring.listeners.RefactoringElementListener;
 import com.intellij.util.containers.ContainerUtil;
+import com.intellij.util.indexing.DumbModeAccessType;
 import com.jetbrains.python.run.PythonRunConfiguration;
 import dev.xeonkryptos.xeonrobotframeworkplugin.RobotBundle;
 import dev.xeonkryptos.xeonrobotframeworkplugin.execution.RobotCommandLineState;
@@ -173,17 +174,18 @@ public class RobotRunConfiguration extends LocatableConfigurationBase<Element>
         long countOfResolvableTestCases = getTestCases().stream().filter(execInfo -> {
             String fqdn = execInfo.getFqdn();
             String unitName = execInfo.getUnitName();
-            return ReadAction.nonBlocking(() -> TestCaseNameIndex.find(unitName, project, allScope)
-                                                                 .stream()
-                                                                 .anyMatch(testCase -> fqdn.equals(testCase.getQualifiedName())))
-                             .inSmartMode(project)
+            return ReadAction.nonBlocking(() -> DumbModeAccessType.RELIABLE_DATA_ONLY.ignoreDumbMode(() -> TestCaseNameIndex.find(unitName, project, allScope)
+                                                                                                                            .stream()
+                                                                                                                            .anyMatch(testCase -> fqdn.equals(
+                                                                                                                                    testCase.getQualifiedName()))))
                              .executeSynchronously();
         }).count();
         long countOfResolvableTasks = getTasks().stream().filter(execInfo -> {
             String fqdn = execInfo.getFqdn();
             String unitName = execInfo.getUnitName();
-            return ReadAction.nonBlocking(() -> TaskNameIndex.find(unitName, project, allScope).stream().anyMatch(task -> fqdn.equals(task.getQualifiedName())))
-                             .inSmartMode(project)
+            return ReadAction.nonBlocking(() -> DumbModeAccessType.RELIABLE_DATA_ONLY.ignoreDumbMode(() -> TaskNameIndex.find(unitName, project, allScope)
+                                                                                                                        .stream()
+                                                                                                                        .anyMatch(task -> fqdn.equals(task.getQualifiedName()))))
                              .executeSynchronously();
         }).count();
 

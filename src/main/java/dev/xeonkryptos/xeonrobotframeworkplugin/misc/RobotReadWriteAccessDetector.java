@@ -14,7 +14,7 @@ import java.util.Map;
 public class RobotReadWriteAccessDetector extends ReadWriteAccessDetector {
 
     private static final Map<String, VariableScope> VARIABLE_SETTERS = Map.of("set variable",
-                                                                              VariableScope.Local,
+                                                                              VariableScope.TestCase,
                                                                               "set global variable",
                                                                               VariableScope.Global,
                                                                               "set local variable",

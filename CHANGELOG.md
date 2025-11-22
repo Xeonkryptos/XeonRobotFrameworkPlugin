@@ -11,6 +11,7 @@
 ### Changed
 
 - Improved detection for cases multiline should be applied
+- Use test case scope for Set Variable keyword
 
 ### Fixed
 
