@@ -414,10 +414,10 @@ LineComment = {LineCommentSign} {NON_EOL}*
       }
 
     {RestrictedLiteralValue}                {
-              int nextState = localTemplateEnabled && templateKeywordFound ? TEMPLATE_DEFINITION : KEYWORD_CALL;
-              enterNewState(nextState);
-              yypushback(yylength());
-              break;
+          int nextState = localTemplateEnabled && templateKeywordFound ? TEMPLATE_DEFINITION : KEYWORD_CALL;
+          enterNewState(nextState);
+          yypushback(yylength());
+          break;
       }
 }
 
@@ -441,7 +441,7 @@ LineComment = {LineCommentSign} {NON_EOL}*
 // Multiline handling (don't return EOL on detected multiline). If there is a multiline without the Ellipsis (...) marker,
 // then return EOL to mark the end of the statement.
 <SETTING, KEYWORD_CALL, KEYWORD_ARGUMENTS, VARIABLE_DEFINITION, VARIABLE_DEFINITION_ARGUMENTS> {
-    <SETTING_TEMPLATE_START> {
+    <SETTING_TEMPLATE_START, TESTCASE_DEFINITION, TASK_DEFINITION, USER_KEYWORD_DEFINITION> {
         {MultiLine}                                  { return WHITE_SPACE; }
         {EOL} {Whitespace}* {LineComment}            { yypushback(yylength() - 1); return WHITE_SPACE; }
     }

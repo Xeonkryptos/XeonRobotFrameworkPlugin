@@ -15,6 +15,7 @@
 ### Fixed
 
 - Respect the working directory provided in run configuration to define relative path for the robot execution
+- Extended support multiline handling
 
 ## 0.5.14
 
