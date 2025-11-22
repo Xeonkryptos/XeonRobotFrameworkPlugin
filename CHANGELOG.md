@@ -4,6 +4,12 @@
 
 ## Unreleased
 
+### Changed
+
+- Improved detection for cases multiline should be applied
+
+## 0.5.14
+
 ### Fixed
 
 - Fixed resolving issues especially for available keyword parameters

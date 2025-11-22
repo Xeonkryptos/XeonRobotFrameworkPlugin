@@ -4,7 +4,9 @@ import com.intellij.codeInsight.editorActions.enter.EnterHandlerDelegateAdapter;
 import com.intellij.openapi.actionSystem.DataContext;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.editor.Editor;
+import com.intellij.openapi.editor.actionSystem.EditorActionHandler;
 import com.intellij.openapi.fileTypes.FileType;
+import com.intellij.openapi.util.Ref;
 import com.intellij.openapi.util.TextRange;
 import com.intellij.psi.PsiComment;
 import com.intellij.psi.PsiDocumentManager;
@@ -15,6 +17,7 @@ import com.intellij.psi.util.PsiTreeUtil;
 import dev.xeonkryptos.xeonrobotframeworkplugin.config.RobotOptionsProvider;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotFeatureFileType;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotResourceFileType;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotQualifiedNameOwner;
 import dev.xeonkryptos.xeonrobotframeworkplugin.util.GlobalConstants;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -26,12 +29,20 @@ public abstract class AbstractRobotSmartMultilineEnterActionHandler<T extends Ps
 
     private final Class<T> expectedElementClass;
 
+    @Nullable
+    private T foundElement;
+
     protected AbstractRobotSmartMultilineEnterActionHandler(Class<T> expectedElementClass) {
         this.expectedElementClass = expectedElementClass;
     }
 
     @Override
-    public Result postProcessEnter(@NotNull PsiFile file, @NotNull Editor editor, @NotNull DataContext dataContext) {
+    public Result preprocessEnter(@NotNull PsiFile file,
+                                  @NotNull Editor editor,
+                                  @NotNull Ref<Integer> caretOffset,
+                                  @NotNull Ref<Integer> caretAdvance,
+                                  @NotNull DataContext dataContext,
+                                  EditorActionHandler originalHandler) {
         FileType fileType = file.getFileType();
         if (fileType == RobotFeatureFileType.getInstance() || fileType == RobotResourceFileType.getInstance()) {
             RobotOptionsProvider robotOptionsProvider = RobotOptionsProvider.getInstance(file.getProject());
@@ -39,36 +50,53 @@ public abstract class AbstractRobotSmartMultilineEnterActionHandler<T extends Ps
                 return Result.Continue;
             }
 
+            Integer currentCaretOffset = caretOffset.get();
+
             Document document = editor.getDocument();
             // Committing document changes before to be able to search on the PSI tree
             PsiDocumentManager.getInstance(file.getProject()).commitDocument(document);
 
-            int caretOffset = editor.getCaretModel().getOffset();
-            PsiElement currentElement = file.findElementAt(caretOffset);
-            if (currentElement == null) {
+            PsiElement element = file.findElementAt(currentCaretOffset);
+            if (element == null) {
                 return Result.Continue;
             }
-            int previousLine = document.getLineNumber(caretOffset) - 1;
-            T element = getExpectedElement(currentElement, previousLine, file, document);
-            if (element != null) {
-                handleSmartMultilineIndentation(file, editor, element);
-                return Result.Stop;
+
+            if (expectedElementClass.isInstance(element)) {
+                foundElement = expectedElementClass.cast(element);
+                return super.preprocessEnter(file, editor, caretOffset, caretAdvance, dataContext, originalHandler);
             }
+
+            int lineNumber = document.getLineNumber(currentCaretOffset);
+            int lineStartOffset = document.getLineStartOffset(lineNumber);
+
+            while (element instanceof PsiWhiteSpace || element instanceof PsiComment) {
+                if (element.getTextOffset() <= lineStartOffset) {
+                    return Result.Continue;
+                }
+                element = element.getPrevSibling();
+            }
+
+            foundElement = getExpectedElement(element, lineNumber, document);
+        }
+        return Result.Continue;
+    }
+
+    @Override
+    public Result postProcessEnter(@NotNull PsiFile file, @NotNull Editor editor, @NotNull DataContext dataContext) {
+        if (foundElement != null) {
+            handleSmartMultilineIndentation(file, editor, foundElement);
+            foundElement = null;
+            return Result.Stop;
         }
         return Result.Continue;
     }
 
     @Nullable
-    protected T getExpectedElement(@Nullable PsiElement element, int previousLine, @NotNull PsiFile file, Document document) {
+    protected T getExpectedElement(@Nullable PsiElement element, int previousLine, Document document) {
         if (expectedElementClass.isInstance(element)) {
             return expectedElementClass.cast(element);
         }
-        T foundElement = PsiTreeUtil.getParentOfType(element, expectedElementClass);
-        if (foundElement == null && element != null) {
-            int textOffset = element.getTextOffset() - 1;
-            PsiElement currentFoundElement = file.findElementAt(textOffset);
-            foundElement = PsiTreeUtil.getParentOfType(currentFoundElement, expectedElementClass);
-        }
+        T foundElement = PsiTreeUtil.getParentOfType(element, expectedElementClass, false, RobotQualifiedNameOwner.class);
         if (foundElement != null) {
             int textOffset = foundElement.getTextOffset();
             int keywordCallLineNumber = document.getLineNumber(textOffset);
