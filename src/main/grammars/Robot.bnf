@@ -236,9 +236,9 @@ executable_statement ::= loop_structure | loop_control_structure | control_struc
 private executable_statement_recover ::= !(FOR | WHILE | IF | ELSE_IF | ELSE | TRY | GROUP | RETURN | BREAK | CONTINUE | VAR | keyword_call_name | variable_definition) & section_recover
 
 fake block_opening_structure ::= DUMMY {implements=[foldable scopeOwner]}
-private control_structure ::= conditional_structure | exception_handling_structure | group_structure
+private control_structure ::= conditional_structure | conditional_inline_structure | exception_handling_structure | group_structure
 private loop_structure ::= for_loop_structure | while_loop_structure
-private call_structure ::= eol_based_keyword_call | inline_variable_statement | keyword_variable_statement | empty_variable_statement
+private call_structure ::= eol_based_keyword_call | inline_variable_statement | keyword_variable_statement | if_variable_statement | empty_variable_statement
 private loop_control_structure ::= (BREAK | CONTINUE) eol_marker?
 private return_structure ::= RETURN positional_argument* eol_marker? {pin=1}
 
@@ -250,15 +250,31 @@ while_loop_structure ::= WHILE positional_argument+ eol_marker (parameter+ eol_m
     pin=1
     implements=block_opening_structure
 }
-private conditional_structure ::= if_structure else_if_structure* if_else_structure? (END eol_marker)? {pin=1}
-if_structure ::= IF conditional_content eol_marker? executable_statement* {
+private conditional_structure ::= if_structure else_if_structure* if_else_structure? END eol_marker {pin=2}
+private conditional_inline_structure ::= inline_if_structure inline_else_if_structure* inline_if_else_structure? eol_marker? {pin=2}
+if_structure ::= IF conditional_content eol_marker executable_statement* {
     implements=block_opening_structure
+    pin=3
 }
-else_if_structure ::= ELSE_IF conditional_content eol_marker? executable_statement* {
+inline_if_structure ::= IF conditional_content EOS call_structure {
     implements=block_opening_structure
+    pin=3
 }
-if_else_structure ::= ELSE eol_marker? executable_statement* {
+else_if_structure ::= ELSE_IF conditional_content eol_marker executable_statement* {
     implements=block_opening_structure
+    pin=3
+}
+inline_else_if_structure ::= ELSE_IF conditional_content EOS call_structure {
+    implements=block_opening_structure
+    pin=3
+}
+if_else_structure ::= ELSE eol_marker executable_statement* {
+    implements=block_opening_structure
+    pin=2
+}
+inline_if_else_structure ::= ELSE call_structure {
+    implements=block_opening_structure
+    pin=2
 }
 conditional_content ::= conditional_content_body+
 private conditional_content_body ::= PYTHON_EXPRESSION_CONTENT | variable
@@ -314,6 +330,7 @@ single_variable_statement ::= variable_definition ASSIGNMENT? variable_value* pa
 empty_variable_statement ::= variable_definition ASSIGNMENT? "${EMPTY}" eol_marker? {pin=3}
 inline_variable_statement ::= VAR variable_definition ASSIGNMENT? variable_value+ parameter? eol_marker? {pin=1}
 keyword_variable_statement ::= variable_definition+ ASSIGNMENT? eol_based_keyword_call {pin=3} // Without EOL as it is handled at a lower level
+if_variable_statement ::= variable_definition+ ASSIGNMENT? conditional_inline_structure {pin=3}
 variable_value ::= variable | positional_argument
 
 positional_argument ::= external_positional_argument {

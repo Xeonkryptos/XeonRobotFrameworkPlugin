@@ -190,6 +190,8 @@ VariableSliceAccess = "[" \s* (-?\d+)? \s* : \s* (-?\d+)? (\s* : \s* (-?\d+))? \
 VariableIndexAccess = "[" \s* \d+ \s* "]"
 VariableKeyAccess = "[" \s* ([^$@%&] | [$@%&][^{])[^\]]* \s* "]"
 
+RobotKeyword = "GIVEN" | "WHEN" | "THEN" | "AND" | "BUT" | "VAR" | "FOR" | "IN" | "IN ENUMERATE" | "IN RANGE" | "IN ZIP" | "END" | "WHILE" | "IF" | "ELSE IF" | "ELSE" | "TRY" | "EXCEPT" | "FINALLY" | "BREAK" | "CONTINUE" | "GROUP" | "RETURN"
+
 MultiLine = {EOL}+ \s* {Ellipsis} \s* {EOL}*
 
 LineComment = {LineCommentSign} {NON_EOL}*
@@ -437,10 +439,11 @@ LineComment = {LineCommentSign} {NON_EOL}*
 <SIMPLE_CONTROL_STRUCTURE_START>           {SpaceBasedEndMarker}     { yybegin(SIMPLE_CONTROL_STRUCTURE); return WHITE_SPACE; }
 <CONTROL_STRUCTURE_START>                  {SpaceBasedEndMarker}     { yybegin(CONTROL_STRUCTURE); return WHITE_SPACE; }
 
-<PYTHON_EVALUTED_CONTROL_STRUCTURE_START>  {SpaceBasedEndMarker}     { yybegin(PYTHON_EXECUTED_CONDITION); return WHITE_SPACE; }
+<PYTHON_EVALUTED_CONTROL_STRUCTURE_START>  {SpaceBasedEndMarker} | {MultiLine} | {EOL} {Whitespace}* {LineComment}   { yybegin(PYTHON_EXECUTED_CONDITION); return WHITE_SPACE; }
 <PYTHON_EXECUTED_CONDITION>  {
-    {EverythingButVariableValue}                { pushBackTrailingWhitespace(); return PYTHON_EXPRESSION_CONTENT; }
-    {SpaceBasedEndMarker} | {EOL}+         { leaveState(); return EOL; }
+    {EverythingButVariableValue}           { pushBackTrailingWhitespace(); return PYTHON_EXPRESSION_CONTENT; }
+    {SpaceBasedEndMarker}                  { leaveState(); return EOS; }
+    \s* {EOL}+                             { leaveState(); return EOL; }
 }
 
 <SIMPLE_CONTROL_STRUCTURE> {
@@ -452,7 +455,7 @@ LineComment = {LineCommentSign} {NON_EOL}*
 // Multiline handling (don't return EOL on detected multiline). If there is a multiline without the Ellipsis (...) marker,
 // then return EOL to mark the end of the statement.
 <SETTING, KEYWORD_CALL, KEYWORD_ARGUMENTS, VARIABLE_DEFINITION, VARIABLE_DEFINITION_ARGUMENTS> {
-    <SETTING_TEMPLATE_START, TESTCASE_DEFINITION, TASK_DEFINITION, USER_KEYWORD_DEFINITION> {
+    <SETTING_TEMPLATE_START, TESTCASE_DEFINITION, TASK_DEFINITION, USER_KEYWORD_DEFINITION, PYTHON_EXECUTED_CONDITION> {
         {MultiLine}                                  { return WHITE_SPACE; }
         {EOL} {Whitespace}* {LineComment}            { yypushback(yylength() - 1); return WHITE_SPACE; }
     }
@@ -499,7 +502,13 @@ LineComment = {LineCommentSign} {NON_EOL}*
     {KeywordLiteralValue}                 { yybegin(KEYWORD_ARGUMENTS); pushBackTrailingWhitespace(); return KEYWORD_NAME; }
 }
 
-<SETTINGS_SECTION, SETTING, KEYWORD_ARGUMENTS, USER_KEYWORD_RETURN_STATEMENT> {RestrictedLiteralValue} { pushBackTrailingWhitespace(); return LITERAL_CONSTANT; }
+<KEYWORD_ARGUMENTS> {
+    {SpaceBasedEndMarker} {RobotKeyword}  { yypushback(yylength()); leaveState(); break; }
+}
+
+<SETTINGS_SECTION, SETTING, KEYWORD_ARGUMENTS, USER_KEYWORD_RETURN_STATEMENT> {
+    {RestrictedLiteralValue}              { pushBackTrailingWhitespace(); return LITERAL_CONSTANT; }
+}
 
 <COMMENTS_SECTION> {
     {SettingsSectionIdentifier}            { resetInternalState(); yybegin(SETTINGS_SECTION); pushBackTrailingWhitespace(); return SETTINGS_HEADER; }
