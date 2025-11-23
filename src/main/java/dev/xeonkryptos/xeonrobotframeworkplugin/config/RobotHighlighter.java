@@ -43,9 +43,9 @@ public class RobotHighlighter extends SyntaxHighlighterBase {
             DefaultLanguageHighlighterColors.BRACKETS);
     public static final TextAttributesKey COMMENT = TextAttributesKey.createTextAttributesKey("ROBOT_COMMENT", DefaultLanguageHighlighterColors.LINE_COMMENT);
     public static final TextAttributesKey GHERKIN = TextAttributesKey.createTextAttributesKey("ROBOT_GHERKIN_KEYWORD",
-                                                                                              DefaultLanguageHighlighterColors.METADATA);
+                                                                                              DefaultLanguageHighlighterColors.KEYWORD);
     public static final TextAttributesKey STRUCTURAL_KEYWORDS = TextAttributesKey.createTextAttributesKey("ROBOT_STRUCTURAL_KEYWORD",
-                                                                                                          DefaultLanguageHighlighterColors.METADATA);
+                                                                                                          DefaultLanguageHighlighterColors.KEYWORD);
     public static final TextAttributesKey PYTHON_EXPRESSION_CONTENT = TextAttributesKey.createTextAttributesKey("ROBOT_PYTHON_EXPRESSION_CONTENT",
                                                                                                                 DefaultLanguageHighlighterColors.TEMPLATE_LANGUAGE_COLOR);
     public static final TextAttributesKey ERROR = TextAttributesKey.createTextAttributesKey(TokenType.BAD_CHARACTER.toString(),
