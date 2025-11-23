@@ -177,7 +177,7 @@ class RobotExecutableUnitWithBrowseButton(
 
     init {
         addActionListener(actionListener)
-        childComponent.document.addDocumentListener(documentListener)
+        childComponent.document.addDocumentListener(documentListener, this)
         childComponent.border = JBUI.Borders.empty(2)
     }
 
@@ -204,7 +204,6 @@ class RobotExecutableUnitWithBrowseButton(
     override fun dispose() {
         super.dispose()
         removeActionListener(actionListener)
-        childComponent.document.removeDocumentListener(documentListener)
     }
 }
 
