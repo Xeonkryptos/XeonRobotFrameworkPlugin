@@ -11,14 +11,14 @@ import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.*;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.*;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotPsiImplUtil;
 
-public class RobotExtendedVariableIndexAccessImpl extends RobotPsiElementBase implements RobotExtendedVariableIndexAccess {
+public class RobotVariableSliceAccessContentImpl extends RobotPsiElementBase implements RobotVariableSliceAccessContent {
 
-  public RobotExtendedVariableIndexAccessImpl(@NotNull ASTNode node) {
+  public RobotVariableSliceAccessContentImpl(@NotNull ASTNode node) {
     super(node);
   }
 
   public void accept(@NotNull RobotVisitor visitor) {
-    visitor.visitExtendedVariableIndexAccess(this);
+    visitor.visitVariableSliceAccessContent(this);
   }
 
   @Override

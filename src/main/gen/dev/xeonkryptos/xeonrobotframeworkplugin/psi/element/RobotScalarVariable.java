@@ -9,22 +9,19 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotScalarVariableStub
 
 public interface RobotScalarVariable extends RobotVariable, StubBasedPsiElement<RobotScalarVariableStub> {
 
-  @NotNull
-  List<RobotExtendedVariableIndexAccess> getExtendedVariableIndexAccessList();
-
-  @NotNull
-  List<RobotExtendedVariableKeyAccess> getExtendedVariableKeyAccessList();
-
-  @NotNull
-  List<RobotExtendedVariableNestedAccess> getExtendedVariableNestedAccessList();
-
-  @NotNull
-  List<RobotExtendedVariableSliceAccess> getExtendedVariableSliceAccessList();
-
   @Nullable
   RobotPythonExpression getPythonExpression();
 
   @Nullable
   RobotVariableContent getVariableContent();
+
+  @NotNull
+  List<RobotVariableIndexAccessContent> getVariableIndexAccessContentList();
+
+  @NotNull
+  List<RobotVariableNestedAccessContent> getVariableNestedAccessContentList();
+
+  @NotNull
+  List<RobotVariableSliceAccessContent> getVariableSliceAccessContentList();
 
 }

@@ -64,22 +64,6 @@ public class RobotVisitor extends PsiElementVisitor {
     // visitElement(o);
   }
 
-  public void visitExtendedVariableIndexAccess(@NotNull RobotExtendedVariableIndexAccess o) {
-    visitElement(o);
-  }
-
-  public void visitExtendedVariableKeyAccess(@NotNull RobotExtendedVariableKeyAccess o) {
-    visitElement(o);
-  }
-
-  public void visitExtendedVariableNestedAccess(@NotNull RobotExtendedVariableNestedAccess o) {
-    visitElement(o);
-  }
-
-  public void visitExtendedVariableSliceAccess(@NotNull RobotExtendedVariableSliceAccess o) {
-    visitElement(o);
-  }
-
   public void visitFinallyStructure(@NotNull RobotFinallyStructure o) {
     visitExecutableStatement(o);
     // visitBlockOpeningStructure(o);
@@ -403,6 +387,18 @@ public class RobotVisitor extends PsiElementVisitor {
     // visitQualifiedNameOwner(o);
     // visitFoldable(o);
     // visitElement(o);
+  }
+
+  public void visitVariableIndexAccessContent(@NotNull RobotVariableIndexAccessContent o) {
+    visitElement(o);
+  }
+
+  public void visitVariableNestedAccessContent(@NotNull RobotVariableNestedAccessContent o) {
+    visitElement(o);
+  }
+
+  public void visitVariableSliceAccessContent(@NotNull RobotVariableSliceAccessContent o) {
+    visitElement(o);
   }
 
   public void visitVariableStatement(@NotNull RobotVariableStatement o) {

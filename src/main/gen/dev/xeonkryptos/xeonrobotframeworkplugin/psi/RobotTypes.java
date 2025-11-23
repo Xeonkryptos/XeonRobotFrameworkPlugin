@@ -27,10 +27,6 @@ public interface RobotTypes {
   IElementType ENVIRONMENT_VARIABLE = new RobotElementType("ENVIRONMENT_VARIABLE");
   IElementType EXCEPT_STRUCTURE = new RobotElementType("EXCEPT_STRUCTURE");
   IElementType EXECUTABLE_STATEMENT = new RobotElementType("EXECUTABLE_STATEMENT");
-  IElementType EXTENDED_VARIABLE_INDEX_ACCESS = new RobotElementType("EXTENDED_VARIABLE_INDEX_ACCESS");
-  IElementType EXTENDED_VARIABLE_KEY_ACCESS = new RobotElementType("EXTENDED_VARIABLE_KEY_ACCESS");
-  IElementType EXTENDED_VARIABLE_NESTED_ACCESS = new RobotElementType("EXTENDED_VARIABLE_NESTED_ACCESS");
-  IElementType EXTENDED_VARIABLE_SLICE_ACCESS = new RobotElementType("EXTENDED_VARIABLE_SLICE_ACCESS");
   IElementType FINALLY_STRUCTURE = new RobotElementType("FINALLY_STRUCTURE");
   IElementType FOR_LOOP_STRUCTURE = new RobotElementType("FOR_LOOP_STRUCTURE");
   IElementType GLOBAL_SETTING_STATEMENT = new RobotElementType("GLOBAL_SETTING_STATEMENT");
@@ -96,6 +92,9 @@ public interface RobotTypes {
   IElementType VARIABLE_BODY_ID = new RobotElementType("VARIABLE_BODY_ID");
   IElementType VARIABLE_CONTENT = new RobotElementType("VARIABLE_CONTENT");
   IElementType VARIABLE_DEFINITION = RobotVariableDefinitionStubElement.create("VARIABLE_DEFINITION");
+  IElementType VARIABLE_INDEX_ACCESS_CONTENT = new RobotElementType("VARIABLE_INDEX_ACCESS_CONTENT");
+  IElementType VARIABLE_NESTED_ACCESS_CONTENT = new RobotElementType("VARIABLE_NESTED_ACCESS_CONTENT");
+  IElementType VARIABLE_SLICE_ACCESS_CONTENT = new RobotElementType("VARIABLE_SLICE_ACCESS_CONTENT");
   IElementType VARIABLE_VALUE = new RobotElementType("VARIABLE_VALUE");
   IElementType WHILE_LOOP_STRUCTURE = new RobotElementType("WHILE_LOOP_STRUCTURE");
 
@@ -163,7 +162,6 @@ public interface RobotTypes {
   IElementType VARIABLE_BODY = new RobotTokenType("VARIABLE_BODY");
   IElementType VARIABLE_END = new RobotTokenType("VARIABLE_END");
   IElementType VARIABLE_INDEX_ACCESS = new RobotTokenType("VARIABLE_INDEX_ACCESS");
-  IElementType VARIABLE_KEY_ACCESS = new RobotTokenType("VARIABLE_KEY_ACCESS");
   IElementType VARIABLE_SLICE_ACCESS = new RobotTokenType("VARIABLE_SLICE_ACCESS");
   IElementType WHEN = new RobotTokenType("WHEN");
   IElementType WHILE = new RobotTokenType("WHILE");
@@ -201,18 +199,6 @@ public interface RobotTypes {
       }
       else if (type == EXECUTABLE_STATEMENT) {
         return new RobotExecutableStatementImpl(node);
-      }
-      else if (type == EXTENDED_VARIABLE_INDEX_ACCESS) {
-        return new RobotExtendedVariableIndexAccessImpl(node);
-      }
-      else if (type == EXTENDED_VARIABLE_KEY_ACCESS) {
-        return new RobotExtendedVariableKeyAccessImpl(node);
-      }
-      else if (type == EXTENDED_VARIABLE_NESTED_ACCESS) {
-        return new RobotExtendedVariableNestedAccessImpl(node);
-      }
-      else if (type == EXTENDED_VARIABLE_SLICE_ACCESS) {
-        return new RobotExtendedVariableSliceAccessImpl(node);
       }
       else if (type == FINALLY_STRUCTURE) {
         return new RobotFinallyStructureImpl(node);
@@ -402,6 +388,15 @@ public interface RobotTypes {
       }
       else if (type == VARIABLE_DEFINITION) {
         return new RobotVariableDefinitionImpl(node);
+      }
+      else if (type == VARIABLE_INDEX_ACCESS_CONTENT) {
+        return new RobotVariableIndexAccessContentImpl(node);
+      }
+      else if (type == VARIABLE_NESTED_ACCESS_CONTENT) {
+        return new RobotVariableNestedAccessContentImpl(node);
+      }
+      else if (type == VARIABLE_SLICE_ACCESS_CONTENT) {
+        return new RobotVariableSliceAccessContentImpl(node);
       }
       else if (type == VARIABLE_VALUE) {
         return new RobotVariableValueImpl(node);

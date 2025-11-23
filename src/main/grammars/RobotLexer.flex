@@ -1,13 +1,12 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.psi;
 
-import com.intellij.lexer.FlexLexer;
 import com.intellij.psi.tree.IElementType;
 
 import java.util.Stack;
 
 import static com.intellij.psi.TokenType.*;
 import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.*;
-
+import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.ExtendedRobotTypes.*;
 %%
 
 %{
@@ -47,34 +46,6 @@ import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.*;
       globalTemplateEnabled = false;
   }
 
-  protected void pushBackTrailingWhitespace() {
-      int textLength = yylength();
-      if (textLength > 0) {
-          int trailingWhitespaceLength = computeTrailingWhitespaceLength();
-          if (trailingWhitespaceLength > 0) {
-              yypushback(trailingWhitespaceLength);
-          }
-      }
-  }
-
-  protected int computeTrailingWhitespaceLength() {
-      int length = 0;
-      int end = yylength() - 1;
-      for (int i = end; i >= 0; i--) {
-          char c = yycharat(i);
-          if (isWhitespace(c)) {
-              length++;
-          } else {
-              break;
-          }
-      }
-      return length;
-  }
-
-  protected boolean isWhitespace(char character) {
-      return character == ' ' || character == '\t' || character == '\r' || character == '\n' || character == '\u00A0';
-  }
-
   protected int indexOf(char character) {
       int length = yylength();
       for (int i = 0; i < length; i++) {
@@ -89,7 +60,7 @@ import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.*;
 %public
 %buffer 65536
 %class RobotLexer
-%implements FlexLexer
+%extends AbstractRobotLexer
 %function advance
 %type IElementType
 %unicode
@@ -104,8 +75,9 @@ EqualSign = "="
 Ellipsis = "..."
 LineCommentSign = "#"
 
-Escape = \\(.|\R)
-EmptyValue = \\ {Space}
+EscapeChar = \\
+Escape = {EscapeChar} (.|\R)
+EmptyValue = {EscapeChar} {Space}
 
 Whitespace = {Space} | {Tab} | {NBSP}
 
@@ -151,8 +123,13 @@ TemplateKeywords = ("Test Template" | "Task Template")
 TimeoutKeywords = ("Test Timeout" | "Task Timeout")
 GenericSettingsKeyword = [\p{L}\p{N}_]+([ ][\p{L}\p{N}_])*
 
-AllowedEverythingButVariableChar = [^\s$@%&] | [$@%&] [^{]
+VariableCharNotAllowed = [^\s$@%&]
+ExceptionForAllowedVariableChar = [$@%&] [^{] | {EscapeChar}{1} [\s$@%&]
+AllowedEverythingButVariableChar = {VariableCharNotAllowed} | {ExceptionForAllowedVariableChar}
 AllowedEverythingButVariableSeq = {AllowedEverythingButVariableChar}+
+
+AllowedExtendedVariableAccessChar = [^\s\[\]$@%&] | {EscapeChar}{1} "[" | {EscapeChar}{1} "]" | {ExceptionForAllowedVariableChar}
+AllowedExtendedVariableAccessSeq = {AllowedExtendedVariableAccessChar}+
 
 AllowedChar = [^\s$@%&=] | [$@%&] [^{]
 AllowedSeq = {AllowedChar}+
@@ -170,6 +147,7 @@ RestrictedLiteralValue = {AllowedSeq} ({Space} {AllowedSeq})*
 KeywordLibraryNameLiteralValue = [/*]? {AllowedKeywordLibraryNameSeq}+ "."
 KeywordLiteralValue = {AllowedKeywordSeq} ({Space} {AllowedKeywordSeq})*
 EverythingButVariableValue = {AllowedEverythingButVariableSeq} ({Space} {AllowedEverythingButVariableSeq})*
+ExtendedVariableAccessValue = {AllowedExtendedVariableAccessSeq}
 
 VariableLiteralValue =   ({Escape} | [^}$@&%] | [\$@&%] [^{] | {OpeningVariable})+
 ParamLiteralValue =      {AllowedParamSeq} ({Space} {AllowedParamSeq})*
@@ -182,10 +160,6 @@ LocalSetupTeardownKeywords = {LocalSettingKeywordStart} ("Setup" | "Teardown") {
 LocalSettingKeyword = {LocalSettingKeywordStart} {GenericSettingsKeyword} {LocalSettingKeywordEnd}
 
 ParameterName = [\p{L}_][\p{L}\p{N}_]*
-
-VariableSliceAccess = "[" \s* (-?\d+)? \s* : \s* (-?\d+)? (\s* : \s* (-?\d+))? \s* "]"
-VariableIndexAccess = "[" \s* \d+ \s* "]"
-VariableKeyAccess = "[" \s* ([^$@%&] | [$@%&][^{])[^\]]* \s* "]"
 
 RobotKeyword = "GIVEN" | "WHEN" | "THEN" | "AND" | "BUT" | "VAR" | "FOR" | "IN" | "IN ENUMERATE" | "IN RANGE" | "IN ZIP" | "END" | "WHILE" | "IF" | "ELSE IF" | "ELSE" | "TRY" | "EXCEPT" | "FINALLY" | "BREAK" | "CONTINUE" | "GROUP" | "RETURN"
 
@@ -200,7 +174,7 @@ LineComment = {LineCommentSign} {NON_EOL}*
 %state KEYWORD_CALL, KEYWORD_ARGUMENTS
 %state INLINE_VARIABLE_DEFINITION, VARIABLE_DEFINITION, VARIABLE_DEFINITION_ARGUMENTS, VARIABLE_USAGE, EXTENDED_VARIABLE_ACCESS, PYTHON_EXPRESSION
 %state PARAMETER_ASSIGNMENT, PARAMETER_VALUE, TEMPLATE_PARAMETER_ASSIGNMENT, TEMPLATE_PARAMETER_VALUE
-%state FOR_STRUCTURE, SIMPLE_CONTROL_STRUCTURE_START, CONTROL_STRUCTURE_START, PYTHON_EXECUTED_CONDITION, PYTHON_EVALUTED_CONTROL_STRUCTURE_START, SIMPLE_CONTROL_STRUCTURE, CONTROL_STRUCTURE
+%state FOR_STRUCTURE, SIMPLE_CONTROL_STRUCTURE_START, CONTROL_STRUCTURE_START, PYTHON_EXECUTED_CONDITION, PYTHON_EVALUATED_CONTROL_STRUCTURE_START, SIMPLE_CONTROL_STRUCTURE, CONTROL_STRUCTURE
 
 %xstate COMMENTS_SECTION
 
@@ -257,26 +231,14 @@ LineComment = {LineCommentSign} {NON_EOL}*
 <VARIABLE_DEFINITION, VARIABLE_USAGE> {VariableLiteralValue}  { return VARIABLE_BODY; }
 
 <EXTENDED_VARIABLE_ACCESS> {
-    {VariableSliceAccess}        { return VARIABLE_SLICE_ACCESS; }
-    {VariableIndexAccess}        { return VARIABLE_INDEX_ACCESS; }
-    {VariableKeyAccess}          { return VARIABLE_KEY_ACCESS; }
-
     "["                          { return VARIABLE_ACCESS_START; }
     "]"                          { return VARIABLE_ACCESS_END; }
-
-    {VariableSliceAccess} \s+    { leaveState(); pushBackTrailingWhitespace(); return VARIABLE_SLICE_ACCESS; }
-    {VariableIndexAccess} \s+    { leaveState(); pushBackTrailingWhitespace(); return VARIABLE_INDEX_ACCESS; }
-    {VariableKeyAccess}   \s+    { leaveState(); pushBackTrailingWhitespace(); return VARIABLE_KEY_ACCESS; }
-
-    {VariableSliceAccess} !"["   { leaveState(); pushBackTrailingWhitespace(); yypushback(yylength() - indexOf(']') - 1); return VARIABLE_SLICE_ACCESS; }
-    {VariableIndexAccess} !"["   { leaveState(); pushBackTrailingWhitespace(); yypushback(yylength() - indexOf(']') - 1); return VARIABLE_INDEX_ACCESS; }
-    {VariableKeyAccess}   !"["   { leaveState(); pushBackTrailingWhitespace(); yypushback(yylength() - indexOf(']') - 1); return VARIABLE_KEY_ACCESS; }
-
-    "]" (\s+ | ! "[")            {
+    "]" (\s+ | [^\[])            {
           leaveState();
           yypushback(yylength() - 1);
           return VARIABLE_ACCESS_END;
       }
+    {ExtendedVariableAccessValue} { pushBackTrailingWhitespace(); return EXTENDED_VARIABLE_ACCESS_BODY; }
 }
 
 <PYTHON_EXPRESSION> {
@@ -404,8 +366,8 @@ LineComment = {LineCommentSign} {NON_EOL}*
 
         "FOR" \s{2}\s* {LiteralValue}             { yypushback(yylength() - "FOR".length()); enterNewState(FOR_STRUCTURE); return FOR; }
         "WHILE" \s{2}\s* {LiteralValue}?          { yypushback(yylength() - "WHILE".length()); enterNewState(CONTROL_STRUCTURE_START); return WHILE; }
-        "IF" \s{2}\s*                             { pushBackTrailingWhitespace(); enterNewState(PYTHON_EVALUTED_CONTROL_STRUCTURE_START); return IF; }
-        "ELSE IF" \s{2}\s*                        { pushBackTrailingWhitespace(); enterNewState(PYTHON_EVALUTED_CONTROL_STRUCTURE_START); return ELSE_IF; }
+        "IF" \s{2}\s*                             { pushBackTrailingWhitespace(); enterNewState(PYTHON_EVALUATED_CONTROL_STRUCTURE_START); return IF; }
+        "ELSE IF" \s{2}\s*                        { pushBackTrailingWhitespace(); enterNewState(PYTHON_EVALUATED_CONTROL_STRUCTURE_START); return ELSE_IF; }
         "ELSE" \s*                                { pushBackTrailingWhitespace(); return ELSE; }
         "TRY" \s*                                 { pushBackTrailingWhitespace(); return TRY; }
         "EXCEPT" \s{2}\s* {LiteralValue}          { yypushback(yylength() - "EXCEPT".length()); enterNewState(SIMPLE_CONTROL_STRUCTURE_START); return EXCEPT; }
@@ -467,11 +429,11 @@ LineComment = {LineCommentSign} {NON_EOL}*
 <SIMPLE_CONTROL_STRUCTURE_START>           {SpaceBasedEndMarker}     { yybegin(SIMPLE_CONTROL_STRUCTURE); return WHITE_SPACE; }
 <CONTROL_STRUCTURE_START>                  {SpaceBasedEndMarker}     { yybegin(CONTROL_STRUCTURE); return WHITE_SPACE; }
 
-<PYTHON_EVALUTED_CONTROL_STRUCTURE_START>  {SpaceBasedEndMarker} | {MultiLine} | {EOL} {Whitespace}* {LineComment}   { yybegin(PYTHON_EXECUTED_CONDITION); return WHITE_SPACE; }
+<PYTHON_EVALUATED_CONTROL_STRUCTURE_START>  {SpaceBasedEndMarker} | {MultiLine} | {EOL} {Whitespace}* {LineComment}   { yybegin(PYTHON_EXECUTED_CONDITION); return WHITE_SPACE; }
 <PYTHON_EXECUTED_CONDITION>  {
-    {EverythingButVariableValue}           { pushBackTrailingWhitespace(); return PYTHON_EXPRESSION_CONTENT; }
-    {SpaceBasedEndMarker}                  { leaveState(); return EOS; }
-    \s* {EOL}+                             { leaveState(); return EOL; }
+    {EverythingButVariableValue}            { pushBackTrailingWhitespace(); return PYTHON_EXPRESSION_CONTENT; }
+    {SpaceBasedEndMarker}                   { leaveState(); return EOS; }
+    \s* {EOL}+                              { leaveState(); return EOL; }
 }
 
 <SIMPLE_CONTROL_STRUCTURE> {

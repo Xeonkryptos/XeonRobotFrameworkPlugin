@@ -6,6 +6,7 @@ import com.intellij.openapi.editor.colors.TextAttributesKey;
 import com.intellij.openapi.fileTypes.SyntaxHighlighterBase;
 import com.intellij.psi.TokenType;
 import com.intellij.psi.tree.IElementType;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.ExtendedRobotTypes;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotLexerAdapter;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes;
 import org.jetbrains.annotations.NotNull;
@@ -102,9 +103,7 @@ public class RobotHighlighter extends SyntaxHighlighterBase {
         keys.put(RobotTypes.ENV_VARIABLE_START, VARIABLE);
         keys.put(RobotTypes.VARIABLE_BODY, VARIABLE);
         keys.put(RobotTypes.VARIABLE_END, VARIABLE);
-        keys.put(RobotTypes.VARIABLE_KEY_ACCESS, VARIABLE);
-        keys.put(RobotTypes.VARIABLE_SLICE_ACCESS, VARIABLE);
-        keys.put(RobotTypes.VARIABLE_INDEX_ACCESS, VARIABLE);
+        keys.put(ExtendedRobotTypes.EXTENDED_VARIABLE_ACCESS_BODY, VARIABLE);
         keys.put(RobotTypes.VARIABLE_ACCESS_START, EXTENDED_VARIABLE_ACCESS_BRACKETS);
         keys.put(RobotTypes.VARIABLE_ACCESS_END, EXTENDED_VARIABLE_ACCESS_BRACKETS);
         keys.put(RobotTypes.USER_KEYWORD_STATEMENT, USER_KEYWORD_NAME);

@@ -34,30 +34,6 @@ public class RobotScalarVariableImpl extends RobotScalarVariableExtension implem
   }
 
   @Override
-  @NotNull
-  public List<RobotExtendedVariableIndexAccess> getExtendedVariableIndexAccessList() {
-    return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotExtendedVariableIndexAccess.class);
-  }
-
-  @Override
-  @NotNull
-  public List<RobotExtendedVariableKeyAccess> getExtendedVariableKeyAccessList() {
-    return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotExtendedVariableKeyAccess.class);
-  }
-
-  @Override
-  @NotNull
-  public List<RobotExtendedVariableNestedAccess> getExtendedVariableNestedAccessList() {
-    return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotExtendedVariableNestedAccess.class);
-  }
-
-  @Override
-  @NotNull
-  public List<RobotExtendedVariableSliceAccess> getExtendedVariableSliceAccessList() {
-    return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotExtendedVariableSliceAccess.class);
-  }
-
-  @Override
   @Nullable
   public RobotPythonExpression getPythonExpression() {
     return PsiTreeUtil.getChildOfType(this, RobotPythonExpression.class);
@@ -67,6 +43,24 @@ public class RobotScalarVariableImpl extends RobotScalarVariableExtension implem
   @Nullable
   public RobotVariableContent getVariableContent() {
     return PsiTreeUtil.getChildOfType(this, RobotVariableContent.class);
+  }
+
+  @Override
+  @NotNull
+  public List<RobotVariableIndexAccessContent> getVariableIndexAccessContentList() {
+    return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotVariableIndexAccessContent.class);
+  }
+
+  @Override
+  @NotNull
+  public List<RobotVariableNestedAccessContent> getVariableNestedAccessContentList() {
+    return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotVariableNestedAccessContent.class);
+  }
+
+  @Override
+  @NotNull
+  public List<RobotVariableSliceAccessContent> getVariableSliceAccessContentList() {
+    return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotVariableSliceAccessContent.class);
   }
 
 }

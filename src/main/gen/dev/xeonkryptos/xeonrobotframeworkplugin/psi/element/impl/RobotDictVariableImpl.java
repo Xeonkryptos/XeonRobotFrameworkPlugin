@@ -34,18 +34,6 @@ public class RobotDictVariableImpl extends RobotDictVariableExtension implements
   }
 
   @Override
-  @NotNull
-  public List<RobotExtendedVariableKeyAccess> getExtendedVariableKeyAccessList() {
-    return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotExtendedVariableKeyAccess.class);
-  }
-
-  @Override
-  @NotNull
-  public List<RobotExtendedVariableNestedAccess> getExtendedVariableNestedAccessList() {
-    return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotExtendedVariableNestedAccess.class);
-  }
-
-  @Override
   @Nullable
   public RobotPythonExpression getPythonExpression() {
     return PsiTreeUtil.getChildOfType(this, RobotPythonExpression.class);
@@ -55,6 +43,12 @@ public class RobotDictVariableImpl extends RobotDictVariableExtension implements
   @Nullable
   public RobotVariableContent getVariableContent() {
     return PsiTreeUtil.getChildOfType(this, RobotVariableContent.class);
+  }
+
+  @Override
+  @NotNull
+  public List<RobotVariableNestedAccessContent> getVariableNestedAccessContentList() {
+    return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotVariableNestedAccessContent.class);
   }
 
 }

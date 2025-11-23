@@ -9,16 +9,13 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotDictVariableStub;
 
 public interface RobotDictVariable extends RobotVariable, StubBasedPsiElement<RobotDictVariableStub> {
 
-  @NotNull
-  List<RobotExtendedVariableKeyAccess> getExtendedVariableKeyAccessList();
-
-  @NotNull
-  List<RobotExtendedVariableNestedAccess> getExtendedVariableNestedAccessList();
-
   @Nullable
   RobotPythonExpression getPythonExpression();
 
   @Nullable
   RobotVariableContent getVariableContent();
+
+  @NotNull
+  List<RobotVariableNestedAccessContent> getVariableNestedAccessContentList();
 
 }
