@@ -2633,7 +2633,7 @@ public class RobotParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // WHILE positional_argument+ eol_marker (parameter+ eol_marker)? executable_statement* END eol_marker
+  // WHILE conditional_content (EOS parameter+)? eol_marker executable_statement* END eol_marker
   public static boolean while_loop_structure(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "while_loop_structure")) return false;
     if (!nextTokenIs(b, WHILE)) return false;
@@ -2641,9 +2641,9 @@ public class RobotParser implements PsiParser, LightPsiParser {
     Marker m = enter_section_(b, l, _NONE_, WHILE_LOOP_STRUCTURE, null);
     r = consumeToken(b, WHILE);
     p = r; // pin = 1
-    r = r && report_error_(b, while_loop_structure_1(b, l + 1));
+    r = r && report_error_(b, conditional_content(b, l + 1));
+    r = p && report_error_(b, while_loop_structure_2(b, l + 1)) && r;
     r = p && report_error_(b, eol_marker(b, l + 1)) && r;
-    r = p && report_error_(b, while_loop_structure_3(b, l + 1)) && r;
     r = p && report_error_(b, while_loop_structure_4(b, l + 1)) && r;
     r = p && report_error_(b, consumeToken(b, END)) && r;
     r = p && eol_marker(b, l + 1) && r;
@@ -2651,49 +2651,34 @@ public class RobotParser implements PsiParser, LightPsiParser {
     return r || p;
   }
 
-  // positional_argument+
-  private static boolean while_loop_structure_1(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "while_loop_structure_1")) return false;
-    boolean r;
-    Marker m = enter_section_(b);
-    r = positional_argument(b, l + 1);
-    while (r) {
-      int c = current_position_(b);
-      if (!positional_argument(b, l + 1)) break;
-      if (!empty_element_parsed_guard_(b, "while_loop_structure_1", c)) break;
-    }
-    exit_section_(b, m, null, r);
-    return r;
-  }
-
-  // (parameter+ eol_marker)?
-  private static boolean while_loop_structure_3(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "while_loop_structure_3")) return false;
-    while_loop_structure_3_0(b, l + 1);
+  // (EOS parameter+)?
+  private static boolean while_loop_structure_2(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "while_loop_structure_2")) return false;
+    while_loop_structure_2_0(b, l + 1);
     return true;
   }
 
-  // parameter+ eol_marker
-  private static boolean while_loop_structure_3_0(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "while_loop_structure_3_0")) return false;
+  // EOS parameter+
+  private static boolean while_loop_structure_2_0(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "while_loop_structure_2_0")) return false;
     boolean r;
     Marker m = enter_section_(b);
-    r = while_loop_structure_3_0_0(b, l + 1);
-    r = r && eol_marker(b, l + 1);
+    r = consumeToken(b, EOS);
+    r = r && while_loop_structure_2_0_1(b, l + 1);
     exit_section_(b, m, null, r);
     return r;
   }
 
   // parameter+
-  private static boolean while_loop_structure_3_0_0(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "while_loop_structure_3_0_0")) return false;
+  private static boolean while_loop_structure_2_0_1(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "while_loop_structure_2_0_1")) return false;
     boolean r;
     Marker m = enter_section_(b);
     r = parameter(b, l + 1);
     while (r) {
       int c = current_position_(b);
       if (!parameter(b, l + 1)) break;
-      if (!empty_element_parsed_guard_(b, "while_loop_structure_3_0_0", c)) break;
+      if (!empty_element_parsed_guard_(b, "while_loop_structure_2_0_1", c)) break;
     }
     exit_section_(b, m, null, r);
     return r;

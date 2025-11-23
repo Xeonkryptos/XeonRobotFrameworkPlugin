@@ -121,7 +121,7 @@ SetupTeardownKeywords = ("Suite Setup" | "Suite Teardown" | "Test Setup" | "Test
 TagsKeywords = ("Test Tags" | "Force Tags" | "Default Tags" | "Keyword Tags")
 TemplateKeywords = ("Test Template" | "Task Template")
 TimeoutKeywords = ("Test Timeout" | "Task Timeout")
-GenericSettingsKeyword = [\p{L}\p{N}_]+([ ][\p{L}\p{N}_])*
+GenericSettingsKeyword = \p{Letter}+([ ][\p{Letter}_]+)*
 
 VariableCharNotAllowed = [^\s$@%&]
 ExceptionForAllowedVariableChar = [$@%&] [^{] | {EscapeChar}{1} [\s$@%&]
@@ -131,16 +131,16 @@ AllowedEverythingButVariableSeq = {AllowedEverythingButVariableChar}+
 AllowedExtendedVariableAccessChar = [^\s\[\]$@%&] | {EscapeChar}{1} "[" | {EscapeChar}{1} "]" | {ExceptionForAllowedVariableChar}
 AllowedExtendedVariableAccessSeq = {AllowedExtendedVariableAccessChar}+
 
-AllowedChar = [^\s$@%&=] | [$@%&] [^{]
+AllowedChar = [^\s$@%&=] | {ExceptionForAllowedVariableChar}
 AllowedSeq = {AllowedChar}+
 
-AllowedKeywordLibraryNameChar = [\p{L}\p{N}_-]
+AllowedKeywordLibraryNameChar = [\p{Alpha}_-]
 AllowedKeywordLibraryNameSeq = {AllowedKeywordLibraryNameChar}+
 
-AllowedKeywordChar = [^\s$@%&.] | [$@%&] [^{]
+AllowedKeywordChar = [^\s$@%&.] | {ExceptionForAllowedVariableChar}
 AllowedKeywordSeq = {AllowedKeywordChar}+
 
-AllowedParamChar = [^\s$@%&] | [$@%&] [^{]
+AllowedParamChar = [^\s$@%&] | {ExceptionForAllowedVariableChar}
 AllowedParamSeq = {AllowedParamChar}+
 
 RestrictedLiteralValue = {AllowedSeq} ({Space} {AllowedSeq})*
@@ -149,7 +149,7 @@ KeywordLiteralValue = {AllowedKeywordSeq} ({Space} {AllowedKeywordSeq})*
 EverythingButVariableValue = {AllowedEverythingButVariableSeq} ({Space} {AllowedEverythingButVariableSeq})*
 ExtendedVariableAccessValue = {AllowedExtendedVariableAccessSeq}
 
-VariableLiteralValue =   ({Escape} | [^}$@&%] | [\$@&%] [^{] | {OpeningVariable})+
+VariableLiteralValue =   ({Escape} | [^}$@&%] | [$@&%] [^{] | {OpeningVariable})+
 ParamLiteralValue =      {AllowedParamSeq} ({Space} {AllowedParamSeq})*
 LiteralValue =           [^\s]+([ ][^\s]+)*[ ]?
 
@@ -159,7 +159,7 @@ LocalTemplateKeyword = {LocalSettingKeywordStart} "Template" {LocalSettingKeywor
 LocalSetupTeardownKeywords = {LocalSettingKeywordStart} ("Setup" | "Teardown") {LocalSettingKeywordEnd}
 LocalSettingKeyword = {LocalSettingKeywordStart} {GenericSettingsKeyword} {LocalSettingKeywordEnd}
 
-ParameterName = [\p{L}_][\p{L}\p{N}_]*
+ParameterName = [\p{Alpha}_-]+
 
 RobotKeyword = "GIVEN" | "WHEN" | "THEN" | "AND" | "BUT" | "VAR" | "FOR" | "IN" | "IN ENUMERATE" | "IN RANGE" | "IN ZIP" | "END" | "WHILE" | "IF" | "ELSE IF" | "ELSE" | "TRY" | "EXCEPT" | "FINALLY" | "BREAK" | "CONTINUE" | "GROUP" | "RETURN"
 
@@ -364,18 +364,18 @@ LineComment = {LineCommentSign} {NON_EOL}*
             }
         }
 
-        "FOR" \s{2}\s* {LiteralValue}             { yypushback(yylength() - "FOR".length()); enterNewState(FOR_STRUCTURE); return FOR; }
-        "WHILE" \s{2}\s* {LiteralValue}?          { yypushback(yylength() - "WHILE".length()); enterNewState(CONTROL_STRUCTURE_START); return WHILE; }
-        "IF" \s{2}\s*                             { pushBackTrailingWhitespace(); enterNewState(PYTHON_EVALUATED_CONTROL_STRUCTURE_START); return IF; }
-        "ELSE IF" \s{2}\s*                        { pushBackTrailingWhitespace(); enterNewState(PYTHON_EVALUATED_CONTROL_STRUCTURE_START); return ELSE_IF; }
-        "ELSE" \s*                                { pushBackTrailingWhitespace(); return ELSE; }
-        "TRY" \s*                                 { pushBackTrailingWhitespace(); return TRY; }
-        "EXCEPT" \s{2}\s* {LiteralValue}          { yypushback(yylength() - "EXCEPT".length()); enterNewState(SIMPLE_CONTROL_STRUCTURE_START); return EXCEPT; }
-        "FINALLY" \s*                             { pushBackTrailingWhitespace(); return FINALLY; }
-        "BREAK" \s*                               { pushBackTrailingWhitespace(); return BREAK; }
-        "CONTINUE" \s*                            { pushBackTrailingWhitespace(); return CONTINUE; }
-        "GROUP" (\s{2}\s* {LiteralValue})?        { yypushback(yylength() - "GROUP".length()); enterNewState(SIMPLE_CONTROL_STRUCTURE_START); return GROUP; }
-        "END" \s*                                 { pushBackTrailingWhitespace(); return END; }
+        "FOR" {SpaceBasedEndMarker}\s* {LiteralValue}             { yypushback(yylength() - "FOR".length()); enterNewState(FOR_STRUCTURE); return FOR; }
+        "WHILE" {SpaceBasedEndMarker}\s*                          { pushBackTrailingWhitespace(); enterNewState(PYTHON_EVALUATED_CONTROL_STRUCTURE_START); return WHILE; }
+        "IF" {SpaceBasedEndMarker}\s*                             { pushBackTrailingWhitespace(); enterNewState(PYTHON_EVALUATED_CONTROL_STRUCTURE_START); return IF; }
+        "ELSE IF" {SpaceBasedEndMarker}\s*                        { pushBackTrailingWhitespace(); enterNewState(PYTHON_EVALUATED_CONTROL_STRUCTURE_START); return ELSE_IF; }
+        "ELSE" \s*                                                { pushBackTrailingWhitespace(); return ELSE; }
+        "TRY" \s*                                                 { pushBackTrailingWhitespace(); return TRY; }
+        "EXCEPT" {SpaceBasedEndMarker}\s* {LiteralValue}          { yypushback(yylength() - "EXCEPT".length()); enterNewState(SIMPLE_CONTROL_STRUCTURE_START); return EXCEPT; }
+        "FINALLY" \s*                                             { pushBackTrailingWhitespace(); return FINALLY; }
+        "BREAK" \s*                                               { pushBackTrailingWhitespace(); return BREAK; }
+        "CONTINUE" \s*                                            { pushBackTrailingWhitespace(); return CONTINUE; }
+        "GROUP" ({SpaceBasedEndMarker}\s* {LiteralValue})?        { yypushback(yylength() - "GROUP".length()); enterNewState(SIMPLE_CONTROL_STRUCTURE_START); return GROUP; }
+        "END" \s*                                                 { pushBackTrailingWhitespace(); return END; }
     }
 
     "GIVEN" \s+ {RestrictedLiteralValue}    {
@@ -419,21 +419,21 @@ LineComment = {LineCommentSign} {NON_EOL}*
 }
 
 <FOR_STRUCTURE>  {
-    "IN" \s{2}\s* {LiteralValue}              { yypushback(yylength() - "IN".length()); yybegin(CONTROL_STRUCTURE_START); return FOR_IN; }
-    "IN ENUMERATE" \s{2}\s* {LiteralValue}    { yypushback(yylength() - "IN ENUMERATE".length()); yybegin(CONTROL_STRUCTURE_START); return FOR_IN; }
-    "IN RANGE" \s{2}\s* {LiteralValue}        { yypushback(yylength() - "IN RANGE".length()); yybegin(CONTROL_STRUCTURE_START); return FOR_IN; }
-    "IN ZIP" \s{2}\s* {LiteralValue}          { yypushback(yylength() - "IN ZIP".length()); yybegin(CONTROL_STRUCTURE_START); return FOR_IN; }
-    "END" \s*                                 { pushBackTrailingWhitespace(); leaveState(); return END; }
+    "IN" \s{2}\s* {LiteralValue}            { yypushback(yylength() - "IN".length()); yybegin(CONTROL_STRUCTURE_START); return FOR_IN; }
+    "IN ENUMERATE" \s{2}\s* {LiteralValue}  { yypushback(yylength() - "IN ENUMERATE".length()); yybegin(CONTROL_STRUCTURE_START); return FOR_IN; }
+    "IN RANGE" \s{2}\s* {LiteralValue}      { yypushback(yylength() - "IN RANGE".length()); yybegin(CONTROL_STRUCTURE_START); return FOR_IN; }
+    "IN ZIP" \s{2}\s* {LiteralValue}        { yypushback(yylength() - "IN ZIP".length()); yybegin(CONTROL_STRUCTURE_START); return FOR_IN; }
+    "END" \s*                               { pushBackTrailingWhitespace(); leaveState(); return END; }
 }
 
-<SIMPLE_CONTROL_STRUCTURE_START>           {SpaceBasedEndMarker}     { yybegin(SIMPLE_CONTROL_STRUCTURE); return WHITE_SPACE; }
-<CONTROL_STRUCTURE_START>                  {SpaceBasedEndMarker}     { yybegin(CONTROL_STRUCTURE); return WHITE_SPACE; }
+<SIMPLE_CONTROL_STRUCTURE_START>            {SpaceBasedEndMarker}     { yybegin(SIMPLE_CONTROL_STRUCTURE); return WHITE_SPACE; }
+<CONTROL_STRUCTURE_START>                   {SpaceBasedEndMarker}     { yybegin(CONTROL_STRUCTURE); return WHITE_SPACE; }
 
 <PYTHON_EVALUATED_CONTROL_STRUCTURE_START>  {SpaceBasedEndMarker} | {MultiLine} | {EOL} {Whitespace}* {LineComment}   { yybegin(PYTHON_EXECUTED_CONDITION); return WHITE_SPACE; }
 <PYTHON_EXECUTED_CONDITION>  {
     {EverythingButVariableValue}            { pushBackTrailingWhitespace(); return PYTHON_EXPRESSION_CONTENT; }
     {SpaceBasedEndMarker}                   { leaveState(); return EOS; }
-    \s* {EOL}+                              { leaveState(); return EOL; }
+    {EOL}+                                  { leaveState(); return EOL; }
 }
 
 <SIMPLE_CONTROL_STRUCTURE> {

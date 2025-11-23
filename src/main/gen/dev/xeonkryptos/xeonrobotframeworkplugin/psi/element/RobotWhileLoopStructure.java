@@ -7,6 +7,9 @@ import com.intellij.psi.PsiElement;
 
 public interface RobotWhileLoopStructure extends RobotExecutableStatement, RobotBlockOpeningStructure {
 
+  @Nullable
+  RobotConditionalContent getConditionalContent();
+
   @NotNull
   List<RobotParameter> getParameterList();
 

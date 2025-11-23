@@ -29,6 +29,12 @@ public class RobotWhileLoopStructureImpl extends RobotExecutableStatementImpl im
   }
 
   @Override
+  @Nullable
+  public RobotConditionalContent getConditionalContent() {
+    return PsiTreeUtil.getChildOfType(this, RobotConditionalContent.class);
+  }
+
+  @Override
   @NotNull
   public List<RobotParameter> getParameterList() {
     return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotParameter.class);

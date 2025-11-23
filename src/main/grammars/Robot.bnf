@@ -246,7 +246,7 @@ for_loop_structure ::= FOR variable_definition+ FOR_IN positional_argument+ para
     pin=1
     implements=block_opening_structure
 }
-while_loop_structure ::= WHILE positional_argument+ eol_marker (parameter+ eol_marker)? executable_statement* END eol_marker {
+while_loop_structure ::= WHILE conditional_content (EOS parameter+)? eol_marker executable_statement* END eol_marker {
     pin=1
     implements=block_opening_structure
 }

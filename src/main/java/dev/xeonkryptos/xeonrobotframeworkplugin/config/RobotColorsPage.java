@@ -46,8 +46,6 @@ public class RobotColorsPage implements ColorSettingsPage {
                                                                                                                    RobotHighlighter.LOCAL_SETTING_OPTION),
                                                                                           new AttributesDescriptor(RobotBundle.message("color.settings.setting"),
                                                                                                                    RobotHighlighter.GLOBAL_SETTING_OPTION),
-                                                                                          new AttributesDescriptor(RobotBundle.message("color.settings.import"),
-                                                                                                                   RobotHighlighter.IMPORT),
                                                                                           new AttributesDescriptor(RobotBundle.message(
                                                                                                   "color.settings.pythonExpression"),
                                                                                                                    RobotHighlighter.PYTHON_EXPRESSION_CONTENT) };

@@ -22,8 +22,6 @@ public class RobotHighlighter extends SyntaxHighlighterBase {
                                                                                                             DefaultLanguageHighlighterColors.DOC_COMMENT_TAG_VALUE);
     public static final TextAttributesKey LOCAL_SETTING_OPTION = TextAttributesKey.createTextAttributesKey("ROBOT_LOCAL_SETTING_OPTION",
                                                                                                            DefaultLanguageHighlighterColors.METADATA);
-    public static final TextAttributesKey IMPORT = TextAttributesKey.createTextAttributesKey("ROBOT_IMPORT_OPTION",
-                                                                                             DefaultLanguageHighlighterColors.DOC_COMMENT_TAG_VALUE);
     public static final TextAttributesKey IMPORT_ARGUMENT = TextAttributesKey.createTextAttributesKey("ROBOT_IMPORT_ARGUMENT",
                                                                                                       DefaultLanguageHighlighterColors.HIGHLIGHTED_REFERENCE);
     public static final TextAttributesKey USER_KEYWORD_NAME = TextAttributesKey.createTextAttributesKey("ROBOT_USER_KEYWORD_DEFINITION",
@@ -119,14 +117,13 @@ public class RobotHighlighter extends SyntaxHighlighterBase {
         keys.put(RobotTypes.TEMPLATE_KEYWORDS, GLOBAL_SETTING_OPTION);
         keys.put(RobotTypes.TIMEOUT_KEYWORDS, GLOBAL_SETTING_OPTION);
         keys.put(RobotTypes.UNKNOWN_SETTING_KEYWORD, GLOBAL_SETTING_OPTION);
+        keys.put(RobotTypes.LIBRARY_IMPORT_KEYWORD, GLOBAL_SETTING_OPTION);
+        keys.put(RobotTypes.RESOURCE_IMPORT_KEYWORD, GLOBAL_SETTING_OPTION);
+        keys.put(RobotTypes.VARIABLES_IMPORT_KEYWORD, GLOBAL_SETTING_OPTION);
 
         keys.put(RobotTypes.LOCAL_SETTING_START, LOCAL_SETTING_OPTION);
         keys.put(RobotTypes.LOCAL_SETTING_END, LOCAL_SETTING_OPTION);
         keys.put(RobotTypes.LOCAL_SETTING_NAME, LOCAL_SETTING_OPTION);
-
-        keys.put(RobotTypes.LIBRARY_IMPORT_KEYWORD, IMPORT);
-        keys.put(RobotTypes.RESOURCE_IMPORT_KEYWORD, IMPORT);
-        keys.put(RobotTypes.VARIABLES_IMPORT_KEYWORD, IMPORT);
 
         keys.put(TokenType.BAD_CHARACTER, ERROR);
     }
