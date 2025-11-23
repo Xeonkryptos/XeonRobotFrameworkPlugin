@@ -20,7 +20,7 @@ public class RobotHighlighter extends SyntaxHighlighterBase {
     public static final TextAttributesKey GLOBAL_SETTING_OPTION = TextAttributesKey.createTextAttributesKey("ROBOT_GLOBAL_SETTING_OPTION",
                                                                                                             DefaultLanguageHighlighterColors.DOC_COMMENT_TAG_VALUE);
     public static final TextAttributesKey LOCAL_SETTING_OPTION = TextAttributesKey.createTextAttributesKey("ROBOT_LOCAL_SETTING_OPTION",
-                                                                                                           DefaultLanguageHighlighterColors.DOC_COMMENT_TAG);
+                                                                                                           DefaultLanguageHighlighterColors.METADATA);
     public static final TextAttributesKey IMPORT = TextAttributesKey.createTextAttributesKey("ROBOT_IMPORT_OPTION",
                                                                                              DefaultLanguageHighlighterColors.DOC_COMMENT_TAG_VALUE);
     public static final TextAttributesKey IMPORT_ARGUMENT = TextAttributesKey.createTextAttributesKey("ROBOT_IMPORT_ARGUMENT",
@@ -37,7 +37,6 @@ public class RobotHighlighter extends SyntaxHighlighterBase {
                                                                                                DefaultLanguageHighlighterColors.STATIC_FIELD);
     public static final TextAttributesKey VARIABLE = TextAttributesKey.createTextAttributesKey("ROBOT_VARIABLE",
                                                                                                DefaultLanguageHighlighterColors.DOC_COMMENT_MARKUP);
-    public static final TextAttributesKey REASSIGNED_VARIABLE = TextAttributesKey.createTextAttributesKey("ROBOT_REASSIGNED_VARIABLE", VARIABLE);
     public static final TextAttributesKey EXTENDED_VARIABLE_ACCESS_BRACKETS = TextAttributesKey.createTextAttributesKey(
             "ROBOT_EXTENDED_VARIABLE_ACCESS_BRACKETS",
             DefaultLanguageHighlighterColors.BRACKETS);
@@ -50,6 +49,8 @@ public class RobotHighlighter extends SyntaxHighlighterBase {
                                                                                                                 DefaultLanguageHighlighterColors.TEMPLATE_LANGUAGE_COLOR);
     public static final TextAttributesKey ERROR = TextAttributesKey.createTextAttributesKey(TokenType.BAD_CHARACTER.toString(),
                                                                                             DefaultLanguageHighlighterColors.INVALID_STRING_ESCAPE);
+
+    public static final TextAttributesKey REASSIGNED_VARIABLE = TextAttributesKey.createTextAttributesKey("ROBOT_REASSIGNED_VARIABLE", VARIABLE);
 
     private static final Map<IElementType, TextAttributesKey> keys = new HashMap<>();
 
@@ -120,8 +121,9 @@ public class RobotHighlighter extends SyntaxHighlighterBase {
         keys.put(RobotTypes.TIMEOUT_KEYWORDS, GLOBAL_SETTING_OPTION);
         keys.put(RobotTypes.UNKNOWN_SETTING_KEYWORD, GLOBAL_SETTING_OPTION);
 
+        keys.put(RobotTypes.LOCAL_SETTING_START, LOCAL_SETTING_OPTION);
+        keys.put(RobotTypes.LOCAL_SETTING_END, LOCAL_SETTING_OPTION);
         keys.put(RobotTypes.LOCAL_SETTING_NAME, LOCAL_SETTING_OPTION);
-        keys.put(RobotTypes.ARGUMENTS_SETTING_NAME, LOCAL_SETTING_OPTION);
 
         keys.put(RobotTypes.LIBRARY_IMPORT_KEYWORD, IMPORT);
         keys.put(RobotTypes.RESOURCE_IMPORT_KEYWORD, IMPORT);

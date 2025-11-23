@@ -131,8 +131,6 @@ TasksSectionIdentifier = {Star} {SectionIdentifierParts} {SectionTasksWords} {NO
 KeywordsSectionIdentifier = {Star} {SectionIdentifierParts} {SectionKeywordsWords} {NON_EOL}*
 VariablesSectionIdentifier = {Star} {SectionIdentifierParts} {SectionVariablesWords} {NON_EOL}*
 
-SectionHeader = {SettingsSectionIdentifier} | {VariablesSectionIdentifier} | {KeywordsSectionIdentifier} | {TestcaseSectionIdentifier} | {TasksSectionIdentifier} | {CommentSectionIdentifier}
-
 OpeningVariable = "{"
 ClosingVariable = "}"
 
@@ -181,7 +179,6 @@ LocalSettingKeywordStart = "[" \s*
 LocalSettingKeywordEnd = \s* "]"
 LocalTemplateKeyword = {LocalSettingKeywordStart} "Template" {LocalSettingKeywordEnd}
 LocalSetupTeardownKeywords = {LocalSettingKeywordStart} ("Setup" | "Teardown") {LocalSettingKeywordEnd}
-LocalArgumentsSettingKeyword = {LocalSettingKeywordStart} "Arguments" {LocalSettingKeywordEnd}
 LocalSettingKeyword = {LocalSettingKeywordStart} {GenericSettingsKeyword} {LocalSettingKeywordEnd}
 
 ParameterName = [\p{L}_][\p{L}\p{N}_]*
@@ -199,7 +196,7 @@ LineComment = {LineCommentSign} {NON_EOL}*
 %state SETTINGS_SECTION, VARIABLES_SECTION
 %state TESTCASE_NAME_DEFINITION, TESTCASE_DEFINITION, TASK_NAME_DEFINITION, TASK_DEFINITION
 %state USER_KEYWORD_NAME_DEFINITION, USER_KEYWORD_DEFINITION, USER_KEYWORD_RETURN_STATEMENT
-%state SETTING, SETTING_TEMPLATE_START, TEMPLATE_DEFINITION
+%state SETTING, LOCAL_SETTING_DEFINITION, SETTING_TEMPLATE_START, LOCAL_TEMPLATE_DEFINITION_START, INTERMEDIATE_TEMPLATE_CONFIGURATION, TEMPLATE_DEFINITION
 %state KEYWORD_CALL, KEYWORD_ARGUMENTS
 %state INLINE_VARIABLE_DEFINITION, VARIABLE_DEFINITION, VARIABLE_DEFINITION_ARGUMENTS, VARIABLE_USAGE, EXTENDED_VARIABLE_ACCESS, PYTHON_EXPRESSION
 %state PARAMETER_ASSIGNMENT, PARAMETER_VALUE, TEMPLATE_PARAMETER_ASSIGNMENT, TEMPLATE_PARAMETER_VALUE
@@ -317,7 +314,45 @@ LineComment = {LineCommentSign} {NON_EOL}*
 <TASK_DEFINITION>             ^ {LiteralValue}    { localTemplateEnabled = globalTemplateEnabled; pushBackTrailingWhitespace(); return TASK_NAME; }
 <USER_KEYWORD_DEFINITION>     ^ {LiteralValue}    { pushBackTrailingWhitespace(); return USER_KEYWORD_NAME; }
 
+<INTERMEDIATE_TEMPLATE_CONFIGURATION> {
+    {SpaceBasedEndMarker} \s* | \s* {MultiLine} "NONE" \s*  {
+          pushBackTrailingWhitespace();
+          yypushback("NONE".length());
+          return WHITE_SPACE;
+    }
+    "NONE" \s*  {
+          pushBackTrailingWhitespace();
+          yybegin(SETTING); // move into SETTING state without remembering this state. When leaving this SETTING state then going back into TEMPLATE_DEFINITION
+          return LITERAL_CONSTANT;
+    }
+    \s* (\R \s* !{Ellipsis} | {MultiLine} \R)  {
+          leaveState(); // back into TEMPLATE_DEFINITION
+          return WHITE_SPACE;
+    }
+}
 <TEMPLATE_DEFINITION> {
+    {LocalTemplateKeyword} ({SpaceBasedEndMarker} \s* | \s* {MultiLine}) "NONE"   {
+          yypushback(yylength());
+          enterNewState(INTERMEDIATE_TEMPLATE_CONFIGURATION);
+          enterNewState(LOCAL_SETTING_DEFINITION);
+          localTemplateEnabled = false;
+          break;
+    }
+    {LocalTemplateKeyword} \s* (\R \s* !{Ellipsis} | {MultiLine} \R)  {
+          yypushback(yylength());
+          enterNewState(INTERMEDIATE_TEMPLATE_CONFIGURATION);
+          enterNewState(LOCAL_SETTING_DEFINITION);
+          localTemplateEnabled = false;
+          break;
+    }
+    {LocalTemplateKeyword} \s*   {
+          yypushback(yylength());
+          enterNewState(TEMPLATE_DEFINITION);
+          enterNewState(SETTING_TEMPLATE_START);
+          enterNewState(LOCAL_SETTING_DEFINITION);
+          localTemplateEnabled = true;
+          break;
+    }
     ^ {LiteralValue}    {
         localTemplateEnabled = globalTemplateEnabled;
         leaveState();
@@ -345,33 +380,26 @@ LineComment = {LineCommentSign} {NON_EOL}*
 
     {RestrictedLiteralValue}       { enterNewState(KEYWORD_CALL); yypushback(yylength()); break; }
 }
+<LOCAL_SETTING_DEFINITION> {
+    {LocalSettingKeywordStart} { pushBackTrailingWhitespace(); return LOCAL_SETTING_START; }
+    {GenericSettingsKeyword}   { pushBackTrailingWhitespace(); return LOCAL_SETTING_NAME; }
+    {LocalSettingKeywordEnd}   { pushBackTrailingWhitespace(); leaveState(); return LOCAL_SETTING_END; }
+}
 <TESTCASE_DEFINITION, TASK_DEFINITION> {
-    <TEMPLATE_DEFINITION> {
-        {LocalTemplateKeyword} (\s{2} \s* | \s* {MultiLine}) "NONE"   {
-              yypushback("NONE".length());
-              pushBackTrailingWhitespace();
-              enterNewState(SETTING);
-              localTemplateEnabled = false;
-              return LOCAL_SETTING_NAME;
-          }
-        {LocalTemplateKeyword} \s* (\R \s* !{Ellipsis} | {MultiLine} \R)      {
-              yypushback(yylength() - indexOf(']') - 1);
-              localTemplateEnabled = false;
-              return LOCAL_SETTING_NAME;
-          }
-        {LocalTemplateKeyword} \s*              {
-              enterNewState(SETTING_TEMPLATE_START);
-              pushBackTrailingWhitespace();
-              localTemplateEnabled = true;
-              return LOCAL_SETTING_NAME;
-          }
-    }
-
     <USER_KEYWORD_DEFINITION> {
         <TEMPLATE_DEFINITION> {
-            {LocalSetupTeardownKeywords} \s+          { enterNewState(KEYWORD_CALL); pushBackTrailingWhitespace(); return LOCAL_SETTING_NAME; }
-            {LocalArgumentsSettingKeyword} \s+        { enterNewState(SETTING); pushBackTrailingWhitespace(); return ARGUMENTS_SETTING_NAME; }
-            {LocalSettingKeyword} \s*                 { enterNewState(SETTING); pushBackTrailingWhitespace(); return LOCAL_SETTING_NAME; }
+            {LocalSetupTeardownKeywords} \s+     {
+                yypushback(yylength());
+                enterNewState(KEYWORD_CALL);
+                enterNewState(LOCAL_SETTING_DEFINITION);
+                break;
+            }
+            {LocalSettingKeyword} \s*            {
+                yypushback(yylength());
+                enterNewState(SETTING);
+                enterNewState(LOCAL_SETTING_DEFINITION);
+                break;
+            }
         }
 
         "FOR" \s{2}\s* {LiteralValue}             { yypushback(yylength() - "FOR".length()); enterNewState(FOR_STRUCTURE); return FOR; }
@@ -454,8 +482,8 @@ LineComment = {LineCommentSign} {NON_EOL}*
 
 // Multiline handling (don't return EOL on detected multiline). If there is a multiline without the Ellipsis (...) marker,
 // then return EOL to mark the end of the statement.
-<SETTING, KEYWORD_CALL, KEYWORD_ARGUMENTS, VARIABLE_DEFINITION, VARIABLE_DEFINITION_ARGUMENTS> {
-    <SETTING_TEMPLATE_START, TESTCASE_DEFINITION, TASK_DEFINITION, USER_KEYWORD_DEFINITION, PYTHON_EXECUTED_CONDITION> {
+<SETTING, KEYWORD_CALL, KEYWORD_ARGUMENTS, VARIABLE_DEFINITION, VARIABLE_DEFINITION_ARGUMENTS, SETTING_TEMPLATE_START> {
+    <TESTCASE_DEFINITION, TASK_DEFINITION, USER_KEYWORD_DEFINITION, PYTHON_EXECUTED_CONDITION> {
         {MultiLine}                                  { return WHITE_SPACE; }
         {EOL} {Whitespace}* {LineComment}            { yypushback(yylength() - 1); return WHITE_SPACE; }
     }
@@ -482,21 +510,15 @@ LineComment = {LineCommentSign} {NON_EOL}*
         {ListVariableStart}                           { enterNewState(VARIABLE_USAGE); return LIST_VARIABLE_START; }
         {DictVariableStart}                           { enterNewState(VARIABLE_USAGE); return DICT_VARIABLE_START; }
         {EnvVariableStart}                            { enterNewState(VARIABLE_USAGE); return ENV_VARIABLE_START; }
-        {Space}{2} \s* | {Tab} \s* | {EOL}+           { leaveState(); yypushback(yylength()); break; }
+        {SpaceBasedEndMarker} \s* | {EOL}+            { leaveState(); yypushback(yylength()); break; }
     }
 }
 
-<SETTING_TEMPLATE_START>  {
-    {KeywordLibraryNameLiteralValue}      { yypushback(1); return KEYWORD_LIBRARY_NAME; }
-    "."                                   { return KEYWORD_LIBRARY_SEPARATOR; }
-    {KeywordLiteralValue}                 { templateKeywordFound = true; pushBackTrailingWhitespace(); return KEYWORD_NAME; }
-    {EOL}+                                { leaveState(); enterNewState(TEMPLATE_DEFINITION); return EOL; }
-}
-
+<SETTING_TEMPLATE_START>  {KeywordLiteralValue}       { templateKeywordFound = true; pushBackTrailingWhitespace(); return KEYWORD_NAME; }
 // Consciously used yybegin instead of enterNewState to avoid pushing the state onto the stack. We're technically still in the KEYWORD_CALL state
 // and when we're, even in KEYWORD_ARGUMENTS, leave the state, it should return to whatever was before KEYWORD_CALL.
 // Just switched into another state to provide keyword arguments as such instead of interpreting them incorrectly as KEYWORD_NAME.
-<KEYWORD_CALL>      {
+<KEYWORD_CALL, SETTING_TEMPLATE_START>  {
     {KeywordLibraryNameLiteralValue}      { yypushback(1); return KEYWORD_LIBRARY_NAME; }
     "."                                   { return KEYWORD_LIBRARY_SEPARATOR; }
     {KeywordLiteralValue}                 { yybegin(KEYWORD_ARGUMENTS); pushBackTrailingWhitespace(); return KEYWORD_NAME; }

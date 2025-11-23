@@ -192,7 +192,7 @@ bdd_statement ::= (
         pin=1
 }
 
-user_keyword_statement ::= user_keyword_statement_id eol_marker (local_setting | local_arguments_setting | executable_statement)* {
+user_keyword_statement ::= user_keyword_statement_id eol_marker (local_arguments_setting | local_setting | executable_statement)* {
     pin=1
     implements = [
         "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotQualifiedNameOwner"
@@ -217,14 +217,14 @@ local_setting ::= local_setting_id (positional_argument | parameter | eol_free_k
     implements=foldable
     hooks=[localTemplateDefinitionHook]
 }
-local_setting_id ::= LOCAL_SETTING_NAME
+local_setting_id ::= LOCAL_SETTING_START LOCAL_SETTING_NAME LOCAL_SETTING_END
 
 local_arguments_setting ::= local_arguments_setting_id local_arguments_setting_parameter* eol_marker {
     pin=1
     methods=[getSettingName]
     implements=foldable
 }
-local_arguments_setting_id ::= ARGUMENTS_SETTING_NAME
+local_arguments_setting_id ::= LOCAL_SETTING_START "Arguments" LOCAL_SETTING_END {pin=2}
 local_arguments_setting_parameter ::= local_arguments_setting_parameter_optional | local_arguments_setting_parameter_mandatory
 local_arguments_setting_parameter_mandatory ::= variable_definition
 local_arguments_setting_parameter_optional ::= variable_definition "=" positional_argument {pin=3}

@@ -100,7 +100,6 @@ public interface RobotTypes {
   IElementType WHILE_LOOP_STRUCTURE = new RobotElementType("WHILE_LOOP_STRUCTURE");
 
   IElementType AND = new RobotTokenType("AND");
-  IElementType ARGUMENTS_SETTING_NAME = new RobotTokenType("ARGUMENTS_SETTING_NAME");
   IElementType ASSIGNMENT = new RobotTokenType("ASSIGNMENT");
   IElementType BREAK = new RobotTokenType("BREAK");
   IElementType BUT = new RobotTokenType("BUT");
@@ -128,7 +127,9 @@ public interface RobotTypes {
   IElementType LIBRARY_IMPORT_KEYWORD = new RobotTokenType("LIBRARY_IMPORT_KEYWORD");
   IElementType LIST_VARIABLE_START = new RobotTokenType("LIST_VARIABLE_START");
   IElementType LITERAL_CONSTANT = new RobotTokenType("LITERAL_CONSTANT");
+  IElementType LOCAL_SETTING_END = new RobotTokenType("LOCAL_SETTING_END");
   IElementType LOCAL_SETTING_NAME = new RobotTokenType("LOCAL_SETTING_NAME");
+  IElementType LOCAL_SETTING_START = new RobotTokenType("LOCAL_SETTING_START");
   IElementType METADATA_KEYWORD = new RobotTokenType("METADATA_KEYWORD");
   IElementType PARAMETER_NAME = new RobotTokenType("PARAMETER_NAME");
   IElementType PYTHON_EXPRESSION_CONTENT = new RobotTokenType("PYTHON_EXPRESSION_CONTENT");

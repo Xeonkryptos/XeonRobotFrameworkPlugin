@@ -15,6 +15,7 @@ public class RobotPairedBraceMatcher implements PairedBraceMatcher {
                                                                      new BracePair(RobotTypes.DICT_VARIABLE_START, RobotTypes.VARIABLE_END, false),
                                                                      new BracePair(RobotTypes.ENV_VARIABLE_START, RobotTypes.VARIABLE_END, false),
                                                                      new BracePair(RobotTypes.VARIABLE_ACCESS_START, RobotTypes.VARIABLE_ACCESS_END, false),
+                                                                     new BracePair(RobotTypes.LOCAL_SETTING_START, RobotTypes.LOCAL_SETTING_END, false),
                                                                      new BracePair(RobotTypes.PYTHON_EXPRESSION_START,
                                                                                    RobotTypes.PYTHON_EXPRESSION_END,
                                                                                    false) };
