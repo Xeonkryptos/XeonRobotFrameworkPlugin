@@ -68,9 +68,18 @@ public abstract class AbstractRobotSmartMultilineEnterActionHandler<T extends Ps
 
             int lineNumber = document.getLineNumber(currentCaretOffset);
             int lineStartOffset = document.getLineStartOffset(lineNumber);
+            int previousLineStartOffset = -1;
+            if (lineNumber > 0) {
+                previousLineStartOffset = document.getLineStartOffset(lineNumber - 1);
+            }
 
+            boolean lookAtPreviousLine = false;
             while (element instanceof PsiWhiteSpace || element instanceof PsiComment) {
-                if (element.getTextOffset() <= lineStartOffset) {
+                if (element instanceof PsiWhiteSpace whiteSpace && whiteSpace.getText().contains(GlobalConstants.ELLIPSIS)) {
+                    lookAtPreviousLine = true;
+                }
+                int textOffset = element.getTextOffset();
+                if (textOffset <= lineStartOffset && (!lookAtPreviousLine || textOffset <= previousLineStartOffset)) {
                     return Result.Continue;
                 }
                 element = element.getPrevSibling();
