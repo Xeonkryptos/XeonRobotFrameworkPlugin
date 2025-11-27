@@ -4,6 +4,10 @@
 
 ## Unreleased
 
+### Fixed
+
+- Fixed run configuration execution issues with an empty set working directory
+
 ## 0.5.15
 
 ### Added

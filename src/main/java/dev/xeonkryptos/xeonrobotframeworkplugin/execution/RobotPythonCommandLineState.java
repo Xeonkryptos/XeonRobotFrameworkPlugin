@@ -351,7 +351,7 @@ public class RobotPythonCommandLineState extends PythonScriptCommandLineState {
                                                                                   .findFirst()
                                                                                   .map(stmt -> stmt.getContainingFile().getOriginalFile().getVirtualFile());
         return virtualFileStmtOptional.map(vfile -> VfsUtil.getCommonAncestor(expandedWorkingDirVFile, vfile))
-                                      .map(vfile -> VfsUtil.getRelativePath(virtualFileStmtOptional.get(), vfile, '/'))
+                                      .map(vfile -> VfsUtil.getRelativePath(vfile, virtualFileStmtOptional.get(), '/'))
                                       .orElseGet(() -> execInfo.getLocation().replace('.', '/') + "." + RobotFeatureFileType.getInstance()
                                                                                                                             .getDefaultExtension());
     }
