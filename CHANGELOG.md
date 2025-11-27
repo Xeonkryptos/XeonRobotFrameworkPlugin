@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+## 0.5.16
+
 ### Fixed
 
 - Fixed run configuration execution issues with an empty set working directory
