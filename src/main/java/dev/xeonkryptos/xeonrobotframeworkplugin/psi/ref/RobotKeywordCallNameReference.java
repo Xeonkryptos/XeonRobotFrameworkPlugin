@@ -64,7 +64,7 @@ public class RobotKeywordCallNameReference extends PsiPolyVariantReferenceBase<R
     @NotNull
     private PsiElement[] findKeywordReferences(@Nullable String libraryName, @NotNull String keyword, @Nullable PsiFile psiFile) {
         if (!(psiFile instanceof RobotFile robotFile)) {
-            return null;
+            return PsiElement.EMPTY_ARRAY;
         }
 
         Collection<VirtualFile> importedFiles = collectImportedVirtualFilesOneselfIncluded(robotFile, libraryName);
