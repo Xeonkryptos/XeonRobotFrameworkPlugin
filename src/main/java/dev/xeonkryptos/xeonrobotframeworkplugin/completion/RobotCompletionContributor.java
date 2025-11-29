@@ -32,7 +32,7 @@ import static dev.xeonkryptos.xeonrobotframeworkplugin.completion.RobotPatterns.
 public class RobotCompletionContributor extends CompletionContributor {
 
     public RobotCompletionContributor() {
-        extend(CompletionType.BASIC, psiElement().andNot(psiComment()).inFile(psiElement(RobotFile.class)), new SectionCompletionProvider());
+        extend(CompletionType.BASIC, psiElement().inFile(psiElement(RobotFile.class)), new SectionCompletionProvider());
         extend(CompletionType.BASIC,
                psiElement().andNot(or(psiComment(),
                                       psiElement(RobotTypes.LITERAL_CONSTANT),
