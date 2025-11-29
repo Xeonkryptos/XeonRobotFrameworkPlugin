@@ -318,11 +318,10 @@ public class RobotPythonCommandLineState extends PythonScriptCommandLineState {
             argumentConsumer.accept("--test");
             argumentConsumer.accept(testCaseInfo.getUnitName());
 
-            String file = computeFileLocation(testCaseInfo,
+            String file = computeFileLocation(project,
+                                              testCaseInfo,
                                               expandedWorkingDirVFile,
-                                              () -> ReadAction.nonBlocking(() -> TestCaseNameIndex.find(unitName, project, contextAnchor.getScope()))
-                                                              .inSmartMode(project)
-                                                              .executeSynchronously());
+                                              () -> TestCaseNameIndex.find(unitName, project, contextAnchor.getScope()));
             directories.add(file);
         }
         for (RobotRunnableUnitExecutionInfo taskInfo : tasks) {
@@ -330,11 +329,10 @@ public class RobotPythonCommandLineState extends PythonScriptCommandLineState {
             argumentConsumer.accept("--task");
             argumentConsumer.accept(unitName);
 
-            String file = computeFileLocation(taskInfo,
+            String file = computeFileLocation(project,
+                                              taskInfo,
                                               expandedWorkingDirVFile,
-                                              () -> ReadAction.nonBlocking(() -> TaskNameIndex.find(unitName, project, contextAnchor.getScope()))
-                                                              .inSmartMode(project)
-                                                              .executeSynchronously());
+                                              () -> TaskNameIndex.find(unitName, project, contextAnchor.getScope()));
             directories.add(file);
         }
         for (String directory : directories) {
@@ -342,16 +340,22 @@ public class RobotPythonCommandLineState extends PythonScriptCommandLineState {
         }
     }
 
-    private static String computeFileLocation(RobotRunnableUnitExecutionInfo execInfo,
+    private static String computeFileLocation(Project project,
+                                              RobotRunnableUnitExecutionInfo execInfo,
                                               VirtualFile expandedWorkingDirVFile,
                                               Supplier<Collection<? extends RobotQualifiedNameOwner>> qualifiedNameOwnerSupplier) {
-        Optional<VirtualFile> virtualFileStmtOptional = qualifiedNameOwnerSupplier.get()
-                                                                                  .stream()
-                                                                                  .filter(stmt -> execInfo.getFqdn().equals(stmt.getQualifiedName()))
-                                                                                  .findFirst()
-                                                                                  .map(stmt -> stmt.getContainingFile().getOriginalFile().getVirtualFile());
+        Optional<VirtualFile> virtualFileStmtOptional = ReadAction.nonBlocking(() -> qualifiedNameOwnerSupplier.get()
+                                                                                                               .stream()
+                                                                                                               .filter(stmt -> execInfo.getFqdn()
+                                                                                                                                       .equals(stmt.getQualifiedName()))
+                                                                                                               .findFirst()
+                                                                                                               .map(stmt -> stmt.getContainingFile()
+                                                                                                                                .getOriginalFile()
+                                                                                                                                .getVirtualFile()))
+                                                                  .inSmartMode(project)
+                                                                  .executeSynchronously();
         return virtualFileStmtOptional.map(vfile -> VfsUtil.getCommonAncestor(expandedWorkingDirVFile, vfile))
-                                      .map(vfile -> VfsUtil.getRelativePath(virtualFileStmtOptional.get(), vfile, '/'))
+                                      .map(vfile -> VfsUtil.getRelativePath(vfile, virtualFileStmtOptional.get(), '/'))
                                       .orElseGet(() -> execInfo.getLocation().replace('.', '/') + "." + RobotFeatureFileType.getInstance()
                                                                                                                             .getDefaultExtension());
     }

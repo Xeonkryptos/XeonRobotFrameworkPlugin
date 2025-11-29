@@ -7,9 +7,15 @@
 ### Changed
 
 - Optimized lexer and parser
-  - added/enhanced support for inline if statements
-  - added support for inline if statements with variable assignment
-  - handle if conditions as python expressions (mark them as such with new syntax highlighting)
+    - added/enhanced support for inline if statements
+    - added support for inline if statements with variable assignment
+    - handle if conditions as python expressions (mark them as such with new syntax highlighting)
+
+## 0.5.16
+
+### Fixed
+
+- Fixed run configuration execution issues with an empty set working directory
 
 ## 0.5.15
 
