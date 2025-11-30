@@ -4,6 +4,31 @@ import com.intellij.lexer.FlexLexer;
 
 public abstract class AbstractRobotLexer implements FlexLexer {
 
+    protected void pushBackEverythingExceptLeadingWhitespace() {
+        int textLength = yylength();
+        if (textLength > 0) {
+            int leadingWhitespaceLength = computeLeadingWhitespaceLength();
+            int charsToPushBack = textLength - leadingWhitespaceLength;
+            if (charsToPushBack > 0) {
+                yypushback(charsToPushBack);
+            }
+        }
+    }
+
+    protected int computeLeadingWhitespaceLength() {
+        int length = 0;
+        int textLength = yylength();
+        for (int i = 0; i < textLength; i++) {
+            char c = yycharat(i);
+            if (isWhitespace(c)) {
+                length++;
+            } else {
+                break;
+            }
+        }
+        return length;
+    }
+
     protected void pushBackTrailingWhitespace() {
         int textLength = yylength();
         if (textLength > 0) {

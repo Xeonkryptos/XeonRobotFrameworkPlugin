@@ -389,25 +389,26 @@ public class RobotParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // DOCUMENTATION_KEYWORD positional_argument* eol_marker
+  // DOCUMENTATION_KEYWORD LITERAL_CONSTANT* eol_marker
   public static boolean documentation_statement_global_setting(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "documentation_statement_global_setting")) return false;
     if (!nextTokenIs(b, DOCUMENTATION_KEYWORD)) return false;
-    boolean r;
-    Marker m = enter_section_(b);
+    boolean r, p;
+    Marker m = enter_section_(b, l, _NONE_, DOCUMENTATION_STATEMENT_GLOBAL_SETTING, null);
     r = consumeToken(b, DOCUMENTATION_KEYWORD);
-    r = r && documentation_statement_global_setting_1(b, l + 1);
-    r = r && eol_marker(b, l + 1);
-    exit_section_(b, m, DOCUMENTATION_STATEMENT_GLOBAL_SETTING, r);
-    return r;
+    p = r; // pin = 1
+    r = r && report_error_(b, documentation_statement_global_setting_1(b, l + 1));
+    r = p && eol_marker(b, l + 1) && r;
+    exit_section_(b, l, m, r, p, null);
+    return r || p;
   }
 
-  // positional_argument*
+  // LITERAL_CONSTANT*
   private static boolean documentation_statement_global_setting_1(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "documentation_statement_global_setting_1")) return false;
     while (true) {
       int c = current_position_(b);
-      if (!positional_argument(b, l + 1)) break;
+      if (!consumeToken(b, LITERAL_CONSTANT)) break;
       if (!empty_element_parsed_guard_(b, "documentation_statement_global_setting_1", c)) break;
     }
     return true;
@@ -868,7 +869,7 @@ public class RobotParser implements PsiParser, LightPsiParser {
   public static boolean global_setting_statement(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "global_setting_statement")) return false;
     boolean r;
-    Marker m = enter_section_(b, l, _COLLAPSE_, GLOBAL_SETTING_STATEMENT, "<global setting statement>");
+    Marker m = enter_section_(b, l, _COLLAPSE_, GLOBAL_SETTING_STATEMENT, "<Resource, Library, Variables, Metadata, Documentation, Name, Suite (Setup | Teardown), Force Tags, (Test | Task) Template, (Test | Task) Timeout>");
     r = library_import_global_setting(b, l + 1);
     if (!r) r = resource_import_global_setting(b, l + 1);
     if (!r) r = variables_import_global_setting(b, l + 1);
@@ -1512,25 +1513,26 @@ public class RobotParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // METADATA_KEYWORD positional_argument* eol_marker
+  // METADATA_KEYWORD parameter* eol_marker
   public static boolean metadata_statement_global_setting(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "metadata_statement_global_setting")) return false;
     if (!nextTokenIs(b, METADATA_KEYWORD)) return false;
-    boolean r;
-    Marker m = enter_section_(b);
+    boolean r, p;
+    Marker m = enter_section_(b, l, _NONE_, METADATA_STATEMENT_GLOBAL_SETTING, null);
     r = consumeToken(b, METADATA_KEYWORD);
-    r = r && metadata_statement_global_setting_1(b, l + 1);
-    r = r && eol_marker(b, l + 1);
-    exit_section_(b, m, METADATA_STATEMENT_GLOBAL_SETTING, r);
-    return r;
+    p = r; // pin = 1
+    r = r && report_error_(b, metadata_statement_global_setting_1(b, l + 1));
+    r = p && eol_marker(b, l + 1) && r;
+    exit_section_(b, l, m, r, p, null);
+    return r || p;
   }
 
-  // positional_argument*
+  // parameter*
   private static boolean metadata_statement_global_setting_1(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "metadata_statement_global_setting_1")) return false;
     while (true) {
       int c = current_position_(b);
-      if (!positional_argument(b, l + 1)) break;
+      if (!parameter(b, l + 1)) break;
       if (!empty_element_parsed_guard_(b, "metadata_statement_global_setting_1", c)) break;
     }
     return true;
@@ -1619,13 +1621,14 @@ public class RobotParser implements PsiParser, LightPsiParser {
   public static boolean resource_import_global_setting(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "resource_import_global_setting")) return false;
     if (!nextTokenIs(b, RESOURCE_IMPORT_KEYWORD)) return false;
-    boolean r;
-    Marker m = enter_section_(b);
+    boolean r, p;
+    Marker m = enter_section_(b, l, _NONE_, RESOURCE_IMPORT_GLOBAL_SETTING, null);
     r = consumeToken(b, RESOURCE_IMPORT_KEYWORD);
-    r = r && positional_argument(b, l + 1);
-    r = r && eol_marker(b, l + 1);
-    exit_section_(b, m, RESOURCE_IMPORT_GLOBAL_SETTING, r);
-    return r;
+    p = r; // pin = 1
+    r = r && report_error_(b, positional_argument(b, l + 1));
+    r = p && eol_marker(b, l + 1) && r;
+    exit_section_(b, l, m, r, p, null);
+    return r || p;
   }
 
   /* ********************************************************** */
@@ -1801,12 +1804,13 @@ public class RobotParser implements PsiParser, LightPsiParser {
   public static boolean setup_teardown_statements_global_setting(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "setup_teardown_statements_global_setting")) return false;
     if (!nextTokenIs(b, SETUP_TEARDOWN_STATEMENT_KEYWORDS)) return false;
-    boolean r;
-    Marker m = enter_section_(b);
+    boolean r, p;
+    Marker m = enter_section_(b, l, _NONE_, SETUP_TEARDOWN_STATEMENTS_GLOBAL_SETTING, null);
     r = consumeToken(b, SETUP_TEARDOWN_STATEMENT_KEYWORDS);
+    p = r; // pin = 1
     r = r && setup_teardown_statements_global_setting_1(b, l + 1);
-    exit_section_(b, m, SETUP_TEARDOWN_STATEMENTS_GLOBAL_SETTING, r);
-    return r;
+    exit_section_(b, l, m, r, p, null);
+    return r || p;
   }
 
   // eol_based_keyword_call | variable
@@ -1867,39 +1871,40 @@ public class RobotParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // SUITE_NAME_KEYWORD positional_argument eol_marker
+  // SUITE_NAME_KEYWORD LITERAL_CONSTANT eol_marker
   public static boolean suite_name_statement_global_setting(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "suite_name_statement_global_setting")) return false;
     if (!nextTokenIs(b, SUITE_NAME_KEYWORD)) return false;
-    boolean r;
-    Marker m = enter_section_(b);
-    r = consumeToken(b, SUITE_NAME_KEYWORD);
-    r = r && positional_argument(b, l + 1);
+    boolean r, p;
+    Marker m = enter_section_(b, l, _NONE_, SUITE_NAME_STATEMENT_GLOBAL_SETTING, null);
+    r = consumeTokens(b, 1, SUITE_NAME_KEYWORD, LITERAL_CONSTANT);
+    p = r; // pin = 1
     r = r && eol_marker(b, l + 1);
-    exit_section_(b, m, SUITE_NAME_STATEMENT_GLOBAL_SETTING, r);
-    return r;
+    exit_section_(b, l, m, r, p, null);
+    return r || p;
   }
 
   /* ********************************************************** */
-  // TAGS_KEYWORDS positional_argument* eol_marker
+  // TAGS_KEYWORDS LITERAL_CONSTANT* eol_marker
   public static boolean tags_statement_global_setting(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "tags_statement_global_setting")) return false;
     if (!nextTokenIs(b, TAGS_KEYWORDS)) return false;
-    boolean r;
-    Marker m = enter_section_(b);
+    boolean r, p;
+    Marker m = enter_section_(b, l, _NONE_, TAGS_STATEMENT_GLOBAL_SETTING, null);
     r = consumeToken(b, TAGS_KEYWORDS);
-    r = r && tags_statement_global_setting_1(b, l + 1);
-    r = r && eol_marker(b, l + 1);
-    exit_section_(b, m, TAGS_STATEMENT_GLOBAL_SETTING, r);
-    return r;
+    p = r; // pin = 1
+    r = r && report_error_(b, tags_statement_global_setting_1(b, l + 1));
+    r = p && eol_marker(b, l + 1) && r;
+    exit_section_(b, l, m, r, p, null);
+    return r || p;
   }
 
-  // positional_argument*
+  // LITERAL_CONSTANT*
   private static boolean tags_statement_global_setting_1(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "tags_statement_global_setting_1")) return false;
     while (true) {
       int c = current_position_(b);
-      if (!positional_argument(b, l + 1)) break;
+      if (!consumeToken(b, LITERAL_CONSTANT)) break;
       if (!empty_element_parsed_guard_(b, "tags_statement_global_setting_1", c)) break;
     }
     return true;
@@ -2087,12 +2092,13 @@ public class RobotParser implements PsiParser, LightPsiParser {
   public static boolean template_statements_global_setting(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "template_statements_global_setting")) return false;
     if (!nextTokenIs(b, TEMPLATE_KEYWORDS)) return false;
-    boolean r;
-    Marker m = enter_section_(b);
+    boolean r, p;
+    Marker m = enter_section_(b, l, _NONE_, TEMPLATE_STATEMENTS_GLOBAL_SETTING, null);
     r = consumeToken(b, TEMPLATE_KEYWORDS);
+    p = r; // pin = 1
     r = r && eol_based_keyword_call(b, l + 1);
-    exit_section_(b, m, TEMPLATE_STATEMENTS_GLOBAL_SETTING, r);
-    return r;
+    exit_section_(b, l, m, r, p, null);
+    return r || p;
   }
 
   /* ********************************************************** */
@@ -2266,17 +2272,17 @@ public class RobotParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // TIMEOUT_KEYWORDS positional_argument eol_marker
+  // TIMEOUT_KEYWORDS LITERAL_CONSTANT eol_marker
   public static boolean timeout_statements_global_setting(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "timeout_statements_global_setting")) return false;
     if (!nextTokenIs(b, TIMEOUT_KEYWORDS)) return false;
-    boolean r;
-    Marker m = enter_section_(b);
-    r = consumeToken(b, TIMEOUT_KEYWORDS);
-    r = r && positional_argument(b, l + 1);
+    boolean r, p;
+    Marker m = enter_section_(b, l, _NONE_, TIMEOUT_STATEMENTS_GLOBAL_SETTING, null);
+    r = consumeTokens(b, 1, TIMEOUT_KEYWORDS, LITERAL_CONSTANT);
+    p = r; // pin = 1
     r = r && eol_marker(b, l + 1);
-    exit_section_(b, m, TIMEOUT_STATEMENTS_GLOBAL_SETTING, r);
-    return r;
+    exit_section_(b, l, m, r, p, null);
+    return r || p;
   }
 
   /* ********************************************************** */
@@ -2334,7 +2340,7 @@ public class RobotParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // UNKNOWN_SETTING_KEYWORD (parameter | positional_argument)* eol_marker
+  // UNKNOWN_SETTING_KEYWORD LITERAL_CONSTANT* eol_marker
   public static boolean unknown_setting_statements_global_setting(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "unknown_setting_statements_global_setting")) return false;
     if (!nextTokenIs(b, UNKNOWN_SETTING_KEYWORD)) return false;
@@ -2348,24 +2354,15 @@ public class RobotParser implements PsiParser, LightPsiParser {
     return r || p;
   }
 
-  // (parameter | positional_argument)*
+  // LITERAL_CONSTANT*
   private static boolean unknown_setting_statements_global_setting_1(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "unknown_setting_statements_global_setting_1")) return false;
     while (true) {
       int c = current_position_(b);
-      if (!unknown_setting_statements_global_setting_1_0(b, l + 1)) break;
+      if (!consumeToken(b, LITERAL_CONSTANT)) break;
       if (!empty_element_parsed_guard_(b, "unknown_setting_statements_global_setting_1", c)) break;
     }
     return true;
-  }
-
-  // parameter | positional_argument
-  private static boolean unknown_setting_statements_global_setting_1_0(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "unknown_setting_statements_global_setting_1_0")) return false;
-    boolean r;
-    r = parameter(b, l + 1);
-    if (!r) r = positional_argument(b, l + 1);
-    return r;
   }
 
   /* ********************************************************** */
@@ -2580,10 +2577,10 @@ public class RobotParser implements PsiParser, LightPsiParser {
     boolean r, p;
     Marker m = enter_section_(b, l, _NONE_, VARIABLES_IMPORT_GLOBAL_SETTING, null);
     r = consumeToken(b, VARIABLES_IMPORT_KEYWORD);
-    r = r && positional_argument(b, l + 1);
-    r = r && variables_import_global_setting_2(b, l + 1);
-    p = r; // pin = 3
-    r = r && eol_marker(b, l + 1);
+    p = r; // pin = 1
+    r = r && report_error_(b, positional_argument(b, l + 1));
+    r = p && report_error_(b, variables_import_global_setting_2(b, l + 1)) && r;
+    r = p && eol_marker(b, l + 1) && r;
     exit_section_(b, l, m, r, p, null);
     return r || p;
   }

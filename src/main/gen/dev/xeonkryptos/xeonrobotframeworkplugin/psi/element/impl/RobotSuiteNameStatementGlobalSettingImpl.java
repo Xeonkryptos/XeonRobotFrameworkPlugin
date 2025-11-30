@@ -30,12 +30,6 @@ public class RobotSuiteNameStatementGlobalSettingImpl extends RobotGlobalSetting
 
   @Override
   @NotNull
-  public RobotPositionalArgument getPositionalArgument() {
-    return notNullChild(PsiTreeUtil.getChildOfType(this, RobotPositionalArgument.class));
-  }
-
-  @Override
-  @NotNull
   public PsiElement getNameElement() {
     return notNullChild(findChildByType(SUITE_NAME_KEYWORD));
   }

@@ -7,7 +7,7 @@ import com.intellij.psi.PsiElement;
 
 public interface RobotResourceImportGlobalSetting extends RobotGlobalSettingStatement, GlobalSettingStatementExpression, RobotImportGlobalSettingExpression {
 
-  @NotNull
+  @Nullable
   RobotPositionalArgument getImportedFile();
 
   @NotNull

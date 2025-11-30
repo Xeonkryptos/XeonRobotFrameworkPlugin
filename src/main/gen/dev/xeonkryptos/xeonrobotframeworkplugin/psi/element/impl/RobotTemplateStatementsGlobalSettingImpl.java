@@ -29,9 +29,9 @@ public class RobotTemplateStatementsGlobalSettingImpl extends RobotGlobalSetting
   }
 
   @Override
-  @NotNull
+  @Nullable
   public RobotKeywordCall getKeywordCall() {
-    return notNullChild(PsiTreeUtil.getChildOfType(this, RobotKeywordCall.class));
+    return PsiTreeUtil.getChildOfType(this, RobotKeywordCall.class);
   }
 
   @Override

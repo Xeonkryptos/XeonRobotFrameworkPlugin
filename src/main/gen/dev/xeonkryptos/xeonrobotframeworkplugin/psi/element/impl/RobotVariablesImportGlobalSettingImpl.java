@@ -41,10 +41,10 @@ public class RobotVariablesImportGlobalSettingImpl extends RobotGlobalSettingSta
   }
 
   @Override
-  @NotNull
+  @Nullable
   public RobotPositionalArgument getImportedFile() {
     List<RobotPositionalArgument> p1 = getPositionalArgumentList();
-    return p1.get(0);
+    return p1.size() < 1 ? null : p1.get(0);
   }
 
   @Override

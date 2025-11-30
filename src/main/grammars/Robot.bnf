@@ -75,7 +75,10 @@ global_setting_statement ::= library_import_global_setting
     | tags_statement_global_setting
     | template_statements_global_setting_wrapper
     | timeout_statements_global_setting
-    | unknown_setting_statements_global_setting {implements=foldable}
+    | unknown_setting_statements_global_setting {
+    implements=foldable
+    name="Resource, Library, Variables, Metadata, Documentation, Name, Suite (Setup | Teardown), Force Tags, (Test | Task) Template, (Test | Task) Timeout"
+}
 
 library_import_global_setting ::= LIBRARY_IMPORT_KEYWORD positional_argument (parameter | positional_argument)* (WITH_NAME new_library_name)? eol_marker {
     methods=[importedFile="/positional_argument[0]" nameElement="LIBRARY_IMPORT_KEYWORD" libraryNameElement="WITH_NAME"]
@@ -83,43 +86,43 @@ library_import_global_setting ::= LIBRARY_IMPORT_KEYWORD positional_argument (pa
 new_library_name ::= LITERAL_CONSTANT
 
 resource_import_global_setting ::= RESOURCE_IMPORT_KEYWORD positional_argument eol_marker {
-    pin=3
+    pin=1
     methods=[importedFile="positional_argument" nameElement="RESOURCE_IMPORT_KEYWORD"]
 }
 variables_import_global_setting ::= VARIABLES_IMPORT_KEYWORD positional_argument (parameter | positional_argument)* eol_marker {
-    pin=3
+    pin=1
     methods=[importedFile="/positional_argument[0]" nameElement="VARIABLES_IMPORT_KEYWORD"]
 }
-suite_name_statement_global_setting ::= SUITE_NAME_KEYWORD positional_argument eol_marker {
-    pin=3
+suite_name_statement_global_setting ::= SUITE_NAME_KEYWORD LITERAL_CONSTANT eol_marker {
+    pin=1
     methods=[nameElement="SUITE_NAME_KEYWORD"]
 }
-documentation_statement_global_setting ::= DOCUMENTATION_KEYWORD positional_argument* eol_marker {
-    pin=3
+documentation_statement_global_setting ::= DOCUMENTATION_KEYWORD LITERAL_CONSTANT* eol_marker {
+    pin=1
     methods = [nameElement="DOCUMENTATION_KEYWORD"]
 }
-metadata_statement_global_setting ::= METADATA_KEYWORD positional_argument* eol_marker {
-    pin=3
+metadata_statement_global_setting ::= METADATA_KEYWORD parameter* eol_marker {
+    pin=1
     methods = [nameElement="METADATA_KEYWORD"]
 }
 setup_teardown_statements_global_setting ::= SETUP_TEARDOWN_STATEMENT_KEYWORDS (eol_based_keyword_call | variable) {
-    pin=3
+    pin=1
     methods = [nameElement="SETUP_TEARDOWN_STATEMENT_KEYWORDS"]
 }
-tags_statement_global_setting ::= TAGS_KEYWORDS positional_argument* eol_marker {
-    pin=3
+tags_statement_global_setting ::= TAGS_KEYWORDS LITERAL_CONSTANT* eol_marker {
+    pin=1
     methods = [nameElement="TAGS_KEYWORDS"]
 }
 private external template_statements_global_setting_wrapper ::= parseTemplateStatementsGlobalSetting template_statements_global_setting
 template_statements_global_setting ::= TEMPLATE_KEYWORDS eol_based_keyword_call {
-    pin=3
+    pin=1
     methods = [nameElement="TEMPLATE_KEYWORDS"]
 }
-timeout_statements_global_setting ::= TIMEOUT_KEYWORDS positional_argument eol_marker {
-    pin=3
+timeout_statements_global_setting ::= TIMEOUT_KEYWORDS LITERAL_CONSTANT eol_marker {
+    pin=1
     methods = [nameElement="TIMEOUT_KEYWORDS"]
 }
-unknown_setting_statements_global_setting ::= UNKNOWN_SETTING_KEYWORD (parameter | positional_argument)* eol_marker {
+unknown_setting_statements_global_setting ::= UNKNOWN_SETTING_KEYWORD LITERAL_CONSTANT* eol_marker {
     pin=1
     methods = [nameElement="UNKNOWN_SETTING_KEYWORD"]
 }

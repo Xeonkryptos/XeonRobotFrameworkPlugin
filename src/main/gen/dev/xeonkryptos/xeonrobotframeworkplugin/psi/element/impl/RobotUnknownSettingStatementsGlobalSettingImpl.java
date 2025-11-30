@@ -30,18 +30,6 @@ public class RobotUnknownSettingStatementsGlobalSettingImpl extends RobotGlobalS
 
   @Override
   @NotNull
-  public List<RobotParameter> getParameterList() {
-    return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotParameter.class);
-  }
-
-  @Override
-  @NotNull
-  public List<RobotPositionalArgument> getPositionalArgumentList() {
-    return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotPositionalArgument.class);
-  }
-
-  @Override
-  @NotNull
   public PsiElement getNameElement() {
     return notNullChild(findChildByType(UNKNOWN_SETTING_KEYWORD));
   }

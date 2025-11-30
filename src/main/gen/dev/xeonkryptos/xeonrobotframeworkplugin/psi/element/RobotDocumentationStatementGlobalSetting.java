@@ -8,9 +8,6 @@ import com.intellij.psi.PsiElement;
 public interface RobotDocumentationStatementGlobalSetting extends RobotGlobalSettingStatement, GlobalSettingStatementExpression {
 
   @NotNull
-  List<RobotPositionalArgument> getPositionalArgumentList();
-
-  @NotNull
   PsiElement getNameElement();
 
 }
