@@ -84,9 +84,8 @@ public class RobotKeywordCallNameReference extends PsiPolyVariantReferenceBase<R
     private static @NotNull Collection<VirtualFile> collectImportedVirtualFilesOneselfIncluded(RobotFile robotFile, String libraryName) {
         Collection<VirtualFile> importedFiles = libraryName != null ?
                                                 robotFile.findImportedFilesWithLibraryName(libraryName) :
-                                                robotFile.collectImportedFiles(true)
+                                                robotFile.collectImportedFiles(true, ImportType.LIBRARY)
                                                          .stream()
-                                                         .filter(keywordFile -> keywordFile.getImportType() != ImportType.VARIABLES)
                                                          .map(KeywordFile::getVirtualFile)
                                                          .collect(Collectors.toSet());
         VirtualFile virtualFile = robotFile.getVirtualFile();

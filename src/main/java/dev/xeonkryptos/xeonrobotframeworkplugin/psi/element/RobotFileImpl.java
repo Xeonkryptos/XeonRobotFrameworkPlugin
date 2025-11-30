@@ -2,8 +2,11 @@ package dev.xeonkryptos.xeonrobotframeworkplugin.psi.element;
 
 import com.intellij.extapi.psi.PsiFileBase;
 import com.intellij.openapi.fileTypes.FileType;
+import com.intellij.openapi.module.Module;
+import com.intellij.openapi.module.ModuleUtil;
 import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.roots.ProjectRootModificationTracker;
 import com.intellij.openapi.util.Key;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.FileViewProvider;
@@ -32,23 +35,29 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class RobotFileImpl extends PsiFileBase implements KeywordFile, RobotFile {
 
     private static final Key<ParameterizedCachedValue<Collection<VirtualFile>, Boolean>> IMPORTED_VIRTUAL_FILES_CACHE_KEY = Key.create(
             "IMPORTED_VIRTUAL_FILES_CACHE");
     private static final Key<CachedValue<Collection<DefinedVariable>>> TEST_SUITE_VARIABLES_CACHE_KEY = Key.create("TEST_SUITE_VARIABLES_CACHE");
+    private static final Key<CachedValue<RobotPythonClass>> BUILT_IN_LIBRARY_CACHE_KEY = Key.create("BUILT_IN_LIBRARY_CACHE");
 
     private final FileType fileType;
 
     private Collection<DefinedVariable> sectionVariables;
+    private Map<ImportType, Set<Supplier<KeywordFile>>> importedKeywordFiles;
 
     public RobotFileImpl(FileViewProvider fileViewProvider) {
         super(fileViewProvider, RobotLanguage.INSTANCE);
@@ -61,6 +70,7 @@ public class RobotFileImpl extends PsiFileBase implements KeywordFile, RobotFile
         super.subtreeChanged();
 
         sectionVariables = null;
+        importedKeywordFiles = null;
     }
 
     @NotNull
@@ -98,7 +108,7 @@ public class RobotFileImpl extends PsiFileBase implements KeywordFile, RobotFile
     public Collection<DefinedVariable> getDefinedVariables(Collection<KeywordFile> visitedFiles) {
         Collection<DefinedVariable> sectionVariables = getSectionVariables();
         Collection<DefinedVariable> globalVariables = RobotFileManager.getGlobalVariables(getProject());
-        Collection<KeywordFile> importedFiles = getImportedFiles(false);
+        Collection<KeywordFile> importedFiles = getImportedFiles(false, ImportType.VARIABLES);
         Set<DefinedVariable> importedVariables = new HashSet<>();
         for (KeywordFile keywordFile : importedFiles) {
             ProgressManager.checkCanceled();
@@ -163,10 +173,13 @@ public class RobotFileImpl extends PsiFileBase implements KeywordFile, RobotFile
 
     @NotNull
     @Override
-    public final Collection<KeywordFile> collectImportedFiles(boolean includeTransitive) {
+    public final Collection<KeywordFile> collectImportedFiles(boolean includeTransitive, ImportType... importTypes) {
         Set<KeywordFile> results = new LinkedHashSet<>();
-        addBuiltInImports(results);
-        Collection<KeywordFile> importedFiles = getImportedFiles(includeTransitive);
+        RobotPythonClass builtInImportClass = getBuiltInImportClass();
+        if (builtInImportClass != null) {
+            results.add(builtInImportClass);
+        }
+        Collection<KeywordFile> importedFiles = getImportedFiles(includeTransitive, importTypes);
         results.addAll(importedFiles);
         return results;
     }
@@ -174,46 +187,68 @@ public class RobotFileImpl extends PsiFileBase implements KeywordFile, RobotFile
     @NotNull
     @Override
     public Collection<VirtualFile> findImportedFilesWithLibraryName(@NotNull String libraryName) {
-        return getImportedFiles(true).stream()
-                                     .filter(importedFile -> libraryName.equals(importedFile.getLibraryName()))
-                                     .map(KeywordFile::getVirtualFile)
-                                     .collect(Collectors.toCollection(LinkedHashSet::new));
+        return getImportedFiles(true, ImportType.LIBRARY).stream()
+                                                         .filter(importedFile -> libraryName.equals(importedFile.getLibraryName()))
+                                                         .map(KeywordFile::getVirtualFile)
+                                                         .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
     @NotNull
     @Override
-    public Collection<KeywordFile> getImportedFiles(boolean includeTransitive) {
+    public Collection<KeywordFile> getImportedFiles(boolean includeTransitive, ImportType... importTypes) {
+        if (importTypes == null || importTypes.length == 0) {
+            importTypes = ImportType.values();
+        }
         if (!includeTransitive) {
-            return collectImportFiles();
+            return collectImportFiles(importTypes);
         }
         Set<KeywordFile> results = new LinkedHashSet<>();
-        for (KeywordFile keywordFile : collectImportFiles()) {
-            collectTransitiveKeywordFiles(keywordFile, results);
+        for (KeywordFile keywordFile : collectImportFiles(importTypes)) {
+            collectTransitiveKeywordFiles(keywordFile, results, importTypes);
         }
         return results;
     }
 
-    private Collection<KeywordFile> collectImportFiles() {
+    private Collection<KeywordFile> collectImportFiles(ImportType[] importTypes) {
         // Don't implement caching here. The method is based on the result of some reference resolves. When we cache the results here, we might not retrieve
         // the latest reference resolves and thus missing some imports.
-        RobotImportFilesCollector importFilesCollector = new RobotImportFilesCollector();
-        acceptChildren(importFilesCollector);
-        return importFilesCollector.getFiles();
+        if (importedKeywordFiles == null) {
+            RobotImportFilesCollector importFilesCollector = new RobotImportFilesCollector();
+            acceptChildren(importFilesCollector);
+            importedKeywordFiles = importFilesCollector.getKeywordFileSuppliers();
+        }
+        Stream<Supplier<KeywordFile>> resourceImports = importedKeywordFiles.getOrDefault(ImportType.RESOURCE, Set.of()).stream();
+        Stream<Supplier<KeywordFile>> imports = Arrays.stream(importTypes)
+                                                      .flatMap(importType -> importedKeywordFiles.getOrDefault(importType, Set.of()).stream());
+        return Stream.concat(resourceImports, imports)
+                     .distinct()
+                     .map(Supplier::get)
+                     .filter(Objects::nonNull)
+                     .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
-    private void collectTransitiveKeywordFiles(KeywordFile keywordFile, Collection<KeywordFile> results) {
+    private void collectTransitiveKeywordFiles(KeywordFile keywordFile, Collection<KeywordFile> results, ImportType[] importTypes) {
         if (results.add(keywordFile) && keywordFile != this) {
-            for (KeywordFile child : keywordFile.getImportedFiles(false)) {
-                collectTransitiveKeywordFiles(child, results);
+            for (KeywordFile child : keywordFile.getImportedFiles(false, importTypes)) {
+                collectTransitiveKeywordFiles(child, results, importTypes);
             }
         }
     }
 
-    private void addBuiltInImports(@NotNull Collection<KeywordFile> files) {
-        PyClass builtIn = PythonResolver.findClass(GlobalConstants.ROBOT_BUILT_IN, getProject());
-        if (builtIn != null) {
-            files.add(new RobotPythonClass(null, builtIn, ImportType.LIBRARY));
+    private RobotPythonClass getBuiltInImportClass() {
+        Module module = ModuleUtil.findModuleForPsiElement(this);
+        if (module != null) {
+            Project project = getProject();
+            return CachedValuesManager.getManager(project).getCachedValue(module, BUILT_IN_LIBRARY_CACHE_KEY, () -> {
+                ProjectRootModificationTracker projectRootModificationTracker = ProjectRootModificationTracker.getInstance(project);
+                PyClass builtIn = PythonResolver.findClass(GlobalConstants.ROBOT_BUILT_IN, project);
+                if (builtIn != null) {
+                    return Result.createSingleDependency(new RobotPythonClass(null, builtIn, ImportType.LIBRARY), projectRootModificationTracker);
+                }
+                return Result.createSingleDependency(null, projectRootModificationTracker);
+            }, false);
         }
+        return null;
     }
 
     @NotNull

@@ -10,6 +10,8 @@
     - added/enhanced support for inline if statements
     - added support for inline if statements with variable assignment
     - handle if conditions as python expressions (mark them as such with new syntax highlighting)
+- Optimized lookup of imported files by filtering for concrete import types and resolve only those
+- Cache Robot Framework's builtin python class instead of looking it up every time
 
 ## 0.5.16
 

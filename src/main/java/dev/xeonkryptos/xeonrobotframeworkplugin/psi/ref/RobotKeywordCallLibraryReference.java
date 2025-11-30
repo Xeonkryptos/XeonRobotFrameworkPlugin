@@ -42,9 +42,8 @@ public class RobotKeywordCallLibraryReference extends PsiPolyVariantReferenceBas
         if (!(psiFile instanceof RobotFile robotFile)) {
             return PsiElement.EMPTY_ARRAY;
         }
-        return robotFile.collectImportedFiles(true)
+        return robotFile.collectImportedFiles(true, ImportType.RESOURCE)
                         .stream()
-                        .filter(keywordFile -> keywordFile.getImportType() == ImportType.RESOURCE)
                         .flatMap(keywordFile -> {
                             RobotLibraryNamesCollector libraryNamesCollector = new RobotLibraryNamesCollector();
                             keywordFile.getPsiFile().acceptChildren(libraryNamesCollector);

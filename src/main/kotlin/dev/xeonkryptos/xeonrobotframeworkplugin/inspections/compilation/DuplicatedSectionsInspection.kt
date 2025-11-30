@@ -35,7 +35,7 @@ class DuplicatedSectionsInspection : LocalInspectionTool(), DumbAware {
             if (duplicatedSections.size > 1) {
                 duplicatedSections.forEach { section ->
                     problemsHolder.registerProblem(
-                        section.nameIdentifier, RobotBundle.message("INSP.duplicated.section.description"), ProblemHighlightType.ERROR
+                        section.nameIdentifier, RobotBundle.message("INSP.duplicated.section.description"), ProblemHighlightType.GENERIC_ERROR
                     )
                 }
             }

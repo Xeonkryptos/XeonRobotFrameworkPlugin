@@ -77,6 +77,7 @@ public class RobotHighlighter extends SyntaxHighlighterBase {
         keys.put(RobotTypes.AND, GHERKIN);
         keys.put(RobotTypes.BUT, GHERKIN);
 
+        keys.put(RobotTypes.VAR, STRUCTURAL_KEYWORDS);
         keys.put(RobotTypes.FOR, STRUCTURAL_KEYWORDS);
         keys.put(RobotTypes.FOR_IN, STRUCTURAL_KEYWORDS);
         keys.put(RobotTypes.WHILE, STRUCTURAL_KEYWORDS);

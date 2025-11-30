@@ -18,7 +18,7 @@ public interface KeywordFile {
 
     @NotNull ImportType getImportType();
 
-    @NotNull Collection<KeywordFile> getImportedFiles(boolean includeTransitive);
+    @NotNull Collection<KeywordFile> getImportedFiles(boolean includeTransitive, ImportType... importTypes);
 
     @NotNull Collection<VirtualFile> getVirtualFiles(boolean includeTransitive);
 

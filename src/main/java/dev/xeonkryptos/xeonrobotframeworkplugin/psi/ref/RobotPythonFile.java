@@ -57,7 +57,7 @@ public class RobotPythonFile implements KeywordFile {
 
     @NotNull
     @Override
-    public final Collection<KeywordFile> getImportedFiles(boolean includeTransitive) {
+    public final Collection<KeywordFile> getImportedFiles(boolean includeTransitive, ImportType... importTypes) {
         return Collections.emptyList();
     }
 

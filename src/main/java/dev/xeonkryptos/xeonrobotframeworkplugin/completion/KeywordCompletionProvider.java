@@ -91,12 +91,11 @@ class KeywordCompletionProvider extends CompletionProvider<CompletionParameters>
         boolean capitalizeKeywords = robotOptionsProvider.capitalizeKeywords();
 
         Collection<DefinedKeyword> definedKeywordsFromRobotFile = collectDefinedKeywords(robotFile);
-        addDefinedKeywords(definedKeywordsFromRobotFile, capitalizeKeywords, keywordCompletionModification, alreadyAddedParameters).forEach(
-                lookupElement -> {
-                    lookupElement.putUserData(CompletionKeys.ROBOT_LOOKUP_CONTEXT, RobotLookupContext.KEYWORDS);
-                    lookupElement.putUserData(CompletionKeys.ROBOT_LOOKUP_ELEMENT_TYPE, RobotLookupElementType.KEYWORD);
-                    lookupElements.add(lookupElement);
-                });
+        addDefinedKeywords(definedKeywordsFromRobotFile, capitalizeKeywords, keywordCompletionModification, alreadyAddedParameters).forEach(lookupElement -> {
+            lookupElement.putUserData(CompletionKeys.ROBOT_LOOKUP_CONTEXT, RobotLookupContext.KEYWORDS);
+            lookupElement.putUserData(CompletionKeys.ROBOT_LOOKUP_ELEMENT_TYPE, RobotLookupElementType.KEYWORD);
+            lookupElements.add(lookupElement);
+        });
     }
 
     private Collection<DefinedKeyword> collectDefinedKeywords(RobotFile robotFile) {
@@ -114,9 +113,8 @@ class KeywordCompletionProvider extends CompletionProvider<CompletionParameters>
     }
 
     private static @NotNull Collection<VirtualFile> collectImportedVirtualFilesOneselfIncluded(RobotFile robotFile) {
-        Collection<VirtualFile> importedFiles = robotFile.collectImportedFiles(true)
+        Collection<VirtualFile> importedFiles = robotFile.collectImportedFiles(true, ImportType.LIBRARY)
                                                          .stream()
-                                                         .filter(keywordFile -> keywordFile.getImportType() != ImportType.VARIABLES)
                                                          .map(KeywordFile::getVirtualFile)
                                                          .collect(Collectors.toSet());
         VirtualFile virtualFile = robotFile.getVirtualFile();

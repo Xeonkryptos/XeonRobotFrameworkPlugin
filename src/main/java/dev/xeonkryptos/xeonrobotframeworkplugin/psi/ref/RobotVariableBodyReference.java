@@ -7,6 +7,7 @@ import com.intellij.psi.ResolveResult;
 import com.intellij.psi.impl.source.resolve.ResolveCache;
 import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.psi.util.PsiTreeUtil;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.dto.ImportType;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.DefinedVariable;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotFile;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariable;
@@ -74,7 +75,7 @@ public class RobotVariableBodyReference extends PsiPolyVariantReferenceBase<Robo
     @NotNull
     private Collection<PsiElement> findVariableElementsOutsideOfCurrentFile(RobotVariable variable, String variableName) {
         RobotFile robotFile = (RobotFile) variable.getContainingFile();
-        return robotFile.collectImportedFiles(true)
+        return robotFile.collectImportedFiles(true, ImportType.VARIABLES, ImportType.RESOURCE)
                         .stream()
                         .flatMap(file -> file.findDefinedVariable(variableName).stream())
                         .filter(foundVar -> foundVar.matches(variableName) && (EASY_SCOPES.contains(foundVar.getScope()) || foundVar.isInScope(variable)))

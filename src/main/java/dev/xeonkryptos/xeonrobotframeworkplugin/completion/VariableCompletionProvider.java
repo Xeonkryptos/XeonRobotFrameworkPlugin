@@ -93,18 +93,15 @@ class VariableCompletionProvider extends CompletionProvider<CompletionParameters
 
     private void addDefinedVariablesFromImportedFiles(@NotNull Collection<LookupElement> lookupElements, @NotNull PsiFile file, @NotNull PsiElement element) {
         RobotFile robotFile = (RobotFile) file;
-        addDefinedVariables(robotFile.getDefinedVariables(),
-                            element).forEach(lookupElement -> {
+        addDefinedVariables(robotFile.getDefinedVariables(), element).forEach(lookupElement -> {
             lookupElement.putUserData(CompletionKeys.ROBOT_LOOKUP_ELEMENT_TYPE, RobotLookupElementType.VARIABLE);
             lookupElements.add(lookupElement);
         });
-        for (KeywordFile importedFile : robotFile.collectImportedFiles(true)) {
-            if (importedFile.getImportType() == ImportType.VARIABLES || importedFile.getImportType() == ImportType.RESOURCE) {
-                addDefinedVariables(importedFile.getDefinedVariables(), element).forEach(lookupElement -> {
-                    lookupElement.putUserData(CompletionKeys.ROBOT_LOOKUP_ELEMENT_TYPE, RobotLookupElementType.VARIABLE);
-                    lookupElements.add(lookupElement);
-                });
-            }
+        for (KeywordFile importedFile : robotFile.collectImportedFiles(true, ImportType.VARIABLES, ImportType.RESOURCE)) {
+            addDefinedVariables(importedFile.getDefinedVariables(), element).forEach(lookupElement -> {
+                lookupElement.putUserData(CompletionKeys.ROBOT_LOOKUP_ELEMENT_TYPE, RobotLookupElementType.VARIABLE);
+                lookupElements.add(lookupElement);
+            });
         }
     }
 
