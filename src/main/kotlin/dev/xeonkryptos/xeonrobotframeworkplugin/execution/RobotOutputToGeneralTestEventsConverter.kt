@@ -8,7 +8,6 @@ import com.intellij.util.Urls.newLocalFileUrl
 import com.intellij.util.Urls.newUrl
 import com.jetbrains.rd.util.lifetime.Lifetime
 import com.jetbrains.rd.util.reactive.adviseEternal
-import dev.xeonkryptos.xeonrobotframeworkplugin.config.RobotOptionsProvider
 import dev.xeonkryptos.xeonrobotframeworkplugin.execution.dap.model.RobotExecutionEventArguments
 import jetbrains.buildServer.messages.serviceMessages.ServiceMessage
 import jetbrains.buildServer.messages.serviceMessages.ServiceMessageVisitor
@@ -26,8 +25,6 @@ class RobotOutputToGeneralTestEventsConverter(testFrameworkName: String, console
     private var _firstCall = false
     private lateinit var visitor: ServiceMessageVisitor
     private val testItemIdStack = mutableListOf<String>()
-
-    private val testsOnlyMode = RobotOptionsProvider.getInstance(consoleProperties.project).testsOnlyMode()
 
     @OptIn(ExperimentalCoroutinesApi::class, DelicateCoroutinesApi::class)
     private val myContext = newSingleThreadContext("RobotOutputToGeneralTestEventsConverter")
@@ -58,28 +55,24 @@ class RobotOutputToGeneralTestEventsConverter(testFrameworkName: String, console
 
     private fun robotStarted(args: RobotExecutionEventArguments) {
         testItemIdStack.add(args.id)
-
         val msg = when (args.type) {
             "suite" -> ServiceMessageBuilder.testSuiteStarted(args.name)
-            "test" -> if (testsOnlyMode) ServiceMessageBuilder.testStarted(args.name) else ServiceMessageBuilder.testSuiteStarted(args.name)
-            "keyword" -> if (!testsOnlyMode) ServiceMessageBuilder.testStarted(args.name) else null
-
+            "test" -> ServiceMessageBuilder.testStarted(args.name)
             else -> null
         }
 
-        processRobotMessage(msg, args)
+        processRobotMessage(msg?.apply { enrichServiceMessage(this, args) })
     }
 
     private fun robotEnded(args: RobotExecutionEventArguments) {
         val msg = when (args.type) {
-            "suite" -> ServiceMessageBuilder.testSuiteFinished(args.name)
-            "test" -> if (testsOnlyMode) onFinishedTestItem(args) else ServiceMessageBuilder.testSuiteFinished(args.name)
-            "keyword" -> if (!testsOnlyMode) onFinishedTestItem(args) else null
-
+            "suite" -> ServiceMessageBuilder.testSuiteFinished(args.name).apply { enrichServiceMessage(this, args) }
+            "test" -> onFinishedTestItem(args).apply { enrichServiceMessage(this, args) }
+            "keyword" -> if (args.attributes.status == "FAIL") onFailedKeyword(args) else null
             else -> null
         }
 
-        processRobotMessage(msg, args)
+        processRobotMessage(msg)
 
         val lastId = testItemIdStack.removeLast()
         if (lastId != args.id) {
@@ -87,35 +80,47 @@ class RobotOutputToGeneralTestEventsConverter(testFrameworkName: String, console
         }
     }
 
-    private fun onFinishedTestItem(args: RobotExecutionEventArguments) = when (args.attributes.status) {
-        "PASS" -> ServiceMessageBuilder.testFinished(args.name).apply {
-            if (args.attributes.message != null) {
-                addAttribute("message", args.attributes.message)
+    private fun onFinishedTestItem(args: RobotExecutionEventArguments): ServiceMessageBuilder {
+        return when (args.attributes.status) {
+            "PASS" -> ServiceMessageBuilder.testFinished(args.name).apply {
+                if (args.attributes.message != null) {
+                    addAttribute("message", args.attributes.message)
+                }
             }
-        }
 
-        "SKIP" -> ServiceMessageBuilder.testIgnored(args.name).apply {
-            addAttribute("message", args.attributes.message ?: "Skipped")
-        }
+            "SKIP" -> ServiceMessageBuilder.testIgnored(args.name).apply {
+                addAttribute("message", args.attributes.message ?: "Skipped")
+            }
 
-        else -> ServiceMessageBuilder.testFailed(args.name).apply {
-            addAttribute("message", args.attributes.message ?: "Error")
+            else -> ServiceMessageBuilder.testFailed(args.name).apply {
+                addAttribute("message", args.attributes.message ?: "Error")
+            }
         }
     }
 
-    private fun processRobotMessage(msg: ServiceMessageBuilder?, args: RobotExecutionEventArguments) {
-        if (msg != null) {
-            with(msg) {
-                addAttribute("nodeId", args.id)
-                addAttribute("parentNodeId", args.parentId ?: "0")
-                if (args.attributes.source != null) {
-                    val localFileUrl = newLocalFileUrl(args.attributes.source!!).toString()
-                    val uri = newUrl("robotcode", "/", localFileUrl).addParameters(mapOf("line" to ((args.attributes.lineno ?: 1) - 1).toString()))
+    private fun onFailedKeyword(args: RobotExecutionEventArguments): ServiceMessageBuilder {
+        return ServiceMessageBuilder.testStarted("").apply {
+            addAttribute("nodeId", args.parentId)
+            addAttribute("metainfo", "lineno:${(args.attributes.lineno ?: 0) - 1}")
+        }
+    }
 
-                    addAttribute("locationHint", uri.toString())
-                }
-                addAttribute("duration", (args.attributes.elapsedtime ?: 0).toString()).toString()
+    private fun enrichServiceMessage(msg: ServiceMessageBuilder, args: RobotExecutionEventArguments) {
+        with(msg) {
+            addAttribute("nodeId", args.id)
+            addAttribute("parentNodeId", args.parentId ?: "0")
+            if (args.attributes.source != null) {
+                val localFileUrl = newLocalFileUrl(args.attributes.source!!).toString()
+                val uri = newUrl("robotcode", "/", localFileUrl).addParameters(mapOf("line" to ((args.attributes.lineno ?: 1) - 1).toString()))
+
+                addAttribute("locationHint", uri.toString())
             }
+            addAttribute("duration", (args.attributes.elapsedtime ?: 0).toString())
+        }
+    }
+
+    private fun processRobotMessage(msg: ServiceMessageBuilder?) {
+        if (msg != null) {
             this.processServiceMessageFromRobot(msg)
         }
     }

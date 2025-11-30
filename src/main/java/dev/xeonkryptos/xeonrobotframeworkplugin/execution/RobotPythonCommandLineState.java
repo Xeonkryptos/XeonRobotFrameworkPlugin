@@ -40,10 +40,9 @@ import com.jetbrains.python.run.PythonScriptExecution;
 import com.jetbrains.python.run.PythonScriptTargetedCommandLineBuilder;
 import com.jetbrains.python.run.target.HelpersAwareTargetEnvironmentRequest;
 import dev.xeonkryptos.xeonrobotframeworkplugin.MyLogger;
-import dev.xeonkryptos.xeonrobotframeworkplugin.config.RobotOptionsProvider;
-import dev.xeonkryptos.xeonrobotframeworkplugin.execution.dap.RobotDebugAdapterProtocolCommunicator;
 import dev.xeonkryptos.xeonrobotframeworkplugin.execution.config.RobotRunConfiguration;
 import dev.xeonkryptos.xeonrobotframeworkplugin.execution.config.RobotRunConfiguration.RobotRunnableUnitExecutionInfo;
+import dev.xeonkryptos.xeonrobotframeworkplugin.execution.dap.RobotDebugAdapterProtocolCommunicator;
 import dev.xeonkryptos.xeonrobotframeworkplugin.execution.ui.RobotRerunFailedTestsAction;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotFeatureFileType;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotQualifiedNameOwner;
@@ -158,8 +157,7 @@ public class RobotPythonCommandLineState extends PythonScriptCommandLineState {
     @SuppressWarnings("UnstableApiUsage")
     public ExecutionResult execute(@NotNull Executor executor, @NotNull PythonScriptTargetedCommandLineBuilder converter) throws ExecutionException {
         final RobotExecutionMode executionMode = computeRobotExecutionMode(executor);
-        ExecutionEnvironment environment = getEnvironment();
-        var wrappedConverter = new MyPythonScriptTargetedCommandLineBuilder(converter, runConfiguration, executionMode, environment);
+        var wrappedConverter = new MyPythonScriptTargetedCommandLineBuilder(converter, runConfiguration, executionMode);
         try {
             String executorId = executor.getId();
             if (showCommandLineAfterwards() && (DefaultRunExecutor.EXECUTOR_ID.equals(executorId) || RobotDryRunExecutor.EXECUTOR_ID.equals(executorId))) {
@@ -229,16 +227,13 @@ public class RobotPythonCommandLineState extends PythonScriptCommandLineState {
         private final PythonScriptTargetedCommandLineBuilder parentBuilder;
         private final RobotRunConfiguration configuration;
         private final RobotExecutionMode executionMode;
-        private final ExecutionEnvironment environment;
 
         private MyPythonScriptTargetedCommandLineBuilder(@NotNull PythonScriptTargetedCommandLineBuilder parentBuilder,
                                                          RobotRunConfiguration configuration,
-                                                         RobotExecutionMode executionMode,
-                                                         ExecutionEnvironment environment) {
+                                                         RobotExecutionMode executionMode) {
             this.parentBuilder = parentBuilder;
             this.configuration = configuration;
             this.executionMode = executionMode;
-            this.environment = environment;
         }
 
         @NotNull
@@ -267,9 +262,6 @@ public class RobotPythonCommandLineState extends PythonScriptCommandLineState {
 
             enrichWithTestArguments(configuration, argument -> additionalParameters.add(TargetEnvironmentFunctions.constant(argument)));
             parameters.addAll(additionalParameters);
-
-            boolean testsOnlyMode = RobotOptionsProvider.getInstance(configuration.getProject()).testsOnlyMode();
-            environment.putUserData(ExecutionKeys.TESTS_ONLY_MODE_KEY, testsOnlyMode);
 
             return parentBuilder.build(helpersAwareTargetEnvironmentRequest, delegateExecution);
         }

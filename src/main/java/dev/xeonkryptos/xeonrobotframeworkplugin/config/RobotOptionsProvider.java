@@ -50,14 +50,6 @@ public final class RobotOptionsProvider implements PersistentStateComponent<Robo
         state.multilineIndentation = multilineIndentation;
     }
 
-    public boolean testsOnlyMode() {
-        return state.testsOnlyMode;
-    }
-
-    public void setTestsOnlyMode(boolean testsOnlyMode) {
-        state.testsOnlyMode = testsOnlyMode;
-    }
-
     public Collator getParameterNameCollator() {
         if (parameterNameCollator == null) {
             updateParameterNameCollator();
@@ -119,14 +111,6 @@ public final class RobotOptionsProvider implements PersistentStateComponent<Robo
         state.pythonLiveInspection = pythonLiveInspection;
     }
 
-    public String getPythonLiveInspectionAdditionalArguments() {
-        return state.pythonLiveInspectionAdditionalArguments;
-    }
-
-    public void setPythonLiveInspectionAdditionalArguments(String pythonLiveInspectionAdditionalArguments) {
-        state.pythonLiveInspectionAdditionalArguments = pythonLiveInspectionAdditionalArguments;
-    }
-
     public List<String> getPythonLiveInspectionDecorators() {
         return state.pythonLiveInspectionDecorators;
     }
@@ -145,10 +129,8 @@ public final class RobotOptionsProvider implements PersistentStateComponent<Robo
         this.state.capitalizeKeywords = state.capitalizeKeywords;
         this.state.smartAutoEncloseVariable = state.smartAutoEncloseVariable;
         this.state.multilineIndentation = state.multilineIndentation;
-        this.state.testsOnlyMode = state.testsOnlyMode;
         this.state.parameterNameCollationRules = state.parameterNameCollationRules;
         this.state.pythonLiveInspection = state.pythonLiveInspection;
-        this.state.pythonLiveInspectionAdditionalArguments = state.pythonLiveInspectionAdditionalArguments;
         this.state.pythonLiveInspectionDecorators = state.pythonLiveInspectionDecorators;
     }
 
@@ -156,10 +138,8 @@ public final class RobotOptionsProvider implements PersistentStateComponent<Robo
         public boolean capitalizeKeywords = true;
         public boolean smartAutoEncloseVariable = true;
         public boolean multilineIndentation = true;
-        public boolean testsOnlyMode = true;
         public String parameterNameCollationRules = "& A < Ä = Ae & a < ä = ae & O < Ö = Oe & o < ö = oe & U < Ü = Ue & u < ü = ue & S < ß = Ss & s < ß = ss";
         public boolean pythonLiveInspection = false;
-        public String pythonLiveInspectionAdditionalArguments = "-m robot.libdoc .robotframework-ls";
         public List<String> pythonLiveInspectionDecorators = List.of();
     }
 }

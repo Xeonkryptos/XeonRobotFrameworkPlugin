@@ -62,7 +62,15 @@ public class RobotConsoleProperties extends SMTRunnerConsoleProperties implement
             }
             String name = proxy.getName();
             String errorMessage = proxy.getErrorMessage();
-            return new RobotTestStackTraceParser(failedLine, name, errorMessage, null);
+            String metainfo = proxy.getMetainfo();
+            String failedKeywordLineLocation = null;
+            if (metainfo != null) {
+                String keywordLineLocation = metainfo.substring("lineno:".length());
+                if (!keywordLineLocation.isBlank() && !"-1".equals(keywordLineLocation)) {
+                    failedKeywordLineLocation = keywordLineLocation;
+                }
+            }
+            return new RobotTestStackTraceParser(failedLine, name, errorMessage, failedKeywordLineLocation);
         }
         return new RobotTestStackTraceParser();
     }

@@ -18,7 +18,6 @@ import com.jetbrains.python.extensions.ContextAnchor;
 import com.jetbrains.python.extensions.ModuleBasedContextAnchor;
 import com.jetbrains.python.extensions.ProjectSdkContextAnchor;
 import com.jetbrains.python.run.PythonRunConfiguration;
-import dev.xeonkryptos.xeonrobotframeworkplugin.execution.ExecutionKeys;
 import dev.xeonkryptos.xeonrobotframeworkplugin.execution.RobotCommandLineState;
 import dev.xeonkryptos.xeonrobotframeworkplugin.execution.config.RobotRunConfiguration;
 import dev.xeonkryptos.xeonrobotframeworkplugin.execution.config.RobotRunConfiguration.RobotRunnableUnitExecutionInfo;
@@ -60,18 +59,11 @@ public class RobotRerunFailedTestsAction extends AbstractRerunFailedTestsAction 
             List<AbstractTestProxy> failedTests = getFailedTests(environment.getProject());
             Set<String> testNames = new LinkedHashSet<>();
             Set<VirtualFile> testFiles = new LinkedHashSet<>();
-            Boolean testsOnlyMode = environment.getUserData(ExecutionKeys.TESTS_ONLY_MODE_KEY);
             Project project = getProject();
             for (AbstractTestProxy failedTest : failedTests) {
                 if (failedTest.isLeaf()) {
-                    AbstractTestProxy failedKeywordTest;
-                    if (testsOnlyMode) {
-                        failedKeywordTest = failedTest;
-                    } else {
-                        failedKeywordTest = failedTest.getParent();
-                    }
-                    Location<?> location = failedKeywordTest.getLocation(project, myConsoleProperties.getScope());
-                    testNames.add(failedKeywordTest.getName());
+                    Location<?> location = failedTest.getLocation(project, myConsoleProperties.getScope());
+                    testNames.add(failedTest.getName());
                     if (location != null && location.getVirtualFile() != null) {
                         testFiles.add(location.getVirtualFile());
                     }

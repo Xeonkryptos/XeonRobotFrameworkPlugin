@@ -12,7 +12,6 @@ import com.jetbrains.python.psi.PyClass;
 import com.jetbrains.python.psi.PyFunction;
 import com.jetbrains.python.psi.PyParameter;
 import dev.xeonkryptos.xeonrobotframeworkplugin.MyLogger;
-import dev.xeonkryptos.xeonrobotframeworkplugin.config.RobotOptionsProvider;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.dto.ParameterDto;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.DefinedParameter;
 import org.jetbrains.annotations.NotNull;
@@ -106,7 +105,7 @@ public class PythonInspector {
         final Sdk finalSdk = sdk;
         return CachedValuesManager.getCachedValue(sourceElement, () -> {
             try {
-                List<String> processArguments = createInspectionProcessArguments(finalSdk, sourceElement, namespace, className, elements);
+                List<String> processArguments = createInspectionProcessArguments(finalSdk, namespace, className, elements);
 
                 ProcessBuilder processBuilder = new ProcessBuilder(processArguments);
 
@@ -142,18 +141,10 @@ public class PythonInspector {
     }
 
     @NotNull
-    private static List<String> createInspectionProcessArguments(Sdk finalSdk,
-                                                                 PsiElement sourceElement,
-                                                                 String namespace,
-                                                                 @Nullable String className,
-                                                                 Map<String, PyFunction> elements) {
-        RobotOptionsProvider robotOptionsProvider = RobotOptionsProvider.getInstance(sourceElement.getProject());
-        String additionalArguments = robotOptionsProvider.getPythonLiveInspectionAdditionalArguments();
-
+    private static List<String> createInspectionProcessArguments(Sdk finalSdk, String namespace, @Nullable String className, Map<String, PyFunction> elements) {
         List<String> processArguments = new ArrayList<>(9);
         processArguments.add(finalSdk.getHomePath());
         processArguments.add(PYTHON_ARGUMENT_INSPECTOR_PY.toString());
-        processArguments.add(additionalArguments);
         processArguments.add("--namespace");
         processArguments.add(namespace);
         if (className != null && !className.isBlank()) {

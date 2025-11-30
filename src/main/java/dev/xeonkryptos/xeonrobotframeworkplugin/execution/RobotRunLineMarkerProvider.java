@@ -42,7 +42,7 @@ public class RobotRunLineMarkerProvider extends RunLineMarkerContributor impleme
                 int textOffset = element.getTextOffset();
                 int lineNumber = document.getLineNumber(textOffset);
                 String path = containingFile.getOriginalFile().getVirtualFile().getPath();
-                String url = "robotcode:///%s?line=%d".formatted(path, lineNumber);
+                String url = RobotSMTestLocator.createLocationUrl(path, lineNumber);
                 icon = getTestStateIcon(url, project, type == RobotTypes.TEST_CASES_HEADER || type == RobotTypes.TASKS_HEADER);
             }
             return new Info(icon, actions);

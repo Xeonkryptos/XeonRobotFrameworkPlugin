@@ -7,6 +7,7 @@
 ### Added
 
 - Update gutter icon based on robot execution results
+- Mark failed keyword calls in editor like for other failed tests in any test framework
 
 ### Changed
 

@@ -35,10 +35,8 @@ public class RobotConfiguration implements NoScroll, SearchableConfigurable {
     private final JBCheckBox capitalizeKeywords;
     private final JBCheckBox smartAutoEncloseVariable;
     private final JBCheckBox multilineIndentation;
-    private final JBCheckBox testsOnlyMode;
     private final JBTextField parameterNameCollationRulesTextField;
     private final JBCheckBox pythonLiveInspection;
-    private final JBTextField pythonLiveInspectionCustomArgumentsTextField;
     private final JBTextField pythonLiveInspectionForDecoratorsTextField;
 
     public RobotConfiguration() {
@@ -48,7 +46,7 @@ public class RobotConfiguration implements NoScroll, SearchableConfigurable {
 
         int mainPanelRow = 0;
         JBPanel<?> checkBoxPanel = new JBPanel<>();
-        checkBoxPanel.setLayout(new GridLayoutManager(9, 1, JBUI.emptyInsets(), -1, -1, false, false));
+        checkBoxPanel.setLayout(new GridLayoutManager(8, 1, JBUI.emptyInsets(), -1, -1, false, false));
         mainPanel.add(checkBoxPanel, new GridConstraints(mainPanelRow++, 0, 1, 2, 0, 3, 3, 3, null, null, null));
 
         int checkBoxPanelRow = 0;
@@ -66,12 +64,6 @@ public class RobotConfiguration implements NoScroll, SearchableConfigurable {
         this.multilineIndentation = multilineIndentationCheckBox;
         multilineIndentationCheckBox.setText("Smart Multiline Indentation");
         checkBoxPanel.add(multilineIndentationCheckBox, new GridConstraints(checkBoxPanelRow++, 0, 1, 1, 8, 0, 3, 0, null, null, null));
-
-        JBCheckBox testsOnlyModeCheckBox = new JBCheckBox();
-        this.testsOnlyMode = testsOnlyModeCheckBox;
-        testsOnlyModeCheckBox.setText(RobotBundle.message("options.tests-only-mode.title"));
-        testsOnlyModeCheckBox.setToolTipText(RobotBundle.message("options.tests-only-mode.tooltip"));
-        checkBoxPanel.add(testsOnlyModeCheckBox, new GridConstraints(checkBoxPanelRow++, 0, 1, 1, 8, 0, 3, 0, null, null, null));
 
         JBPanel<?> parameterNameCollationRulesForDecoratorsPanel = new JBPanel<>();
         parameterNameCollationRulesForDecoratorsPanel.setLayout(new BoxLayout(parameterNameCollationRulesForDecoratorsPanel, BoxLayout.LINE_AXIS));
@@ -118,11 +110,6 @@ public class RobotConfiguration implements NoScroll, SearchableConfigurable {
         //        customArgumentsPanel.add(customArgumentsLabel);
         customArgumentsLabel.setToolTipText(RobotBundle.message("options.inspection.custom.arguments.tooltip"));
 
-        JBTextField pythonLiveInspectionCustomArgumentsTextField = new JBTextField();
-        this.pythonLiveInspectionCustomArgumentsTextField = pythonLiveInspectionCustomArgumentsTextField;
-        pythonLiveInspectionCustomArgumentsTextField.setText("Custom Arguments");
-        //        customArgumentsPanel.add(pythonLiveInspectionCustomArgumentsTextField);
-
         JBPanel<?> pythonLiveInspectionForDecoratorsPanel = new JBPanel<>();
         pythonLiveInspectionForDecoratorsPanel.setLayout(new BoxLayout(pythonLiveInspectionForDecoratorsPanel, BoxLayout.LINE_AXIS));
         //        checkBoxPanel.add(pythonLiveInspectionForDecoratorsPanel, new GridConstraints(row, 0, 1, 1, 8, GridBagConstraints.BOTH, 3, 0, null, null, null));
@@ -141,12 +128,10 @@ public class RobotConfiguration implements NoScroll, SearchableConfigurable {
             int selectionStateChange = e.getStateChange();
             boolean enabled = selectionStateChange == ItemEvent.SELECTED;
             customArgumentsLabel.setEnabled(enabled);
-            pythonLiveInspectionCustomArgumentsTextField.setEnabled(enabled);
             pythonLiveInspectionForDecoratorsLabel.setEnabled(enabled);
             pythonLiveInspectionForDecoratorsTextField.setEnabled(enabled);
         });
         customArgumentsLabel.setEnabled(pythonLiveInspectionCheckBox.isSelected());
-        pythonLiveInspectionCustomArgumentsTextField.setEnabled(pythonLiveInspectionCheckBox.isSelected());
         pythonLiveInspectionForDecoratorsLabel.setEnabled(pythonLiveInspectionCheckBox.isSelected());
         pythonLiveInspectionForDecoratorsTextField.setEnabled(pythonLiveInspectionCheckBox.isSelected());
 
@@ -189,12 +174,10 @@ public class RobotConfiguration implements NoScroll, SearchableConfigurable {
         RobotOptionsProvider provider = getOptionProvider();
         return provider != null && (provider.capitalizeKeywords() != this.capitalizeKeywords.isSelected()
                                     || provider.smartAutoEncloseVariable() != this.smartAutoEncloseVariable.isSelected()
-                                    || provider.multilineIndentation() != this.multilineIndentation.isSelected()
-                                    || provider.testsOnlyMode() != this.testsOnlyMode.isSelected() || provider.parameterNameCollationRules()
-                                                                                                              .equals(this.parameterNameCollationRulesTextField.getText())
-                                    || provider.pythonLiveInspection() != this.pythonLiveInspection.isSelected() || provider.pythonLiveInspection() && (
-                !provider.getPythonLiveInspectionAdditionalArguments().equals(this.pythonLiveInspectionCustomArgumentsTextField.getText())
-                || !provider.getPythonLiveInspectionDecorators().equals(convertToDecoratorNames())));
+                                    || provider.multilineIndentation() != this.multilineIndentation.isSelected() || provider.parameterNameCollationRules()
+                                                                                                                            .equals(this.parameterNameCollationRulesTextField.getText())
+                                    || provider.pythonLiveInspection() != this.pythonLiveInspection.isSelected()
+                                    || provider.pythonLiveInspection() && !provider.getPythonLiveInspectionDecorators().equals(convertToDecoratorNames()));
     }
 
     @Override
@@ -204,10 +187,8 @@ public class RobotConfiguration implements NoScroll, SearchableConfigurable {
             provider.setCapitalizeKeywords(this.capitalizeKeywords.isSelected());
             provider.setSmartAutoEncloseVariable(this.smartAutoEncloseVariable.isSelected());
             provider.setMultilineIndentation(this.multilineIndentation.isSelected());
-            provider.setTestsOnlyMode(this.testsOnlyMode.isSelected());
             provider.setParameterNameCollationRules(this.parameterNameCollationRulesTextField.getText());
             provider.setPythonLiveInspection(this.pythonLiveInspection.isSelected());
-            provider.setPythonLiveInspectionAdditionalArguments(this.pythonLiveInspectionCustomArgumentsTextField.getText());
             List<String> decoratorNames = convertToDecoratorNames();
             provider.setPythonLiveInspectionDecorators(decoratorNames);
         }
@@ -227,11 +208,9 @@ public class RobotConfiguration implements NoScroll, SearchableConfigurable {
         if (provider != null) {
             this.capitalizeKeywords.setSelected(provider.capitalizeKeywords());
             this.smartAutoEncloseVariable.setSelected(provider.smartAutoEncloseVariable());
-            this.testsOnlyMode.setSelected(provider.testsOnlyMode());
             this.multilineIndentation.setSelected(provider.multilineIndentation());
             this.parameterNameCollationRulesTextField.setText(provider.parameterNameCollationRules());
             this.pythonLiveInspection.setSelected(provider.pythonLiveInspection());
-            this.pythonLiveInspectionCustomArgumentsTextField.setText(provider.getPythonLiveInspectionAdditionalArguments());
             this.pythonLiveInspectionForDecoratorsTextField.setText(String.join(", ", provider.getPythonLiveInspectionDecorators()));
         }
     }

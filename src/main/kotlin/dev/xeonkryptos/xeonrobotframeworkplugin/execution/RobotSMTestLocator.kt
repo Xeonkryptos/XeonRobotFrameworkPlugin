@@ -12,10 +12,17 @@ import com.intellij.psi.search.GlobalSearchScope
 import com.intellij.util.Urls
 
 class RobotSMTestLocator : SMTestLocator {
+
+    companion object {
+        @JvmStatic
+        fun createLocationUrl(filePath: String, lineNumber: Int): String {
+            return "robotcode:///${filePath}?line=${lineNumber}"
+        }
+    }
+
     override fun getLocation(
         protocol: String, path: String, project: Project, scope: GlobalSearchScope
     ): MutableList<Location<PsiElement>> {
-        
         val uri = Urls.parse("file://$path", true)
         if (uri != null) {
             val line = uri.parameters?.drop(1)?.split("&")?.firstOrNull { it.startsWith("line=") }?.substring(5)
