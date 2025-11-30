@@ -41,7 +41,7 @@ import com.jetbrains.python.run.PythonScriptTargetedCommandLineBuilder;
 import com.jetbrains.python.run.target.HelpersAwareTargetEnvironmentRequest;
 import dev.xeonkryptos.xeonrobotframeworkplugin.MyLogger;
 import dev.xeonkryptos.xeonrobotframeworkplugin.config.RobotOptionsProvider;
-import dev.xeonkryptos.xeonrobotframeworkplugin.debugger.dap.RobotDebugAdapterProtocolCommunicator;
+import dev.xeonkryptos.xeonrobotframeworkplugin.execution.dap.RobotDebugAdapterProtocolCommunicator;
 import dev.xeonkryptos.xeonrobotframeworkplugin.execution.config.RobotRunConfiguration;
 import dev.xeonkryptos.xeonrobotframeworkplugin.execution.config.RobotRunConfiguration.RobotRunnableUnitExecutionInfo;
 import dev.xeonkryptos.xeonrobotframeworkplugin.execution.ui.RobotRerunFailedTestsAction;

@@ -9,7 +9,7 @@ import com.intellij.util.Urls.newUrl
 import com.jetbrains.rd.util.lifetime.Lifetime
 import com.jetbrains.rd.util.reactive.adviseEternal
 import dev.xeonkryptos.xeonrobotframeworkplugin.config.RobotOptionsProvider
-import dev.xeonkryptos.xeonrobotframeworkplugin.debugger.dap.model.RobotExecutionEventArguments
+import dev.xeonkryptos.xeonrobotframeworkplugin.execution.dap.model.RobotExecutionEventArguments
 import jetbrains.buildServer.messages.serviceMessages.ServiceMessage
 import jetbrains.buildServer.messages.serviceMessages.ServiceMessageVisitor
 import kotlinx.coroutines.CompletableDeferred

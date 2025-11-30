@@ -4,6 +4,10 @@
 
 ## Unreleased
 
+### Added
+
+- Update gutter icon based on robot execution results
+
 ### Changed
 
 - Optimized lexer and parser

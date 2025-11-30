@@ -1,4 +1,4 @@
-package dev.xeonkryptos.xeonrobotframeworkplugin.debugger.dap;
+package dev.xeonkryptos.xeonrobotframeworkplugin.execution.dap;
 
 import com.intellij.execution.process.ProcessEvent;
 import com.intellij.execution.process.ProcessListener;

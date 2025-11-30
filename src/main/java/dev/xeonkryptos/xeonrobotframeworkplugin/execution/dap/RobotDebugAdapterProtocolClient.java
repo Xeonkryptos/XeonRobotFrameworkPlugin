@@ -1,9 +1,9 @@
-package dev.xeonkryptos.xeonrobotframeworkplugin.debugger.dap;
+package dev.xeonkryptos.xeonrobotframeworkplugin.execution.dap;
 
-import dev.xeonkryptos.xeonrobotframeworkplugin.debugger.dap.model.RobotEnqueuedArguments;
-import dev.xeonkryptos.xeonrobotframeworkplugin.debugger.dap.model.RobotExecutionEventArguments;
-import dev.xeonkryptos.xeonrobotframeworkplugin.debugger.dap.model.RobotExitedEventArguments;
-import dev.xeonkryptos.xeonrobotframeworkplugin.debugger.dap.model.RobotLogMessageEventArguments;
+import dev.xeonkryptos.xeonrobotframeworkplugin.execution.dap.model.RobotEnqueuedArguments;
+import dev.xeonkryptos.xeonrobotframeworkplugin.execution.dap.model.RobotExecutionEventArguments;
+import dev.xeonkryptos.xeonrobotframeworkplugin.execution.dap.model.RobotExitedEventArguments;
+import dev.xeonkryptos.xeonrobotframeworkplugin.execution.dap.model.RobotLogMessageEventArguments;
 import com.jetbrains.rd.util.reactive.Signal;
 import org.eclipse.lsp4j.debug.ExitedEventArguments;
 import org.eclipse.lsp4j.debug.OutputEventArguments;

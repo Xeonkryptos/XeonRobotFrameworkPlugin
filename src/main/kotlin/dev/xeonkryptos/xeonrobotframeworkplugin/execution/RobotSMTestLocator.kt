@@ -23,15 +23,12 @@ class RobotSMTestLocator : SMTestLocator {
             
             LocalFileSystem.getInstance().findFileByPath(uri.path)?.let { virtualFile ->
                 PsiManager.getInstance(project).findFile(virtualFile)?.let { psiFile ->
-                    
                     PsiDocumentManager.getInstance(project).getDocument(psiFile)?.let { doc ->
                         val offset = doc.getLineStartOffset(line ?: 0)
                         psiFile.findElementAt(offset)
                     }
                 }
-            }?.let {
-                return mutableListOf(PsiLocation(it))
-            }
+            }?.let { return mutableListOf(PsiLocation(it)) }
         }
         return mutableListOf()
     }

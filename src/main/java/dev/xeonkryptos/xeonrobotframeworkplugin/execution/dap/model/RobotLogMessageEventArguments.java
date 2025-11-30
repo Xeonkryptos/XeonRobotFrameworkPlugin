@@ -1,4 +1,4 @@
-package dev.xeonkryptos.xeonrobotframeworkplugin.debugger.dap.model;
+package dev.xeonkryptos.xeonrobotframeworkplugin.execution.dap.model;
 
 public record RobotLogMessageEventArguments(String itemId,
                                             String source,

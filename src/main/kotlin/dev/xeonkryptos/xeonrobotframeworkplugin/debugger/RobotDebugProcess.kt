@@ -14,7 +14,7 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.debugger.breakpoint.RobotExcepti
 import dev.xeonkryptos.xeonrobotframeworkplugin.debugger.breakpoint.RobotExceptionBreakpointProperties
 import dev.xeonkryptos.xeonrobotframeworkplugin.debugger.breakpoint.RobotLineBreakpointHandler
 import dev.xeonkryptos.xeonrobotframeworkplugin.debugger.breakpoint.RobotLineBreakpointProperties
-import dev.xeonkryptos.xeonrobotframeworkplugin.debugger.dap.RobotDebugAdapterProtocolCommunicator
+import dev.xeonkryptos.xeonrobotframeworkplugin.execution.dap.RobotDebugAdapterProtocolCommunicator
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.future.await
 import kotlinx.coroutines.runBlocking

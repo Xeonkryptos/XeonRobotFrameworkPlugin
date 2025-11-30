@@ -1,4 +1,4 @@
-package dev.xeonkryptos.xeonrobotframeworkplugin.debugger.dap;
+package dev.xeonkryptos.xeonrobotframeworkplugin.execution.dap;
 
 import org.eclipse.lsp4j.debug.services.IDebugProtocolServer;
 import org.eclipse.lsp4j.jsonrpc.services.JsonRequest;
