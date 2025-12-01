@@ -2,6 +2,8 @@ package dev.xeonkryptos.xeonrobotframeworkplugin.inspections
 
 import com.intellij.codeInspection.LocalQuickFix
 import com.intellij.execution.TestStateStorage
+import com.intellij.openapi.components.Service
+import com.intellij.openapi.components.service
 import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.fileEditor.FileEditorManagerListener
 import com.intellij.openapi.project.Project
@@ -17,6 +19,7 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.execution.RobotSMTestLocator
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTaskStatement
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTestCaseStatement
 
+@Service(Service.Level.PROJECT)
 class RobotTestFailedLineManager(private val project: Project) : TestFailedLineManager, FileEditorManagerListener {
 
     private val testStorage = TestStateStorage.getInstance(project)
@@ -28,6 +31,8 @@ class RobotTestFailedLineManager(private val project: Project) : TestFailedLineM
 
     companion object {
         private const val TEST_FAILED_MAGNITUDE = 6 // see TestStateInfo#Magnitude
+
+        fun getInstance(project: Project): RobotTestFailedLineManager = project.service()
     }
 
     override fun fileClosed(source: FileEditorManager, file: VirtualFile) {

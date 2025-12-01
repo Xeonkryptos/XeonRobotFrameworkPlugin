@@ -7,7 +7,6 @@ import com.intellij.codeInspection.ProblemHighlightType
 import com.intellij.codeInspection.ProblemsHolder
 import com.intellij.openapi.editor.colors.CodeInsightColors
 import com.intellij.psi.PsiElementVisitor
-import com.intellij.testIntegration.TestFailedLineManager
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCall
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVisitor
 
@@ -23,7 +22,7 @@ class TestFailedLineInspection : LocalInspectionTool() {
     class TestFailedVisitor(private val holder: ProblemsHolder, private val isOnTheFly: Boolean) : RobotVisitor() {
 
         override fun visitKeywordCall(keywordCall: RobotKeywordCall) {
-            val testFailProvider = TestFailedLineManager.getInstance(holder.project)
+            val testFailProvider = RobotTestFailedLineManager.getInstance(holder.project)
             val testInfo = testFailProvider.getTestInfo(keywordCall) ?: return
             if (testInfo.magnitude < TEST_FAILED_MAGNITUDE) return // don't highlight skipped tests
 

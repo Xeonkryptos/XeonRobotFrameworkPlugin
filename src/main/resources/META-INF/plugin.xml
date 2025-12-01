@@ -16,9 +16,6 @@
         <projectConfigurable groupId="language" instance="dev.xeonkryptos.xeonrobotframeworkplugin.config.RobotConfiguration" key="options.entrypoint"
                              bundle="messages.RobotBundle"/>
 
-        <projectService serviceInterface="com.intellij.testIntegration.TestFailedLineManager"
-                        serviceImplementation="dev.xeonkryptos.xeonrobotframeworkplugin.inspections.RobotTestFailedLineManager"/>
-
         <fileType name="Robot Feature" implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotFeatureFileType" fieldName="INSTANCE"
                   language="Robot" extensions="robot"/>
         <fileType name="Robot Resource" implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotResourceFileType" fieldName="INSTANCE"
