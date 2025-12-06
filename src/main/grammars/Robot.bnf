@@ -47,21 +47,18 @@ internal_root ::= !<<eof>> root
 
 root ::= section*
 
-fake foldable ::= DUMMY
-fake scopeOwner ::= DUMMY
-
 section ::= settings_section
     | variables_section
     | test_cases_section
     | tasks_section
     | keywords_section
-    | comments_section {methods=[getSectionName] implements=foldable}
+    | comments_section {methods=[getSectionName] implements="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotFoldable"}
 
 settings_section ::= SETTINGS_HEADER global_setting_statement* {methods=[nameIdentifier="SETTINGS_HEADER" getSectionName]}
 variables_section ::= VARIABLES_HEADER single_variable_statement* {methods=[nameIdentifier="VARIABLES_HEADER" getSectionName]}
-test_cases_section ::= TEST_CASES_HEADER test_case_statement* {methods=[nameIdentifier="TEST_CASES_HEADER" getSectionName] implements=scopeOwner}
-tasks_section ::= TASKS_HEADER task_statement* {methods=[nameIdentifier="TASKS_HEADER" getSectionName] implements=scopeOwner}
-keywords_section ::= USER_KEYWORDS_HEADER user_keyword_statement* {methods=[nameIdentifier="USER_KEYWORDS_HEADER" getSectionName] implements=scopeOwner}
+test_cases_section ::= TEST_CASES_HEADER test_case_statement* {methods=[nameIdentifier="TEST_CASES_HEADER" getSectionName] implements="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotScopeOwner"}
+tasks_section ::= TASKS_HEADER task_statement* {methods=[nameIdentifier="TASKS_HEADER" getSectionName] implements="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotScopeOwner"}
+keywords_section ::= USER_KEYWORDS_HEADER user_keyword_statement* {methods=[nameIdentifier="USER_KEYWORDS_HEADER" getSectionName] implements="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotScopeOwner"}
 comments_section ::= COMMENTS_HEADER COMMENT* {methods=[nameIdentifier="COMMENTS_HEADER" getSectionName]}
 private section_recover ::= !(SETTINGS_HEADER | VARIABLES_HEADER | TEST_CASES_HEADER | TASKS_HEADER | USER_KEYWORDS_HEADER | COMMENTS_HEADER)
 
@@ -76,7 +73,7 @@ global_setting_statement ::= library_import_global_setting
     | template_statements_global_setting_wrapper
     | timeout_statements_global_setting
     | unknown_setting_statements_global_setting {
-    implements=foldable
+    implements="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotFoldable"
     name="Resource, Library, Variables, Metadata, Documentation, Name, Suite (Setup | Teardown), Force Tags, (Test | Task) Template, (Test | Task) Timeout"
 }
 
@@ -133,8 +130,8 @@ test_case_statement ::= test_case_id eol_marker? testcase_task_statement* {
         "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotQualifiedNameOwner"
         "com.intellij.psi.PsiNameIdentifierOwner"
         "com.intellij.navigation.NavigationItem"
-        foldable
-        scopeOwner
+        "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotFoldable"
+        "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotScopeOwner"
     ]
     extends = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotTestCaseExtension"
     methods = [getName getNameIdentifier getIcon getQualifiedName getLocalSettings]
@@ -151,8 +148,8 @@ task_statement ::= task_id eol_marker? testcase_task_statement* {
         "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotQualifiedNameOwner"
         "com.intellij.psi.PsiNameIdentifierOwner"
         "com.intellij.navigation.NavigationItem"
-        scopeOwner
-        foldable
+        "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotScopeOwner"
+        "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotFoldable"
     ]
     extends = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotTaskExtension"
     methods = [getName getNameIdentifier getIcon getQualifiedName getLocalSettings]
@@ -202,8 +199,8 @@ user_keyword_statement ::= user_keyword_statement_id eol_marker (local_arguments
         "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotUserKeywordStatementExpression"
         "com.intellij.psi.PsiNameIdentifierOwner"
         "com.intellij.navigation.NavigationItem"
-        scopeOwner
-        foldable
+        "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotScopeOwner"
+        "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotFoldable"
     ]
     mixin = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotUserKeywordExtension"
     stubClass = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotUserKeywordStub"
@@ -217,7 +214,7 @@ private user_keyword_statement_recover ::= !user_keyword_statement_id & section_
 local_setting ::= local_setting_id (positional_argument | parameter | eol_free_keyword_call | ASSIGNMENT)* eol_marker {
     pin=1
     methods=[getSettingName]
-    implements=foldable
+    implements="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotFoldable"
     hooks=[localTemplateDefinitionHook]
 }
 local_setting_id ::= LOCAL_SETTING_START LOCAL_SETTING_NAME LOCAL_SETTING_END
@@ -225,7 +222,7 @@ local_setting_id ::= LOCAL_SETTING_START LOCAL_SETTING_NAME LOCAL_SETTING_END
 local_arguments_setting ::= local_arguments_setting_id local_arguments_setting_parameter* eol_marker {
     pin=1
     methods=[getSettingName]
-    implements=foldable
+    implements="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotFoldable"
 }
 local_arguments_setting_id ::= LOCAL_SETTING_START "Arguments" LOCAL_SETTING_END {pin=2}
 local_arguments_setting_parameter ::= local_arguments_setting_parameter_optional | local_arguments_setting_parameter_mandatory
@@ -234,11 +231,11 @@ local_arguments_setting_parameter_optional ::= variable_definition "=" positiona
 
 executable_statement ::= loop_structure | loop_control_structure | control_structure | call_structure | return_structure {
     pin=1
-    implements=foldable
+    implements="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotFoldable"
 }
 private executable_statement_recover ::= !(FOR | WHILE | IF | ELSE_IF | ELSE | TRY | GROUP | RETURN | BREAK | CONTINUE | VAR | keyword_call_name | variable_definition) & section_recover
 
-fake block_opening_structure ::= DUMMY {implements=[foldable scopeOwner]}
+fake block_opening_structure ::= DUMMY {implements=["dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotFoldable" "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotScopeOwner"]}
 private control_structure ::= conditional_structure | conditional_inline_structure | exception_handling_structure | group_structure
 private loop_structure ::= for_loop_structure | while_loop_structure
 private call_structure ::= eol_based_keyword_call | inline_variable_statement | keyword_variable_statement | if_variable_statement | empty_variable_statement
@@ -310,7 +307,7 @@ fake keyword_call ::= base_keyword_call {
         "com.intellij.psi.PsiNameIdentifierOwner"
         "com.intellij.navigation.NavigationItem"
         "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotCallArgumentsContainer"
-        foldable
+        "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotFoldable"
     ]
     methods = [getName getNameIdentifier]
     mixin = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotKeywordCallExtension"
@@ -328,7 +325,7 @@ fake argument ::= DUMMY // This is a placeholder for the argument type, which is
 parameter ::= parameter_id ASSIGNMENT positional_argument? {methods=[getParameterName]}
 parameter_id ::= PARAMETER_NAME {methods = [getReference]}
 
-fake variable_statement ::= DUMMY {methods = [getIcon] implements=foldable}
+fake variable_statement ::= DUMMY {methods = [getIcon] implements="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotFoldable"}
 single_variable_statement ::= variable_definition ASSIGNMENT? variable_value* parameter? eol_marker? {pin=3}
 empty_variable_statement ::= variable_definition ASSIGNMENT? "${EMPTY}" eol_marker? {pin=3}
 inline_variable_statement ::= VAR variable_definition ASSIGNMENT? variable_value+ parameter? eol_marker? {pin=1}
@@ -351,7 +348,7 @@ variable_definition ::= variable {
         "com.intellij.navigation.NavigationItem"
         "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.DefinedVariable"
         "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotQualifiedNameOwner"
-        foldable
+        "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotFoldable"
     ]
     mixin = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotVariableDefinitionExtension"
     stubClass = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotVariableDefinitionStub"

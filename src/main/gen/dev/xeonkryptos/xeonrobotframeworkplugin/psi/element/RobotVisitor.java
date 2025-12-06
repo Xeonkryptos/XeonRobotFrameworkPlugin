@@ -19,7 +19,6 @@ public class RobotVisitor extends PsiElementVisitor {
 
   public void visitBlockOpeningStructure(@NotNull RobotBlockOpeningStructure o) {
     visitExecutableStatement(o);
-    // visitFoldable(o);
     // visitScopeOwner(o);
   }
 
@@ -67,10 +66,6 @@ public class RobotVisitor extends PsiElementVisitor {
   public void visitFinallyStructure(@NotNull RobotFinallyStructure o) {
     visitExecutableStatement(o);
     // visitBlockOpeningStructure(o);
-  }
-
-  public void visitFoldable(@NotNull RobotFoldable o) {
-    visitElement(o);
   }
 
   public void visitForLoopStructure(@NotNull RobotForLoopStructure o) {
@@ -236,10 +231,6 @@ public class RobotVisitor extends PsiElementVisitor {
 
   public void visitScalarVariable(@NotNull RobotScalarVariable o) {
     visitVariable(o);
-  }
-
-  public void visitScopeOwner(@NotNull RobotScopeOwner o) {
-    visitElement(o);
   }
 
   public void visitSection(@NotNull RobotSection o) {
@@ -431,6 +422,10 @@ public class RobotVisitor extends PsiElementVisitor {
   }
 
   public void visitElement(@NotNull RobotElement o) {
+    visitPsiElement(o);
+  }
+
+  public void visitFoldable(@NotNull RobotFoldable o) {
     visitPsiElement(o);
   }
 

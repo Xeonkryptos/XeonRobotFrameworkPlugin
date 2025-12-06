@@ -5,6 +5,6 @@ import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 
-public interface RobotBlockOpeningStructure extends RobotExecutableStatement, RobotFoldable, RobotScopeOwner {
+public interface RobotBlockOpeningStructure extends RobotExecutableStatement, RobotScopeOwner {
 
 }

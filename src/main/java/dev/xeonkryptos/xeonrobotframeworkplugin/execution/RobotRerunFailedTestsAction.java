@@ -1,4 +1,4 @@
-package dev.xeonkryptos.xeonrobotframeworkplugin.execution.ui;
+package dev.xeonkryptos.xeonrobotframeworkplugin.execution;
 
 import com.intellij.execution.Executor;
 import com.intellij.execution.Location;
@@ -18,7 +18,6 @@ import com.jetbrains.python.extensions.ContextAnchor;
 import com.jetbrains.python.extensions.ModuleBasedContextAnchor;
 import com.jetbrains.python.extensions.ProjectSdkContextAnchor;
 import com.jetbrains.python.run.PythonRunConfiguration;
-import dev.xeonkryptos.xeonrobotframeworkplugin.execution.RobotCommandLineState;
 import dev.xeonkryptos.xeonrobotframeworkplugin.execution.config.RobotRunConfiguration;
 import dev.xeonkryptos.xeonrobotframeworkplugin.execution.config.RobotRunConfiguration.RobotRunnableUnitExecutionInfo;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTestCaseStatement;
