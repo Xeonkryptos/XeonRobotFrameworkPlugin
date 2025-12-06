@@ -18,6 +18,11 @@
 - Optimized lookup of imported files by filtering for concrete import types and resolve only those
 - Cache Robot Framework's builtin python class instead of looking it up every time
 
+### Fixed
+
+- Fixed issues with selecting single test cases to execute them but not providing the option to do so rather failing with an exception, not providing the run
+  option
+
 ## 0.5.16
 
 ### Fixed

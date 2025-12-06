@@ -243,14 +243,14 @@ LineComment = {LineCommentSign} {NON_EOL}*
 <VARIABLE_DEFINITION, VARIABLE_USAGE> {VariableLiteralValue}  { return VARIABLE_BODY; }
 
 <EXTENDED_VARIABLE_ACCESS> {
-    "["                          { return VARIABLE_ACCESS_START; }
-    "]"                          { return VARIABLE_ACCESS_END; }
+    "["                                          { return VARIABLE_ACCESS_START; }
+    "]"                                          { return VARIABLE_ACCESS_END; }
     "]" ({WhitespaceIncludingNewline}+ | [^\[])  {
           leaveState();
           yypushback(yylength() - 1);
           return VARIABLE_ACCESS_END;
       }
-    {ExtendedVariableAccessValue} { return EXTENDED_VARIABLE_ACCESS_BODY; }
+    {ExtendedVariableAccessValue}                { return EXTENDED_VARIABLE_ACCESS_BODY; }
 }
 
 <PYTHON_EXPRESSION> {
@@ -299,7 +299,7 @@ LineComment = {LineCommentSign} {NON_EOL}*
 <INTERMEDIATE_TEMPLATE_CONFIGURATION> {
     ({ExtendedSpaceBasedEndMarker} | ({NonNewlineWhitespace}* {MultiLine})) "NONE" {ExtendedKeywordFinishedMarker}  {
           pushBackTrailingWhitespace();
-          yypushback("NONE".length() + 1);
+          yypushback("NONE".length());
           return WHITE_SPACE;
     }
     "NONE" {ExtendedKeywordFinishedMarker}  {

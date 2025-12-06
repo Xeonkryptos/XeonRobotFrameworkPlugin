@@ -90,7 +90,12 @@ public class RobotRunConfigurationProducer extends LazyRunConfigurationProducer<
                 RobotQualifiedNameOwner executableElement = getTestCaseTaskFromAnyElement(element);
                 if (executableElement != null) {
                     if (executionInfos == null) {
-                        executionInfos = executableElement instanceof RobotTestCaseStatement ? runConfig.getTestCases() : runConfig.getTasks();
+                        executionInfos = new ArrayList<>();
+                        if (executableElement instanceof RobotTestCaseStatement) {
+                            runConfig.setTestCases(executionInfos);
+                        } else {
+                            runConfig.setTasks(executionInfos);
+                        }
                     }
                     String qualifiedName = executableElement.getQualifiedName();
                     RobotRunnableUnitExecutionInfo executionInfo = new RobotRunnableUnitExecutionInfo(qualifiedName);

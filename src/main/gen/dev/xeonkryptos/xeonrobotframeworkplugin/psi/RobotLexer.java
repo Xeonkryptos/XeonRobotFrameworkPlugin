@@ -5570,7 +5570,7 @@ public class RobotLexer extends AbstractRobotLexer {
           case 215: break;
           case 92:
             { pushBackTrailingWhitespace();
-          yypushback("NONE".length() + 1);
+          yypushback("NONE".length());
           return WHITE_SPACE;
             }
           // fall through

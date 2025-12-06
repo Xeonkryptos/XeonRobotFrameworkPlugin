@@ -25,9 +25,8 @@ class RobotSMTestLocator : SMTestLocator {
     ): MutableList<Location<PsiElement>> {
         val uri = Urls.parse("file://$path", true)
         if (uri != null) {
-            val line = uri.parameters?.drop(1)?.split("&")?.firstOrNull { it.startsWith("line=") }?.substring(5)
-                ?.toIntOrNull()
-            
+            val line = uri.parameters?.drop(1)?.split("&")?.firstOrNull { it.startsWith("line=") }?.substring(5)?.toIntOrNull()?.minus(1)
+
             LocalFileSystem.getInstance().findFileByPath(uri.path)?.let { virtualFile ->
                 PsiManager.getInstance(project).findFile(virtualFile)?.let { psiFile ->
                     PsiDocumentManager.getInstance(project).getDocument(psiFile)?.let { doc ->
@@ -39,5 +38,5 @@ class RobotSMTestLocator : SMTestLocator {
         }
         return mutableListOf()
     }
-    
+
 }
