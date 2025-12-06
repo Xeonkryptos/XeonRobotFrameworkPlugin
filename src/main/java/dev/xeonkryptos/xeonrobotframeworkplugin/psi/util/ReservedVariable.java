@@ -61,19 +61,12 @@ public enum ReservedVariable {
     SUITE_MESSAGE("${SUITE_MESSAGE}", VariableScope.SuiteTeardown) // The full message of the current test suite, including statistics.
     ;
 
-    private static final String SCALAR = "${%s}";
-
     private final String variable;
     private final VariableScope scope;
 
     ReservedVariable(@NotNull String variable, @NotNull VariableScope scope) {
         this.variable = variable;
         this.scope = scope;
-    }
-
-    @NotNull
-    public static String wrapToScalar(@NotNull String content) {
-        return String.format(SCALAR, content);
     }
 
     @NotNull

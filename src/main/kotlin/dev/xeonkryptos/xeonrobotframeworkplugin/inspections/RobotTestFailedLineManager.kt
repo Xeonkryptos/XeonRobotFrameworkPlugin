@@ -44,7 +44,7 @@ class RobotTestFailedLineManager(private val project: Project) : TestFailedLineM
 
         val executableStatement = PsiTreeUtil.getParentOfType(element, true, RobotTestCaseStatement::class.java, RobotTaskStatement::class.java) ?: return null
         val url = computeLocationUrl(executableStatement) ?: return null
-        val record = testStorage.getState(url) ?: return null
+        var record = testStorage.getState(url) ?: return null
 
         val containingFile = element.containingFile ?: return null
         val vFile = containingFile.virtualFile ?: return null
@@ -60,8 +60,17 @@ class RobotTestFailedLineManager(private val project: Project) : TestFailedLineM
 
         info.pointer?.element?.let {
             if (element == it) return info.apply {
-                record.failedLine = document.getLineNumber(executableStatement.textOffset)
-                record.topStacktraceLine = elementLine.toString()
+                record = TestStateStorage.Record(
+                    record.magnitude,
+                    record.date,
+                    record.configurationHash,
+                    document.getLineNumber(executableStatement.textOffset),
+                    record.failedMethod,
+                    record.errorMessage,
+                    elementLine.toString()
+                )
+                testStorage.writeState(url, record)
+                info.record = record
             }
         }
 

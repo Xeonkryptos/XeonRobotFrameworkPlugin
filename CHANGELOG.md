@@ -8,6 +8,8 @@
 
 - Update gutter icon based on robot execution results
 - Mark failed keyword calls in editor like for other failed tests in any test framework
+- Added a new inspection to detect arguments that looks like they should be variables instead (currently only global standard variable) and provide a quickfix
+  to change them
 
 ### Changed
 

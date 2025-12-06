@@ -19,6 +19,7 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTaskId;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTemplateParameterId;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTestCaseId;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotUserKeywordStatementId;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariable;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableBodyId;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.visitor.RecursiveRobotVisitor;
 import org.jetbrains.annotations.NotNull;
@@ -171,6 +172,21 @@ public record RobotElementGenerator(Project project) {
         return positionalArgumentFinder.positionalArgument;
     }
 
+    public RobotVariable createNewScalarVariable(String variableBodyId) {
+        String fileContent = """
+                             *** Variables ***
+                             ${%s}=  DUMMY
+                             """.formatted(variableBodyId);
+
+        PsiFile psiFile = createDummyPsiFile(fileContent);
+        if (psiFile == null) {
+            return null;
+        }
+        RobotVariableFinder variableFinder = new RobotVariableFinder();
+        psiFile.acceptChildren(variableFinder);
+        return variableFinder.variable;
+    }
+
     public RobotVariableBodyId createNewVariableBodyId(String variableBodyId) {
         String fileContent = """
                              *** Variables ***
@@ -306,6 +322,16 @@ public record RobotElementGenerator(Project project) {
         @Override
         public void visitVariableBodyId(@NotNull RobotVariableBodyId o) {
             variableBodyId = o;
+        }
+    }
+
+    private static final class RobotVariableFinder extends RecursiveRobotVisitor {
+
+        private RobotVariable variable;
+
+        @Override
+        public void visitVariable(@NotNull RobotVariable o) {
+            variable = o;
         }
     }
 }

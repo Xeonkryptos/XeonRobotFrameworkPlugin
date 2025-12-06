@@ -156,6 +156,9 @@
         <localInspection language="Robot" shortName="RobotDeprecatedKeywordSettings" bundle="messages.RobotBundle" key="INSP.NAME.deprecated.settings.local"
                          groupKey="INSP.GROUP.robot" enabledByDefault="true" level="WARNING" dumbAware="true"
                          implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.inspections.deprecation.RobotDeprecatedKeywordSettingsInspection"/>
+        <localInspection language="Robot" shortName="RobotVariableRatherArgumentMeant" bundle="messages.RobotBundle"
+                         key="INSP.NAME.variable.rather.argument.meant" groupKey="INSP.GROUP.robot" enabledByDefault="true" level="WARNING" dumbAware="true"
+                         implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.inspections.maintainability.RobotVariableRatherArgumentMeantInspection"/>
         <localInspection language="Robot" enabledByDefault="true" level="WARNING" shortName="TestFailedLine" bundle="messages.RobotBundle"
                          groupKey="INSP.GROUP.robot" key="INSP.NAME.execution.test.failed.line"
                          implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.inspections.TestFailedLineInspection"/>
