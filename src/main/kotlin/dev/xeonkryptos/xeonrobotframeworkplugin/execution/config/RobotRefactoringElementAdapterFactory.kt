@@ -56,9 +56,12 @@ class RobotRefactoringElementAdapterFactory(private val configuration: RobotRunC
         if (!indexExecutionInfoPairs.isEmpty()) {
             return object : RefactoringElementAdapter() {
                 override fun elementRenamedOrMoved(newElement: PsiElement) {
-                    val newQualifiedName = (newElement as RobotQualifiedNameOwner).getQualifiedName()
+                    val owner = newElement as RobotQualifiedNameOwner
+                    val elementName = owner.name!!
+                    val newQualifiedName = owner.getQualifiedName()
+                    val newQualifiedLocation = newQualifiedName.take(newQualifiedName.length - elementName.length - 1)
                     for (pair in indexExecutionInfoPairs) {
-                        val newExecInfo = RobotRunnableUnitExecutionInfo(newQualifiedName)
+                        val newExecInfo = RobotRunnableUnitExecutionInfo(newQualifiedLocation, elementName)
                         items[pair.first] = newExecInfo
                     }
                 }

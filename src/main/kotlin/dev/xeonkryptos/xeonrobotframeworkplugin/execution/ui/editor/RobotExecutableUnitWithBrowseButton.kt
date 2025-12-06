@@ -18,6 +18,9 @@ import com.intellij.openapi.ui.ComponentWithBrowseButton
 import com.intellij.openapi.ui.TextComponentAccessor
 import com.intellij.openapi.ui.TextFieldWithBrowseButton
 import com.intellij.openapi.ui.ValidationInfo
+import com.intellij.openapi.ui.getUserData
+import com.intellij.openapi.ui.putUserData
+import com.intellij.openapi.util.Key
 import com.intellij.openapi.vfs.VfsUtil
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiNamedElement
@@ -29,12 +32,10 @@ import com.intellij.util.TextFieldCompletionProvider
 import com.intellij.util.textCompletion.TextFieldWithCompletion
 import com.intellij.util.ui.JBUI
 import com.jetbrains.python.extensions.ContextAnchor
-import com.jetbrains.python.extensions.getQName
 import com.sun.java.accessibility.util.SwingEventMonitor.removeDocumentListener
 import dev.xeonkryptos.xeonrobotframeworkplugin.RobotBundle
 import dev.xeonkryptos.xeonrobotframeworkplugin.gotocontributor.RobotGotoClassContributor
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotFeatureFileType
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotFile
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotQualifiedNameOwner
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTaskStatement
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTestCaseStatement
@@ -58,7 +59,24 @@ import kotlin.io.path.Path
 import javax.swing.event.DocumentEvent as SwingDocumentEvent
 import javax.swing.event.DocumentListener as SwingDocumentListener
 
-class RobotTextFieldWithDirectoryBrowseButton(private val contextAnchor: ContextAnchor) : TextFieldWithBrowseButton() {
+private val ROBOT_UNIT_LOCATION_KEY = Key.create<String>("ROBOT_UNIT_LOCATION_KEY")
+private val ROBOT_UNIT_NAME_KEY = Key.create<String?>("ROBOT_UNIT_NAME_KEY")
+
+interface RobotUnitLocationProvider {
+
+    val qualifiedLocation: String
+    val unitName: String?
+
+    fun updateUnitLocation(newLocation: String, unitName: String? = null)
+}
+
+class RobotTextFieldWithDirectoryBrowseButton(private val contextAnchor: ContextAnchor) : TextFieldWithBrowseButton(), RobotUnitLocationProvider {
+
+    override val qualifiedLocation: String
+        get() = getUserData(ROBOT_UNIT_LOCATION_KEY) ?: ""
+
+    override val unitName: String?
+        get() = null
 
     private val validator = ComponentValidator(this).installOn(childComponent)
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
@@ -67,6 +85,7 @@ class RobotTextFieldWithDirectoryBrowseButton(private val contextAnchor: Context
     private val documentListener: SwingDocumentListener = object : DocumentAdapter() {
         override fun textChanged(e: SwingDocumentEvent) {
             textChanges.value = textField.text
+            updateUnitLocation(textField.text)
         }
     }
 
@@ -109,6 +128,12 @@ class RobotTextFieldWithDirectoryBrowseButton(private val contextAnchor: Context
         }
     }
 
+    override fun updateUnitLocation(newLocation: String, unitName: String?) {
+        putUserData(ROBOT_UNIT_LOCATION_KEY, newLocation)
+        putUserData(ROBOT_UNIT_NAME_KEY, null)
+        text = newLocation
+    }
+
     private fun applyValidationResult(info: ValidationInfo?) {
         if (info == null) {
             childComponent.putClientProperty("JComponent.outline", null)
@@ -134,14 +159,30 @@ class RobotExecutableUnitWithBrowseButton(
             contextAnchor, unitModeProvider
         ), "", true, true, true
     ), null
-), TextAccessor {
+), TextAccessor, RobotUnitLocationProvider {
+
+    companion object {
+        private val escapedDotRegex = Regex("""^.*(?<!\\)\.""", RegexOption.DOT_MATCHES_ALL)
+        private val escapedDotReplaceRegex = """\\\.""".toRegex()
+
+        internal fun extractLeafName(fqName: String): String = fqName.replace(escapedDotRegex, "").replace(escapedDotReplaceRegex, ".")
+
+        internal fun extractLocation(qualifiedName: String, elementName: String?): String =
+            qualifiedName.take(qualifiedName.length - (elementName?.replace(".", "\\.")?.length?.plus(1) ?: 0))
+    }
+
+    override val qualifiedLocation: String
+        get() = getUserData(ROBOT_UNIT_LOCATION_KEY) ?: ""
+
+    override val unitName: String?
+        get() = getUserData(ROBOT_UNIT_NAME_KEY)
 
     private val validator = ComponentValidator(this).withValidator {
         val txt = text.trim()
         if (txt.isEmpty()) return@withValidator null
 
         val mode = unitModeProvider()
-        return@withValidator if (!isValidQualifiedName(txt, mode)) {
+        return@withValidator if (!isValidQualifiedName(qualifiedLocation, unitName, mode)) {
             childComponent.putClientProperty("JComponent.outline", "error")
             ValidationInfo(RobotBundle.message("robot.run.configuration.fragment.unit.symbol.validation.invalid"), childComponent)
         } else {
@@ -161,16 +202,31 @@ class RobotExecutableUnitWithBrowseButton(
         dialog.showDialog()
         when (val element = dialog.selected) {
             is RobotQualifiedNameOwner -> {
-                setText(element.qualifiedName)
-            }
-
-            is RobotFile -> {
-                setText(element.getQName()?.toString())
+                val elementName = element.name
+                val qualifiedName = element.qualifiedName
+                val qualifiedLocation = extractLocation(qualifiedName, elementName)
+                updateUnitLocation(qualifiedLocation, elementName)
             }
         }
     }
+
     private val documentListener = object : DocumentListener {
         override fun documentChanged(event: DocumentEvent) {
+            val qualifiedName = text.trim()
+            val elementName = extractLeafName(qualifiedName)
+            val qualifiedLocation = extractLocation(qualifiedName, elementName)
+            when (unitModeProvider()) {
+                RobotTestExecutionMode.TEST_CASES, RobotTestExecutionMode.TASKS -> {
+                    putUserData(ROBOT_UNIT_LOCATION_KEY, qualifiedLocation)
+                    putUserData(ROBOT_UNIT_NAME_KEY, elementName)
+                }
+
+                RobotTestExecutionMode.DIRECTORIES -> {
+                    putUserData(ROBOT_UNIT_LOCATION_KEY, elementName)
+                    putUserData(ROBOT_UNIT_NAME_KEY, null)
+                }
+            }
+
             validator.revalidate()
         }
     }
@@ -181,25 +237,30 @@ class RobotExecutableUnitWithBrowseButton(
         childComponent.border = JBUI.Borders.empty(2)
     }
 
+    override fun updateUnitLocation(newLocation: String, unitName: String?) {
+        putUserData(ROBOT_UNIT_LOCATION_KEY, newLocation)
+        putUserData(ROBOT_UNIT_NAME_KEY, unitName)
+        text = "${newLocation}.${unitName?.replace(".", "\\.") ?: ""}"
+    }
+
     override fun getText(): String = childComponent.text
 
     override fun setText(text: String?) {
         childComponent.setText(text)
     }
 
-    private fun isValidQualifiedName(fqName: String, executionMode: RobotTestExecutionMode): Boolean {
+    private fun isValidQualifiedName(location: String, unitName: String?, executionMode: RobotTestExecutionMode): Boolean {
+        val fqdn = "$location.$unitName"
         return when (executionMode) {
-            RobotTestExecutionMode.TEST_CASES -> TestCaseNameIndex.find(extractLeafName(fqName), contextAnchor.project, contextAnchor.scope)
-                ?.any { it is RobotQualifiedNameOwner && it.qualifiedName == fqName } ?: false
+            RobotTestExecutionMode.TEST_CASES -> TestCaseNameIndex.find(unitName, contextAnchor.project, contextAnchor.scope)
+                ?.any { it is RobotQualifiedNameOwner && it.qualifiedName == fqdn } ?: false
 
-            RobotTestExecutionMode.TASKS -> TaskNameIndex.find(extractLeafName(fqName), contextAnchor.project, contextAnchor.scope)
-                ?.any { it is RobotQualifiedNameOwner && it.qualifiedName == fqName } ?: false
+            RobotTestExecutionMode.TASKS -> TaskNameIndex.find(unitName, contextAnchor.project, contextAnchor.scope)
+                ?.any { it is RobotQualifiedNameOwner && it.qualifiedName == fqdn } ?: false
 
             else -> false
         }
     }
-
-    private fun extractLeafName(fqName: String): String = fqName.substringAfterLast('.')
 
     override fun dispose() {
         super.dispose()

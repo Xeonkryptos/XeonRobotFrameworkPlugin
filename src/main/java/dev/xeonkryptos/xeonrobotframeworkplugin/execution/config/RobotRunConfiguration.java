@@ -41,7 +41,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -265,15 +264,9 @@ public class RobotRunConfiguration extends LocatableConfigurationBase<Element>
 
         protected RobotRunnableUnitExecutionInfo() {}
 
-        public RobotRunnableUnitExecutionInfo(String fqdn) {
-            int unitNameStartIndex = fqdn.lastIndexOf('.');
-            if (unitNameStartIndex == -1) {
-                location = "";
-                unitName = fqdn;
-            } else {
-                location = fqdn.substring(0, unitNameStartIndex);
-                unitName = fqdn.substring(unitNameStartIndex + 1);
-            }
+        public RobotRunnableUnitExecutionInfo(String location, String unitName) {
+            this.location = location;
+            this.unitName = unitName;
         }
 
         public void readExternal(Element element) throws InvalidDataException {

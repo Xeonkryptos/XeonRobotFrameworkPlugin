@@ -1,5 +1,8 @@
 import org.jetbrains.changelog.Changelog
 import org.jetbrains.changelog.markdownToHTML
+import org.jetbrains.intellij.platform.gradle.Constants.Configurations
+import org.jetbrains.intellij.platform.gradle.Constants.Constraints
+import org.jetbrains.intellij.platform.gradle.TestFrameworkType
 import org.jetbrains.intellij.platform.gradle.models.ProductRelease
 import org.jetbrains.intellij.platform.gradle.tasks.PrepareSandboxTask
 
@@ -45,8 +48,17 @@ dependencies {
     implementation("org.eclipse.lsp4j:org.eclipse.lsp4j.debug:0.24.0")
     implementation("org.apache.commons:commons-text:1.14.0")
 
+//    testImplementation(kotlin("test"))
+    testImplementation(platform("org.junit:junit-bom:5.14.1"))
+    testImplementation("org.junit.jupiter:junit-jupiter")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+
+    testRuntimeOnly("junit:junit:4.13.2")
+
     intellijPlatform {
         val platformVersion = properties("platformVersion")
+
+        testFramework(TestFrameworkType.JUnit5)
 
         pycharmCommunity(platformVersion)
         jetbrainsRuntime()
@@ -62,7 +74,7 @@ dependencies {
 // Read more: https://github.com/JetBrains/gradle-changelog-plugin
 changelog {
     version = properties("pluginVersion")
-    groups.set(listOf("Added", "Changed", "Deprecated", "Removed", "Fixed", "Security"))
+    groups.set(listOf("Added", "Changed", "Fixed"))
     path.set(file("CHANGELOG.md").canonicalPath)
     itemPrefix.set("-")
     lineSeparator.set("\n")
@@ -135,8 +147,12 @@ tasks {
     patchPluginXml {
         changeNotes.set(provider {
             changelog.renderItem(
-                changelog.getLatest().withHeader(true).withEmptySections(false), Changelog.OutputType.HTML
+                changelog.getLatest().withHeader(false).withEmptySections(false), Changelog.OutputType.HTML
             )
         })
+    }
+
+    test {
+        useJUnitPlatform()
     }
 }

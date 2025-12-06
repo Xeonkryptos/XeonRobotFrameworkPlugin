@@ -97,8 +97,12 @@ public class RobotRunConfigurationProducer extends LazyRunConfigurationProducer<
                             runConfig.setTasks(executionInfos);
                         }
                     }
+                    String unitName = executableElement.getName();
+                    assert unitName != null;
+                    unitName = unitName.replace(".", "\\.");
                     String qualifiedName = executableElement.getQualifiedName();
-                    RobotRunnableUnitExecutionInfo executionInfo = new RobotRunnableUnitExecutionInfo(qualifiedName);
+                    String qualifiedLocation = qualifiedName.substring(0, qualifiedName.length() - unitName.length() - 1);
+                    RobotRunnableUnitExecutionInfo executionInfo = new RobotRunnableUnitExecutionInfo(qualifiedLocation, unitName);
                     executionInfos.add(executionInfo);
                 }
             }
@@ -123,14 +127,17 @@ public class RobotRunConfigurationProducer extends LazyRunConfigurationProducer<
     private static void addRunParameters(ConfigurationContext context, String basePath, @NotNull RobotRunConfiguration runConfig) {
         RobotQualifiedNameOwner element = getTestCaseTaskElement(context);
         if (element != null) {
-            String qualifiedName = element.getQualifiedName().replace("\"", "\\\"");
+            String elementName = element.getName();
+            assert elementName != null;
+            String qualifiedName = element.getQualifiedName();
+            String qualifiedLocation = qualifiedName.substring(0, qualifiedName.length() - elementName.length() - 1).replace("\"", "\\\"");
             List<RobotRunnableUnitExecutionInfo> executionInfos = new ArrayList<>();
             if (element instanceof RobotTestCaseStatement) {
                 runConfig.setTestCases(executionInfos);
             } else {
                 runConfig.setTasks(executionInfos);
             }
-            RobotRunnableUnitExecutionInfo executionInfo = new RobotRunnableUnitExecutionInfo(qualifiedName);
+            RobotRunnableUnitExecutionInfo executionInfo = new RobotRunnableUnitExecutionInfo(qualifiedLocation, elementName);
             executionInfos.add(executionInfo);
         } else {
             List<String> directories = new ArrayList<>();

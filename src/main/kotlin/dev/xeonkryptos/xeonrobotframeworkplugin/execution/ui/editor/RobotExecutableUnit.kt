@@ -131,9 +131,9 @@ class RobotExecutableUnit(configuration: RobotRunConfiguration) : JPanel(BorderL
     }
 
     fun apply(configuration: RobotRunConfiguration) {
-        configuration.testCases = browseButtonContainer.getTestCases().map { RobotRunConfiguration.RobotRunnableUnitExecutionInfo(it) }
-        configuration.tasks = browseButtonContainer.getTasks().map { RobotRunConfiguration.RobotRunnableUnitExecutionInfo(it) }
-        configuration.directories = browseButtonContainer.getDirectories().map { it }
+        configuration.testCases = browseButtonContainer.getTestCases()
+        configuration.tasks = browseButtonContainer.getTasks()
+        configuration.directories = browseButtonContainer.getDirectories()
         dialogPanel.apply()
     }
 
@@ -170,8 +170,7 @@ class RobotExecutableUnit(configuration: RobotRunConfiguration) : JPanel(BorderL
 }
 
 private class RobotBrowseButtonContainer(
-    private val contextAnchor: ContextAnchor,
-    initialExecutionMode: RobotTestExecutionMode
+    private val contextAnchor: ContextAnchor, initialExecutionMode: RobotTestExecutionMode
 ) : JPanel(), RobotExecutionModeChangeListener, Disposable {
 
     private val containerListener = object : ContainerListener {
@@ -206,21 +205,25 @@ private class RobotBrowseButtonContainer(
         addContainerListener(containerListener)
     }
 
-    fun addNewBrowseButton(initialText: String? = null, change: (() -> Unit)? = null) {
-        val deletableBrowseButtonPanel = DeletableBrowseButtonPanel(contextAnchor, executionMode, initialText, change)
+    fun addNewBrowseButton(executionUnit: RobotRunConfiguration.RobotRunnableUnitExecutionInfo? = null, change: (() -> Unit)? = null) {
+        val deletableBrowseButtonPanel = DeletableBrowseButtonPanel(contextAnchor, executionMode, executionUnit, change)
         Disposer.register(this, deletableBrowseButtonPanel)
         add(deletableBrowseButtonPanel)
     }
 
-    fun getTestCases(): List<String> = getResultForExecutionMode(RobotTestExecutionMode.TEST_CASES)
+    fun getTestCases(): List<RobotRunConfiguration.RobotRunnableUnitExecutionInfo> = getResultForExecutionMode(RobotTestExecutionMode.TEST_CASES)
 
-    fun getTasks(): List<String> = getResultForExecutionMode(RobotTestExecutionMode.TASKS)
+    fun getTasks(): List<RobotRunConfiguration.RobotRunnableUnitExecutionInfo> = getResultForExecutionMode(RobotTestExecutionMode.TASKS)
 
-    fun getDirectories(): List<String> = getResultForExecutionMode(RobotTestExecutionMode.DIRECTORIES)
+    fun getDirectories(): List<String> = getResultForExecutionMode(RobotTestExecutionMode.DIRECTORIES).map { it.location }
 
-    private fun getResultForExecutionMode(expectedMode: RobotTestExecutionMode): List<String> {
+    private fun getResultForExecutionMode(expectedMode: RobotTestExecutionMode): List<RobotRunConfiguration.RobotRunnableUnitExecutionInfo> {
         if (executionMode == expectedMode) {
-            return components.asSequence().filterIsInstance(DeletableBrowseButtonPanel::class.java).map { it.getText() }.filter { it.isNotBlank() }.toList()
+            return components.asSequence()
+                .filterIsInstance(DeletableBrowseButtonPanel::class.java)
+                .filter { it.getText().isNotBlank() }
+                .map { RobotRunConfiguration.RobotRunnableUnitExecutionInfo(it.getQualifiedLocation(), it.getElementName()) }
+                .toList()
         }
         return emptyList()
     }
@@ -242,9 +245,9 @@ private class RobotBrowseButtonContainer(
         }
         onModeChanged(newMode)
 
-        testCases.forEach { addNewBrowseButton("${it.fqdn}", change) }
-        tasks.forEach { addNewBrowseButton("${it.fqdn}", change) }
-        directories.forEach { addNewBrowseButton(it, change) }
+        testCases.forEach { addNewBrowseButton(it, change) }
+        tasks.forEach { addNewBrowseButton(it, change) }
+        directories.forEach { addNewBrowseButton(RobotRunConfiguration.RobotRunnableUnitExecutionInfo(it, null), change) }
         return newMode
     }
 
@@ -259,7 +262,10 @@ private class RobotBrowseButtonContainer(
 }
 
 private class DeletableBrowseButtonPanel(
-    contextAnchor: ContextAnchor, initialExecutionMode: RobotTestExecutionMode, initialText: String? = null, change: (() -> Unit)? = null
+    contextAnchor: ContextAnchor,
+    initialExecutionMode: RobotTestExecutionMode,
+    executionUnit: RobotRunConfiguration.RobotRunnableUnitExecutionInfo? = null,
+    change: (() -> Unit)? = null
 ) : JPanel(), RobotExecutionModeChangeListener, Disposable {
 
     private var executionMode = initialExecutionMode
@@ -274,7 +280,9 @@ private class DeletableBrowseButtonPanel(
     }
 
     private val newSymbolBrowseButton =
-        RobotExecutableUnitWithBrowseButton(contextAnchor) { executionMode }.applyIf(executionMode.unitExecutionMode) { text = initialText ?: "" }.apply {
+        RobotExecutableUnitWithBrowseButton(contextAnchor) { executionMode }.applyIf(executionMode.unitExecutionMode && executionUnit != null) {
+            updateUnitLocation(executionUnit!!.location, executionUnit.unitName)
+        }.apply {
             childComponent.addDocumentListener(this, object : DocumentListener {
                 override fun documentChanged(event: com.intellij.openapi.editor.event.DocumentEvent) {
                     change?.invoke()
@@ -282,7 +290,9 @@ private class DeletableBrowseButtonPanel(
             })
         }
     private val newDirectoryBrowseButton =
-        RobotTextFieldWithDirectoryBrowseButton(contextAnchor).applyIf(!executionMode.unitExecutionMode) { text = initialText ?: "" }.apply {
+        RobotTextFieldWithDirectoryBrowseButton(contextAnchor).applyIf(!executionMode.unitExecutionMode && executionUnit != null) {
+            updateUnitLocation(executionUnit!!.location)
+        }.apply {
             addDocumentListener(directoryDocumentListener)
         }
 
@@ -333,6 +343,16 @@ private class DeletableBrowseButtonPanel(
     fun getText(): String {
         val label = if (executionMode.unitExecutionMode) symbolLabel else directoryLabel
         return (label.component as TextAccessor).text
+    }
+
+    fun getQualifiedLocation(): String {
+        val label = if (executionMode.unitExecutionMode) symbolLabel else directoryLabel
+        return (label.component as RobotUnitLocationProvider).qualifiedLocation
+    }
+
+    fun getElementName(): String? {
+        val label = if (executionMode.unitExecutionMode) symbolLabel else directoryLabel
+        return (label.component as RobotUnitLocationProvider).unitName
     }
 
     fun updateDeleteButtonVisibility(isVisible: Boolean) {

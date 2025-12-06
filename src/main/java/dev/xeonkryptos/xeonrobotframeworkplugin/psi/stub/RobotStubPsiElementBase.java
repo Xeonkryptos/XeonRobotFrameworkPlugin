@@ -13,6 +13,8 @@ import javax.swing.Icon;
 
 public abstract class RobotStubPsiElementBase<T extends StubElement<P>, P extends PsiElement> extends StubBasedPsiElementBase<T> {
 
+    private String text;
+
     public RobotStubPsiElementBase(@NotNull ASTNode node) {
         super(node);
     }
@@ -45,6 +47,20 @@ public abstract class RobotStubPsiElementBase<T extends StubElement<P>, P extend
                 return RobotStubPsiElementBase.this.getIcon(ICON_FLAG_VISIBILITY);
             }
         };
+    }
+
+    @Override
+    public void subtreeChanged() {
+        super.subtreeChanged();
+        text = null;
+    }
+
+    @Override
+    public String getText() {
+        if (text == null) {
+            text = super.getText();
+        }
+        return text;
     }
 
     @Override

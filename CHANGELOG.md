@@ -22,6 +22,8 @@
 
 - Fixed issues with selecting single test cases to execute them but not providing the option to do so rather failing with an exception, not providing the run
   option
+- Fixed detection of continuation marker within lexing
+- Fixed issues with test cases/tasks having a DOT in their name
 
 ## 0.5.16
 

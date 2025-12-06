@@ -89,7 +89,8 @@ public class RobotRerunFailedTestsAction extends AbstractRerunFailedTestsAction 
                     }
                     if (testFiles.contains(virtualFile)) {
                         String qualifiedName = statement.getQualifiedName();
-                        RobotRunnableUnitExecutionInfo testCaseInfo = new RobotRunnableUnitExecutionInfo(qualifiedName);
+                        String qualifiedLocation = qualifiedName.substring(0, qualifiedName.length() - testName.length() - 1);
+                        RobotRunnableUnitExecutionInfo testCaseInfo = new RobotRunnableUnitExecutionInfo(qualifiedLocation, testName);
                         testCaseInfos.add(testCaseInfo);
                         break;
                     }

@@ -94,6 +94,8 @@ ExtendedSpaceBasedEndMarker = {SpaceBasedEndMarker} {WhitespaceIncludingNewline}
 KeywordFinishedMarker = {SpaceBasedEndMarker} | {EOL}
 ExtendedKeywordFinishedMarker = {KeywordFinishedMarker} {WhitespaceIncludingNewline}*
 
+MultiLineContinuation = {Continuation} {ExtendedSpaceBasedEndMarker}
+
 WithNameKeyword = "WITH NAME" | "AS"
 
 SectionSettingsWords = "Settings" | "Setting"
@@ -175,7 +177,7 @@ ParameterName = [\w_-]+
 
 RobotKeyword = "GIVEN" | "WHEN" | "THEN" | "AND" | "BUT" | "VAR" | "FOR" | "IN" | "IN ENUMERATE" | "IN RANGE" | "IN ZIP" | "END" | "WHILE" | "IF" | "ELSE IF" | "ELSE" | "TRY" | "EXCEPT" | "FINALLY" | "BREAK" | "CONTINUE" | "GROUP" | "RETURN"
 
-MultiLine = {EOL}+ {NonNewlineWhitespace}* {Continuation} {NonNewlineWhitespace}* {EOL}*
+MultiLine = {EOL}+ {NonNewlineWhitespace}* {MultiLineContinuation}
 
 LineComment = {LineCommentSign} {NON_EOL}*
 
@@ -317,7 +319,7 @@ LineComment = {LineCommentSign} {NON_EOL}*
               localTemplateEnabled = false;
               break;
         }
-        {LocalTemplateKeyword} {NonNewlineWhitespace}* {EOL} {WhitespaceIncludingNewline}* !{Continuation}  {
+        {LocalTemplateKeyword} {NonNewlineWhitespace}* {EOL} {WhitespaceIncludingNewline}* !{MultiLineContinuation}  {
               yypushback(yylength());
               enterNewState(LITERAL_CONSTANT_ONLY);
               enterNewState(LOCAL_SETTING_DEFINITION);
