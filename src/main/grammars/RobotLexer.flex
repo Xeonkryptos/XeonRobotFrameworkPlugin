@@ -94,7 +94,7 @@ ExtendedSpaceBasedEndMarker = {SpaceBasedEndMarker} {WhitespaceIncludingNewline}
 KeywordFinishedMarker = {SpaceBasedEndMarker} | {EOL}
 ExtendedKeywordFinishedMarker = {KeywordFinishedMarker} {WhitespaceIncludingNewline}*
 
-MultiLineContinuation = {Continuation} {ExtendedSpaceBasedEndMarker}
+MultiLineContinuation = {Continuation} {SpaceBasedEndMarker}
 
 WithNameKeyword = "WITH NAME" | "AS"
 
@@ -127,10 +127,10 @@ VariablesImportKeyword = "Variables"
 NameKeyword = "Name"
 DocumentationKeyword = "Documentation"
 MetadataKeyword = "Metadata"
-SetupTeardownKeywords = ("Suite Setup" | "Suite Teardown" | "Test Setup" | "Test Teardown" | "Task Setup" | "Task Teardown")
-TagsKeywords = ("Test Tags" | "Force Tags" | "Default Tags" | "Keyword Tags")
-TemplateKeywords = ("Test Template" | "Task Template")
-TimeoutKeywords = ("Test Timeout" | "Task Timeout")
+SetupTeardownKeywords = "Suite Setup" | "Suite Teardown" | "Test Setup" | "Test Teardown" | "Task Setup" | "Task Teardown"
+TagsKeywords = "Test Tags" | "Force Tags" | "Default Tags" | "Keyword Tags"
+TemplateKeywords = "Test Template" | "Task Template"
+TimeoutKeywords = "Test Timeout" | "Task Timeout"
 GenericSettingsKeyword = [\w_-]+([ ][\w_-]+)*
 
 VariableCharNotAllowed = [^\s$@%&]
@@ -141,26 +141,19 @@ AllowedEverythingButVariableSeq = {AllowedEverythingButVariableChar}+
 AllowedExtendedVariableAccessChar = [^\s\[\]$@%&] | {EscapeChar}{1} "[" | {EscapeChar}{1} "]" | {ExceptionForAllowedVariableChar}
 AllowedExtendedVariableAccessSeq = {AllowedExtendedVariableAccessChar}+
 
-AllowedChar = [^\s$@%&] | {ExceptionForAllowedVariableChar}
-AllowedSeq = {AllowedChar}+
-
 AllowedKeywordLibraryNameChar = [\w_-]
 AllowedKeywordLibraryNameSeq = {AllowedKeywordLibraryNameChar}+
 
 AllowedKeywordChar = [^\s$@%&.] | {ExceptionForAllowedVariableChar}
 AllowedKeywordSeq = {AllowedKeywordChar}+
 
-AllowedParamChar = [^\s$@%&] | {ExceptionForAllowedVariableChar}
-AllowedParamSeq = {AllowedParamChar}+
-
-RestrictedLiteralValue = {AllowedSeq} ({Space} {AllowedSeq})*
+RestrictedLiteralValue = {AllowedEverythingButVariableSeq} ({Space} {AllowedEverythingButVariableSeq})*
 KeywordLibraryNameLiteralValue = [/*]? {AllowedKeywordLibraryNameSeq}+ "."
 KeywordLiteralValue = {AllowedKeywordSeq} ({Space} {AllowedKeywordSeq})*
 EverythingButVariableValue = {AllowedEverythingButVariableSeq} ({Space} {AllowedEverythingButVariableSeq})*
 ExtendedVariableAccessValue = {AllowedExtendedVariableAccessSeq}
 
 VariableLiteralValue =   ({Escape} | [^}$@&%] | [$@&%] [^{] | {OpeningVariable})+
-ParamLiteralValue =      {AllowedParamSeq} ({Space} {AllowedParamSeq})*
 LiteralValue =           [^\s]+([ ][^\s]+)*[ ]?
 
 LocalSettingKeywordStartWhitespaceFree = "["
@@ -172,8 +165,6 @@ LocalTemplateKeyword = {LocalSettingKeywordStart} "Template" {LocalSettingKeywor
 LocalSetupTeardownKeywords = {LocalSettingKeywordStart} ("Setup" | "Teardown") {LocalSettingKeywordEnd}
 LocalArgumentsKeyword = {LocalSettingKeywordStart} "Arguments" {LocalSettingKeywordEnd}
 LocalSettingKeyword = {LocalSettingKeywordStart} {GenericSettingsKeyword} {LocalSettingKeywordEnd}
-
-ParameterName = [\w_-]+
 
 RobotKeyword = "GIVEN" | "WHEN" | "THEN" | "AND" | "BUT" | "VAR" | "FOR" | "IN" | "IN ENUMERATE" | "IN RANGE" | "IN ZIP" | "END" | "WHILE" | "IF" | "ELSE IF" | "ELSE" | "TRY" | "EXCEPT" | "FINALLY" | "BREAK" | "CONTINUE" | "GROUP" | "RETURN"
 
@@ -187,11 +178,11 @@ LineComment = {LineCommentSign} {NON_EOL}*
 %state SETTING, SETTING_TEMPLATE_START, LOCAL_TEMPLATE_DEFINITION_START, INTERMEDIATE_TEMPLATE_CONFIGURATION, TEMPLATE_DEFINITION
 %state KEYWORD_CALL, KEYWORD_ARGUMENTS
 %state INLINE_VARIABLE_DEFINITION, VARIABLE_DEFINITION, VARIABLE_DEFINITION_ARGUMENTS, VARIABLE_USAGE, EXTENDED_VARIABLE_ACCESS, PYTHON_EXPRESSION
-%state PARAMETER_VALUE, TEMPLATE_PARAMETER_ASSIGNMENT, TEMPLATE_PARAMETER_VALUE
+%state PARAMETER_VALUE, TEMPLATE_PARAMETER_VALUE
 %state FOR_STRUCTURE, SIMPLE_CONTROL_STRUCTURE_START, FOR_STRUCTURE_LOOP_START, SIMPLE_CONTROL_STRUCTURE, FOR_STRUCTURE_LOOP
 %state PYTHON_EXECUTED_CONDITION, PYTHON_EVALUATED_CONTROL_STRUCTURE_START
 
-%xstate COMMENTS_SECTION, PARAMETER_ASSIGNMENT, LITERAL_CONSTANT_ONLY, LOCAL_SETTING_DEFINITION
+%xstate COMMENTS_SECTION, PARAMETER_ASSIGNMENT, TEMPLATE_PARAMETER_ASSIGNMENT, LITERAL_CONSTANT_ONLY, LOCAL_SETTING_DEFINITION
 
 %%
 
@@ -230,9 +221,9 @@ LineComment = {LineCommentSign} {NON_EOL}*
 }
 
 <VARIABLE_DEFINITION_ARGUMENTS> {
-    {EqualSign} (!{ExtendedSpaceBasedEndMarker})+   { yypushback(yylength() - 1); return ASSIGNMENT; }
+    {EqualSign} !{SpaceBasedEndMarker}              { yypushback(yylength() - 1); return ASSIGNMENT; }
     "scope" {EqualSign} !{KeywordFinishedMarker}    { yypushback(yylength() - "scope".length()); enterNewState(PARAMETER_ASSIGNMENT); return PARAMETER_NAME; }
-    {ParamLiteralValue}                             { return LITERAL_CONSTANT; }
+    {RestrictedLiteralValue}                        { return LITERAL_CONSTANT; }
 }
 
 <VARIABLE_USAGE> {
@@ -290,13 +281,20 @@ LineComment = {LineCommentSign} {NON_EOL}*
 <USER_KEYWORD_DEFINITION>      ^ {LiteralValue}    { pushBackTrailingWhitespace(); return USER_KEYWORD_NAME; }
 
 <KEYWORD_ARGUMENTS, TESTCASE_DEFINITION, TASK_DEFINITION, USER_KEYWORD_DEFINITION, VARIABLE_DEFINITION, SETTINGS_SECTION> {
-    <SETTING, FOR_STRUCTURE> {ParameterName} {EqualSign} !{ExtendedKeywordFinishedMarker} {
-          int assignmentPos = indexOf('=');
-          yypushback(yylength() - assignmentPos);
-          enterNewState(PARAMETER_ASSIGNMENT);
-          return PARAMETER_NAME;
+    <SETTING, FOR_STRUCTURE> {
+        {RestrictedLiteralValue} {EqualSign} {
+              yypushback(1);
+              enterNewState(PARAMETER_ASSIGNMENT);
+              return PARAMETER_NAME;
+        }
+        {RestrictedLiteralValue} {EqualSign} {RestrictedLiteralValue} {
+              int assignmentPos = indexOf('=');
+              yypushback(yylength() - assignmentPos);
+              enterNewState(PARAMETER_ASSIGNMENT);
+              return PARAMETER_NAME;
+        }
     }
-    {EqualSign} {ExtendedKeywordFinishedMarker}   { pushBackTrailingWhitespace(); return ASSIGNMENT; }
+    {EqualSign} {KeywordFinishedMarker}           { pushBackTrailingWhitespace(); return ASSIGNMENT; }
 }
 <INTERMEDIATE_TEMPLATE_CONFIGURATION> {
     ({ExtendedSpaceBasedEndMarker} | ({NonNewlineWhitespace}* {MultiLine})) "NONE" {ExtendedKeywordFinishedMarker}  {
@@ -313,44 +311,49 @@ LineComment = {LineCommentSign} {NON_EOL}*
 <TEMPLATE_DEFINITION> {
     <TESTCASE_DEFINITION, TASK_DEFINITION> {
         {LocalTemplateKeyword} ({ExtendedSpaceBasedEndMarker} | ({NonNewlineWhitespace}* {MultiLine})) "NONE" {ExtendedKeywordFinishedMarker}   {
-              yypushback(yylength());
+              yypushback(yylength() - 1);
               enterNewState(INTERMEDIATE_TEMPLATE_CONFIGURATION);
               enterNewState(LOCAL_SETTING_DEFINITION);
               localTemplateEnabled = false;
-              break;
+              return LOCAL_SETTING_START;
         }
         {LocalTemplateKeyword} {NonNewlineWhitespace}* {EOL} {WhitespaceIncludingNewline}* !{MultiLineContinuation}  {
-              yypushback(yylength());
+              yypushback(yylength() - 1);
               enterNewState(LITERAL_CONSTANT_ONLY);
               enterNewState(LOCAL_SETTING_DEFINITION);
               localTemplateEnabled = false;
-              break;
+              return LOCAL_SETTING_START;
         }
         {LocalTemplateKeyword} ({ExtendedSpaceBasedEndMarker} | {MultiLine})   {
-              yypushback(yylength());
+              yypushback(yylength() - 1);
               enterNewState(TEMPLATE_DEFINITION);
               enterNewState(SETTING_TEMPLATE_START);
               enterNewState(LOCAL_SETTING_DEFINITION);
               localTemplateEnabled = true;
-              break;
+              return LOCAL_SETTING_START;
         }
     }
     ^ {LiteralValue}    {
         localTemplateEnabled = globalTemplateEnabled;
         leaveState();
-        yypushback(yylength());
-        break;
+        pushBackTrailingWhitespace();
+        return yystate() == TESTCASE_DEFINITION ? TEST_CASE_NAME : TASK_NAME;
     }
-    {ParameterName} {EqualSign} !{ExtendedKeywordFinishedMarker}       {
+    {RestrictedLiteralValue} {EqualSign}       {
+          yypushback(1);
+          enterNewState(TEMPLATE_PARAMETER_ASSIGNMENT);
+          return TEMPLATE_PARAMETER_NAME;
+    }
+    {RestrictedLiteralValue} {EqualSign} {RestrictedLiteralValue}      {
           int assignmentPos = indexOf('=');
           yypushback(yylength() - assignmentPos);
           enterNewState(TEMPLATE_PARAMETER_ASSIGNMENT);
           return TEMPLATE_PARAMETER_NAME;
-      }
+    }
     <TEMPLATE_PARAMETER_ASSIGNMENT>  {EqualSign}       { yybegin(TEMPLATE_PARAMETER_VALUE); return ASSIGNMENT; }
     {RestrictedLiteralValue}                           { return TEMPLATE_ARGUMENT_VALUE; }
 }
-<TEMPLATE_PARAMETER_VALUE>      {ParamLiteralValue}    { return TEMPLATE_ARGUMENT_VALUE; }
+<TEMPLATE_PARAMETER_VALUE>  {RestrictedLiteralValue}   { return TEMPLATE_ARGUMENT_VALUE; }
 
 <USER_KEYWORD_DEFINITION> {
     "RETURN" {ExtendedKeywordFinishedMarker}     {
@@ -369,26 +372,26 @@ LineComment = {LineCommentSign} {NON_EOL}*
 }
 <USER_KEYWORD_DEFINITION> {
     {LocalArgumentsKeyword} {ExtendedKeywordFinishedMarker}       {
-        yypushback(yylength());
+        yypushback(yylength() - 1);
         enterNewState(INLINE_VARIABLE_DEFINITION);
         enterNewState(LOCAL_SETTING_DEFINITION);
-        break;
+        return LOCAL_SETTING_START;
     }
 }
 <TESTCASE_DEFINITION, TASK_DEFINITION> {
     <USER_KEYWORD_DEFINITION> {
         <TEMPLATE_DEFINITION> {
             {LocalSetupTeardownKeywords} {ExtendedKeywordFinishedMarker}  {
-                yypushback(yylength());
+                yypushback(yylength() - 1);
                 enterNewState(KEYWORD_CALL);
                 enterNewState(LOCAL_SETTING_DEFINITION);
-                break;
+                return LOCAL_SETTING_START;
             }
             {LocalSettingKeyword} {ExtendedKeywordFinishedMarker}         {
-                yypushback(yylength());
+                yypushback(yylength() - 1);
                 enterNewState(LITERAL_CONSTANT_ONLY);
                 enterNewState(LOCAL_SETTING_DEFINITION);
-                break;
+                return LOCAL_SETTING_START;
             }
         }
 
@@ -471,18 +474,15 @@ LineComment = {LineCommentSign} {NON_EOL}*
 // Multiline handling (don't return EOL on detected multiline). If there is a multiline without the Ellipsis (...) marker,
 // then return EOL to mark the end of the statement.
 <SETTING, KEYWORD_CALL, KEYWORD_ARGUMENTS, VARIABLE_DEFINITION, VARIABLE_DEFINITION_ARGUMENTS, SETTING_TEMPLATE_START, TESTCASE_DEFINITION, TASK_DEFINITION, USER_KEYWORD_DEFINITION, PYTHON_EXECUTED_CONDITION, LITERAL_CONSTANT_ONLY, INLINE_VARIABLE_DEFINITION> {
-    {MultiLine}                                            { return WHITE_SPACE; }
-    {EOL} {WhitespaceIncludingNewline}* {LineCommentSign}  {
-          yypushback(1);
-          return WHITE_SPACE;
-    }
+    {MultiLine} {WhitespaceIncludingNewline}*                { return WHITE_SPACE; }
+    {EOL} {WhitespaceIncludingNewline}* {LineCommentSign}    { yypushback(1); return WHITE_SPACE; }
 }
 <SETTING, KEYWORD_CALL, KEYWORD_ARGUMENTS, VARIABLE_DEFINITION, USER_KEYWORD_RETURN_STATEMENT, FOR_STRUCTURE_LOOP, PYTHON_EXECUTED_CONDITION, LITERAL_CONSTANT_ONLY, VARIABLE_DEFINITION_ARGUMENTS, SETTING_TEMPLATE_START> {EOL}+   { leaveState(); return EOL; }
 <TESTCASE_DEFINITION, TASK_DEFINITION, USER_KEYWORD_DEFINITION, VARIABLE_DEFINITION, TEMPLATE_DEFINITION> {EOL}+   { return EOL; }
 
 <PARAMETER_ASSIGNMENT>  {EqualSign}     { yybegin(PARAMETER_VALUE); return ASSIGNMENT; }
 <PARAMETER_VALUE>       {
-    {ParamLiteralValue}                 { return LITERAL_CONSTANT; }
+    {RestrictedLiteralValue}            { return LITERAL_CONSTANT; }
     <TEMPLATE_PARAMETER_VALUE> {
         {ExtendedKeywordFinishedMarker} { leaveState(); yypushback(yylength()); break; }
     }
