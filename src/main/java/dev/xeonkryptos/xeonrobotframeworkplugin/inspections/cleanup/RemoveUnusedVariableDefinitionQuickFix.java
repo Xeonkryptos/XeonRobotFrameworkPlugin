@@ -66,13 +66,16 @@ public class RemoveUnusedVariableDefinitionQuickFix extends LocalQuickFixOnPsiEl
     private void removeEverything(PsiElement element) {
         PsiElement superParent = element.getParent();
         PsiElement prevSibling = element.getPrevSibling();
-        PsiElement copiedPrevSibling = prevSibling.copy();
+        PsiElement copiedPrevSibling = prevSibling != null ? prevSibling.copy() : null;
 
-        CodeStyleManager.getInstance(element.getProject()).performActionWithFormatterDisabled((Runnable) element::delete);
+        Project project = element.getProject();
+        CodeStyleManager.getInstance(project).performActionWithFormatterDisabled((Runnable) element::delete);
 
-        // Re-adding the previous sibling to the super parent if it doesn't exist anymore to keep empty lines and don't collapse everything maybe invalidly, too
-        if (Arrays.stream(superParent.getChildren()).noneMatch(child -> child == copiedPrevSibling)) {
-            superParent.add(copiedPrevSibling);
+        if (prevSibling != null) {
+            // Re-adding the previous sibling to the super parent if it doesn't exist anymore to keep empty lines and don't collapse everything maybe invalidly, too
+            if (Arrays.stream(superParent.getChildren()).noneMatch(child -> child == copiedPrevSibling)) {
+                superParent.add(copiedPrevSibling);
+            }
         }
     }
 
