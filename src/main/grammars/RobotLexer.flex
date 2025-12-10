@@ -82,7 +82,6 @@ EOL = (\r) | (\n) | (\r\n)
 NON_EOL = [^\r\n]
 
 EscapeChar = \\
-Escape = {EscapeChar} (.|{EOL})
 EmptyValue = {EscapeChar} {Space}
 
 NonNewlineWhitespace = [^\S\r\n]
@@ -121,6 +120,8 @@ ListVariableStart = "@" {OpeningVariable}
 DictVariableStart = "&" {OpeningVariable}
 EnvVariableStart = "%" {OpeningVariable}
 
+VariableStart = ("$" | "@" | "&" | "%") {OpeningVariable}
+
 LibraryImportKeyword = "Library"
 ResourceImportKeyword = "Resource"
 VariablesImportKeyword = "Variables"
@@ -153,7 +154,7 @@ KeywordLiteralValue = {AllowedKeywordSeq} ({Space} {AllowedKeywordSeq})*
 EverythingButVariableValue = {AllowedEverythingButVariableSeq} ({Space} {AllowedEverythingButVariableSeq})*
 ExtendedVariableAccessValue = {AllowedExtendedVariableAccessSeq}
 
-VariableLiteralValue =   ({Escape} | [^}$@&%] | [$@&%] [^{] | {OpeningVariable})+
+VariableLiteralValue =   ([^}$@&%] | {ExceptionForAllowedVariableChar} | {OpeningVariable})+
 LiteralValue =           [^\s]+([ ][^\s]+)*[ ]?
 
 LocalSettingKeywordStartWhitespaceFree = "["
@@ -233,7 +234,11 @@ LineComment = {LineCommentSign} {NON_EOL}*
     {OpeningVariable} (!{ClosingVariable}{2})+    { enterNewState(PYTHON_EXPRESSION); yypushback(yylength() - 1); return PYTHON_EXPRESSION_START; }
 }
 
-<VARIABLE_DEFINITION, VARIABLE_USAGE> {VariableLiteralValue}  { return VARIABLE_BODY; }
+<VARIABLE_DEFINITION, VARIABLE_USAGE> {
+    {VariableLiteralValue} {ClosingVariable}                 { yypushback(1); return VARIABLE_BODY; }
+    {VariableLiteralValue} {ClosingVariable} {EqualSign}     { yypushback(2); return VARIABLE_BODY; }
+    {VariableLiteralValue} {VariableStart}                   { yypushback(2); return VARIABLE_BODY; }
+}
 
 <EXTENDED_VARIABLE_ACCESS> {
     "["                                          { return VARIABLE_ACCESS_START; }
