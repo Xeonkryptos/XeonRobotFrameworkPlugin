@@ -126,7 +126,13 @@ class KeywordCompletionProvider extends CompletionProvider<CompletionParameters>
     }
 
     private static void collectUserKeywords(Project project, GlobalSearchScope searchScope, Set<DefinedKeyword> definedKeywords) {
+        Set<String> collectedUserKeywords = new LinkedHashSet<>();
         Processor<String> userKeywordProcessor = normalizedKeywordName -> {
+            collectedUserKeywords.add(normalizedKeywordName);
+            return true;
+        };
+        StubIndex.getInstance().processAllKeys(KeywordDefinitionNameIndex.KEY, userKeywordProcessor, searchScope);
+        for (String normalizedKeywordName : collectedUserKeywords) {
             for (RobotUserKeywordStatement userKeywordStatement : KeywordDefinitionNameIndex.getUserKeywordStatements(normalizedKeywordName,
                                                                                                                       project,
                                                                                                                       searchScope)) {
@@ -135,9 +141,7 @@ class KeywordCompletionProvider extends CompletionProvider<CompletionParameters>
                 Collection<DefinedKeyword> constructedUserKeywords = robotUserKeywordsCollector.getKeywords();
                 definedKeywords.addAll(constructedUserKeywords);
             }
-            return true;
-        };
-        StubIndex.getInstance().processAllKeys(KeywordDefinitionNameIndex.KEY, userKeywordProcessor, searchScope);
+        }
     }
 
     private Collection<LookupElement> addDefinedKeywords(Collection<DefinedKeyword> keywords,
