@@ -69,7 +69,10 @@ public final class RobotUsedFilesCollector extends RobotVisitor {
 
     @Override
     public void visitTemplateStatementsGlobalSetting(@NotNull RobotTemplateStatementsGlobalSetting o) {
-        o.getKeywordCall().accept(this);
+        RobotKeywordCall keywordCall = o.getKeywordCall();
+        if (keywordCall != null) {
+            keywordCall.accept(this);
+        }
     }
 
     @Override
@@ -89,8 +92,10 @@ public final class RobotUsedFilesCollector extends RobotVisitor {
 
     private void visitImportGlobalSetting(@NotNull RobotImportGlobalSettingExpression o) {
         RobotPositionalArgument positionalArgument = o.getImportedFile();
-        String fileName = positionalArgument.getText();
-        references.put(fileName, positionalArgument.getReference());
+        if (positionalArgument != null) {
+            String fileName = positionalArgument.getText();
+            references.put(fileName, positionalArgument.getReference());
+        }
     }
 
     @Override

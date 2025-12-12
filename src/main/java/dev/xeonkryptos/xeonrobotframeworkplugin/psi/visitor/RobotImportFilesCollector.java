@@ -52,15 +52,16 @@ public final class RobotImportFilesCollector extends RobotVisitor {
     @Override
     public void visitLibraryImportGlobalSetting(@NotNull RobotLibraryImportGlobalSetting o) {
         RobotPositionalArgument positionalArgument = o.getImportedFile();
+        if (positionalArgument != null) {
+            RobotNewLibraryName newLibraryNameElement = o.getNewLibraryName();
+            String newLibraryName = null;
+            if (newLibraryNameElement != null) {
+                newLibraryName = newLibraryNameElement.getText();
+            }
 
-        RobotNewLibraryName newLibraryNameElement = o.getNewLibraryName();
-        String newLibraryName = null;
-        if (newLibraryNameElement != null) {
-            newLibraryName = newLibraryNameElement.getText();
+            PythonBasedKeywordFileSupplier keywordFileSupplier = new PythonBasedKeywordFileSupplier(positionalArgument, ImportType.LIBRARY, newLibraryName);
+            keywordFileSuppliers.computeIfAbsent(ImportType.LIBRARY, key -> new LinkedHashSet<>()).add(keywordFileSupplier);
         }
-
-        PythonBasedKeywordFileSupplier keywordFileSupplier = new PythonBasedKeywordFileSupplier(positionalArgument, ImportType.LIBRARY, newLibraryName);
-        keywordFileSuppliers.computeIfAbsent(ImportType.LIBRARY, key -> new LinkedHashSet<>()).add(keywordFileSupplier);
     }
 
     @Override

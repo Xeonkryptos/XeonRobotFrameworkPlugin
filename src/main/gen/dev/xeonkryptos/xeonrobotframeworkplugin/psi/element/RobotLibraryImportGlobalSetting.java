@@ -1,9 +1,11 @@
 // This is a generated file. Not intended for manual editing.
 package dev.xeonkryptos.xeonrobotframeworkplugin.psi.element;
 
-import java.util.List;
-import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.List;
 
 public interface RobotLibraryImportGlobalSetting extends RobotGlobalSettingStatement, GlobalSettingStatementExpression, RobotImportGlobalSettingExpression {
 
@@ -16,7 +18,7 @@ public interface RobotLibraryImportGlobalSetting extends RobotGlobalSettingState
   @NotNull
   List<RobotPositionalArgument> getPositionalArgumentList();
 
-  @NotNull
+  @Nullable
   RobotPositionalArgument getImportedFile();
 
   @NotNull

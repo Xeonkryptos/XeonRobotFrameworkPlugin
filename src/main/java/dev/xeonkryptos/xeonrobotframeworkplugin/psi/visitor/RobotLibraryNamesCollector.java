@@ -29,12 +29,14 @@ public final class RobotLibraryNamesCollector extends RobotVisitor {
     @Override
     public void visitLibraryImportGlobalSetting(@NotNull RobotLibraryImportGlobalSetting o) {
         RobotPositionalArgument positionalArgument = o.getImportedFile();
-        positionalArgument.acceptChildren(this);
+        if (positionalArgument != null) {
+            positionalArgument.acceptChildren(this);
 
-        RobotNewLibraryName newLibraryName = o.getNewLibraryName();
-        if (newLibraryName != null) {
-            String libraryName = newLibraryName.getText();
-            renamedLibraries.put(libraryName, newLibraryName);
+            RobotNewLibraryName newLibraryName = o.getNewLibraryName();
+            if (newLibraryName != null) {
+                String libraryName = newLibraryName.getText();
+                renamedLibraries.put(libraryName, newLibraryName);
+            }
         }
     }
 

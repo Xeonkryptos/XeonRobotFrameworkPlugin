@@ -10,6 +10,7 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.config.RobotOptionsProvider;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCall;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLibraryImportGlobalSetting;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotParameterId;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotPositionalArgument;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -51,16 +52,19 @@ public class RobotParameterReference extends PsiReferenceBase<RobotParameterId> 
                                                                     String parameterName) {
         RobotLibraryImportGlobalSetting importSetting = PsiTreeUtil.getParentOfType(parameterId, RobotLibraryImportGlobalSetting.class);
         if (importSetting != null) {
-            PsiElement resolvedImport = importSetting.getImportedFile().getReference().resolve();
-            if (resolvedImport instanceof PyClass pyClass) {
-                reference = Arrays.stream(pyClass.getMethods())
-                                  .filter(method -> Objects.equals(method.getName(), "__init__"))
-                                  .flatMap(method -> Arrays.stream(method.getParameterList().getParameters()))
-                                  .filter(parameter -> !parameter.isSelf())
-                                  .filter(parameter -> parameterNameCollator.equals(parameterName, parameter.getName())
-                                                       || parameter.getAsNamed() != null && parameter.getAsNamed().isKeywordContainer())
-                                  .findFirst()
-                                  .orElse(null);
+            RobotPositionalArgument importedFile = importSetting.getImportedFile();
+            if (importedFile != null) {
+                PsiElement resolvedImport = importedFile.getReference().resolve();
+                if (resolvedImport instanceof PyClass pyClass) {
+                    reference = Arrays.stream(pyClass.getMethods())
+                                      .filter(method -> Objects.equals(method.getName(), "__init__"))
+                                      .flatMap(method -> Arrays.stream(method.getParameterList().getParameters()))
+                                      .filter(parameter -> !parameter.isSelf())
+                                      .filter(parameter -> parameterNameCollator.equals(parameterName, parameter.getName())
+                                                           || parameter.getAsNamed() != null && parameter.getAsNamed().isKeywordContainer())
+                                      .findFirst()
+                                      .orElse(null);
+                }
             }
         }
         return reference;

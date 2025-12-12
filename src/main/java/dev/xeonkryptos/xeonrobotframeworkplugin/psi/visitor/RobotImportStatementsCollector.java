@@ -31,22 +31,28 @@ public class RobotImportStatementsCollector extends RobotVisitor {
     @Override
     public void visitResourceImportGlobalSetting(@NotNull RobotResourceImportGlobalSetting o) {
         RobotPositionalArgument positionalArgument = o.getImportedFile();
-        addImportedFile(positionalArgument);
-        importElements.add(o);
+        if (positionalArgument != null) {
+            addImportedFile(positionalArgument);
+            importElements.add(o);
+        }
     }
 
     @Override
     public void visitLibraryImportGlobalSetting(@NotNull RobotLibraryImportGlobalSetting o) {
         RobotPositionalArgument positionalArgument = o.getImportedFile();
-        addImportedFile(positionalArgument);
-        importElements.add(o);
+        if (positionalArgument != null) {
+            addImportedFile(positionalArgument);
+            importElements.add(o);
+        }
     }
 
     @Override
     public void visitVariablesImportGlobalSetting(@NotNull RobotVariablesImportGlobalSetting o) {
         RobotPositionalArgument positionalArgument = o.getImportedFile();
-        addImportedFile(positionalArgument);
-        importElements.add(o);
+        if (positionalArgument != null) {
+            addImportedFile(positionalArgument);
+            importElements.add(o);
+        }
     }
 
     private void addImportedFile(RobotPositionalArgument positionalArgument) {
