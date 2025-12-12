@@ -43,8 +43,10 @@ public final class RobotImportFilesCollector extends RobotVisitor {
     @Override
     public void visitResourceImportGlobalSetting(@NotNull RobotResourceImportGlobalSetting o) {
         RobotPositionalArgument positionalArgument = o.getImportedFile();
-        RobotBasedKeywordFileSupplier keywordFileSupplier = new RobotBasedKeywordFileSupplier(positionalArgument);
-        keywordFileSuppliers.computeIfAbsent(ImportType.RESOURCE, key -> new LinkedHashSet<>()).add(keywordFileSupplier);
+        if (positionalArgument != null) {
+            RobotBasedKeywordFileSupplier keywordFileSupplier = new RobotBasedKeywordFileSupplier(positionalArgument);
+            keywordFileSuppliers.computeIfAbsent(ImportType.RESOURCE, key -> new LinkedHashSet<>()).add(keywordFileSupplier);
+        }
     }
 
     @Override
