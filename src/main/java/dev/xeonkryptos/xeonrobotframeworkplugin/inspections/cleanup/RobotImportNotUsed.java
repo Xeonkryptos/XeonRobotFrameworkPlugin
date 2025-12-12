@@ -28,6 +28,9 @@ public class RobotImportNotUsed extends LocalInspectionTool {
             public void visitResourceImportGlobalSetting(@NotNull RobotResourceImportGlobalSetting o) {
                 super.visitResourceImportGlobalSetting(o);
                 RobotPositionalArgument positionalArgument = o.getImportedFile();
+                if (positionalArgument == null) {
+                    return;
+                }
                 PsiElement resolvedElement = positionalArgument.getReference().resolve();
                 if (resolvedElement instanceof RobotFile) {
                     RobotImportStatementsCollector collector = new RobotImportStatementsCollector();
