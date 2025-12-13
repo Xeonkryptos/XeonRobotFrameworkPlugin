@@ -14,7 +14,9 @@ import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.ExtendedRobotTypes.*;
   protected boolean localTemplateEnabled = false;
   protected boolean templateKeywordFound = false;
 
-  protected final Stack<Integer> previousStates = new Stack<>();
+  protected int currentIndex = -1;
+
+  protected final int[] previousStates = new int[20];
 
   public RobotLexer() {
       this((java.io.Reader)null);
@@ -22,20 +24,23 @@ import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.ExtendedRobotTypes.*;
 
   protected void enterNewState(int newState) {
       int previousState = yystate();
-      previousStates.push(previousState);
+      ++currentIndex;
+      previousStates[currentIndex] = previousState;
       yybegin(newState);
   }
 
   protected void leaveState() {
-      if (!previousStates.empty()) {
-          yybegin(previousStates.pop());
+      if (currentIndex >= 0) {
+          int previousState = previousStates[currentIndex];
+          --currentIndex;
+          yybegin(previousState);
       } else {
           yybegin(YYINITIAL);
       }
   }
 
   private void resetInternalState() {
-      previousStates.clear();
+      currentIndex = -1;
       localTemplateEnabled = globalTemplateEnabled;
   }
 
@@ -54,7 +59,7 @@ import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.ExtendedRobotTypes.*;
    * reset the lexer to the initial state completely, e.g. when starting to lex a new file.
    */
   protected void resetLexer() {
-      previousStates.clear();
+      currentIndex = -1;
       localTemplateEnabled = false;
       templateKeywordFound = false;
       globalTemplateEnabled = false;
@@ -257,15 +262,15 @@ LineComment = {LineCommentSign} {NON_EOL}*
 }
 
 <SETTINGS_SECTION> {
-    {LibraryImportKeyword} {ExtendedKeywordFinishedMarker}             { enterNewState(SETTING); pushBackTrailingWhitespace(); return LIBRARY_IMPORT_KEYWORD; }
-    {ResourceImportKeyword} {ExtendedKeywordFinishedMarker}            { enterNewState(LITERAL_CONSTANT_ONLY); pushBackTrailingWhitespace(); return RESOURCE_IMPORT_KEYWORD; }
-    {VariablesImportKeyword} {ExtendedKeywordFinishedMarker}           { enterNewState(SETTING); pushBackTrailingWhitespace(); return VARIABLES_IMPORT_KEYWORD; }
-    {NameKeyword} {ExtendedKeywordFinishedMarker}                      { enterNewState(LITERAL_CONSTANT_ONLY); pushBackTrailingWhitespace(); return SUITE_NAME_KEYWORD; }
-    {DocumentationKeyword} {ExtendedKeywordFinishedMarker}             { enterNewState(LITERAL_CONSTANT_ONLY); pushBackTrailingWhitespace(); return DOCUMENTATION_KEYWORD; }
-    {MetadataKeyword} {ExtendedKeywordFinishedMarker}                  { enterNewState(SETTING); pushBackTrailingWhitespace(); return METADATA_KEYWORD; }
-    {SetupTeardownKeywords} {ExtendedKeywordFinishedMarker}            { enterNewState(KEYWORD_CALL); pushBackTrailingWhitespace(); return SETUP_TEARDOWN_STATEMENT_KEYWORDS; }
-    {TagsKeywords} {ExtendedKeywordFinishedMarker}                     { enterNewState(LITERAL_CONSTANT_ONLY); pushBackTrailingWhitespace(); return TAGS_KEYWORDS; }
-    {TemplateKeywords} {ExtendedKeywordFinishedMarker}                 {
+    ^ {LibraryImportKeyword} {ExtendedKeywordFinishedMarker}             { enterNewState(SETTING); pushBackTrailingWhitespace(); return LIBRARY_IMPORT_KEYWORD; }
+    ^ {ResourceImportKeyword} {ExtendedKeywordFinishedMarker}            { enterNewState(LITERAL_CONSTANT_ONLY); pushBackTrailingWhitespace(); return RESOURCE_IMPORT_KEYWORD; }
+    ^ {VariablesImportKeyword} {ExtendedKeywordFinishedMarker}           { enterNewState(SETTING); pushBackTrailingWhitespace(); return VARIABLES_IMPORT_KEYWORD; }
+    ^ {NameKeyword} {ExtendedKeywordFinishedMarker}                      { enterNewState(LITERAL_CONSTANT_ONLY); pushBackTrailingWhitespace(); return SUITE_NAME_KEYWORD; }
+    ^ {DocumentationKeyword} {ExtendedKeywordFinishedMarker}             { enterNewState(LITERAL_CONSTANT_ONLY); pushBackTrailingWhitespace(); return DOCUMENTATION_KEYWORD; }
+    ^ {MetadataKeyword} {ExtendedKeywordFinishedMarker}                  { enterNewState(SETTING); pushBackTrailingWhitespace(); return METADATA_KEYWORD; }
+    ^ {SetupTeardownKeywords} {ExtendedKeywordFinishedMarker}            { enterNewState(KEYWORD_CALL); pushBackTrailingWhitespace(); return SETUP_TEARDOWN_STATEMENT_KEYWORDS; }
+    ^ {TagsKeywords} {ExtendedKeywordFinishedMarker}                     { enterNewState(LITERAL_CONSTANT_ONLY); pushBackTrailingWhitespace(); return TAGS_KEYWORDS; }
+    ^ {TemplateKeywords} {ExtendedKeywordFinishedMarker}                 {
           enterNewState(KEYWORD_CALL);
           pushBackTrailingWhitespace();
           globalTemplateEnabled = true;
@@ -273,8 +278,8 @@ LineComment = {LineCommentSign} {NON_EOL}*
           templateKeywordFound = true;
           return TEMPLATE_KEYWORDS;
       }
-    {TimeoutKeywords} {ExtendedKeywordFinishedMarker}                  { enterNewState(LITERAL_CONSTANT_ONLY); pushBackTrailingWhitespace(); return TIMEOUT_KEYWORDS; }
-    {GenericSettingsKeyword} {ExtendedKeywordFinishedMarker}           { enterNewState(LITERAL_CONSTANT_ONLY); pushBackTrailingWhitespace(); return UNKNOWN_SETTING_KEYWORD; }
+    ^ {TimeoutKeywords} {ExtendedKeywordFinishedMarker}                  { enterNewState(LITERAL_CONSTANT_ONLY); pushBackTrailingWhitespace(); return TIMEOUT_KEYWORDS; }
+    ^ {GenericSettingsKeyword} {ExtendedKeywordFinishedMarker}           { enterNewState(LITERAL_CONSTANT_ONLY); pushBackTrailingWhitespace(); return UNKNOWN_SETTING_KEYWORD; }
 }
 
 <TESTCASE_NAME_DEFINITION>     ^ {LiteralValue}    { enterNewState(TESTCASE_DEFINITION); pushBackTrailingWhitespace(); return TEST_CASE_NAME; }

@@ -135,6 +135,7 @@ public class RobotParameterInfoHandler implements ParameterInfoHandler<RobotKeyw
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public void updateUI(PsiElement callingFunction, @NotNull ParameterInfoUIContext context) {
         final int currentParamIndex = context.getCurrentParameterIndex();
         // formatting of hints: hint index -> flags. this includes flags for parens.
@@ -151,7 +152,6 @@ public class RobotParameterInfoHandler implements ParameterInfoHandler<RobotKeyw
         String[] hints = ArrayUtilRt.toStringArray(hintsAndAnnotations.first);
         String[] annotations = ArrayUtilRt.toStringArray(hintsAndAnnotations.second);
         if (context instanceof ParameterInfoUIContextEx contextEx) {
-            //noinspection unchecked
             EnumSet<ParameterInfoUIContextEx.Flag>[] flags = new EnumSet[hintFlags.size()];
             for (int i = 0; i < flags.length; i++) {
                 EnumSet<ParameterInfoUIContextEx.Flag> curFlags = hintFlags.get(i);
@@ -165,7 +165,6 @@ public class RobotParameterInfoHandler implements ParameterInfoHandler<RobotKeyw
             }
             if (hints.length == 0) {
                 hints = new String[] { getNoParamsMsg() };
-                //noinspection unchecked
                 flags = new EnumSet[] { EnumSet.of(ParameterInfoUIContextEx.Flag.DISABLE) };
             }
 

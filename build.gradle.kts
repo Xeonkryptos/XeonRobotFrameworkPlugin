@@ -132,6 +132,8 @@ tasks {
     withType<JavaCompile> {
         sourceCompatibility = "21"
         targetCompatibility = "21"
+        options.compilerArgs = listOf("-Xlint:unchecked")
+        options.isDeprecation = true
     }
 
     withType<PrepareSandboxTask> {
