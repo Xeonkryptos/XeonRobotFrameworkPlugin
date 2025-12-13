@@ -35,10 +35,9 @@ public class RobotVariableReferenceSearch extends QueryExecutorBase<PsiReference
         GlobalSearchScope globalSearchScope = QueryExecutorUtil.convertToGlobalSearchScope(queryParameters.getEffectiveSearchScope(), project);
         if (element instanceof RobotVariableDefinition variableDefinition) {
             String variableName = variableDefinition.getName();
-            if (variableName == null) {
-                return;
+            if (variableName != null) {
+                searchForVariablesInIndex(variableDefinition, variableName, project, globalSearchScope, consumer);
             }
-            searchForVariablesInIndex(variableDefinition, variableName, project, globalSearchScope, consumer);
         }
     }
 

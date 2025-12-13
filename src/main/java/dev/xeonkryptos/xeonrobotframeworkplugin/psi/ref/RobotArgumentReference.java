@@ -54,14 +54,13 @@ public class RobotArgumentReference extends PsiPolyVariantReferenceBase<RobotPos
     @Override
     public ResolveResult @NotNull [] multiResolve(boolean incompleteCode) {
         return ResolveCache.getInstance(getElement().getProject())
-                           .resolveWithCaching(this, (resolver, incompCode) -> multiResolve(resolver.getElement()), false, incompleteCode);
+                           .resolveWithCaching(this, (resolver, incompCode) -> multiResolve(getElement()), false, incompleteCode);
     }
 
     private static ResolveResult @NotNull [] multiResolve(RobotPositionalArgument positionalArgument) {
         Project project = positionalArgument.getProject();
         PsiElement parent = positionalArgument.getParent();
         String argumentValue = positionalArgument.getText();
-
 
         Set<ResolveResult> results = new LinkedHashSet<>();
         if (parent instanceof RobotResourceImportGlobalSetting resourceImport) {

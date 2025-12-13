@@ -47,7 +47,7 @@ public class RobotKeywordCallNameReference extends PsiPolyVariantReferenceBase<R
     @NotNull
     private PsiElement[] findKeywordReferences(@NotNull RobotKeywordCallName keywordCallName, @Nullable PsiFile psiFile) {
         RobotKeywordCallLibrary keywordCallLibrary = keywordCallName.getKeywordCallLibrary();
-        String libraryName = keywordCallLibrary != null ? keywordCallLibrary.getText() : null;
+        String libraryName = keywordCallLibrary != null ? keywordCallLibrary.getKeywordCallLibraryName().getText() : null;
         String keywordName = keywordCallName.getText();
         if (KeywordCompletionModification.isKeywordStartsWithModifier(libraryName)) {
             libraryName = libraryName.substring(1);
@@ -74,6 +74,11 @@ public class RobotKeywordCallNameReference extends PsiPolyVariantReferenceBase<R
 
         Collection<RobotUserKeywordStatement> userKeywordStatements = KeywordDefinitionNameIndex.getUserKeywordStatements(keyword, project, searchScope);
         Collection<PyFunction> pythonKeywordFunctions = Util.findKeywordFunctions(keyword, psiFile.getProject(), searchScope);
+        if (libraryName != null && (userKeywordStatements.isEmpty() || pythonKeywordFunctions.isEmpty())) {
+            String fullKeywordName = libraryName + "." + keyword;
+            userKeywordStatements = KeywordDefinitionNameIndex.getUserKeywordStatements(fullKeywordName, project, searchScope);
+            pythonKeywordFunctions = Util.findKeywordFunctions(fullKeywordName, psiFile.getProject(), searchScope);
+        }
         Collection<PsiElement> keywordElements = new LinkedHashSet<>(userKeywordStatements.size() + pythonKeywordFunctions.size());
         keywordElements.addAll(userKeywordStatements);
         keywordElements.addAll(pythonKeywordFunctions);
@@ -81,13 +86,15 @@ public class RobotKeywordCallNameReference extends PsiPolyVariantReferenceBase<R
         return keywordElements.toArray(PsiElement[]::new);
     }
 
-    private static @NotNull Collection<VirtualFile> collectImportedVirtualFilesOneselfIncluded(RobotFile robotFile, String libraryName) {
-        Collection<VirtualFile> importedFiles = libraryName != null ?
-                                                robotFile.findImportedFilesWithLibraryName(libraryName) :
-                                                robotFile.collectImportedFiles(true, ImportType.LIBRARY)
-                                                         .stream()
-                                                         .map(KeywordFile::getVirtualFile)
-                                                         .collect(Collectors.toSet());
+    @NotNull
+    private static Collection<VirtualFile> collectImportedVirtualFilesOneselfIncluded(RobotFile robotFile, String libraryName) {
+        Collection<VirtualFile> importedFiles = null;
+        if (libraryName != null) {
+            importedFiles = robotFile.findImportedFilesWithLibraryName(libraryName);
+        }
+        if (importedFiles == null || importedFiles.isEmpty()) {
+            importedFiles = robotFile.collectImportedFiles(true, ImportType.LIBRARY).stream().map(KeywordFile::getVirtualFile).collect(Collectors.toSet());
+        }
         VirtualFile virtualFile = robotFile.getVirtualFile();
         if (virtualFile == null) {
             virtualFile = robotFile.getOriginalFile().getVirtualFile();

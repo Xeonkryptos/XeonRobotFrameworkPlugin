@@ -38,11 +38,7 @@ public class RobotKeywordReferenceSearch extends QueryExecutorBase<PsiReference,
         GlobalSearchScope globalSearchScope = QueryExecutorUtil.convertToGlobalSearchScope(queryParameters.getEffectiveSearchScope(), project);
         if (element instanceof PyFunction pyFunction) {
             String functionName = pyFunction.getName();
-            String possibleKeywordName = null;
-            if (functionName != null) {
-                possibleKeywordName = KeywordUtil.getInstance(project).functionToKeyword(functionName);
-            }
-            if (possibleKeywordName == null || pyFunction.isValid() && searchForKeywordsInIndex(possibleKeywordName, project, globalSearchScope, consumer)) {
+            if (functionName == null || pyFunction.isValid() && searchForKeywordsInIndex(functionName, project, globalSearchScope, consumer)) {
                 return;
             }
             Optional<String> customKeywordNameOpt = RobotPyUtil.findCustomKeywordNameDecoratorExpression(pyFunction)
@@ -66,7 +62,8 @@ public class RobotKeywordReferenceSearch extends QueryExecutorBase<PsiReference,
         for (RobotKeywordCall keywordStatement : keywordStatements) {
             if (keywordStatement.isValid()) {
                 RobotKeywordCallName keywordCallName = keywordStatement.getKeywordCallName();
-                if (!consumer.process(keywordCallName.getReference())) {
+                PsiReference reference = keywordCallName.getReference();
+                if (reference.isReferenceTo(keywordStatement) && !consumer.process(reference)) {
                     return true;
                 }
             }

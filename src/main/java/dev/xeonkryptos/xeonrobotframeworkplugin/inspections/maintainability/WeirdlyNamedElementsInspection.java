@@ -33,13 +33,14 @@ public class WeirdlyNamedElementsInspection extends LocalInspectionTool {
             @Override
             @SuppressWarnings("UnstableApiUsage")
             public void visitKeywordCallName(@NotNull RobotKeywordCallName o) {
-                String callName = o.getText();
+                String fullKeywordCallName = o.getText().trim();
+                String callName = fullKeywordCallName;
                 RobotKeywordCallLibrary keywordCallLibrary = o.getKeywordCallLibrary();
                 if (keywordCallLibrary != null) {
                     int textLength = keywordCallLibrary.getKeywordCallLibraryName().getTextLength();
-                    callName = callName.substring(textLength + 2);
+                    callName = callName.substring(textLength + 1);
                 }
-                final String finalizedCallName = callName.trim();
+                final String finalizedCallName = callName;
                 PsiElement resolvedElement = o.getReference().resolve();
                 String expectedName = null;
                 if (resolvedElement instanceof PyFunction pyFunction) {
@@ -55,8 +56,8 @@ public class WeirdlyNamedElementsInspection extends LocalInspectionTool {
                     }
                 } else if (resolvedElement != null) {
                     RobotUserKeywordStatement userKeywordStatement = (RobotUserKeywordStatement) resolvedElement;
-                    String userKeywordName = userKeywordStatement.getName();
-                    if (!userKeywordName.trim().equalsIgnoreCase(finalizedCallName)) {
+                    String userKeywordName = userKeywordStatement.getName().trim();
+                    if (!userKeywordName.equalsIgnoreCase(finalizedCallName) && !userKeywordName.equalsIgnoreCase(fullKeywordCallName)) {
                         expectedName = userKeywordName;
                     }
                 }

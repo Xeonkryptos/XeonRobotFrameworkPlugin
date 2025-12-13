@@ -22,6 +22,8 @@
 - Optimized lookup of imported files by filtering for concrete import types and resolve only those
 - Cache Robot Framework's builtin python class instead of looking it up every time
 - Provide custom Robot keyword names in code completion as they are defined without removing underscores with spaces
+- Allow dots in keyword names as part of the name. According to that, changed the resolving of keywords with a potential library name by checking for
+  the longest matching name first
 
 ### Fixed
 
