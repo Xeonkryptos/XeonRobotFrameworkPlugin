@@ -170,6 +170,8 @@
 
         <postStartupActivity implementation="dev.xeonkryptos.xeonrobotframeworkplugin.PostStartupActivity"/>
 
+        <lookup.charFilter implementation="dev.xeonkryptos.xeonrobotframeworkplugin.completion.RobotCharFilter"/>
+
         <internalFileTemplate name="Robot Feature File"/>
         <internalFileTemplate name="Robot Resource File"/>
         <internalFileTemplate name="Robot Script"/>

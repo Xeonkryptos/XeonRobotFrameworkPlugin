@@ -8,23 +8,21 @@ import java.util.Collection;
 
 public interface DefinedKeyword {
 
-   @Nullable
-   String getLibraryName();
+    @Nullable String getLibraryName();
 
-   String getKeywordName();
+    String getKeywordName();
 
-   boolean hasParameters();
+    boolean hasParameters();
 
-   Collection<DefinedParameter> getParameters();
+    Collection<DefinedParameter> getParameters();
 
-   boolean matches(String text);
+    boolean matches(String text);
 
-   @NotNull
-   PsiElement reference();
+    @NotNull PsiElement reference();
 
-   String getArgumentsDisplayable();
+    String getArgumentsDisplayable();
 
-   boolean isDeprecated();
+    boolean isDeprecated();
 
     boolean isPrivate();
 }

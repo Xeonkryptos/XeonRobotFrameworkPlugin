@@ -57,7 +57,7 @@ class PyRobotKeywordDefinitionIndex : FileBasedIndexExtension<String, PyRobotKey
                 for (offset in offsets.array) {
                     val elementAt = pyFile.findElementAt(offset.coerceAtMost(pyFile.textLength - 1))
                     val pyFunction = PsiTreeUtil.getParentOfType(elementAt, PyFunction::class.java, false) ?: continue
-                    val keywordName = RobotPyUtil.findCustomKeywordNameDecoratorExpression(pyFunction).map { it.getStringValue() }.orElse(pyFunction.name)
+                    val keywordName = RobotPyUtil.findCustomKeywordNameDecoratorExpression(pyFunction).map { it.stringValue }.orElse(pyFunction.name)
                     val normalizedFoundKeywordName = KeywordNameUtil.normalizeKeywordName(keywordName ?: continue)
                     if (normalizedFoundKeywordName == normalizedKeywordName) {
                         result += pyFunction
@@ -107,7 +107,7 @@ class PyRobotKeywordDefinitionIndex : FileBasedIndexExtension<String, PyRobotKey
     }
 
     companion object {
-        private const val VERSION: Int = 1
+        private const val VERSION: Int = 2
     }
 
     override fun getName(): ID<String, IntArrayWrapper> = Util.INDEX_ID

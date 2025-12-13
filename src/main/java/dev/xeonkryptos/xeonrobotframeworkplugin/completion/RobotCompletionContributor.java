@@ -105,7 +105,7 @@ public class RobotCompletionContributor extends CompletionContributor {
     @Override
     public void fillCompletionVariants(@NotNull CompletionParameters parameters, @NotNull CompletionResultSet result) {
         // debugging point
-        super.fillCompletionVariants(parameters, result);
+        super.fillCompletionVariants(parameters, result.withPrefixMatcher(new RobotPrefixMatcher(result.getPrefixMatcher().getPrefix())));
     }
 
     @SuppressWarnings("SameParameterValue")
