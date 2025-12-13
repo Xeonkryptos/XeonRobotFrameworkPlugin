@@ -3,7 +3,7 @@ package dev.xeonkryptos.xeonrobotframeworkplugin.util;
 @SuppressWarnings("ApplicationServiceAsStaticFinalFieldOrProperty")
 public final class GlobalConstants {
 
-    public static final String ELLIPSIS = "...";
+    public static final String CONTINUATION = "...";
 
     public static final String DEFAULT_INDENTATION = "    ";
 

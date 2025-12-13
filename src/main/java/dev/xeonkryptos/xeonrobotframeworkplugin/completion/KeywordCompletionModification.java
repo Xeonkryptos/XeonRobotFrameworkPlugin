@@ -117,7 +117,7 @@ public enum KeywordCompletionModification {
         String textBeforeKeyword = document.getText(new TextRange(lineStartOffset, keywordStartOffset));
         int numberOfWhitespaceCharacters = textBeforeKeyword.length() - textBeforeKeyword.stripLeading().length();
         String indentationWhitespace = " ".repeat(numberOfWhitespaceCharacters);
-        return "\n" + indentationWhitespace + GlobalConstants.ELLIPSIS + GlobalConstants.DEFAULT_INDENTATION;
+        return "\n" + indentationWhitespace + GlobalConstants.CONTINUATION + GlobalConstants.DEFAULT_INDENTATION;
     }
 
     public static boolean isKeywordStartsWithModifier(String keywordName) {

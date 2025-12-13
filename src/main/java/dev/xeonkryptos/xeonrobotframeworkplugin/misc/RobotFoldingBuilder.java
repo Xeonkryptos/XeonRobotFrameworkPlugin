@@ -90,7 +90,7 @@ public class RobotFoldingBuilder extends CustomFoldingBuilder {
         if ((presentation = ((NavigationItem) node.getPsi()).getPresentation()) != null) {
             return presentation.getPresentableText();
         } else {
-            return GlobalConstants.ELLIPSIS;
+            return GlobalConstants.CONTINUATION;
         }
     }
 

@@ -75,7 +75,7 @@ public abstract class AbstractRobotSmartMultilineEnterActionHandler<T extends Ps
 
             boolean lookAtPreviousLine = false;
             while (element instanceof PsiWhiteSpace || element instanceof PsiComment) {
-                if (element instanceof PsiWhiteSpace whiteSpace && whiteSpace.getText().contains(GlobalConstants.ELLIPSIS)) {
+                if (element instanceof PsiWhiteSpace whiteSpace && whiteSpace.getText().contains(GlobalConstants.CONTINUATION)) {
                     lookAtPreviousLine = true;
                 }
                 int textOffset = element.getTextOffset();
@@ -128,7 +128,7 @@ public abstract class AbstractRobotSmartMultilineEnterActionHandler<T extends Ps
         for (int i = 0; i < lineText.length(); i++) {
             int codePoint = lineText.codePointAt(i);
             if (!Character.isWhitespace(codePoint)) {
-                return codePoint == '.' && i + 2 < lineText.length() && GlobalConstants.ELLIPSIS.equals(lineText.substring(i, i + 3));
+                return codePoint == '.' && i + 2 < lineText.length() && GlobalConstants.CONTINUATION.equals(lineText.substring(i, i + 3));
             }
         }
         return false;
@@ -141,7 +141,7 @@ public abstract class AbstractRobotSmartMultilineEnterActionHandler<T extends Ps
         int lineStartOffset = document.getLineStartOffset(lineNumber);
         int lineEndOffset = document.getLineEndOffset(lineNumber);
         String originalText = document.getText(new TextRange(lineStartOffset, lineEndOffset));
-        String text = originalText.replace(GlobalConstants.ELLIPSIS, ""); // Remove existing ellipses to identify whitespaces easier
+        String text = originalText.replace(GlobalConstants.CONTINUATION, ""); // Remove existing ellipses to identify whitespaces easier
         if (text.isBlank()) {
             // Don't add ellipsis if the previous line didn't contain anything besides whitespace. Furthermore, remove the empty line with the
             // unnecessary ellipsis to allow for a better writing flow
@@ -155,7 +155,7 @@ public abstract class AbstractRobotSmartMultilineEnterActionHandler<T extends Ps
     }
 
     private void addEllipsisAndIndentationIntoNewLine(@NotNull PsiFile file, @NotNull Editor editor, T multilinePsiElement, int lineNumber) {
-        String textToInsert = GlobalConstants.ELLIPSIS;
+        String textToInsert = GlobalConstants.CONTINUATION;
         String whitespacesToInsert = GlobalConstants.DEFAULT_INDENTATION;
         Document document = editor.getDocument();
         int lineStartOffset = document.getLineStartOffset(lineNumber);
@@ -187,10 +187,10 @@ public abstract class AbstractRobotSmartMultilineEnterActionHandler<T extends Ps
             PsiElement ellipsisElement = elementForIndentation;
             do {
                 ellipsisElement = ellipsisElement.getPrevSibling();
-            } while (ellipsisElement instanceof PsiWhiteSpace && !ellipsisElement.textMatches(GlobalConstants.ELLIPSIS)
+            } while (ellipsisElement instanceof PsiWhiteSpace && !ellipsisElement.textMatches(GlobalConstants.CONTINUATION)
                      || ellipsisElement instanceof PsiComment);
 
-            if (ellipsisElement != null && ellipsisElement.textMatches(GlobalConstants.ELLIPSIS)) {
+            if (ellipsisElement != null && ellipsisElement.textMatches(GlobalConstants.CONTINUATION)) {
                 int ellipsesEndOffset = ellipsisElement.getTextOffset() + ellipsisElement.getTextLength();
                 whitespacesToInsert = IntStream.range(0, argumentForIndentationOffset - ellipsesEndOffset).mapToObj(n -> " ").collect(Collectors.joining());
             }
