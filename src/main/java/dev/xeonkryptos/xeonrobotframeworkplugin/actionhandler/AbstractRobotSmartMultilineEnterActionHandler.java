@@ -79,10 +79,10 @@ public abstract class AbstractRobotSmartMultilineEnterActionHandler<T extends Ps
                     lookAtPreviousLine = true;
                 }
                 int textOffset = element.getTextOffset();
-                if (textOffset <= lineStartOffset && (!lookAtPreviousLine || textOffset <= previousLineStartOffset)) {
+                if (textOffset <= lineStartOffset && (!lookAtPreviousLine || textOffset <= previousLineStartOffset) || textOffset == 0) {
                     return Result.Continue;
                 }
-                element = element.getPrevSibling();
+                element = file.findElementAt(textOffset - 1);
             }
 
             foundElement = getExpectedElement(element, lineNumber, document);
