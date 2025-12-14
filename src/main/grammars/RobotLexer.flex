@@ -195,6 +195,17 @@ ConditionalRunKeywordCall = "Run" {IntraKeywordSeparator}? "Keyword" {IntraKeywo
 
 AssertRunKeywordCall = "Run" {IntraKeywordSeparator}? "Keyword" {IntraKeywordSeparator}? "And" {IntraKeywordSeparator}? "Expect" {IntraKeywordSeparator}? "Error"
 
+SetVariableIf = "Set" {IntraKeywordSeparator}? "Variable" {IntraKeywordSeparator}? "If"
+ForLoopIf = ("Continue" | "Exit") {IntraKeywordSeparator}? "For" {IntraKeywordSeparator}? "Loop" {IntraKeywordSeparator}? "If"
+PassExecutionIf = "Pass" {IntraKeywordSeparator}? "Execution" {IntraKeywordSeparator}? {IntraKeywordSeparator}? "If"
+ReturnFromKeywordIf = "Return" {IntraKeywordSeparator}? "From" {IntraKeywordSeparator}? "Keyword" {IntraKeywordSeparator}? "If"
+SkipIf = "Skip" {IntraKeywordSeparator}? "If"
+
+ShouldBeTrue = "Should" {IntraKeywordSeparator}? "Be" {IntraKeywordSeparator}? "True"
+ShouldNotBeTrue = "Should" {IntraKeywordSeparator}? "Not" {IntraKeywordSeparator}? "Be" {IntraKeywordSeparator}? "True"
+
+SimpleConditionalKeywordCall = {SetVariableIf} | {ForLoopIf} | {PassExecutionIf} | {ReturnFromKeywordIf} | {SkipIf} | {ShouldBeTrue} | {ShouldNotBeTrue}
+
 MultiLine = {EOL}+ {NonNewlineWhitespace}* {MultiLineContinuation}
 
 LineComment = {LineCommentSign} {NON_EOL}*
@@ -536,8 +547,13 @@ LineComment = {LineCommentSign} {NON_EOL}*
     {RunKeywordCall}                                               { return KEYWORD_NAME; }
     {ConditionalRunKeywordCall}                                    { yybegin(PYTHON_EVALUATED_CONTROL_STRUCTURE_START); return KEYWORD_NAME; }
     {AssertRunKeywordCall}                                         { enterNewState(SINGLE_LITERAL_CONSTANT_START); return KEYWORD_NAME; }
+    {SimpleConditionalKeywordCall}                                     {
+          yybegin(KEYWORD_ARGUMENTS);
+          enterNewState(PYTHON_EVALUATED_CONTROL_STRUCTURE_START);
+          return KEYWORD_NAME;
+    }
 
-    {BuiltInNamespace} ({RunKeywordCall} | {ConditionalRunKeywordCall} | {AssertRunKeywordCall}) {
+    {BuiltInNamespace} ({RunKeywordCall} | {ConditionalRunKeywordCall} | {AssertRunKeywordCall} | {SimpleConditionalKeywordCall}) {
           yypushback(yylength() - "BuiltIn".length());
           enterNewState(KEYWORD_LIBRARY_NAME_SEPARATOR);
           return KEYWORD_LIBRARY_NAME;
