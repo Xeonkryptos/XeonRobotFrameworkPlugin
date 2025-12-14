@@ -26,6 +26,7 @@
 - Provide custom Robot keyword names in code completion as they are defined without removing underscores with spaces
 - Allow dots in keyword names as part of the name. According to that, changed the resolving of keywords with a potential library name by checking for
   the longest matching name first
+- Changed the deprecation check into an inspection to be able to suppress it with comment suppression
 
 ### Fixed
 
@@ -37,6 +38,7 @@
   represents a resolvable name
 - Do not complain about misplaced normal arguments after a detected parameter but highlighted as normal argument
 - Extended multiline handling to every other element not yet supported like for loops
+- Fixed issue leading to deprecation marking not shown to keyword calls referencing a python function with deprecation prefix **\*DEPRECATED** in documentation
 
 ## 0.5.16
 

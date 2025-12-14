@@ -529,11 +529,13 @@ LineComment = {LineCommentSign} {NON_EOL}*
     {RunKeywordCall}                                               { return KEYWORD_NAME; }
     {ConditionalRunKeywordCall}                                    { yybegin(PYTHON_EVALUATED_CONTROL_STRUCTURE_START); return KEYWORD_NAME; }
     {AssertRunKeywordCall}                                         { enterNewState(SINGLE_LITERAL_CONSTANT_START); return KEYWORD_NAME; }
-    {BuiltInNamespace} {RunKeywordCall}                            {
+
+    {BuiltInNamespace} ({RunKeywordCall} | {ConditionalRunKeywordCall} | {AssertRunKeywordCall}) {
           yypushback(yylength() - "BuiltIn".length());
           enterNewState(KEYWORD_LIBRARY_NAME_SEPARATOR);
           return KEYWORD_LIBRARY_NAME;
     }
+
     {KeywordLibraryNameLiteralValue} {VariableFreeLiteralValue}    {
           int libraryNameSeparatorStart = indexOf('.');
           yypushback(yylength() - libraryNameSeparatorStart);
@@ -547,8 +549,8 @@ LineComment = {LineCommentSign} {NON_EOL}*
 
 <SETTINGS_SECTION, SETTING, KEYWORD_ARGUMENTS, USER_KEYWORD_RETURN_STATEMENT, SINGLE_LITERAL_CONSTANT>  {VariableFreeLiteralValue}  { return LITERAL_CONSTANT; }
 
-<SINGLE_LITERAL_CONSTANT_START>  {SpaceBasedEndMarker}   { yybegin(SINGLE_LITERAL_CONSTANT); return WHITE_SPACE; }
-<SINGLE_LITERAL_CONSTANT>        {SpaceBasedEndMarker}   { leaveState(); return WHITE_SPACE; }
+<SINGLE_LITERAL_CONSTANT_START>  {SpaceBasedEndMarker}       { yybegin(SINGLE_LITERAL_CONSTANT); return WHITE_SPACE; }
+<SINGLE_LITERAL_CONSTANT>        {SpaceBasedEndMarker}       { leaveState(); return WHITE_SPACE; }
 
 <LITERAL_CONSTANT_ONLY> {
     {NonNewlineWhitespace}+                                  { return WHITE_SPACE; }

@@ -64,9 +64,10 @@ public class PyElementDeprecatedVisitor extends PyElementVisitor {
     }
 
     @Override
+    @SuppressWarnings("UnstableApiUsage")
     public void visitPyStringLiteralExpression(@NotNull PyStringLiteralExpression node) {
         super.visitPyStringLiteralExpression(node);
-        deprecated |= node.getText().startsWith(GlobalConstants.DEPRECATED_PREFIX);
+        deprecated |= node.getStringValue().startsWith(GlobalConstants.DEPRECATED_PREFIX);
     }
 
     public boolean isDeprecated() {

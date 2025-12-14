@@ -92,8 +92,6 @@
                    order="before invalid-parameters-annotator"/>
         <annotator language="Robot" implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.inspections.compilation.RobotUnresolvedKeywordAnnotator"/>
         <annotator language="Robot"
-                   implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.inspections.highlight.RobotKeywordDeprecationAnnotator"/>
-        <annotator language="Robot"
                    implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.inspections.compilation.RobotMissingMandatoryKeywordParametersAnnotator"/>
         <annotator language="Robot" implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.inspections.compilation.RobotImportAnnotator"/>
         <annotator language="Robot"
@@ -158,6 +156,10 @@
         <localInspection language="Robot" shortName="RobotDeprecatedKeywordSettings" bundle="messages.RobotBundle" key="INSP.NAME.deprecated.settings.local"
                          groupKey="INSP.GROUP.robot" enabledByDefault="true" level="WARNING" dumbAware="true"
                          implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.inspections.deprecation.RobotDeprecatedKeywordSettingsInspection"/>
+        <localInspection language="Robot" shortName="RobotDeprecatedKeywordCall" bundle="messages.RobotBundle" key="INSP.NAME.deprecated.keyword-call"
+                         groupKey="INSP.GROUP.robot" enabledByDefault="true" level="WARNING" dumbAware="false"
+                         implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.inspections.deprecation.RobotDeprecatedKeywordCallInspection"/>
+
         <localInspection language="Robot" shortName="RobotVariableRatherArgumentMeant" bundle="messages.RobotBundle"
                          key="INSP.NAME.variable.rather.argument.meant" groupKey="INSP.GROUP.robot" enabledByDefault="true" level="WARNING" dumbAware="true"
                          implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.inspections.maintainability.RobotVariableRatherArgumentMeantInspection"/>
