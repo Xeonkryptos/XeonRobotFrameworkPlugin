@@ -11,6 +11,8 @@
 - Added a new inspection to detect arguments that looks like they should be variables instead (currently only global standard variable) and provide a quickfix
   to change them
 - Added custom CharFilter to allow for spaces being typed while code completion is opened without closing it
+- Added support for Builtin keywords of Robot Framework like Run Keyword If, Run Keywords, etc. Highlighting the parameters as keywords or python expressions
+  accordingly. Additionally, providing code completion for those parameters
 
 ### Changed
 
@@ -33,6 +35,8 @@
 - Fixed issues with test cases/tasks having a DOT in their name
 - Fixed code completion issue with prefixed / or * keyword calls when code completion suggestion differs from defined keyword even though the defined keyword
   represents a resolvable name
+- Do not complain about misplaced normal arguments after a detected parameter but highlighted as normal argument
+- Extended multiline handling to every other element not yet supported like for loops
 
 ## 0.5.16
 

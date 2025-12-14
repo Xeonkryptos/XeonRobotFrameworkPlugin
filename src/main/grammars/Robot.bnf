@@ -317,7 +317,7 @@ fake keyword_call ::= base_keyword_call {
 }
 eol_based_keyword_call ::= base_keyword_call eol_marker? {elementType=keyword_call}
 eol_free_keyword_call ::= base_keyword_call {elementType=keyword_call}
-private base_keyword_call ::= keyword_call_name (parameter | positional_argument | ASSIGNMENT)* {pin=1}
+private base_keyword_call ::= keyword_call_name (parameter | positional_argument)* {pin=1}
 keyword_call_name ::= keyword_call_library? KEYWORD_NAME { methods = [getReference] }
 keyword_call_library ::= keyword_call_library_name KEYWORD_LIBRARY_SEPARATOR
 keyword_call_library_name ::= KEYWORD_LIBRARY_NAME {methods = [getReference]}
@@ -334,14 +334,14 @@ keyword_variable_statement ::= variable_definition+ ASSIGNMENT? eol_based_keywor
 if_variable_statement ::= variable_definition+ ASSIGNMENT? conditional_inline_structure {pin=3}
 variable_value ::= variable | positional_argument
 
-positional_argument ::= external_positional_argument {
+positional_argument ::= external_positional_argument EOS? {
     mixin = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotPositionalArgumentExtension"
     stubClass = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotPositionalArgumentStub"
     elementTypeFactory = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotPositionalArgumentStubElement.create"
     methods = [getReference]
 }
 external external_positional_argument ::= parsePositionalArgument positional_argument_content
-private positional_argument_content ::= literal_constant_value | variable
+private positional_argument_content ::= literal_constant_value | variable | eol_free_keyword_call | conditional_content
 
 variable_definition ::= variable {
     implements = [

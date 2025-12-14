@@ -14,6 +14,7 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotArgument;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCall;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLocalSetting;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotParameter;
+import dev.xeonkryptos.xeonrobotframeworkplugin.util.KeyUtils;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
@@ -25,6 +26,8 @@ public class RobotParameterAnnotator implements Annotator {
         if (!(element instanceof RobotParameter parameter)) {
             return;
         }
+        parameter.putUserData(KeyUtils.HANDLED_AS_SIMPLE_ARGUMENT_KEY, false);
+
         RobotKeywordCall keywordCall = PsiTreeUtil.getParentOfType(element, RobotKeywordCall.class);
         if (keywordCall != null) {
             Collection<DefinedParameter> availableParameters = keywordCall.getAvailableParameters();
@@ -75,5 +78,6 @@ public class RobotParameterAnnotator implements Annotator {
         // Grow range by 1 to include the assignment operator
         TextRange parameterIdTextRange = parameter.getParameterId().getTextRange().grown(1);
         holder.newSilentAnnotation(HighlightSeverity.TEXT_ATTRIBUTES).range(parameterIdTextRange).textAttributes(RobotHighlighter.ARGUMENT).create();
+        parameter.putUserData(KeyUtils.HANDLED_AS_SIMPLE_ARGUMENT_KEY, true);
     }
 }

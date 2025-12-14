@@ -24,7 +24,7 @@ public class RobotParserDefinition implements ParserDefinition {
     @Override
     public Lexer createLexer(Project project) {
         LayeredLexer layeredLexer = new LayeredLexer(new RobotLexerAdapter());
-        layeredLexer.registerLayer(new RobotParsingLayerLexerAdapter(), ExtendedRobotTypes.EXTENDED_VARIABLE_ACCESS_BODY);
+        layeredLexer.registerLayer(new RobotExtendedVariableAccessLayerAdapter(), ExtendedRobotTypes.EXTENDED_VARIABLE_ACCESS_BODY);
         return layeredLexer;
     }
 

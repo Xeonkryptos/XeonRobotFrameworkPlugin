@@ -57,6 +57,16 @@ public abstract class AbstractRobotLexer implements FlexLexer {
         return character == ' ' || character == '\t' || character == '\r' || character == '\n' || character == '\u00A0';
     }
 
+    protected int indexOf(char character) {
+        int length = yylength();
+        for (int i = 0; i < length; i++) {
+            if (yycharat(i) == character) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
     protected abstract int yylength();
 
     protected abstract char yycharat(int position);

@@ -47,7 +47,10 @@ public class RobotVariableBodyReference extends PsiPolyVariantReferenceBase<Robo
     public ResolveResult @NotNull [] multiResolve(boolean incompleteCode) {
         RobotVariableBodyId variableBodyId = getElement();
         RobotVariable variable = PsiTreeUtil.getParentOfType(variableBodyId, RobotVariable.class);
-        assert variable != null;
+        if (variable == null) {
+            return ResolveResult.EMPTY_ARRAY;
+        }
+
         ResolveCache resolveCache = ResolveCache.getInstance(variableBodyId.getProject());
         return resolveCache.resolveWithCaching(this, (robotVariableReference, incompCode) -> {
             String variableName = variable.getVariableName();

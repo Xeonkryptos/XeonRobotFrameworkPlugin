@@ -2,9 +2,9 @@ package dev.xeonkryptos.xeonrobotframeworkplugin.psi;
 
 import com.intellij.lexer.FlexAdapter;
 
-public class RobotParsingLayerLexerAdapter extends FlexAdapter {
+public class RobotExtendedVariableAccessLayerAdapter extends FlexAdapter {
 
-    public RobotParsingLayerLexerAdapter() {
+    public RobotExtendedVariableAccessLayerAdapter() {
         super(new RobotExtendedVariableAccessLayerLexer());
     }
 }

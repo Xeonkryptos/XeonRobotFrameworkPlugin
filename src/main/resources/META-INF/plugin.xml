@@ -85,7 +85,11 @@
                                  implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.manipulator.RobotTemplateParameterIdManipulator"/>
 
         <!-- Annotations -->
-        <annotator language="Robot" implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.inspections.compilation.RobotParameterAnnotator"/>
+        <annotator language="Robot"
+                   implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.inspections.compilation.KeywordCallWithInvalidParameterOrderAnnotator"
+                   id="invalid-parameters-annotator"/>
+        <annotator language="Robot" implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.inspections.compilation.RobotParameterAnnotator"
+                   order="before invalid-parameters-annotator"/>
         <annotator language="Robot" implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.inspections.compilation.RobotUnresolvedKeywordAnnotator"/>
         <annotator language="Robot"
                    implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.inspections.highlight.RobotKeywordDeprecationAnnotator"/>
@@ -106,8 +110,6 @@
                    implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.inspections.compilation.RobotInvalidKeywordOnlyMarkerAnnotation"/>
         <annotator language="Robot"
                    implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.inspections.highlight.ReassignedRobotVariableAnnotator"/>
-        <annotator language="Robot"
-                   implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.inspections.compilation.KeywordCallWithInvalidParameterOrderAnnotator"/>
 
         <!-- Inspections -->
         <!-- TODO: inspection: error?: resource import is not a robot file -->
