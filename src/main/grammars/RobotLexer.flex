@@ -61,11 +61,16 @@ import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.ExtendedRobotTypes.*;
           leaveState();
       } else if (currentState == SINGLE_LITERAL_CONSTANT_START) {
           yybegin(SINGLE_LITERAL_CONSTANT);
+      } else if (currentState == PYTHON_EVALUATED_CONTROL_STRUCTURE_START) {
+          yybegin(PYTHON_EXECUTED_CONDITION);
       }
   }
 
   protected boolean shouldLeaveStateOnMultilineDetection(int currentState) {
-      return currentState == SINGLE_LITERAL_CONSTANT || currentState == PARAMETER_VALUE || currentState == TEMPLATE_PARAMETER_VALUE;
+      return currentState == SINGLE_LITERAL_CONSTANT
+            || currentState == PARAMETER_VALUE
+            || currentState == TEMPLATE_PARAMETER_VALUE
+            || currentState == PYTHON_EXECUTED_CONDITION;
   }
 %}
 
@@ -491,7 +496,9 @@ LineComment = {LineCommentSign} {NON_EOL}*
 
 <SIMPLE_CONTROL_STRUCTURE_START>            {ExtendedSpaceBasedEndMarker}      { yybegin(SIMPLE_CONTROL_STRUCTURE); return WHITE_SPACE; }
 <FOR_STRUCTURE_LOOP_START>                  {ExtendedSpaceBasedEndMarker}      { yybegin(FOR_STRUCTURE_LOOP); return WHITE_SPACE; }
-<PYTHON_EVALUATED_CONTROL_STRUCTURE_START>  {ExtendedSpaceBasedEndMarker}      { yybegin(PYTHON_EXECUTED_CONDITION); return WHITE_SPACE; }
+<PYTHON_EVALUATED_CONTROL_STRUCTURE_START>  {
+    {ExtendedSpaceBasedEndMarker}      { yybegin(PYTHON_EXECUTED_CONDITION); return WHITE_SPACE; }
+}
 <PYTHON_EXECUTED_CONDITION>  {
     {EverythingButVariableValue}            { return PYTHON_EXPRESSION_CONTENT; }
     {ExtendedSpaceBasedEndMarker}           { leaveState(); return EOS; }

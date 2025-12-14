@@ -6151,11 +6151,16 @@ public class RobotLexer extends AbstractRobotLexer {
           leaveState();
       } else if (currentState == SINGLE_LITERAL_CONSTANT_START) {
           yybegin(SINGLE_LITERAL_CONSTANT);
+      } else if (currentState == PYTHON_EVALUATED_CONTROL_STRUCTURE_START) {
+          yybegin(PYTHON_EXECUTED_CONDITION);
       }
   }
 
   protected boolean shouldLeaveStateOnMultilineDetection(int currentState) {
-      return currentState == SINGLE_LITERAL_CONSTANT || currentState == PARAMETER_VALUE || currentState == TEMPLATE_PARAMETER_VALUE;
+      return currentState == SINGLE_LITERAL_CONSTANT
+            || currentState == PARAMETER_VALUE
+            || currentState == TEMPLATE_PARAMETER_VALUE
+            || currentState == PYTHON_EXECUTED_CONDITION;
   }
 
 
