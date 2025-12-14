@@ -206,6 +206,8 @@ ShouldNotBeTrue = "Should" {IntraKeywordSeparator}? "Not" {IntraKeywordSeparator
 
 SimpleConditionalKeywordCall = {SetVariableIf} | {ForLoopIf} | {PassExecutionIf} | {ReturnFromKeywordIf} | {SkipIf} | {ShouldBeTrue} | {ShouldNotBeTrue}
 
+RepeatKeywordCall = "Repeat" {IntraKeywordSeparator}? "Keyword"
+
 MultiLine = {EOL}+ {NonNewlineWhitespace}* {MultiLineContinuation}
 
 LineComment = {LineCommentSign} {NON_EOL}*
@@ -546,14 +548,15 @@ LineComment = {LineCommentSign} {NON_EOL}*
 <KEYWORD_CALL>  {
     {RunKeywordCall}                                               { return KEYWORD_NAME; }
     {ConditionalRunKeywordCall}                                    { yybegin(PYTHON_EVALUATED_CONTROL_STRUCTURE_START); return KEYWORD_NAME; }
-    {AssertRunKeywordCall}                                         { enterNewState(SINGLE_LITERAL_CONSTANT_START); return KEYWORD_NAME; }
-    {SimpleConditionalKeywordCall}                                     {
+    {AssertRunKeywordCall} | {RepeatKeywordCall}                   { enterNewState(SINGLE_LITERAL_CONSTANT_START); return KEYWORD_NAME; }
+    {SimpleConditionalKeywordCall}                                 {
           yybegin(KEYWORD_ARGUMENTS);
           enterNewState(PYTHON_EVALUATED_CONTROL_STRUCTURE_START);
           return KEYWORD_NAME;
     }
+    {RepeatKeywordCall}                                            { return KEYWORD_NAME; }
 
-    {BuiltInNamespace} ({RunKeywordCall} | {ConditionalRunKeywordCall} | {AssertRunKeywordCall} | {SimpleConditionalKeywordCall}) {
+    {BuiltInNamespace} ({RunKeywordCall} | {ConditionalRunKeywordCall} | {AssertRunKeywordCall} | {SimpleConditionalKeywordCall} | {RepeatKeywordCall}) {
           yypushback(yylength() - "BuiltIn".length());
           enterNewState(KEYWORD_LIBRARY_NAME_SEPARATOR);
           return KEYWORD_LIBRARY_NAME;
