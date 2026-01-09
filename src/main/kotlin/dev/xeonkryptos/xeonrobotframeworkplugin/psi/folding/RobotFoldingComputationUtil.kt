@@ -33,15 +33,16 @@ object RobotFoldingComputationUtil {
      */
     @JvmStatic
     fun computeSimpleFoldingRegionFor(element: PsiElement, document: Document): FoldingDescriptor {
-        val foldingRegion = computeOptimizedTextRangeForSimpleFolding(element, document)
+        val foldingRegion = computeFoldableTextRange(element, document)
         return FoldingDescriptor(element, foldingRegion)
     }
 
     /**
-     * Computes an optimized text range for simple folding regions. It means, that for the given element, a folding region is constructed that encompasses the
-     * element itself. Any sub elements are hidden while the folding region is over the main element's text body (i.e. name or whatever denotes the element itself).
+     * Computes the foldable text range for a given PSI element, excluding trailing new lines and comments in different lines. The produced text range encompasses
+     * the complete element, but excludes any trailing new lines and comments that are not in the same line as the last relevant element.
      */
-    private fun computeOptimizedTextRangeForSimpleFolding(element: PsiElement, document: Document): TextRange {
+    @JvmStatic
+    fun computeFoldableTextRange(element: PsiElement, document: Document): TextRange {
         var ignorableNewLines = 0
         val charsSequence = document.charsSequence
         val textRange = element.textRange
