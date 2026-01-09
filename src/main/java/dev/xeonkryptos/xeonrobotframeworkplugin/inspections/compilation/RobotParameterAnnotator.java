@@ -2,13 +2,12 @@ package dev.xeonkryptos.xeonrobotframeworkplugin.inspections.compilation;
 
 import com.intellij.codeInspection.ProblemHighlightType;
 import com.intellij.lang.annotation.AnnotationHolder;
-import com.intellij.lang.annotation.Annotator;
 import com.intellij.lang.annotation.HighlightSeverity;
 import com.intellij.openapi.util.TextRange;
-import com.intellij.psi.PsiElement;
 import com.intellij.psi.util.PsiTreeUtil;
 import dev.xeonkryptos.xeonrobotframeworkplugin.RobotBundle;
 import dev.xeonkryptos.xeonrobotframeworkplugin.config.RobotHighlighter;
+import dev.xeonkryptos.xeonrobotframeworkplugin.inspections.RobotAnnotator;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.DefinedParameter;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotArgument;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCall;
@@ -19,27 +18,27 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
 
-public class RobotParameterAnnotator implements Annotator {
+public class RobotParameterAnnotator extends RobotAnnotator {
 
     @Override
-    public void annotate(@NotNull PsiElement element, @NotNull AnnotationHolder holder) {
-        if (!(element instanceof RobotParameter parameter)) {
-            return;
-        }
+    public void visitParameter(@NotNull RobotParameter parameter) {
         parameter.putUserData(KeyUtils.HANDLED_AS_SIMPLE_ARGUMENT_KEY, false);
 
-        RobotKeywordCall keywordCall = PsiTreeUtil.getParentOfType(element, RobotKeywordCall.class);
+        RobotKeywordCall keywordCall = PsiTreeUtil.getParentOfType(parameter, RobotKeywordCall.class);
         if (keywordCall != null) {
             Collection<DefinedParameter> availableParameters = keywordCall.getAvailableParameters();
             String parameterName = parameter.getParameterName();
             boolean directMatchFound = availableParameters.stream().anyMatch(param -> param.matches(parameterName));
             if (!directMatchFound && availableParameters.stream().noneMatch(DefinedParameter::isKeywordContainer)) {
                 keywordCall.getStartOfKeywordsOnlyIndex()
-                           .ifPresentOrElse(keywordsOnlyIndex -> handleParameterWithinKeywordOnlyKeywordCall(keywordsOnlyIndex, parameter, keywordCall, holder),
-                                            () -> convertParameterToArgumentVisually(holder, parameter));
+                           .ifPresentOrElse(keywordsOnlyIndex -> handleParameterWithinKeywordOnlyKeywordCall(keywordsOnlyIndex,
+                                                                                                             parameter,
+                                                                                                             keywordCall,
+                                                                                                             getHolder()),
+                                            () -> convertParameterToArgumentVisually(getHolder(), parameter));
             }
         } else if (PsiTreeUtil.getParentOfType(parameter, RobotLocalSetting.class) != null) {
-            convertParameterToArgumentVisually(holder, parameter);
+            convertParameterToArgumentVisually(getHolder(), parameter);
         }
     }
 

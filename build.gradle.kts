@@ -1,7 +1,5 @@
 import org.jetbrains.changelog.Changelog
 import org.jetbrains.changelog.markdownToHTML
-import org.jetbrains.intellij.platform.gradle.Constants.Configurations
-import org.jetbrains.intellij.platform.gradle.Constants.Constraints
 import org.jetbrains.intellij.platform.gradle.TestFrameworkType
 import org.jetbrains.intellij.platform.gradle.models.ProductRelease
 import org.jetbrains.intellij.platform.gradle.tasks.PrepareSandboxTask
@@ -14,7 +12,7 @@ plugins {
     // gradle-intellij-plugin - read more: https://github.com/JetBrains/gradle-intellij-plugin
     id("org.jetbrains.intellij.platform") version "2.10.5"
     // gradle-changelog-plugin - read more: https://github.com/JetBrains/gradle-changelog-plugin
-    id("org.jetbrains.changelog") version "2.4.0"
+    id("org.jetbrains.changelog") version "2.5.0"
 
     kotlin("jvm") version "2.0.21"
 }
@@ -46,9 +44,8 @@ repositories {
 
 dependencies {
     implementation("org.eclipse.lsp4j:org.eclipse.lsp4j.debug:0.24.0")
-    implementation("org.apache.commons:commons-text:1.14.0")
+    implementation("org.apache.commons:commons-text:1.15.0")
 
-//    testImplementation(kotlin("test"))
     testImplementation(platform("org.junit:junit-bom:5.14.1"))
     testImplementation("org.junit.jupiter:junit-jupiter")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")

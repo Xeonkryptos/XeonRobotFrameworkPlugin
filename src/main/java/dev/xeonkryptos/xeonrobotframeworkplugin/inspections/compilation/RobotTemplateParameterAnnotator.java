@@ -2,14 +2,13 @@ package dev.xeonkryptos.xeonrobotframeworkplugin.inspections.compilation;
 
 import com.intellij.codeInspection.ProblemHighlightType;
 import com.intellij.lang.annotation.AnnotationHolder;
-import com.intellij.lang.annotation.Annotator;
 import com.intellij.lang.annotation.HighlightSeverity;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.TextRange;
-import com.intellij.psi.PsiElement;
 import com.intellij.psi.util.PsiTreeUtil;
 import dev.xeonkryptos.xeonrobotframeworkplugin.RobotBundle;
 import dev.xeonkryptos.xeonrobotframeworkplugin.config.RobotHighlighter;
+import dev.xeonkryptos.xeonrobotframeworkplugin.inspections.RobotAnnotator;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.DefinedParameter;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotArgument;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCall;
@@ -20,14 +19,10 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
 
-public class RobotTemplateParameterAnnotator implements Annotator {
+public class RobotTemplateParameterAnnotator extends RobotAnnotator {
 
     @Override
-    public void annotate(@NotNull PsiElement element, @NotNull AnnotationHolder holder) {
-        if (!(element instanceof RobotTemplateParameter parameter)) {
-            return;
-        }
-
+    public void visitTemplateParameter(@NotNull RobotTemplateParameter parameter) {
         Project project = parameter.getProject();
         KeywordUtil keywordUtil = KeywordUtil.getInstance(project);
         RobotKeywordCall keywordCall = keywordUtil.findTemplateKeywordCall(parameter);
@@ -40,8 +35,8 @@ public class RobotTemplateParameterAnnotator implements Annotator {
                            .ifPresentOrElse(keywordsOnlyIndex -> handleParameterWithinKeywordOnlyKeywordCall(keywordsOnlyIndex,
                                                                                                              parameter,
                                                                                                              keywordCall.getName(),
-                                                                                                             holder),
-                                            () -> convertParameterToArgumentVisually(holder, parameter));
+                                                                                                             getHolder()),
+                                            () -> convertParameterToArgumentVisually(getHolder(), parameter));
             }
         }
     }

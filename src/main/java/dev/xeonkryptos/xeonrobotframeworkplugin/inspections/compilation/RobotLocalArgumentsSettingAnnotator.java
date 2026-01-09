@@ -1,13 +1,11 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.inspections.compilation;
 
 import com.intellij.codeInspection.ProblemHighlightType;
-import com.intellij.lang.annotation.AnnotationHolder;
-import com.intellij.lang.annotation.Annotator;
 import com.intellij.lang.annotation.HighlightSeverity;
 import com.intellij.openapi.progress.ProgressManager;
-import com.intellij.openapi.project.DumbAware;
 import com.intellij.psi.PsiElement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.RobotBundle;
+import dev.xeonkryptos.xeonrobotframeworkplugin.inspections.RobotAnnotator;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLocalArgumentsSetting;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLocalArgumentsSettingParameter;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLocalArgumentsSettingParameterMandatory;
@@ -19,13 +17,10 @@ import org.jetbrains.annotations.NotNull;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-public class RobotLocalArgumentsSettingAnnotator implements Annotator, DumbAware {
+public class RobotLocalArgumentsSettingAnnotator extends RobotAnnotator {
 
     @Override
-    public void annotate(@NotNull PsiElement element, @NotNull AnnotationHolder holder) {
-        if (!(element instanceof RobotLocalArgumentsSetting argumentsSetting)) {
-            return;
-        }
+    public void visitLocalArgumentsSetting(@NotNull RobotLocalArgumentsSetting argumentsSetting) {
         boolean keywordOnlyMarkerFound = false;
         for (RobotLocalArgumentsSettingParameter localArgumentsSettingParameter : argumentsSetting.getLocalArgumentsSettingParameterList()) {
             RobotLocalArgumentsSettingParameterMandatory parameterMandatory = localArgumentsSettingParameter.getLocalArgumentsSettingParameterMandatory();
@@ -36,12 +31,12 @@ public class RobotLocalArgumentsSettingAnnotator implements Annotator, DumbAware
                     if (!keywordOnlyMarkerFound) {
                         keywordOnlyMarkerFound = true;
                     } else {
-                        holder.newAnnotation(HighlightSeverity.ERROR,
-                                             RobotBundle.message("annotation.user-keyword.settings.argument.keyword-only-marker-more-than-once"))
-                              .highlightType(ProblemHighlightType.GENERIC_ERROR)
-                              .range(variableDefinition)
-                              .withFix(new RemoveMoreThanOnceDefinedKeywordOnlyMarkersQuickFix())
-                              .create();
+                        getHolder().newAnnotation(HighlightSeverity.ERROR,
+                                                  RobotBundle.message("annotation.user-keyword.settings.argument.keyword-only-marker-more-than-once"))
+                                   .highlightType(ProblemHighlightType.GENERIC_ERROR)
+                                   .range(variableDefinition)
+                                   .withFix(new RemoveMoreThanOnceDefinedKeywordOnlyMarkersQuickFix())
+                                   .create();
                     }
                 }
             }
@@ -51,11 +46,11 @@ public class RobotLocalArgumentsSettingAnnotator implements Annotator, DumbAware
             RobotLocalArgumentsSettingArgumentVisitor visitor = new RobotLocalArgumentsSettingArgumentVisitor();
             argumentsSetting.acceptChildren(visitor);
             for (PsiElement invalidVariableDefinition : visitor.invalidVariableDefinitions) {
-                holder.newAnnotation(HighlightSeverity.ERROR,
-                                     RobotBundle.message("annotation.user-keyword.settings.argument.variable-defined-after-keyword-only-marker"))
-                      .highlightType(ProblemHighlightType.GENERIC_ERROR)
-                      .range(invalidVariableDefinition)
-                      .create();
+                getHolder().newAnnotation(HighlightSeverity.ERROR,
+                                          RobotBundle.message("annotation.user-keyword.settings.argument.variable-defined-after-keyword-only-marker"))
+                           .highlightType(ProblemHighlightType.GENERIC_ERROR)
+                           .range(invalidVariableDefinition)
+                           .create();
             }
         }
     }

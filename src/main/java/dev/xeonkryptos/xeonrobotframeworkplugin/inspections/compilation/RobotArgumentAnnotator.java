@@ -2,34 +2,30 @@ package dev.xeonkryptos.xeonrobotframeworkplugin.inspections.compilation;
 
 import com.intellij.codeInspection.ProblemHighlightType;
 import com.intellij.lang.annotation.AnnotationHolder;
-import com.intellij.lang.annotation.Annotator;
 import com.intellij.lang.annotation.HighlightSeverity;
-import com.intellij.psi.PsiElement;
 import com.intellij.psi.util.PsiTreeUtil;
 import dev.xeonkryptos.xeonrobotframeworkplugin.RobotBundle;
+import dev.xeonkryptos.xeonrobotframeworkplugin.inspections.RobotAnnotator;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotArgument;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotElement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCall;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotParameter;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotPositionalArgument;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotElement;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
 
-public class RobotArgumentAnnotator implements Annotator {
+public class RobotArgumentAnnotator extends RobotAnnotator {
 
     @Override
-    public void annotate(@NotNull PsiElement element, @NotNull AnnotationHolder holder) {
-        if (!(element instanceof RobotPositionalArgument positionalArgument)) {
-            return;
-        }
+    public void visitPositionalArgument(@NotNull RobotPositionalArgument element) {
         RobotElement robotElement = PsiTreeUtil.getParentOfType(element, RobotParameter.class, RobotKeywordCall.class);
         if (robotElement instanceof RobotKeywordCall keywordCall) {
             keywordCall.getStartOfKeywordsOnlyIndex()
                        .ifPresent(keywordsOnlyIndex -> handlePositionalArgumentWithinKeywordOnlyKeywordCall(keywordsOnlyIndex,
-                                                                                                            positionalArgument,
+                                                                                                            element,
                                                                                                             keywordCall,
-                                                                                                            holder));
+                                                                                                            getHolder()));
         }
     }
 

@@ -85,29 +85,8 @@
                                  implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.manipulator.RobotTemplateParameterIdManipulator"/>
 
         <!-- Annotations -->
-        <annotator language="Robot"
-                   implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.inspections.compilation.KeywordCallWithInvalidParameterOrderAnnotator"
-                   id="invalid-parameters-annotator"/>
-        <annotator language="Robot" implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.inspections.compilation.RobotParameterAnnotator"
-                   order="before invalid-parameters-annotator"/>
-        <annotator language="Robot" implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.inspections.compilation.RobotUnresolvedKeywordAnnotator"/>
-        <annotator language="Robot"
-                   implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.inspections.compilation.RobotMissingMandatoryKeywordParametersAnnotator"/>
-        <annotator language="Robot" implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.inspections.compilation.RobotImportAnnotator"/>
-        <annotator language="Robot"
-                   implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.inspections.highlight.RobotVariableDefinitionNotFoundAnnotator"/>
-        <annotator language="Robot"
-                   implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.inspections.compilation.RobotUserKeywordStatementAnnotator"/>
-        <annotator language="Robot"
-                   implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.inspections.compilation.RobotLocalArgumentsSettingAnnotator"/>
-        <annotator language="Robot" implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.inspections.compilation.RobotArgumentAnnotator"/>
-        <annotator language="Robot" implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.inspections.compilation.RobotTemplateParameterAnnotator"/>
-        <annotator language="Robot"
-                   implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.inspections.compilation.RobotMissingMandatoryTemplateArgumentsAnnotator"/>
-        <annotator language="Robot"
-                   implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.inspections.compilation.RobotInvalidKeywordOnlyMarkerAnnotation"/>
-        <annotator language="Robot"
-                   implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.inspections.highlight.ReassignedRobotVariableAnnotator"/>
+        <annotator language="Robot" implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.inspections.RobotAnnotatingVisitor"/>
+        <annotator language="Robot" implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.inspections.RobotDumbAwareAnnotatingVisitor"/>
 
         <!-- Inspections -->
         <!-- TODO: inspection: error?: resource import is not a robot file -->

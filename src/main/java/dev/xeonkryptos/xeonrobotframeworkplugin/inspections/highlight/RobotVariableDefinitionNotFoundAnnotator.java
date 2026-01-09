@@ -1,6 +1,5 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.inspections.highlight;
 
-import com.intellij.lang.annotation.AnnotationHolder;
 import com.intellij.lang.annotation.HighlightSeverity;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiPolyVariantReference;
@@ -23,24 +22,21 @@ public class RobotVariableDefinitionNotFoundAnnotator extends AbstractRobotVaria
     private static final Pattern NUMBERS_PATTERN = Pattern.compile("\\d+");
 
     @Override
-    public void annotate(@NotNull PsiElement element, @NotNull AnnotationHolder holder) {
-        if (isEvaluatable(element)) {
-            RobotVariable variable = (RobotVariable) element;
-            RobotVariableBodyId variableBodyId = RobotPsiImplUtil.getVariableBodyId(variable);
-            if (variableBodyId != null && Arrays.stream(((PsiPolyVariantReference) variableBodyId.getReference()).multiResolve(false))
-                                                .filter(ResolveResult::isValidResult)
-                                                .map(ResolveResult::getElement)
-                                                .noneMatch(result -> result instanceof RobotVariableDefinition || result instanceof PyElement)) {
-                RobotVariableAnalyser robotVariableAnalyser = new RobotVariableAnalyser();
-                variable.accept(robotVariableAnalyser);
+    protected void evaluateAnnotation(@NotNull RobotVariable variable) {
+        RobotVariableBodyId variableBodyId = RobotPsiImplUtil.getVariableBodyId(variable);
+        if (variableBodyId != null && Arrays.stream(((PsiPolyVariantReference) variableBodyId.getReference()).multiResolve(false))
+                                            .filter(ResolveResult::isValidResult)
+                                            .map(ResolveResult::getElement)
+                                            .noneMatch(result -> result instanceof RobotVariableDefinition || result instanceof PyElement)) {
+            RobotVariableAnalyser robotVariableAnalyser = new RobotVariableAnalyser();
+            variable.accept(robotVariableAnalyser);
 
-                String variableName = variable.getVariableName();
-                assert variableName != null;
+            String variableName = variable.getVariableName();
+            assert variableName != null;
 
-                if (!robotVariableAnalyser.variableDefinitionAsParent && !robotVariableAnalyser.pythonExpressionVariableBodyFound && !NUMBERS_PATTERN.matcher(
-                        variableName).matches()) {
-                    holder.newAnnotation(HighlightSeverity.WEAK_WARNING, RobotBundle.message("annotation.variable.not-found")).range(element).create();
-                }
+            if (!robotVariableAnalyser.variableDefinitionAsParent && !robotVariableAnalyser.pythonExpressionVariableBodyFound && !NUMBERS_PATTERN.matcher(
+                    variableName).matches()) {
+                getHolder().newAnnotation(HighlightSeverity.WEAK_WARNING, RobotBundle.message("annotation.variable.not-found")).range(variable).create();
             }
         }
     }

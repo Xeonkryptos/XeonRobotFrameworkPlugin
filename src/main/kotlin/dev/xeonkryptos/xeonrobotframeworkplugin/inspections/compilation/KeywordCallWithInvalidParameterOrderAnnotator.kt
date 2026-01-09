@@ -1,22 +1,17 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.inspections.compilation
 
 import com.intellij.codeInspection.ProblemHighlightType
-import com.intellij.lang.annotation.AnnotationHolder
-import com.intellij.lang.annotation.Annotator
 import com.intellij.lang.annotation.HighlightSeverity
-import com.intellij.openapi.project.DumbAware
-import com.intellij.psi.PsiElement
 import dev.xeonkryptos.xeonrobotframeworkplugin.RobotBundle
+import dev.xeonkryptos.xeonrobotframeworkplugin.inspections.RobotAnnotator
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCall
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotParameter
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.visitor.RobotCallArgumentsCollector
 import dev.xeonkryptos.xeonrobotframeworkplugin.util.KeyUtils
 
-class KeywordCallWithInvalidParameterOrderAnnotator : Annotator, DumbAware {
+class KeywordCallWithInvalidParameterOrderAnnotator : RobotAnnotator() {
 
-    override fun annotate(element: PsiElement, holder: AnnotationHolder) {
-        if (element !is RobotKeywordCall) return
-
+    override fun visitKeywordCall(element: RobotKeywordCall) {
         val robotCallArgumentsCollector = RobotCallArgumentsCollector()
         element.acceptChildren(robotCallArgumentsCollector)
 
