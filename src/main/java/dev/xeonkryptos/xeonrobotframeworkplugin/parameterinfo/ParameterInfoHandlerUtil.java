@@ -20,9 +20,10 @@ import com.jetbrains.python.psi.types.PyCallableType;
 import com.jetbrains.python.psi.types.PyStructuralType;
 import com.jetbrains.python.psi.types.TypeEvalContext;
 import dev.xeonkryptos.xeonrobotframeworkplugin.config.RobotOptionsProvider;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.DefinedParameter;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotCallArgumentsContainer;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotArgument;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotCallArgumentsContainer;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotParameter;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotUserKeywordStatement;
 import org.jetbrains.annotations.NotNull;
@@ -42,7 +43,7 @@ import java.util.stream.Collectors;
 @SuppressWarnings("UnstableApiUsage")
 public class ParameterInfoHandlerUtil {
 
-    static <V> int getCurrentParameterIndex(SyntaxTraverser<V> traverser, int offset, IElementType... delimiterTypes) {
+    static <V> int getCurrentParameterIndex(SyntaxTraverser<V> traverser, int offset) {
         V root = traverser.getRoot();
         int curOffset = traverser.api.rangeOf(root).getStartOffset();
         if (offset < curOffset) {
@@ -50,7 +51,10 @@ public class ParameterInfoHandlerUtil {
         }
 
         int index = 0;
-        Set<IElementType> delimiterTypeSet = Set.of(delimiterTypes);
+        Set<IElementType> delimiterTypeSet = Set.of(new IElementType[] { RobotTypes.PARAMETER,
+                                                                         RobotTypes.POSITIONAL_ARGUMENT,
+                                                                         RobotTypes.TEMPLATE_PARAMETER,
+                                                                         RobotTypes.TEMPLATE_ARGUMENT });
         for (V child : traverser) {
             curOffset += traverser.api.rangeOf(child).getLength();
             if (offset < curOffset) {

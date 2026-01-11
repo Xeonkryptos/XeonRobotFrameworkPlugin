@@ -14,9 +14,6 @@ public interface RobotLocalSetting extends RobotFoldable, RobotElement {
   RobotLocalSettingId getLocalSettingId();
 
   @NotNull
-  List<RobotParameter> getParameterList();
-
-  @NotNull
   List<RobotPositionalArgument> getPositionalArgumentList();
 
   @NotNull String getSettingName();

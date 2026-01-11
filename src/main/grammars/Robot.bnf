@@ -17,8 +17,6 @@
   elementTypeClass="dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotElementType"
   tokenTypeClass="dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTokenType"
 
-  implements("parameter|positional_argument")="argument"
-
   implements(".*_global_setting")="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.GlobalSettingStatementExpression"
   extends(".*_global_setting")="global_setting_statement"
 
@@ -212,20 +210,21 @@ user_keyword_statement ::= user_keyword_statement_id eol_marker (local_arguments
 user_keyword_statement_id ::= USER_KEYWORD_NAME
 private user_keyword_statement_recover ::= !user_keyword_statement_id & section_recover
 
-local_setting ::= local_setting_id (positional_argument | parameter | eol_free_keyword_call)* eol_marker {
+local_setting ::= local_setting_id (positional_argument | eol_free_keyword_call)* eol_marker {
     pin=1
     methods=[getSettingName]
     implements="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotFoldable"
+    mixin="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotLocalSettingExtension"
     hooks=[localTemplateDefinitionHook]
 }
-local_setting_id ::= LOCAL_SETTING_START LOCAL_SETTING_NAME LOCAL_SETTING_END
+local_setting_id ::= LOCAL_SETTING_START LOCAL_SETTING_NAME LOCAL_SETTING_END {methods=[settingName="LOCAL_SETTING_NAME"]}
 
 local_arguments_setting ::= local_arguments_setting_id local_arguments_setting_parameter* eol_marker {
     pin=1
     methods=[getSettingName]
     implements="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotFoldable"
 }
-local_arguments_setting_id ::= LOCAL_SETTING_START "Arguments" LOCAL_SETTING_END {pin=2}
+local_arguments_setting_id ::= LOCAL_SETTING_START "Arguments" LOCAL_SETTING_END {methods=[getSettingName] pin=2}
 local_arguments_setting_parameter ::= local_arguments_setting_parameter_optional | local_arguments_setting_parameter_mandatory
 local_arguments_setting_parameter_mandatory ::= variable_definition
 local_arguments_setting_parameter_optional ::= variable_definition "=" positional_argument {pin=3}
@@ -236,7 +235,6 @@ executable_statement ::= loop_structure | loop_control_structure | control_struc
 }
 private executable_statement_recover ::= !(FOR | WHILE | IF | ELSE_IF | ELSE | TRY | GROUP | RETURN | BREAK | CONTINUE | VAR | keyword_call_name | variable_definition) & section_recover
 
-fake block_opening_structure ::= DUMMY {implements=["dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotFoldable" "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotScopeOwner"]}
 private control_structure ::= conditional_structure | conditional_inline_structure | exception_handling_structure | group_structure
 private loop_structure ::= for_loop_structure | while_loop_structure
 private call_structure ::= eol_based_keyword_call | inline_variable_statement | keyword_variable_statement | if_variable_statement | empty_variable_statement
@@ -245,36 +243,36 @@ private return_structure ::= RETURN positional_argument* eol_marker? {pin=1}
 
 for_loop_structure ::= FOR variable_definition+ FOR_IN positional_argument+ parameter* eol_marker executable_statement* END eol_marker {
     pin=1
-    implements=block_opening_structure
+    implements="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotBlockOpeningStructure"
 }
 while_loop_structure ::= WHILE conditional_content (EOS parameter+)? eol_marker executable_statement* END eol_marker {
     pin=1
-    implements=block_opening_structure
+    implements="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotBlockOpeningStructure"
 }
 private conditional_structure ::= if_structure else_if_structure* if_else_structure? END eol_marker {pin=2}
 private conditional_inline_structure ::= inline_if_structure inline_else_if_structure* inline_if_else_structure? eol_marker? {pin=2}
 if_structure ::= IF conditional_content eol_marker executable_statement* {
-    implements=block_opening_structure
+    implements="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotBlockOpeningStructure"
     pin=3
 }
 inline_if_structure ::= IF conditional_content EOS call_structure {
-    implements=block_opening_structure
+    implements="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotBlockOpeningStructure"
     pin=3
 }
 else_if_structure ::= ELSE_IF conditional_content eol_marker executable_statement* {
-    implements=block_opening_structure
+    implements="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotBlockOpeningStructure"
     pin=3
 }
 inline_else_if_structure ::= ELSE_IF conditional_content EOS call_structure {
-    implements=block_opening_structure
+    implements="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotBlockOpeningStructure"
     pin=3
 }
 if_else_structure ::= ELSE eol_marker executable_statement* {
-    implements=block_opening_structure
+    implements="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotBlockOpeningStructure"
     pin=2
 }
 inline_if_else_structure ::= ELSE call_structure {
-    implements=block_opening_structure
+    implements="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotBlockOpeningStructure"
     pin=2
 }
 conditional_content ::= conditional_content_body+
@@ -285,20 +283,20 @@ private exception_handling_structure ::= try_structure
     finally_structure?
     END eol_marker {pin=1}
 try_structure ::= TRY eol_marker executable_statement+ {
-    implements=block_opening_structure
+    implements="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotBlockOpeningStructure"
 }
 except_structure ::= EXCEPT (positional_argument | parameter*)? eol_marker executable_statement* {
-    implements=block_opening_structure
+    implements="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotBlockOpeningStructure"
 }
 try_else_structure ::= ELSE eol_marker executable_statement* {
-    implements=block_opening_structure
+    implements="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotBlockOpeningStructure"
 }
 finally_structure ::= FINALLY executable_statement* {
-    implements=block_opening_structure
+    implements="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotBlockOpeningStructure"
 }
 group_structure ::= GROUP positional_argument? eol_marker executable_statement* END eol_marker {
     pin=1
-    implements=block_opening_structure
+    implements="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotBlockOpeningStructure"
 }
 
 fake keyword_call ::= base_keyword_call {
@@ -322,8 +320,10 @@ keyword_call_name ::= keyword_call_library? KEYWORD_NAME { methods = [getReferen
 keyword_call_library ::= keyword_call_library_name KEYWORD_LIBRARY_SEPARATOR
 keyword_call_library_name ::= KEYWORD_LIBRARY_NAME {methods = [getReference]}
 
-fake argument ::= DUMMY // This is a placeholder for the argument type, which is used to represent both parameters and positional arguments in the grammar.
-parameter ::= parameter_id ASSIGNMENT positional_argument? {methods=[getParameterName]}
+parameter ::= parameter_id ASSIGNMENT positional_argument? {
+    methods=[getParameterName]
+    implements="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotArgument"
+}
 parameter_id ::= PARAMETER_NAME {methods = [getReference]}
 
 fake variable_statement ::= DUMMY {methods = [getIcon] implements="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotFoldable"}
@@ -335,6 +335,7 @@ if_variable_statement ::= variable_definition+ ASSIGNMENT? conditional_inline_st
 variable_value ::= variable | positional_argument
 
 positional_argument ::= external_positional_argument EOS? {
+    implements="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotArgument"
     mixin = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotPositionalArgumentExtension"
     stubClass = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotPositionalArgumentStub"
     elementTypeFactory = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotPositionalArgumentStubElement.create"

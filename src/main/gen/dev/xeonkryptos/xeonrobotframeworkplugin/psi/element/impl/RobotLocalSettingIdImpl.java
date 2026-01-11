@@ -27,4 +27,10 @@ public class RobotLocalSettingIdImpl extends RobotPsiElementBase implements Robo
     else super.accept(visitor);
   }
 
+  @Override
+  @NotNull
+  public PsiElement getSettingName() {
+    return notNullChild(findChildByType(LOCAL_SETTING_NAME));
+  }
+
 }

@@ -1,6 +1,7 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.psi;
 
 import com.intellij.psi.tree.IElementType;
+import dev.xeonkryptos.xeonrobotframeworkplugin.util.RobotNames;
 import dev.xeonkryptos.xeonrobotframeworkplugin.util.RobotTailTypes;
 import com.intellij.codeInsight.TailType;
 import com.intellij.codeInsight.TailTypes;
@@ -76,14 +77,14 @@ public class RobotKeywordProvider {
         KEYWORD_TABLE.addSyntax(RobotTypes.LOCAL_SETTING, "[Timeout]");
         KEYWORD_TABLE.addSyntax(RobotTypes.LOCAL_SETTING, "[Return]");
 
-        addRecommendation(RobotTypes.LOCAL_SETTING, "[Documentation]", "Documentation", RobotTailTypes.TAB);
-        addRecommendation(RobotTypes.LOCAL_SETTING, "[Tags]", "Tags", RobotTailTypes.TAB);
+        addRecommendation(RobotTypes.LOCAL_SETTING, "[Documentation]", RobotNames.DOCUMENTATION_SETTING_NAME, RobotTailTypes.TAB);
+        addRecommendation(RobotTypes.LOCAL_SETTING, "[Tags]", RobotNames.TAGS_SETTING_NAME, RobotTailTypes.TAB);
         addRecommendation(RobotTypes.LOCAL_SETTING, "[Setup]", "Setup", RobotTailTypes.TAB);
-        addRecommendation(RobotTypes.LOCAL_SETTING, "[Teardown]", "Teardown", RobotTailTypes.TAB);
-        addRecommendation(RobotTypes.LOCAL_SETTING, "[Template]", "Template", RobotTailTypes.TAB);
+        addRecommendation(RobotTypes.LOCAL_SETTING, "[Teardown]", RobotNames.TEARDOWN_SETTING_NAME, RobotTailTypes.TAB);
+        addRecommendation(RobotTypes.LOCAL_SETTING, "[Template]", RobotNames.TEMPLATE_SETTING_NAME, RobotTailTypes.TAB);
         addRecommendation(RobotTypes.LOCAL_SETTING, "[Timeout]", "Timeout", RobotTailTypes.TAB);
         addRecommendation(RobotTypes.LOCAL_SETTING, "[Arguments]", "Arguments", RobotTailTypes.TAB);
-        addRecommendation(RobotTypes.LOCAL_SETTING, "[Return]", "Return", RobotTailTypes.TAB);
+        addRecommendation(RobotTypes.LOCAL_SETTING, "[Return]", RobotNames.RETURN_SETTING_NAME, RobotTailTypes.TAB);
 
         KEYWORD_TABLE.addSyntax(IMPORT, "Library");
         KEYWORD_TABLE.addSyntax(IMPORT, "Resource");

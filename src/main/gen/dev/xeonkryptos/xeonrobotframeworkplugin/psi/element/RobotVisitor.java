@@ -9,17 +9,8 @@ import com.intellij.navigation.NavigationItem;
 
 public class RobotVisitor extends PsiElementVisitor {
 
-  public void visitArgument(@NotNull RobotArgument o) {
-    visitElement(o);
-  }
-
   public void visitBddStatement(@NotNull RobotBddStatement o) {
     visitElement(o);
-  }
-
-  public void visitBlockOpeningStructure(@NotNull RobotBlockOpeningStructure o) {
-    visitExecutableStatement(o);
-    // visitScopeOwner(o);
   }
 
   public void visitCommentsSection(@NotNull RobotCommentsSection o) {
@@ -419,6 +410,10 @@ public class RobotVisitor extends PsiElementVisitor {
 
   public void visitPsiNameIdentifierOwner(@NotNull PsiNameIdentifierOwner o) {
     visitElement(o);
+  }
+
+  public void visitArgument(@NotNull RobotArgument o) {
+    visitPsiElement(o);
   }
 
   public void visitElement(@NotNull RobotElement o) {

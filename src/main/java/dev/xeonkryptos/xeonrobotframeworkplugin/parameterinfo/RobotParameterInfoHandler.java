@@ -18,7 +18,6 @@ import com.intellij.psi.PsiWhiteSpace;
 import com.intellij.psi.SyntaxTraverser;
 import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.util.ArrayUtilRt;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotElement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCall;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCallName;
@@ -118,12 +117,7 @@ public class RobotParameterInfoHandler implements ParameterInfoHandler<RobotKeyw
         }
 
         SyntaxTraverser<PsiElement> syntaxTraverser = SyntaxTraverser.psiTraverser(traverserElement).expandAndSkip(Conditions.is(traverserElement));
-        int parameterIndex = ParameterInfoHandlerUtil.getCurrentParameterIndex(syntaxTraverser,
-                                                                               offset,
-                                                                               RobotTypes.PARAMETER,
-                                                                               RobotTypes.POSITIONAL_ARGUMENT,
-                                                                               RobotTypes.TEMPLATE_PARAMETER,
-                                                                               RobotTypes.TEMPLATE_ARGUMENT);
+        int parameterIndex = ParameterInfoHandlerUtil.getCurrentParameterIndex(syntaxTraverser, offset);
         parameterIndex = parameterIndex - 1;
         context.setCurrentParameter(parameterIndex);
         // Need to reassign the owner because the traverserElement can be a RobotTemplateArguments

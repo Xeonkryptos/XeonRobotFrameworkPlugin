@@ -1423,7 +1423,7 @@ public class RobotParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // local_setting_id (positional_argument | parameter | eol_free_keyword_call)* eol_marker
+  // local_setting_id (positional_argument | eol_free_keyword_call)* eol_marker
   public static boolean local_setting(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "local_setting")) return false;
     if (!nextTokenIs(b, LOCAL_SETTING_START)) return false;
@@ -1438,7 +1438,7 @@ public class RobotParser implements PsiParser, LightPsiParser {
     return r || p;
   }
 
-  // (positional_argument | parameter | eol_free_keyword_call)*
+  // (positional_argument | eol_free_keyword_call)*
   private static boolean local_setting_1(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "local_setting_1")) return false;
     while (true) {
@@ -1449,12 +1449,11 @@ public class RobotParser implements PsiParser, LightPsiParser {
     return true;
   }
 
-  // positional_argument | parameter | eol_free_keyword_call
+  // positional_argument | eol_free_keyword_call
   private static boolean local_setting_1_0(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "local_setting_1_0")) return false;
     boolean r;
     r = positional_argument(b, l + 1);
-    if (!r) r = parameter(b, l + 1);
     if (!r) r = eol_free_keyword_call(b, l + 1);
     return r;
   }

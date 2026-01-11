@@ -31,7 +31,7 @@ public final class DeprecationInspector {
 
     private static boolean isUserKeywordDeprecated(RobotUserKeywordStatement userKeywordStatement) {
         for (RobotLocalSetting robotLocalSetting : userKeywordStatement.getLocalSettingList()) {
-            if ("[Documentation]".equalsIgnoreCase(robotLocalSetting.getSettingName())) {
+            if ("Documentation".equalsIgnoreCase(robotLocalSetting.getSettingName())) {
                 List<RobotPositionalArgument> positionalArgumentList = robotLocalSetting.getPositionalArgumentList();
                 if (!positionalArgumentList.isEmpty()) {
                     RobotPositionalArgument documentationArgument = positionalArgumentList.getFirst();

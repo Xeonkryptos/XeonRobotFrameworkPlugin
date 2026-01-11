@@ -198,6 +198,10 @@ public abstract class RobotKeywordCallExtension extends RobotStubPsiElementBase<
         return startOfKeywordsOnlyIndex != null ? OptionalInt.of(startOfKeywordsOnlyIndex) : OptionalInt.empty();
     }
 
+    @NotNull
+    @Override
+    public abstract String getName();
+
     @Override
     public PsiElement setName(@NotNull String newName) throws IncorrectOperationException {
         RobotKeywordCallName newKeywordCallName = RobotElementGenerator.getInstance(getProject()).createNewKeywordCallName(newName);

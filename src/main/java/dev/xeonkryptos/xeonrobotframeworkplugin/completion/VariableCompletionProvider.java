@@ -30,6 +30,7 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.KeywordUtil;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.visitor.RecursiveRobotVisitor;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.visitor.RobotInStatementVariableCollector;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.visitor.RobotSectionVariablesCollector;
+import dev.xeonkryptos.xeonrobotframeworkplugin.util.RobotNames;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
@@ -41,7 +42,8 @@ import java.util.Set;
 
 class VariableCompletionProvider extends CompletionProvider<CompletionParameters> {
 
-    private static final Set<String> RESTRICTED_VARIABLE_COMPLETION_LOCAL_SETTING_NAMES = Set.of("[Documentation]", "[Tags]");
+    private static final Set<String> RESTRICTED_VARIABLE_COMPLETION_LOCAL_SETTING_NAMES = Set.of(RobotNames.DOCUMENTATION_SETTING_NAME,
+                                                                                                 RobotNames.TAGS_SETTING_NAME);
 
     @Override
     protected void addCompletions(@NotNull CompletionParameters parameters, @NotNull ProcessingContext context, @NotNull CompletionResultSet result) {
@@ -55,9 +57,9 @@ class VariableCompletionProvider extends CompletionProvider<CompletionParameters
         Collection<LookupElement> lookupElements = new LinkedList<>();
         RobotKeywordCall keywordCall = null;
         RobotElement parentOfInterest = PsiTreeUtil.getParentOfType(psiElement,
-                                                                    // Stop-gaps to ignore any of the real-interested parents
+                // Stop-gaps to ignore any of the real-interested parents
                                                                     RobotParameter.class, RobotTemplateParameter.class,
-                                                                    // Really interested in, but only when not one of the previous defined types are matching
+                // Really interested in, but only when not one of the previous defined types are matching
                                                                     RobotKeywordCall.class, RobotTemplateArguments.class);
         if (parentOfInterest instanceof RobotTemplateArguments templateArguments) {
             keywordCall = KeywordUtil.getInstance(templateArguments.getProject()).findTemplateKeywordCall(templateArguments);

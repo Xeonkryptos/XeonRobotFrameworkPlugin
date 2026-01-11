@@ -9,10 +9,11 @@ import org.jetbrains.annotations.Nullable;
 public interface RobotFoldable extends RobotElement {
 
     @Nullable
-    default FoldingDescriptor fold(@NotNull Document document) {
+    default FoldingDescriptor[] fold(@NotNull Document document) {
         if (!RobotFoldingComputationUtil.isFoldingUseful(getTextRange(), document)) {
             return null;
         }
-        return RobotFoldingComputationUtil.computeSimpleFoldingRegionFor(this, document);
+        var foldingDescriptor = RobotFoldingComputationUtil.computeSimpleFoldingRegionFor(this, document);
+        return new FoldingDescriptor[] { foldingDescriptor };
     }
 }

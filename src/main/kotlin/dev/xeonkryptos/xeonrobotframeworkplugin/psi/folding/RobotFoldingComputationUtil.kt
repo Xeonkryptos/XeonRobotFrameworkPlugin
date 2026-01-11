@@ -1,7 +1,9 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.psi.folding
 
+import com.intellij.lang.ASTNode
 import com.intellij.lang.folding.FoldingDescriptor
 import com.intellij.openapi.editor.Document
+import com.intellij.openapi.editor.FoldingGroup
 import com.intellij.openapi.util.TextRange
 import com.intellij.psi.PsiElement
 import com.intellij.psi.TokenType
@@ -14,7 +16,7 @@ object RobotFoldingComputationUtil {
     const val CONTAINER_FOLDING_PLACEHOLDER_WITH_SINGLE_SPACE_SEPARATOR = "${SINGLE_SPACE}${CONTAINER_FOLDING_PLACEHOLDER}"
 
     @JvmStatic
-    fun computeFoldingDescriptorForIdBasedContainerRepresentation(element: PsiElement, idElement: PsiElement, document: Document): FoldingDescriptor? {
+    fun computeFoldingDescriptorForIdBasedContainer(element: PsiElement, idElement: PsiElement, document: Document): FoldingDescriptor? {
         if (!isFoldingUseful(element.textRange, document)) return null
 
         val identifiedFoldableTextRange = computeFoldableTextRange(element, document)
@@ -43,6 +45,23 @@ object RobotFoldingComputationUtil {
     fun computeMethodLikeFoldingPlaceholder(element: PsiElement): String {
         return if (!element.text.endsWith(SINGLE_SPACE)) CONTAINER_FOLDING_PLACEHOLDER_WITH_SINGLE_SPACE_SEPARATOR
         else CONTAINER_FOLDING_PLACEHOLDER
+    }
+
+    @JvmStatic
+    fun computeFoldingDescriptorsForListing(node: ASTNode, foldingGroupName: String, initialElement: PsiElement, listItems: List<PsiElement>): List<FoldingDescriptor> {
+        var currentTextRange: TextRange = initialElement.textRange
+        val foldingGroup = FoldingGroup.newGroup(foldingGroupName)
+
+        val foldingDescriptors = mutableListOf<FoldingDescriptor>()
+        for (item in listItems) {
+            val previousTextRange = currentTextRange
+            currentTextRange = item.textRange
+
+            val foldableTextRange = TextRange.create(previousTextRange.endOffset, currentTextRange.startOffset)
+            val foldingDescriptor = FoldingDescriptor(node, foldableTextRange, foldingGroup, "  ")
+            foldingDescriptors.add(foldingDescriptor)
+        }
+        return foldingDescriptors
     }
 
     /**
@@ -89,7 +108,7 @@ object RobotFoldingComputationUtil {
         var prevSibling = elementAt.prevSibling
         if (prevSibling != null) {
             var prevSiblingNode = prevSibling.node
-            while (prevSiblingNode.elementType === RobotTypes.EOL || prevSiblingNode.elementType === TokenType.WHITE_SPACE) {
+            while (prevSiblingNode.elementType === RobotTypes.EOL || prevSiblingNode.elementType === TokenType.WHITE_SPACE || prevSiblingNode.elementType === RobotTypes.COMMENT) {
                 prevSibling = prevSibling.prevSibling
                 prevSiblingNode = prevSibling.node
             }

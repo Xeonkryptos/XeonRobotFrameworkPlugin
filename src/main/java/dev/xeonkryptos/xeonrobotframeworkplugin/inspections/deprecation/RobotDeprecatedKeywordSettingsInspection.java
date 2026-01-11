@@ -12,6 +12,7 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLocalSetting;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLocalSettingId;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotUserKeywordStatement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVisitor;
+import dev.xeonkryptos.xeonrobotframeworkplugin.util.RobotNames;
 import dev.xeonkryptos.xeonrobotframeworkplugin.util.RobotVersionProvider.RobotVersion;
 import org.jetbrains.annotations.NotNull;
 
@@ -27,7 +28,7 @@ public class RobotDeprecatedKeywordSettingsInspection extends RobotVersionBasedI
                 RobotVersion robotVersion = getRobotVersion(session);
                 String settingName = o.getSettingName();
                 RobotUserKeywordStatement userKeywordStatement = PsiTreeUtil.getParentOfType(o, RobotUserKeywordStatement.class, true);
-                if (settingName.equalsIgnoreCase("[Return]") && userKeywordStatement != null && robotVersion.supports(new RobotVersion(7, 0, 0))) {
+                if (settingName.equalsIgnoreCase(RobotNames.RETURN_SETTING_NAME) && userKeywordStatement != null && robotVersion.supports(new RobotVersion(7, 0, 0))) {
                     RobotLocalSettingId localSettingId = o.getLocalSettingId();
                     holder.registerProblem(localSettingId,
                                            RobotBundle.message("INSP.setting.local.return.deprecated"),

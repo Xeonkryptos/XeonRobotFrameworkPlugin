@@ -131,13 +131,24 @@ public class RobotPsiImplUtil {
     @NotNull
     public static String getSettingName(@NotNull RobotLocalSetting localSetting) {
         RobotLocalSettingId localSettingId = localSetting.getLocalSettingId();
-        return localSettingId.getText();
+        return localSettingId.getSettingName().getText();
     }
 
     @NotNull
     public static String getSettingName(@NotNull RobotLocalArgumentsSetting localArgumentsSetting) {
         RobotLocalArgumentsSettingId localSettingId = localArgumentsSetting.getLocalArgumentsSettingId();
-        return localSettingId.getText();
+        return getSettingName(localSettingId);
+    }
+
+    @NotNull
+    public static String getSettingName(@NotNull RobotLocalArgumentsSettingId localArgumentsSettingId) {
+        PsiElement[] children = localArgumentsSettingId.getChildren();
+        for (PsiElement child : children) {
+            if (child.getNode().getElementType() == RobotTypes.LOCAL_SETTING_NAME) {
+                return child.getText();
+            }
+        }
+        throw new IllegalArgumentException("LocalArgumentsSettingId has no LOCAL_SETTING_NAME child");
     }
 
     @NotNull

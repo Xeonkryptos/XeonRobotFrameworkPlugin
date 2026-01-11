@@ -9,6 +9,7 @@ import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.util.TextRange;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiElementVisitor;
+import com.intellij.util.containers.ContainerUtil;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotFoldable;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCall;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTaskStatement;
@@ -77,9 +78,9 @@ public class RobotFoldingBuilder extends CustomFoldingBuilder {
 
         @Override
         public void visitFoldable(@NotNull RobotFoldable foldable) {
-            FoldingDescriptor foldingRegion = foldable.fold(document);
-            if (foldingRegion != null) {
-                descriptors.add(foldingRegion);
+            FoldingDescriptor[] foldingRegions = foldable.fold(document);
+            if (foldingRegions != null && foldingRegions.length > 0) {
+                ContainerUtil.addAll(descriptors, foldingRegions);
             }
 
             super.visitFoldable(foldable);

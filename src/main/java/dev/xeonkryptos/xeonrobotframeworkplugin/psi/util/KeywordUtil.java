@@ -14,15 +14,14 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotSettingsSection
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTemplateStatementsGlobalSetting;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTestCaseStatement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVisitor;
+import dev.xeonkryptos.xeonrobotframeworkplugin.util.RobotNames;
 import org.apache.commons.text.WordUtils;
 import org.jetbrains.annotations.NotNull;
 
 @Service(Level.PROJECT)
 public record KeywordUtil(Project project) {
 
-    @SuppressWarnings("ApplicationServiceAsStaticFinalFieldOrProperty")
     private static final String SPACE = " ";
-    @SuppressWarnings("ApplicationServiceAsStaticFinalFieldOrProperty")
     private static final String UNDERSCORE = "_";
 
     public static KeywordUtil getInstance(Project project) {
@@ -47,7 +46,7 @@ public record KeywordUtil(Project project) {
         RobotTestCaseStatement testCaseStatement = PsiTreeUtil.getParentOfType(element, RobotTestCaseStatement.class);
         if (testCaseStatement != null) {
             for (RobotLocalSetting localSetting : testCaseStatement.getLocalSettings()) {
-                if ("[Template]".equalsIgnoreCase(localSetting.getSettingName())) {
+                if (RobotNames.TEMPLATE_SETTING_NAME.equalsIgnoreCase(localSetting.getSettingName())) {
                     return PsiTreeUtil.getChildOfType(localSetting, RobotKeywordCall.class);
                 }
             }
