@@ -31,7 +31,7 @@ public abstract class RobotTestCaseExtension extends RobotStubPsiElementBase<Rob
     @Nullable
     @Override
     public FoldingDescriptor fold(@NotNull Document document) {
-        return RobotFoldingComputationUtil.computeFoldingDescriptorForIdBasedMethodRepresentation(this, getTestCaseId(), document);
+        return RobotFoldingComputationUtil.computeFoldingDescriptorForIdBasedContainerRepresentation(this, getTestCaseId(), document);
     }
 
     @NotNull

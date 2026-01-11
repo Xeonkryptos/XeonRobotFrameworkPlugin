@@ -10,11 +10,11 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes
 object RobotFoldingComputationUtil {
 
     const val SINGLE_SPACE: String = " "
-    const val METHOD_LIKE_FOLDING_PLACEHOLDER = "{ ... }"
-    const val METHOD_LIKE_FOLDING_PLACEHOLDER_WITH_SINGLE_SPACE = "${SINGLE_SPACE}${METHOD_LIKE_FOLDING_PLACEHOLDER}"
+    const val CONTAINER_FOLDING_PLACEHOLDER = "{ ... }"
+    const val CONTAINER_FOLDING_PLACEHOLDER_WITH_SINGLE_SPACE_SEPARATOR = "${SINGLE_SPACE}${CONTAINER_FOLDING_PLACEHOLDER}"
 
     @JvmStatic
-    fun computeFoldingDescriptorForIdBasedMethodRepresentation(element: PsiElement, idElement: PsiElement, document: Document): FoldingDescriptor? {
+    fun computeFoldingDescriptorForIdBasedContainerRepresentation(element: PsiElement, idElement: PsiElement, document: Document): FoldingDescriptor? {
         if (!isFoldingUseful(element.textRange, document)) return null
 
         val identifiedFoldableTextRange = computeFoldableTextRange(element, document)
@@ -41,8 +41,8 @@ object RobotFoldingComputationUtil {
 
     @JvmStatic
     fun computeMethodLikeFoldingPlaceholder(element: PsiElement): String {
-        return if (!element.text.endsWith(SINGLE_SPACE)) METHOD_LIKE_FOLDING_PLACEHOLDER_WITH_SINGLE_SPACE
-        else METHOD_LIKE_FOLDING_PLACEHOLDER
+        return if (!element.text.endsWith(SINGLE_SPACE)) CONTAINER_FOLDING_PLACEHOLDER_WITH_SINGLE_SPACE_SEPARATOR
+        else CONTAINER_FOLDING_PLACEHOLDER
     }
 
     /**
