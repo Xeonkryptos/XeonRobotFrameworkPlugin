@@ -27,6 +27,7 @@
 - Allow dots in keyword names as part of the name. According to that, changed the resolving of keywords with a potential library name by checking for
   the longest matching name first
 - Changed the deprecation check into an inspection to be able to suppress it with comment suppression
+- Changed folding logic to keep important editor elements visible when folding multi-line statements
 
 ### Fixed
 
