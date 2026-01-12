@@ -61,8 +61,11 @@ public abstract class RobotUserKeywordExtension extends RobotStubPsiElementBase<
     @Nullable
     @Override
     public FoldingDescriptor[] fold(@NotNull Document document) {
-        var foldingDescriptor = RobotFoldingComputationUtil.computeFoldingDescriptorForIdBasedContainer(this, getUserKeywordStatementId(), document);
-        return new FoldingDescriptor[] { foldingDescriptor };
+        if (!RobotFoldingComputationUtil.isFoldingUseful(getTextRange(), document)) {
+            return null;
+        }
+        var foldingDescriptor = RobotFoldingComputationUtil.computeFoldingDescriptorForContainer(this, getUserKeywordStatementId(), document);
+        return foldingDescriptor != null ? new FoldingDescriptor[] { foldingDescriptor } : null;
     }
 
     @NotNull

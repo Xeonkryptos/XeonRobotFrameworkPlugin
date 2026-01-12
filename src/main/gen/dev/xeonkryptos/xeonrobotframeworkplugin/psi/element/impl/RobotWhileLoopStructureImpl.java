@@ -11,7 +11,7 @@ import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.*;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.*;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotPsiImplUtil;
 
-public class RobotWhileLoopStructureImpl extends RobotExecutableStatementImpl implements RobotWhileLoopStructure {
+public class RobotWhileLoopStructureImpl extends RobotWhileLoopStructureExtension implements RobotWhileLoopStructure {
 
   public RobotWhileLoopStructureImpl(@NotNull ASTNode node) {
     super(node);

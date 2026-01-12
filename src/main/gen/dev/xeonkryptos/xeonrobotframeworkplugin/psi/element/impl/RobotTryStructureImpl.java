@@ -11,7 +11,7 @@ import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.*;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.*;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotPsiImplUtil;
 
-public class RobotTryStructureImpl extends RobotExecutableStatementImpl implements RobotTryStructure {
+public class RobotTryStructureImpl extends RobotTryStructureExtension implements RobotTryStructure {
 
   public RobotTryStructureImpl(@NotNull ASTNode node) {
     super(node);

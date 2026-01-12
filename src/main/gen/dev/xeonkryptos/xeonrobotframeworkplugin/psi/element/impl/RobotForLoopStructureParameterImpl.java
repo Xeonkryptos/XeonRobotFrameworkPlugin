@@ -11,15 +11,14 @@ import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.*;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.*;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotPsiImplUtil;
 
-public class RobotExceptStructureImpl extends RobotExceptStructureExtension implements RobotExceptStructure {
+public class RobotForLoopStructureParameterImpl extends RobotPsiElementBase implements RobotForLoopStructureParameter {
 
-  public RobotExceptStructureImpl(@NotNull ASTNode node) {
+  public RobotForLoopStructureParameterImpl(@NotNull ASTNode node) {
     super(node);
   }
 
-  @Override
   public void accept(@NotNull RobotVisitor visitor) {
-    visitor.visitExceptStructure(this);
+    visitor.visitForLoopStructureParameter(this);
   }
 
   @Override
@@ -29,15 +28,15 @@ public class RobotExceptStructureImpl extends RobotExceptStructureExtension impl
   }
 
   @Override
-  @NotNull
-  public List<RobotParameter> getParameterList() {
-    return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotParameter.class);
+  @Nullable
+  public RobotForLoopStructureFillParameter getForLoopStructureFillParameter() {
+    return PsiTreeUtil.getChildOfType(this, RobotForLoopStructureFillParameter.class);
   }
 
   @Override
   @Nullable
-  public RobotPositionalArgument getPositionalArgument() {
-    return PsiTreeUtil.getChildOfType(this, RobotPositionalArgument.class);
+  public RobotForLoopStructureModeParameter getForLoopStructureModeParameter() {
+    return PsiTreeUtil.getChildOfType(this, RobotForLoopStructureModeParameter.class);
   }
 
 }

@@ -30,8 +30,11 @@ public abstract class RobotTaskExtension extends RobotStubPsiElementBase<RobotTa
     @Nullable
     @Override
     public FoldingDescriptor[] fold(@NotNull Document document) {
-        var foldingDescriptor = RobotFoldingComputationUtil.computeFoldingDescriptorForIdBasedContainer(this, getTaskId(), document);
-        return new FoldingDescriptor[] { foldingDescriptor };
+        if (!RobotFoldingComputationUtil.isFoldingUseful(getTextRange(), document)) {
+            return null;
+        }
+        var foldingDescriptor = RobotFoldingComputationUtil.computeFoldingDescriptorForContainer(this, getTaskId(), document);
+        return foldingDescriptor != null ? new FoldingDescriptor[] { foldingDescriptor } : null;
     }
 
     @NotNull

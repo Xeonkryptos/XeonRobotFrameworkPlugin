@@ -29,12 +29,12 @@ public abstract class RobotLocalSettingExtension extends RobotPsiElementBase imp
         String settingName = getSettingName();
         List<RobotPositionalArgument> positionalArguments = getPositionalArgumentList();
         if (positionalArguments.isEmpty() || !settingName.equalsIgnoreCase(RobotNames.TAGS_SETTING_NAME)) {
-            FoldingDescriptor foldingDescriptor = RobotFoldingComputationUtil.computeFoldingDescriptorForIdBasedContainer(this, localSettingId, document);
-            return new FoldingDescriptor[] { foldingDescriptor };
+            FoldingDescriptor foldingDescriptor = RobotFoldingComputationUtil.computeFoldingDescriptorForContainer(this, localSettingId, document);
+            return foldingDescriptor != null ? new FoldingDescriptor[] { foldingDescriptor } : null;
         }
 
         List<FoldingDescriptor> foldingDescriptors = RobotFoldingComputationUtil.computeFoldingDescriptorsForListing(getNode(),
-                                                                                                                     "Robot Local Setting Tag Grouping",
+                                                                                                                     "LocalSettingTagListFolding",
                                                                                                                      localSettingId,
                                                                                                                      positionalArguments);
         return !foldingDescriptors.isEmpty() ? foldingDescriptors.toArray(FoldingDescriptor.EMPTY_ARRAY) : null;

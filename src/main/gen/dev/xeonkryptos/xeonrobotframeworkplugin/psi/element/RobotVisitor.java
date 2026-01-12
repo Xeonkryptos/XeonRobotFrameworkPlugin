@@ -34,6 +34,13 @@ public class RobotVisitor extends PsiElementVisitor {
   public void visitElseIfStructure(@NotNull RobotElseIfStructure o) {
     visitExecutableStatement(o);
     // visitBlockOpeningStructure(o);
+    // visitFoldable(o);
+  }
+
+  public void visitElseStructure(@NotNull RobotElseStructure o) {
+    visitExecutableStatement(o);
+    // visitBlockOpeningStructure(o);
+    // visitFoldable(o);
   }
 
   public void visitEmptyVariableStatement(@NotNull RobotEmptyVariableStatement o) {
@@ -47,21 +54,35 @@ public class RobotVisitor extends PsiElementVisitor {
   public void visitExceptStructure(@NotNull RobotExceptStructure o) {
     visitExecutableStatement(o);
     // visitBlockOpeningStructure(o);
+    // visitFoldable(o);
   }
 
   public void visitExecutableStatement(@NotNull RobotExecutableStatement o) {
-    visitFoldable(o);
-    // visitElement(o);
+    visitElement(o);
   }
 
   public void visitFinallyStructure(@NotNull RobotFinallyStructure o) {
     visitExecutableStatement(o);
     // visitBlockOpeningStructure(o);
+    // visitFoldable(o);
   }
 
   public void visitForLoopStructure(@NotNull RobotForLoopStructure o) {
     visitExecutableStatement(o);
     // visitBlockOpeningStructure(o);
+    // visitFoldable(o);
+  }
+
+  public void visitForLoopStructureFillParameter(@NotNull RobotForLoopStructureFillParameter o) {
+    visitElement(o);
+  }
+
+  public void visitForLoopStructureModeParameter(@NotNull RobotForLoopStructureModeParameter o) {
+    visitElement(o);
+  }
+
+  public void visitForLoopStructureParameter(@NotNull RobotForLoopStructureParameter o) {
+    visitElement(o);
   }
 
   public void visitGlobalSettingStatement(@NotNull RobotGlobalSettingStatement o) {
@@ -72,16 +93,13 @@ public class RobotVisitor extends PsiElementVisitor {
   public void visitGroupStructure(@NotNull RobotGroupStructure o) {
     visitExecutableStatement(o);
     // visitBlockOpeningStructure(o);
-  }
-
-  public void visitIfElseStructure(@NotNull RobotIfElseStructure o) {
-    visitExecutableStatement(o);
-    // visitBlockOpeningStructure(o);
+    // visitFoldable(o);
   }
 
   public void visitIfStructure(@NotNull RobotIfStructure o) {
     visitExecutableStatement(o);
     // visitBlockOpeningStructure(o);
+    // visitFoldable(o);
   }
 
   public void visitIfVariableStatement(@NotNull RobotIfVariableStatement o) {
@@ -321,14 +339,10 @@ public class RobotVisitor extends PsiElementVisitor {
     // visitGlobalSettingStatementExpression(o);
   }
 
-  public void visitTryElseStructure(@NotNull RobotTryElseStructure o) {
-    visitExecutableStatement(o);
-    // visitBlockOpeningStructure(o);
-  }
-
   public void visitTryStructure(@NotNull RobotTryStructure o) {
     visitExecutableStatement(o);
     // visitBlockOpeningStructure(o);
+    // visitFoldable(o);
   }
 
   public void visitUnknownSettingStatementsGlobalSetting(@NotNull RobotUnknownSettingStatementsGlobalSetting o) {
@@ -383,8 +397,7 @@ public class RobotVisitor extends PsiElementVisitor {
   }
 
   public void visitVariableStatement(@NotNull RobotVariableStatement o) {
-    visitFoldable(o);
-    // visitElement(o);
+    visitElement(o);
   }
 
   public void visitVariableValue(@NotNull RobotVariableValue o) {
@@ -405,6 +418,7 @@ public class RobotVisitor extends PsiElementVisitor {
   public void visitWhileLoopStructure(@NotNull RobotWhileLoopStructure o) {
     visitExecutableStatement(o);
     // visitBlockOpeningStructure(o);
+    // visitFoldable(o);
   }
 
   public void visitPsiNameIdentifierOwner(@NotNull PsiNameIdentifierOwner o) {

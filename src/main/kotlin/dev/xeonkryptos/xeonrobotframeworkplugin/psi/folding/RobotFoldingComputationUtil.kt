@@ -8,27 +8,17 @@ import com.intellij.openapi.util.TextRange
 import com.intellij.psi.PsiElement
 import com.intellij.psi.TokenType
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotBlockOpeningStructure
 import dev.xeonkryptos.xeonrobotframeworkplugin.util.GlobalConstants
 
 object RobotFoldingComputationUtil {
 
     const val SINGLE_SPACE: String = " "
-    const val CONTAINER_FOLDING_PLACEHOLDER = "{...}"
+    const val CONTAINER_FOLDING_PLACEHOLDER = "..."
     const val CONTAINER_FOLDING_PLACEHOLDER_WITH_SINGLE_SPACE_SEPARATOR = "${SINGLE_SPACE}${CONTAINER_FOLDING_PLACEHOLDER}"
+    const val CONTAINER_FOLDING_PLACEHOLDER_WITH_SUPER_SPACE_SEPARATOR = "${GlobalConstants.SUPER_SPACE}${CONTAINER_FOLDING_PLACEHOLDER}"
 
     const val MAX_LIST_FOLDING_LENGTH = 100
-
-    @JvmStatic
-    fun computeFoldingDescriptorForIdBasedContainer(element: PsiElement, idElement: PsiElement, document: Document): FoldingDescriptor? {
-        if (!isFoldingUseful(element.textRange, document)) return null
-
-        val identifiedFoldableTextRange = computeFoldableTextRange(element, document)
-        val foldableTextRange = TextRange.create(identifiedFoldableTextRange.startOffset + idElement.textLength, identifiedFoldableTextRange.endOffset)
-        if (foldableTextRange.isEmpty) return null
-
-        val placeholderText = computeMethodLikeFoldingPlaceholder(idElement)
-        return FoldingDescriptor(element.node, foldableTextRange, null, placeholderText)
-    }
 
     @JvmStatic
     fun isFoldingUseful(textRange: TextRange, document: Document): Boolean {
@@ -45,12 +35,58 @@ object RobotFoldingComputationUtil {
     }
 
     @JvmStatic
-    fun computeFoldingDescriptorsForListing(
-        node: ASTNode,
-        foldingGroupName: String,
-        initialElement: PsiElement,
-        listItems: List<PsiElement>
-    ): List<FoldingDescriptor> {
+    fun computeFoldingDescriptorsForBlockStructure(element: PsiElement, items: Collection<PsiElement>, document: Document): List<FoldingDescriptor> {
+        if (items.isEmpty()) return emptyList()
+
+        var eolMarker = items.first().prevSibling
+        while (eolMarker != null && eolMarker.node.elementType !== RobotTypes.EOL) {
+            eolMarker = eolMarker.prevSibling
+        }
+
+        val lastHeaderElement = eolMarker?.prevSibling ?: return emptyList()
+        var child = element.lastChild
+        while (child != null && child.node.elementType !== RobotTypes.END) {
+            child = child.prevSibling
+        }
+        if (child == null) return emptyList()
+
+        return computeFoldingDescriptorsForBlockStructure(element, lastHeaderElement, child, items, document)
+    }
+
+    @JvmStatic
+    fun computeFoldingDescriptorsForBlockStructure(element: PsiElement, headerElement: PsiElement, endMarker: PsiElement, items: Collection<PsiElement>, document: Document): List<FoldingDescriptor> {
+        if (items.isEmpty()) return emptyList()
+
+        val node = element.node
+        val foldingDescriptors = mutableListOf<FoldingDescriptor>()
+        if (items.size == 1 && items.first() !is RobotBlockOpeningStructure && !isFoldingUseful(items.first().textRange, document)) {
+            val bodyElement = items.first()
+            val headerMarkerFoldableTextRange = TextRange.create(headerElement.textRange.endOffset, bodyElement.textRange.startOffset)
+            val endMarkerFoldableTextRange = TextRange.create(bodyElement.textRange.endOffset, endMarker.textRange.startOffset)
+            val foldingGroup = FoldingGroup.newGroup("SingleItemBlockStructureFolding")
+
+            FoldingDescriptor(node, headerMarkerFoldableTextRange, foldingGroup, GlobalConstants.SUPER_SPACE).let { foldingDescriptors.add(it) }
+            FoldingDescriptor(node, endMarkerFoldableTextRange, foldingGroup, GlobalConstants.SUPER_SPACE).let { foldingDescriptors.add(it) }
+        } else {
+            val foldableTextRange = TextRange.create(headerElement.textRange.endOffset, endMarker.textRange.startOffset)
+            val placeholderText = computeMethodLikeFoldingPlaceholder(headerElement) + GlobalConstants.SUPER_SPACE
+            FoldingDescriptor(element.node, foldableTextRange, null, placeholderText).let { foldingDescriptors.add(it) }
+        }
+        return foldingDescriptors
+    }
+
+    @JvmStatic
+    fun computeFoldingDescriptorForContainer(element: PsiElement, startElement: PsiElement, document: Document): FoldingDescriptor? {
+        val identifiedFoldableTextRange = computeFoldableTextRange(element, document)
+        val foldableTextRange = TextRange.create(identifiedFoldableTextRange.startOffset + startElement.textLength, identifiedFoldableTextRange.endOffset)
+        if (foldableTextRange.isEmpty) return null
+
+        val placeholderText = computeMethodLikeFoldingPlaceholder(startElement)
+        return FoldingDescriptor(element.node, foldableTextRange, null, placeholderText)
+    }
+
+    @JvmStatic
+    fun computeFoldingDescriptorsForListing(node: ASTNode, foldingGroupName: String, initialElement: PsiElement, listItems: Collection<PsiElement>): List<FoldingDescriptor> {
         var currentTextRange: TextRange = initialElement.textRange
         val foldingGroup = FoldingGroup.newGroup(foldingGroupName)
 
@@ -63,8 +99,8 @@ object RobotFoldingComputationUtil {
             val foldingDescriptor = FoldingDescriptor(node, foldableTextRange, foldingGroup, GlobalConstants.SUPER_SPACE)
             foldingDescriptors.add(foldingDescriptor)
         }
-        if (foldingDescriptors.isNotEmpty()) {
-            val completeFoldingRange = TextRange.create(foldingDescriptors.first().range.startOffset, foldingDescriptors.last().range.endOffset)
+        if (foldingDescriptors.size > 1) {
+            val completeFoldingRange = TextRange.create(foldingDescriptors.first().range.startOffset, listItems.last().textRange.endOffset)
             if (completeFoldingRange.length > MAX_LIST_FOLDING_LENGTH) {
                 foldingDescriptors.clear()
 
@@ -76,30 +112,17 @@ object RobotFoldingComputationUtil {
     }
 
     private fun computeMethodLikeFoldingPlaceholder(element: PsiElement): String {
-        return if (!element.text.endsWith(SINGLE_SPACE)) CONTAINER_FOLDING_PLACEHOLDER_WITH_SINGLE_SPACE_SEPARATOR
+        val text = element.text
+        return if (text.endsWith(SINGLE_SPACE)) CONTAINER_FOLDING_PLACEHOLDER_WITH_SINGLE_SPACE_SEPARATOR
+        else if (!text.endsWith(SINGLE_SPACE)) CONTAINER_FOLDING_PLACEHOLDER_WITH_SUPER_SPACE_SEPARATOR
         else CONTAINER_FOLDING_PLACEHOLDER
-    }
-
-    /**
-     * Computes an optimized folding region for simple folding scenarios. Simple folding regions are encompassing the entire element, replacing it in the editor.
-     *
-     * @param element The PSI element for which the folding region is to be computed.
-     * @param document The document containing the text of the PSI element.
-     *
-     * @return A folding descriptor for a simple folding region
-     */
-    @JvmStatic
-    fun computeSimpleFoldingRegionFor(element: PsiElement, document: Document): FoldingDescriptor {
-        val foldingRegion = computeFoldableTextRange(element, document)
-        return FoldingDescriptor(element, foldingRegion)
     }
 
     /**
      * Computes the foldable text range for a given PSI element, excluding trailing new lines and comments in different lines. The produced text range encompasses
      * the complete element, but excludes any trailing new lines and comments that are not in the same line as the last relevant element.
      */
-    @JvmStatic
-    fun computeFoldableTextRange(element: PsiElement, document: Document): TextRange {
+    private fun computeFoldableTextRange(element: PsiElement, document: Document): TextRange {
         var ignorableNewLines = 0
         val charsSequence = document.charsSequence
         val textRange = element.textRange
@@ -108,7 +131,7 @@ object RobotFoldingComputationUtil {
             if (c != '\n' && c != '\r') {
                 val offset = textRange.endOffset - ignorableNewLines
                 val elementAt = element.findElementAt(offset)
-                if (elementAt != null && elementAt.node.elementType === RobotTypes.EOL) {
+                if (elementAt?.node?.elementType === RobotTypes.EOL) {
                     return computeTextRangeWithoutCommentsInDifferentLines(elementAt, textRange, document)
                 }
                 break

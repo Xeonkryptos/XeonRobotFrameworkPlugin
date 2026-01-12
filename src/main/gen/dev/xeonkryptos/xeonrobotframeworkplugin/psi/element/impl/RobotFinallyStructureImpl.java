@@ -11,7 +11,7 @@ import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.*;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.*;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotPsiImplUtil;
 
-public class RobotFinallyStructureImpl extends RobotExecutableStatementImpl implements RobotFinallyStructure {
+public class RobotFinallyStructureImpl extends RobotFinallyStructureExtension implements RobotFinallyStructure {
 
   public RobotFinallyStructureImpl(@NotNull ASTNode node) {
     super(node);

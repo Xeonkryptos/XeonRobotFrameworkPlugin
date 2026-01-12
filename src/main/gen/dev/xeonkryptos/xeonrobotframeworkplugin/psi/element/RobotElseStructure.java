@@ -5,9 +5,6 @@ import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 
-public interface RobotTryStructure extends RobotExecutableStatement, RobotBlockOpeningStructure, RobotFoldable {
-
-  @NotNull
-  List<RobotExecutableStatement> getExecutableStatementList();
+public interface RobotElseStructure extends RobotExecutableStatement, RobotBlockOpeningStructure, RobotFoldable {
 
 }

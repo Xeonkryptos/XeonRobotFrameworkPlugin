@@ -11,21 +11,26 @@ import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.*;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.*;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotPsiImplUtil;
 
-public class RobotTryElseStructureImpl extends RobotExecutableStatementImpl implements RobotTryElseStructure {
+public class RobotForLoopStructureFillParameterImpl extends RobotPsiElementBase implements RobotForLoopStructureFillParameter {
 
-  public RobotTryElseStructureImpl(@NotNull ASTNode node) {
+  public RobotForLoopStructureFillParameterImpl(@NotNull ASTNode node) {
     super(node);
   }
 
-  @Override
   public void accept(@NotNull RobotVisitor visitor) {
-    visitor.visitTryElseStructure(this);
+    visitor.visitForLoopStructureFillParameter(this);
   }
 
   @Override
   public void accept(@NotNull PsiElementVisitor visitor) {
     if (visitor instanceof RobotVisitor) accept((RobotVisitor)visitor);
     else super.accept(visitor);
+  }
+
+  @Override
+  @Nullable
+  public RobotPositionalArgument getPositionalArgument() {
+    return PsiTreeUtil.getChildOfType(this, RobotPositionalArgument.class);
   }
 
 }

@@ -10,13 +10,22 @@ import com.intellij.openapi.util.TextRange;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiElementVisitor;
 import com.intellij.util.containers.ContainerUtil;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotElseIfStructure;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotElseStructure;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotExceptStructure;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotFinallyStructure;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotFoldable;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotForLoopStructure;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotGroupStructure;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotIfStructure;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCall;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTaskStatement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTestCaseStatement;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTryStructure;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotUserKeywordStatement;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotWhileLoopStructure;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.folding.RobotFoldingComputationUtil;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.visitor.RecursiveRobotVisitor;
-import dev.xeonkryptos.xeonrobotframeworkplugin.util.GlobalConstants;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -32,7 +41,7 @@ public class RobotFoldingBuilder extends CustomFoldingBuilder {
     @Override
     protected String getLanguagePlaceholderText(@NotNull ASTNode node, @NotNull TextRange range) {
         ItemPresentation presentation = ((NavigationItem) node.getPsi()).getPresentation();
-        return presentation != null ? presentation.getPresentableText() : GlobalConstants.CONTINUATION;
+        return presentation != null ? presentation.getPresentableText() : RobotFoldingComputationUtil.CONTAINER_FOLDING_PLACEHOLDER;
     }
 
     @Override
@@ -67,6 +76,51 @@ public class RobotFoldingBuilder extends CustomFoldingBuilder {
 
         @Override
         public void visitUserKeywordStatement(@NotNull RobotUserKeywordStatement o) {
+            visitFoldable(o);
+        }
+
+        @Override
+        public void visitForLoopStructure(@NotNull RobotForLoopStructure o) {
+            visitFoldable(o);
+        }
+
+        @Override
+        public void visitIfStructure(@NotNull RobotIfStructure o) {
+            visitFoldable(o);
+        }
+
+        @Override
+        public void visitElseIfStructure(@NotNull RobotElseIfStructure o) {
+            visitFoldable(o);
+        }
+
+        @Override
+        public void visitGroupStructure(@NotNull RobotGroupStructure o) {
+            visitFoldable(o);
+        }
+
+        @Override
+        public void visitExceptStructure(@NotNull RobotExceptStructure o) {
+            visitFoldable(o);
+        }
+
+        @Override
+        public void visitFinallyStructure(@NotNull RobotFinallyStructure o) {
+            visitFoldable(o);
+        }
+
+        @Override
+        public void visitTryStructure(@NotNull RobotTryStructure o) {
+            visitFoldable(o);
+        }
+
+        @Override
+        public void visitElseStructure(@NotNull RobotElseStructure o) {
+            visitFoldable(o);
+        }
+
+        @Override
+        public void visitWhileLoopStructure(@NotNull RobotWhileLoopStructure o) {
             visitFoldable(o);
         }
 

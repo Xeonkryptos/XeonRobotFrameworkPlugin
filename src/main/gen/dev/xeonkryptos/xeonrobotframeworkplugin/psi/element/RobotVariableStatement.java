@@ -6,7 +6,7 @@ import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 import javax.swing.Icon;
 
-public interface RobotVariableStatement extends RobotFoldable, RobotElement {
+public interface RobotVariableStatement extends RobotElement {
 
   @NotNull Icon getIcon(int flags);
 

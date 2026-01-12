@@ -11,7 +11,7 @@ import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.*;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.*;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotPsiImplUtil;
 
-public class RobotGlobalSettingStatementImpl extends RobotPsiElementBase implements RobotGlobalSettingStatement {
+public class RobotGlobalSettingStatementImpl extends RobotGlobalSettingExtension implements RobotGlobalSettingStatement {
 
   public RobotGlobalSettingStatementImpl(@NotNull ASTNode node) {
     super(node);
