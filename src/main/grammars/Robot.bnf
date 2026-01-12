@@ -350,7 +350,6 @@ variable_definition ::= variable {
         "com.intellij.navigation.NavigationItem"
         "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.DefinedVariable"
         "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotQualifiedNameOwner"
-        "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotFoldable"
     ]
     mixin = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotVariableDefinitionExtension"
     stubClass = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotVariableDefinitionStub"

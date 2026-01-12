@@ -367,7 +367,6 @@ public class RobotVisitor extends PsiElementVisitor {
     // visitNavigationItem(o);
     // visitDefinedVariable(o);
     // visitQualifiedNameOwner(o);
-    // visitFoldable(o);
     // visitElement(o);
   }
 
