@@ -15,7 +15,6 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCall;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTaskStatement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTestCaseStatement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotUserKeywordStatement;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableDefinition;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.visitor.RecursiveRobotVisitor;
 import dev.xeonkryptos.xeonrobotframeworkplugin.util.GlobalConstants;
 import org.jetbrains.annotations.NotNull;
@@ -68,11 +67,6 @@ public class RobotFoldingBuilder extends CustomFoldingBuilder {
 
         @Override
         public void visitUserKeywordStatement(@NotNull RobotUserKeywordStatement o) {
-            visitFoldable(o);
-        }
-
-        @Override
-        public void visitVariableDefinition(@NotNull RobotVariableDefinition o) {
             visitFoldable(o);
         }
 

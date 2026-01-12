@@ -8,12 +8,15 @@ import com.intellij.openapi.util.TextRange
 import com.intellij.psi.PsiElement
 import com.intellij.psi.TokenType
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes
+import dev.xeonkryptos.xeonrobotframeworkplugin.util.GlobalConstants
 
 object RobotFoldingComputationUtil {
 
     const val SINGLE_SPACE: String = " "
-    const val CONTAINER_FOLDING_PLACEHOLDER = "{ ... }"
+    const val CONTAINER_FOLDING_PLACEHOLDER = "{...}"
     const val CONTAINER_FOLDING_PLACEHOLDER_WITH_SINGLE_SPACE_SEPARATOR = "${SINGLE_SPACE}${CONTAINER_FOLDING_PLACEHOLDER}"
+
+    const val MAX_LIST_FOLDING_LENGTH = 100
 
     @JvmStatic
     fun computeFoldingDescriptorForIdBasedContainer(element: PsiElement, idElement: PsiElement, document: Document): FoldingDescriptor? {
@@ -42,13 +45,12 @@ object RobotFoldingComputationUtil {
     }
 
     @JvmStatic
-    fun computeMethodLikeFoldingPlaceholder(element: PsiElement): String {
-        return if (!element.text.endsWith(SINGLE_SPACE)) CONTAINER_FOLDING_PLACEHOLDER_WITH_SINGLE_SPACE_SEPARATOR
-        else CONTAINER_FOLDING_PLACEHOLDER
-    }
-
-    @JvmStatic
-    fun computeFoldingDescriptorsForListing(node: ASTNode, foldingGroupName: String, initialElement: PsiElement, listItems: List<PsiElement>): List<FoldingDescriptor> {
+    fun computeFoldingDescriptorsForListing(
+        node: ASTNode,
+        foldingGroupName: String,
+        initialElement: PsiElement,
+        listItems: List<PsiElement>
+    ): List<FoldingDescriptor> {
         var currentTextRange: TextRange = initialElement.textRange
         val foldingGroup = FoldingGroup.newGroup(foldingGroupName)
 
@@ -58,10 +60,24 @@ object RobotFoldingComputationUtil {
             currentTextRange = item.textRange
 
             val foldableTextRange = TextRange.create(previousTextRange.endOffset, currentTextRange.startOffset)
-            val foldingDescriptor = FoldingDescriptor(node, foldableTextRange, foldingGroup, "  ")
+            val foldingDescriptor = FoldingDescriptor(node, foldableTextRange, foldingGroup, GlobalConstants.SUPER_SPACE)
             foldingDescriptors.add(foldingDescriptor)
         }
+        if (foldingDescriptors.isNotEmpty()) {
+            val completeFoldingRange = TextRange.create(foldingDescriptors.first().range.startOffset, foldingDescriptors.last().range.endOffset)
+            if (completeFoldingRange.length > MAX_LIST_FOLDING_LENGTH) {
+                foldingDescriptors.clear()
+
+                val placeholderText = computeMethodLikeFoldingPlaceholder(initialElement)
+                foldingDescriptors.add(FoldingDescriptor(node, completeFoldingRange, foldingGroup, placeholderText))
+            }
+        }
         return foldingDescriptors
+    }
+
+    private fun computeMethodLikeFoldingPlaceholder(element: PsiElement): String {
+        return if (!element.text.endsWith(SINGLE_SPACE)) CONTAINER_FOLDING_PLACEHOLDER_WITH_SINGLE_SPACE_SEPARATOR
+        else CONTAINER_FOLDING_PLACEHOLDER
     }
 
     /**

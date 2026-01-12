@@ -14,6 +14,7 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCallName
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotParameter;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTemplateArguments;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.RobotElementGenerator;
+import dev.xeonkryptos.xeonrobotframeworkplugin.util.GlobalConstants;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
@@ -33,7 +34,7 @@ class InsertMissingMandatoryKeywordParametersQuickFix extends PsiElementBaseInte
         PsiElement foundElement = PsiTreeUtil.getParentOfType(element, false, RobotKeywordCall.class, RobotTemplateArguments.class);
         if (foundElement instanceof RobotKeywordCall keywordCall) {
             RobotKeywordCallName keywordCallName = keywordCall.getKeywordCallName();
-            PsiElement whiteSpace = project.getService(PsiParserFacade.class).createWhiteSpaceFromText("  ");
+            PsiElement whiteSpace = project.getService(PsiParserFacade.class).createWhiteSpaceFromText(GlobalConstants.SUPER_SPACE);
             for (String missingRequiredParameter : missingRequiredParameters) {
                 RobotParameter newParameter = robotElementGenerator.createNewParameter(missingRequiredParameter);
                 if (newParameter != null) {
@@ -42,7 +43,7 @@ class InsertMissingMandatoryKeywordParametersQuickFix extends PsiElementBaseInte
                 }
             }
         } else if (foundElement instanceof RobotTemplateArguments templateArguments) {
-            PsiElement whiteSpace = project.getService(PsiParserFacade.class).createWhiteSpaceFromText("  ");
+            PsiElement whiteSpace = project.getService(PsiParserFacade.class).createWhiteSpaceFromText(GlobalConstants.SUPER_SPACE);
             for (String missingRequiredParameter : missingRequiredParameters) {
                 RobotParameter newParameter = robotElementGenerator.createNewParameter(missingRequiredParameter);
                 if (newParameter != null) {

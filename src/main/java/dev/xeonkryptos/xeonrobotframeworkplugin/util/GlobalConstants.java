@@ -5,6 +5,8 @@ public final class GlobalConstants {
 
     public static final String CONTINUATION = "...";
 
+    public static final String SUPER_SPACE = "  ";
+
     public static final String DEFAULT_INDENTATION = "    ";
 
     public static final String ROBOT_BUILT_IN = "robot.libraries.BuiltIn";
