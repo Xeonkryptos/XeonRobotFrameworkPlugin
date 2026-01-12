@@ -40,6 +40,7 @@
 - Do not complain about misplaced normal arguments after a detected parameter but highlighted as normal argument
 - Extended multiline handling to every other element not yet supported like for loops
 - Fixed issue leading to deprecation marking not shown to keyword calls referencing a python function with deprecation prefix **\*DEPRECATED** in documentation
+- Detection of continuations with empty line
 
 ## 0.5.16
 

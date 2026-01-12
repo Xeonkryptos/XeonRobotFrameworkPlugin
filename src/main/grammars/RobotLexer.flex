@@ -106,7 +106,7 @@ ExtendedSpaceBasedEndMarker = {SpaceBasedEndMarker} {WhitespaceIncludingNewline}
 KeywordFinishedMarker = {SpaceBasedEndMarker} | {EOL}
 ExtendedKeywordFinishedMarker = {KeywordFinishedMarker} {WhitespaceIncludingNewline}*
 
-MultiLineContinuation = {Continuation} {SpaceBasedEndMarker}
+MultiLineContinuation = {Continuation} ({SpaceBasedEndMarker} | {EOL})
 
 WithNameKeyword = "WITH NAME" | "AS"
 
@@ -208,7 +208,7 @@ SimpleConditionalKeywordCall = {SetVariableIf} | {ForLoopIf} | {PassExecutionIf}
 
 RepeatKeywordCall = "Repeat" {IntraKeywordSeparator}? "Keyword"
 
-MultiLine = {EOL}+ {NonNewlineWhitespace}* {MultiLineContinuation}
+MultiLine = {EOL}+ {NonNewlineWhitespace}* ({MultiLineContinuation} {NonNewlineWhitespace}*)+
 
 LineComment = {LineCommentSign} {NON_EOL}*
 
