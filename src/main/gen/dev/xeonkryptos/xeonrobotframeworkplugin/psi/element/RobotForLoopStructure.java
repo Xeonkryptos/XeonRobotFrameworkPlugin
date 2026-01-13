@@ -13,4 +13,7 @@ public interface RobotForLoopStructure extends RobotExecutableStatement, RobotBl
   @NotNull
   List<RobotVariableDefinition> getVariableDefinitionList();
 
+  @Nullable
+  PsiElement getForInElement();
+
 }

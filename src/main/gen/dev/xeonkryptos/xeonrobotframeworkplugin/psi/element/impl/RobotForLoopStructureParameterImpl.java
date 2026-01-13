@@ -39,4 +39,10 @@ public class RobotForLoopStructureParameterImpl extends RobotPsiElementBase impl
     return PsiTreeUtil.getChildOfType(this, RobotForLoopStructureModeParameter.class);
   }
 
+  @Override
+  @Nullable
+  public RobotForLoopStructureStartParameter getForLoopStructureStartParameter() {
+    return PsiTreeUtil.getChildOfType(this, RobotForLoopStructureStartParameter.class);
+  }
+
 }

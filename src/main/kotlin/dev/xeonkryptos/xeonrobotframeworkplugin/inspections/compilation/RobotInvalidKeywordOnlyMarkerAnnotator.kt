@@ -9,7 +9,7 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLocalArgumentsS
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariable
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.visitor.EmptyVariableDetector
 
-class RobotInvalidKeywordOnlyMarkerAnnotation : RobotAnnotator() {
+class RobotInvalidKeywordOnlyMarkerAnnotator : RobotAnnotator() {
 
     override fun visitVariable(element: RobotVariable) {
         if (element.variableName != null) {

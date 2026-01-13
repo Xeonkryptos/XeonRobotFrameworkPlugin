@@ -40,4 +40,10 @@ public class RobotForLoopStructureImpl extends RobotForLoopStructureExtension im
     return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotVariableDefinition.class);
   }
 
+  @Override
+  @Nullable
+  public PsiElement getForInElement() {
+    return findChildByType(FOR_IN);
+  }
+
 }

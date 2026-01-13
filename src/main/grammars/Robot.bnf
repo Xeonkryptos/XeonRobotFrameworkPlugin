@@ -251,10 +251,12 @@ for_loop_structure ::= FOR variable_definition+ FOR_IN positional_argument+ for_
         "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotFoldable"
     ]
     mixin="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotForLoopStructureExtension"
+    methods=[forInElement="FOR_IN"]
 }
-for_loop_structure_parameter ::= for_loop_structure_fill_parameter | for_loop_structure_mode_parameter
+for_loop_structure_parameter ::= for_loop_structure_fill_parameter | for_loop_structure_mode_parameter | for_loop_structure_start_parameter
 for_loop_structure_mode_parameter ::= "mode" ASSIGNMENT ("STRICT" | "SHORTEST" | "LONGEST") {pin=2}
 for_loop_structure_fill_parameter ::= "fill" ASSIGNMENT positional_argument {pin=2}
+for_loop_structure_start_parameter ::= "start" ASSIGNMENT positional_argument {pin=2}
 while_loop_structure ::= WHILE conditional_content (EOS parameter+)? eol_marker executable_statement* END eol_marker {
     pin=1
     implements=[

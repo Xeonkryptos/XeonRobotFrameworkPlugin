@@ -89,6 +89,10 @@ public class RobotVisitor extends PsiElementVisitor {
     visitElement(o);
   }
 
+  public void visitForLoopStructureStartParameter(@NotNull RobotForLoopStructureStartParameter o) {
+    visitElement(o);
+  }
+
   public void visitGlobalSettingStatement(@NotNull RobotGlobalSettingStatement o) {
     visitFoldable(o);
     // visitElement(o);

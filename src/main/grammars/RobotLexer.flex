@@ -331,7 +331,7 @@ LineComment = {LineCommentSign} {NON_EOL}*
 <USER_KEYWORD_DEFINITION>      ^ {LiteralValue}    { pushBackTrailingWhitespace(); return USER_KEYWORD_NAME; }
 
 <KEYWORD_ARGUMENTS, TESTCASE_DEFINITION, TASK_DEFINITION, USER_KEYWORD_DEFINITION, VARIABLE_DEFINITION, SETTINGS_SECTION> {
-    <SETTING, FOR_STRUCTURE> {
+    <SETTING, FOR_STRUCTURE_LOOP> {
         {VariableFreeLiteralValue} {EqualSign} {
               yypushback(1);
               enterNewState(PARAMETER_ASSIGNMENT);

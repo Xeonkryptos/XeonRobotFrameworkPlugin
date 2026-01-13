@@ -34,6 +34,7 @@ public interface RobotTypes {
   IElementType FOR_LOOP_STRUCTURE_FILL_PARAMETER = new RobotElementType("FOR_LOOP_STRUCTURE_FILL_PARAMETER");
   IElementType FOR_LOOP_STRUCTURE_MODE_PARAMETER = new RobotElementType("FOR_LOOP_STRUCTURE_MODE_PARAMETER");
   IElementType FOR_LOOP_STRUCTURE_PARAMETER = new RobotElementType("FOR_LOOP_STRUCTURE_PARAMETER");
+  IElementType FOR_LOOP_STRUCTURE_START_PARAMETER = new RobotElementType("FOR_LOOP_STRUCTURE_START_PARAMETER");
   IElementType GLOBAL_SETTING_STATEMENT = new RobotElementType("GLOBAL_SETTING_STATEMENT");
   IElementType GROUP_STRUCTURE = new RobotElementType("GROUP_STRUCTURE");
   IElementType IF_STRUCTURE = new RobotElementType("IF_STRUCTURE");
@@ -223,6 +224,9 @@ public interface RobotTypes {
       }
       else if (type == FOR_LOOP_STRUCTURE_PARAMETER) {
         return new RobotForLoopStructureParameterImpl(node);
+      }
+      else if (type == FOR_LOOP_STRUCTURE_START_PARAMETER) {
+        return new RobotForLoopStructureStartParameterImpl(node);
       }
       else if (type == GLOBAL_SETTING_STATEMENT) {
         return new RobotGlobalSettingStatementImpl(node);

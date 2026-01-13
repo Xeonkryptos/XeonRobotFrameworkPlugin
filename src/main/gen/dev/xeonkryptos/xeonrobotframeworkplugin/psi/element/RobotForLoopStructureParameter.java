@@ -13,4 +13,7 @@ public interface RobotForLoopStructureParameter extends RobotElement {
   @Nullable
   RobotForLoopStructureModeParameter getForLoopStructureModeParameter();
 
+  @Nullable
+  RobotForLoopStructureStartParameter getForLoopStructureStartParameter();
+
 }

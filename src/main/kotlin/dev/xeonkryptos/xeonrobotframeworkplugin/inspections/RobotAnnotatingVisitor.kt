@@ -6,7 +6,7 @@ import com.intellij.psi.PsiElement
 import dev.xeonkryptos.xeonrobotframeworkplugin.inspections.compilation.KeywordCallWithInvalidParameterOrderAnnotator
 import dev.xeonkryptos.xeonrobotframeworkplugin.inspections.compilation.RobotArgumentAnnotator
 import dev.xeonkryptos.xeonrobotframeworkplugin.inspections.compilation.RobotImportAnnotator
-import dev.xeonkryptos.xeonrobotframeworkplugin.inspections.compilation.RobotInvalidKeywordOnlyMarkerAnnotation
+import dev.xeonkryptos.xeonrobotframeworkplugin.inspections.compilation.RobotInvalidKeywordOnlyMarkerAnnotator
 import dev.xeonkryptos.xeonrobotframeworkplugin.inspections.compilation.RobotMissingMandatoryKeywordParametersAnnotator
 import dev.xeonkryptos.xeonrobotframeworkplugin.inspections.compilation.RobotMissingMandatoryTemplateArgumentsAnnotator
 import dev.xeonkryptos.xeonrobotframeworkplugin.inspections.compilation.RobotParameterAnnotator
@@ -22,7 +22,7 @@ open class RobotAnnotatingVisitor : Annotator {
         RobotTemplateParameterAnnotator(),
         ReassignedRobotVariableAnnotator(),
         RobotVariableDefinitionNotFoundAnnotator(),
-        RobotInvalidKeywordOnlyMarkerAnnotation(),
+        RobotInvalidKeywordOnlyMarkerAnnotator(),
         RobotMissingMandatoryTemplateArgumentsAnnotator(),
         RobotParameterAnnotator(),
         // KeywordCallWithInvalidParameterOrderAnnotator is technically dumb-aware, but it depends on the evaluation result of RobotParameterAnnotator

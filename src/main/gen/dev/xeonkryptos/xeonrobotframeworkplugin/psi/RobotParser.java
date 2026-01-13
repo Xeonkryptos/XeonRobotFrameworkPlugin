@@ -917,15 +917,30 @@ public class RobotParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // for_loop_structure_fill_parameter | for_loop_structure_mode_parameter
+  // for_loop_structure_fill_parameter | for_loop_structure_mode_parameter | for_loop_structure_start_parameter
   public static boolean for_loop_structure_parameter(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "for_loop_structure_parameter")) return false;
     boolean r;
     Marker m = enter_section_(b, l, _NONE_, FOR_LOOP_STRUCTURE_PARAMETER, "<for loop structure parameter>");
     r = for_loop_structure_fill_parameter(b, l + 1);
     if (!r) r = for_loop_structure_mode_parameter(b, l + 1);
+    if (!r) r = for_loop_structure_start_parameter(b, l + 1);
     exit_section_(b, l, m, r, false, null);
     return r;
+  }
+
+  /* ********************************************************** */
+  // "start" ASSIGNMENT positional_argument
+  public static boolean for_loop_structure_start_parameter(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "for_loop_structure_start_parameter")) return false;
+    boolean r, p;
+    Marker m = enter_section_(b, l, _NONE_, FOR_LOOP_STRUCTURE_START_PARAMETER, "<for loop structure start parameter>");
+    r = consumeToken(b, "start");
+    r = r && consumeToken(b, ASSIGNMENT);
+    p = r; // pin = 2
+    r = r && positional_argument(b, l + 1);
+    exit_section_(b, l, m, r, p, null);
+    return r || p;
   }
 
   /* ********************************************************** */
