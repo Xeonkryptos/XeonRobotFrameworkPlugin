@@ -14,6 +14,7 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCall;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLocalSetting;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotParameter;
 import dev.xeonkryptos.xeonrobotframeworkplugin.util.KeyUtils;
+import dev.xeonkryptos.xeonrobotframeworkplugin.util.RobotNames;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
@@ -31,21 +32,20 @@ public class RobotParameterAnnotator extends RobotAnnotator {
             boolean directMatchFound = availableParameters.stream().anyMatch(param -> param.matches(parameterName));
             if (!directMatchFound && availableParameters.stream().noneMatch(DefinedParameter::isKeywordContainer)) {
                 keywordCall.getStartOfKeywordsOnlyIndex()
-                           .ifPresentOrElse(keywordsOnlyIndex -> handleParameterWithinKeywordOnlyKeywordCall(keywordsOnlyIndex,
-                                                                                                             parameter,
-                                                                                                             keywordCall,
-                                                                                                             getHolder()),
-                                            () -> convertParameterToArgumentVisually(getHolder(), parameter));
+                           .ifPresentOrElse(keywordsOnlyIndex -> handleParameterWithinKeywordOnlyKeywordCall(keywordsOnlyIndex, parameter, keywordCall, getHolder()), () -> {
+                               String normalizedKeywordCallName = keywordCall.getName().replaceAll("[\\s_]", "");
+                               // Create Dictionary keyword calls have special handling for parameters
+                               if (!RobotNames.CREATE_DICTIONARY_NORMALIZED_KEYWORD_NAME.equalsIgnoreCase(normalizedKeywordCallName)) {
+                                   convertParameterToArgumentVisually(getHolder(), parameter);
+                               }
+                           });
             }
         } else if (PsiTreeUtil.getParentOfType(parameter, RobotLocalSetting.class) != null) {
             convertParameterToArgumentVisually(getHolder(), parameter);
         }
     }
 
-    private static void handleParameterWithinKeywordOnlyKeywordCall(int keywordsOnlyIndex,
-                                                                    RobotParameter parameter,
-                                                                    RobotKeywordCall keywordCall,
-                                                                    @NotNull AnnotationHolder holder) {
+    private static void handleParameterWithinKeywordOnlyKeywordCall(int keywordsOnlyIndex, RobotParameter parameter, RobotKeywordCall keywordCall, @NotNull AnnotationHolder holder) {
         String keywordCallName = keywordCall.getName();
         if (keywordsOnlyIndex == 0) {
             highlightParameterAsNotFound(parameter, keywordCallName, holder);

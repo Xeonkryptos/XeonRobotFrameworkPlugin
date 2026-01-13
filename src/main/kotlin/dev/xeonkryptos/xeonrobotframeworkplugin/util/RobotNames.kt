@@ -11,4 +11,6 @@ object RobotNames {
     const val TEARDOWN_SETTING_NAME = "Teardown"
     const val TEMPLATE_SETTING_NAME = "Template"
     const val RETURN_SETTING_NAME = "Return"
+
+    const val CREATE_DICTIONARY_NORMALIZED_KEYWORD_NAME: String = "createdictionary"
 }
