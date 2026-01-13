@@ -10,14 +10,13 @@ import com.intellij.openapi.util.TextRange;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiElementVisitor;
 import com.intellij.util.containers.ContainerUtil;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotElseIfStructure;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotConditionalStructure;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotElseStructure;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotExceptStructure;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotFinallyStructure;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotFoldable;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotForLoopStructure;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotGroupStructure;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotIfStructure;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCall;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTaskStatement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTestCaseStatement;
@@ -85,12 +84,7 @@ public class RobotFoldingBuilder extends CustomFoldingBuilder {
         }
 
         @Override
-        public void visitIfStructure(@NotNull RobotIfStructure o) {
-            visitFoldable(o);
-        }
-
-        @Override
-        public void visitElseIfStructure(@NotNull RobotElseIfStructure o) {
+        public void visitConditionalStructure(@NotNull RobotConditionalStructure o) {
             visitFoldable(o);
         }
 

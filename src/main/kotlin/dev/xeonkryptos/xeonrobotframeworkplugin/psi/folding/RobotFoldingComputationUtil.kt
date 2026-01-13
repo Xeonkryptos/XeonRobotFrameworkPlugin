@@ -45,32 +45,31 @@ object RobotFoldingComputationUtil {
 
         val lastHeaderElement = eolMarker?.prevSibling ?: return emptyList()
         var child = element.lastChild
-        while (child != null && child.node.elementType !== RobotTypes.END) {
+        while (child != null && child !== items.last() && child.node.elementType !== RobotTypes.END) {
             child = child.prevSibling
         }
-        if (child == null) return emptyList()
+        val endOffset = child?.textRange?.startOffset ?: items.last().textRange.endOffset
 
-        return computeFoldingDescriptorsForBlockStructure(element, lastHeaderElement, child, items, document)
+        return computeFoldingDescriptorsForBlockStructure(element.node, lastHeaderElement, endOffset, items, document)
     }
 
     @JvmStatic
-    fun computeFoldingDescriptorsForBlockStructure(element: PsiElement, headerElement: PsiElement, endMarker: PsiElement, items: Collection<PsiElement>, document: Document): List<FoldingDescriptor> {
+    fun computeFoldingDescriptorsForBlockStructure(node: ASTNode, headerElement: PsiElement, endOffset: Int, items: Collection<PsiElement>, document: Document): List<FoldingDescriptor> {
         if (items.isEmpty()) return emptyList()
 
-        val node = element.node
         val foldingDescriptors = mutableListOf<FoldingDescriptor>()
         if (items.size == 1 && items.first() !is RobotBlockOpeningStructure && !isFoldingUseful(items.first().textRange, document)) {
             val bodyElement = items.first()
             val headerMarkerFoldableTextRange = TextRange.create(headerElement.textRange.endOffset, bodyElement.textRange.startOffset)
-            val endMarkerFoldableTextRange = TextRange.create(bodyElement.textRange.endOffset, endMarker.textRange.startOffset)
+            val endMarkerFoldableTextRange = TextRange.create(bodyElement.textRange.endOffset, endOffset)
             val foldingGroup = FoldingGroup.newGroup("SingleItemBlockStructureFolding")
 
             FoldingDescriptor(node, headerMarkerFoldableTextRange, foldingGroup, GlobalConstants.SUPER_SPACE).let { foldingDescriptors.add(it) }
             FoldingDescriptor(node, endMarkerFoldableTextRange, foldingGroup, GlobalConstants.SUPER_SPACE).let { foldingDescriptors.add(it) }
         } else {
-            val foldableTextRange = TextRange.create(headerElement.textRange.endOffset, endMarker.textRange.startOffset)
+            val foldableTextRange = TextRange.create(headerElement.textRange.endOffset, endOffset)
             val placeholderText = computeMethodLikeFoldingPlaceholder(headerElement) + GlobalConstants.SUPER_SPACE
-            FoldingDescriptor(element.node, foldableTextRange, null, placeholderText).let { foldingDescriptors.add(it) }
+            FoldingDescriptor(node, foldableTextRange, null, placeholderText).let { foldingDescriptors.add(it) }
         }
         return foldingDescriptors
     }

@@ -11,7 +11,7 @@ import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.*;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.*;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotPsiImplUtil;
 
-public class RobotElseIfStructureImpl extends RobotElseIfStructureExtension implements RobotElseIfStructure {
+public class RobotElseIfStructureImpl extends RobotExecutableStatementImpl implements RobotElseIfStructure {
 
   public RobotElseIfStructureImpl(@NotNull ASTNode node) {
     super(node);

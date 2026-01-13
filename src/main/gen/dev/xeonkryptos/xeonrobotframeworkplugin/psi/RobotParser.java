@@ -46,10 +46,10 @@ public class RobotParser implements PsiParser, LightPsiParser {
     create_token_set_(DOCUMENTATION_STATEMENT_GLOBAL_SETTING, GLOBAL_SETTING_STATEMENT, LIBRARY_IMPORT_GLOBAL_SETTING, METADATA_STATEMENT_GLOBAL_SETTING,
       RESOURCE_IMPORT_GLOBAL_SETTING, SETUP_TEARDOWN_STATEMENTS_GLOBAL_SETTING, SUITE_NAME_STATEMENT_GLOBAL_SETTING, TAGS_STATEMENT_GLOBAL_SETTING,
       TEMPLATE_STATEMENTS_GLOBAL_SETTING, TIMEOUT_STATEMENTS_GLOBAL_SETTING, UNKNOWN_SETTING_STATEMENTS_GLOBAL_SETTING, VARIABLES_IMPORT_GLOBAL_SETTING),
-    create_token_set_(ELSE_IF_STRUCTURE, ELSE_STRUCTURE, EXCEPT_STRUCTURE, EXECUTABLE_STATEMENT,
-      FINALLY_STRUCTURE, FOR_LOOP_STRUCTURE, GROUP_STRUCTURE, IF_STRUCTURE,
-      INLINE_ELSE_IF_STRUCTURE, INLINE_IF_ELSE_STRUCTURE, INLINE_IF_STRUCTURE, TRY_STRUCTURE,
-      WHILE_LOOP_STRUCTURE),
+    create_token_set_(CONDITIONAL_STRUCTURE, ELSE_IF_STRUCTURE, ELSE_STRUCTURE, EXCEPT_STRUCTURE,
+      EXECUTABLE_STATEMENT, FINALLY_STRUCTURE, FOR_LOOP_STRUCTURE, GROUP_STRUCTURE,
+      IF_STRUCTURE, INLINE_ELSE_IF_STRUCTURE, INLINE_IF_ELSE_STRUCTURE, INLINE_IF_STRUCTURE,
+      TRY_STRUCTURE, WHILE_LOOP_STRUCTURE),
   };
 
   /* ********************************************************** */
@@ -272,9 +272,9 @@ public class RobotParser implements PsiParser, LightPsiParser {
     boolean r, p;
     Marker m = enter_section_(b, l, _NONE_);
     r = inline_if_structure(b, l + 1);
-    r = r && conditional_inline_structure_1(b, l + 1);
-    p = r; // pin = 2
-    r = r && report_error_(b, conditional_inline_structure_2(b, l + 1));
+    p = r; // pin = 1
+    r = r && report_error_(b, conditional_inline_structure_1(b, l + 1));
+    r = p && report_error_(b, conditional_inline_structure_2(b, l + 1)) && r;
     r = p && conditional_inline_structure_3(b, l + 1) && r;
     exit_section_(b, l, m, r, p, null);
     return r || p;
@@ -307,15 +307,15 @@ public class RobotParser implements PsiParser, LightPsiParser {
 
   /* ********************************************************** */
   // if_structure else_if_structure* else_structure? END eol_marker
-  static boolean conditional_structure(PsiBuilder b, int l) {
+  public static boolean conditional_structure(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "conditional_structure")) return false;
     if (!nextTokenIs(b, IF)) return false;
     boolean r, p;
-    Marker m = enter_section_(b, l, _NONE_);
+    Marker m = enter_section_(b, l, _COLLAPSE_, CONDITIONAL_STRUCTURE, null);
     r = if_structure(b, l + 1);
-    r = r && conditional_structure_1(b, l + 1);
-    p = r; // pin = 2
-    r = r && report_error_(b, conditional_structure_2(b, l + 1));
+    p = r; // pin = 1
+    r = r && report_error_(b, conditional_structure_1(b, l + 1));
+    r = p && report_error_(b, conditional_structure_2(b, l + 1)) && r;
     r = p && report_error_(b, consumeToken(b, END)) && r;
     r = p && eol_marker(b, l + 1) && r;
     exit_section_(b, l, m, r, p, null);

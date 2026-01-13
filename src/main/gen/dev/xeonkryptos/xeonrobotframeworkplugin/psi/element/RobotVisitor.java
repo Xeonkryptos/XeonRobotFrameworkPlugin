@@ -22,6 +22,11 @@ public class RobotVisitor extends PsiElementVisitor {
     visitElement(o);
   }
 
+  public void visitConditionalStructure(@NotNull RobotConditionalStructure o) {
+    visitExecutableStatement(o);
+    // visitFoldable(o);
+  }
+
   public void visitDictVariable(@NotNull RobotDictVariable o) {
     visitVariable(o);
   }
@@ -34,7 +39,6 @@ public class RobotVisitor extends PsiElementVisitor {
   public void visitElseIfStructure(@NotNull RobotElseIfStructure o) {
     visitExecutableStatement(o);
     // visitBlockOpeningStructure(o);
-    // visitFoldable(o);
   }
 
   public void visitElseStructure(@NotNull RobotElseStructure o) {
@@ -99,7 +103,6 @@ public class RobotVisitor extends PsiElementVisitor {
   public void visitIfStructure(@NotNull RobotIfStructure o) {
     visitExecutableStatement(o);
     // visitBlockOpeningStructure(o);
-    // visitFoldable(o);
   }
 
   public void visitIfVariableStatement(@NotNull RobotIfVariableStatement o) {

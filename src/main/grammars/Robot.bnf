@@ -263,15 +263,15 @@ while_loop_structure ::= WHILE conditional_content (EOS parameter+)? eol_marker 
     ]
     mixin="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotWhileLoopStructureExtension"
 }
-private conditional_structure ::= if_structure else_if_structure* else_structure? END eol_marker {pin=2}
-private conditional_inline_structure ::= inline_if_structure inline_else_if_structure* inline_if_else_structure? eol_marker? {pin=2}
+conditional_structure ::= if_structure else_if_structure* else_structure? END eol_marker {
+    pin=1
+    implements="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotFoldable"
+    mixin="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotConditionalStructureExtension"
+}
+private conditional_inline_structure ::= inline_if_structure inline_else_if_structure* inline_if_else_structure? eol_marker? {pin=1}
 if_structure ::= IF conditional_content eol_marker executable_statement* {
     pin=3
-    implements=[
-        "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotBlockOpeningStructure"
-        "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotFoldable"
-    ]
-    mixin="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotIfStructureExtension"
+    implements="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotBlockOpeningStructure"
 }
 inline_if_structure ::= IF conditional_content EOS call_structure {
     pin=3
@@ -279,11 +279,7 @@ inline_if_structure ::= IF conditional_content EOS call_structure {
 }
 else_if_structure ::= ELSE_IF conditional_content eol_marker executable_statement* {
     pin=3
-    implements=[
-        "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotBlockOpeningStructure"
-        "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotFoldable"
-    ]
-    mixin="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotElseIfStructureExtension"
+    implements="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotBlockOpeningStructure"
 }
 inline_else_if_structure ::= ELSE_IF conditional_content EOS call_structure {
     pin=3
