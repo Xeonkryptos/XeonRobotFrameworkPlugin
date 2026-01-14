@@ -1,4 +1,4 @@
-package dev.xeonkryptos.xeonrobotframeworkplugin.inspections.compilation;
+package dev.xeonkryptos.xeonrobotframeworkplugin.annotator.compilation;
 
 import com.intellij.codeInsight.intention.PsiElementBaseIntentionAction;
 import com.intellij.codeInspection.util.IntentionFamilyName;
@@ -25,7 +25,7 @@ class InsertMissingMandatoryKeywordParametersQuickFix extends PsiElementBaseInte
 
     public InsertMissingMandatoryKeywordParametersQuickFix(Collection<String> missingRequiredParameters) {
         this.missingRequiredParameters = missingRequiredParameters;
-        setText(RobotBundle.message("intention.family.insert.text.keyword.missing-required-parameters"));
+        setText(RobotBundle.message("intention.family.insert.keyword.missing-required-parameters.text"));
     }
 
     @Override
@@ -64,6 +64,6 @@ class InsertMissingMandatoryKeywordParametersQuickFix extends PsiElementBaseInte
     @Override
     @IntentionFamilyName
     public String getFamilyName() {
-        return RobotBundle.message("intention.family.insert.name.keyword.missing-required-parameters");
+        return RobotBundle.message("intention.family.insert.keyword.missing-required-parameters.name");
     }
 }

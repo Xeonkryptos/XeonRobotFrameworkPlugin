@@ -1,4 +1,4 @@
-package dev.xeonkryptos.xeonrobotframeworkplugin.inspections.highlight;
+package dev.xeonkryptos.xeonrobotframeworkplugin.annotator.highlight;
 
 import com.intellij.lang.annotation.HighlightSeverity;
 import com.intellij.psi.PsiElement;

@@ -1,8 +1,8 @@
-package dev.xeonkryptos.xeonrobotframeworkplugin.inspections.compilation
+package dev.xeonkryptos.xeonrobotframeworkplugin.annotator.compilation
 
 import com.intellij.lang.annotation.HighlightSeverity
 import dev.xeonkryptos.xeonrobotframeworkplugin.RobotBundle
-import dev.xeonkryptos.xeonrobotframeworkplugin.inspections.RobotAnnotator
+import dev.xeonkryptos.xeonrobotframeworkplugin.annotator.RobotAnnotator
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotForLoopStructure
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotForLoopStructureFillParameter
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotForLoopStructureModeParameter
@@ -22,6 +22,7 @@ class DuplicatedDefinedForLoopParameterSettingsAnnotator : RobotAnnotator() {
         definedFillParameters = localDefinedFillParameters
         definedModeParameters = localDefinedModeParameters
         definedStartParameters = localDefinedStartParameters
+
         for (parameter in o.forLoopStructureParameterList) {
             parameter.accept(this)
         }
@@ -35,9 +36,6 @@ class DuplicatedDefinedForLoopParameterSettingsAnnotator : RobotAnnotator() {
         if (localDefinedStartParameters.size > 1) {
             localDefinedStartParameters.forEach { holder.newAnnotation(HighlightSeverity.ERROR, RobotBundle.message("annotation.for-loop.parameter.duplicated", "start")).range(it).create() }
         }
-
-        definedFillParameters = null
-        definedModeParameters = null
     }
 
     override fun visitForLoopStructureParameter(o: RobotForLoopStructureParameter) {
@@ -54,5 +52,11 @@ class DuplicatedDefinedForLoopParameterSettingsAnnotator : RobotAnnotator() {
 
     override fun visitForLoopStructureStartParameter(o: RobotForLoopStructureStartParameter) {
         definedStartParameters?.add(o)
+    }
+
+    override fun resetState() {
+        definedFillParameters = null
+        definedModeParameters = null
+        definedStartParameters = null
     }
 }

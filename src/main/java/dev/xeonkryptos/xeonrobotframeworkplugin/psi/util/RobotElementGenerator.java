@@ -173,10 +173,14 @@ public record RobotElementGenerator(Project project) {
     }
 
     public RobotVariable createNewScalarVariable(String variableBodyId) {
+        return createNewScalarVariable(variableBodyId, "");
+    }
+
+    public RobotVariable createNewScalarVariable(String variableBodyId, String extensionText) {
         String fileContent = """
                              *** Variables ***
-                             ${%s}=  DUMMY
-                             """.formatted(variableBodyId);
+                             ${%s}%s=  DUMMY
+                             """.formatted(variableBodyId, extensionText);
 
         PsiFile psiFile = createDummyPsiFile(fileContent);
         if (psiFile == null) {

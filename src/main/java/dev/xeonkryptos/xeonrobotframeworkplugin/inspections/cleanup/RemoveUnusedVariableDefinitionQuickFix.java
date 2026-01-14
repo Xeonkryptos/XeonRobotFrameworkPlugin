@@ -29,7 +29,7 @@ public class RemoveUnusedVariableDefinitionQuickFix extends LocalQuickFixOnPsiEl
     @Override
     @IntentionName
     public String getText() {
-        return RobotBundle.message("intention.family.remove.text.unused-variable");
+        return RobotBundle.message("intention.family.remove.unused-variable.text");
     }
 
     @Override
@@ -110,6 +110,6 @@ public class RemoveUnusedVariableDefinitionQuickFix extends LocalQuickFixOnPsiEl
     @IntentionFamilyName
     @Override
     public String getFamilyName() {
-        return RobotBundle.message("intention.family.remove.name.unused");
+        return RobotBundle.message("intention.family.remov.unusede.name");
     }
 }

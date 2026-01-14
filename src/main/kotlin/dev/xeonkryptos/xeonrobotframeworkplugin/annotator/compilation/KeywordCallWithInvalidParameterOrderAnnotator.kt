@@ -1,9 +1,9 @@
-package dev.xeonkryptos.xeonrobotframeworkplugin.inspections.compilation
+package dev.xeonkryptos.xeonrobotframeworkplugin.annotator.compilation
 
 import com.intellij.codeInspection.ProblemHighlightType
 import com.intellij.lang.annotation.HighlightSeverity
 import dev.xeonkryptos.xeonrobotframeworkplugin.RobotBundle
-import dev.xeonkryptos.xeonrobotframeworkplugin.inspections.RobotAnnotator
+import dev.xeonkryptos.xeonrobotframeworkplugin.annotator.RobotAnnotator
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCall
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotParameter
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.visitor.RobotCallArgumentsCollector

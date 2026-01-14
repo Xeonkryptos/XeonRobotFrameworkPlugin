@@ -1,7 +1,7 @@
-package dev.xeonkryptos.xeonrobotframeworkplugin.inspections.highlight;
+package dev.xeonkryptos.xeonrobotframeworkplugin.annotator.highlight;
 
 import com.intellij.psi.util.PsiTreeUtil;
-import dev.xeonkryptos.xeonrobotframeworkplugin.inspections.RobotAnnotator;
+import dev.xeonkryptos.xeonrobotframeworkplugin.annotator.RobotAnnotator;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.DefinedVariable;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotDictVariable;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotListVariable;

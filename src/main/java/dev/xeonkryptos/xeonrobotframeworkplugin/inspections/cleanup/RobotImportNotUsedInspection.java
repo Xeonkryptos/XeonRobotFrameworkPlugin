@@ -18,7 +18,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Collection;
 import java.util.List;
 
-public class RobotImportNotUsed extends LocalInspectionTool {
+public class RobotImportNotUsedInspection extends LocalInspectionTool {
 
     @NotNull
     @Override

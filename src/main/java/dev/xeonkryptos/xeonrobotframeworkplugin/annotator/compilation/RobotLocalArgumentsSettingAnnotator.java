@@ -1,11 +1,17 @@
-package dev.xeonkryptos.xeonrobotframeworkplugin.inspections.compilation;
+package dev.xeonkryptos.xeonrobotframeworkplugin.annotator.compilation;
 
+import com.intellij.codeInsight.intention.PsiElementBaseIntentionAction;
 import com.intellij.codeInspection.ProblemHighlightType;
+import com.intellij.codeInspection.util.IntentionFamilyName;
 import com.intellij.lang.annotation.HighlightSeverity;
+import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.progress.ProgressManager;
+import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiElement;
+import com.intellij.psi.util.PsiTreeUtil;
+import com.intellij.util.IncorrectOperationException;
 import dev.xeonkryptos.xeonrobotframeworkplugin.RobotBundle;
-import dev.xeonkryptos.xeonrobotframeworkplugin.inspections.RobotAnnotator;
+import dev.xeonkryptos.xeonrobotframeworkplugin.annotator.RobotAnnotator;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLocalArgumentsSetting;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLocalArgumentsSettingParameter;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLocalArgumentsSettingParameterMandatory;
@@ -74,6 +80,37 @@ public class RobotLocalArgumentsSettingAnnotator extends RobotAnnotator {
             } else if (keywordOnlyMarkerFound) {
                 invalidVariableDefinitions.add(o);
             }
+        }
+    }
+
+    private static class RemoveMoreThanOnceDefinedKeywordOnlyMarkersQuickFix extends PsiElementBaseIntentionAction {
+
+        public RemoveMoreThanOnceDefinedKeywordOnlyMarkersQuickFix() {
+            setText(RobotBundle.message("intention.family.remove.illegal-arguments-setting.keyword-only-markers.text"));
+        }
+
+        @Override
+        public void invoke(@NotNull Project project, Editor editor, @NotNull PsiElement element) throws IncorrectOperationException {
+            RobotVariableDefinition variableDefinition = PsiTreeUtil.getParentOfType(element, RobotVariableDefinition.class);
+            if (variableDefinition != null) {
+                variableDefinition.delete();
+            }
+        }
+
+        @Override
+        public boolean isAvailable(@NotNull Project project, Editor editor, @NotNull PsiElement element) {
+            if (PsiTreeUtil.getParentOfType(element, RobotLocalArgumentsSetting.class) != null) {
+                RobotVariableDefinition variableDefinition = PsiTreeUtil.getParentOfType(element, RobotVariableDefinition.class);
+                return variableDefinition != null && variableDefinition.getName() == null;
+            }
+            return false;
+        }
+
+        @NotNull
+        @Override
+        @IntentionFamilyName
+        public String getFamilyName() {
+            return RobotBundle.message("intention.family.remove.illegal-arguments-setting.keyword-only-markers.name");
         }
     }
 }

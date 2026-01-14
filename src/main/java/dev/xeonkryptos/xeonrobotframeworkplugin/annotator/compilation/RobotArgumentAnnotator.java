@@ -1,11 +1,11 @@
-package dev.xeonkryptos.xeonrobotframeworkplugin.inspections.compilation;
+package dev.xeonkryptos.xeonrobotframeworkplugin.annotator.compilation;
 
 import com.intellij.codeInspection.ProblemHighlightType;
 import com.intellij.lang.annotation.AnnotationHolder;
 import com.intellij.lang.annotation.HighlightSeverity;
 import com.intellij.psi.util.PsiTreeUtil;
 import dev.xeonkryptos.xeonrobotframeworkplugin.RobotBundle;
-import dev.xeonkryptos.xeonrobotframeworkplugin.inspections.RobotAnnotator;
+import dev.xeonkryptos.xeonrobotframeworkplugin.annotator.RobotAnnotator;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotArgument;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotElement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCall;

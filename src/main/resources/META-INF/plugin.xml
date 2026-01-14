@@ -85,8 +85,8 @@
                                  implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.manipulator.RobotTemplateParameterIdManipulator"/>
 
         <!-- Annotations -->
-        <annotator language="Robot" implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.inspections.RobotAnnotatingVisitor"/>
-        <annotator language="Robot" implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.inspections.RobotDumbAwareAnnotatingVisitor"/>
+        <annotator language="Robot" implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.annotator.RobotAnnotatingVisitor"/>
+        <annotator language="Robot" implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.annotator.RobotDumbAwareAnnotatingVisitor"/>
 
         <!-- Inspections -->
         <!-- TODO: inspection: error?: resource import is not a robot file -->
@@ -94,7 +94,7 @@
         <!-- Inspections: Cleanup -->
         <localInspection language="Robot" shortName="RobotImportNotUsed" bundle="messages.RobotBundle" key="INSP.NAME.import.unused" groupPath="Robot"
                          groupKey="INSP.GROUP.robot" enabledByDefault="true" level="WARNING" dumbAware="true"
-                         implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.inspections.cleanup.RobotImportNotUsed"/>
+                         implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.inspections.cleanup.RobotImportNotUsedInspection"/>
         <localInspection language="Robot" shortName="RobotUnusedVariableDefinition" bundle="messages.RobotBundle" key="INSP.NAME.variable.unused"
                          groupPath="Robot"
                          groupKey="INSP.GROUP.robot" enabledByDefault="true" level="WARNING" dumbAware="false"
