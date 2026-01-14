@@ -172,7 +172,7 @@
 
         <configurationType implementation="dev.xeonkryptos.xeonrobotframeworkplugin.execution.config.RobotRunConfigurationType"/>
 
-        <spellchecker.support language="Robot" implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.misc.RobotSpellcheckingStrategy"/>
+        <spellchecker.support language="Robot" implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.spellchecker.RobotSpellcheckingStrategy"/>
 
         <xdebugger.breakpointType implementation="dev.xeonkryptos.xeonrobotframeworkplugin.debugger.breakpoint.RobotLineBreakpointType"/>
         <xdebugger.breakpointType implementation="dev.xeonkryptos.xeonrobotframeworkplugin.debugger.breakpoint.RobotExceptionBreakpointType"/>
