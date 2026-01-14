@@ -4,5 +4,5 @@ import com.intellij.psi.PsiElement;
 
 public interface RobotImportGlobalSettingExpression extends PsiElement {
 
-    RobotPositionalArgument getImportedFile();
+    RobotImportArgument getImportedFile();
 }

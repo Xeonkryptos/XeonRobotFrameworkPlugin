@@ -5,9 +5,9 @@ import com.intellij.psi.tree.IElementType;
 import com.intellij.psi.PsiElement;
 import com.intellij.lang.ASTNode;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotDictVariableStubElement;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotImportArgumentStubElement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotKeywordCallStubElement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotListVariableStubElement;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotPositionalArgumentStubElement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotScalarVariableStubElement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotTaskStatementStubElement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotTestCaseStatementStubElement;
@@ -39,6 +39,7 @@ public interface RobotTypes {
   IElementType GROUP_STRUCTURE = new RobotElementType("GROUP_STRUCTURE");
   IElementType IF_STRUCTURE = new RobotElementType("IF_STRUCTURE");
   IElementType IF_VARIABLE_STATEMENT = new RobotElementType("IF_VARIABLE_STATEMENT");
+  IElementType IMPORT_ARGUMENT = RobotImportArgumentStubElement.create("IMPORT_ARGUMENT");
   IElementType INLINE_ELSE_IF_STRUCTURE = new RobotElementType("INLINE_ELSE_IF_STRUCTURE");
   IElementType INLINE_IF_ELSE_STRUCTURE = new RobotElementType("INLINE_IF_ELSE_STRUCTURE");
   IElementType INLINE_IF_STRUCTURE = new RobotElementType("INLINE_IF_STRUCTURE");
@@ -63,7 +64,7 @@ public interface RobotTypes {
   IElementType NEW_LIBRARY_NAME = new RobotElementType("NEW_LIBRARY_NAME");
   IElementType PARAMETER = new RobotElementType("PARAMETER");
   IElementType PARAMETER_ID = new RobotElementType("PARAMETER_ID");
-  IElementType POSITIONAL_ARGUMENT = RobotPositionalArgumentStubElement.create("POSITIONAL_ARGUMENT");
+  IElementType POSITIONAL_ARGUMENT = new RobotElementType("POSITIONAL_ARGUMENT");
   IElementType PYTHON_EXPRESSION = new RobotElementType("PYTHON_EXPRESSION");
   IElementType RESOURCE_IMPORT_GLOBAL_SETTING = new RobotElementType("RESOURCE_IMPORT_GLOBAL_SETTING");
   IElementType ROOT = new RobotElementType("ROOT");
@@ -239,6 +240,9 @@ public interface RobotTypes {
       }
       else if (type == IF_VARIABLE_STATEMENT) {
         return new RobotIfVariableStatementImpl(node);
+      }
+      else if (type == IMPORT_ARGUMENT) {
+        return new RobotImportArgumentImpl(node);
       }
       else if (type == INLINE_ELSE_IF_STRUCTURE) {
         return new RobotInlineElseIfStructureImpl(node);

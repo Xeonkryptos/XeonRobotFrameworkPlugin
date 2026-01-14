@@ -30,8 +30,8 @@ public class RobotResourceImportGlobalSettingImpl extends RobotGlobalSettingStat
 
   @Override
   @Nullable
-  public RobotPositionalArgument getImportedFile() {
-    return PsiTreeUtil.getChildOfType(this, RobotPositionalArgument.class);
+  public RobotImportArgument getImportedFile() {
+    return PsiTreeUtil.getChildOfType(this, RobotImportArgument.class);
   }
 
   @Override

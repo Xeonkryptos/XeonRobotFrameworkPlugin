@@ -6,6 +6,7 @@ import com.intellij.psi.util.PsiTreeUtil;
 import dev.xeonkryptos.xeonrobotframeworkplugin.icons.RobotIcons;
 import dev.xeonkryptos.xeonrobotframeworkplugin.misc.RobotReadWriteAccessDetector;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotCommentsSection;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotImportArgument;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotInlineVariableStatement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCall;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCallLibraryName;
@@ -38,10 +39,11 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableDefinit
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableStatement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariablesSection;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotTestCaseExtension;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.ref.RobotArgumentReference;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.ref.RobotImportArgumentReference;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.ref.RobotKeywordCallLibraryReference;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.ref.RobotKeywordCallNameReference;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.ref.RobotParameterReference;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.ref.RobotPositionalArgumentReference;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.ref.RobotTemplateParameterReference;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.ref.RobotVariableBodyReference;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.QualifiedNameBuilder;
@@ -173,7 +175,12 @@ public class RobotPsiImplUtil {
 
     @NotNull
     public static PsiReference getReference(RobotPositionalArgument positionalArgument) {
-        return new RobotArgumentReference(positionalArgument);
+        return new RobotPositionalArgumentReference(positionalArgument);
+    }
+
+    @NotNull
+    public static PsiReference getReference(RobotImportArgument importArgument) {
+        return new RobotImportArgumentReference(importArgument);
     }
 
     @NotNull

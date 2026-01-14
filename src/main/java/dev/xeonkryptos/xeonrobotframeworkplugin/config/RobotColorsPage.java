@@ -79,11 +79,11 @@ public class RobotColorsPage implements ColorSettingsPage {
                *** Test Cases ***
                Addition
                  [Tags]  Calculator
-                   Given calculator has been cleared
+                   Given  calculator has been cleared
                    \
                When user types "1 + 1"
-                   And user pushes equals
-                   Then result is "2"
+                   And  user pushes equals
+                   Then  result is "2"
                
                #Subtraction
                #  [Tags]  Calculator

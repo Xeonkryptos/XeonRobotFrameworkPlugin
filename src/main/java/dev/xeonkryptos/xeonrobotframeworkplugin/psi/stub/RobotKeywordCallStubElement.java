@@ -1,6 +1,5 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub;
 
-import com.intellij.lang.ASTNode;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.stubs.IStubElementType;
 import com.intellij.psi.stubs.IndexSink;
@@ -42,11 +41,6 @@ public class RobotKeywordCallStubElement extends IStubElementType<RobotKeywordCa
         String libraryName = keywordCallLibrary != null ? keywordCallLibrary.getKeywordCallLibraryName().getText() : null;
         String fullKeywordName = psi.getName();
         return new RobotKeywordCallStubImpl(parentStub, libraryName, fullKeywordName);
-    }
-
-    @Override
-    public boolean shouldCreateStub(ASTNode node) {
-        return node.getPsi() instanceof RobotKeywordCall;
     }
 
     @NotNull

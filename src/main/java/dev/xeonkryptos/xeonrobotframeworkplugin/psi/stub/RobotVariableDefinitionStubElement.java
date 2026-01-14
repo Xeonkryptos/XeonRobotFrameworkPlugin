@@ -43,7 +43,9 @@ public class RobotVariableDefinitionStubElement extends IStubElementType<RobotVa
 
     @Override
     public boolean shouldCreateStub(ASTNode node) {
-        return node.getPsi() instanceof RobotVariableDefinition variableDefinition && variableDefinition.getName() != null;
+        RobotVariableDefinition variableDefinition = node.getPsi(RobotVariableDefinition.class);
+        String definitionName = variableDefinition.getName();
+        return definitionName != null && !definitionName.isBlank();
     }
 
     @NotNull

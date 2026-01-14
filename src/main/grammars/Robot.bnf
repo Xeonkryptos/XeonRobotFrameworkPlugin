@@ -80,19 +80,19 @@ global_setting_statement ::= library_import_global_setting
     name="Resource, Library, Variables, Metadata, Documentation, Name, Suite (Setup | Teardown), Force Tags, (Test | Task) Template, (Test | Task) Timeout"
 }
 
-library_import_global_setting ::= LIBRARY_IMPORT_KEYWORD positional_argument (parameter | positional_argument)* (WITH_NAME new_library_name)? eol_marker {
+library_import_global_setting ::= LIBRARY_IMPORT_KEYWORD import_argument (parameter | positional_argument)* (WITH_NAME new_library_name)? eol_marker {
     pin=1
-    methods=[importedFile="/positional_argument[0]" nameElement="LIBRARY_IMPORT_KEYWORD" libraryNameElement="WITH_NAME"]
+    methods=[importedFile="import_argument" nameElement="LIBRARY_IMPORT_KEYWORD" libraryNameElement="WITH_NAME"]
 }
 new_library_name ::= LITERAL_CONSTANT
 
-resource_import_global_setting ::= RESOURCE_IMPORT_KEYWORD positional_argument eol_marker {
+resource_import_global_setting ::= RESOURCE_IMPORT_KEYWORD import_argument eol_marker {
     pin=1
-    methods=[importedFile="positional_argument" nameElement="RESOURCE_IMPORT_KEYWORD"]
+    methods=[importedFile="import_argument" nameElement="RESOURCE_IMPORT_KEYWORD"]
 }
-variables_import_global_setting ::= VARIABLES_IMPORT_KEYWORD positional_argument (parameter | positional_argument)* eol_marker {
+variables_import_global_setting ::= VARIABLES_IMPORT_KEYWORD import_argument (parameter | positional_argument)* eol_marker {
     pin=1
-    methods=[importedFile="/positional_argument[0]" nameElement="VARIABLES_IMPORT_KEYWORD"]
+    methods=[importedFile="import_argument" nameElement="VARIABLES_IMPORT_KEYWORD"]
 }
 suite_name_statement_global_setting ::= SUITE_NAME_KEYWORD LITERAL_CONSTANT eol_marker {
     pin=1
@@ -370,11 +370,15 @@ keyword_variable_statement ::= variable_definition+ ASSIGNMENT? eol_based_keywor
 if_variable_statement ::= variable_definition+ ASSIGNMENT? conditional_inline_structure {pin=3}
 variable_value ::= variable | positional_argument
 
+import_argument ::= external_positional_argument EOS? {
+    implements="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotArgument"
+    mixin = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotImportArgumentExtension"
+    stubClass = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotImportArgumentStub"
+    elementTypeFactory = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotImportArgumentStubElement.create"
+    methods = [getReference]
+}
 positional_argument ::= external_positional_argument EOS? {
     implements="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotArgument"
-    mixin = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotPositionalArgumentExtension"
-    stubClass = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotPositionalArgumentStub"
-    elementTypeFactory = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotPositionalArgumentStubElement.create"
     methods = [getReference]
 }
 external external_positional_argument ::= parsePositionalArgument positional_argument_content

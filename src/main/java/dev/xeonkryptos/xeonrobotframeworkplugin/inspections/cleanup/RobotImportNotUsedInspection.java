@@ -9,7 +9,7 @@ import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.PsiFile;
 import dev.xeonkryptos.xeonrobotframeworkplugin.RobotBundle;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotFile;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotPositionalArgument;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotImportArgument;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotResourceImportGlobalSetting;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVisitor;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.visitor.RobotImportStatementsCollector;
@@ -27,24 +27,24 @@ public class RobotImportNotUsedInspection extends LocalInspectionTool {
             @Override
             public void visitResourceImportGlobalSetting(@NotNull RobotResourceImportGlobalSetting o) {
                 super.visitResourceImportGlobalSetting(o);
-                RobotPositionalArgument positionalArgument = o.getImportedFile();
-                if (positionalArgument == null) {
+                RobotImportArgument importArgument = o.getImportedFile();
+                if (importArgument == null) {
                     return;
                 }
-                PsiElement resolvedElement = positionalArgument.getReference().resolve();
+                PsiElement resolvedElement = importArgument.getReference().resolve();
                 if (resolvedElement instanceof RobotFile) {
                     RobotImportStatementsCollector collector = new RobotImportStatementsCollector();
                     resolvedElement.acceptChildren(collector);
                     List<String> importIdentifiers = collector.getImportedFiles();
 
-                    String importText = positionalArgument.getText();
+                    String importText = importArgument.getText();
                     int firstOccurrenceIndex = importIdentifiers.indexOf(importText);
                     int lastOccurrenceIndex = importIdentifiers.lastIndexOf(importText);
 
                     if (firstOccurrenceIndex != lastOccurrenceIndex && collector.getImportElements().indexOf(o) != firstOccurrenceIndex) {
                         holder.registerProblem(o, RobotBundle.message("INSP.import.unused"), ProblemHighlightType.LIKE_UNUSED_SYMBOL);
                     } else {
-                        Collection<PsiFile> filesFromInvokedKeywordsAndVariables = ((RobotFile) positionalArgument.getContainingFile()).getFilesFromInvokedKeywordsAndVariables();
+                        Collection<PsiFile> filesFromInvokedKeywordsAndVariables = ((RobotFile) importArgument.getContainingFile()).getFilesFromInvokedKeywordsAndVariables();
                         PsiFile importedFile = resolvedElement.getContainingFile();
                         if (!filesFromInvokedKeywordsAndVariables.contains(importedFile)) {
                             holder.registerProblem(o, RobotBundle.message("INSP.import.unused"), ProblemHighlightType.LIKE_UNUSED_SYMBOL);

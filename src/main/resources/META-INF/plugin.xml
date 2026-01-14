@@ -30,7 +30,9 @@
         <!--suppress PluginXmlValidity -->
         <additionalTextAttributes scheme="Dark" file="colorSchemes/RobotColorScheme.xml"/>
         <!--suppress PluginXmlValidity -->
-        <additionalTextAttributes scheme="Light" file="colorSchemes/RobotColorScheme.xml"/>
+        <additionalTextAttributes scheme="Light" file="colorSchemes/RobotLightColorScheme.xml"/>
+        <!--suppress PluginXmlValidity -->
+        <additionalTextAttributes scheme="Classic Light" file="colorSchemes/RobotLightColorScheme.xml"/>
         <!--suppress PluginXmlValidity -->
         <additionalTextAttributes scheme="Darcula" file="colorSchemes/RobotColorScheme.xml"/>
 
@@ -58,7 +60,7 @@
         <stubElementTypeHolder class="dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes" externalIdPrefix="robot."/>
         <stubIndex implementation="dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.index.KeywordDefinitionNameIndex"/>
         <stubIndex implementation="dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.index.KeywordCallNameIndex"/>
-        <stubIndex implementation="dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.index.PositionalArgumentImportIndex"/>
+        <stubIndex implementation="dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.index.ImportArgumentIndex"/>
         <stubIndex implementation="dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.index.VariableNameIndex"/>
         <stubIndex implementation="dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.index.VariableDefinitionNameIndex"/>
         <stubIndex implementation="dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.index.TestCaseNameIndex"/>
@@ -73,6 +75,8 @@
         <!-- Manipulators -->
         <lang.elementManipulator forClass="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotPositionalArgument"
                                  implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.manipulator.RobotPositionalArgumentManipulator"/>
+        <lang.elementManipulator forClass="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotImportArgument"
+                                 implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.manipulator.RobotImportArgumentManipulator"/>
         <lang.elementManipulator forClass="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCallName"
                                  implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.manipulator.RobotKeywordCallNameElementManipulator"/>
         <lang.elementManipulator forClass="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCallLibraryName"

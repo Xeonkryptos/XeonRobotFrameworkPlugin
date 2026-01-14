@@ -5,10 +5,10 @@ import com.jetbrains.python.psi.PyClass;
 import com.jetbrains.python.psi.PyFile;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.dto.ImportType;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.KeywordFile;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotImportArgument;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLibraryImportGlobalSetting;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLiteralConstantValue;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotNewLibraryName;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotPositionalArgument;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotResourceImportGlobalSetting;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotRoot;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotSettingsSection;
@@ -42,24 +42,24 @@ public final class RobotImportFilesCollector extends RobotVisitor {
 
     @Override
     public void visitResourceImportGlobalSetting(@NotNull RobotResourceImportGlobalSetting o) {
-        RobotPositionalArgument positionalArgument = o.getImportedFile();
-        if (positionalArgument != null) {
-            RobotBasedKeywordFileSupplier keywordFileSupplier = new RobotBasedKeywordFileSupplier(positionalArgument);
+        RobotImportArgument importArgument = o.getImportedFile();
+        if (importArgument != null) {
+            RobotBasedKeywordFileSupplier keywordFileSupplier = new RobotBasedKeywordFileSupplier(importArgument);
             keywordFileSuppliers.computeIfAbsent(ImportType.RESOURCE, key -> new LinkedHashSet<>()).add(keywordFileSupplier);
         }
     }
 
     @Override
     public void visitLibraryImportGlobalSetting(@NotNull RobotLibraryImportGlobalSetting o) {
-        RobotPositionalArgument positionalArgument = o.getImportedFile();
-        if (positionalArgument != null) {
+        RobotImportArgument importArgument = o.getImportedFile();
+        if (importArgument != null) {
             RobotNewLibraryName newLibraryNameElement = o.getNewLibraryName();
             String newLibraryName = null;
             if (newLibraryNameElement != null) {
                 newLibraryName = newLibraryNameElement.getText();
             }
 
-            PythonBasedKeywordFileSupplier keywordFileSupplier = new PythonBasedKeywordFileSupplier(positionalArgument, ImportType.LIBRARY, newLibraryName);
+            PythonBasedKeywordFileSupplier keywordFileSupplier = new PythonBasedKeywordFileSupplier(importArgument, ImportType.LIBRARY, newLibraryName);
             keywordFileSuppliers.computeIfAbsent(ImportType.LIBRARY, key -> new LinkedHashSet<>()).add(keywordFileSupplier);
         }
     }
@@ -68,11 +68,11 @@ public final class RobotImportFilesCollector extends RobotVisitor {
     public void visitVariablesImportGlobalSetting(@NotNull RobotVariablesImportGlobalSetting o) {
         newLibraryName = null;
 
-        RobotPositionalArgument positionalArgument = o.getImportedFile();
-        if (positionalArgument != null) {
-            positionalArgument.acceptChildren(this);
+        RobotImportArgument importArgument = o.getImportedFile();
+        if (importArgument != null) {
+            importArgument.acceptChildren(this);
 
-            Supplier<KeywordFile> keywordFileSupplier = new PythonBasedKeywordFileSupplier(positionalArgument, ImportType.VARIABLES, newLibraryName);
+            Supplier<KeywordFile> keywordFileSupplier = new PythonBasedKeywordFileSupplier(importArgument, ImportType.VARIABLES, newLibraryName);
             keywordFileSuppliers.computeIfAbsent(ImportType.VARIABLES, key -> new LinkedHashSet<>()).add(keywordFileSupplier);
         }
     }
@@ -86,11 +86,11 @@ public final class RobotImportFilesCollector extends RobotVisitor {
         return keywordFileSuppliers;
     }
 
-    private record RobotBasedKeywordFileSupplier(RobotPositionalArgument positionalArgument) implements Supplier<KeywordFile> {
+    private record RobotBasedKeywordFileSupplier(RobotImportArgument importArgument) implements Supplier<KeywordFile> {
 
         @Override
         public KeywordFile get() {
-            PsiElement resolved = positionalArgument.getReference().resolve();
+            PsiElement resolved = importArgument.getReference().resolve();
             if (resolved instanceof KeywordFile keywordFile) {
                 return keywordFile;
             }
@@ -98,12 +98,12 @@ public final class RobotImportFilesCollector extends RobotVisitor {
         }
     }
 
-    private record PythonBasedKeywordFileSupplier(RobotPositionalArgument positionalArgument, ImportType importType, String libraryName)
+    private record PythonBasedKeywordFileSupplier(RobotImportArgument importArgument, ImportType importType, String libraryName)
             implements Supplier<KeywordFile> {
 
         @Override
         public KeywordFile get() {
-            PsiElement resolved = positionalArgument.getReference().resolve();
+            PsiElement resolved = importArgument.getReference().resolve();
             if (resolved instanceof PyClass pyClass) {
                 return new RobotPythonClass(libraryName, pyClass, importType);
             } else if (resolved instanceof PyFile file) {

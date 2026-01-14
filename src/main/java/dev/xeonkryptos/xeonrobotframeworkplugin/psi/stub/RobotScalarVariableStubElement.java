@@ -45,8 +45,9 @@ public class RobotScalarVariableStubElement extends IStubElementType<RobotScalar
 
     @Override
     public boolean shouldCreateStub(ASTNode node) {
-        return node.getPsi() instanceof RobotScalarVariable variable && variable.getVariableName() != null
-               && !(variable.getParent() instanceof RobotVariableDefinition);
+        RobotScalarVariable scalarVariable = node.getPsi(RobotScalarVariable.class);
+        String variableName = scalarVariable.getVariableName();
+        return variableName != null && !variableName.isBlank() && !(scalarVariable.getParent() instanceof RobotVariableDefinition);
     }
 
     @NotNull

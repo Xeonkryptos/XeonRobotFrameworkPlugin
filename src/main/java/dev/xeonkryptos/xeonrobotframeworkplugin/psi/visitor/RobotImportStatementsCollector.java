@@ -1,8 +1,8 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.psi.visitor;
 
 import com.intellij.psi.PsiElement;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotImportArgument;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLibraryImportGlobalSetting;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotPositionalArgument;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotResourceImportGlobalSetting;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotRoot;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotSection;
@@ -30,33 +30,33 @@ public class RobotImportStatementsCollector extends RobotVisitor {
 
     @Override
     public void visitResourceImportGlobalSetting(@NotNull RobotResourceImportGlobalSetting o) {
-        RobotPositionalArgument positionalArgument = o.getImportedFile();
-        if (positionalArgument != null) {
-            addImportedFile(positionalArgument);
+        RobotImportArgument importArgument = o.getImportedFile();
+        if (importArgument != null) {
+            addImportedFile(importArgument);
             importElements.add(o);
         }
     }
 
     @Override
     public void visitLibraryImportGlobalSetting(@NotNull RobotLibraryImportGlobalSetting o) {
-        RobotPositionalArgument positionalArgument = o.getImportedFile();
-        if (positionalArgument != null) {
-            addImportedFile(positionalArgument);
+        RobotImportArgument importArgument = o.getImportedFile();
+        if (importArgument != null) {
+            addImportedFile(importArgument);
             importElements.add(o);
         }
     }
 
     @Override
     public void visitVariablesImportGlobalSetting(@NotNull RobotVariablesImportGlobalSetting o) {
-        RobotPositionalArgument positionalArgument = o.getImportedFile();
-        if (positionalArgument != null) {
-            addImportedFile(positionalArgument);
+        RobotImportArgument importArgument = o.getImportedFile();
+        if (importArgument != null) {
+            addImportedFile(importArgument);
             importElements.add(o);
         }
     }
 
-    private void addImportedFile(RobotPositionalArgument positionalArgument) {
-        String importedFile = positionalArgument.getText();
+    private void addImportedFile(RobotImportArgument importArgument) {
+        String importedFile = importArgument.getText();
         importedFiles.add(importedFile);
     }
 

@@ -12,8 +12,8 @@ import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.psi.search.searches.ReferencesSearch.SearchParameters;
 import com.intellij.util.Processor;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotFile;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotPositionalArgument;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.index.PositionalArgumentImportIndex;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotImportArgument;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.index.ImportArgumentIndex;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
@@ -50,11 +50,9 @@ public class RobotImportArgumentReferenceSearch extends QueryExecutorBase<PsiRef
                 } while (relativePath == null && index < contentRoots.length);
 
                 if (relativePath != null) {
-                    PositionalArgumentImportIndex positionalArgumentImportIndex = PositionalArgumentImportIndex.getInstance();
-                    Collection<RobotPositionalArgument> matchingArguments = positionalArgumentImportIndex.getPositionalArgumentForImport(relativePath,
-                                                                                                                                         project,
-                                                                                                                                         globalSearchScope);
-                    for (RobotPositionalArgument argument : matchingArguments) {
+                    ImportArgumentIndex importArgumentIndex = ImportArgumentIndex.getInstance();
+                    Collection<RobotImportArgument> matchingArguments = importArgumentIndex.getImportArgument(relativePath, project, globalSearchScope);
+                    for (RobotImportArgument argument : matchingArguments) {
                         if (argument != null && !consumer.process(argument.getReference())) {
                             return;
                         }

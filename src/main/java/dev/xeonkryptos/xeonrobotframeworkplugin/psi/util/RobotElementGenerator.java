@@ -10,6 +10,7 @@ import com.intellij.psi.impl.PsiFileFactoryImpl;
 import com.intellij.testFramework.LightVirtualFile;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotFeatureFileType;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotLanguage;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotImportArgument;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCallLibraryName;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCallName;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotParameter;
@@ -172,6 +173,21 @@ public record RobotElementGenerator(Project project) {
         return positionalArgumentFinder.positionalArgument;
     }
 
+    public RobotImportArgument createNewImportArgument(String importArgument) {
+        String fileContent = """
+                             *** Settings ***
+                             Resource %s
+                             """.formatted(importArgument);
+
+        PsiFile psiFile = createDummyPsiFile(fileContent);
+        if (psiFile == null) {
+            return null;
+        }
+        RobotImportArgumentFinder importArgumentFinder = new RobotImportArgumentFinder();
+        psiFile.acceptChildren(importArgumentFinder);
+        return importArgumentFinder.importArgument;
+    }
+
     public RobotVariable createNewScalarVariable(String variableBodyId) {
         return createNewScalarVariable(variableBodyId, "");
     }
@@ -316,6 +332,16 @@ public record RobotElementGenerator(Project project) {
         @Override
         public void visitPositionalArgument(@NotNull RobotPositionalArgument o) {
             positionalArgument = o;
+        }
+    }
+
+    private static final class RobotImportArgumentFinder extends RecursiveRobotVisitor {
+
+        private RobotImportArgument importArgument;
+
+        @Override
+        public void visitImportArgument(@NotNull RobotImportArgument o) {
+            importArgument = o;
         }
     }
 

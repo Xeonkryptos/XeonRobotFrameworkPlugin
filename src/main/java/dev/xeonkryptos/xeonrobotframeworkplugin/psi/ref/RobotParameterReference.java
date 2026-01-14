@@ -1,16 +1,15 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.psi.ref;
 
 import com.intellij.psi.PsiElement;
-import com.intellij.psi.PsiReference;
 import com.intellij.psi.PsiReferenceBase;
 import com.intellij.psi.impl.source.resolve.ResolveCache;
 import com.intellij.psi.util.PsiTreeUtil;
 import com.jetbrains.python.psi.PyClass;
 import dev.xeonkryptos.xeonrobotframeworkplugin.config.RobotOptionsProvider;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotImportArgument;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCall;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLibraryImportGlobalSetting;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotParameterId;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotPositionalArgument;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -18,7 +17,7 @@ import java.text.Collator;
 import java.util.Arrays;
 import java.util.Objects;
 
-public class RobotParameterReference extends PsiReferenceBase<RobotParameterId> implements PsiReference {
+public class RobotParameterReference extends PsiReferenceBase<RobotParameterId> {
 
     public RobotParameterReference(@NotNull RobotParameterId parameter) {
         super(parameter, false);
@@ -52,7 +51,7 @@ public class RobotParameterReference extends PsiReferenceBase<RobotParameterId> 
                                                                     String parameterName) {
         RobotLibraryImportGlobalSetting importSetting = PsiTreeUtil.getParentOfType(parameterId, RobotLibraryImportGlobalSetting.class);
         if (importSetting != null) {
-            RobotPositionalArgument importedFile = importSetting.getImportedFile();
+            RobotImportArgument importedFile = importSetting.getImportedFile();
             if (importedFile != null) {
                 PsiElement resolvedImport = importedFile.getReference().resolve();
                 if (resolvedImport instanceof PyClass pyClass) {

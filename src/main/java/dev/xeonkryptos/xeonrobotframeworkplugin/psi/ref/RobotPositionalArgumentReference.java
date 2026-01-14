@@ -3,12 +3,8 @@ package dev.xeonkryptos.xeonrobotframeworkplugin.psi.ref;
 import com.intellij.codeInsight.lookup.LookupElement;
 import com.intellij.codeInsight.lookup.LookupElementBuilder;
 import com.intellij.icons.AllIcons.Nodes;
-import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiElement;
-import com.intellij.psi.PsiElementResolveResult;
-import com.intellij.psi.PsiFile;
-import com.intellij.psi.PsiPolyVariantReferenceBase;
-import com.intellij.psi.ResolveResult;
+import com.intellij.psi.PsiReferenceBase;
 import com.intellij.psi.impl.source.resolve.ResolveCache;
 import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.util.ArrayUtilRt;
@@ -29,13 +25,10 @@ import com.jetbrains.python.psi.PyTupleExpression;
 import dev.xeonkryptos.xeonrobotframeworkplugin.completion.CompletionKeys;
 import dev.xeonkryptos.xeonrobotframeworkplugin.completion.RobotLookupContext;
 import dev.xeonkryptos.xeonrobotframeworkplugin.completion.RobotLookupElementType;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotResourceFileType;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLibraryImportGlobalSetting;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotParameter;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotPositionalArgument;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotResourceImportGlobalSetting;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariablesImportGlobalSetting;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -45,45 +38,29 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
 
-public class RobotArgumentReference extends PsiPolyVariantReferenceBase<RobotPositionalArgument> {
+public class RobotPositionalArgumentReference extends PsiReferenceBase<RobotPositionalArgument> {
 
-    public RobotArgumentReference(@NotNull RobotPositionalArgument positionalArgument) {
+    public RobotPositionalArgumentReference(@NotNull RobotPositionalArgument positionalArgument) {
         super(positionalArgument);
     }
 
+    @Nullable
     @Override
-    public ResolveResult @NotNull [] multiResolve(boolean incompleteCode) {
-        return ResolveCache.getInstance(getElement().getProject())
-                           .resolveWithCaching(this, (resolver, incompCode) -> multiResolve(getElement()), false, incompleteCode);
-    }
-
-    private static ResolveResult @NotNull [] multiResolve(RobotPositionalArgument positionalArgument) {
-        Project project = positionalArgument.getProject();
-        PsiElement parent = positionalArgument.getParent();
-        String argumentValue = positionalArgument.getText();
-
-        Set<ResolveResult> results = new LinkedHashSet<>();
-        if (parent instanceof RobotResourceImportGlobalSetting resourceImport) {
-            PsiFile containingFile = resourceImport.getContainingFile();
-            PsiFile resourceFile = ResourceFileImportFinder.getInstance(project)
-                                                           .findFileInFileSystem(argumentValue, containingFile, RobotResourceFileType.getInstance());
-            if (resourceFile != null) {
-                results.add(new PsiElementResolveResult(resourceFile));
-            }
-        } else if (parent instanceof RobotLibraryImportGlobalSetting || parent instanceof RobotVariablesImportGlobalSetting) {
-            PsiFile containingFile = parent.getContainingFile();
-            PsiFile resourceFile = ResourceFileImportFinder.getInstance(project).findFileInFileSystem(argumentValue, containingFile);
-            if (resourceFile != null) {
-                results.add(new PsiElementResolveResult(resourceFile));
-            } else {
-                // File not directly found in file system. Try to find it in module search path (e.g. for classes or modules)
-                PsiElement result = PythonResolver.resolveElement(argumentValue, project);
-                if (result != null) {
-                    results.add(new PsiElementResolveResult(result));
+    public PsiElement resolve() {
+        RobotPositionalArgument positionalArgument = getElement();
+        return ResolveCache.getInstance(positionalArgument.getProject()).resolveWithCaching(this, (reference, incompleteCode) -> {
+            Object[] variants = getVariants();
+            if (variants.length > 0) {
+                String enumValue = positionalArgument.getText();
+                for (Object variant : variants) {
+                    LookupElement lookupElement = (LookupElement) variant;
+                    if (lookupElement.getAllLookupStrings().contains(enumValue)) {
+                        return lookupElement.getPsiElement();
+                    }
                 }
             }
-        }
-        return results.toArray(ResolveResult.EMPTY_ARRAY);
+            return null;
+        }, false, false);
     }
 
     @Override
@@ -107,9 +84,9 @@ public class RobotArgumentReference extends PsiPolyVariantReferenceBase<RobotPos
         return ArrayUtilRt.EMPTY_OBJECT_ARRAY;
     }
 
-    private Stream<?> handleResolvedEnumExpression(PsiElement resolvedExpression) {
+    private Stream<LookupElement> handleResolvedEnumExpression(PsiElement resolvedExpression) {
         if (isEnumConstructor(resolvedExpression)) {
-            return ((PyClass) resolvedExpression).getClassAttributes().stream().map(RobotArgumentReference::createEnumLookupElement);
+            return ((PyClass) resolvedExpression).getClassAttributes().stream().map(RobotPositionalArgumentReference::createEnumLookupElement);
         }
         PyFunctionalEnumElementVisitor pyElementVisitor = new PyFunctionalEnumElementVisitor();
         resolvedExpression.accept(pyElementVisitor);
@@ -117,11 +94,11 @@ public class RobotArgumentReference extends PsiPolyVariantReferenceBase<RobotPos
     }
 
     private static LookupElementBuilder createEnumLookupElement(PyTargetExpression targetExpression) {
-        return createEnumLookupElement(LookupElementBuilder.create(targetExpression));
+        return createEnumLookupElement(LookupElementBuilder.createWithSmartPointer(targetExpression.getText(), targetExpression));
     }
 
-    private static LookupElementBuilder createEnumLookupElement(String enumExpression) {
-        return createEnumLookupElement(LookupElementBuilder.create(enumExpression));
+    private static LookupElementBuilder createEnumLookupElement(String enumExpression, PsiElement pointerElement) {
+        return createEnumLookupElement(LookupElementBuilder.createWithSmartPointer(enumExpression, pointerElement));
     }
 
     private static LookupElementBuilder createEnumLookupElement(LookupElementBuilder enumElementBuilder) {
@@ -218,7 +195,7 @@ public class RobotArgumentReference extends PsiPolyVariantReferenceBase<RobotPos
             String enumValue = node.getStringValue();
             if (!enumValue.isBlank()) {
                 String[] partedEnumValues = enumValue.split("[,\\s]+");
-                Arrays.stream(partedEnumValues).map(RobotArgumentReference::createEnumLookupElement).forEach(extractedEnumValues::add);
+                Arrays.stream(partedEnumValues).map(enumEntry -> createEnumLookupElement(enumEntry, node)).forEach(extractedEnumValues::add);
             }
         }
     }

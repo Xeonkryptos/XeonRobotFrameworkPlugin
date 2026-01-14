@@ -11,15 +11,21 @@ import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.*;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.*;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotPsiImplUtil;
 import com.intellij.psi.PsiReference;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotImportArgumentStub;
+import com.intellij.psi.stubs.IStubElementType;
 
-public class RobotPositionalArgumentImpl extends RobotPsiElementBase implements RobotPositionalArgument {
+public class RobotImportArgumentImpl extends RobotImportArgumentExtension implements RobotImportArgument {
 
-  public RobotPositionalArgumentImpl(@NotNull ASTNode node) {
+  public RobotImportArgumentImpl(@NotNull ASTNode node) {
     super(node);
   }
 
+  public RobotImportArgumentImpl(RobotImportArgumentStub stub, IStubElementType<RobotImportArgumentStub, RobotImportArgument> type) {
+    super(stub, type);
+  }
+
   public void accept(@NotNull RobotVisitor visitor) {
-    visitor.visitPositionalArgument(this);
+    visitor.visitImportArgument(this);
   }
 
   @Override

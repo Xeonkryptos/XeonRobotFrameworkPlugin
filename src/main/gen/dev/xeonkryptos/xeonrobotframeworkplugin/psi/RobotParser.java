@@ -1073,6 +1073,25 @@ public class RobotParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
+  // external_positional_argument EOS?
+  public static boolean import_argument(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "import_argument")) return false;
+    boolean r;
+    Marker m = enter_section_(b, l, _NONE_, IMPORT_ARGUMENT, "<import argument>");
+    r = parsePositionalArgument(b, l + 1, RobotParser::positional_argument_content);
+    r = r && import_argument_1(b, l + 1);
+    exit_section_(b, l, m, r, false, null);
+    return r;
+  }
+
+  // EOS?
+  private static boolean import_argument_1(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "import_argument_1")) return false;
+    consumeToken(b, EOS);
+    return true;
+  }
+
+  /* ********************************************************** */
   // ELSE_IF conditional_content EOS call_structure
   public static boolean inline_else_if_structure(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "inline_else_if_structure")) return false;
@@ -1298,7 +1317,7 @@ public class RobotParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // LIBRARY_IMPORT_KEYWORD positional_argument (parameter | positional_argument)* (WITH_NAME new_library_name)? eol_marker
+  // LIBRARY_IMPORT_KEYWORD import_argument (parameter | positional_argument)* (WITH_NAME new_library_name)? eol_marker
   public static boolean library_import_global_setting(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "library_import_global_setting")) return false;
     if (!nextTokenIs(b, LIBRARY_IMPORT_KEYWORD)) return false;
@@ -1306,7 +1325,7 @@ public class RobotParser implements PsiParser, LightPsiParser {
     Marker m = enter_section_(b, l, _NONE_, LIBRARY_IMPORT_GLOBAL_SETTING, null);
     r = consumeToken(b, LIBRARY_IMPORT_KEYWORD);
     p = r; // pin = 1
-    r = r && report_error_(b, positional_argument(b, l + 1));
+    r = r && report_error_(b, import_argument(b, l + 1));
     r = p && report_error_(b, library_import_global_setting_2(b, l + 1)) && r;
     r = p && report_error_(b, library_import_global_setting_3(b, l + 1)) && r;
     r = p && eol_marker(b, l + 1) && r;
@@ -1689,7 +1708,7 @@ public class RobotParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // RESOURCE_IMPORT_KEYWORD positional_argument eol_marker
+  // RESOURCE_IMPORT_KEYWORD import_argument eol_marker
   public static boolean resource_import_global_setting(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "resource_import_global_setting")) return false;
     if (!nextTokenIs(b, RESOURCE_IMPORT_KEYWORD)) return false;
@@ -1697,7 +1716,7 @@ public class RobotParser implements PsiParser, LightPsiParser {
     Marker m = enter_section_(b, l, _NONE_, RESOURCE_IMPORT_GLOBAL_SETTING, null);
     r = consumeToken(b, RESOURCE_IMPORT_KEYWORD);
     p = r; // pin = 1
-    r = r && report_error_(b, positional_argument(b, l + 1));
+    r = r && report_error_(b, import_argument(b, l + 1));
     r = p && eol_marker(b, l + 1) && r;
     exit_section_(b, l, m, r, p, null);
     return r || p;
@@ -2617,7 +2636,7 @@ public class RobotParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // VARIABLES_IMPORT_KEYWORD positional_argument (parameter | positional_argument)* eol_marker
+  // VARIABLES_IMPORT_KEYWORD import_argument (parameter | positional_argument)* eol_marker
   public static boolean variables_import_global_setting(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "variables_import_global_setting")) return false;
     if (!nextTokenIs(b, VARIABLES_IMPORT_KEYWORD)) return false;
@@ -2625,7 +2644,7 @@ public class RobotParser implements PsiParser, LightPsiParser {
     Marker m = enter_section_(b, l, _NONE_, VARIABLES_IMPORT_GLOBAL_SETTING, null);
     r = consumeToken(b, VARIABLES_IMPORT_KEYWORD);
     p = r; // pin = 1
-    r = r && report_error_(b, positional_argument(b, l + 1));
+    r = r && report_error_(b, import_argument(b, l + 1));
     r = p && report_error_(b, variables_import_global_setting_2(b, l + 1)) && r;
     r = p && eol_marker(b, l + 1) && r;
     exit_section_(b, l, m, r, p, null);

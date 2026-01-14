@@ -17,7 +17,7 @@ public interface RobotLibraryImportGlobalSetting extends RobotGlobalSettingState
   List<RobotPositionalArgument> getPositionalArgumentList();
 
   @Nullable
-  RobotPositionalArgument getImportedFile();
+  RobotImportArgument getImportedFile();
 
   @NotNull
   PsiElement getNameElement();
