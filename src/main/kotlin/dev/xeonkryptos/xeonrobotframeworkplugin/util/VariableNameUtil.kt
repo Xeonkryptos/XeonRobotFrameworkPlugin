@@ -5,7 +5,7 @@ import java.util.regex.Pattern
 
 object VariableNameUtil {
 
-    private val VARIABLE_BASENAME_PATTERN: Pattern = "([\\p{Alnum}_\\s]+)".toPattern()
+    private val VARIABLE_BASENAME_PATTERN: Pattern = "([\\p{L}\\p{N}_\\s]+)".toPattern()
 
     fun matchesVariableName(variableName: String?, variableNameToMatchVariants: Set<String>): Boolean {
         if (variableName == null) {
