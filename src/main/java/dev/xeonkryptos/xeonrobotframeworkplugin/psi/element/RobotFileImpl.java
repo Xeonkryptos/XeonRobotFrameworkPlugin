@@ -30,7 +30,7 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.VariableScope;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.visitor.RobotImportFilesCollector;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.visitor.RobotSectionVariablesCollector;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.visitor.RobotUsedFilesCollector;
-import dev.xeonkryptos.xeonrobotframeworkplugin.util.GlobalConstants;
+import dev.xeonkryptos.xeonrobotframeworkplugin.util.RobotNames;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -241,7 +241,7 @@ public class RobotFileImpl extends PsiFileBase implements KeywordFile, RobotFile
             Project project = getProject();
             return CachedValuesManager.getManager(project).getCachedValue(module, BUILT_IN_LIBRARY_CACHE_KEY, () -> {
                 ProjectRootModificationTracker projectRootModificationTracker = ProjectRootModificationTracker.getInstance(project);
-                PyClass builtIn = PythonResolver.findClass(GlobalConstants.ROBOT_BUILT_IN, project);
+                PyClass builtIn = PythonResolver.findClass(RobotNames.BUILTIN_FULL_PYTHON_NAMESPACE, project);
                 if (builtIn != null) {
                     return Result.createSingleDependency(new RobotPythonClass(null, builtIn, ImportType.LIBRARY), projectRootModificationTracker);
                 }

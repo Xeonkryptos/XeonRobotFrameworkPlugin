@@ -5,6 +5,8 @@ import com.intellij.openapi.project.DumbAware
 import com.intellij.psi.PsiElement
 import dev.xeonkryptos.xeonrobotframeworkplugin.annotator.compilation.DuplicatedDefinedForLoopParameterSettingsAnnotator
 import dev.xeonkryptos.xeonrobotframeworkplugin.annotator.compilation.ForLoopParameterRestrictionAnnotator
+import dev.xeonkryptos.xeonrobotframeworkplugin.annotator.compilation.InvalidlyPlacedBuiltInKeywordCallsAnnotator
+import dev.xeonkryptos.xeonrobotframeworkplugin.annotator.compilation.InvalidlyPlacedConditionalKeywordsAnnotator
 import dev.xeonkryptos.xeonrobotframeworkplugin.annotator.compilation.RobotInZipVariableSourceTypeAnnotator
 import dev.xeonkryptos.xeonrobotframeworkplugin.annotator.compilation.RobotLocalArgumentsSettingAnnotator
 import dev.xeonkryptos.xeonrobotframeworkplugin.annotator.compilation.RobotUserKeywordStatementAnnotator
@@ -16,7 +18,9 @@ class RobotDumbAwareAnnotatingVisitor : RobotAnnotatingVisitor(), DumbAware {
         RobotLocalArgumentsSettingAnnotator(),
         DuplicatedDefinedForLoopParameterSettingsAnnotator(),
         ForLoopParameterRestrictionAnnotator(),
-        RobotInZipVariableSourceTypeAnnotator()
+        RobotInZipVariableSourceTypeAnnotator(),
+        InvalidlyPlacedConditionalKeywordsAnnotator(),
+        InvalidlyPlacedBuiltInKeywordCallsAnnotator()
     )
 
     override fun annotate(psiElement: PsiElement, holder: AnnotationHolder) {

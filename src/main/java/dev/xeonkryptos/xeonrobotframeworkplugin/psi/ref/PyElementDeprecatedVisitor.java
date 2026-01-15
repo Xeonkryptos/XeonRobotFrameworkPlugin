@@ -8,7 +8,7 @@ import com.jetbrains.python.psi.PyExpressionStatement;
 import com.jetbrains.python.psi.PyFunction;
 import com.jetbrains.python.psi.PyStatementList;
 import com.jetbrains.python.psi.PyStringLiteralExpression;
-import dev.xeonkryptos.xeonrobotframeworkplugin.util.GlobalConstants;
+import dev.xeonkryptos.xeonrobotframeworkplugin.util.RobotNames;
 import org.jetbrains.annotations.NotNull;
 
 public class PyElementDeprecatedVisitor extends PyElementVisitor {
@@ -67,7 +67,7 @@ public class PyElementDeprecatedVisitor extends PyElementVisitor {
     @SuppressWarnings("UnstableApiUsage")
     public void visitPyStringLiteralExpression(@NotNull PyStringLiteralExpression node) {
         super.visitPyStringLiteralExpression(node);
-        deprecated |= node.getStringValue().startsWith(GlobalConstants.DEPRECATED_PREFIX);
+        deprecated |= node.getStringValue().startsWith(RobotNames.DEPRECATED_PREFIX);
     }
 
     public boolean isDeprecated() {

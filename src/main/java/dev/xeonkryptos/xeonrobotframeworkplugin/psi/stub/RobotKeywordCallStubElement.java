@@ -12,7 +12,7 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCallLibr
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCallName;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotKeywordCallImpl;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.index.KeywordCallNameIndex;
-import dev.xeonkryptos.xeonrobotframeworkplugin.util.KeywordNameUtil;
+import dev.xeonkryptos.xeonrobotframeworkplugin.util.KeywordUtil;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
 
@@ -70,7 +70,7 @@ public class RobotKeywordCallStubElement extends IStubElementType<RobotKeywordCa
     public void indexStub(@NotNull RobotKeywordCallStub stub, @NotNull IndexSink sink) {
         String libraryName = stub.getLibraryName();
         String keywordName = stub.getName();
-        keywordName = KeywordNameUtil.normalizeKeywordName(keywordName);
+        keywordName = KeywordUtil.normalizeKeywordName(keywordName);
         sink.occurrence(KeywordCallNameIndex.KEY, keywordName);
 
         if (libraryName != null) {

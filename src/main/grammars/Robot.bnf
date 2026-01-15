@@ -194,6 +194,7 @@ bdd_statement ::= (
     )
     THEN eol_based_keyword_call (AND eol_based_keyword_call)* (BUT eol_based_keyword_call)* {
         pin=1
+        name="Behavior Driven Statement (GIVEN, WHEN, THEN, AND or BUT)"
 }
 
 user_keyword_statement ::= user_keyword_statement_id eol_marker (local_arguments_setting | local_setting | executable_statement)* {
@@ -270,7 +271,7 @@ conditional_structure ::= if_structure else_if_structure* else_structure? END eo
     implements="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotFoldable"
     mixin="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotConditionalStructureExtension"
 }
-private conditional_inline_structure ::= inline_if_structure inline_else_if_structure* inline_if_else_structure? eol_marker? {pin=1}
+private conditional_inline_structure ::= inline_if_structure inline_else_if_structure* inline_else_structure? eol_marker? {pin=1}
 if_structure ::= IF conditional_content eol_marker executable_statement* {
     pin=3
     implements="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotBlockOpeningStructure"
@@ -287,7 +288,7 @@ inline_else_if_structure ::= ELSE_IF conditional_content EOS call_structure {
     pin=3
     implements="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotBlockOpeningStructure"
 }
-inline_if_else_structure ::= ELSE call_structure {
+inline_else_structure ::= ELSE call_structure {
     pin=2
     implements="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotBlockOpeningStructure"
 }
@@ -348,11 +349,13 @@ fake keyword_call ::= base_keyword_call {
     mixin = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotKeywordCallExtension"
     stubClass = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotKeywordCallStub"
     elementTypeFactory = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotKeywordCallStubElement.create"
+    name="Keyword call"
 }
-eol_based_keyword_call ::= base_keyword_call eol_marker? {elementType=keyword_call name="Keyword call"}
-eol_free_keyword_call ::= base_keyword_call {elementType=keyword_call name="Keyword call"}
-private base_keyword_call ::= keyword_call_name (parameter | positional_argument)* {pin=1}
-keyword_call_name ::= keyword_call_library? KEYWORD_NAME { methods = [getReference] }
+eol_based_keyword_call ::= base_keyword_call eol_marker? {elementType=keyword_call}
+eol_free_keyword_call ::= base_keyword_call {elementType=keyword_call}
+private base_keyword_call ::= keyword_call_name (parameter | extended_positional_argument)* {pin=1}
+sub_keyword_call ::= keyword_call_name (parameter | reduced_positional_argument)* {pin=1 elementType=keyword_call}
+keyword_call_name ::= keyword_call_library? KEYWORD_NAME { methods = [getReference keywordName="KEYWORD_NAME"] }
 keyword_call_library ::= keyword_call_library_name KEYWORD_LIBRARY_SEPARATOR
 keyword_call_library_name ::= KEYWORD_LIBRARY_NAME {methods = [getReference]}
 
@@ -364,6 +367,8 @@ parameter_id ::= PARAMETER_NAME {methods = [getReference]}
 
 fake variable_statement ::= DUMMY {methods = [getIcon]}
 single_variable_statement ::= variable_definition ASSIGNMENT? variable_value* parameter? eol_marker? {pin=3}
+// TODO: Extra token for ${EMPTY}? Spaces and underscores in-between, before and after the word are ignored by default. Nothing that can be handled by string matching in the parser.
+//  Or define a custom parser rule to detect the empty variable itself
 empty_variable_statement ::= variable_definition ASSIGNMENT? "${EMPTY}" eol_marker? {pin=3}
 inline_variable_statement ::= VAR variable_definition ASSIGNMENT? variable_value+ parameter? eol_marker? {pin=1}
 keyword_variable_statement ::= variable_definition+ ASSIGNMENT? eol_based_keyword_call {pin=3} // Without EOL as it is handled at a lower level
@@ -382,7 +387,31 @@ positional_argument ::= external_positional_argument EOS? {
     methods = [getReference]
 }
 external external_positional_argument ::= parsePositionalArgument positional_argument_content
-private positional_argument_content ::= literal_constant_value | variable | eol_free_keyword_call | conditional_content
+private positional_argument_content ::= literal_constant_value | variable | sub_keyword_call | conditional_content
+
+extended_positional_argument ::= <<parsePositionalArgument extended_positional_argument_content>> EOS? {
+    implements="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotArgument"
+    methods = [getReference]
+    elementType=positional_argument
+}
+private extended_positional_argument_content ::= literal_constant_value | variable | sub_keyword_call | sub_keyword_inline_else_if_structure | sub_keyword_inline_else_structure | conditional_content
+sub_keyword_inline_else_if_structure ::= ELSE_IF conditional_content EOS sub_keyword_call {
+    pin=3
+    implements="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotBlockOpeningStructure"
+    elementType=inline_else_if_structure
+}
+sub_keyword_inline_else_structure ::= ELSE sub_keyword_call {
+    pin=2
+    implements="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotBlockOpeningStructure"
+    elementType=inline_else_structure
+}
+
+reduced_positional_argument ::= <<parsePositionalArgument reduced_positional_argument_content>> EOS? {
+    implements="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotArgument"
+    methods = [getReference]
+    elementType=positional_argument
+}
+private reduced_positional_argument_content ::= literal_constant_value | variable | conditional_content
 
 variable_definition ::= variable {
     implements = [

@@ -18,6 +18,7 @@ import com.jetbrains.python.psi.PyDecorator;
 import com.jetbrains.python.psi.PyFunction;
 import com.jetbrains.python.psi.PyStringLiteralExpression;
 import com.jetbrains.python.sdk.PythonSdkUtil;
+import dev.xeonkryptos.xeonrobotframeworkplugin.util.KeywordUtil;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;

@@ -58,6 +58,9 @@ public abstract class AbstractRobotSmartMultilineEnterActionHandler<T extends Ps
 
             PsiElement element = file.findElementAt(currentCaretOffset);
             if (element == null) {
+                element = file.findElementAt(currentCaretOffset - 1);
+            }
+            if (element == null) {
                 return Result.Continue;
             }
 

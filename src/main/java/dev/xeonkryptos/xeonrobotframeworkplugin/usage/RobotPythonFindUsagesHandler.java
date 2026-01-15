@@ -5,8 +5,8 @@ import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiElement;
 import com.jetbrains.python.psi.PyExpression;
 import com.jetbrains.python.psi.PyFunction;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.KeywordUtil;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.RobotPyUtil;
+import dev.xeonkryptos.xeonrobotframeworkplugin.util.KeywordUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

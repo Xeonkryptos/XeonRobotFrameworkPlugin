@@ -573,6 +573,11 @@ LineComment = {LineCommentSign} {NON_EOL}*
 <KEYWORD_LIBRARY_NAME_SEPARATOR> "."                               { yybegin(KEYWORD_CALL_NAME); return KEYWORD_LIBRARY_SEPARATOR; }
 <KEYWORD_CALL_NAME> {VariableFreeLiteralValue}                     { leaveState(); return KEYWORD_NAME; }
 
+<KEYWORD_ARGUMENTS> {
+    "ELSE IF" {ExtendedSpaceBasedEndMarker}     { yypushback(yylength() - "ELSE IF".length()); yybegin(PYTHON_EVALUATED_CONTROL_STRUCTURE_START); return ELSE_IF; }
+    "ELSE" {ExtendedKeywordFinishedMarker}      { yypushback(yylength() - "ELSE".length()); yybegin(KEYWORD_CALL); return ELSE; }
+}
+
 <SETTINGS_SECTION, SETTING, KEYWORD_ARGUMENTS, USER_KEYWORD_RETURN_STATEMENT, SINGLE_LITERAL_CONSTANT>  {VariableFreeLiteralValue}  { return LITERAL_CONSTANT; }
 
 <SINGLE_LITERAL_CONSTANT_START>  {SpaceBasedEndMarker}       { yybegin(SINGLE_LITERAL_CONSTANT); return WHITE_SPACE; }

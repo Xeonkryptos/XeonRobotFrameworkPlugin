@@ -7,7 +7,6 @@ import com.intellij.lang.parameterInfo.ParameterInfoUIContext;
 import com.intellij.lang.parameterInfo.ParameterInfoUIContextEx;
 import com.intellij.lang.parameterInfo.ParameterInfoUtils;
 import com.intellij.lang.parameterInfo.UpdateParameterInfoContext;
-import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Conditions;
 import com.intellij.openapi.util.Pair;
 import com.intellij.psi.PsiComment;
@@ -26,7 +25,7 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTaskStatement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTemplateArguments;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTestCaseStatement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotUserKeywordStatement;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.KeywordUtil;
+import dev.xeonkryptos.xeonrobotframeworkplugin.util.KeywordUtil;
 import one.util.streamex.MoreCollectors;
 import one.util.streamex.StreamEx;
 import org.jetbrains.annotations.NotNull;
@@ -95,8 +94,7 @@ public class RobotParameterInfoHandler implements ParameterInfoHandler<RobotKeyw
                     if (robotElement instanceof RobotKeywordCall found) {
                         keywordCall = found;
                     } else if (robotElement instanceof RobotTemplateArguments) {
-                        Project project = psiFile.getProject();
-                        keywordCall = KeywordUtil.getInstance(project).findTemplateKeywordCall(robotElement);
+                        keywordCall = KeywordUtil.findTemplateKeywordCall(robotElement);
                     }
                 }
             }

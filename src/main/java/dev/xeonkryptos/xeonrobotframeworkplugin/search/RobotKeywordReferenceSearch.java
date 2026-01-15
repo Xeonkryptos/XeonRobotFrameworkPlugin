@@ -13,7 +13,6 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCall;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCallName;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotUserKeywordStatement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.index.KeywordCallNameIndex;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.KeywordUtil;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.RobotPyUtil;
 import org.jetbrains.annotations.NotNull;
 

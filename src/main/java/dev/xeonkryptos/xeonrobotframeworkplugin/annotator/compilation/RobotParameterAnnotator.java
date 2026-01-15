@@ -14,6 +14,7 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCall;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLocalSetting;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotParameter;
 import dev.xeonkryptos.xeonrobotframeworkplugin.util.KeyUtils;
+import dev.xeonkryptos.xeonrobotframeworkplugin.util.KeywordUtil;
 import dev.xeonkryptos.xeonrobotframeworkplugin.util.RobotNames;
 import org.jetbrains.annotations.NotNull;
 
@@ -33,7 +34,8 @@ public class RobotParameterAnnotator extends RobotAnnotator {
             if (!directMatchFound && availableParameters.stream().noneMatch(DefinedParameter::isKeywordContainer)) {
                 keywordCall.getStartOfKeywordsOnlyIndex()
                            .ifPresentOrElse(keywordsOnlyIndex -> handleParameterWithinKeywordOnlyKeywordCall(keywordsOnlyIndex, parameter, keywordCall, getHolder()), () -> {
-                               String normalizedKeywordCallName = keywordCall.getName().replaceAll("[\\s_]", "");
+                               String keywordCallName = keywordCall.getName();
+                               String normalizedKeywordCallName = KeywordUtil.normalizeKeywordName(keywordCallName);
                                // Create Dictionary keyword calls have special handling for parameters
                                if (!RobotNames.CREATE_DICTIONARY_NORMALIZED_KEYWORD_NAME.equalsIgnoreCase(normalizedKeywordCallName)) {
                                    convertParameterToArgumentVisually(getHolder(), parameter);

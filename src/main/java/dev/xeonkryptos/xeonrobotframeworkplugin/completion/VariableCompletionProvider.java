@@ -26,10 +26,10 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTemplateArgumen
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTemplateParameter;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTestCaseStatement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotUserKeywordStatement;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.KeywordUtil;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.visitor.RecursiveRobotVisitor;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.visitor.RobotInStatementVariableCollector;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.visitor.RobotSectionVariablesCollector;
+import dev.xeonkryptos.xeonrobotframeworkplugin.util.KeywordUtil;
 import dev.xeonkryptos.xeonrobotframeworkplugin.util.RobotNames;
 import org.jetbrains.annotations.NotNull;
 
@@ -42,7 +42,7 @@ import java.util.Set;
 
 class VariableCompletionProvider extends CompletionProvider<CompletionParameters> {
 
-    private static final Set<String> RESTRICTED_VARIABLE_COMPLETION_LOCAL_SETTING_NAMES = Set.of(RobotNames.DOCUMENTATION_SETTING_NAME,
+    private static final Set<String> RESTRICTED_VARIABLE_COMPLETION_LOCAL_SETTING_NAMES = Set.of(RobotNames.DOCUMENTATION_LOCAL_SETTING_NAME,
                                                                                                  RobotNames.TAGS_SETTING_NAME);
 
     @Override
@@ -62,7 +62,7 @@ class VariableCompletionProvider extends CompletionProvider<CompletionParameters
                 // Really interested in, but only when not one of the previous defined types are matching
                                                                     RobotKeywordCall.class, RobotTemplateArguments.class);
         if (parentOfInterest instanceof RobotTemplateArguments templateArguments) {
-            keywordCall = KeywordUtil.getInstance(templateArguments.getProject()).findTemplateKeywordCall(templateArguments);
+            keywordCall = KeywordUtil.findTemplateKeywordCall(templateArguments);
         } else if (parentOfInterest instanceof RobotKeywordCall call) {
             keywordCall = call;
         }

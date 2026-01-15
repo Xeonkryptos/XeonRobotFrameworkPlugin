@@ -142,7 +142,7 @@
         <localInspection language="Robot" shortName="RobotDeprecatedKeywordCall" bundle="messages.RobotBundle" key="INSP.NAME.deprecated.keyword-call"
                          groupKey="INSP.GROUP.robot" enabledByDefault="true" level="WARNING" dumbAware="false"
                          implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.inspections.deprecation.RobotDeprecatedKeywordCallInspection"/>
-
+        <!-- Maintainability -->
         <localInspection language="Robot" shortName="RobotVariableRatherArgumentMeant" bundle="messages.RobotBundle"
                          key="INSP.NAME.variable.rather.argument.meant" groupKey="INSP.GROUP.robot" enabledByDefault="true" level="WARNING" dumbAware="true"
                          implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.inspections.maintainability.RobotVariableRatherArgumentMeantInspection"/>

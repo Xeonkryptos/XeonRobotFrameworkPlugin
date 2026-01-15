@@ -157,7 +157,7 @@ public enum VariableScope {
                 return false;
             }
             RobotLocalSetting localSetting = PsiTreeUtil.getParentOfType(keyword, RobotLocalSetting.class);
-            return localSetting != null && RobotNames.TEARDOWN_SETTING_NAME.equalsIgnoreCase(localSetting.getSettingName());
+            return localSetting != null && RobotNames.TEARDOWN_LOCAL_SETTING_NAME.equalsIgnoreCase(localSetting.getSettingName());
         }
         return false;
     }
@@ -178,7 +178,7 @@ public enum VariableScope {
         RobotKeywordsSection keywordsSection = PsiTreeUtil.getParentOfType(keyword, RobotKeywordsSection.class);
         if (keywordsSection != null) {
             RobotLocalSetting localSetting = PsiTreeUtil.getParentOfType(keyword, RobotLocalSetting.class);
-            return localSetting != null && RobotNames.TEARDOWN_SETTING_NAME.equalsIgnoreCase(localSetting.getSettingName());
+            return localSetting != null && RobotNames.TEARDOWN_LOCAL_SETTING_NAME.equalsIgnoreCase(localSetting.getSettingName());
         }
         return false;
     }

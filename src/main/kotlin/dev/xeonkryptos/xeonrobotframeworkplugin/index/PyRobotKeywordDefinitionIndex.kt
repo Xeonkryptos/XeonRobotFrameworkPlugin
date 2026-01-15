@@ -24,7 +24,7 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.dto.KeywordDto
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.DefinedKeyword
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.RobotPyUtil
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.visitor.RobotPyFunctionKeywordLocator
-import dev.xeonkryptos.xeonrobotframeworkplugin.util.KeywordNameUtil
+import dev.xeonkryptos.xeonrobotframeworkplugin.util.KeywordUtil
 import java.io.DataInput
 import java.io.DataOutput
 import java.io.IOException
@@ -41,7 +41,7 @@ class PyRobotKeywordDefinitionIndex : FileBasedIndexExtension<String, PyRobotKey
         fun findKeywordFunctions(
             keywordName: String, project: Project, scope: GlobalSearchScope = GlobalSearchScope.projectScope(project)
         ): Collection<PyFunction> {
-            val normalizedKeywordName = KeywordNameUtil.normalizeKeywordName(keywordName)
+            val normalizedKeywordName = KeywordUtil.normalizeKeywordName(keywordName)
 
             val fileBasedIndex = FileBasedIndex.getInstance()
             val virtualFiles: Collection<VirtualFile> = fileBasedIndex.getContainingFiles(INDEX_ID, normalizedKeywordName, scope)
@@ -58,7 +58,7 @@ class PyRobotKeywordDefinitionIndex : FileBasedIndexExtension<String, PyRobotKey
                     val elementAt = pyFile.findElementAt(offset.coerceAtMost(pyFile.textLength - 1))
                     val pyFunction = PsiTreeUtil.getParentOfType(elementAt, PyFunction::class.java, false) ?: continue
                     val keywordName = RobotPyUtil.findCustomKeywordNameDecoratorExpression(pyFunction).map { it.stringValue }.orElse(pyFunction.name)
-                    val normalizedFoundKeywordName = KeywordNameUtil.normalizeKeywordName(keywordName ?: continue)
+                    val normalizedFoundKeywordName = KeywordUtil.normalizeKeywordName(keywordName ?: continue)
                     if (normalizedFoundKeywordName == normalizedKeywordName) {
                         result += pyFunction
                     }

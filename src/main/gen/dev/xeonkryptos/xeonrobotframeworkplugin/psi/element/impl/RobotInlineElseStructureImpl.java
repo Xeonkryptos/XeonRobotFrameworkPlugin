@@ -11,15 +11,15 @@ import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.*;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.*;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotPsiImplUtil;
 
-public class RobotInlineIfElseStructureImpl extends RobotExecutableStatementImpl implements RobotInlineIfElseStructure {
+public class RobotInlineElseStructureImpl extends RobotExecutableStatementImpl implements RobotInlineElseStructure {
 
-  public RobotInlineIfElseStructureImpl(@NotNull ASTNode node) {
+  public RobotInlineElseStructureImpl(@NotNull ASTNode node) {
     super(node);
   }
 
   @Override
   public void accept(@NotNull RobotVisitor visitor) {
-    visitor.visitInlineIfElseStructure(this);
+    visitor.visitInlineElseStructure(this);
   }
 
   @Override

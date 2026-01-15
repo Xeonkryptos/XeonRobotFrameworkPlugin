@@ -10,6 +10,7 @@ import com.intellij.psi.impl.PsiFileFactoryImpl;
 import com.intellij.testFramework.LightVirtualFile;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotFeatureFileType;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotLanguage;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotConditionalStructure;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotImportArgument;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCallLibraryName;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCallName;
@@ -222,6 +223,25 @@ public record RobotElementGenerator(Project project) {
         return variableBodyFinder.variableBodyId;
     }
 
+    public RobotConditionalStructure createNewIfConditionalStructure(String condition, String conditionalBody) {
+        String fileContent = """
+                             *** Test Case ***
+                             Dummy
+                                 IF  %s
+                                     %s
+                                 END
+                             """.formatted(condition, conditionalBody);
+
+        PsiFile psiFile = createDummyPsiFile(fileContent);
+        if (psiFile == null) {
+            return null;
+        }
+
+        RobotConditionalStructureFinder conditionalStructureFinder = new RobotConditionalStructureFinder();
+        psiFile.acceptChildren(conditionalStructureFinder);
+        return conditionalStructureFinder.conditionalStructure;
+    }
+
     public PsiElement createEolElement(int count) {
         String repeatedEols = "\n".repeat(Math.max(0, count - 1));
         String fileContent = """
@@ -362,6 +382,16 @@ public record RobotElementGenerator(Project project) {
         @Override
         public void visitVariable(@NotNull RobotVariable o) {
             variable = o;
+        }
+    }
+
+    private static final class RobotConditionalStructureFinder extends RecursiveRobotVisitor {
+
+        private RobotConditionalStructure conditionalStructure;
+
+        @Override
+        public void visitConditionalStructure(@NotNull RobotConditionalStructure o) {
+            conditionalStructure = o;
         }
     }
 }

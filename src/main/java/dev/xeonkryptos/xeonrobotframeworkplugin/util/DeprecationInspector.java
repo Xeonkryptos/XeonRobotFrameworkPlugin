@@ -36,7 +36,7 @@ public final class DeprecationInspector {
                 if (!positionalArgumentList.isEmpty()) {
                     RobotPositionalArgument documentationArgument = positionalArgumentList.getFirst();
                     String documentation = documentationArgument.getText();
-                    if (documentation.startsWith(GlobalConstants.DEPRECATED_PREFIX)) {
+                    if (documentation.startsWith(RobotNames.DEPRECATED_PREFIX)) {
                         return true;
                     }
                     break;

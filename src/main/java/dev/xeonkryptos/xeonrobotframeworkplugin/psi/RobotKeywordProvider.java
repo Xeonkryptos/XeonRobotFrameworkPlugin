@@ -1,10 +1,10 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.psi;
 
+import com.intellij.codeInsight.TailType;
+import com.intellij.codeInsight.TailTypes;
 import com.intellij.psi.tree.IElementType;
 import dev.xeonkryptos.xeonrobotframeworkplugin.util.RobotNames;
 import dev.xeonkryptos.xeonrobotframeworkplugin.util.RobotTailTypes;
-import com.intellij.codeInsight.TailType;
-import com.intellij.codeInsight.TailTypes;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -77,14 +77,14 @@ public class RobotKeywordProvider {
         KEYWORD_TABLE.addSyntax(RobotTypes.LOCAL_SETTING, "[Timeout]");
         KEYWORD_TABLE.addSyntax(RobotTypes.LOCAL_SETTING, "[Return]");
 
-        addRecommendation(RobotTypes.LOCAL_SETTING, "[Documentation]", RobotNames.DOCUMENTATION_SETTING_NAME, RobotTailTypes.TAB);
+        addRecommendation(RobotTypes.LOCAL_SETTING, "[Documentation]", RobotNames.DOCUMENTATION_LOCAL_SETTING_NAME, RobotTailTypes.TAB);
         addRecommendation(RobotTypes.LOCAL_SETTING, "[Tags]", RobotNames.TAGS_SETTING_NAME, RobotTailTypes.TAB);
         addRecommendation(RobotTypes.LOCAL_SETTING, "[Setup]", "Setup", RobotTailTypes.TAB);
-        addRecommendation(RobotTypes.LOCAL_SETTING, "[Teardown]", RobotNames.TEARDOWN_SETTING_NAME, RobotTailTypes.TAB);
-        addRecommendation(RobotTypes.LOCAL_SETTING, "[Template]", RobotNames.TEMPLATE_SETTING_NAME, RobotTailTypes.TAB);
+        addRecommendation(RobotTypes.LOCAL_SETTING, "[Teardown]", RobotNames.TEARDOWN_LOCAL_SETTING_NAME, RobotTailTypes.TAB);
+        addRecommendation(RobotTypes.LOCAL_SETTING, "[Template]", RobotNames.TEMPLATE_LOCAL_SETTING_NAME, RobotTailTypes.TAB);
         addRecommendation(RobotTypes.LOCAL_SETTING, "[Timeout]", "Timeout", RobotTailTypes.TAB);
         addRecommendation(RobotTypes.LOCAL_SETTING, "[Arguments]", "Arguments", RobotTailTypes.TAB);
-        addRecommendation(RobotTypes.LOCAL_SETTING, "[Return]", RobotNames.RETURN_SETTING_NAME, RobotTailTypes.TAB);
+        addRecommendation(RobotTypes.LOCAL_SETTING, "[Return]", RobotNames.RETURN_LOCAL_SETTING_NAME, RobotTailTypes.TAB);
 
         KEYWORD_TABLE.addSyntax(IMPORT, "Library");
         KEYWORD_TABLE.addSyntax(IMPORT, "Resource");
@@ -94,16 +94,16 @@ public class RobotKeywordProvider {
         addRecommendation(IMPORT, "Resource", "Resource", RobotTailTypes.TAB);
         addRecommendation(IMPORT, "Variables", "Variables", RobotTailTypes.TAB);
 
-        KEYWORD_TABLE.addSyntax(GHERKIN, "Given");
-        KEYWORD_TABLE.addSyntax(GHERKIN, "When");
-        KEYWORD_TABLE.addSyntax(GHERKIN, "Then");
-        KEYWORD_TABLE.addSyntax(GHERKIN, "And");
+        KEYWORD_TABLE.addSyntax(GHERKIN, "GIVEN");
+        KEYWORD_TABLE.addSyntax(GHERKIN, "WHEN");
+        KEYWORD_TABLE.addSyntax(GHERKIN, "THEN");
+        KEYWORD_TABLE.addSyntax(GHERKIN, "AND");
         KEYWORD_TABLE.addSyntax(GHERKIN, "BUT");
 
-        addRecommendation(GHERKIN, "Given", "Given", TailTypes.spaceType());
-        addRecommendation(GHERKIN, "When", "When", TailTypes.spaceType());
-        addRecommendation(GHERKIN, "Then", "Then", TailTypes.spaceType());
-        addRecommendation(GHERKIN, "And", "And", TailTypes.spaceType());
+        addRecommendation(GHERKIN, "GIVEN", "Given", TailTypes.spaceType());
+        addRecommendation(GHERKIN, "WHEN", "WHEN", TailTypes.spaceType());
+        addRecommendation(GHERKIN, "THEN", "THEN", TailTypes.spaceType());
+        addRecommendation(GHERKIN, "AND", "AND", TailTypes.spaceType());
         addRecommendation(GHERKIN, "BUT", "BUT", TailTypes.spaceType());
 
         KEYWORD_TABLE.addSyntax(SYNTAX_MARKER, "IF");

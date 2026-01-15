@@ -7,7 +7,7 @@ import com.intellij.psi.PsiReferenceBase;
 import com.intellij.psi.impl.source.resolve.ResolveCache;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCall;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTemplateParameterId;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.KeywordUtil;
+import dev.xeonkryptos.xeonrobotframeworkplugin.util.KeywordUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -23,10 +23,9 @@ public class RobotTemplateParameterReference extends PsiReferenceBase<RobotTempl
         RobotTemplateParameterId parameterId = getElement();
         Project project = parameterId.getProject();
         ResolveCache resolveCache = ResolveCache.getInstance(project);
-        KeywordUtil keywordUtil = KeywordUtil.getInstance(project);
         return resolveCache.resolveWithCaching(this, (robotParameterReference, incompleteCode) -> {
             String parameterName = parameterId.getText();
-            RobotKeywordCall keywordCall = keywordUtil.findTemplateKeywordCall(parameterId);
+            RobotKeywordCall keywordCall = KeywordUtil.findTemplateKeywordCall(parameterId);
             return keywordCall != null ? keywordCall.findParameterReference(parameterName) : null;
         }, false, false);
     }

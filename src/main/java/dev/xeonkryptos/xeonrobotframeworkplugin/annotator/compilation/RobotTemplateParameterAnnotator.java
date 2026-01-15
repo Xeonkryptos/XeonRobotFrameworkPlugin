@@ -3,7 +3,6 @@ package dev.xeonkryptos.xeonrobotframeworkplugin.annotator.compilation;
 import com.intellij.codeInspection.ProblemHighlightType;
 import com.intellij.lang.annotation.AnnotationHolder;
 import com.intellij.lang.annotation.HighlightSeverity;
-import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.TextRange;
 import com.intellij.psi.util.PsiTreeUtil;
 import dev.xeonkryptos.xeonrobotframeworkplugin.RobotBundle;
@@ -14,7 +13,7 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotArgument;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCall;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTemplateArguments;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTemplateParameter;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.KeywordUtil;
+import dev.xeonkryptos.xeonrobotframeworkplugin.util.KeywordUtil;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
@@ -23,9 +22,7 @@ public class RobotTemplateParameterAnnotator extends RobotAnnotator {
 
     @Override
     public void visitTemplateParameter(@NotNull RobotTemplateParameter parameter) {
-        Project project = parameter.getProject();
-        KeywordUtil keywordUtil = KeywordUtil.getInstance(project);
-        RobotKeywordCall keywordCall = keywordUtil.findTemplateKeywordCall(parameter);
+        RobotKeywordCall keywordCall = KeywordUtil.findTemplateKeywordCall(parameter);
         if (keywordCall != null) {
             Collection<DefinedParameter> availableParameters = keywordCall.getAvailableParameters();
             String parameterName = parameter.getParameterName();

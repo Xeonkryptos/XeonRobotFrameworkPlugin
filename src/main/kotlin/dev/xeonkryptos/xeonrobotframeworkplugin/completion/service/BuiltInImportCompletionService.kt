@@ -7,7 +7,7 @@ import com.intellij.openapi.components.Service
 import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.ref.RobotFileManager
-import dev.xeonkryptos.xeonrobotframeworkplugin.util.GlobalConstants
+import dev.xeonkryptos.xeonrobotframeworkplugin.util.RobotNames
 import org.apache.commons.text.WordUtils
 import java.util.Locale
 
@@ -31,6 +31,6 @@ class BuiltInImportCompletionService(private val project: Project) {
                 .withLookupStrings(listOf(*lookupStrings))
                 .withCaseSensitivity(true)
                 .withIcon(AllIcons.Nodes.Package)
-                .withTypeText(GlobalConstants.ROBOT_BUILT_IN)
+                .withTypeText(RobotNames.BUILTIN_FULL_PYTHON_NAMESPACE)
         }.toList()
 }

@@ -123,7 +123,7 @@ public class RobotVisitor extends PsiElementVisitor {
     // visitBlockOpeningStructure(o);
   }
 
-  public void visitInlineIfElseStructure(@NotNull RobotInlineIfElseStructure o) {
+  public void visitInlineElseStructure(@NotNull RobotInlineElseStructure o) {
     visitExecutableStatement(o);
     // visitBlockOpeningStructure(o);
   }

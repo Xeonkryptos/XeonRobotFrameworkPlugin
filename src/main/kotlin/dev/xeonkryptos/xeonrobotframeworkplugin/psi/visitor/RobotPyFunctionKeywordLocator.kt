@@ -5,7 +5,7 @@ import com.intellij.lang.LighterASTNode
 import com.intellij.psi.impl.source.tree.RecursiveLighterASTNodeWalkingVisitor
 import com.jetbrains.python.PyElementTypes
 import com.jetbrains.python.PyTokenTypes
-import dev.xeonkryptos.xeonrobotframeworkplugin.util.KeywordNameUtil
+import dev.xeonkryptos.xeonrobotframeworkplugin.util.KeywordUtil
 import java.util.ArrayDeque
 import java.util.regex.Pattern
 
@@ -103,7 +103,7 @@ class RobotPyFunctionKeywordLocator(private val ast: LighterAST, private val fil
     }
 
     private fun register(keywordName: CharSequence, node: LighterASTNode) {
-        val normalized = KeywordNameUtil.normalizeKeywordName(keywordName.toString())
+        val normalized = KeywordUtil.normalizeKeywordName(keywordName.toString())
         mutableKeywordPythonFunctionOccurrences.getOrPut(normalized) { mutableListOf() }.add(node.startOffset)
     }
 

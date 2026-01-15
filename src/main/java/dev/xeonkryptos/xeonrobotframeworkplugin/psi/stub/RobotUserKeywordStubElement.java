@@ -10,7 +10,7 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotLanguage;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotUserKeywordStatement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotUserKeywordStatementImpl;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.index.KeywordDefinitionNameIndex;
-import dev.xeonkryptos.xeonrobotframeworkplugin.util.KeywordNameUtil;
+import dev.xeonkryptos.xeonrobotframeworkplugin.util.KeywordUtil;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
 
@@ -57,7 +57,7 @@ public class RobotUserKeywordStubElement extends IStubElementType<RobotUserKeywo
     @Override
     public void indexStub(@NotNull RobotUserKeywordStub stub, @NotNull IndexSink sink) {
         String name = stub.getName();
-        String normalizeKeywordName = KeywordNameUtil.normalizeKeywordName(name);
+        String normalizeKeywordName = KeywordUtil.normalizeKeywordName(name);
         sink.occurrence(KeywordDefinitionNameIndex.KEY, normalizeKeywordName);
     }
 }

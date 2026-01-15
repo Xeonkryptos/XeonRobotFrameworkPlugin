@@ -39,4 +39,10 @@ public class RobotKeywordCallNameImpl extends RobotPsiElementBase implements Rob
     return RobotPsiImplUtil.getReference(this);
   }
 
+  @Override
+  @NotNull
+  public PsiElement getKeywordName() {
+    return notNullChild(findChildByType(KEYWORD_NAME));
+  }
+
 }

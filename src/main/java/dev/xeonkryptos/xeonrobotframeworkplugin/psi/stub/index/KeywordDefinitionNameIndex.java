@@ -7,7 +7,7 @@ import com.intellij.psi.stubs.StubIndex;
 import com.intellij.psi.stubs.StubIndexKey;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotUserKeywordStatement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotStubFileElementType;
-import dev.xeonkryptos.xeonrobotframeworkplugin.util.KeywordNameUtil;
+import dev.xeonkryptos.xeonrobotframeworkplugin.util.KeywordUtil;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
@@ -25,7 +25,7 @@ public class KeywordDefinitionNameIndex extends StringStubIndexExtension<RobotUs
     public static Collection<RobotUserKeywordStatement> getUserKeywordStatements(@NotNull String keywordName,
                                                                                  @NotNull Project project,
                                                                                  @NotNull GlobalSearchScope scope) {
-        String normalizedKeywordName = KeywordNameUtil.normalizeKeywordName(keywordName);
+        String normalizedKeywordName = KeywordUtil.normalizeKeywordName(keywordName);
         return StubIndex.getElements(KEY, normalizedKeywordName, project, scope, RobotUserKeywordStatement.class);
     }
 
