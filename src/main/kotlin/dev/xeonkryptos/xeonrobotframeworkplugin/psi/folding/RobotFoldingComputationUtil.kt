@@ -94,7 +94,7 @@ object RobotFoldingComputationUtil {
             val previousTextRange = currentTextRange
             currentTextRange = item.textRange
 
-            val foldableTextRange = TextRange.create(previousTextRange.endOffset, currentTextRange.startOffset)
+            val foldableTextRange = TextRange.create(previousTextRange.endOffset, currentTextRange.endOffset)
             val foldingDescriptor = FoldingDescriptor(node, foldableTextRange, foldingGroup, GlobalConstants.SUPER_SPACE)
             foldingDescriptors.add(foldingDescriptor)
         }
