@@ -10,6 +10,7 @@ import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiManager
 import com.intellij.psi.search.GlobalSearchScope
 import com.intellij.util.Urls
+import kotlin.math.max
 
 class RobotSMTestLocator : SMTestLocator {
 
@@ -30,7 +31,7 @@ class RobotSMTestLocator : SMTestLocator {
             LocalFileSystem.getInstance().findFileByPath(uri.path)?.let { virtualFile ->
                 PsiManager.getInstance(project).findFile(virtualFile)?.let { psiFile ->
                     PsiDocumentManager.getInstance(project).getDocument(psiFile)?.let { doc ->
-                        val offset = doc.getLineStartOffset(line ?: 0)
+                        val offset = doc.getLineStartOffset(max(line ?: 0, 0))
                         psiFile.findElementAt(offset)
                     }
                 }
