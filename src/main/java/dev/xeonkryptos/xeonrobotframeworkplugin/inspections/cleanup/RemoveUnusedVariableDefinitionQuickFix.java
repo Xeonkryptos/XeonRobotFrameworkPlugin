@@ -110,6 +110,6 @@ public class RemoveUnusedVariableDefinitionQuickFix extends LocalQuickFixOnPsiEl
     @IntentionFamilyName
     @Override
     public String getFamilyName() {
-        return RobotBundle.message("intention.family.remov.unusede.name");
+        return RobotBundle.message("intention.family.remove.unused.name");
     }
 }

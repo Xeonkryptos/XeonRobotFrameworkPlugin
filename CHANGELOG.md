@@ -13,6 +13,7 @@
 - Added custom CharFilter to allow for spaces being typed while code completion is opened without closing it
 - Added support for Builtin keywords of Robot Framework like Run Keyword If, Run Keywords, etc. Highlighting the parameters as keywords or python expressions
   accordingly. Additionally, providing code completion for those parameters
+- Added new inspection to convert deprecated keyword calls into native Robot syntax (i.e. `Run Keyword If` into if statement)
 
 ### Changed
 

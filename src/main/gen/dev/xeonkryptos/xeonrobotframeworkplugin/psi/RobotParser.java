@@ -46,10 +46,10 @@ public class RobotParser implements PsiParser, LightPsiParser {
     create_token_set_(DOCUMENTATION_STATEMENT_GLOBAL_SETTING, GLOBAL_SETTING_STATEMENT, LIBRARY_IMPORT_GLOBAL_SETTING, METADATA_STATEMENT_GLOBAL_SETTING,
       RESOURCE_IMPORT_GLOBAL_SETTING, SETUP_TEARDOWN_STATEMENTS_GLOBAL_SETTING, SUITE_NAME_STATEMENT_GLOBAL_SETTING, TAGS_STATEMENT_GLOBAL_SETTING,
       TEMPLATE_STATEMENTS_GLOBAL_SETTING, TIMEOUT_STATEMENTS_GLOBAL_SETTING, UNKNOWN_SETTING_STATEMENTS_GLOBAL_SETTING, VARIABLES_IMPORT_GLOBAL_SETTING),
-    create_token_set_(CONDITIONAL_STRUCTURE, ELSE_IF_STRUCTURE, ELSE_STRUCTURE, EXCEPT_STRUCTURE,
-      EXECUTABLE_STATEMENT, FINALLY_STRUCTURE, FOR_LOOP_STRUCTURE, GROUP_STRUCTURE,
-      IF_STRUCTURE, INLINE_ELSE_IF_STRUCTURE, INLINE_ELSE_STRUCTURE, INLINE_IF_STRUCTURE,
-      TRY_STRUCTURE, WHILE_LOOP_STRUCTURE),
+    create_token_set_(CONDITIONAL_STRUCTURE, ELSE_IF_STRUCTURE, ELSE_STRUCTURE, EXCEPTION_HANDLING_STRUCTURE,
+      EXCEPT_STRUCTURE, EXECUTABLE_STATEMENT, FINALLY_STRUCTURE, FOR_LOOP_STRUCTURE,
+      GROUP_STRUCTURE, IF_STRUCTURE, INLINE_ELSE_IF_STRUCTURE, INLINE_ELSE_STRUCTURE,
+      INLINE_IF_STRUCTURE, TRY_STRUCTURE, WHILE_LOOP_STRUCTURE),
   };
 
   /* ********************************************************** */
@@ -628,11 +628,11 @@ public class RobotParser implements PsiParser, LightPsiParser {
   //     else_structure?
   //     finally_structure?
   //     END eol_marker
-  static boolean exception_handling_structure(PsiBuilder b, int l) {
+  public static boolean exception_handling_structure(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "exception_handling_structure")) return false;
     if (!nextTokenIs(b, TRY)) return false;
     boolean r, p;
-    Marker m = enter_section_(b, l, _NONE_);
+    Marker m = enter_section_(b, l, _COLLAPSE_, EXCEPTION_HANDLING_STRUCTURE, null);
     r = try_structure(b, l + 1);
     p = r; // pin = 1
     r = r && report_error_(b, exception_handling_structure_1(b, l + 1));

@@ -29,6 +29,7 @@ object RobotNames {
     const val RUN_KEYWORD_IF_TEST_FAILED_NORMALIZED_KEYWORD_NAME = "runkeywordiftestfailed"
     const val RUN_KEYWORD_IF_TEST_PASSED_NORMALIZED_KEYWORD_NAME = "runkeywordiftestpassed"
     const val RUN_KEYWORD_IF_TIMEOUT_OCCURRED_NORMALIZED_KEYWORD_NAME = "runkeywordiftimeoutoccurred"
+    const val RUN_KEYWORD_AND_EXPECT_ERROR_NORMALIZED_KEYWORD_NAME = "runkeywordandexpecterror"
 
-    const val DEPRECATED_PREFIX = "*DEPRECATED";
+    const val DEPRECATED_PREFIX = "*DEPRECATED"
 }

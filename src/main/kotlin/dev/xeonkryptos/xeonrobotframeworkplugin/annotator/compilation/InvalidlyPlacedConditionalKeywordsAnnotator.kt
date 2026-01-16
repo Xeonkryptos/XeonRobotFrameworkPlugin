@@ -10,14 +10,13 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotInlineElseIfStr
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotInlineElseStructure
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCall
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotPositionalArgument
-import dev.xeonkryptos.xeonrobotframeworkplugin.util.KeywordUtil
 import dev.xeonkryptos.xeonrobotframeworkplugin.util.RobotNames
+import dev.xeonkryptos.xeonrobotframeworkplugin.util.matchesNormalizedName
 
 class InvalidlyPlacedConditionalKeywordsAnnotator : RobotAnnotator() {
 
     override fun visitKeywordCall(keywordCall: RobotKeywordCall) {
-        val normalizedKeywordName = KeywordUtil.normalizeKeywordName(keywordCall.keywordCallName.keywordName.text)
-        if (normalizedKeywordName == RobotNames.RUN_KEYWORD_IF_NORMALIZED_KEYWORD_NAME) {
+        if (keywordCall.matchesNormalizedName(RobotNames.RUN_KEYWORD_IF_NORMALIZED_KEYWORD_NAME)) {
             val inlineElseStructureArguments = keywordCall.positionalArgumentList.filter { arg -> arg.childrenOfType<RobotInlineElseStructure>().isNotEmpty() }
             if (inlineElseStructureArguments.size > 1) {
                 inlineElseStructureArguments.asSequence()
@@ -36,11 +35,8 @@ class InvalidlyPlacedConditionalKeywordsAnnotator : RobotAnnotator() {
             val keywordCall = it.parentOfType<RobotKeywordCall>()
             if (keywordCall == null) {
                 holder.newAnnotation(HighlightSeverity.ERROR, RobotBundle.message("annotation.inline-conditional.invalid")).range(element).create()
-            } else {
-                val normalizedKeywordName = KeywordUtil.normalizeKeywordName(keywordCall.keywordCallName.keywordName.text)
-                if (normalizedKeywordName != RobotNames.RUN_KEYWORD_IF_NORMALIZED_KEYWORD_NAME) {
-                    holder.newAnnotation(HighlightSeverity.ERROR, RobotBundle.message("annotation.inline-conditional.invalid")).range(element).create()
-                }
+            } else if (!keywordCall.matchesNormalizedName(RobotNames.RUN_KEYWORD_IF_NORMALIZED_KEYWORD_NAME)) {
+                holder.newAnnotation(HighlightSeverity.ERROR, RobotBundle.message("annotation.inline-conditional.invalid")).range(element).create()
             }
         }
     }

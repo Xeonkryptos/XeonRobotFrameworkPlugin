@@ -1,0 +1,53 @@
+<html lang="en">
+    <body>
+        Detects legacy built-in keywords that can be replaced with modern native Robot Framework conditional structures.
+
+        <p>
+            Robot Framework provides native conditional syntax (such as <code>IF</code>, <code>ELSE IF</code>, and <code>ELSE</code> blocks)
+            that are more readable and maintainable than older built-in keywords like <code>Run Keyword If</code>.
+            This inspection helps modernize test code by identifying opportunities to replace deprecated control flow keywords
+            with their native equivalents.
+        </p>
+
+        <p>
+            Using native conditional structures improves code clarity, reduces nesting complexity, and makes test cases easier to maintain.
+            They also provide better integration with modern Robot Framework IDE features and debugging tools.
+        </p>
+
+        <p>
+            Example of problematic code using legacy keywords:
+        </p>
+        <pre><code>
+*** Test Cases ***
+Legacy Conditional Test
+    Run Keyword If    ${condition}    Log    Condition is true
+    ...    ELSE IF    ${other_condition}    Log    Other condition is true
+    ...    ELSE    Log    No condition was true
+</code></pre>
+
+        <p>
+            The inspection suggests replacing this with the modern native syntax:
+        </p>
+        <pre><code>
+*** Test Cases ***
+Modern Conditional Test
+    IF    ${condition}
+        Log    Condition is true
+    ELSE IF    ${other_condition}
+        Log    Other condition is true
+    ELSE
+        Log    No condition was true
+    END
+</code></pre>
+
+        <!-- tooltip end -->
+        <p>
+            <strong>Note:</strong> Other cases like for TRY-EXCEPT-FINALLY are also supported and handled by this inspection.
+        </p>
+
+        <p>
+            The quick fix will automatically convert the legacy keyword syntax to the equivalent native conditional structure,
+            ensuring that the logic and behavior remain unchanged while improving code readability.
+        </p>
+    </body>
+</html>

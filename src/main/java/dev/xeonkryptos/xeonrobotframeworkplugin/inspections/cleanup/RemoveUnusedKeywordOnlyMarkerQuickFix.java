@@ -31,6 +31,6 @@ class RemoveUnusedKeywordOnlyMarkerQuickFix extends LocalQuickFixOnPsiElement {
     @Override
     @IntentionFamilyName
     public String getFamilyName() {
-        return RobotBundle.message("intention.family.remov.unusede.name");
+        return RobotBundle.message("intention.family.remove.unused.name");
     }
 }

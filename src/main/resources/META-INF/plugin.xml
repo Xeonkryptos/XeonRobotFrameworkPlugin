@@ -149,6 +149,9 @@
         <localInspection language="Robot" enabledByDefault="true" level="WARNING" shortName="TestFailedLine" bundle="messages.RobotBundle"
                          groupKey="INSP.GROUP.robot" key="INSP.NAME.execution.test.failed.line"
                          implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.inspections.TestFailedLineInspection"/>
+        <localInspection language="Robot" shortName="ReplaceBuiltInKeywordsWithNativeExpressions" bundle="messages.RobotBundle" key="INSP.NAME.keyword.replace.with.native.expressions"
+                         groupKey="INSP.GROUP.robot" enabledByDefault="true" level="WARNING" dumbAware="true"
+                         implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.inspections.maintainability.ReplaceBuiltInKeywordsWithNativeExpressionsInspection"/>
         <lang.inspectionSuppressor language="Robot" implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.inspections.RobotInspectionSuppressor"/>
 
         <runConfigurationProducer implementation="dev.xeonkryptos.xeonrobotframeworkplugin.execution.config.RobotRunConfigurationProducer"/>

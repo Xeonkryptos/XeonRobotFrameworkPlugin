@@ -27,6 +27,7 @@ public interface RobotTypes {
   IElementType ELSE_STRUCTURE = new RobotElementType("ELSE_STRUCTURE");
   IElementType EMPTY_VARIABLE_STATEMENT = new RobotElementType("EMPTY_VARIABLE_STATEMENT");
   IElementType ENVIRONMENT_VARIABLE = new RobotElementType("ENVIRONMENT_VARIABLE");
+  IElementType EXCEPTION_HANDLING_STRUCTURE = new RobotElementType("EXCEPTION_HANDLING_STRUCTURE");
   IElementType EXCEPT_STRUCTURE = new RobotElementType("EXCEPT_STRUCTURE");
   IElementType EXECUTABLE_STATEMENT = new RobotElementType("EXECUTABLE_STATEMENT");
   IElementType FINALLY_STRUCTURE = new RobotElementType("FINALLY_STRUCTURE");
@@ -204,6 +205,9 @@ public interface RobotTypes {
       }
       else if (type == ENVIRONMENT_VARIABLE) {
         return new RobotEnvironmentVariableImpl(node);
+      }
+      else if (type == EXCEPTION_HANDLING_STRUCTURE) {
+        return new RobotExceptionHandlingStructureImpl(node);
       }
       else if (type == EXCEPT_STRUCTURE) {
         return new RobotExceptStructureImpl(node);

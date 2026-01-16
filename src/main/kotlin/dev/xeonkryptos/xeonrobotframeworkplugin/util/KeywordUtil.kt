@@ -15,6 +15,8 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTestCaseStateme
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVisitor
 import org.apache.commons.text.WordUtils
 
+fun RobotKeywordCall.matchesNormalizedName(normalizedName: String): Boolean = KeywordUtil.normalizeKeywordName(this.keywordCallName.keywordName.text) == normalizedName
+
 @Service(Service.Level.PROJECT)
 class KeywordUtil(private val project: Project) {
 

@@ -61,6 +61,10 @@ public class RobotVisitor extends PsiElementVisitor {
     // visitFoldable(o);
   }
 
+  public void visitExceptionHandlingStructure(@NotNull RobotExceptionHandlingStructure o) {
+    visitExecutableStatement(o);
+  }
+
   public void visitExecutableStatement(@NotNull RobotExecutableStatement o) {
     visitElement(o);
   }

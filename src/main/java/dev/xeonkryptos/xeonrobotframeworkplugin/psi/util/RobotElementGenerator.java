@@ -3,6 +3,7 @@ package dev.xeonkryptos.xeonrobotframeworkplugin.psi.util;
 import com.intellij.openapi.components.Service;
 import com.intellij.openapi.components.Service.Level;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.util.Pair;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiFileFactory;
@@ -11,6 +12,7 @@ import com.intellij.testFramework.LightVirtualFile;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotFeatureFileType;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotLanguage;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotConditionalStructure;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotExceptionHandlingStructure;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotImportArgument;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCallLibraryName;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCallName;
@@ -25,6 +27,7 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariable;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableBodyId;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.visitor.RecursiveRobotVisitor;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 @Service(Level.PROJECT)
 public record RobotElementGenerator(Project project) {
@@ -111,10 +114,10 @@ public record RobotElementGenerator(Project project) {
 
     public RobotParameter createNewParameter(String parameterId) {
         String fileContent = """
-                             *** Test Case ***
-                             Dummy
-                                 Keyword  %s=\s\s
-                            \s""".formatted(parameterId);
+                              *** Test Case ***
+                              Dummy
+                                  Keyword  %s=\s\s
+                             \s""".formatted(parameterId);
 
         PsiFile psiFile = createDummyPsiFile(fileContent);
         if (psiFile == null) {
@@ -223,15 +226,35 @@ public record RobotElementGenerator(Project project) {
         return variableBodyFinder.variableBodyId;
     }
 
-    public RobotConditionalStructure createNewIfConditionalStructure(String condition, String conditionalBody) {
-        String fileContent = """
-                             *** Test Case ***
-                             Dummy
-                                 IF  %s
-                                     %s
-                                 END
-                             """.formatted(condition, conditionalBody);
+    public RobotConditionalStructure createNewConditionalStructure(String ifCondition,
+                                                                   String ifConditionalBody,
+                                                                   Pair<String, String>[] elseIfConditionalDefinitions,
+                                                                   @Nullable String elseConditionalBody) {
+        StringBuilder conditionalBuilder = new StringBuilder("""
+                                                             *** Test Cases ***
+                                                             Dummy
+                                                                 IF  %s
+                                                                     %s
+                                                             """.formatted(ifCondition.trim(), ifConditionalBody.trim()));
 
+        for (Pair<String, String> elseIfConditionalDefinition : elseIfConditionalDefinitions) {
+            String elseIfConditionResult = """
+                                               ELSE IF  %s
+                                                   %s
+                                           """.formatted(elseIfConditionalDefinition.first.trim(), elseIfConditionalDefinition.second.trim());
+            conditionalBuilder.append(elseIfConditionResult);
+        }
+
+        if (elseConditionalBody != null) {
+            String elseConditionResult = """
+                                             ELSE
+                                                 %s
+                                         """.formatted(elseConditionalBody.trim());
+            conditionalBuilder.append(elseConditionResult);
+        }
+        conditionalBuilder.append("    END\n");
+
+        String fileContent = conditionalBuilder.toString();
         PsiFile psiFile = createDummyPsiFile(fileContent);
         if (psiFile == null) {
             return null;
@@ -240,6 +263,42 @@ public record RobotElementGenerator(Project project) {
         RobotConditionalStructureFinder conditionalStructureFinder = new RobotConditionalStructureFinder();
         psiFile.acceptChildren(conditionalStructureFinder);
         return conditionalStructureFinder.conditionalStructure;
+    }
+
+    public RobotExceptionHandlingStructure createNewExceptionHandlingStructure(String tryBody, Pair<@NotNull String, @NotNull String>[] exceptDefinitions, @Nullable String finallyBody) {
+        StringBuilder structureBuilder = new StringBuilder("""
+                                                           *** Test Cases ***
+                                                           Dummy
+                                                               TRY
+                                                                   %s
+                                                           """.formatted(tryBody.trim()));
+
+        for (Pair<String, String> exceptDefinition : exceptDefinitions) {
+            String finallyBodyResult = """
+                                           EXCEPT  %s
+                                               %s
+                                       """.formatted(exceptDefinition.first.trim(), exceptDefinition.second.trim());
+            structureBuilder.append(finallyBodyResult);
+        }
+
+        if (finallyBody != null) {
+            String finallyBodyResult = """
+                                           FINALLY
+                                               %s
+                                       """.formatted(finallyBody.trim());
+            structureBuilder.append(finallyBodyResult);
+        }
+        structureBuilder.append("    END\n");
+
+        String fileContent = structureBuilder.toString();
+        PsiFile psiFile = createDummyPsiFile(fileContent);
+        if (psiFile == null) {
+            return null;
+        }
+
+        RobotExceptionHandlingStructureFinder structureFinder = new RobotExceptionHandlingStructureFinder();
+        psiFile.acceptChildren(structureFinder);
+        return structureFinder.exceptionHandlingStructure;
     }
 
     public PsiElement createEolElement(int count) {
@@ -392,6 +451,16 @@ public record RobotElementGenerator(Project project) {
         @Override
         public void visitConditionalStructure(@NotNull RobotConditionalStructure o) {
             conditionalStructure = o;
+        }
+    }
+
+    private static final class RobotExceptionHandlingStructureFinder extends RecursiveRobotVisitor {
+
+        private RobotExceptionHandlingStructure exceptionHandlingStructure;
+
+        @Override
+        public void visitExceptionHandlingStructure(@NotNull RobotExceptionHandlingStructure o) {
+            exceptionHandlingStructure = o;
         }
     }
 }

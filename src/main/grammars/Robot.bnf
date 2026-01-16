@@ -294,7 +294,7 @@ inline_else_structure ::= ELSE call_structure {
 }
 conditional_content ::= conditional_content_body+ {name="Condition"}
 private conditional_content_body ::= PYTHON_EXPRESSION_CONTENT | variable
-private exception_handling_structure ::= try_structure
+exception_handling_structure ::= try_structure
     except_structure*
     else_structure?
     finally_structure?

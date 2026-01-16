@@ -456,7 +456,7 @@ LineComment = {LineCommentSign} {NON_EOL}*
         "BREAK" {ExtendedKeywordFinishedMarker}     { yypushback(yylength() - "BREAK".length()); return BREAK; }
         "CONTINUE" {ExtendedKeywordFinishedMarker}  { yypushback(yylength() - "CONTINUE".length()); return CONTINUE; }
         "GROUP" {ExtendedKeywordFinishedMarker}     { yypushback(yylength() - "GROUP".length()); enterNewState(SIMPLE_CONTROL_STRUCTURE_START); return GROUP; }
-        "END" {EOL}                                 { yypushback(1); return END; }
+        "END" {EOL}?                                { yypushback(1); return END; }
     }
 
     "GIVEN" {ExtendedSpaceBasedEndMarker}   {
