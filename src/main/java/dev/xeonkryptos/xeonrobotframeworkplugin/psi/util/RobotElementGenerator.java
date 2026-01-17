@@ -19,6 +19,7 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCallName
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotParameter;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotParameterId;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotPositionalArgument;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotReturnStructure;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTaskId;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTemplateParameterId;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTestCaseId;
@@ -317,6 +318,21 @@ public record RobotElementGenerator(Project project) {
         return testCaseIdFinder.testCaseId.getNextSibling();
     }
 
+    public RobotReturnStructure createReturnStructure(String returnValue) {
+        String fileContent = """
+                             *** Keywords ***
+                             Dummy Keyword
+                                 RETURN  %s
+                             """.formatted(returnValue);
+        PsiFile psiFile = createDummyPsiFile(fileContent);
+        if (psiFile == null) {
+            return null;
+        }
+        RobotReturnStructureFinder returnStructureFinder = new RobotReturnStructureFinder();
+        psiFile.acceptChildren(returnStructureFinder);
+        return returnStructureFinder.returnStructure;
+    }
+
     public PsiFile createDummyPsiFile(String text) {
         PsiFileFactory factory = PsiFileFactory.getInstance(project);
 
@@ -461,6 +477,16 @@ public record RobotElementGenerator(Project project) {
         @Override
         public void visitExceptionHandlingStructure(@NotNull RobotExceptionHandlingStructure o) {
             exceptionHandlingStructure = o;
+        }
+    }
+
+    private static final class RobotReturnStructureFinder extends RecursiveRobotVisitor {
+
+        private RobotReturnStructure returnStructure;
+
+        @Override
+        public void visitReturnStructure(@NotNull RobotReturnStructure o) {
+            returnStructure = o;
         }
     }
 }

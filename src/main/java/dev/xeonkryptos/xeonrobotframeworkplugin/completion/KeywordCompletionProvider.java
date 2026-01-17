@@ -18,7 +18,7 @@ import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.util.ProcessingContext;
 import com.intellij.util.Processor;
 import dev.xeonkryptos.xeonrobotframeworkplugin.config.RobotOptionsProvider;
-import dev.xeonkryptos.xeonrobotframeworkplugin.index.PyRobotKeywordDefinitionIndex.Util;
+import dev.xeonkryptos.xeonrobotframeworkplugin.index.PyRobotKeywordDefinitionIndex.PyRobotKeywordDefinitionIndexUtil;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.dto.ImportType;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.dto.ParameterDto;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.DefinedKeyword;
@@ -107,7 +107,7 @@ class KeywordCompletionProvider extends CompletionProvider<CompletionParameters>
         Set<DefinedKeyword> definedKeywords = new LinkedHashSet<>();
         collectUserKeywords(project, searchScope, definedKeywords);
 
-        Collection<DefinedKeyword> constructedPythonKeywords = Util.getKeywordNames(project, searchScope, null);
+        Collection<DefinedKeyword> constructedPythonKeywords = PyRobotKeywordDefinitionIndexUtil.getKeywordNames(project, searchScope, null);
         definedKeywords.addAll(constructedPythonKeywords);
         return definedKeywords;
     }

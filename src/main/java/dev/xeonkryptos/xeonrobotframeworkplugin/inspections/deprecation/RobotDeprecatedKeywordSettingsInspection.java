@@ -24,18 +24,18 @@ public class RobotDeprecatedKeywordSettingsInspection extends RobotVersionBasedI
         return new RobotVisitor() {
             @Override
             public void visitLocalSetting(@NotNull RobotLocalSetting o) {
-                super.visitLocalSetting(o);
-                RobotVersion robotVersion = getRobotVersion(session);
                 String settingName = o.getSettingName();
                 RobotUserKeywordStatement userKeywordStatement = PsiTreeUtil.getParentOfType(o, RobotUserKeywordStatement.class, true);
-                if (settingName.equalsIgnoreCase(RobotNames.RETURN_LOCAL_SETTING_NAME) && userKeywordStatement != null && robotVersion.supports(new RobotVersion(7, 0, 0))) {
+                if (settingName.equalsIgnoreCase(RobotNames.RETURN_LOCAL_SETTING_NAME) && userKeywordStatement != null) {
                     RobotLocalSettingId localSettingId = o.getLocalSettingId();
-                    holder.registerProblem(localSettingId,
-                                           RobotBundle.message("INSP.setting.local.return.deprecated"),
-                                           ProblemHighlightType.LIKE_DEPRECATED);
-
+                    holder.registerProblem(localSettingId, RobotBundle.message("INSP.setting.local.return.deprecated"), ProblemHighlightType.LIKE_DEPRECATED);
                 }
             }
         };
+    }
+
+    @Override
+    protected RobotVersion getMinimumRobotVersion() {
+        return new RobotVersion(7, 0, 0);
     }
 }

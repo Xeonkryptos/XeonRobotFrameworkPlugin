@@ -1,14 +1,8 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.inspections.maintainability
 
-import com.intellij.codeInspection.LocalQuickFixOnPsiElement
-import com.intellij.codeInspection.util.IntentionFamilyName
-import com.intellij.codeInspection.util.IntentionName
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Pair
-import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
-import com.intellij.psi.util.parentOfType
-import dev.xeonkryptos.xeonrobotframeworkplugin.RobotBundle
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotConditionalContent
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotInlineElseIfStructure
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotInlineElseStructure
@@ -16,32 +10,19 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCall
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotPositionalArgument
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVisitor
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.RobotElementGenerator
-import dev.xeonkryptos.xeonrobotframeworkplugin.util.KeywordUtil
 import dev.xeonkryptos.xeonrobotframeworkplugin.util.RobotNames
 
-class ReplaceRunKeywordIfQuickFix(keywordCall: RobotKeywordCall) : LocalQuickFixOnPsiElement(keywordCall) {
+class ReplaceRunKeywordIfQuickFix(keywordCall: RobotKeywordCall) : AbstractReplaceKeywordQuickFix(keywordCall, RobotNames.RUN_KEYWORD_IF_NORMALIZED_KEYWORD_NAME) {
 
-    companion object {
-        private val replaceableKeywordNames = setOf(RobotNames.RUN_KEYWORD_IF_NORMALIZED_KEYWORD_NAME, "${RobotNames.BUILTIN_NAMESPACE}.${RobotNames.RUN_KEYWORD_IF_NORMALIZED_KEYWORD_NAME}")
+    override fun isAvailable(keywordCall: RobotKeywordCall): Boolean {
+        val conditionalStructureCollector = ConditionalStructureCollector()
+        keywordCall.positionalArgumentList.forEach { positionalArgument -> positionalArgument.accept(conditionalStructureCollector) }
+        return conditionalStructureCollector.conditionalContent != null && conditionalStructureCollector.ifKeywordCall != null
     }
 
-    override fun getText(): @IntentionName String = RobotBundle.message("intention.family.deprecated.keyword.native.replacement.name")
-
-    override fun isAvailable(project: Project, file: PsiFile, startElement: PsiElement, endElement: PsiElement): Boolean = startElement.parentOfType<RobotKeywordCall>(withSelf = true)?.let {
-        val normalizeKeywordName = KeywordUtil.normalizeKeywordName(it.name)
-        // The quick fix is not available for keyword calls with parameters. A keyword call like "Run Keyword If" needs positional arguments.
-        return@let if (replaceableKeywordNames.contains(normalizeKeywordName) && it.parameterList.isEmpty()) {
-            val conditionalStructureCollector = ConditionalStructureCollector()
-            it.positionalArgumentList.forEach { positionalArgument -> positionalArgument.accept(conditionalStructureCollector) }
-            conditionalStructureCollector.conditionalContent != null && conditionalStructureCollector.ifKeywordCall != null
-        } else false
-    } ?: false
-
-    override fun invoke(project: Project, file: PsiFile, startElement: PsiElement, endElement: PsiElement) {
-        val runKeywordIfCall = startElement.parentOfType<RobotKeywordCall>(withSelf = true) ?: return
-
+    override fun invoke(project: Project, file: PsiFile, keywordCall: RobotKeywordCall) {
         val conditionalStructureCollector = ConditionalStructureCollector()
-        runKeywordIfCall.positionalArgumentList.forEach { it.accept(conditionalStructureCollector) }
+        keywordCall.positionalArgumentList.forEach { it.accept(conditionalStructureCollector) }
 
         val ifCondition = conditionalStructureCollector.conditionalContent?.text ?: return
         val ifKeywordCall = conditionalStructureCollector.ifKeywordCall?.text ?: return
@@ -53,10 +34,8 @@ class ReplaceRunKeywordIfQuickFix(keywordCall: RobotKeywordCall) : LocalQuickFix
         val elseConditionalBody = conditionalStructureCollector.inlineElseStructure?.keywordCall?.text
 
         val newConditionalStructure = RobotElementGenerator.getInstance(project).createNewConditionalStructure(ifCondition, ifKeywordCall, elseIfPairs, elseConditionalBody)
-        startElement.replace(newConditionalStructure)
+        keywordCall.replace(newConditionalStructure)
     }
-
-    override fun getFamilyName(): @IntentionFamilyName String = RobotBundle.message("intention.family.deprecated.keyword.native.replacement.text")
 
     private class ConditionalStructureCollector : RobotVisitor() {
 

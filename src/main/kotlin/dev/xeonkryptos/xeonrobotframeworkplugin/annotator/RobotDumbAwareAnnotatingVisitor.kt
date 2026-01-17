@@ -7,6 +7,7 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.annotator.compilation.Duplicated
 import dev.xeonkryptos.xeonrobotframeworkplugin.annotator.compilation.ForLoopParameterRestrictionAnnotator
 import dev.xeonkryptos.xeonrobotframeworkplugin.annotator.compilation.InvalidlyPlacedBuiltInKeywordCallsAnnotator
 import dev.xeonkryptos.xeonrobotframeworkplugin.annotator.compilation.InvalidlyPlacedConditionalKeywordsAnnotator
+import dev.xeonkryptos.xeonrobotframeworkplugin.annotator.compilation.InvalidlyPlacedReturnAnnotator
 import dev.xeonkryptos.xeonrobotframeworkplugin.annotator.compilation.RobotInZipVariableSourceTypeAnnotator
 import dev.xeonkryptos.xeonrobotframeworkplugin.annotator.compilation.RobotLocalArgumentsSettingAnnotator
 import dev.xeonkryptos.xeonrobotframeworkplugin.annotator.compilation.RobotUserKeywordStatementAnnotator
@@ -20,7 +21,8 @@ class RobotDumbAwareAnnotatingVisitor : RobotAnnotatingVisitor(), DumbAware {
         ForLoopParameterRestrictionAnnotator(),
         RobotInZipVariableSourceTypeAnnotator(),
         InvalidlyPlacedConditionalKeywordsAnnotator(),
-        InvalidlyPlacedBuiltInKeywordCallsAnnotator()
+        InvalidlyPlacedBuiltInKeywordCallsAnnotator(),
+        InvalidlyPlacedReturnAnnotator()
     )
 
     override fun annotate(psiElement: PsiElement, holder: AnnotationHolder) {

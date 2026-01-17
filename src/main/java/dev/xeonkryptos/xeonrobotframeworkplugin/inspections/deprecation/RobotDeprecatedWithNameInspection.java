@@ -10,6 +10,7 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.RobotBundle;
 import dev.xeonkryptos.xeonrobotframeworkplugin.inspections.RobotVersionBasedInspection;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLibraryImportGlobalSetting;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVisitor;
+import dev.xeonkryptos.xeonrobotframeworkplugin.util.RobotNames;
 import dev.xeonkryptos.xeonrobotframeworkplugin.util.RobotVersionProvider.RobotVersion;
 import org.jetbrains.annotations.NotNull;
 
@@ -21,17 +22,16 @@ public class RobotDeprecatedWithNameInspection extends RobotVersionBasedInspecti
         return new RobotVisitor() {
             @Override
             public void visitLibraryImportGlobalSetting(@NotNull RobotLibraryImportGlobalSetting o) {
-                super.visitLibraryImportGlobalSetting(o);
                 PsiElement libraryNameElement = o.getLibraryNameElement();
-                RobotVersion robotVersion = getRobotVersion(session);
-                if (libraryNameElement != null && "WITH_NAME".equalsIgnoreCase(libraryNameElement.getText()) && robotVersion.supports(new RobotVersion(6,
-                                                                                                                                                       0,
-                                                                                                                                                       0))) {
-                    holder.registerProblem(libraryNameElement,
-                                           RobotBundle.message("INSP.library.import.with-name.deprecated"),
-                                           ProblemHighlightType.LIKE_DEPRECATED);
+                if (libraryNameElement != null && RobotNames.WITH_NAME_RESERVED_NAME.equals(libraryNameElement.getText())) {
+                    holder.registerProblem(libraryNameElement, RobotBundle.message("INSP.library.import.with-name.deprecated"), ProblemHighlightType.LIKE_DEPRECATED);
                 }
             }
         };
+    }
+
+    @Override
+    protected RobotVersion getMinimumRobotVersion() {
+        return new RobotVersion(6, 0, 0);
     }
 }

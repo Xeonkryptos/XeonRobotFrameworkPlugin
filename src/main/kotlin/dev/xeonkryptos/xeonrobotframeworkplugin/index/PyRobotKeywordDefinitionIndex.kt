@@ -33,7 +33,7 @@ import java.util.function.Consumer
 @Suppress("UnstableApiUsage")
 class PyRobotKeywordDefinitionIndex : FileBasedIndexExtension<String, PyRobotKeywordDefinitionIndex.IntArrayWrapper>() {
 
-    object Util {
+    object PyRobotKeywordDefinitionIndexUtil {
         @JvmField
         val INDEX_ID: ID<String, IntArrayWrapper> = ID.create("dev.xeonkryptos.xeonrobotframeworkplugin.PyRobotKeywordIndex")
 
@@ -110,7 +110,7 @@ class PyRobotKeywordDefinitionIndex : FileBasedIndexExtension<String, PyRobotKey
         private const val VERSION: Int = 2
     }
 
-    override fun getName(): ID<String, IntArrayWrapper> = Util.INDEX_ID
+    override fun getName(): ID<String, IntArrayWrapper> = PyRobotKeywordDefinitionIndexUtil.INDEX_ID
 
     override fun getVersion(): Int = VERSION
 

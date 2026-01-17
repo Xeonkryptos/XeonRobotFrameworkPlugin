@@ -78,7 +78,7 @@ public class RobotKeywordProvider {
         KEYWORD_TABLE.addSyntax(RobotTypes.LOCAL_SETTING, "[Return]");
 
         addRecommendation(RobotTypes.LOCAL_SETTING, "[Documentation]", RobotNames.DOCUMENTATION_LOCAL_SETTING_NAME, RobotTailTypes.TAB);
-        addRecommendation(RobotTypes.LOCAL_SETTING, "[Tags]", RobotNames.TAGS_SETTING_NAME, RobotTailTypes.TAB);
+        addRecommendation(RobotTypes.LOCAL_SETTING, "[Tags]", RobotNames.TAGS_LOCAL_SETTING_NAME, RobotTailTypes.TAB);
         addRecommendation(RobotTypes.LOCAL_SETTING, "[Setup]", "Setup", RobotTailTypes.TAB);
         addRecommendation(RobotTypes.LOCAL_SETTING, "[Teardown]", RobotNames.TEARDOWN_LOCAL_SETTING_NAME, RobotTailTypes.TAB);
         addRecommendation(RobotTypes.LOCAL_SETTING, "[Template]", RobotNames.TEMPLATE_LOCAL_SETTING_NAME, RobotTailTypes.TAB);

@@ -9,6 +9,7 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.RobotBundle;
 import dev.xeonkryptos.xeonrobotframeworkplugin.inspections.RobotVersionBasedInspection;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotSection;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVisitor;
+import dev.xeonkryptos.xeonrobotframeworkplugin.util.RobotNames;
 import dev.xeonkryptos.xeonrobotframeworkplugin.util.RobotVersionProvider.RobotVersion;
 import org.jetbrains.annotations.NotNull;
 
@@ -21,16 +22,18 @@ public class RobotDeprecatedSectionsNamingInspection extends RobotVersionBasedIn
 
             @Override
             public void visitSection(@NotNull RobotSection o) {
-                super.visitSection(o);
-                RobotVersion robotVersion = getRobotVersion(session);
-                if (robotVersion != null && robotVersion.supports(new RobotVersion(6, 0, 0))) {
-                    String sectionName = o.getText().replace("*", "").trim();
-                    if ("Test Case".equalsIgnoreCase(sectionName) || "Keyword".equalsIgnoreCase(sectionName) || "Setting".equalsIgnoreCase(sectionName)
-                        || "Variable".equalsIgnoreCase(sectionName) || "Comment".equalsIgnoreCase(sectionName) || "Task".equalsIgnoreCase(sectionName)) {
-                        holder.registerProblem(o, RobotBundle.message("INSP.section.single-section-name.deprecated"), ProblemHighlightType.LIKE_DEPRECATED);
-                    }
+                String sectionName = o.getText().replace("*", "").trim();
+                if (RobotNames.TEST_CASE_SECTION_NAME.equalsIgnoreCase(sectionName) || RobotNames.KEYWORD_SECTION_NAME.equalsIgnoreCase(sectionName)
+                    || RobotNames.SETTING_SECTION_NAME.equalsIgnoreCase(sectionName) || RobotNames.VARIABLE_SECTION_NAME.equalsIgnoreCase(sectionName)
+                    || RobotNames.COMMENT_SECTION_NAME.equalsIgnoreCase(sectionName) || RobotNames.TASK_SECTION_NAME.equalsIgnoreCase(sectionName)) {
+                    holder.registerProblem(o, RobotBundle.message("INSP.section.single-section-name.deprecated"), ProblemHighlightType.LIKE_DEPRECATED);
                 }
             }
         };
+    }
+
+    @Override
+    protected RobotVersion getMinimumRobotVersion() {
+        return new RobotVersion(6, 0, 0);
     }
 }

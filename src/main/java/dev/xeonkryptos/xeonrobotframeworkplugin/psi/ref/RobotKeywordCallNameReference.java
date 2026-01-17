@@ -11,7 +11,7 @@ import com.intellij.psi.impl.source.resolve.ResolveCache;
 import com.intellij.psi.search.GlobalSearchScope;
 import com.jetbrains.python.psi.PyFunction;
 import dev.xeonkryptos.xeonrobotframeworkplugin.completion.KeywordCompletionModification;
-import dev.xeonkryptos.xeonrobotframeworkplugin.index.PyRobotKeywordDefinitionIndex.Util;
+import dev.xeonkryptos.xeonrobotframeworkplugin.index.PyRobotKeywordDefinitionIndex.PyRobotKeywordDefinitionIndexUtil;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.dto.ImportType;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.KeywordFile;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotFile;
@@ -73,11 +73,11 @@ public class RobotKeywordCallNameReference extends PsiPolyVariantReferenceBase<R
         GlobalSearchScope searchScope = GlobalSearchScope.filesWithLibrariesScope(project, importedFiles);
 
         Collection<RobotUserKeywordStatement> userKeywordStatements = KeywordDefinitionNameIndex.getUserKeywordStatements(keyword, project, searchScope);
-        Collection<PyFunction> pythonKeywordFunctions = Util.findKeywordFunctions(keyword, psiFile.getProject(), searchScope);
+        Collection<PyFunction> pythonKeywordFunctions = PyRobotKeywordDefinitionIndexUtil.findKeywordFunctions(keyword, psiFile.getProject(), searchScope);
         if (libraryName != null && (userKeywordStatements.isEmpty() || pythonKeywordFunctions.isEmpty())) {
             String fullKeywordName = libraryName + "." + keyword;
             userKeywordStatements = KeywordDefinitionNameIndex.getUserKeywordStatements(fullKeywordName, project, searchScope);
-            pythonKeywordFunctions = Util.findKeywordFunctions(fullKeywordName, psiFile.getProject(), searchScope);
+            pythonKeywordFunctions = PyRobotKeywordDefinitionIndexUtil.findKeywordFunctions(fullKeywordName, psiFile.getProject(), searchScope);
         }
         Collection<PsiElement> keywordElements = new LinkedHashSet<>(userKeywordStatements.size() + pythonKeywordFunctions.size());
         keywordElements.addAll(userKeywordStatements);

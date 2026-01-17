@@ -43,7 +43,7 @@ import java.util.Set;
 class VariableCompletionProvider extends CompletionProvider<CompletionParameters> {
 
     private static final Set<String> RESTRICTED_VARIABLE_COMPLETION_LOCAL_SETTING_NAMES = Set.of(RobotNames.DOCUMENTATION_LOCAL_SETTING_NAME,
-                                                                                                 RobotNames.TAGS_SETTING_NAME);
+                                                                                                 RobotNames.TAGS_LOCAL_SETTING_NAME);
 
     @Override
     protected void addCompletions(@NotNull CompletionParameters parameters, @NotNull ProcessingContext context, @NotNull CompletionResultSet result) {
