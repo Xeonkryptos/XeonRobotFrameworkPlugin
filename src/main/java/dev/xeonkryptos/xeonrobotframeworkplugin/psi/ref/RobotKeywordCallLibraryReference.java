@@ -6,11 +6,13 @@ import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiPolyVariantReferenceBase;
 import com.intellij.psi.ResolveResult;
 import com.intellij.psi.impl.source.resolve.ResolveCache;
+import com.jetbrains.python.psi.PyClass;
 import dev.xeonkryptos.xeonrobotframeworkplugin.completion.KeywordCompletionModification;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.dto.ImportType;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotFile;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCallLibraryName;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.visitor.RobotLibraryNamesCollector;
+import dev.xeonkryptos.xeonrobotframeworkplugin.util.RobotNames;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -33,7 +35,8 @@ public class RobotKeywordCallLibraryReference extends PsiPolyVariantReferenceBas
                 libraryName = libraryName.substring(1);
             }
             PsiFile containingFile = keywordCallLibraryId.getContainingFile();
-            return Arrays.stream(findKeywordLibraryReference(libraryName, containingFile)).map(PsiElementResolveResult::new).toArray(ResolveResult[]::new);
+            PsiElement[] keywordLibraryReference = findKeywordLibraryReference(libraryName, containingFile);
+            return Arrays.stream(keywordLibraryReference).map(PsiElementResolveResult::new).toArray(ResolveResult[]::new);
         }, false, false);
     }
 
@@ -42,15 +45,14 @@ public class RobotKeywordCallLibraryReference extends PsiPolyVariantReferenceBas
         if (!(psiFile instanceof RobotFile robotFile)) {
             return PsiElement.EMPTY_ARRAY;
         }
-        return robotFile.collectImportedFiles(true, ImportType.RESOURCE)
-                        .stream()
-                        .flatMap(keywordFile -> {
-                            RobotLibraryNamesCollector libraryNamesCollector = new RobotLibraryNamesCollector();
-                            keywordFile.getPsiFile().acceptChildren(libraryNamesCollector);
-                            return libraryNamesCollector.getRenamedLibraries().entrySet().stream();
-                        })
-                        .filter(entry -> libraryName.equals(entry.getKey()))
-                        .map(Entry::getValue)
-                        .toArray(PsiElement[]::new);
+        if (libraryName.equalsIgnoreCase(RobotNames.BUILTIN_NAMESPACE)) {
+            PyClass builtInImportClass = PythonResolver.getBuiltInClass(psiFile);
+            return builtInImportClass != null ? new PsiElement[] { builtInImportClass } : PsiElement.EMPTY_ARRAY;
+        }
+        return robotFile.collectImportedFiles(true, ImportType.RESOURCE).stream().flatMap(keywordFile -> {
+            RobotLibraryNamesCollector libraryNamesCollector = new RobotLibraryNamesCollector();
+            keywordFile.getPsiFile().acceptChildren(libraryNamesCollector);
+            return libraryNamesCollector.getRenamedLibraries().entrySet().stream();
+        }).filter(entry -> libraryName.equals(entry.getKey())).map(Entry::getValue).toArray(PsiElement[]::new);
     }
 }

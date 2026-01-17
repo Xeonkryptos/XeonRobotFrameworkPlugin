@@ -9,6 +9,7 @@ import com.intellij.psi.PsiPolyVariantReferenceBase;
 import com.intellij.psi.ResolveResult;
 import com.intellij.psi.impl.source.resolve.ResolveCache;
 import com.intellij.psi.search.GlobalSearchScope;
+import com.jetbrains.python.psi.PyClass;
 import com.jetbrains.python.psi.PyFunction;
 import dev.xeonkryptos.xeonrobotframeworkplugin.completion.KeywordCompletionModification;
 import dev.xeonkryptos.xeonrobotframeworkplugin.index.PyRobotKeywordDefinitionIndex.PyRobotKeywordDefinitionIndexUtil;
@@ -19,6 +20,7 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCallLibr
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCallName;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotUserKeywordStatement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.index.KeywordDefinitionNameIndex;
+import dev.xeonkryptos.xeonrobotframeworkplugin.util.RobotNames;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -65,6 +67,15 @@ public class RobotKeywordCallNameReference extends PsiPolyVariantReferenceBase<R
     private PsiElement[] findKeywordReferences(@Nullable String libraryName, @NotNull String keyword, @Nullable PsiFile psiFile) {
         if (!(psiFile instanceof RobotFile robotFile)) {
             return PsiElement.EMPTY_ARRAY;
+        }
+        if (libraryName != null && libraryName.equalsIgnoreCase(RobotNames.BUILTIN_NAMESPACE)) {
+            PyClass builtInClass = PythonResolver.getBuiltInClass(psiFile);
+            if (builtInClass == null) {
+                return PsiElement.EMPTY_ARRAY;
+            }
+            GlobalSearchScope searchScope = GlobalSearchScope.fileScope(builtInClass.getContainingFile());
+            Collection<PyFunction> builtinFunctions = PyRobotKeywordDefinitionIndexUtil.findKeywordFunctions(keyword, psiFile.getProject(), searchScope);
+            return builtinFunctions.toArray(PsiElement[]::new);
         }
 
         Collection<VirtualFile> importedFiles = collectImportedVirtualFilesOneselfIncluded(robotFile, libraryName);

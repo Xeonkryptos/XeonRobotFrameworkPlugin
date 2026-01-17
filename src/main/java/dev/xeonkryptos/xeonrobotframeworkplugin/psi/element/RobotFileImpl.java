@@ -2,11 +2,8 @@ package dev.xeonkryptos.xeonrobotframeworkplugin.psi.element;
 
 import com.intellij.extapi.psi.PsiFileBase;
 import com.intellij.openapi.fileTypes.FileType;
-import com.intellij.openapi.module.Module;
-import com.intellij.openapi.module.ModuleUtil;
 import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.roots.ProjectRootModificationTracker;
 import com.intellij.openapi.util.Key;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.FileViewProvider;
@@ -30,7 +27,6 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.VariableScope;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.visitor.RobotImportFilesCollector;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.visitor.RobotSectionVariablesCollector;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.visitor.RobotUsedFilesCollector;
-import dev.xeonkryptos.xeonrobotframeworkplugin.util.RobotNames;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -52,7 +48,6 @@ public class RobotFileImpl extends PsiFileBase implements KeywordFile, RobotFile
     private static final Key<ParameterizedCachedValue<Collection<VirtualFile>, Boolean>> IMPORTED_VIRTUAL_FILES_CACHE_KEY = Key.create(
             "IMPORTED_VIRTUAL_FILES_CACHE");
     private static final Key<CachedValue<Collection<DefinedVariable>>> TEST_SUITE_VARIABLES_CACHE_KEY = Key.create("TEST_SUITE_VARIABLES_CACHE");
-    private static final Key<CachedValue<RobotPythonClass>> BUILT_IN_LIBRARY_CACHE_KEY = Key.create("BUILT_IN_LIBRARY_CACHE");
 
     private final FileType fileType;
 
@@ -175,9 +170,9 @@ public class RobotFileImpl extends PsiFileBase implements KeywordFile, RobotFile
     @Override
     public final Collection<KeywordFile> collectImportedFiles(boolean includeTransitive, ImportType... importTypes) {
         Set<KeywordFile> results = new LinkedHashSet<>();
-        RobotPythonClass builtInImportClass = getBuiltInImportClass();
+        PyClass builtInImportClass = PythonResolver.getBuiltInClass(this);
         if (builtInImportClass != null) {
-            results.add(builtInImportClass);
+            results.add(new RobotPythonClass(null, builtInImportClass, ImportType.LIBRARY));
         }
         Collection<KeywordFile> importedFiles = getImportedFiles(includeTransitive, importTypes);
         results.addAll(importedFiles);
@@ -233,22 +228,6 @@ public class RobotFileImpl extends PsiFileBase implements KeywordFile, RobotFile
                 collectTransitiveKeywordFiles(child, results, importTypes);
             }
         }
-    }
-
-    private RobotPythonClass getBuiltInImportClass() {
-        Module module = ModuleUtil.findModuleForPsiElement(this);
-        if (module != null) {
-            Project project = getProject();
-            return CachedValuesManager.getManager(project).getCachedValue(module, BUILT_IN_LIBRARY_CACHE_KEY, () -> {
-                ProjectRootModificationTracker projectRootModificationTracker = ProjectRootModificationTracker.getInstance(project);
-                PyClass builtIn = PythonResolver.findClass(RobotNames.BUILTIN_FULL_PYTHON_NAMESPACE, project);
-                if (builtIn != null) {
-                    return Result.createSingleDependency(new RobotPythonClass(null, builtIn, ImportType.LIBRARY), projectRootModificationTracker);
-                }
-                return Result.createSingleDependency(null, projectRootModificationTracker);
-            }, false);
-        }
-        return null;
     }
 
     @NotNull

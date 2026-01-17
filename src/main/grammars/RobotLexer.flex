@@ -224,7 +224,7 @@ LineComment = {LineCommentSign} {NON_EOL}*
 
 %xstate COMMENTS_SECTION, LITERAL_CONSTANT_ONLY, LOCAL_SETTING_DEFINITION
 %xstate PARAMETER_ASSIGNMENT, TEMPLATE_PARAMETER_ASSIGNMENT
-%xstate KEYWORD_LIBRARY_NAME_SEPARATOR, KEYWORD_CALL_NAME,
+%xstate KEYWORD_LIBRARY_NAME_SEPARATOR, KEYWORD_CALL_NAME, KEYWORD_LIBRARY_NAME_SEPARATOR_FOR_SPECIAL_KEYWORD
 
 %%
 
@@ -546,19 +546,23 @@ LineComment = {LineCommentSign} {NON_EOL}*
 }
 
 <KEYWORD_CALL>  {
-    {RunKeywordCall}                                               { return KEYWORD_NAME; }
-    {ConditionalRunKeywordCall}                                    { yybegin(PYTHON_EVALUATED_CONTROL_STRUCTURE_START); return KEYWORD_NAME; }
-    {AssertRunKeywordCall} | {RepeatKeywordCall}                   { enterNewState(SINGLE_LITERAL_CONSTANT_START); return KEYWORD_NAME; }
-    {SimpleConditionalKeywordCall}                                 {
+    [/*]? {RunKeywordCall}                                               { return KEYWORD_NAME; }
+    [/*]? {ConditionalRunKeywordCall}                                    { yybegin(PYTHON_EVALUATED_CONTROL_STRUCTURE_START); return KEYWORD_NAME; }
+    [/*]? ({AssertRunKeywordCall} | {RepeatKeywordCall})                 { enterNewState(SINGLE_LITERAL_CONSTANT_START); return KEYWORD_NAME; }
+    [/*]? {SimpleConditionalKeywordCall}                                 {
           yybegin(KEYWORD_ARGUMENTS);
           enterNewState(PYTHON_EVALUATED_CONTROL_STRUCTURE_START);
           return KEYWORD_NAME;
     }
-    {RepeatKeywordCall}                                            { return KEYWORD_NAME; }
+    [/*]? {RepeatKeywordCall}                                            { return KEYWORD_NAME; }
 
-    {BuiltInNamespace} ({RunKeywordCall} | {ConditionalRunKeywordCall} | {AssertRunKeywordCall} | {SimpleConditionalKeywordCall} | {RepeatKeywordCall}) {
-          yypushback(yylength() - "BuiltIn".length());
-          enterNewState(KEYWORD_LIBRARY_NAME_SEPARATOR);
+    [/*]? {BuiltInNamespace} ({RunKeywordCall} | {ConditionalRunKeywordCall} | {AssertRunKeywordCall} | {SimpleConditionalKeywordCall} | {RepeatKeywordCall}) {
+          int additionalPushbackLength = 0;
+          if (yycharat(0) != 'B' && yycharat(0) != 'b') {
+              additionalPushbackLength = 1;
+          }
+          yypushback(yylength() - "BuiltIn".length() - additionalPushbackLength);
+          enterNewState(KEYWORD_LIBRARY_NAME_SEPARATOR_FOR_SPECIAL_KEYWORD);
           return KEYWORD_LIBRARY_NAME;
     }
 
@@ -571,6 +575,7 @@ LineComment = {LineCommentSign} {NON_EOL}*
     {VariableFreeLiteralValue}                                     { yybegin(KEYWORD_ARGUMENTS); return KEYWORD_NAME; }
 }
 <KEYWORD_LIBRARY_NAME_SEPARATOR> "."                               { yybegin(KEYWORD_CALL_NAME); return KEYWORD_LIBRARY_SEPARATOR; }
+<KEYWORD_LIBRARY_NAME_SEPARATOR_FOR_SPECIAL_KEYWORD> "."           { leaveState(); return KEYWORD_LIBRARY_SEPARATOR; }
 <KEYWORD_CALL_NAME> {VariableFreeLiteralValue}                     { leaveState(); return KEYWORD_NAME; }
 
 <KEYWORD_ARGUMENTS> {
