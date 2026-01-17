@@ -19,7 +19,7 @@ public abstract class RobotLocalArgumentsSettingExtension extends RobotPsiElemen
 
     @Override
     public @Nullable FoldingDescriptor[] fold(@NotNull Document document) {
-        if (!RobotFoldingComputationUtil.isFoldingUseful(getTextRange(), document)) {
+        if (!RobotFoldingComputationUtil.isFoldingUseful(this, document)) {
             return null;
         }
         RobotLocalArgumentsSettingId localArgumentsSettingId = getLocalArgumentsSettingId();
@@ -27,7 +27,8 @@ public abstract class RobotLocalArgumentsSettingExtension extends RobotPsiElemen
         List<FoldingDescriptor> foldingDescriptors = RobotFoldingComputationUtil.computeFoldingDescriptorsForListing(getNode(),
                                                                                                                      "LocalArgumentsSettingListFolding",
                                                                                                                      localArgumentsSettingId,
-                                                                                                                     localArgumentsSettingParameters);
+                                                                                                                     localArgumentsSettingParameters,
+                                                                                                                     document);
         return !foldingDescriptors.isEmpty() ? foldingDescriptors.toArray(FoldingDescriptor.EMPTY_ARRAY) : null;
     }
 }

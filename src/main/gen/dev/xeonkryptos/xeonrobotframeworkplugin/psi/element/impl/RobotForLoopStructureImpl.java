@@ -30,20 +30,8 @@ public class RobotForLoopStructureImpl extends RobotForLoopStructureExtension im
 
   @Override
   @NotNull
-  public List<RobotForLoopStructureParameter> getForLoopStructureParameterList() {
-    return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotForLoopStructureParameter.class);
-  }
-
-  @Override
-  @NotNull
-  public List<RobotVariableDefinition> getVariableDefinitionList() {
-    return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotVariableDefinition.class);
-  }
-
-  @Override
-  @Nullable
-  public PsiElement getForInElement() {
-    return findChildByType(FOR_IN);
+  public RobotForLoopHeader getForLoopHeader() {
+    return notNullChild(PsiTreeUtil.getChildOfType(this, RobotForLoopHeader.class));
   }
 
 }

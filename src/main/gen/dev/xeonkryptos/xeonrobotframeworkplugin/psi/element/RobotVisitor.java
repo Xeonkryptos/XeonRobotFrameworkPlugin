@@ -55,6 +55,10 @@ public class RobotVisitor extends PsiElementVisitor {
     visitVariable(o);
   }
 
+  public void visitExceptHeader(@NotNull RobotExceptHeader o) {
+    visitElement(o);
+  }
+
   public void visitExceptStructure(@NotNull RobotExceptStructure o) {
     visitExecutableStatement(o);
     // visitBlockOpeningStructure(o);
@@ -73,6 +77,10 @@ public class RobotVisitor extends PsiElementVisitor {
     visitExecutableStatement(o);
     // visitBlockOpeningStructure(o);
     // visitFoldable(o);
+  }
+
+  public void visitForLoopHeader(@NotNull RobotForLoopHeader o) {
+    visitElement(o);
   }
 
   public void visitForLoopStructure(@NotNull RobotForLoopStructure o) {
@@ -100,6 +108,10 @@ public class RobotVisitor extends PsiElementVisitor {
   public void visitGlobalSettingStatement(@NotNull RobotGlobalSettingStatement o) {
     visitFoldable(o);
     // visitElement(o);
+  }
+
+  public void visitGroupHeader(@NotNull RobotGroupHeader o) {
+    visitElement(o);
   }
 
   public void visitGroupStructure(@NotNull RobotGroupStructure o) {
@@ -248,6 +260,10 @@ public class RobotVisitor extends PsiElementVisitor {
     visitGlobalSettingStatement(o);
     // visitGlobalSettingStatementExpression(o);
     // visitImportGlobalSettingExpression(o);
+  }
+
+  public void visitReturnStructure(@NotNull RobotReturnStructure o) {
+    visitExecutableStatement(o);
   }
 
   public void visitRoot(@NotNull RobotRoot o) {
@@ -429,6 +445,10 @@ public class RobotVisitor extends PsiElementVisitor {
   public void visitVariablesSection(@NotNull RobotVariablesSection o) {
     visitSection(o);
     // visitNameIdentifierHolder(o);
+  }
+
+  public void visitWhileLoopHeader(@NotNull RobotWhileLoopHeader o) {
+    visitElement(o);
   }
 
   public void visitWhileLoopStructure(@NotNull RobotWhileLoopStructure o) {

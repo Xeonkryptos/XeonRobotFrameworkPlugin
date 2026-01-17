@@ -29,15 +29,9 @@ public class RobotWhileLoopStructureImpl extends RobotWhileLoopStructureExtensio
   }
 
   @Override
-  @Nullable
-  public RobotConditionalContent getConditionalContent() {
-    return PsiTreeUtil.getChildOfType(this, RobotConditionalContent.class);
-  }
-
-  @Override
   @NotNull
-  public List<RobotParameter> getParameterList() {
-    return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotParameter.class);
+  public RobotWhileLoopHeader getWhileLoopHeader() {
+    return notNullChild(PsiTreeUtil.getChildOfType(this, RobotWhileLoopHeader.class));
   }
 
 }

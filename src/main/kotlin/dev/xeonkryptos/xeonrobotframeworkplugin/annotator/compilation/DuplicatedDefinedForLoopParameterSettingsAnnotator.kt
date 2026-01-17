@@ -23,7 +23,7 @@ class DuplicatedDefinedForLoopParameterSettingsAnnotator : RobotAnnotator() {
         definedModeParameters = localDefinedModeParameters
         definedStartParameters = localDefinedStartParameters
 
-        for (parameter in o.forLoopStructureParameterList) {
+        for (parameter in o.forLoopHeader.forLoopStructureParameterList) {
             parameter.accept(this)
         }
 

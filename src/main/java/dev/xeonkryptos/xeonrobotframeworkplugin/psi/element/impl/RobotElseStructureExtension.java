@@ -21,7 +21,7 @@ public abstract class RobotElseStructureExtension extends RobotExecutableStateme
     @Override
     public @Nullable FoldingDescriptor[] fold(@NotNull Document document) {
         List<RobotExecutableStatement> executableStatements = getExecutableStatementList();
-        List<FoldingDescriptor> foldingDescriptors = RobotFoldingComputationUtil.computeFoldingDescriptorsForBlockStructure(this, executableStatements, document);
+        List<FoldingDescriptor> foldingDescriptors = RobotFoldingComputationUtil.computeFoldingDescriptorsForBlockStructure(this, getFirstChild(), executableStatements, document);
         return !foldingDescriptors.isEmpty() ? foldingDescriptors.toArray(FoldingDescriptor.EMPTY_ARRAY) : null;
     }
 }

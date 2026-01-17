@@ -3,7 +3,10 @@ package dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl;
 import com.intellij.lang.ASTNode;
 import com.intellij.lang.folding.FoldingDescriptor;
 import com.intellij.openapi.editor.Document;
+import com.intellij.psi.PsiElement;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotExecutableStatement;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotForLoopHeader;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotForLoopStructure;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.folding.RobotFoldingComputationUtil;
 import org.jetbrains.annotations.NotNull;
@@ -20,8 +23,17 @@ public abstract class RobotForLoopStructureExtension extends RobotExecutableStat
     @Nullable
     @Override
     public FoldingDescriptor[] fold(@NotNull Document document) {
+        RobotForLoopHeader forLoopHeader = getForLoopHeader();
         List<RobotExecutableStatement> executableStatements = getExecutableStatementList();
-        List<FoldingDescriptor> foldingDescriptors = RobotFoldingComputationUtil.computeFoldingDescriptorsForBlockStructure(this, executableStatements, document);
+        PsiElement endElement = findChildByType(RobotTypes.END);
+        if (endElement == null) {
+            return null;
+        }
+        List<FoldingDescriptor> foldingDescriptors = RobotFoldingComputationUtil.computeFoldingDescriptorsForBlockStructure(this,
+                                                                                                                            forLoopHeader,
+                                                                                                                            executableStatements,
+                                                                                                                            document,
+                                                                                                                            endElement.getTextRange().getStartOffset());
         return !foldingDescriptors.isEmpty() ? foldingDescriptors.toArray(FoldingDescriptor.EMPTY_ARRAY) : null;
     }
 }

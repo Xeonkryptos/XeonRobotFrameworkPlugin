@@ -28,15 +28,18 @@ public interface RobotTypes {
   IElementType EMPTY_VARIABLE_STATEMENT = new RobotElementType("EMPTY_VARIABLE_STATEMENT");
   IElementType ENVIRONMENT_VARIABLE = new RobotElementType("ENVIRONMENT_VARIABLE");
   IElementType EXCEPTION_HANDLING_STRUCTURE = new RobotElementType("EXCEPTION_HANDLING_STRUCTURE");
+  IElementType EXCEPT_HEADER = new RobotElementType("EXCEPT_HEADER");
   IElementType EXCEPT_STRUCTURE = new RobotElementType("EXCEPT_STRUCTURE");
   IElementType EXECUTABLE_STATEMENT = new RobotElementType("EXECUTABLE_STATEMENT");
   IElementType FINALLY_STRUCTURE = new RobotElementType("FINALLY_STRUCTURE");
+  IElementType FOR_LOOP_HEADER = new RobotElementType("FOR_LOOP_HEADER");
   IElementType FOR_LOOP_STRUCTURE = new RobotElementType("FOR_LOOP_STRUCTURE");
   IElementType FOR_LOOP_STRUCTURE_FILL_PARAMETER = new RobotElementType("FOR_LOOP_STRUCTURE_FILL_PARAMETER");
   IElementType FOR_LOOP_STRUCTURE_MODE_PARAMETER = new RobotElementType("FOR_LOOP_STRUCTURE_MODE_PARAMETER");
   IElementType FOR_LOOP_STRUCTURE_PARAMETER = new RobotElementType("FOR_LOOP_STRUCTURE_PARAMETER");
   IElementType FOR_LOOP_STRUCTURE_START_PARAMETER = new RobotElementType("FOR_LOOP_STRUCTURE_START_PARAMETER");
   IElementType GLOBAL_SETTING_STATEMENT = new RobotElementType("GLOBAL_SETTING_STATEMENT");
+  IElementType GROUP_HEADER = new RobotElementType("GROUP_HEADER");
   IElementType GROUP_STRUCTURE = new RobotElementType("GROUP_STRUCTURE");
   IElementType IF_STRUCTURE = new RobotElementType("IF_STRUCTURE");
   IElementType IF_VARIABLE_STATEMENT = new RobotElementType("IF_VARIABLE_STATEMENT");
@@ -68,6 +71,7 @@ public interface RobotTypes {
   IElementType POSITIONAL_ARGUMENT = new RobotElementType("POSITIONAL_ARGUMENT");
   IElementType PYTHON_EXPRESSION = new RobotElementType("PYTHON_EXPRESSION");
   IElementType RESOURCE_IMPORT_GLOBAL_SETTING = new RobotElementType("RESOURCE_IMPORT_GLOBAL_SETTING");
+  IElementType RETURN_STRUCTURE = new RobotElementType("RETURN_STRUCTURE");
   IElementType ROOT = new RobotElementType("ROOT");
   IElementType SCALAR_VARIABLE = RobotScalarVariableStubElement.create("SCALAR_VARIABLE");
   IElementType SECTION = new RobotElementType("SECTION");
@@ -102,6 +106,7 @@ public interface RobotTypes {
   IElementType VARIABLE_NESTED_ACCESS_CONTENT = new RobotElementType("VARIABLE_NESTED_ACCESS_CONTENT");
   IElementType VARIABLE_SLICE_ACCESS_CONTENT = new RobotElementType("VARIABLE_SLICE_ACCESS_CONTENT");
   IElementType VARIABLE_VALUE = new RobotElementType("VARIABLE_VALUE");
+  IElementType WHILE_LOOP_HEADER = new RobotElementType("WHILE_LOOP_HEADER");
   IElementType WHILE_LOOP_STRUCTURE = new RobotElementType("WHILE_LOOP_STRUCTURE");
 
   IElementType AND = new RobotTokenType("AND");
@@ -209,6 +214,9 @@ public interface RobotTypes {
       else if (type == EXCEPTION_HANDLING_STRUCTURE) {
         return new RobotExceptionHandlingStructureImpl(node);
       }
+      else if (type == EXCEPT_HEADER) {
+        return new RobotExceptHeaderImpl(node);
+      }
       else if (type == EXCEPT_STRUCTURE) {
         return new RobotExceptStructureImpl(node);
       }
@@ -217,6 +225,9 @@ public interface RobotTypes {
       }
       else if (type == FINALLY_STRUCTURE) {
         return new RobotFinallyStructureImpl(node);
+      }
+      else if (type == FOR_LOOP_HEADER) {
+        return new RobotForLoopHeaderImpl(node);
       }
       else if (type == FOR_LOOP_STRUCTURE) {
         return new RobotForLoopStructureImpl(node);
@@ -235,6 +246,9 @@ public interface RobotTypes {
       }
       else if (type == GLOBAL_SETTING_STATEMENT) {
         return new RobotGlobalSettingStatementImpl(node);
+      }
+      else if (type == GROUP_HEADER) {
+        return new RobotGroupHeaderImpl(node);
       }
       else if (type == GROUP_STRUCTURE) {
         return new RobotGroupStructureImpl(node);
@@ -328,6 +342,9 @@ public interface RobotTypes {
       }
       else if (type == RESOURCE_IMPORT_GLOBAL_SETTING) {
         return new RobotResourceImportGlobalSettingImpl(node);
+      }
+      else if (type == RETURN_STRUCTURE) {
+        return new RobotReturnStructureImpl(node);
       }
       else if (type == ROOT) {
         return new RobotRootImpl(node);
@@ -424,6 +441,9 @@ public interface RobotTypes {
       }
       else if (type == VARIABLE_VALUE) {
         return new RobotVariableValueImpl(node);
+      }
+      else if (type == WHILE_LOOP_HEADER) {
+        return new RobotWhileLoopHeaderImpl(node);
       }
       else if (type == WHILE_LOOP_STRUCTURE) {
         return new RobotWhileLoopStructureImpl(node);

@@ -28,9 +28,10 @@ class RobotInZipVariableSourceTypeAnnotator : RobotAnnotator() {
     private var lookingAtForLoopArguments = false
 
     override fun visitForLoopStructure(o: RobotForLoopStructure) {
-        if (o.forInElement?.text == RobotNames.FOR_IN_ZIP) {
+        val forLoopHeader = o.forLoopHeader
+        if (forLoopHeader.forInElement?.text == RobotNames.FOR_IN_ZIP_RESERVED_NAME) {
             lookingAtForLoopArguments = true
-            o.positionalArgumentList.forEach { it.acceptChildren(this) }
+            forLoopHeader.positionalArgumentList.forEach { it.acceptChildren(this) }
         }
     }
 

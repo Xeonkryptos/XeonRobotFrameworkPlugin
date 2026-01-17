@@ -5,15 +5,12 @@ import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 
-public interface RobotExecutableStatement extends RobotElement {
+public interface RobotExceptHeader extends RobotElement {
 
   @NotNull
-  List<RobotExecutableStatement> getExecutableStatementList();
+  List<RobotParameter> getParameterList();
 
   @Nullable
-  RobotKeywordCall getKeywordCall();
-
-  @Nullable
-  RobotVariableStatement getVariableStatement();
+  RobotPositionalArgument getPositionalArgument();
 
 }

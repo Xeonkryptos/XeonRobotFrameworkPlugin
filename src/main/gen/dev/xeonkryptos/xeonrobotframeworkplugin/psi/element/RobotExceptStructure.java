@@ -8,9 +8,6 @@ import com.intellij.psi.PsiElement;
 public interface RobotExceptStructure extends RobotExecutableStatement, RobotBlockOpeningStructure, RobotFoldable {
 
   @NotNull
-  List<RobotParameter> getParameterList();
-
-  @Nullable
-  RobotPositionalArgument getPositionalArgument();
+  RobotExceptHeader getExceptHeader();
 
 }

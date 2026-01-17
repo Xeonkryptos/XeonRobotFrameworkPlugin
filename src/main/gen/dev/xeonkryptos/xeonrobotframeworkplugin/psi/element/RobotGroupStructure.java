@@ -7,7 +7,7 @@ import com.intellij.psi.PsiElement;
 
 public interface RobotGroupStructure extends RobotExecutableStatement, RobotBlockOpeningStructure, RobotFoldable {
 
-  @Nullable
-  RobotPositionalArgument getPositionalArgument();
+  @NotNull
+  RobotGroupHeader getGroupHeader();
 
 }

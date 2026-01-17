@@ -29,9 +29,9 @@ public class RobotGroupStructureImpl extends RobotGroupStructureExtension implem
   }
 
   @Override
-  @Nullable
-  public RobotPositionalArgument getPositionalArgument() {
-    return PsiTreeUtil.getChildOfType(this, RobotPositionalArgument.class);
+  @NotNull
+  public RobotGroupHeader getGroupHeader() {
+    return notNullChild(PsiTreeUtil.getChildOfType(this, RobotGroupHeader.class));
   }
 
 }

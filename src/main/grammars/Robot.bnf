@@ -243,22 +243,22 @@ private control_structure ::= conditional_structure | conditional_inline_structu
 private loop_structure ::= for_loop_structure | while_loop_structure
 private call_structure ::= eol_based_keyword_call | inline_variable_statement | keyword_variable_statement | if_variable_statement | empty_variable_statement
 private loop_control_structure ::= (BREAK | CONTINUE) eol_marker?
-private return_structure ::= RETURN positional_argument* eol_marker? {pin=1}
+return_structure ::= RETURN positional_argument* eol_marker? {pin=1}
 
-for_loop_structure ::= FOR variable_definition+ FOR_IN positional_argument+ for_loop_structure_parameter* eol_marker executable_statement* END eol_marker {
+for_loop_structure ::= for_loop_header eol_marker executable_statement* END eol_marker {
     pin=1
     implements=[
         "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotBlockOpeningStructure"
         "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotFoldable"
     ]
     mixin="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotForLoopStructureExtension"
-    methods=[forInElement="FOR_IN"]
 }
+for_loop_header ::= FOR variable_definition+ FOR_IN positional_argument+ for_loop_structure_parameter* {pin=1 methods=[forInElement="FOR_IN"]}
 for_loop_structure_parameter ::= for_loop_structure_fill_parameter | for_loop_structure_mode_parameter | for_loop_structure_start_parameter
 for_loop_structure_mode_parameter ::= "mode" ASSIGNMENT ("STRICT" | "SHORTEST" | "LONGEST") {pin=2}
 for_loop_structure_fill_parameter ::= "fill" ASSIGNMENT positional_argument {pin=2}
 for_loop_structure_start_parameter ::= "start" ASSIGNMENT positional_argument {pin=2}
-while_loop_structure ::= WHILE conditional_content (EOS parameter+)? eol_marker executable_statement* END eol_marker {
+while_loop_structure ::= while_loop_header eol_marker executable_statement* END eol_marker {
     pin=1
     implements=[
         "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotBlockOpeningStructure"
@@ -266,6 +266,7 @@ while_loop_structure ::= WHILE conditional_content (EOS parameter+)? eol_marker 
     ]
     mixin="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotWhileLoopStructureExtension"
 }
+while_loop_header ::= WHILE conditional_content (EOS parameter+)? {pin=1}
 conditional_structure ::= if_structure else_if_structure* else_structure? END eol_marker {
     pin=1
     implements="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotFoldable"
@@ -306,13 +307,15 @@ try_structure ::= TRY eol_marker executable_statement+ {
     ]
     mixin="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotTryStructureExtension"
 }
-except_structure ::= EXCEPT (positional_argument | parameter*)? eol_marker executable_statement* {
+except_structure ::= except_header eol_marker executable_statement* {
+    pin=1
     implements=[
         "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotBlockOpeningStructure"
         "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotFoldable"
     ]
     mixin="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotExceptStructureExtension"
 }
+except_header ::= EXCEPT (positional_argument | parameter*)? {pin=1}
 else_structure ::= ELSE eol_marker executable_statement* {
     implements=[
         "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotBlockOpeningStructure"
@@ -327,7 +330,7 @@ finally_structure ::= FINALLY executable_statement* {
     ]
     mixin="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotFinallyStructureExtension"
 }
-group_structure ::= GROUP positional_argument? eol_marker executable_statement* END eol_marker {
+group_structure ::= group_header eol_marker executable_statement* END eol_marker {
     pin=1
     implements=[
         "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotBlockOpeningStructure"
@@ -335,6 +338,7 @@ group_structure ::= GROUP positional_argument? eol_marker executable_statement* 
     ]
     mixin="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotGroupStructureExtension"
 }
+group_header ::= GROUP positional_argument? {pin=1}
 
 fake keyword_call ::= base_keyword_call {
     implements = [

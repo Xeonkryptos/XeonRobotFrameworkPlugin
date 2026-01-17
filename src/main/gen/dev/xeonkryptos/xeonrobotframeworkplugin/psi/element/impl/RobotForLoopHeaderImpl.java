@@ -11,15 +11,14 @@ import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.*;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.*;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotPsiImplUtil;
 
-public class RobotExceptStructureImpl extends RobotExceptStructureExtension implements RobotExceptStructure {
+public class RobotForLoopHeaderImpl extends RobotPsiElementBase implements RobotForLoopHeader {
 
-  public RobotExceptStructureImpl(@NotNull ASTNode node) {
+  public RobotForLoopHeaderImpl(@NotNull ASTNode node) {
     super(node);
   }
 
-  @Override
   public void accept(@NotNull RobotVisitor visitor) {
-    visitor.visitExceptStructure(this);
+    visitor.visitForLoopHeader(this);
   }
 
   @Override
@@ -30,8 +29,26 @@ public class RobotExceptStructureImpl extends RobotExceptStructureExtension impl
 
   @Override
   @NotNull
-  public RobotExceptHeader getExceptHeader() {
-    return notNullChild(PsiTreeUtil.getChildOfType(this, RobotExceptHeader.class));
+  public List<RobotForLoopStructureParameter> getForLoopStructureParameterList() {
+    return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotForLoopStructureParameter.class);
+  }
+
+  @Override
+  @NotNull
+  public List<RobotPositionalArgument> getPositionalArgumentList() {
+    return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotPositionalArgument.class);
+  }
+
+  @Override
+  @NotNull
+  public List<RobotVariableDefinition> getVariableDefinitionList() {
+    return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotVariableDefinition.class);
+  }
+
+  @Override
+  @Nullable
+  public PsiElement getForInElement() {
+    return findChildByType(FOR_IN);
   }
 
 }

@@ -17,7 +17,7 @@ public abstract class RobotGlobalSettingExtension extends RobotPsiElementBase im
     @Nullable
     @Override
     public FoldingDescriptor[] fold(@NotNull Document document) {
-        if (!RobotFoldingComputationUtil.isFoldingUseful(getTextRange(), document)) {
+        if (!RobotFoldingComputationUtil.isFoldingUseful(this, document)) {
             return null;
         }
         var foldingDescriptor = RobotFoldingComputationUtil.computeFoldingDescriptorForContainer(this, getFirstChild(), document);

@@ -22,13 +22,13 @@ public abstract class RobotLocalSettingExtension extends RobotPsiElementBase imp
     @Nullable
     @Override
     public FoldingDescriptor[] fold(@NotNull Document document) {
-        if (!RobotFoldingComputationUtil.isFoldingUseful(getTextRange(), document)) {
+        if (!RobotFoldingComputationUtil.isFoldingUseful(this, document)) {
             return null;
         }
         RobotLocalSettingId localSettingId = getLocalSettingId();
         String settingName = getSettingName();
         List<RobotPositionalArgument> positionalArguments = getPositionalArgumentList();
-        if (positionalArguments.isEmpty() || !settingName.equalsIgnoreCase(RobotNames.TAGS_SETTING_NAME)) {
+        if (positionalArguments.isEmpty() || !settingName.equalsIgnoreCase(RobotNames.TAGS_LOCAL_SETTING_NAME)) {
             FoldingDescriptor foldingDescriptor = RobotFoldingComputationUtil.computeFoldingDescriptorForContainer(this, localSettingId, document);
             return foldingDescriptor != null ? new FoldingDescriptor[] { foldingDescriptor } : null;
         }
@@ -36,7 +36,8 @@ public abstract class RobotLocalSettingExtension extends RobotPsiElementBase imp
         List<FoldingDescriptor> foldingDescriptors = RobotFoldingComputationUtil.computeFoldingDescriptorsForListing(getNode(),
                                                                                                                      "LocalSettingTagListFolding",
                                                                                                                      localSettingId,
-                                                                                                                     positionalArguments);
+                                                                                                                     positionalArguments,
+                                                                                                                     document);
         return !foldingDescriptors.isEmpty() ? foldingDescriptors.toArray(FoldingDescriptor.EMPTY_ARRAY) : null;
     }
 }

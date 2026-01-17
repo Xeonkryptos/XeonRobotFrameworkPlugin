@@ -39,31 +39,31 @@ public abstract class RobotConditionalStructureExtension extends RobotExecutable
     private void foldSingleIfClause(@NotNull Document document, List<RobotExecutableStatement> executableStatements, List<FoldingDescriptor> foldingDescriptors) {
         RobotExecutableStatement ifBlock = executableStatements.getFirst();
 
-        PsiElement endElement = getLastChild();
-        while (endElement != null && endElement.getNode().getElementType() != RobotTypes.END) {
-            endElement = endElement.getPrevSibling();
-        }
-
-        List<RobotExecutableStatement> ifBlockExecutableStatements = ifBlock.getExecutableStatementList();
+        PsiElement endElement = findChildByType(RobotTypes.END);
         RobotConditionalContent conditionalContent = PsiTreeUtil.findChildOfType(ifBlock, RobotConditionalContent.class, true, RobotExecutableStatement.class);
         if (endElement == null || conditionalContent == null) {
-            List<FoldingDescriptor> conditionalBlockFoldingDescriptors = RobotFoldingComputationUtil.computeFoldingDescriptorsForBlockStructure(this, ifBlockExecutableStatements, document);
-            foldingDescriptors.addAll(conditionalBlockFoldingDescriptors);
-        } else {
-            int endElementStartOffset = endElement.getTextRange().getStartOffset();
-            List<FoldingDescriptor> conditionalFoldingDescriptors = RobotFoldingComputationUtil.computeFoldingDescriptorsForBlockStructure(getNode(),
-                                                                                                                                           conditionalContent,
-                                                                                                                                           endElementStartOffset,
-                                                                                                                                           ifBlockExecutableStatements,
-                                                                                                                                           document);
-            foldingDescriptors.addAll(conditionalFoldingDescriptors);
+            return;
         }
+        List<RobotExecutableStatement> ifBlockExecutableStatements = ifBlock.getExecutableStatementList();
+        int endElementStartOffset = endElement.getTextRange().getStartOffset();
+        List<FoldingDescriptor> conditionalFoldingDescriptors = RobotFoldingComputationUtil.computeFoldingDescriptorsForBlockStructure(getNode(),
+                                                                                                                                       conditionalContent,
+                                                                                                                                       endElementStartOffset,
+                                                                                                                                       ifBlockExecutableStatements,
+                                                                                                                                       document);
+        foldingDescriptors.addAll(conditionalFoldingDescriptors);
     }
 
     private static void foldMultipleClauses(@NotNull Document document, List<RobotExecutableStatement> executableStatements, List<FoldingDescriptor> foldingDescriptors) {
         for (RobotExecutableStatement conditionalBlock : executableStatements) {
             List<RobotExecutableStatement> conditionalBlockExecutableStatements = conditionalBlock.getExecutableStatementList();
+            PsiElement lastHeaderElement = PsiTreeUtil.findChildOfType(conditionalBlock, RobotConditionalContent.class, true, RobotExecutableStatement.class);
+            if (lastHeaderElement == null) {
+                // Can be only ELSE here
+                lastHeaderElement = conditionalBlock.getFirstChild();
+            }
             List<FoldingDescriptor> conditionalBlockFoldingDescriptors = RobotFoldingComputationUtil.computeFoldingDescriptorsForBlockStructure(conditionalBlock,
+                                                                                                                                                lastHeaderElement,
                                                                                                                                                 conditionalBlockExecutableStatements,
                                                                                                                                                 document);
             foldingDescriptors.addAll(conditionalBlockFoldingDescriptors);

@@ -20,30 +20,31 @@ class ForLoopParameterRestrictionAnnotator : RobotAnnotator() {
 
     override fun visitForLoopStructure(o: RobotForLoopStructure) {
         visitForLoopStructureChildren = true
-        for (parameter in o.forLoopStructureParameterList) {
+        val forLoopHeader = o.forLoopHeader
+        for (parameter in forLoopHeader.forLoopStructureParameterList) {
             parameter.accept(this)
         }
 
         startParameter?.let { startParam ->
-            val forInElementText = o.forInElement?.text
-            if (forInElementText != null && forInElementText != RobotNames.FOR_IN_ENUMERATE) {
-                holder.newAnnotation(HighlightSeverity.ERROR, RobotBundle.message("annotation.for-loop.parameter.unsupported.for.loop.type", "start", forInElementText, RobotNames.FOR_IN_ENUMERATE))
+            val forInElementText = forLoopHeader.forInElement?.text
+            if (forInElementText != null && forInElementText != RobotNames.FOR_IN_ENUMERATE_RESERVED_NAME) {
+                holder.newAnnotation(HighlightSeverity.ERROR, RobotBundle.message("annotation.for-loop.parameter.unsupported.for.loop.type", "start", forInElementText, RobotNames.FOR_IN_ENUMERATE_RESERVED_NAME))
                     .range(startParam)
                     .create()
             }
         }
         modeParameter?.let { modeParam ->
-            val forInElementText = o.forInElement?.text
-            if (forInElementText != null && forInElementText != RobotNames.FOR_IN_ZIP) {
-                holder.newAnnotation(HighlightSeverity.ERROR, RobotBundle.message("annotation.for-loop.parameter.unsupported.for.loop.type", "mode", forInElementText, RobotNames.FOR_IN_ZIP))
+            val forInElementText = forLoopHeader.forInElement?.text
+            if (forInElementText != null && forInElementText != RobotNames.FOR_IN_ZIP_RESERVED_NAME) {
+                holder.newAnnotation(HighlightSeverity.ERROR, RobotBundle.message("annotation.for-loop.parameter.unsupported.for.loop.type", "mode", forInElementText, RobotNames.FOR_IN_ZIP_RESERVED_NAME))
                     .range(modeParam)
                     .create()
             }
         }
         fillParameter?.let { modeParam ->
-            val forInElementText = o.forInElement?.text
-            if (forInElementText != null && forInElementText != RobotNames.FOR_IN_ZIP) {
-                holder.newAnnotation(HighlightSeverity.ERROR, RobotBundle.message("annotation.for-loop.parameter.unsupported.for.loop.type", "fill", forInElementText, RobotNames.FOR_IN_ZIP))
+            val forInElementText = forLoopHeader.forInElement?.text
+            if (forInElementText != null && forInElementText != RobotNames.FOR_IN_ZIP_RESERVED_NAME) {
+                holder.newAnnotation(HighlightSeverity.ERROR, RobotBundle.message("annotation.for-loop.parameter.unsupported.for.loop.type", "fill", forInElementText, RobotNames.FOR_IN_ZIP_RESERVED_NAME))
                     .range(modeParam)
                     .create()
             }
