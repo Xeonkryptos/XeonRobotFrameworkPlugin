@@ -11,8 +11,6 @@ class GherkinCompletionProvider extends CompletionProvider<CompletionParameters>
 
     @Override
     protected void addCompletions(@NotNull CompletionParameters parameters, @NotNull ProcessingContext context, @NotNull CompletionResultSet result) {
-        if (CompletionProviderUtils.isIndexPositionAWhitespaceCharacter(parameters)) {
-            CompletionProviderUtils.addSyntaxLookup(RobotKeywordProvider.GHERKIN, result);
-        }
+        CompletionProviderUtils.addSyntaxLookup(RobotKeywordProvider.GHERKIN, result);
     }
 }

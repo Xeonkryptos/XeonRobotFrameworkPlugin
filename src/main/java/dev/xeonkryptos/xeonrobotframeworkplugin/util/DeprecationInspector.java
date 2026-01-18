@@ -6,8 +6,8 @@ import com.jetbrains.python.psi.PyFunction;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLocalSetting;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotPositionalArgument;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotUserKeywordStatement;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.ref.PyElementDeprecatedVisitor;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.ref.PyElementParentTraversalVisitor;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.reference.PyElementDeprecatedVisitor;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.reference.PyElementParentTraversalVisitor;
 
 import java.util.List;
 

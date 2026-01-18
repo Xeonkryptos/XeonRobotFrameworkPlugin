@@ -1,4 +1,4 @@
-package dev.xeonkryptos.xeonrobotframeworkplugin.psi.ref
+package dev.xeonkryptos.xeonrobotframeworkplugin.psi.reference
 
 import com.intellij.openapi.components.Service
 import com.intellij.openapi.components.service

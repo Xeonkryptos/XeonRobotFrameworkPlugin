@@ -29,6 +29,7 @@
   the longest matching name first
 - Changed the deprecation check into an inspection to be able to suppress it with comment suppression
 - Changed folding logic to keep important editor elements visible when folding multi-line statements
+- Optimized code completion for reserved keywords to provide a more context-sensitive list of suggestions
 
 ### Fixed
 

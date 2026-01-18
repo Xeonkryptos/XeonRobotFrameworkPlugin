@@ -16,6 +16,8 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotExceptionHandli
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotImportArgument;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCallLibraryName;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCallName;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordVariableStatement;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLoopControlStructure;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotParameter;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotParameterId;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotPositionalArgument;
@@ -227,22 +229,56 @@ public record RobotElementGenerator(Project project) {
         return variableBodyFinder.variableBodyId;
     }
 
+    public RobotKeywordVariableStatement createNewKeywordVariableDefinition(String variableName, String keywordCall) {
+        String fileContent = """
+                             *** Keywords ***
+                             Dummy Keyword
+                                 ${%s}=  %s
+                             """.formatted(variableName, keywordCall);
+
+        PsiFile psiFile = createDummyPsiFile(fileContent);
+        if (psiFile == null) {
+            return null;
+        }
+        RobotKeywordVariableStatementFinder keywordVariableStatementFinder = new RobotKeywordVariableStatementFinder();
+        psiFile.acceptChildren(keywordVariableStatementFinder);
+        return keywordVariableStatementFinder.keywordVariableStatement;
+    }
+
+    public RobotLoopControlStructure createNewLoopControlStructure(LoopControlStructureType type) {
+        String fileContent = """
+        *** Keywords ***
+        Dummy Keyword
+            FOR  ${item}  IN  @{items}
+                %s
+            END
+        """.formatted(type);
+
+        PsiFile psiFile = createDummyPsiFile(fileContent);
+        if (psiFile == null) {
+            return null;
+        }
+        RobotLoopControlStructureFinder loopControlStructureFinder = new RobotLoopControlStructureFinder();
+        psiFile.acceptChildren(loopControlStructureFinder);
+        return loopControlStructureFinder.loopControlStructure;
+    }
+
     public RobotConditionalStructure createNewConditionalStructure(String ifCondition,
                                                                    String ifConditionalBody,
                                                                    Pair<String, String>[] elseIfConditionalDefinitions,
                                                                    @Nullable String elseConditionalBody) {
         StringBuilder conditionalBuilder = new StringBuilder("""
-                                                             *** Test Cases ***
+                                                             *** Keywords ***
                                                              Dummy
                                                                  IF  %s
                                                                      %s
-                                                             """.formatted(ifCondition.trim(), ifConditionalBody.trim()));
+                                                             """.formatted(ifCondition.trim(), ifConditionalBody.replace("\n", "\n        ").trim()));
 
         for (Pair<String, String> elseIfConditionalDefinition : elseIfConditionalDefinitions) {
             String elseIfConditionResult = """
                                                ELSE IF  %s
                                                    %s
-                                           """.formatted(elseIfConditionalDefinition.first.trim(), elseIfConditionalDefinition.second.trim());
+                                           """.formatted(elseIfConditionalDefinition.first.trim(), elseIfConditionalDefinition.second.replace("\n", "\n        ").trim());
             conditionalBuilder.append(elseIfConditionResult);
         }
 
@@ -250,7 +286,7 @@ public record RobotElementGenerator(Project project) {
             String elseConditionResult = """
                                              ELSE
                                                  %s
-                                         """.formatted(elseConditionalBody.trim());
+                                         """.formatted(elseConditionalBody.replace("\n", "\n        ").trim());
             conditionalBuilder.append(elseConditionResult);
         }
         conditionalBuilder.append("    END\n");
@@ -318,7 +354,7 @@ public record RobotElementGenerator(Project project) {
         return testCaseIdFinder.testCaseId.getNextSibling();
     }
 
-    public RobotReturnStructure createReturnStructure(String returnValue) {
+    public RobotReturnStructure createNewReturnStructure(String returnValue) {
         String fileContent = """
                              *** Keywords ***
                              Dummy Keyword
@@ -338,6 +374,10 @@ public record RobotElementGenerator(Project project) {
 
         LightVirtualFile virtualFile = new LightVirtualFile("dummy.robot", RobotFeatureFileType.getInstance(), text);
         return ((PsiFileFactoryImpl) factory).trySetupPsiForFile(virtualFile, RobotLanguage.INSTANCE, false, true);
+    }
+
+    public enum LoopControlStructureType {
+        CONTINUE, BREAK
     }
 
     private static final class RobotUserKeywordStatementIdFinder extends RecursiveRobotVisitor {
@@ -487,6 +527,26 @@ public record RobotElementGenerator(Project project) {
         @Override
         public void visitReturnStructure(@NotNull RobotReturnStructure o) {
             returnStructure = o;
+        }
+    }
+
+    private static final class RobotKeywordVariableStatementFinder extends RecursiveRobotVisitor {
+
+        private RobotKeywordVariableStatement keywordVariableStatement;
+
+        @Override
+        public void visitKeywordVariableStatement(@NotNull RobotKeywordVariableStatement o) {
+            keywordVariableStatement = o;
+        }
+    }
+
+    private static final class RobotLoopControlStructureFinder extends RecursiveRobotVisitor {
+
+        private RobotLoopControlStructure loopControlStructure;
+
+        @Override
+        public void visitLoopControlStructure(@NotNull RobotLoopControlStructure o) {
+            loopControlStructure = o;
         }
     }
 }

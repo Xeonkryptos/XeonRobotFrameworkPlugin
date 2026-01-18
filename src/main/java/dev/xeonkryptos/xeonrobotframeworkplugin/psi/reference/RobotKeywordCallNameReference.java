@@ -1,4 +1,4 @@
-package dev.xeonkryptos.xeonrobotframeworkplugin.psi.ref;
+package dev.xeonkryptos.xeonrobotframeworkplugin.psi.reference;
 
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;

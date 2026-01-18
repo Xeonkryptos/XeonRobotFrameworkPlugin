@@ -49,7 +49,8 @@ public class RobotParser implements PsiParser, LightPsiParser {
     create_token_set_(CONDITIONAL_STRUCTURE, ELSE_IF_STRUCTURE, ELSE_STRUCTURE, EXCEPTION_HANDLING_STRUCTURE,
       EXCEPT_STRUCTURE, EXECUTABLE_STATEMENT, FINALLY_STRUCTURE, FOR_LOOP_STRUCTURE,
       GROUP_STRUCTURE, IF_STRUCTURE, INLINE_ELSE_IF_STRUCTURE, INLINE_ELSE_STRUCTURE,
-      INLINE_IF_STRUCTURE, RETURN_STRUCTURE, TRY_STRUCTURE, WHILE_LOOP_STRUCTURE),
+      INLINE_IF_STRUCTURE, LOOP_CONTROL_STRUCTURE, RETURN_STRUCTURE, TRY_STRUCTURE,
+      WHILE_LOOP_STRUCTURE),
   };
 
   /* ********************************************************** */
@@ -1628,14 +1629,14 @@ public class RobotParser implements PsiParser, LightPsiParser {
 
   /* ********************************************************** */
   // (BREAK | CONTINUE) eol_marker?
-  static boolean loop_control_structure(PsiBuilder b, int l) {
+  public static boolean loop_control_structure(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "loop_control_structure")) return false;
-    if (!nextTokenIs(b, "", BREAK, CONTINUE)) return false;
+    if (!nextTokenIs(b, "<loop control structure>", BREAK, CONTINUE)) return false;
     boolean r;
-    Marker m = enter_section_(b);
+    Marker m = enter_section_(b, l, _COLLAPSE_, LOOP_CONTROL_STRUCTURE, "<loop control structure>");
     r = loop_control_structure_0(b, l + 1);
     r = r && loop_control_structure_1(b, l + 1);
-    exit_section_(b, m, null, r);
+    exit_section_(b, l, m, r, false, null);
     return r;
   }
 

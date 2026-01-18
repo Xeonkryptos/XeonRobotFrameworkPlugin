@@ -15,7 +15,7 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotSetupTeardownSt
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTestCaseStatement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTestCasesSection;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariable;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.ref.PythonResolver;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.reference.PythonResolver;
 import dev.xeonkryptos.xeonrobotframeworkplugin.util.RobotNames;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;

@@ -48,38 +48,32 @@ class KeywordCompletionProvider extends CompletionProvider<CompletionParameters>
 
     @Override
     protected void addCompletions(@NotNull CompletionParameters parameters, @NotNull ProcessingContext context, @NotNull CompletionResultSet result) {
-        if (CompletionProviderUtils.isIndexPositionAWhitespaceCharacter(parameters)) {
-            PsiElement position = parameters.getPosition();
-            RobotSection section = CompletionProviderUtils.getSection(position);
-            if (section == null) {
-                return;
-            }
-
-            PsiElement positionContext = position.getContext();
-            RobotKeywordCall keywordCall = PsiTreeUtil.getParentOfType(positionContext, RobotKeywordCall.class);
-            if (keywordCall == null) {
-                return;
-            }
-
-            String name = keywordCall.getName();
-            KeywordCompletionModification keywordCompletionModification = KeywordCompletionModification.NONE;
-            if (!name.isEmpty()) {
-                char firstCharacter = name.charAt(0);
-                keywordCompletionModification = Arrays.stream(KeywordCompletionModification.values())
-                                                      .filter(modification -> modification.getIdentifier() != null
-                                                                              && firstCharacter == modification.getIdentifier())
-                                                      .findFirst()
-                                                      .orElse(KeywordCompletionModification.NONE);
-            }
-            Collection<DefinedParameter> alreadyAddedParameters = keywordCall.getParameterList()
-                                                                             .stream()
-                                                                             .map(param -> new ParameterDto(param, param.getParameterName(), null))
-                                                                             .collect(Collectors.toSet());
-
-            Collection<LookupElement> lookupElements = new LinkedList<>();
-            addDefinedKeywordsFromFile(lookupElements, parameters.getOriginalFile(), keywordCompletionModification, alreadyAddedParameters);
-            result.addAllElements(lookupElements);
+        PsiElement position = parameters.getPosition();
+        RobotSection section = CompletionProviderUtils.getSection(position);
+        if (section == null) {
+            return;
         }
+
+        PsiElement positionContext = position.getContext();
+        RobotKeywordCall keywordCall = PsiTreeUtil.getParentOfType(positionContext, RobotKeywordCall.class);
+        if (keywordCall == null) {
+            return;
+        }
+
+        String name = keywordCall.getName();
+        KeywordCompletionModification keywordCompletionModification = KeywordCompletionModification.NONE;
+        if (!name.isEmpty()) {
+            char firstCharacter = name.charAt(0);
+            keywordCompletionModification = Arrays.stream(KeywordCompletionModification.values())
+                                                  .filter(modification -> modification.getIdentifier() != null && firstCharacter == modification.getIdentifier())
+                                                  .findFirst()
+                                                  .orElse(KeywordCompletionModification.NONE);
+        }
+        Collection<DefinedParameter> alreadyAddedParameters = keywordCall.getParameterList().stream().map(param -> new ParameterDto(param, param.getParameterName(), null)).collect(Collectors.toSet());
+
+        Collection<LookupElement> lookupElements = new LinkedList<>();
+        addDefinedKeywordsFromFile(lookupElements, parameters.getOriginalFile(), keywordCompletionModification, alreadyAddedParameters);
+        result.addAllElements(lookupElements);
     }
 
     private void addDefinedKeywordsFromFile(Collection<LookupElement> lookupElements,
@@ -113,10 +107,7 @@ class KeywordCompletionProvider extends CompletionProvider<CompletionParameters>
     }
 
     private static @NotNull Collection<VirtualFile> collectImportedVirtualFilesOneselfIncluded(RobotFile robotFile) {
-        Collection<VirtualFile> importedFiles = robotFile.collectImportedFiles(true, ImportType.LIBRARY)
-                                                         .stream()
-                                                         .map(KeywordFile::getVirtualFile)
-                                                         .collect(Collectors.toSet());
+        Collection<VirtualFile> importedFiles = robotFile.collectImportedFiles(true, ImportType.LIBRARY).stream().map(KeywordFile::getVirtualFile).collect(Collectors.toSet());
         VirtualFile virtualFile = robotFile.getVirtualFile();
         if (virtualFile == null) {
             virtualFile = robotFile.getOriginalFile().getVirtualFile();
@@ -133,9 +124,7 @@ class KeywordCompletionProvider extends CompletionProvider<CompletionParameters>
         };
         StubIndex.getInstance().processAllKeys(KeywordDefinitionNameIndex.KEY, userKeywordProcessor, searchScope);
         for (String normalizedKeywordName : collectedUserKeywords) {
-            for (RobotUserKeywordStatement userKeywordStatement : KeywordDefinitionNameIndex.getUserKeywordStatements(normalizedKeywordName,
-                                                                                                                      project,
-                                                                                                                      searchScope)) {
+            for (RobotUserKeywordStatement userKeywordStatement : KeywordDefinitionNameIndex.getUserKeywordStatements(normalizedKeywordName, project, searchScope)) {
                 RobotUserKeywordsCollector robotUserKeywordsCollector = new RobotUserKeywordsCollector();
                 userKeywordStatement.accept(robotUserKeywordsCollector);
                 Collection<DefinedKeyword> constructedUserKeywords = robotUserKeywordsCollector.getKeywords();

@@ -121,24 +121,25 @@ public class RobotKeywordProvider {
         KEYWORD_TABLE.addSyntax(SYNTAX_MARKER, "IN");
         KEYWORD_TABLE.addSyntax(SYNTAX_MARKER, "IN RANGE");
         KEYWORD_TABLE.addSyntax(SYNTAX_MARKER, "IN ENUMERATE");
+        KEYWORD_TABLE.addSyntax(SYNTAX_MARKER, "IN ZIP");
         KEYWORD_TABLE.addSyntax(SYNTAX_MARKER, "AS");
         KEYWORD_TABLE.addSyntax(SYNTAX_MARKER, "VAR");
 
         addRecommendation(SYNTAX_MARKER, "IF", "IF", RobotTailTypes.TAB);
-        addRecommendation(SYNTAX_MARKER, "END", "END", TailTypes.noneType());
-        addRecommendation(SYNTAX_MARKER, "ELSE", "ELSE", TailTypes.noneType());
-        addRecommendation(SYNTAX_MARKER, "ELSE IF", "ELSE IF", RobotTailTypes.TAB);
+        addRecommendation(RobotTypes.CONDITIONAL_STRUCTURE, "ELSE IF", "ELSE IF", RobotTailTypes.TAB);
+        addRecommendation(RobotTypes.CONDITIONAL_STRUCTURE, "ELSE", "ELSE", TailTypes.noneType());
         addRecommendation(SYNTAX_MARKER, "WHILE", "WHILE", RobotTailTypes.TAB);
-        addRecommendation(SYNTAX_MARKER, "CONTINUE", "CONTINUE", TailTypes.noneType());
-        addRecommendation(SYNTAX_MARKER, "BREAK", "BREAK", TailTypes.noneType());
         addRecommendation(SYNTAX_MARKER, "FOR", "FOR", RobotTailTypes.TAB);
+        addRecommendation(RobotTypes.LOOP_CONTROL_STRUCTURE, "CONTINUE", "CONTINUE", TailTypes.noneType());
+        addRecommendation(RobotTypes.LOOP_CONTROL_STRUCTURE, "BREAK", "BREAK", TailTypes.noneType());
         addRecommendation(SYNTAX_MARKER, "TRY", "TRY", TailTypes.noneType());
-        addRecommendation(SYNTAX_MARKER, "EXCEPT", "EXCEPT", RobotTailTypes.TAB);
-        addRecommendation(SYNTAX_MARKER, "FINALLY", "FINALLY", TailTypes.noneType());
-        addRecommendation(SYNTAX_MARKER, "RETURN", "RETURN", TailTypes.noneType());
-        addRecommendation(SYNTAX_MARKER, "IN", "IN", RobotTailTypes.TAB);
-        addRecommendation(SYNTAX_MARKER, "IN RANGE", "IN RANGE", RobotTailTypes.TAB);
-        addRecommendation(SYNTAX_MARKER, "IN ENUMERATE", "IN ENUMERATE", RobotTailTypes.TAB);
+        addRecommendation(RobotTypes.EXCEPTION_HANDLING_STRUCTURE, "EXCEPT", "EXCEPT", RobotTailTypes.TAB);
+        addRecommendation(RobotTypes.EXCEPTION_HANDLING_STRUCTURE, "FINALLY", "FINALLY", TailTypes.noneType());
+        addRecommendation(RobotTypes.USER_KEYWORD_STATEMENT, "RETURN", "RETURN", TailTypes.noneType());
+        addRecommendation(RobotTypes.FOR_IN, "IN", "IN", RobotTailTypes.TAB);
+        addRecommendation(RobotTypes.FOR_IN, "IN RANGE", "IN RANGE", RobotTailTypes.TAB);
+        addRecommendation(RobotTypes.FOR_IN, "IN ENUMERATE", "IN ENUMERATE", RobotTailTypes.TAB);
+        addRecommendation(RobotTypes.FOR_IN, "IN ZIP", "IN ZIP", RobotTailTypes.TAB);
         addRecommendation(SYNTAX_MARKER, "AS", "AS", RobotTailTypes.TAB);
         addRecommendation(SYNTAX_MARKER, "VAR", "VAR", RobotTailTypes.TAB);
     }

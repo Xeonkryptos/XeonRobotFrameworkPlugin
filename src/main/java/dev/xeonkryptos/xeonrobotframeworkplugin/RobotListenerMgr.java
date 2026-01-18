@@ -6,10 +6,9 @@ import com.intellij.openapi.components.Service.Level;
 import com.intellij.openapi.project.DumbService;
 import com.intellij.openapi.project.DumbService.DumbModeListener;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.projectRoots.ProjectJdkTable;
 import com.intellij.psi.impl.source.resolve.ResolveCache;
 import com.intellij.util.messages.MessageBusConnection;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.ref.ProjectFileCache;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.reference.ProjectFileCache;
 
 @Service(Level.PROJECT)
 public final class RobotListenerMgr implements Disposable {

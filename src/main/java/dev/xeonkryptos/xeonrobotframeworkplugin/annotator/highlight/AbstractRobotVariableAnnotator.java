@@ -8,7 +8,7 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotListVariable;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLocalArgumentsSetting;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotScalarVariable;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariable;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.ref.RobotFileManager;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.reference.RobotFileManager;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;

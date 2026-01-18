@@ -1,4 +1,4 @@
-package dev.xeonkryptos.xeonrobotframeworkplugin.psi.ref;
+package dev.xeonkryptos.xeonrobotframeworkplugin.psi.reference;
 
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModuleUtilCore;

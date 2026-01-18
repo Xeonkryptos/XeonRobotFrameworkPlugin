@@ -1,8 +1,8 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.completion;
 
 import com.intellij.codeInsight.TailType;
-import com.intellij.codeInsight.completion.CompletionParameters;
 import com.intellij.codeInsight.completion.CompletionResultSet;
+import com.intellij.codeInsight.completion.InsertHandler;
 import com.intellij.codeInsight.completion.InsertionContext;
 import com.intellij.codeInsight.lookup.LookupElement;
 import com.intellij.codeInsight.lookup.LookupElementBuilder;
@@ -10,7 +10,6 @@ import com.intellij.codeInsight.lookup.TailTypeDecorator;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.util.Key;
-import com.intellij.openapi.util.TextRange;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.tree.IElementType;
 import com.intellij.psi.util.PsiTreeUtil;
@@ -41,31 +40,7 @@ final class CompletionProviderUtils {
         if (current == null) {
             return null;
         }
-        if (current instanceof RobotSection heading) {
-            return heading;
-        }
-        return PsiTreeUtil.getParentOfType(current, RobotSection.class);
-    }
-
-    static boolean isIndexPositionAWhitespaceCharacter(@NotNull CompletionParameters parameters) {
-        int offset = parameters.getOffset();
-        Document document = parameters.getEditor().getDocument();
-        int lineNumber = document.getLineNumber(offset);
-        int lineStartOffset = document.getLineStartOffset(lineNumber);
-        String textBeforeOffset = document.getText(new TextRange(lineStartOffset, offset));
-        if (textBeforeOffset.isEmpty()) {
-            return false;
-        }
-        int firstCharacterInLine = textBeforeOffset.codePointAt(0);
-        return Character.isWhitespace(firstCharacterInLine);
-    }
-
-    static boolean isIndexPositionStartOfLine(@NotNull CompletionParameters parameters) {
-        int offset = parameters.getOffset();
-        Document document = parameters.getEditor().getDocument();
-        int lineNumber = document.getLineNumber(offset);
-        int lineStartOffset = document.getLineStartOffset(lineNumber);
-        return lineStartOffset == offset;
+        return PsiTreeUtil.getParentOfType(current, RobotSection.class, false);
     }
 
     static void addSyntaxLookup(@NotNull IElementType elementType, @NotNull CompletionResultSet resultSet) {
@@ -77,31 +52,36 @@ final class CompletionProviderUtils {
         List<LookupElement> results = new ArrayList<>();
         Collection<RecommendationWord> words = RobotKeywordProvider.getRecommendationsForType(type);
         for (RecommendationWord word : words) {
-            String text = word.lookup();
             String lookupString = word.presentation();
-            String[] lookupStrings = { text, WordUtils.capitalize(text), lookupString, WordUtils.capitalize(lookupString), lookupString.toLowerCase() };
-            LookupElement element = TailTypeDecorator.withTail(LookupElementBuilder.create(lookupString)
-                                                                                   .withLookupStrings(Arrays.asList(lookupStrings))
-                                                                                   .withPresentableText(lookupString)
-                                                                                   .withInsertHandler((context, item) -> {
-                                                                                       if (type == RobotTypes.SECTION) {
-                                                                                           Editor editor = context.getEditor();
-                                                                                           Document document = context.getDocument();
-                                                                                           int startOffset = context.getStartOffset();
-                                                                                           int lineNumber = document.getLineNumber(startOffset);
-                                                                                           int lineStartOffset = document.getLineStartOffset(lineNumber);
-                                                                                           int lineEndOffset = document.getLineEndOffset(lineNumber);
+            LookupElement element = createLookupElementForSyntaxLookup(word, (context, item) -> {
+                if (type == RobotTypes.SECTION) {
+                    Editor editor = context.getEditor();
+                    Document document = context.getDocument();
+                    int startOffset = context.getStartOffset();
+                    int lineNumber = document.getLineNumber(startOffset);
+                    int lineStartOffset = document.getLineStartOffset(lineNumber);
+                    int lineEndOffset = document.getLineEndOffset(lineNumber);
 
-                                                                                           int newEndOffset = lineStartOffset + lookupString.length();
-                                                                                           document.replaceString(lineStartOffset, lineEndOffset, lookupString);
-                                                                                           editor.getCaretModel().moveToOffset(newEndOffset);
-                                                                                           context.setTailOffset(newEndOffset);
-                                                                                       }
-                                                                                   })
-                                                                                   .withCaseSensitivity(true), word.tailType());
+                    int newEndOffset = lineStartOffset + lookupString.length();
+                    document.replaceString(lineStartOffset, lineEndOffset, lookupString);
+                    editor.getCaretModel().moveToOffset(newEndOffset);
+                    context.setTailOffset(newEndOffset);
+                }
+            });
             results.add(element);
         }
         return results;
+    }
+
+    static LookupElement createLookupElementForSyntaxLookup(RecommendationWord word, @Nullable InsertHandler<LookupElement> insertHandler) {
+        String text = word.lookup();
+        String lookupString = word.presentation();
+        String[] lookupStrings = { text, WordUtils.capitalize(text), lookupString, WordUtils.capitalize(lookupString), lookupString.toLowerCase() };
+        return TailTypeDecorator.withTail(LookupElementBuilder.create(lookupString)
+                                                                               .withLookupStrings(Arrays.asList(lookupStrings))
+                                                                               .withPresentableText(lookupString)
+                                                                               .withInsertHandler(insertHandler)
+                                                                               .withCaseSensitivity(true), word.tailType());
     }
 
     static Optional<LookupElement> createLookupElement(LookupElementMarker lookupElementMarker, @Nullable Icon icon, boolean bold, @NotNull TailType tailType) {

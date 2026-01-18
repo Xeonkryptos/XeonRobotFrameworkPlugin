@@ -27,11 +27,17 @@ object RobotNames {
     const val SUITE_TEARDOWN_GLOBAL_SETTING_NAME = "Suite Teardown"
     const val TEST_TEARDOWN_GLOBAL_SETTING_NAME = "Test Teardown"
 
+    const val RETURN_RESERVED_NAME = "RETURN"
+
     const val FOR_IN_ENUMERATE_RESERVED_NAME = "IN ENUMERATE"
     const val FOR_IN_ZIP_RESERVED_NAME = "IN ZIP"
 
     const val WITH_NAME_RESERVED_NAME = "WITH NAME"
 
+    const val CONTINUE_FOR_LOOP_NORMALIZED_KEYWORD_NAME = "continueforloop"
+    const val CONTINUE_FOR_LOOP_IF_NORMALIZED_KEYWORD_NAME = "continueforloopif"
+    const val EXIT_FOR_LOOP_NORMALIZED_KEYWORD_NAME = "exitforloop"
+    const val EXIT_FOR_LOOP_IF_NORMALIZED_KEYWORD_NAME = "exitforloopif"
     const val CREATE_DICTIONARY_NORMALIZED_KEYWORD_NAME: String = "createdictionary"
     const val RUN_KEYWORD_IF_NORMALIZED_KEYWORD_NAME: String = "runkeywordif"
     const val RUN_KEYWORD_IF_ALL_TESTS_PASSED_NORMALIZED_KEYWORD_NAME = "runkeywordifalltestspassed"
@@ -42,6 +48,8 @@ object RobotNames {
     const val RUN_KEYWORD_AND_EXPECT_ERROR_NORMALIZED_KEYWORD_NAME = "runkeywordandexpecterror"
     const val RETURN_FROM_KEYWORD_NORMALIZED_KEYWORD_NAME = "returnfromkeyword"
     const val RETURN_FROM_KEYWORD_IF_NORMALIZED_KEYWORD_NAME = "returnfromkeywordif"
+    const val RUN_KEYWORD_AND_RETURN_NORMALIZED_KEYWORD_NAME = "runkeywordandreturn"
+    const val RUN_KEYWORD_AND_RETURN_IF_NORMALIZED_KEYWORD_NAME = "runkeywordandreturnif"
 
     const val DEPRECATED_PREFIX = "*DEPRECATED"
 }

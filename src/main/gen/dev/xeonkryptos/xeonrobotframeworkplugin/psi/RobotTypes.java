@@ -64,6 +64,7 @@ public interface RobotTypes {
   IElementType LOCAL_ARGUMENTS_SETTING_PARAMETER_OPTIONAL = new RobotElementType("LOCAL_ARGUMENTS_SETTING_PARAMETER_OPTIONAL");
   IElementType LOCAL_SETTING = new RobotElementType("LOCAL_SETTING");
   IElementType LOCAL_SETTING_ID = new RobotElementType("LOCAL_SETTING_ID");
+  IElementType LOOP_CONTROL_STRUCTURE = new RobotElementType("LOOP_CONTROL_STRUCTURE");
   IElementType METADATA_STATEMENT_GLOBAL_SETTING = new RobotElementType("METADATA_STATEMENT_GLOBAL_SETTING");
   IElementType NEW_LIBRARY_NAME = new RobotElementType("NEW_LIBRARY_NAME");
   IElementType PARAMETER = new RobotElementType("PARAMETER");
@@ -321,6 +322,9 @@ public interface RobotTypes {
       }
       else if (type == LOCAL_SETTING_ID) {
         return new RobotLocalSettingIdImpl(node);
+      }
+      else if (type == LOOP_CONTROL_STRUCTURE) {
+        return new RobotLoopControlStructureImpl(node);
       }
       else if (type == METADATA_STATEMENT_GLOBAL_SETTING) {
         return new RobotMetadataStatementGlobalSettingImpl(node);

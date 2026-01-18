@@ -11,8 +11,6 @@ class LocalSettingsCompletionProvider extends CompletionProvider<CompletionParam
 
     @Override
     protected void addCompletions(@NotNull CompletionParameters parameters, @NotNull ProcessingContext context, @NotNull CompletionResultSet result) {
-        if (CompletionProviderUtils.isIndexPositionAWhitespaceCharacter(parameters)) {
-            CompletionProviderUtils.addSyntaxLookup(RobotTypes.LOCAL_SETTING, result);
-        }
+        CompletionProviderUtils.addSyntaxLookup(RobotTypes.LOCAL_SETTING, result);
     }
 }

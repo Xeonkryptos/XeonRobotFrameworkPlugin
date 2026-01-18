@@ -229,6 +229,10 @@ public class RobotVisitor extends PsiElementVisitor {
     visitElement(o);
   }
 
+  public void visitLoopControlStructure(@NotNull RobotLoopControlStructure o) {
+    visitExecutableStatement(o);
+  }
+
   public void visitMetadataStatementGlobalSetting(@NotNull RobotMetadataStatementGlobalSetting o) {
     visitGlobalSettingStatement(o);
     // visitGlobalSettingStatementExpression(o);

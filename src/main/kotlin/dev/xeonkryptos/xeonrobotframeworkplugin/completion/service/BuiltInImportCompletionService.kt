@@ -6,7 +6,7 @@ import com.intellij.icons.AllIcons
 import com.intellij.openapi.components.Service
 import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.ref.RobotFileManager
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.reference.RobotFileManager
 import dev.xeonkryptos.xeonrobotframeworkplugin.util.RobotNames
 import org.apache.commons.text.WordUtils
 import java.util.Locale

@@ -25,7 +25,7 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotKeywordProvider;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotImportGlobalSettingExpression;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLibraryImportGlobalSetting;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotResourceImportGlobalSetting;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.ref.RobotFileManager;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.reference.RobotFileManager;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.RobotPyUtil;
 import org.apache.commons.text.WordUtils;
 import org.jetbrains.annotations.NotNull;

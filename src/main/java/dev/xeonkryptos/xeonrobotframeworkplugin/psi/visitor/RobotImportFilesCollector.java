@@ -14,8 +14,8 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotRoot;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotSettingsSection;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariablesImportGlobalSetting;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVisitor;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.ref.RobotPythonClass;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.ref.RobotPythonFile;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.reference.RobotPythonClass;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.reference.RobotPythonFile;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.EnumMap;
