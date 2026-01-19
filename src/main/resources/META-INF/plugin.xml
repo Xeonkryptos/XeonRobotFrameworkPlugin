@@ -152,6 +152,9 @@
         <localInspection language="Robot" shortName="ReplaceBuiltInKeywordsWithNativeExpressions" bundle="messages.RobotBundle" key="INSP.NAME.keyword.replace.with.native.expressions"
                          groupKey="INSP.GROUP.robot" enabledByDefault="true" level="WARNING" dumbAware="true"
                          implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.inspections.maintainability.ReplaceBuiltInKeywordsWithNativeExpressionsInspection"/>
+        <localInspection language="Robot" shortName="DuplicatedParameterInKeywordCall" bundle="messages.RobotBundle" key="INSP.NAME.keyword.duplicated.parameters.defined"
+                         groupKey="INSP.GROUP.robot" enabledByDefault="true" level="WEAK WARNING" dumbAware="true"
+                         implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.inspections.maintainability.DuplicatedParameterInKeywordCallInspection"/>
         <lang.inspectionSuppressor language="Robot" implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.inspections.RobotInspectionSuppressor"/>
 
         <runConfigurationProducer implementation="dev.xeonkryptos.xeonrobotframeworkplugin.execution.config.RobotRunConfigurationProducer"/>

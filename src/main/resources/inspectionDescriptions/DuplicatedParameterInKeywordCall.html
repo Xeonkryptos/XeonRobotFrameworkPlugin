@@ -1,0 +1,29 @@
+<html lang="en">
+    <body>
+        <p>Detects duplicate parameters in Robot Framework keyword calls.</p>
+        <p>
+            When a keyword is called with the same parameter specified multiple times, it often indicates a mistake.
+            This inspection helps you identify and remove redundant parameter definitions to keep your test cases clean and maintainable.
+        </p>
+
+        <h3>Example:</h3>
+        <pre><code>
+My Keyword    arg1=value1    arg2=value2    arg1=value3
+</code></pre>
+        <p>
+            In this example, the parameter <code>arg1</code> is defined twice with different values.
+            This is likely unintended and should be corrected to use only one definition.
+        </p>
+
+        <h3>Corrected code:</h3>
+        <pre><code>
+My Keyword    arg1=value3    arg2=value2
+</code></pre>
+
+        <!-- tooltip end -->
+        <p>
+            The inspection will highlight all occurrences of duplicated parameters in keyword calls.
+            Use the provided quick fix to navigate to and review the duplicate definitions.
+        </p>
+    </body>
+</html>
