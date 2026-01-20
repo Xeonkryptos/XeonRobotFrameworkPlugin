@@ -34,14 +34,6 @@ public final class RobotOptionsProvider implements PersistentStateComponent<Robo
         state.capitalizeKeywords = capitalizeKeywords;
     }
 
-    public boolean smartAutoEncloseVariable() {
-        return state.smartAutoEncloseVariable;
-    }
-
-    public void setSmartAutoEncloseVariable(boolean smartAutoEncloseVariable) {
-        state.smartAutoEncloseVariable = smartAutoEncloseVariable;
-    }
-
     public boolean multilineIndentation() {
         return state.multilineIndentation;
     }

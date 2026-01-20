@@ -176,7 +176,7 @@
         <enterHandlerDelegate implementation="dev.xeonkryptos.xeonrobotframeworkplugin.actionhandler.RobotLocalArgumentsSettingEnterActionHandler"/>
         <enterHandlerDelegate implementation="dev.xeonkryptos.xeonrobotframeworkplugin.actionhandler.RobotKeywordCallEnterActionHandler"/>
 
-        <typedHandler implementation="dev.xeonkryptos.xeonrobotframeworkplugin.actionhandler.RobotTypedActionHandler"/>
+        <lang.quoteHandler implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.actionhandler.RobotQuoteHandler" language="Robot"/>
 
         <editorActionHandler action="EditorTab" implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.actionhandler.RobotTabActionHandler"/>
 

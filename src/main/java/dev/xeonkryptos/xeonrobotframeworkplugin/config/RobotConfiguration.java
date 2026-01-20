@@ -33,7 +33,6 @@ public class RobotConfiguration implements NoScroll, SearchableConfigurable {
 
     private final JBPanel<?> panel;
     private final JBCheckBox capitalizeKeywords;
-    private final JBCheckBox smartAutoEncloseVariable;
     private final JBCheckBox multilineIndentation;
     private final JBTextField parameterNameCollationRulesTextField;
     private final JBCheckBox pythonLiveInspection;
@@ -46,7 +45,7 @@ public class RobotConfiguration implements NoScroll, SearchableConfigurable {
 
         int mainPanelRow = 0;
         JBPanel<?> checkBoxPanel = new JBPanel<>();
-        checkBoxPanel.setLayout(new GridLayoutManager(8, 1, JBUI.emptyInsets(), -1, -1, false, false));
+        checkBoxPanel.setLayout(new GridLayoutManager(7, 1, JBUI.emptyInsets(), -1, -1, false, false));
         mainPanel.add(checkBoxPanel, new GridConstraints(mainPanelRow++, 0, 1, 2, 0, 3, 3, 3, null, null, null));
 
         int checkBoxPanelRow = 0;
@@ -54,11 +53,6 @@ public class RobotConfiguration implements NoScroll, SearchableConfigurable {
         this.capitalizeKeywords = capitalizeKeywordsCheckBox;
         capitalizeKeywordsCheckBox.setText("Capitalize Keywords");
         checkBoxPanel.add(capitalizeKeywordsCheckBox, new GridConstraints(checkBoxPanelRow++, 0, 1, 1, 8, 0, 3, 0, null, null, null));
-
-        JBCheckBox smartAutoEncloseVariableCheckBox = new JBCheckBox();
-        this.smartAutoEncloseVariable = smartAutoEncloseVariableCheckBox;
-        smartAutoEncloseVariableCheckBox.setText("Smart Auto Enclose Variable");
-        checkBoxPanel.add(smartAutoEncloseVariableCheckBox, new GridConstraints(checkBoxPanelRow++, 0, 1, 1, 8, 0, 3, 0, null, null, null));
 
         JBCheckBox multilineIndentationCheckBox = new JBCheckBox();
         this.multilineIndentation = multilineIndentationCheckBox;
@@ -173,7 +167,6 @@ public class RobotConfiguration implements NoScroll, SearchableConfigurable {
     public boolean isModified() {
         RobotOptionsProvider provider = getOptionProvider();
         return provider != null && (provider.capitalizeKeywords() != this.capitalizeKeywords.isSelected()
-                                    || provider.smartAutoEncloseVariable() != this.smartAutoEncloseVariable.isSelected()
                                     || provider.multilineIndentation() != this.multilineIndentation.isSelected() || provider.parameterNameCollationRules()
                                                                                                                             .equals(this.parameterNameCollationRulesTextField.getText())
                                     || provider.pythonLiveInspection() != this.pythonLiveInspection.isSelected()
@@ -185,7 +178,6 @@ public class RobotConfiguration implements NoScroll, SearchableConfigurable {
         RobotOptionsProvider provider = getOptionProvider();
         if (provider != null) {
             provider.setCapitalizeKeywords(this.capitalizeKeywords.isSelected());
-            provider.setSmartAutoEncloseVariable(this.smartAutoEncloseVariable.isSelected());
             provider.setMultilineIndentation(this.multilineIndentation.isSelected());
             provider.setParameterNameCollationRules(this.parameterNameCollationRulesTextField.getText());
             provider.setPythonLiveInspection(this.pythonLiveInspection.isSelected());
@@ -207,7 +199,6 @@ public class RobotConfiguration implements NoScroll, SearchableConfigurable {
         RobotOptionsProvider provider = getOptionProvider();
         if (provider != null) {
             this.capitalizeKeywords.setSelected(provider.capitalizeKeywords());
-            this.smartAutoEncloseVariable.setSelected(provider.smartAutoEncloseVariable());
             this.multilineIndentation.setSelected(provider.multilineIndentation());
             this.parameterNameCollationRulesTextField.setText(provider.parameterNameCollationRules());
             this.pythonLiveInspection.setSelected(provider.pythonLiveInspection());
