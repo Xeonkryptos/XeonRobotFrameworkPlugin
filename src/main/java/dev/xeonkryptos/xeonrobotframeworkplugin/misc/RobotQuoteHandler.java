@@ -1,4 +1,4 @@
-package dev.xeonkryptos.xeonrobotframeworkplugin.actionhandler;
+package dev.xeonkryptos.xeonrobotframeworkplugin.misc;
 
 import com.jetbrains.python.editor.BaseQuoteHandler;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTokenSets;

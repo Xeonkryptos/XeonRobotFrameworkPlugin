@@ -175,10 +175,9 @@
         <enterHandlerDelegate implementation="dev.xeonkryptos.xeonrobotframeworkplugin.actionhandler.RobotLocalSettingEnterActionHandler"/>
         <enterHandlerDelegate implementation="dev.xeonkryptos.xeonrobotframeworkplugin.actionhandler.RobotLocalArgumentsSettingEnterActionHandler"/>
         <enterHandlerDelegate implementation="dev.xeonkryptos.xeonrobotframeworkplugin.actionhandler.RobotKeywordCallEnterActionHandler"/>
+        <enterHandlerDelegate implementation="dev.xeonkryptos.xeonrobotframeworkplugin.actionhandler.RobotSmartBlockCloseActionHandler"/>
 
-        <lang.quoteHandler implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.actionhandler.RobotQuoteHandler" language="Robot"/>
-
-        <editorActionHandler action="EditorTab" implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.actionhandler.RobotTabActionHandler"/>
+        <lang.quoteHandler implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.misc.RobotQuoteHandler" language="Robot"/>
 
         <configurationType implementation="dev.xeonkryptos.xeonrobotframeworkplugin.execution.config.RobotRunConfigurationType"/>
 
