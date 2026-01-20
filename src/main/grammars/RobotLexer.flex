@@ -170,6 +170,7 @@ LocalSettingKeywordEnd = {NonNewlineWhitespace}* {LocalSettingKeywordEndWhitespa
 LocalTemplateKeyword = {LocalSettingKeywordStart} "Template" {LocalSettingKeywordEnd}
 LocalSetupTeardownKeywords = {LocalSettingKeywordStart} ("Setup" | "Teardown") {LocalSettingKeywordEnd}
 LocalArgumentsKeyword = {LocalSettingKeywordStart} "Arguments" {LocalSettingKeywordEnd}
+LocalTagsKeyword = {LocalSettingKeywordStart} "Tags" {LocalSettingKeywordEnd}
 LocalSettingKeyword = {LocalSettingKeywordStart} {GenericSettingsKeyword} {LocalSettingKeywordEnd}
 
 BuiltInNamespace = "BuiltIn."
@@ -222,7 +223,7 @@ LineComment = {LineCommentSign} {NON_EOL}*
 %state FOR_STRUCTURE, SIMPLE_CONTROL_STRUCTURE_START, FOR_STRUCTURE_LOOP_START, SIMPLE_CONTROL_STRUCTURE, FOR_STRUCTURE_LOOP
 %state PYTHON_EXECUTED_CONDITION, PYTHON_EVALUATED_CONTROL_STRUCTURE_START
 
-%xstate COMMENTS_SECTION, LITERAL_CONSTANT_ONLY, LOCAL_SETTING_DEFINITION
+%xstate COMMENTS_SECTION, LITERAL_CONSTANT_ONLY, LITERAL_CONSTANT_ONLY_LIST, LOCAL_SETTING_DEFINITION
 %xstate PARAMETER_ASSIGNMENT, TEMPLATE_PARAMETER_ASSIGNMENT
 %xstate KEYWORD_LIBRARY_NAME_SEPARATOR, KEYWORD_CALL_NAME, KEYWORD_LIBRARY_NAME_SEPARATOR_FOR_SPECIAL_KEYWORD
 
@@ -437,6 +438,12 @@ LineComment = {LineCommentSign} {NON_EOL}*
                 enterNewState(LOCAL_SETTING_DEFINITION);
                 return LOCAL_SETTING_START;
             }
+            {LocalTagsKeyword} {ExtendedKeywordFinishedMarker}         {
+                yypushback(yylength() - 1);
+                enterNewState(LITERAL_CONSTANT_ONLY_LIST);
+                enterNewState(LOCAL_SETTING_DEFINITION);
+                return LOCAL_SETTING_START;
+            }
             {LocalSettingKeyword} {ExtendedKeywordFinishedMarker}         {
                 yypushback(yylength() - 1);
                 enterNewState(LITERAL_CONSTANT_ONLY);
@@ -456,7 +463,13 @@ LineComment = {LineCommentSign} {NON_EOL}*
         "BREAK" {ExtendedKeywordFinishedMarker}     { yypushback(yylength() - "BREAK".length()); return BREAK; }
         "CONTINUE" {ExtendedKeywordFinishedMarker}  { yypushback(yylength() - "CONTINUE".length()); return CONTINUE; }
         "GROUP" {ExtendedKeywordFinishedMarker}     { yypushback(yylength() - "GROUP".length()); enterNewState(SIMPLE_CONTROL_STRUCTURE_START); return GROUP; }
-        "END" {EOL}?                                { yypushback(1); return END; }
+        "END" {EOL}?                                {
+          int lastCharacterPos = yylength() - 1;
+          char lastCharacter = yycharat(lastCharacterPos);
+          if (Character.isWhitespace(lastCharacter)) {
+              yypushback(1);
+          }
+          return END; }
     }
 
     "GIVEN" {ExtendedSpaceBasedEndMarker}   {
@@ -523,7 +536,7 @@ LineComment = {LineCommentSign} {NON_EOL}*
 }
 <SETTING> {WithNameKeyword} {ExtendedSpaceBasedEndMarker}    { pushBackTrailingWhitespace(); return WITH_NAME; }
 
-<SETTING, KEYWORD_CALL, KEYWORD_ARGUMENTS, VARIABLE_DEFINITION, USER_KEYWORD_RETURN_STATEMENT, FOR_STRUCTURE_LOOP, PYTHON_EXECUTED_CONDITION, LITERAL_CONSTANT_ONLY, VARIABLE_DEFINITION_ARGUMENTS, SETTING_TEMPLATE_START, FOR_STRUCTURE> {EOL}+   { leaveState(); return EOL; }
+<SETTING, KEYWORD_CALL, KEYWORD_ARGUMENTS, VARIABLE_DEFINITION, USER_KEYWORD_RETURN_STATEMENT, FOR_STRUCTURE_LOOP, PYTHON_EXECUTED_CONDITION, LITERAL_CONSTANT_ONLY, LITERAL_CONSTANT_ONLY_LIST, VARIABLE_DEFINITION_ARGUMENTS, SETTING_TEMPLATE_START, FOR_STRUCTURE> {EOL}+   { leaveState(); return EOL; }
 <TESTCASE_DEFINITION, TASK_DEFINITION, USER_KEYWORD_DEFINITION, VARIABLE_DEFINITION, TEMPLATE_DEFINITION> {EOL}+   { return EOL; }
 
 <PARAMETER_ASSIGNMENT>  {EqualSign}       { yybegin(PARAMETER_VALUE); return ASSIGNMENT; }
@@ -583,22 +596,26 @@ LineComment = {LineCommentSign} {NON_EOL}*
     "ELSE" {ExtendedKeywordFinishedMarker}      { yypushback(yylength() - "ELSE".length()); yybegin(KEYWORD_CALL); return ELSE; }
 }
 
-<SETTINGS_SECTION, SETTING, KEYWORD_ARGUMENTS, USER_KEYWORD_RETURN_STATEMENT, SINGLE_LITERAL_CONSTANT>  {VariableFreeLiteralValue}  { return LITERAL_CONSTANT; }
+<LITERAL_CONSTANT_ONLY> {
+    <LITERAL_CONSTANT_ONLY_LIST> {
+        ^ {LineComment}                                          { pushBackTrailingWhitespace(); return COMMENT; }
+        {LineComment}                                            { pushBackTrailingWhitespace(); return COMMENT; }
+
+        {EOL} {WhitespaceIncludingNewline}* {LineCommentSign}    { yypushback(1); return WHITE_SPACE; }
+        {MultiLine} {WhitespaceIncludingNewline}*                { return WHITE_SPACE; }
+    }
+
+    {NonNewlineWhitespace}+                                      { return WHITE_SPACE; }
+    {ExtendedSpaceBasedEndMarker} {LineCommentSign}              { yypushback(1); return WHITE_SPACE; }
+    {NonNewlineWhitespace}+ {NON_EOL}+                           { pushBackEverythingExceptLeadingWhitespace(); return WHITE_SPACE; }
+    {NON_EOL}+                                                   { pushBackTrailingWhitespace(); return LITERAL_CONSTANT; }
+}
+<LITERAL_CONSTANT_ONLY_LIST> {SpaceBasedEndMarker}               { return WHITE_SPACE; }
+
+<SETTINGS_SECTION, SETTING, KEYWORD_ARGUMENTS, USER_KEYWORD_RETURN_STATEMENT, SINGLE_LITERAL_CONSTANT, LITERAL_CONSTANT_ONLY_LIST>  {VariableFreeLiteralValue}  { return LITERAL_CONSTANT; }
 
 <SINGLE_LITERAL_CONSTANT_START>  {SpaceBasedEndMarker}       { yybegin(SINGLE_LITERAL_CONSTANT); return WHITE_SPACE; }
 <SINGLE_LITERAL_CONSTANT>        {SpaceBasedEndMarker}       { leaveState(); return WHITE_SPACE; }
-
-<LITERAL_CONSTANT_ONLY> {
-    {NonNewlineWhitespace}+                                  { return WHITE_SPACE; }
-    {ExtendedSpaceBasedEndMarker} {LineCommentSign}          { yypushback(1); return WHITE_SPACE; }
-    {NonNewlineWhitespace}+ {NON_EOL}+                       { pushBackEverythingExceptLeadingWhitespace(); return WHITE_SPACE; }
-    ^ {LineComment}                                          { pushBackTrailingWhitespace(); return COMMENT; }
-    {LineComment}                                            { pushBackTrailingWhitespace(); return COMMENT; }
-    {NON_EOL}+                                               { pushBackTrailingWhitespace(); return LITERAL_CONSTANT; }
-
-    {EOL} {WhitespaceIncludingNewline}* {LineCommentSign}    { yypushback(1); return WHITE_SPACE; }
-    {MultiLine} {WhitespaceIncludingNewline}*                { return WHITE_SPACE; }
-}
 
 <COMMENTS_SECTION> {
     ^ {SettingsSectionIdentifier}            { resetInternalState(); yybegin(SETTINGS_SECTION); pushBackTrailingWhitespace(); return SETTINGS_HEADER; }
