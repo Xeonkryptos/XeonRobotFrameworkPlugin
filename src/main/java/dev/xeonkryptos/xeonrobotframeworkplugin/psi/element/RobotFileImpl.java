@@ -1,6 +1,7 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.psi.element;
 
 import com.intellij.extapi.psi.PsiFileBase;
+import com.intellij.openapi.Disposable;
 import com.intellij.openapi.fileTypes.FileType;
 import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.project.Project;
@@ -27,6 +28,7 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.VariableScope;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.visitor.RobotImportFilesCollector;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.visitor.RobotSectionVariablesCollector;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.visitor.RobotUsedFilesCollector;
+import dev.xeonkryptos.xeonrobotframeworkplugin.util.DisposableSupplier;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -45,14 +47,13 @@ import java.util.stream.Stream;
 
 public class RobotFileImpl extends PsiFileBase implements KeywordFile, RobotFile {
 
-    private static final Key<ParameterizedCachedValue<Collection<VirtualFile>, Boolean>> IMPORTED_VIRTUAL_FILES_CACHE_KEY = Key.create(
-            "IMPORTED_VIRTUAL_FILES_CACHE");
+    private static final Key<ParameterizedCachedValue<Collection<VirtualFile>, Boolean>> IMPORTED_VIRTUAL_FILES_CACHE_KEY = Key.create("IMPORTED_VIRTUAL_FILES_CACHE");
     private static final Key<CachedValue<Collection<DefinedVariable>>> TEST_SUITE_VARIABLES_CACHE_KEY = Key.create("TEST_SUITE_VARIABLES_CACHE");
 
     private final FileType fileType;
 
     private Collection<DefinedVariable> sectionVariables;
-    private Map<ImportType, Set<Supplier<KeywordFile>>> importedKeywordFiles;
+    private Map<ImportType, Set<DisposableSupplier<KeywordFile>>> importedKeywordFiles;
 
     public RobotFileImpl(FileViewProvider fileViewProvider) {
         super(fileViewProvider, RobotLanguage.INSTANCE);
@@ -65,6 +66,9 @@ public class RobotFileImpl extends PsiFileBase implements KeywordFile, RobotFile
         super.subtreeChanged();
 
         sectionVariables = null;
+        if (importedKeywordFiles != null) {
+            importedKeywordFiles.values().stream().flatMap(Collection::stream).forEach(Disposable::dispose);
+        }
         importedKeywordFiles = null;
     }
 
@@ -94,8 +98,7 @@ public class RobotFileImpl extends PsiFileBase implements KeywordFile, RobotFile
     public final Collection<DefinedVariable> getDefinedVariables() {
         return CachedValuesManager.getCachedValue(this,
                                                   TEST_SUITE_VARIABLES_CACHE_KEY,
-                                                  () -> Result.createSingleDependency(getDefinedVariables(new LinkedHashSet<>()),
-                                                                                      PsiModificationTracker.MODIFICATION_COUNT));
+                                                  () -> Result.createSingleDependency(getDefinedVariables(new LinkedHashSet<>()), PsiModificationTracker.MODIFICATION_COUNT));
     }
 
     @NotNull
@@ -212,14 +215,9 @@ public class RobotFileImpl extends PsiFileBase implements KeywordFile, RobotFile
             acceptChildren(importFilesCollector);
             importedKeywordFiles = importFilesCollector.getKeywordFileSuppliers();
         }
-        Stream<Supplier<KeywordFile>> resourceImports = importedKeywordFiles.getOrDefault(ImportType.RESOURCE, Set.of()).stream();
-        Stream<Supplier<KeywordFile>> imports = Arrays.stream(importTypes)
-                                                      .flatMap(importType -> importedKeywordFiles.getOrDefault(importType, Set.of()).stream());
-        return Stream.concat(resourceImports, imports)
-                     .distinct()
-                     .map(Supplier::get)
-                     .filter(Objects::nonNull)
-                     .collect(Collectors.toCollection(LinkedHashSet::new));
+        Stream<DisposableSupplier<KeywordFile>> resourceImports = importedKeywordFiles.getOrDefault(ImportType.RESOURCE, Set.of()).stream();
+        Stream<Supplier<KeywordFile>> imports = Arrays.stream(importTypes).flatMap(importType -> importedKeywordFiles.getOrDefault(importType, Set.of()).stream());
+        return Stream.concat(resourceImports, imports).distinct().map(Supplier::get).filter(Objects::nonNull).collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
     private void collectTransitiveKeywordFiles(KeywordFile keywordFile, Collection<KeywordFile> results, ImportType[] importTypes) {
