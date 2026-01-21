@@ -1,4 +1,4 @@
-package dev.xeonkryptos.xeonrobotframeworkplugin.completion;
+package dev.xeonkryptos.xeonrobotframeworkplugin.patterns;
 
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.util.TextRange;

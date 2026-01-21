@@ -29,6 +29,12 @@ public class RobotConditionalContentImpl extends RobotPsiElementBase implements 
 
   @Override
   @NotNull
+  public List<RobotPythonExpressionBody> getPythonExpressionBodyList() {
+    return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotPythonExpressionBody.class);
+  }
+
+  @Override
+  @NotNull
   public List<RobotVariable> getVariableList() {
     return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotVariable.class);
   }

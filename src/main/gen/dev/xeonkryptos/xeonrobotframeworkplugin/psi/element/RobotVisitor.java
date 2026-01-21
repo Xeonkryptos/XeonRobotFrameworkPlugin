@@ -260,6 +260,11 @@ public class RobotVisitor extends PsiElementVisitor {
     visitElement(o);
   }
 
+  public void visitPythonExpressionBody(@NotNull RobotPythonExpressionBody o) {
+    visitPythonExpressionBodyExtension(o);
+    // visitElement(o);
+  }
+
   public void visitResourceImportGlobalSetting(@NotNull RobotResourceImportGlobalSetting o) {
     visitGlobalSettingStatement(o);
     // visitGlobalSettingStatementExpression(o);
@@ -474,6 +479,10 @@ public class RobotVisitor extends PsiElementVisitor {
   }
 
   public void visitFoldable(@NotNull RobotFoldable o) {
+    visitPsiElement(o);
+  }
+
+  public void visitPythonExpressionBodyExtension(@NotNull RobotPythonExpressionBodyExtension o) {
     visitPsiElement(o);
   }
 

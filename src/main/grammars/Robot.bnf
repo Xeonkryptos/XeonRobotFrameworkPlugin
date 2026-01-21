@@ -294,7 +294,7 @@ inline_else_structure ::= ELSE call_structure {
     implements="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotBlockOpeningStructure"
 }
 conditional_content ::= conditional_content_body+ {name="Condition"}
-private conditional_content_body ::= PYTHON_EXPRESSION_CONTENT | variable
+private conditional_content_body ::= python_expression_body | variable
 exception_handling_structure ::= try_structure
     except_structure*
     else_structure?

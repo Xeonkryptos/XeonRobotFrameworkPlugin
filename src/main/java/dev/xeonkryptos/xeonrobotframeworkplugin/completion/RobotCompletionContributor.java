@@ -32,9 +32,9 @@ import static com.intellij.patterns.PlatformPatterns.psiComment;
 import static com.intellij.patterns.PlatformPatterns.psiElement;
 import static com.intellij.patterns.StandardPatterns.instanceOf;
 import static com.intellij.patterns.StandardPatterns.or;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.completion.RobotPatterns.atFirstPositionOf;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.completion.RobotPatterns.indented;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.completion.RobotPatterns.previousNonWhitespaceOrCommentSibling;
+import static dev.xeonkryptos.xeonrobotframeworkplugin.patterns.RobotPatterns.atFirstPositionOf;
+import static dev.xeonkryptos.xeonrobotframeworkplugin.patterns.RobotPatterns.indented;
+import static dev.xeonkryptos.xeonrobotframeworkplugin.patterns.RobotPatterns.previousNonWhitespaceOrCommentSibling;
 
 public class RobotCompletionContributor extends CompletionContributor {
 

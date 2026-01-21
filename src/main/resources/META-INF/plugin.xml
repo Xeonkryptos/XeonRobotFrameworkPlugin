@@ -9,7 +9,6 @@
     <depends>com.intellij.modules.json</depends>
 
     <depends>PythonCore</depends>
-    <depends optional="true" config-file="robot-injections.xml">org.intellij.intelliLang</depends>
 
     <resource-bundle>messages.RobotBundle</resource-bundle>
 
@@ -88,6 +87,8 @@
                                  implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.manipulator.RobotParameterIdManipulator"/>
         <lang.elementManipulator forClass="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTemplateParameterId"
                                  implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.manipulator.RobotTemplateParameterIdManipulator"/>
+        <lang.elementManipulator forClass="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotPythonExpressionBody"
+                                 implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.manipulator.RobotPythonExpressionBodyManipulator"/>
 
         <!-- Annotations -->
         <annotator language="Robot" implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.annotator.RobotAnnotatingVisitor"/>
@@ -211,6 +212,8 @@
                                    order="first, before pyvar"/>
         <renamePsiElementProcessor implementation="dev.xeonkryptos.xeonrobotframeworkplugin.rename.RobotVariableDefinitionRenameElementProcessor"/>
         <renameHandler implementation="dev.xeonkryptos.xeonrobotframeworkplugin.rename.RobotMemberInplaceRenameHandler"/>
+
+        <languageInjectionContributor language="Robot" implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.injection.RobotLanguageInjectionContributor"/>
     </extensions>
     <actions>
         <action id="XeonRobotFrameworkPlugin.CreateNew" class="dev.xeonkryptos.xeonrobotframeworkplugin.actions.RobotCreateAction">

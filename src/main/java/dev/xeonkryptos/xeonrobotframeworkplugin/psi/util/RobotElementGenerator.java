@@ -21,6 +21,7 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLoopControlStru
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotParameter;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotParameterId;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotPositionalArgument;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotPythonExpressionBody;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotReturnStructure;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTaskId;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTemplateParameterId;
@@ -369,6 +370,21 @@ public record RobotElementGenerator(Project project) {
         return returnStructureFinder.returnStructure;
     }
 
+    public RobotPythonExpressionBody createNewPythonExpressionBody(String pythonStatement) {
+        String fileContent = """
+                             *** Variables ***
+                             ${Variable}=  ${{%s}}
+                             """.formatted(pythonStatement);
+
+        PsiFile psiFile = createDummyPsiFile(fileContent);
+        if (psiFile == null) {
+            return null;
+        }
+        RobotPythonExpressionBodyFinder pythonExpressionBodyFinder = new RobotPythonExpressionBodyFinder();
+        psiFile.acceptChildren(pythonExpressionBodyFinder);
+        return pythonExpressionBodyFinder.pythonExpressionBody;
+    }
+
     public PsiFile createDummyPsiFile(String text) {
         PsiFileFactory factory = PsiFileFactory.getInstance(project);
 
@@ -547,6 +563,16 @@ public record RobotElementGenerator(Project project) {
         @Override
         public void visitLoopControlStructure(@NotNull RobotLoopControlStructure o) {
             loopControlStructure = o;
+        }
+    }
+
+    private static final class RobotPythonExpressionBodyFinder extends RecursiveRobotVisitor {
+
+        private RobotPythonExpressionBody pythonExpressionBody;
+
+        @Override
+        public void visitPythonExpressionBody(@NotNull RobotPythonExpressionBody o) {
+            pythonExpressionBody = o;
         }
     }
 }
