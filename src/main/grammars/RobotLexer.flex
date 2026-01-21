@@ -468,7 +468,7 @@ LineComment = {LineCommentSign} {NON_EOL}*
         "FINALLY" {EOL}?                             { yypushback(yylength() - "FINALLY".length()); return FINALLY; }
         "BREAK" {ExtendedKeywordFinishedMarker}?     { yypushback(yylength() - "BREAK".length()); return BREAK; }
         "CONTINUE" {ExtendedKeywordFinishedMarker}?  { yypushback(yylength() - "CONTINUE".length()); return CONTINUE; }
-        "GROUP" {ExtendedKeywordFinishedMarker}?     {
+        "GROUP" {ExtendedSpaceBasedEndMarker}?       {
           if (yylength() > "GROUP".length()) {
               enterNewState(SIMPLE_CONTROL_STRUCTURE_START);
           }
