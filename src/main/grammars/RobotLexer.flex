@@ -452,24 +452,30 @@ LineComment = {LineCommentSign} {NON_EOL}*
             }
         }
 
-        "FOR" {ExtendedSpaceBasedEndMarker}         { yypushback(yylength() - "FOR".length()); enterNewState(FOR_STRUCTURE); return FOR; }
-        "WHILE" {ExtendedSpaceBasedEndMarker}       { yypushback(yylength() - "WHILE".length()); enterNewState(PYTHON_EVALUATED_CONTROL_STRUCTURE_START); return WHILE; }
-        "IF" {ExtendedSpaceBasedEndMarker}          { yypushback(yylength() - "IF".length()); enterNewState(PYTHON_EVALUATED_CONTROL_STRUCTURE_START); return IF; }
-        "ELSE IF" {ExtendedSpaceBasedEndMarker}     { yypushback(yylength() - "ELSE IF".length()); enterNewState(PYTHON_EVALUATED_CONTROL_STRUCTURE_START); return ELSE_IF; }
-        "ELSE" {ExtendedKeywordFinishedMarker}      { yypushback(yylength() - "ELSE".length()); return ELSE; }
-        "TRY" {EOL}                                 { yypushback(1); return TRY; }
-        "EXCEPT" {ExtendedSpaceBasedEndMarker}      { yypushback(yylength() - "EXCEPT".length()); enterNewState(SIMPLE_CONTROL_STRUCTURE_START); return EXCEPT; }
-        "FINALLY" {EOL}                             { yypushback(1); return FINALLY; }
-        "BREAK" {ExtendedKeywordFinishedMarker}     { yypushback(yylength() - "BREAK".length()); return BREAK; }
-        "CONTINUE" {ExtendedKeywordFinishedMarker}  { yypushback(yylength() - "CONTINUE".length()); return CONTINUE; }
-        "GROUP" {ExtendedKeywordFinishedMarker}     { yypushback(yylength() - "GROUP".length()); enterNewState(SIMPLE_CONTROL_STRUCTURE_START); return GROUP; }
-        "END" {EOL}?                                {
-          int lastCharacterPos = yylength() - 1;
-          char lastCharacter = yycharat(lastCharacterPos);
-          if (Character.isWhitespace(lastCharacter)) {
-              yypushback(1);
+        "FOR" {ExtendedSpaceBasedEndMarker}?         { yypushback(yylength() - "FOR".length()); enterNewState(FOR_STRUCTURE); return FOR; }
+        "WHILE" {ExtendedSpaceBasedEndMarker}?       { yypushback(yylength() - "WHILE".length()); enterNewState(PYTHON_EVALUATED_CONTROL_STRUCTURE_START); return WHILE; }
+        "IF" {ExtendedSpaceBasedEndMarker}?          { yypushback(yylength() - "IF".length()); enterNewState(PYTHON_EVALUATED_CONTROL_STRUCTURE_START); return IF; }
+        "ELSE IF" {ExtendedSpaceBasedEndMarker}?     { yypushback(yylength() - "ELSE IF".length()); enterNewState(PYTHON_EVALUATED_CONTROL_STRUCTURE_START); return ELSE_IF; }
+        "ELSE" {ExtendedKeywordFinishedMarker}?      { yypushback(yylength() - "ELSE".length()); return ELSE; }
+        "TRY" {EOL}?                                 { yypushback(yylength() - "TRY".length()); return TRY; }
+        "EXCEPT" {ExtendedSpaceBasedEndMarker}?      {
+          if (yylength() > "EXCEPT".length()) {
+              enterNewState(SIMPLE_CONTROL_STRUCTURE_START);
           }
-          return END; }
+          yypushback(yylength() - "EXCEPT".length());
+          return EXCEPT;
+        }
+        "FINALLY" {EOL}?                             { yypushback(yylength() - "FINALLY".length()); return FINALLY; }
+        "BREAK" {ExtendedKeywordFinishedMarker}?     { yypushback(yylength() - "BREAK".length()); return BREAK; }
+        "CONTINUE" {ExtendedKeywordFinishedMarker}?  { yypushback(yylength() - "CONTINUE".length()); return CONTINUE; }
+        "GROUP" {ExtendedKeywordFinishedMarker}?     {
+          if (yylength() > "GROUP".length()) {
+              enterNewState(SIMPLE_CONTROL_STRUCTURE_START);
+          }
+          yypushback(yylength() - "GROUP".length());
+          return GROUP;
+        }
+        "END" {EOL}?                                 { yypushback(yylength() - "END".length()); return END; }
     }
 
     "GIVEN" {ExtendedSpaceBasedEndMarker}   {
@@ -597,6 +603,11 @@ LineComment = {LineCommentSign} {NON_EOL}*
 }
 
 <LITERAL_CONSTANT_ONLY> {
+    {ScalarVariableStart}                       { enterNewState(VARIABLE_USAGE); return SCALAR_VARIABLE_START; }
+    {ListVariableStart}                         { enterNewState(VARIABLE_USAGE); return LIST_VARIABLE_START; }
+    {DictVariableStart}                         { enterNewState(VARIABLE_USAGE); return DICT_VARIABLE_START; }
+    {EnvVariableStart}                          { enterNewState(VARIABLE_USAGE); return ENV_VARIABLE_START; }
+
     <LITERAL_CONSTANT_ONLY_LIST> {
         ^ {LineComment}                                          { pushBackTrailingWhitespace(); return COMMENT; }
         {LineComment}                                            { pushBackTrailingWhitespace(); return COMMENT; }
