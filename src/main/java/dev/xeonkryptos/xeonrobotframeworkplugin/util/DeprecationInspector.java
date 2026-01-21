@@ -6,8 +6,8 @@ import com.jetbrains.python.psi.PyFunction;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLocalSetting;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotPositionalArgument;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotUserKeywordStatement;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.ref.PyElementDeprecatedVisitor;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.ref.PyElementParentTraversalVisitor;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.reference.PyElementDeprecatedVisitor;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.reference.PyElementParentTraversalVisitor;
 
 import java.util.List;
 
@@ -31,12 +31,12 @@ public final class DeprecationInspector {
 
     private static boolean isUserKeywordDeprecated(RobotUserKeywordStatement userKeywordStatement) {
         for (RobotLocalSetting robotLocalSetting : userKeywordStatement.getLocalSettingList()) {
-            if ("[Documentation]".equalsIgnoreCase(robotLocalSetting.getSettingName())) {
+            if ("Documentation".equalsIgnoreCase(robotLocalSetting.getSettingName())) {
                 List<RobotPositionalArgument> positionalArgumentList = robotLocalSetting.getPositionalArgumentList();
                 if (!positionalArgumentList.isEmpty()) {
                     RobotPositionalArgument documentationArgument = positionalArgumentList.getFirst();
                     String documentation = documentationArgument.getText();
-                    if (documentation.startsWith(GlobalConstants.DEPRECATED_PREFIX)) {
+                    if (documentation.startsWith(RobotNames.DEPRECATED_PREFIX)) {
                         return true;
                     }
                     break;

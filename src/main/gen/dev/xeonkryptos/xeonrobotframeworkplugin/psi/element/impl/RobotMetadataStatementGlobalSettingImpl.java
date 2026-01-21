@@ -30,8 +30,8 @@ public class RobotMetadataStatementGlobalSettingImpl extends RobotGlobalSettingS
 
   @Override
   @NotNull
-  public List<RobotPositionalArgument> getPositionalArgumentList() {
-    return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotPositionalArgument.class);
+  public List<RobotParameter> getParameterList() {
+    return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotParameter.class);
   }
 
   @Override

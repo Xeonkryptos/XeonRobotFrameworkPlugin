@@ -27,4 +27,9 @@ public class RobotLocalArgumentsSettingIdImpl extends RobotPsiElementBase implem
     else super.accept(visitor);
   }
 
+  @Override
+  public @NotNull String getSettingName() {
+    return RobotPsiImplUtil.getSettingName(this);
+  }
+
 }

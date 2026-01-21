@@ -1,6 +1,8 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl;
 
 import com.intellij.lang.ASTNode;
+import com.intellij.lang.folding.FoldingDescriptor;
+import com.intellij.openapi.editor.Document;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.stubs.IStubElementType;
 import com.intellij.util.IncorrectOperationException;
@@ -8,11 +10,13 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.DefinedParameter;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLocalArgumentsSetting;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotUserKeywordStatement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotUserKeywordStatementId;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.folding.RobotFoldingComputationUtil;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotStubPsiElementBase;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotUserKeywordStub;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.RobotElementGenerator;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.visitor.RobotUserKeywordInputArgumentCollector;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
 import java.util.List;
@@ -53,6 +57,20 @@ public abstract class RobotUserKeywordExtension extends RobotStubPsiElementBase<
         }
         return inputParameters;
     }
+
+    @Nullable
+    @Override
+    public FoldingDescriptor[] fold(@NotNull Document document) {
+        if (!RobotFoldingComputationUtil.isFoldingUseful(this, document)) {
+            return null;
+        }
+        var foldingDescriptor = RobotFoldingComputationUtil.computeFoldingDescriptorForContainer(this, getUserKeywordStatementId(), document);
+        return foldingDescriptor != null ? new FoldingDescriptor[] { foldingDescriptor } : null;
+    }
+
+    @NotNull
+    @Override
+    public abstract String getName();
 
     @Override
     public PsiElement setName(@NotNull String newName) throws IncorrectOperationException {

@@ -29,11 +29,11 @@ public class VariableDefinitionNameIndex extends StringStubIndexExtension<RobotV
         return KEY;
     }
 
-    public Collection<RobotVariableDefinition> getVariableDefinitions(@NotNull String unwrappedVariableName,
+    public Collection<RobotVariableDefinition> getVariableDefinitions(@NotNull String variableName,
                                                                       @NotNull Project project,
                                                                       @Nullable GlobalSearchScope scope) {
         StubIndexKey<String, RobotVariableDefinition> stubIndexKey = getKey();
-        return VariableNameUtil.INSTANCE.computeVariableNameVariants(unwrappedVariableName)
+        return VariableNameUtil.INSTANCE.computeVariableNameVariants(variableName)
                                         .stream()
                                         .flatMap(variant -> StubIndex.getElements(stubIndexKey, variant, project, scope, RobotVariableDefinition.class)
                                                                      .stream())

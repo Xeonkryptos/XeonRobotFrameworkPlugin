@@ -11,7 +11,7 @@ import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.*;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.*;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotPsiImplUtil;
 
-public class RobotGroupStructureImpl extends RobotExecutableStatementImpl implements RobotGroupStructure {
+public class RobotGroupStructureImpl extends RobotGroupStructureExtension implements RobotGroupStructure {
 
   public RobotGroupStructureImpl(@NotNull ASTNode node) {
     super(node);
@@ -29,9 +29,9 @@ public class RobotGroupStructureImpl extends RobotExecutableStatementImpl implem
   }
 
   @Override
-  @Nullable
-  public RobotPositionalArgument getPositionalArgument() {
-    return PsiTreeUtil.getChildOfType(this, RobotPositionalArgument.class);
+  @NotNull
+  public RobotGroupHeader getGroupHeader() {
+    return notNullChild(PsiTreeUtil.getChildOfType(this, RobotGroupHeader.class));
   }
 
 }

@@ -3,6 +3,7 @@ package dev.xeonkryptos.xeonrobotframeworkplugin.psi.util;
 import com.intellij.openapi.components.Service;
 import com.intellij.openapi.components.Service.Level;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.util.Pair;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiFileFactory;
@@ -10,18 +11,26 @@ import com.intellij.psi.impl.PsiFileFactoryImpl;
 import com.intellij.testFramework.LightVirtualFile;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotFeatureFileType;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotLanguage;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotConditionalStructure;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotExceptionHandlingStructure;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotImportArgument;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCallLibraryName;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCallName;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordVariableStatement;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLoopControlStructure;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotParameter;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotParameterId;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotPositionalArgument;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotReturnStructure;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTaskId;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTemplateParameterId;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTestCaseId;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotUserKeywordStatementId;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariable;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableBodyId;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.visitor.RecursiveRobotVisitor;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 @Service(Level.PROJECT)
 public record RobotElementGenerator(Project project) {
@@ -108,10 +117,10 @@ public record RobotElementGenerator(Project project) {
 
     public RobotParameter createNewParameter(String parameterId) {
         String fileContent = """
-                             *** Test Case ***
-                             Dummy
-                                 Keyword  %s=\s\s
-                            \s""".formatted(parameterId);
+                              *** Test Case ***
+                              Dummy
+                                  Keyword  %s=\s\s
+                             \s""".formatted(parameterId);
 
         PsiFile psiFile = createDummyPsiFile(fileContent);
         if (psiFile == null) {
@@ -171,6 +180,40 @@ public record RobotElementGenerator(Project project) {
         return positionalArgumentFinder.positionalArgument;
     }
 
+    public RobotImportArgument createNewImportArgument(String importArgument) {
+        String fileContent = """
+                             *** Settings ***
+                             Resource %s
+                             """.formatted(importArgument);
+
+        PsiFile psiFile = createDummyPsiFile(fileContent);
+        if (psiFile == null) {
+            return null;
+        }
+        RobotImportArgumentFinder importArgumentFinder = new RobotImportArgumentFinder();
+        psiFile.acceptChildren(importArgumentFinder);
+        return importArgumentFinder.importArgument;
+    }
+
+    public RobotVariable createNewScalarVariable(String variableBodyId) {
+        return createNewScalarVariable(variableBodyId, "");
+    }
+
+    public RobotVariable createNewScalarVariable(String variableBodyId, String extensionText) {
+        String fileContent = """
+                             *** Variables ***
+                             ${%s}%s=  DUMMY
+                             """.formatted(variableBodyId, extensionText);
+
+        PsiFile psiFile = createDummyPsiFile(fileContent);
+        if (psiFile == null) {
+            return null;
+        }
+        RobotVariableFinder variableFinder = new RobotVariableFinder();
+        psiFile.acceptChildren(variableFinder);
+        return variableFinder.variable;
+    }
+
     public RobotVariableBodyId createNewVariableBodyId(String variableBodyId) {
         String fileContent = """
                              *** Variables ***
@@ -184,6 +227,115 @@ public record RobotElementGenerator(Project project) {
         RobotVariableBodyIdFinder variableBodyFinder = new RobotVariableBodyIdFinder();
         psiFile.acceptChildren(variableBodyFinder);
         return variableBodyFinder.variableBodyId;
+    }
+
+    public RobotKeywordVariableStatement createNewKeywordVariableDefinition(String variableName, String keywordCall) {
+        String fileContent = """
+                             *** Keywords ***
+                             Dummy Keyword
+                                 ${%s}=  %s
+                             """.formatted(variableName, keywordCall);
+
+        PsiFile psiFile = createDummyPsiFile(fileContent);
+        if (psiFile == null) {
+            return null;
+        }
+        RobotKeywordVariableStatementFinder keywordVariableStatementFinder = new RobotKeywordVariableStatementFinder();
+        psiFile.acceptChildren(keywordVariableStatementFinder);
+        return keywordVariableStatementFinder.keywordVariableStatement;
+    }
+
+    public RobotLoopControlStructure createNewLoopControlStructure(LoopControlStructureType type) {
+        String fileContent = """
+        *** Keywords ***
+        Dummy Keyword
+            FOR  ${item}  IN  @{items}
+                %s
+            END
+        """.formatted(type);
+
+        PsiFile psiFile = createDummyPsiFile(fileContent);
+        if (psiFile == null) {
+            return null;
+        }
+        RobotLoopControlStructureFinder loopControlStructureFinder = new RobotLoopControlStructureFinder();
+        psiFile.acceptChildren(loopControlStructureFinder);
+        return loopControlStructureFinder.loopControlStructure;
+    }
+
+    public RobotConditionalStructure createNewConditionalStructure(String ifCondition,
+                                                                   String ifConditionalBody,
+                                                                   Pair<String, String>[] elseIfConditionalDefinitions,
+                                                                   @Nullable String elseConditionalBody) {
+        StringBuilder conditionalBuilder = new StringBuilder("""
+                                                             *** Keywords ***
+                                                             Dummy
+                                                                 IF  %s
+                                                                     %s
+                                                             """.formatted(ifCondition.trim(), ifConditionalBody.replace("\n", "\n        ").trim()));
+
+        for (Pair<String, String> elseIfConditionalDefinition : elseIfConditionalDefinitions) {
+            String elseIfConditionResult = """
+                                               ELSE IF  %s
+                                                   %s
+                                           """.formatted(elseIfConditionalDefinition.first.trim(), elseIfConditionalDefinition.second.replace("\n", "\n        ").trim());
+            conditionalBuilder.append(elseIfConditionResult);
+        }
+
+        if (elseConditionalBody != null) {
+            String elseConditionResult = """
+                                             ELSE
+                                                 %s
+                                         """.formatted(elseConditionalBody.replace("\n", "\n        ").trim());
+            conditionalBuilder.append(elseConditionResult);
+        }
+        conditionalBuilder.append("    END\n");
+
+        String fileContent = conditionalBuilder.toString();
+        PsiFile psiFile = createDummyPsiFile(fileContent);
+        if (psiFile == null) {
+            return null;
+        }
+
+        RobotConditionalStructureFinder conditionalStructureFinder = new RobotConditionalStructureFinder();
+        psiFile.acceptChildren(conditionalStructureFinder);
+        return conditionalStructureFinder.conditionalStructure;
+    }
+
+    public RobotExceptionHandlingStructure createNewExceptionHandlingStructure(String tryBody, Pair<@NotNull String, @NotNull String>[] exceptDefinitions, @Nullable String finallyBody) {
+        StringBuilder structureBuilder = new StringBuilder("""
+                                                           *** Test Cases ***
+                                                           Dummy
+                                                               TRY
+                                                                   %s
+                                                           """.formatted(tryBody.trim()));
+
+        for (Pair<String, String> exceptDefinition : exceptDefinitions) {
+            String finallyBodyResult = """
+                                           EXCEPT  %s
+                                               %s
+                                       """.formatted(exceptDefinition.first.trim(), exceptDefinition.second.trim());
+            structureBuilder.append(finallyBodyResult);
+        }
+
+        if (finallyBody != null) {
+            String finallyBodyResult = """
+                                           FINALLY
+                                               %s
+                                       """.formatted(finallyBody.trim());
+            structureBuilder.append(finallyBodyResult);
+        }
+        structureBuilder.append("    END\n");
+
+        String fileContent = structureBuilder.toString();
+        PsiFile psiFile = createDummyPsiFile(fileContent);
+        if (psiFile == null) {
+            return null;
+        }
+
+        RobotExceptionHandlingStructureFinder structureFinder = new RobotExceptionHandlingStructureFinder();
+        psiFile.acceptChildren(structureFinder);
+        return structureFinder.exceptionHandlingStructure;
     }
 
     public PsiElement createEolElement(int count) {
@@ -202,11 +354,30 @@ public record RobotElementGenerator(Project project) {
         return testCaseIdFinder.testCaseId.getNextSibling();
     }
 
+    public RobotReturnStructure createNewReturnStructure(String returnValue) {
+        String fileContent = """
+                             *** Keywords ***
+                             Dummy Keyword
+                                 RETURN  %s
+                             """.formatted(returnValue);
+        PsiFile psiFile = createDummyPsiFile(fileContent);
+        if (psiFile == null) {
+            return null;
+        }
+        RobotReturnStructureFinder returnStructureFinder = new RobotReturnStructureFinder();
+        psiFile.acceptChildren(returnStructureFinder);
+        return returnStructureFinder.returnStructure;
+    }
+
     public PsiFile createDummyPsiFile(String text) {
         PsiFileFactory factory = PsiFileFactory.getInstance(project);
 
         LightVirtualFile virtualFile = new LightVirtualFile("dummy.robot", RobotFeatureFileType.getInstance(), text);
         return ((PsiFileFactoryImpl) factory).trySetupPsiForFile(virtualFile, RobotLanguage.INSTANCE, false, true);
+    }
+
+    public enum LoopControlStructureType {
+        CONTINUE, BREAK
     }
 
     private static final class RobotUserKeywordStatementIdFinder extends RecursiveRobotVisitor {
@@ -299,6 +470,16 @@ public record RobotElementGenerator(Project project) {
         }
     }
 
+    private static final class RobotImportArgumentFinder extends RecursiveRobotVisitor {
+
+        private RobotImportArgument importArgument;
+
+        @Override
+        public void visitImportArgument(@NotNull RobotImportArgument o) {
+            importArgument = o;
+        }
+    }
+
     private static final class RobotVariableBodyIdFinder extends RecursiveRobotVisitor {
 
         private RobotVariableBodyId variableBodyId;
@@ -306,6 +487,66 @@ public record RobotElementGenerator(Project project) {
         @Override
         public void visitVariableBodyId(@NotNull RobotVariableBodyId o) {
             variableBodyId = o;
+        }
+    }
+
+    private static final class RobotVariableFinder extends RecursiveRobotVisitor {
+
+        private RobotVariable variable;
+
+        @Override
+        public void visitVariable(@NotNull RobotVariable o) {
+            variable = o;
+        }
+    }
+
+    private static final class RobotConditionalStructureFinder extends RecursiveRobotVisitor {
+
+        private RobotConditionalStructure conditionalStructure;
+
+        @Override
+        public void visitConditionalStructure(@NotNull RobotConditionalStructure o) {
+            conditionalStructure = o;
+        }
+    }
+
+    private static final class RobotExceptionHandlingStructureFinder extends RecursiveRobotVisitor {
+
+        private RobotExceptionHandlingStructure exceptionHandlingStructure;
+
+        @Override
+        public void visitExceptionHandlingStructure(@NotNull RobotExceptionHandlingStructure o) {
+            exceptionHandlingStructure = o;
+        }
+    }
+
+    private static final class RobotReturnStructureFinder extends RecursiveRobotVisitor {
+
+        private RobotReturnStructure returnStructure;
+
+        @Override
+        public void visitReturnStructure(@NotNull RobotReturnStructure o) {
+            returnStructure = o;
+        }
+    }
+
+    private static final class RobotKeywordVariableStatementFinder extends RecursiveRobotVisitor {
+
+        private RobotKeywordVariableStatement keywordVariableStatement;
+
+        @Override
+        public void visitKeywordVariableStatement(@NotNull RobotKeywordVariableStatement o) {
+            keywordVariableStatement = o;
+        }
+    }
+
+    private static final class RobotLoopControlStructureFinder extends RecursiveRobotVisitor {
+
+        private RobotLoopControlStructure loopControlStructure;
+
+        @Override
+        public void visitLoopControlStructure(@NotNull RobotLoopControlStructure o) {
+            loopControlStructure = o;
         }
     }
 }

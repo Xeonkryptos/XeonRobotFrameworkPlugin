@@ -1,9 +1,9 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.psi.visitor;
 
 import com.intellij.psi.PsiElement;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotImportArgument;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLibraryImportGlobalSetting;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotNewLibraryName;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotPositionalArgument;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotRoot;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotSettingsSection;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVisitor;
@@ -28,13 +28,15 @@ public final class RobotLibraryNamesCollector extends RobotVisitor {
 
     @Override
     public void visitLibraryImportGlobalSetting(@NotNull RobotLibraryImportGlobalSetting o) {
-        RobotPositionalArgument positionalArgument = o.getImportedFile();
-        positionalArgument.acceptChildren(this);
+        RobotImportArgument importArgument = o.getImportedFile();
+        if (importArgument != null) {
+            importArgument.acceptChildren(this);
 
-        RobotNewLibraryName newLibraryName = o.getNewLibraryName();
-        if (newLibraryName != null) {
-            String libraryName = newLibraryName.getText();
-            renamedLibraries.put(libraryName, newLibraryName);
+            RobotNewLibraryName newLibraryName = o.getNewLibraryName();
+            if (newLibraryName != null) {
+                String libraryName = newLibraryName.getText();
+                renamedLibraries.put(libraryName, newLibraryName);
+            }
         }
     }
 

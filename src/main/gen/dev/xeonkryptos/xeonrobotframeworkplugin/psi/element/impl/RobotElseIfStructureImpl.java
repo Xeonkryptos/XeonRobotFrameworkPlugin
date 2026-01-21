@@ -30,8 +30,8 @@ public class RobotElseIfStructureImpl extends RobotExecutableStatementImpl imple
 
   @Override
   @NotNull
-  public List<RobotPositionalArgument> getPositionalArgumentList() {
-    return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotPositionalArgument.class);
+  public RobotConditionalContent getConditionalContent() {
+    return notNullChild(PsiTreeUtil.getChildOfType(this, RobotConditionalContent.class));
   }
 
 }

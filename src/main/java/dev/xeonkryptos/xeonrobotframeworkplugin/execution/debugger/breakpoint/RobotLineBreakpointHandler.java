@@ -1,0 +1,27 @@
+package dev.xeonkryptos.xeonrobotframeworkplugin.execution.debugger.breakpoint;
+
+import com.intellij.xdebugger.breakpoints.XBreakpointHandler;
+import com.intellij.xdebugger.breakpoints.XLineBreakpoint;
+import dev.xeonkryptos.xeonrobotframeworkplugin.debugger.RobotDebugProcess;
+import org.jetbrains.annotations.NotNull;
+
+public class RobotLineBreakpointHandler extends XBreakpointHandler<XLineBreakpoint<RobotLineBreakpointProperties>> {
+
+    private final RobotDebugProcess debugProcess;
+
+    public RobotLineBreakpointHandler(@NotNull RobotDebugProcess debugProcess) {
+        super(RobotLineBreakpointType.class);
+
+        this.debugProcess = debugProcess;
+    }
+
+    @Override
+    public void registerBreakpoint(@NotNull XLineBreakpoint<RobotLineBreakpointProperties> breakpoint) {
+        debugProcess.registerBreakpoint(breakpoint);
+    }
+
+    @Override
+    public void unregisterBreakpoint(@NotNull XLineBreakpoint<RobotLineBreakpointProperties> breakpoint, boolean temporary) {
+        debugProcess.unregisterBreakpoint(breakpoint);
+    }
+}

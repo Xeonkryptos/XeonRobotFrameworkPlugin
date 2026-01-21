@@ -4,6 +4,170 @@
 
 ## Unreleased
 
+### Added
+
+- Update gutter icon based on robot execution results
+- Mark failed keyword calls in editor like for other failed tests in any test framework
+- Added a new inspection to detect arguments that looks like they should be variables instead (currently only global standard variable) and provide a quickfix
+  to change them
+- Added custom CharFilter to allow for spaces being typed while code completion is opened without closing it
+- Added support for Builtin keywords of Robot Framework like Run Keyword If, Run Keywords, etc. Highlighting the parameters as keywords or python expressions
+  accordingly. Additionally, providing code completion for those parameters
+- Added new inspection to convert deprecated keyword calls into native Robot syntax (i.e. `Run Keyword If` into if statement)
+- Added new inspection to detect duplicated parameter definitions in the same keyword call
+
+### Changed
+
+- Optimized lexer and parser
+    - added/enhanced support for inline if statements
+    - added support for inline if statements with variable assignment
+    - handle if conditions as python expressions (mark them as such with new syntax highlighting)
+    - general optimizations to improve lexing performance
+- Optimized lookup of imported files by filtering for concrete import types and resolve only those
+- Cache Robot Framework's builtin python class instead of looking it up every time
+- Provide custom Robot keyword names in code completion as they are defined without removing underscores with spaces
+- Allow dots in keyword names as part of the name. According to that, changed the resolving of keywords with a potential library name by checking for
+  the longest matching name first
+- Changed the deprecation check into an inspection to be able to suppress it with comment suppression
+- Changed folding logic to keep important editor elements visible when folding multi-line statements
+- Optimized code completion for reserved keywords to provide a more context-sensitive list of suggestions
+
+### Fixed
+
+- Fixed issues with selecting single test cases to execute them but not providing the option to do so rather failing with an exception, not providing the run
+  option
+- Fixed detection of continuation marker within lexing
+- Fixed issues with test cases/tasks having a DOT in their name
+- Fixed code completion issue with prefixed / or * keyword calls when code completion suggestion differs from defined keyword even though the defined keyword
+  represents a resolvable name
+- Do not complain about misplaced normal arguments after a detected parameter but highlighted as normal argument
+- Extended multiline handling to every other element not yet supported like for loops
+- Fixed issue leading to deprecation marking not shown to keyword calls referencing a python function with deprecation prefix **\*DEPRECATED** in documentation
+- Detection of continuations with empty line
+- Fixed variable lookup with variables names containing non-latin but still word characters (characters with diacritics or Greek, Japanese, Cyrillic characters, etc.)
+- Stabilized process start/cancel workflows to execute tests/tasks
+
+## 0.5.16
+
+### Fixed
+
+- Fixed run configuration execution issues with an empty set working directory
+
+## 0.5.15
+
+### Added
+
+- Added robot feature files into Goto class name lookup
+
+### Changed
+
+- Improved detection for cases multiline should be applied
+- Use test case scope for Set Variable keyword
+
+### Fixed
+
+- Respect the working directory provided in run configuration to define relative path for the robot execution
+- Extended support multiline handling
+- Fixed unsafe index access leading to broken indices
+
+## 0.5.14
+
+### Fixed
+
+- Fixed resolving issues especially for available keyword parameters
+
+### Changed
+
+- Handling with virtual files to get the expected results
+
+## 0.5.13
+
+### Fixed
+
+- Fixed NullPointerException when looking for importable files
+- Fixed evaluation for unresolvable variable. Don't mark resolved variables as unresolved when a target could be found in python files
+
+## 0.5.12
+
+### Added
+
+- Added checks for run configuration's healthiness (does the provided test case / task still exist? can the directory / file be found?)
+- Added refactoring listener to handle renames of robot files, directories and test cases / tasks to update run configurations accordingly
+
+### Fixed
+
+- Run configuration handling on making changes. Any changes made in the run configuration aren't safed directly; they are temporary until applied
+- Fixed reassigned variable highlighting
+
+### Changed
+
+- Changed import behaviour for imported files. Now, imported files are looked up the same way Robot does it internally:
+    - an absolute path is used directly
+    - a relative path is first looked up relative to the current file's location
+    - if not found, the imported file is looked up relative to the content root of the module search paths. In case of a library or variables import, the lookup
+      looks also for classes and modules
+- Use index lookup for finding referenced variable definitions in the same file to speed up the process
+- Use index lookup for finding referenced variable definitions in imported python modules and classes to speed up the process
+
+## 0.5.11
+
+### Fixed
+
+- Fixed incorrect detection of comments when somewhere within the file with robot entries before them and at the beginning of a line
+
+## 0.5.10
+
+### Fixed
+
+- Fixed construction of command line argument to run entries from run configuration with custom python script arguments
+- Fixed issues with keyword names containing special characters in non tests-only mode
+- Fixed issue not allowing the run configuration to run in python console
+- Fixed comment detection
+- Show keywords as unknown keywords when an overridden python function in the same place exists
+- Fixed issue leading to a very slow robot code execution in debug mode
+
+### Changed
+
+- Changed highlighting of unknown keywords to differentiate them from other error reasons
+- Optimized code completion provisioning to reduce pop in of suggestions
+- Resolve imported resource files relative to the content root location only. Accordingly, provide code completion for resource files from content root only
+- Optimized management of running and executed robot suites and tests
+
+## 0.5.9
+
+### Changed
+
+- Run configuration dialog and settings to differentiate between test cases, tasks and directory executions
+
+### Fixed
+
+- Fixed re-run failed tests failing in tests-only mode
+
+## 0.5.8
+
+### Fixed
+
+- Issue with the debugger being unable to connect to the robot process breaking the complete process in the end
+
+## 0.5.7
+
+### Added
+
+- New action to create robot directories with `__init__.robot` file included
+- Mark directories with a `__init__.robot` file as a robot package in project explorer
+- New inspections for duplicated sections
+- New inspection for task and test case section defined in the same robot file
+
+### Changed
+
+- Handle variable rename depending on the name match (rename only the basename or the entire variable name)
+- Added a new index to find robot keywords defined in robot files and python files to speed up keyword lookup
+
+### Fixed
+
+- Fixed global setting elements shown as `Unknown` in structural view
+- Fixed radically changed highlighting for reassigned variables
+
 ## 0.5.6
 
 ### Added

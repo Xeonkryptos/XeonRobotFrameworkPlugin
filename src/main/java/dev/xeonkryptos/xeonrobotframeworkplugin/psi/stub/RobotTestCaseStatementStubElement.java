@@ -1,6 +1,5 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub;
 
-import com.intellij.lang.ASTNode;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.stubs.IStubElementType;
 import com.intellij.psi.stubs.IndexSink;
@@ -35,11 +34,6 @@ public class RobotTestCaseStatementStubElement extends IStubElementType<RobotTes
     @Override
     public RobotTestCaseStatementStub createStub(@NotNull RobotTestCaseStatement psi, StubElement<? extends PsiElement> parentStub) {
         return new RobotTestCaseStatementStubImpl(parentStub, psi.getName());
-    }
-
-    @Override
-    public boolean shouldCreateStub(ASTNode node) {
-        return node.getPsi() instanceof RobotTestCaseStatement;
     }
 
     @NotNull

@@ -1,6 +1,6 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.psi;
 
-import dev.xeonkryptos.xeonrobotframeworkplugin.ide.icons.RobotIcons;
+import dev.xeonkryptos.xeonrobotframeworkplugin.icons.RobotIcons;
 import com.intellij.openapi.fileTypes.LanguageFileType;
 import javax.swing.Icon;
 import org.jetbrains.annotations.NotNull;

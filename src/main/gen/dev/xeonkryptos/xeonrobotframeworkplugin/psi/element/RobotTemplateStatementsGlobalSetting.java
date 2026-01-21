@@ -5,9 +5,9 @@ import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 
-public interface RobotTemplateStatementsGlobalSetting extends RobotGlobalSettingStatement {
+public interface RobotTemplateStatementsGlobalSetting extends RobotGlobalSettingStatement, GlobalSettingStatementExpression {
 
-  @NotNull
+  @Nullable
   RobotKeywordCall getKeywordCall();
 
   @NotNull

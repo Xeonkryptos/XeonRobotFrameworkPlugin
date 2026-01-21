@@ -1,6 +1,5 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub;
 
-import com.intellij.lang.ASTNode;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.stubs.IStubElementType;
 import com.intellij.psi.stubs.IndexSink;
@@ -11,6 +10,7 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotLanguage;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotUserKeywordStatement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotUserKeywordStatementImpl;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.index.KeywordDefinitionNameIndex;
+import dev.xeonkryptos.xeonrobotframeworkplugin.util.KeywordUtil;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
 
@@ -37,11 +37,6 @@ public class RobotUserKeywordStubElement extends IStubElementType<RobotUserKeywo
         return new RobotUserKeywordStubImpl(parentStub, psi.getName());
     }
 
-    @Override
-    public boolean shouldCreateStub(ASTNode node) {
-        return node.getPsi() instanceof RobotUserKeywordStatement;
-    }
-
     @NotNull
     @Override
     public String getExternalId() {
@@ -62,8 +57,7 @@ public class RobotUserKeywordStubElement extends IStubElementType<RobotUserKeywo
     @Override
     public void indexStub(@NotNull RobotUserKeywordStub stub, @NotNull IndexSink sink) {
         String name = stub.getName();
-        sink.occurrence(KeywordDefinitionNameIndex.KEY, name.toLowerCase());
-        sink.occurrence(KeywordDefinitionNameIndex.KEY, name);
-        sink.occurrence(KeywordDefinitionNameIndex.KEY, name.toLowerCase().replaceAll("[_\\s]", ""));
+        String normalizeKeywordName = KeywordUtil.normalizeKeywordName(name);
+        sink.occurrence(KeywordDefinitionNameIndex.KEY, normalizeKeywordName);
     }
 }

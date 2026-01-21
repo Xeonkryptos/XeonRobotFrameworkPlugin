@@ -1,6 +1,5 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub;
 
-import com.intellij.lang.ASTNode;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.stubs.IStubElementType;
 import com.intellij.psi.stubs.IndexSink;
@@ -13,6 +12,7 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCallLibr
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCallName;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotKeywordCallImpl;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.index.KeywordCallNameIndex;
+import dev.xeonkryptos.xeonrobotframeworkplugin.util.KeywordUtil;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
 
@@ -38,14 +38,9 @@ public class RobotKeywordCallStubElement extends IStubElementType<RobotKeywordCa
     public RobotKeywordCallStub createStub(@NotNull RobotKeywordCall psi, StubElement<? extends PsiElement> parentStub) {
         RobotKeywordCallName keywordCallName = psi.getKeywordCallName();
         RobotKeywordCallLibrary keywordCallLibrary = keywordCallName.getKeywordCallLibrary();
-        String libraryName = keywordCallLibrary != null ? keywordCallLibrary.getText() : null;
+        String libraryName = keywordCallLibrary != null ? keywordCallLibrary.getKeywordCallLibraryName().getText() : null;
         String fullKeywordName = psi.getName();
         return new RobotKeywordCallStubImpl(parentStub, libraryName, fullKeywordName);
-    }
-
-    @Override
-    public boolean shouldCreateStub(ASTNode node) {
-        return node.getPsi() instanceof RobotKeywordCall;
     }
 
     @NotNull
@@ -75,11 +70,12 @@ public class RobotKeywordCallStubElement extends IStubElementType<RobotKeywordCa
     public void indexStub(@NotNull RobotKeywordCallStub stub, @NotNull IndexSink sink) {
         String libraryName = stub.getLibraryName();
         String keywordName = stub.getName();
+        keywordName = KeywordUtil.normalizeKeywordName(keywordName);
+        sink.occurrence(KeywordCallNameIndex.KEY, keywordName);
+
         if (libraryName != null) {
             keywordName = keywordName.substring(libraryName.length() + 1);
+            sink.occurrence(KeywordCallNameIndex.KEY, keywordName);
         }
-        sink.occurrence(KeywordCallNameIndex.KEY, keywordName);
-        sink.occurrence(KeywordCallNameIndex.KEY, keywordName.toLowerCase());
-        sink.occurrence(KeywordCallNameIndex.KEY, keywordName.toLowerCase().replaceAll("[_\\s]", ""));
     }
 }

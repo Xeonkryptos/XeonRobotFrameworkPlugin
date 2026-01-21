@@ -11,7 +11,7 @@ import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.*;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.*;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotPsiImplUtil;
 
-public class RobotForLoopStructureImpl extends RobotExecutableStatementImpl implements RobotForLoopStructure {
+public class RobotForLoopStructureImpl extends RobotForLoopStructureExtension implements RobotForLoopStructure {
 
   public RobotForLoopStructureImpl(@NotNull ASTNode node) {
     super(node);
@@ -30,14 +30,8 @@ public class RobotForLoopStructureImpl extends RobotExecutableStatementImpl impl
 
   @Override
   @NotNull
-  public List<RobotParameter> getParameterList() {
-    return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotParameter.class);
-  }
-
-  @Override
-  @NotNull
-  public List<RobotVariableDefinition> getVariableDefinitionList() {
-    return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotVariableDefinition.class);
+  public RobotForLoopHeader getForLoopHeader() {
+    return notNullChild(PsiTreeUtil.getChildOfType(this, RobotForLoopHeader.class));
   }
 
 }

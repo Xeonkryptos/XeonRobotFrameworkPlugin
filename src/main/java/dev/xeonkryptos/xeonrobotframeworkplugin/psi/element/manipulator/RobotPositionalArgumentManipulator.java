@@ -12,13 +12,11 @@ public class RobotPositionalArgumentManipulator extends AbstractElementManipulat
 
     @Nullable
     @Override
-    public RobotPositionalArgument handleContentChange(@NotNull RobotPositionalArgument positionalArgument, @NotNull TextRange textRange, String newText) throws
-                                                                                                                                                          IncorrectOperationException {
+    public RobotPositionalArgument handleContentChange(@NotNull RobotPositionalArgument positionalArgument, @NotNull TextRange textRange, String newText) throws IncorrectOperationException {
         String original = positionalArgument.getText();
         String newContent = textRange.replace(original, newText);
 
-        RobotPositionalArgument newPositionalArgument = RobotElementGenerator.getInstance(positionalArgument.getProject())
-                                                                             .createNewPositionalArgument(newContent);
+        RobotPositionalArgument newPositionalArgument = RobotElementGenerator.getInstance(positionalArgument.getProject()).createNewPositionalArgument(newContent);
         if (newPositionalArgument == null) {
             return null;
         }

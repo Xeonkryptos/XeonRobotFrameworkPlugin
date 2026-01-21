@@ -1,0 +1,27 @@
+<html lang="en">
+    <body>
+        Reports keyword calls that reference deprecated keywords or library functions.
+        <p>
+            This inspection detects when a keyword call in Robot Framework references a keyword
+            that has been marked as deprecated. Deprecated keywords are typically outdated and
+            may be removed in future versions of the library or framework.
+        </p>
+        <p>
+            Using deprecated keywords can lead to compatibility issues when upgrading libraries
+            or the Robot Framework itself. It is recommended to replace deprecated keyword calls
+            with their suggested alternatives.
+        </p>
+        <p>Example of a deprecated keyword call:</p>
+        <pre><code>
+*** Test Cases ***
+Example Test
+    Deprecated Keyword    argument1    argument2
+</code></pre>
+        <!-- tooltip end -->
+        <p>
+            The inspection checks keyword calls against their resolved references and highlights
+            those that are marked with deprecation annotations or decorators (e.g., @deprecated
+            in Python libraries).
+        </p>
+    </body>
+</html>

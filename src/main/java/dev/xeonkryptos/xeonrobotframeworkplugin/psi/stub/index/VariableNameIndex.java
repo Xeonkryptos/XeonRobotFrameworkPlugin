@@ -40,6 +40,6 @@ public class VariableNameIndex extends StringStubIndexExtension<RobotVariable> {
 
     @Override
     public int getVersion() {
-        return RobotStubFileElementType.STUB_FILE_VERSION + super.getVersion() + 2;
+        return RobotStubFileElementType.STUB_FILE_VERSION + super.getVersion() + 3;
     }
 }

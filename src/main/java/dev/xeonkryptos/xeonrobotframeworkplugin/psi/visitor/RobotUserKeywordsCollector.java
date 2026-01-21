@@ -57,7 +57,7 @@ public final class RobotUserKeywordsCollector extends RobotVisitor {
     public void visitLocalSetting(@NotNull RobotLocalSetting o) {
         super.visitLocalSetting(o);
 
-        if ("[Tags]".equalsIgnoreCase(o.getSettingName())) {
+        if ("Tags".equalsIgnoreCase(o.getSettingName())) {
             lookingForPrivateMarker = true;
             o.acceptChildren(this);
             lookingForPrivateMarker = false;

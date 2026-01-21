@@ -45,8 +45,9 @@ public class RobotDictVariableStubElement extends IStubElementType<RobotDictVari
 
     @Override
     public boolean shouldCreateStub(ASTNode node) {
-        return node.getPsi() instanceof RobotDictVariable variable && variable.getVariableName() != null
-               && !(variable.getParent() instanceof RobotVariableDefinition);
+        RobotDictVariable dictVariable = node.getPsi(RobotDictVariable.class);
+        String variableName = dictVariable.getVariableName();
+        return variableName != null && !variableName.isBlank() && !(dictVariable.getParent() instanceof RobotVariableDefinition);
     }
 
     @NotNull

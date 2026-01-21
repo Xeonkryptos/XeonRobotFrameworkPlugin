@@ -1,10 +1,11 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.util
 
+import com.intellij.openapi.util.TextRange
 import java.util.regex.Pattern
 
 object VariableNameUtil {
 
-    private val VARIABLE_BASENAME_PATTERN: Pattern = "([\\p{Alnum}_\\s]+)".toPattern()
+    private val VARIABLE_BASENAME_PATTERN: Pattern = "([\\p{L}\\p{N}_\\s]+)".toPattern()
 
     fun matchesVariableName(variableName: String?, variableNameToMatchVariants: Set<String>): Boolean {
         if (variableName == null) {
@@ -35,6 +36,16 @@ object VariableNameUtil {
             matcher.group().trim()
         } else {
             variableName.trim()
+        }
+    }
+
+    fun computeBaseVariableNameTextRange(variableName: String): TextRange {
+        val matcher = VARIABLE_BASENAME_PATTERN.matcher(variableName)
+        return if (matcher.find()) {
+            val baseNameLength = matcher.group().trim().length
+            TextRange(0, baseNameLength)
+        } else {
+            TextRange.create(0, variableName.trim().length)
         }
     }
 }

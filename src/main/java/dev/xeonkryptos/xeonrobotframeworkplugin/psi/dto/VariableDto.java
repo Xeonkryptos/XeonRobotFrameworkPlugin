@@ -7,6 +7,7 @@ import com.intellij.openapi.util.TextRange;
 import com.intellij.psi.PsiElement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.DefinedVariable;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.VariableScope;
+import dev.xeonkryptos.xeonrobotframeworkplugin.util.RobotNames;
 import dev.xeonkryptos.xeonrobotframeworkplugin.util.VariableNameUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -28,11 +29,21 @@ public class VariableDto implements DefinedVariable {
 
     public VariableDto(@NotNull PsiElement reference, @NotNull String name, @NotNull String matchingVariableName, @Nullable VariableScope scope) {
         this.reference = reference;
-        this.name = name.trim();
+        this.name = normalizeName(name.trim());
         this.matchingVariableName = matchingVariableName.trim();
         this.scope = scope;
 
         this.variableNameVariants = VariableNameUtil.INSTANCE.computeVariableNameVariants(this.matchingVariableName);
+    }
+
+    private static String normalizeName(String name) {
+        if (name.startsWith(RobotNames.LIST_VARIABLE_TYPE_INDICATOR_PREFIX) || name.startsWith(RobotNames.DICT_VARIABLE_TYPE_INDICATOR_PREFIX)) {
+            int index = name.indexOf("__", 2);
+            if (index != -1 && index + 2 < name.length()) {
+                return name.substring(index + 2);
+            }
+        }
+        return name;
     }
 
     @Override

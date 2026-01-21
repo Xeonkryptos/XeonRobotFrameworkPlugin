@@ -11,7 +11,7 @@ import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.*;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.*;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotPsiImplUtil;
 
-public class RobotTryStructureImpl extends RobotExecutableStatementImpl implements RobotTryStructure {
+public class RobotTryStructureImpl extends RobotTryStructureExtension implements RobotTryStructure {
 
   public RobotTryStructureImpl(@NotNull ASTNode node) {
     super(node);
@@ -26,12 +26,6 @@ public class RobotTryStructureImpl extends RobotExecutableStatementImpl implemen
   public void accept(@NotNull PsiElementVisitor visitor) {
     if (visitor instanceof RobotVisitor) accept((RobotVisitor)visitor);
     else super.accept(visitor);
-  }
-
-  @Override
-  @NotNull
-  public List<RobotExecutableStatement> getExecutableStatementList() {
-    return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotExecutableStatement.class);
   }
 
 }

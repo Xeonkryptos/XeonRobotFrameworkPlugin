@@ -1,6 +1,6 @@
 import org.jetbrains.changelog.Changelog
 import org.jetbrains.changelog.markdownToHTML
-import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
+import org.jetbrains.intellij.platform.gradle.TestFrameworkType
 import org.jetbrains.intellij.platform.gradle.models.ProductRelease
 import org.jetbrains.intellij.platform.gradle.tasks.PrepareSandboxTask
 
@@ -10,11 +10,11 @@ plugins {
     // Java support
     id("java")
     // gradle-intellij-plugin - read more: https://github.com/JetBrains/gradle-intellij-plugin
-    id("org.jetbrains.intellij.platform") version "2.5.0"
+    id("org.jetbrains.intellij.platform") version "2.10.5"
     // gradle-changelog-plugin - read more: https://github.com/JetBrains/gradle-changelog-plugin
-    id("org.jetbrains.changelog") version "2.2.1"
+    id("org.jetbrains.changelog") version "2.5.0"
 
-    kotlin("jvm") version "2.1.10"
+    kotlin("jvm") version "2.0.21"
 }
 
 group = properties("pluginGroup")
@@ -44,10 +44,18 @@ repositories {
 
 dependencies {
     implementation("org.eclipse.lsp4j:org.eclipse.lsp4j.debug:0.24.0")
-    implementation("org.apache.commons:commons-text:1.14.0")
+    implementation("org.apache.commons:commons-text:1.15.0")
+
+    testImplementation(platform("org.junit:junit-bom:5.14.1"))
+    testImplementation("org.junit.jupiter:junit-jupiter")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+
+    testRuntimeOnly("junit:junit:4.13.2")
 
     intellijPlatform {
         val platformVersion = properties("platformVersion")
+
+        testFramework(TestFrameworkType.JUnit5)
 
         pycharmCommunity(platformVersion)
         jetbrainsRuntime()
@@ -63,7 +71,7 @@ dependencies {
 // Read more: https://github.com/JetBrains/gradle-changelog-plugin
 changelog {
     version = properties("pluginVersion")
-    groups.set(listOf("Added", "Changed", "Deprecated", "Removed", "Fixed", "Security"))
+    groups.set(listOf("Added", "Changed", "Fixed"))
     path.set(file("CHANGELOG.md").canonicalPath)
     itemPrefix.set("-")
     lineSeparator.set("\n")
@@ -108,7 +116,6 @@ intellijPlatform {
         ides {
             recommended()
             select {
-                types = listOf(IntelliJPlatformType.PyCharmCommunity, IntelliJPlatformType.IntellijIdeaUltimate)
                 channels = listOf(ProductRelease.Channel.EAP, ProductRelease.Channel.RELEASE)
                 sinceBuild = properties("pluginSinceBuild")
                 untilBuild = properties("pluginUntilBuild")
@@ -122,6 +129,8 @@ tasks {
     withType<JavaCompile> {
         sourceCompatibility = "21"
         targetCompatibility = "21"
+        options.compilerArgs = listOf("-Xlint:unchecked")
+        options.isDeprecation = true
     }
 
     withType<PrepareSandboxTask> {
@@ -137,8 +146,12 @@ tasks {
     patchPluginXml {
         changeNotes.set(provider {
             changelog.renderItem(
-                changelog.getLatest().withHeader(true).withEmptySections(false), Changelog.OutputType.HTML
+                changelog.getLatest().withHeader(false).withEmptySections(false), Changelog.OutputType.HTML
             )
         })
+    }
+
+    test {
+        useJUnitPlatform()
     }
 }

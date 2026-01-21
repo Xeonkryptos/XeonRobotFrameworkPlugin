@@ -1,6 +1,5 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.psi.dto;
 
-import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiElement;
 import com.jetbrains.python.psi.PyBoolLiteralExpression;
 import com.jetbrains.python.psi.PyElementVisitor;
@@ -12,7 +11,6 @@ import com.jetbrains.python.psi.PyStringLiteralExpression;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.DefinedKeyword;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.DefinedParameter;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.DefinedVariable;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.KeywordUtil;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.ReservedVariable;
 import dev.xeonkryptos.xeonrobotframeworkplugin.util.DeprecationInspector;
 import org.jetbrains.annotations.NotNull;
@@ -38,10 +36,6 @@ public class KeywordDto implements DefinedKeyword {
     private final boolean deprecated;
     private final boolean markedAsPrivate;
 
-    public KeywordDto(@NotNull PsiElement reference, @Nullable String libraryName, @NotNull String name) {
-        this(reference, libraryName, name, null, false);
-    }
-
     public KeywordDto(@NotNull PsiElement reference, @Nullable String libraryName, @NotNull String name, Collection<PyParameter> parameters) {
         this(reference, libraryName, name, convertPyParameters(parameters), false);
     }
@@ -50,13 +44,11 @@ public class KeywordDto implements DefinedKeyword {
                       @Nullable String libraryName,
                       @NotNull String name,
                       Collection<DefinedParameter> parameters,
-                      boolean markedAsPrivate,
-                      Object... ignored) { // Object... ignored is just a trick to avoid constructor clashing
+                      boolean markedAsPrivate) {
         this.reference = reference;
         this.libraryName = libraryName;
-        Project project = reference.getProject();
-        this.name = KeywordUtil.getInstance(project).functionToKeyword(name).trim();
-        this.reducedKeywordName = name.toLowerCase().replaceAll("[_\\s]", "");
+        this.name = name.trim();
+        this.reducedKeywordName = this.name.toLowerCase().replaceAll("[_\\s]", "");
         this.args = parameters != null && !parameters.isEmpty();
         this.parameters = parameters;
         this.deprecated = DeprecationInspector.isDeprecated(reference);

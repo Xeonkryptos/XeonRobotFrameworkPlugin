@@ -4,7 +4,7 @@
 name: Release
 on:
   release:
-    types: [prereleased, released]
+    types: [ prereleased, released ]
 
 jobs:
 
@@ -49,12 +49,13 @@ jobs:
           echo "$CHANGELOG" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
 
-      - name: Download RobotCode Debugger
-        shell: bash
-        run: |
-          mkdir -p bundled/libs
-          pip install --upgrade -t bundled/libs robotcode[debugger]
-          rm -rf bundled/libs/robot && rm -rf bundled/libs/robotframework*
+      # RobotCode Debugger is patched to retrieve events for started keywords. Until it isn't in RobotCode Debugger, there is no point in downloading it here.
+      #      - name: Download RobotCode Debugger
+      #        shell: bash
+      #        run: |
+      #          mkdir -p bundled/libs
+      #          pip install --upgrade -t bundled/libs robotcode[debugger]==2.0.1
+      #          rm -rf bundled/libs/robot && rm -rf bundled/libs/robotframework* && rm -rf bundled/libs/bin
 
       # Publish the plugin to the Marketplace
       - name: Publish Plugin

@@ -5,9 +5,9 @@ import com.intellij.psi.tree.IElementType;
 import com.intellij.psi.PsiElement;
 import com.intellij.lang.ASTNode;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotDictVariableStubElement;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotImportArgumentStubElement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotKeywordCallStubElement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotListVariableStubElement;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotPositionalArgumentStubElement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotScalarVariableStubElement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotTaskStatementStubElement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotTestCaseStatementStubElement;
@@ -19,23 +19,34 @@ public interface RobotTypes {
 
   IElementType BDD_STATEMENT = new RobotElementType("BDD_STATEMENT");
   IElementType COMMENTS_SECTION = new RobotElementType("COMMENTS_SECTION");
+  IElementType CONDITIONAL_CONTENT = new RobotElementType("CONDITIONAL_CONTENT");
+  IElementType CONDITIONAL_STRUCTURE = new RobotElementType("CONDITIONAL_STRUCTURE");
   IElementType DICT_VARIABLE = RobotDictVariableStubElement.create("DICT_VARIABLE");
   IElementType DOCUMENTATION_STATEMENT_GLOBAL_SETTING = new RobotElementType("DOCUMENTATION_STATEMENT_GLOBAL_SETTING");
   IElementType ELSE_IF_STRUCTURE = new RobotElementType("ELSE_IF_STRUCTURE");
+  IElementType ELSE_STRUCTURE = new RobotElementType("ELSE_STRUCTURE");
   IElementType EMPTY_VARIABLE_STATEMENT = new RobotElementType("EMPTY_VARIABLE_STATEMENT");
   IElementType ENVIRONMENT_VARIABLE = new RobotElementType("ENVIRONMENT_VARIABLE");
+  IElementType EXCEPTION_HANDLING_STRUCTURE = new RobotElementType("EXCEPTION_HANDLING_STRUCTURE");
+  IElementType EXCEPT_HEADER = new RobotElementType("EXCEPT_HEADER");
   IElementType EXCEPT_STRUCTURE = new RobotElementType("EXCEPT_STRUCTURE");
   IElementType EXECUTABLE_STATEMENT = new RobotElementType("EXECUTABLE_STATEMENT");
-  IElementType EXTENDED_VARIABLE_INDEX_ACCESS = new RobotElementType("EXTENDED_VARIABLE_INDEX_ACCESS");
-  IElementType EXTENDED_VARIABLE_KEY_ACCESS = new RobotElementType("EXTENDED_VARIABLE_KEY_ACCESS");
-  IElementType EXTENDED_VARIABLE_NESTED_ACCESS = new RobotElementType("EXTENDED_VARIABLE_NESTED_ACCESS");
-  IElementType EXTENDED_VARIABLE_SLICE_ACCESS = new RobotElementType("EXTENDED_VARIABLE_SLICE_ACCESS");
   IElementType FINALLY_STRUCTURE = new RobotElementType("FINALLY_STRUCTURE");
+  IElementType FOR_LOOP_HEADER = new RobotElementType("FOR_LOOP_HEADER");
   IElementType FOR_LOOP_STRUCTURE = new RobotElementType("FOR_LOOP_STRUCTURE");
+  IElementType FOR_LOOP_STRUCTURE_FILL_PARAMETER = new RobotElementType("FOR_LOOP_STRUCTURE_FILL_PARAMETER");
+  IElementType FOR_LOOP_STRUCTURE_MODE_PARAMETER = new RobotElementType("FOR_LOOP_STRUCTURE_MODE_PARAMETER");
+  IElementType FOR_LOOP_STRUCTURE_PARAMETER = new RobotElementType("FOR_LOOP_STRUCTURE_PARAMETER");
+  IElementType FOR_LOOP_STRUCTURE_START_PARAMETER = new RobotElementType("FOR_LOOP_STRUCTURE_START_PARAMETER");
   IElementType GLOBAL_SETTING_STATEMENT = new RobotElementType("GLOBAL_SETTING_STATEMENT");
+  IElementType GROUP_HEADER = new RobotElementType("GROUP_HEADER");
   IElementType GROUP_STRUCTURE = new RobotElementType("GROUP_STRUCTURE");
-  IElementType IF_ELSE_STRUCTURE = new RobotElementType("IF_ELSE_STRUCTURE");
   IElementType IF_STRUCTURE = new RobotElementType("IF_STRUCTURE");
+  IElementType IF_VARIABLE_STATEMENT = new RobotElementType("IF_VARIABLE_STATEMENT");
+  IElementType IMPORT_ARGUMENT = RobotImportArgumentStubElement.create("IMPORT_ARGUMENT");
+  IElementType INLINE_ELSE_IF_STRUCTURE = new RobotElementType("INLINE_ELSE_IF_STRUCTURE");
+  IElementType INLINE_ELSE_STRUCTURE = new RobotElementType("INLINE_ELSE_STRUCTURE");
+  IElementType INLINE_IF_STRUCTURE = new RobotElementType("INLINE_IF_STRUCTURE");
   IElementType INLINE_VARIABLE_STATEMENT = new RobotElementType("INLINE_VARIABLE_STATEMENT");
   IElementType KEYWORDS_SECTION = new RobotElementType("KEYWORDS_SECTION");
   IElementType KEYWORD_CALL = RobotKeywordCallStubElement.create("KEYWORD_CALL");
@@ -43,8 +54,6 @@ public interface RobotTypes {
   IElementType KEYWORD_CALL_LIBRARY_NAME = new RobotElementType("KEYWORD_CALL_LIBRARY_NAME");
   IElementType KEYWORD_CALL_NAME = new RobotElementType("KEYWORD_CALL_NAME");
   IElementType KEYWORD_VARIABLE_STATEMENT = new RobotElementType("KEYWORD_VARIABLE_STATEMENT");
-  IElementType LANGUAGE = new RobotElementType("LANGUAGE");
-  IElementType LANGUAGE_ID = new RobotElementType("LANGUAGE_ID");
   IElementType LIBRARY_IMPORT_GLOBAL_SETTING = new RobotElementType("LIBRARY_IMPORT_GLOBAL_SETTING");
   IElementType LIST_VARIABLE = RobotListVariableStubElement.create("LIST_VARIABLE");
   IElementType LITERAL_CONSTANT_VALUE = new RobotElementType("LITERAL_CONSTANT_VALUE");
@@ -55,14 +64,16 @@ public interface RobotTypes {
   IElementType LOCAL_ARGUMENTS_SETTING_PARAMETER_OPTIONAL = new RobotElementType("LOCAL_ARGUMENTS_SETTING_PARAMETER_OPTIONAL");
   IElementType LOCAL_SETTING = new RobotElementType("LOCAL_SETTING");
   IElementType LOCAL_SETTING_ID = new RobotElementType("LOCAL_SETTING_ID");
+  IElementType LOOP_CONTROL_STRUCTURE = new RobotElementType("LOOP_CONTROL_STRUCTURE");
   IElementType METADATA_STATEMENT_GLOBAL_SETTING = new RobotElementType("METADATA_STATEMENT_GLOBAL_SETTING");
   IElementType NEW_LIBRARY_NAME = new RobotElementType("NEW_LIBRARY_NAME");
   IElementType PARAMETER = new RobotElementType("PARAMETER");
   IElementType PARAMETER_ID = new RobotElementType("PARAMETER_ID");
-  IElementType POSITIONAL_ARGUMENT = RobotPositionalArgumentStubElement.create("POSITIONAL_ARGUMENT");
+  IElementType POSITIONAL_ARGUMENT = new RobotElementType("POSITIONAL_ARGUMENT");
   IElementType PYTHON_EXPRESSION = new RobotElementType("PYTHON_EXPRESSION");
   IElementType PYTHON_EXPRESSION_BODY = new RobotElementType("PYTHON_EXPRESSION_BODY");
   IElementType RESOURCE_IMPORT_GLOBAL_SETTING = new RobotElementType("RESOURCE_IMPORT_GLOBAL_SETTING");
+  IElementType RETURN_STRUCTURE = new RobotElementType("RETURN_STRUCTURE");
   IElementType ROOT = new RobotElementType("ROOT");
   IElementType SCALAR_VARIABLE = RobotScalarVariableStubElement.create("SCALAR_VARIABLE");
   IElementType SECTION = new RobotElementType("SECTION");
@@ -83,7 +94,6 @@ public interface RobotTypes {
   IElementType TEST_CASE_ID = new RobotElementType("TEST_CASE_ID");
   IElementType TEST_CASE_STATEMENT = RobotTestCaseStatementStubElement.create("TEST_CASE_STATEMENT");
   IElementType TIMEOUT_STATEMENTS_GLOBAL_SETTING = new RobotElementType("TIMEOUT_STATEMENTS_GLOBAL_SETTING");
-  IElementType TRY_ELSE_STRUCTURE = new RobotElementType("TRY_ELSE_STRUCTURE");
   IElementType TRY_STRUCTURE = new RobotElementType("TRY_STRUCTURE");
   IElementType UNKNOWN_SETTING_STATEMENTS_GLOBAL_SETTING = new RobotElementType("UNKNOWN_SETTING_STATEMENTS_GLOBAL_SETTING");
   IElementType USER_KEYWORD_STATEMENT = RobotUserKeywordStubElement.create("USER_KEYWORD_STATEMENT");
@@ -94,11 +104,14 @@ public interface RobotTypes {
   IElementType VARIABLE_BODY_ID = new RobotElementType("VARIABLE_BODY_ID");
   IElementType VARIABLE_CONTENT = new RobotElementType("VARIABLE_CONTENT");
   IElementType VARIABLE_DEFINITION = RobotVariableDefinitionStubElement.create("VARIABLE_DEFINITION");
+  IElementType VARIABLE_INDEX_ACCESS_CONTENT = new RobotElementType("VARIABLE_INDEX_ACCESS_CONTENT");
+  IElementType VARIABLE_NESTED_ACCESS_CONTENT = new RobotElementType("VARIABLE_NESTED_ACCESS_CONTENT");
+  IElementType VARIABLE_SLICE_ACCESS_CONTENT = new RobotElementType("VARIABLE_SLICE_ACCESS_CONTENT");
   IElementType VARIABLE_VALUE = new RobotElementType("VARIABLE_VALUE");
+  IElementType WHILE_LOOP_HEADER = new RobotElementType("WHILE_LOOP_HEADER");
   IElementType WHILE_LOOP_STRUCTURE = new RobotElementType("WHILE_LOOP_STRUCTURE");
 
   IElementType AND = new RobotTokenType("AND");
-  IElementType ARGUMENTS_SETTING_NAME = new RobotTokenType("ARGUMENTS_SETTING_NAME");
   IElementType ASSIGNMENT = new RobotTokenType("ASSIGNMENT");
   IElementType BREAK = new RobotTokenType("BREAK");
   IElementType BUT = new RobotTokenType("BUT");
@@ -112,6 +125,7 @@ public interface RobotTypes {
   IElementType END = new RobotTokenType("END");
   IElementType ENV_VARIABLE_START = new RobotTokenType("ENV_VARIABLE_START");
   IElementType EOL = new RobotTokenType("EOL");
+  IElementType EOS = new RobotTokenType("EOS");
   IElementType EXCEPT = new RobotTokenType("EXCEPT");
   IElementType FINALLY = new RobotTokenType("FINALLY");
   IElementType FOR = new RobotTokenType("FOR");
@@ -122,12 +136,12 @@ public interface RobotTypes {
   IElementType KEYWORD_LIBRARY_NAME = new RobotTokenType("KEYWORD_LIBRARY_NAME");
   IElementType KEYWORD_LIBRARY_SEPARATOR = new RobotTokenType("KEYWORD_LIBRARY_SEPARATOR");
   IElementType KEYWORD_NAME = new RobotTokenType("KEYWORD_NAME");
-  IElementType LANGUAGE_KEYWORD = new RobotTokenType("LANGUAGE_KEYWORD");
-  IElementType LANGUAGE_NAME = new RobotTokenType("LANGUAGE_NAME");
   IElementType LIBRARY_IMPORT_KEYWORD = new RobotTokenType("LIBRARY_IMPORT_KEYWORD");
   IElementType LIST_VARIABLE_START = new RobotTokenType("LIST_VARIABLE_START");
   IElementType LITERAL_CONSTANT = new RobotTokenType("LITERAL_CONSTANT");
+  IElementType LOCAL_SETTING_END = new RobotTokenType("LOCAL_SETTING_END");
   IElementType LOCAL_SETTING_NAME = new RobotTokenType("LOCAL_SETTING_NAME");
+  IElementType LOCAL_SETTING_START = new RobotTokenType("LOCAL_SETTING_START");
   IElementType METADATA_KEYWORD = new RobotTokenType("METADATA_KEYWORD");
   IElementType PARAMETER_NAME = new RobotTokenType("PARAMETER_NAME");
   IElementType PYTHON_EXPRESSION_CONTENT = new RobotTokenType("PYTHON_EXPRESSION_CONTENT");
@@ -161,7 +175,6 @@ public interface RobotTypes {
   IElementType VARIABLE_BODY = new RobotTokenType("VARIABLE_BODY");
   IElementType VARIABLE_END = new RobotTokenType("VARIABLE_END");
   IElementType VARIABLE_INDEX_ACCESS = new RobotTokenType("VARIABLE_INDEX_ACCESS");
-  IElementType VARIABLE_KEY_ACCESS = new RobotTokenType("VARIABLE_KEY_ACCESS");
   IElementType VARIABLE_SLICE_ACCESS = new RobotTokenType("VARIABLE_SLICE_ACCESS");
   IElementType WHEN = new RobotTokenType("WHEN");
   IElementType WHILE = new RobotTokenType("WHILE");
@@ -176,6 +189,12 @@ public interface RobotTypes {
       else if (type == COMMENTS_SECTION) {
         return new RobotCommentsSectionImpl(node);
       }
+      else if (type == CONDITIONAL_CONTENT) {
+        return new RobotConditionalContentImpl(node);
+      }
+      else if (type == CONDITIONAL_STRUCTURE) {
+        return new RobotConditionalStructureImpl(node);
+      }
       else if (type == DICT_VARIABLE) {
         return new RobotDictVariableImpl(node);
       }
@@ -185,11 +204,20 @@ public interface RobotTypes {
       else if (type == ELSE_IF_STRUCTURE) {
         return new RobotElseIfStructureImpl(node);
       }
+      else if (type == ELSE_STRUCTURE) {
+        return new RobotElseStructureImpl(node);
+      }
       else if (type == EMPTY_VARIABLE_STATEMENT) {
         return new RobotEmptyVariableStatementImpl(node);
       }
       else if (type == ENVIRONMENT_VARIABLE) {
         return new RobotEnvironmentVariableImpl(node);
+      }
+      else if (type == EXCEPTION_HANDLING_STRUCTURE) {
+        return new RobotExceptionHandlingStructureImpl(node);
+      }
+      else if (type == EXCEPT_HEADER) {
+        return new RobotExceptHeaderImpl(node);
       }
       else if (type == EXCEPT_STRUCTURE) {
         return new RobotExceptStructureImpl(node);
@@ -197,35 +225,53 @@ public interface RobotTypes {
       else if (type == EXECUTABLE_STATEMENT) {
         return new RobotExecutableStatementImpl(node);
       }
-      else if (type == EXTENDED_VARIABLE_INDEX_ACCESS) {
-        return new RobotExtendedVariableIndexAccessImpl(node);
-      }
-      else if (type == EXTENDED_VARIABLE_KEY_ACCESS) {
-        return new RobotExtendedVariableKeyAccessImpl(node);
-      }
-      else if (type == EXTENDED_VARIABLE_NESTED_ACCESS) {
-        return new RobotExtendedVariableNestedAccessImpl(node);
-      }
-      else if (type == EXTENDED_VARIABLE_SLICE_ACCESS) {
-        return new RobotExtendedVariableSliceAccessImpl(node);
-      }
       else if (type == FINALLY_STRUCTURE) {
         return new RobotFinallyStructureImpl(node);
+      }
+      else if (type == FOR_LOOP_HEADER) {
+        return new RobotForLoopHeaderImpl(node);
       }
       else if (type == FOR_LOOP_STRUCTURE) {
         return new RobotForLoopStructureImpl(node);
       }
+      else if (type == FOR_LOOP_STRUCTURE_FILL_PARAMETER) {
+        return new RobotForLoopStructureFillParameterImpl(node);
+      }
+      else if (type == FOR_LOOP_STRUCTURE_MODE_PARAMETER) {
+        return new RobotForLoopStructureModeParameterImpl(node);
+      }
+      else if (type == FOR_LOOP_STRUCTURE_PARAMETER) {
+        return new RobotForLoopStructureParameterImpl(node);
+      }
+      else if (type == FOR_LOOP_STRUCTURE_START_PARAMETER) {
+        return new RobotForLoopStructureStartParameterImpl(node);
+      }
       else if (type == GLOBAL_SETTING_STATEMENT) {
         return new RobotGlobalSettingStatementImpl(node);
+      }
+      else if (type == GROUP_HEADER) {
+        return new RobotGroupHeaderImpl(node);
       }
       else if (type == GROUP_STRUCTURE) {
         return new RobotGroupStructureImpl(node);
       }
-      else if (type == IF_ELSE_STRUCTURE) {
-        return new RobotIfElseStructureImpl(node);
-      }
       else if (type == IF_STRUCTURE) {
         return new RobotIfStructureImpl(node);
+      }
+      else if (type == IF_VARIABLE_STATEMENT) {
+        return new RobotIfVariableStatementImpl(node);
+      }
+      else if (type == IMPORT_ARGUMENT) {
+        return new RobotImportArgumentImpl(node);
+      }
+      else if (type == INLINE_ELSE_IF_STRUCTURE) {
+        return new RobotInlineElseIfStructureImpl(node);
+      }
+      else if (type == INLINE_ELSE_STRUCTURE) {
+        return new RobotInlineElseStructureImpl(node);
+      }
+      else if (type == INLINE_IF_STRUCTURE) {
+        return new RobotInlineIfStructureImpl(node);
       }
       else if (type == INLINE_VARIABLE_STATEMENT) {
         return new RobotInlineVariableStatementImpl(node);
@@ -247,12 +293,6 @@ public interface RobotTypes {
       }
       else if (type == KEYWORD_VARIABLE_STATEMENT) {
         return new RobotKeywordVariableStatementImpl(node);
-      }
-      else if (type == LANGUAGE) {
-        return new RobotLanguageImpl(node);
-      }
-      else if (type == LANGUAGE_ID) {
-        return new RobotLanguageIdImpl(node);
       }
       else if (type == LIBRARY_IMPORT_GLOBAL_SETTING) {
         return new RobotLibraryImportGlobalSettingImpl(node);
@@ -284,6 +324,9 @@ public interface RobotTypes {
       else if (type == LOCAL_SETTING_ID) {
         return new RobotLocalSettingIdImpl(node);
       }
+      else if (type == LOOP_CONTROL_STRUCTURE) {
+        return new RobotLoopControlStructureImpl(node);
+      }
       else if (type == METADATA_STATEMENT_GLOBAL_SETTING) {
         return new RobotMetadataStatementGlobalSettingImpl(node);
       }
@@ -307,6 +350,9 @@ public interface RobotTypes {
       }
       else if (type == RESOURCE_IMPORT_GLOBAL_SETTING) {
         return new RobotResourceImportGlobalSettingImpl(node);
+      }
+      else if (type == RETURN_STRUCTURE) {
+        return new RobotReturnStructureImpl(node);
       }
       else if (type == ROOT) {
         return new RobotRootImpl(node);
@@ -365,9 +411,6 @@ public interface RobotTypes {
       else if (type == TIMEOUT_STATEMENTS_GLOBAL_SETTING) {
         return new RobotTimeoutStatementsGlobalSettingImpl(node);
       }
-      else if (type == TRY_ELSE_STRUCTURE) {
-        return new RobotTryElseStructureImpl(node);
-      }
       else if (type == TRY_STRUCTURE) {
         return new RobotTryStructureImpl(node);
       }
@@ -395,8 +438,20 @@ public interface RobotTypes {
       else if (type == VARIABLE_DEFINITION) {
         return new RobotVariableDefinitionImpl(node);
       }
+      else if (type == VARIABLE_INDEX_ACCESS_CONTENT) {
+        return new RobotVariableIndexAccessContentImpl(node);
+      }
+      else if (type == VARIABLE_NESTED_ACCESS_CONTENT) {
+        return new RobotVariableNestedAccessContentImpl(node);
+      }
+      else if (type == VARIABLE_SLICE_ACCESS_CONTENT) {
+        return new RobotVariableSliceAccessContentImpl(node);
+      }
       else if (type == VARIABLE_VALUE) {
         return new RobotVariableValueImpl(node);
+      }
+      else if (type == WHILE_LOOP_HEADER) {
+        return new RobotWhileLoopHeaderImpl(node);
       }
       else if (type == WHILE_LOOP_STRUCTURE) {
         return new RobotWhileLoopStructureImpl(node);

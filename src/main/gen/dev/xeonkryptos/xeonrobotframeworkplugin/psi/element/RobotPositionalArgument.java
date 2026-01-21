@@ -4,11 +4,9 @@ package dev.xeonkryptos.xeonrobotframeworkplugin.psi.element;
 import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
-import com.intellij.psi.StubBasedPsiElement;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotPositionalArgumentStub;
 import com.intellij.psi.PsiReference;
 
-public interface RobotPositionalArgument extends RobotArgument, RobotElement, StubBasedPsiElement<RobotPositionalArgumentStub> {
+public interface RobotPositionalArgument extends RobotArgument, RobotElement {
 
   @NotNull PsiReference getReference();
 

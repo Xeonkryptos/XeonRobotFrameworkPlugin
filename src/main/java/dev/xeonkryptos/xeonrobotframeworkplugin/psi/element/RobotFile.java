@@ -1,16 +1,13 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.psi.element;
 
+import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiFile;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.dto.ImportType;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
 
 public interface RobotFile extends PsiFile {
-
-    /**
-     * @return locally defined keywords.
-     */
-    @NotNull Collection<DefinedKeyword> getDefinedKeywords();
 
     /**
      * @return all files that contain references to invoked keywords and used variables.
@@ -23,10 +20,9 @@ public interface RobotFile extends PsiFile {
      *
      * @return a collection of keyword files that this files knows about.
      */
-    @NotNull Collection<KeywordFile> collectImportedFiles(boolean includeTransitive);
+    @NotNull Collection<KeywordFile> collectImportedFiles(boolean includeTransitive, ImportType... importTypes);
 
-    @NotNull
-    Collection<KeywordFile> findImportedFilesWithLibraryName(@NotNull String libraryName);
+    @NotNull Collection<VirtualFile> findImportedFilesWithLibraryName(@NotNull String libraryName);
 
     @NotNull Collection<DefinedVariable> getDefinedVariables();
 }

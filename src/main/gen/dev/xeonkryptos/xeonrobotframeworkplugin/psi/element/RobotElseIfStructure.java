@@ -8,6 +8,6 @@ import com.intellij.psi.PsiElement;
 public interface RobotElseIfStructure extends RobotExecutableStatement, RobotBlockOpeningStructure {
 
   @NotNull
-  List<RobotPositionalArgument> getPositionalArgumentList();
+  RobotConditionalContent getConditionalContent();
 
 }

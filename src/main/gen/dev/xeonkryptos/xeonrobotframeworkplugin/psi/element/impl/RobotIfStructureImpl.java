@@ -30,8 +30,8 @@ public class RobotIfStructureImpl extends RobotExecutableStatementImpl implement
 
   @Override
   @NotNull
-  public List<RobotPositionalArgument> getPositionalArgumentList() {
-    return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotPositionalArgument.class);
+  public RobotConditionalContent getConditionalContent() {
+    return notNullChild(PsiTreeUtil.getChildOfType(this, RobotConditionalContent.class));
   }
 
 }

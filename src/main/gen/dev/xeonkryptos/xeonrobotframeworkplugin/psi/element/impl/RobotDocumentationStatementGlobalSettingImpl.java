@@ -30,12 +30,6 @@ public class RobotDocumentationStatementGlobalSettingImpl extends RobotGlobalSet
 
   @Override
   @NotNull
-  public List<RobotPositionalArgument> getPositionalArgumentList() {
-    return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotPositionalArgument.class);
-  }
-
-  @Override
-  @NotNull
   public PsiElement getNameElement() {
     return notNullChild(findChildByType(DOCUMENTATION_KEYWORD));
   }

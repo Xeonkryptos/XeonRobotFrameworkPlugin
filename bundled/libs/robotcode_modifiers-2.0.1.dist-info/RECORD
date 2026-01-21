@@ -1,0 +1,11 @@
+robotcode/modifiers/__init__.py,sha256=Kn-0b4Zz4ygXjJZ8o0-NNIsJDXdhyIFmYxahjg0va5M,111
+robotcode/modifiers/__pycache__/__init__.cpython-311.pyc,,
+robotcode/modifiers/__pycache__/__version__.cpython-311.pyc,,
+robotcode/modifiers/__pycache__/longname_modifiers.cpython-311.pyc,,
+robotcode/modifiers/__version__.py,sha256=wAxkK8w13vqoF47A8iqWdSlIgRRXmZiQ0R4wePZfzhs,22
+robotcode/modifiers/longname_modifiers.py,sha256=xCRICYPtZa4Q8aqxLOP5pcPMdExyR33s-F9DssVR-pw,2215
+robotcode/modifiers/py.typed,sha256=bWew9mHgMy8LqMu7RuqQXFXLBxh2CRx0dUbSx-3wE48,27
+robotcode_modifiers-2.0.1.dist-info/INSTALLER,sha256=zuuue4knoyJ-UwPPXg8fezS7VCrXJQrAP7zeNuwvFQg,4
+robotcode_modifiers-2.0.1.dist-info/METADATA,sha256=G09niCKJ-z-bVw5w8u907AGusBsmzXi44fSAmLR1oHw,2755
+robotcode_modifiers-2.0.1.dist-info/RECORD,,
+robotcode_modifiers-2.0.1.dist-info/WHEEL,sha256=qtCwoSJWgHk21S1Kb4ihdzI2rlJ1ZKaIurTj_ngOhyQ,87

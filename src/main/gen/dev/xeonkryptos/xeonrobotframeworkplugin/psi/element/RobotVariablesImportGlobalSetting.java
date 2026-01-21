@@ -5,7 +5,7 @@ import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 
-public interface RobotVariablesImportGlobalSetting extends RobotGlobalSettingStatement, RobotImportGlobalSettingExpression {
+public interface RobotVariablesImportGlobalSetting extends RobotGlobalSettingStatement, GlobalSettingStatementExpression, RobotImportGlobalSettingExpression {
 
   @NotNull
   List<RobotParameter> getParameterList();
@@ -13,8 +13,8 @@ public interface RobotVariablesImportGlobalSetting extends RobotGlobalSettingSta
   @NotNull
   List<RobotPositionalArgument> getPositionalArgumentList();
 
-  @NotNull
-  RobotPositionalArgument getImportedFile();
+  @Nullable
+  RobotImportArgument getImportedFile();
 
   @NotNull
   PsiElement getNameElement();

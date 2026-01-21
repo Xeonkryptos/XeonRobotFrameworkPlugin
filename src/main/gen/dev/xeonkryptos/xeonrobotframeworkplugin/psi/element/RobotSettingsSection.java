@@ -5,7 +5,7 @@ import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 
-public interface RobotSettingsSection extends RobotSection {
+public interface RobotSettingsSection extends RobotSection, NameIdentifierHolder {
 
   @NotNull
   List<RobotGlobalSettingStatement> getGlobalSettingStatementList();

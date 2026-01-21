@@ -1,0 +1,26 @@
+<html lang="en">
+    <body>
+        <p>Reports duplicate Robot Framework section headers by detecting multiple occurrences of the same section type in a single file.</p>
+
+        <p>This inspection highlights every repeated section (e.g. *** Settings ***, *** Variables ***, *** Test Cases ***, *** Tasks ***, *** Keywords ***) because Robot Framework expects each section at most once. Keeping only one instance per section improves clarity, prevents unexpected parser behavior, and avoids silently ignored content.</p>
+        <p><b>Why it matters:</b> When a section is duplicated, Robot Framework will only process one occurrence; later duplicates can mislead maintainers and hide intended configuration or tests.</p>
+        <p><b>Typical fix:</b> Merge the contents of all duplicates into a single section and remove the extras.</p>
+
+        <p>Example of a problem:</p>
+        <pre><code>*** Settings ***
+Library    Collections
+
+*** Settings ***
+Library    OperatingSystem
+</code></pre>
+
+        <p>After fix:</p>
+        <pre><code>*** Settings ***
+Library    Collections
+Library    OperatingSystem
+</code></pre>
+
+        <!-- tooltip end -->
+        <p>In inspection settings you can disable or change severity if needed.</p>
+    </body>
+</html>

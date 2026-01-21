@@ -15,7 +15,8 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotSetupTeardownSt
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTestCaseStatement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTestCasesSection;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariable;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.ref.PythonResolver;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.reference.PythonResolver;
+import dev.xeonkryptos.xeonrobotframeworkplugin.util.RobotNames;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -148,7 +149,7 @@ public enum VariableScope {
                 return false;
             }
             RobotSetupTeardownStatementsGlobalSetting globalSetting = PsiTreeUtil.getParentOfType(keyword, RobotSetupTeardownStatementsGlobalSetting.class);
-            return globalSetting != null && "[Test Teardown]".equalsIgnoreCase(globalSetting.getNameElement().getText());
+            return globalSetting != null && "Test Teardown".equalsIgnoreCase(globalSetting.getNameElement().getText());
         } else if (isInTestCase(position)) {
             // check that we are next to a teardown bracket setting
             RobotKeywordCall keyword = getKeywordCall(position);
@@ -156,7 +157,7 @@ public enum VariableScope {
                 return false;
             }
             RobotLocalSetting localSetting = PsiTreeUtil.getParentOfType(keyword, RobotLocalSetting.class);
-            return localSetting != null && "[Teardown]".equalsIgnoreCase(localSetting.getSettingName());
+            return localSetting != null && RobotNames.TEARDOWN_LOCAL_SETTING_NAME.equalsIgnoreCase(localSetting.getSettingName());
         }
         return false;
     }
@@ -177,7 +178,7 @@ public enum VariableScope {
         RobotKeywordsSection keywordsSection = PsiTreeUtil.getParentOfType(keyword, RobotKeywordsSection.class);
         if (keywordsSection != null) {
             RobotLocalSetting localSetting = PsiTreeUtil.getParentOfType(keyword, RobotLocalSetting.class);
-            return localSetting != null && "[Teardown]".equalsIgnoreCase(localSetting.getSettingName());
+            return localSetting != null && RobotNames.TEARDOWN_LOCAL_SETTING_NAME.equalsIgnoreCase(localSetting.getSettingName());
         }
         return false;
     }
@@ -197,13 +198,7 @@ public enum VariableScope {
 
     @Nullable
     public static PsiElement getReferencedPsiElement(@NotNull Project project) {
-        // Robot 2.x
-        PsiElement element = PythonResolver.findVariable("GLOBAL_VARIABLES", project);
-        if (element == null) {
-            // Robot 3.x
-            element = PythonResolver.findClass("robot.variables.scopes.GlobalVariables", project);
-        }
-        return element;
+        return PythonResolver.findClass("robot.variables.scopes.GlobalVariables", project);
     }
 
     public abstract boolean isInScope(@NotNull PsiElement sourceElement, @NotNull PsiElement element);

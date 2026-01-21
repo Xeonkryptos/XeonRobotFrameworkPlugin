@@ -1,6 +1,8 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl;
 
 import com.intellij.lang.ASTNode;
+import com.intellij.lang.folding.FoldingDescriptor;
+import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.util.Key;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.stubs.IStubElementType;
@@ -14,8 +16,8 @@ import com.jetbrains.python.psi.PyNamedParameter;
 import com.jetbrains.python.psi.PyParameter;
 import com.jetbrains.python.psi.PyParameterList;
 import com.jetbrains.python.psi.PySingleStarParameter;
-import dev.xeonkryptos.xeonrobotframeworkplugin.ide.config.RobotOptionsProvider;
-import dev.xeonkryptos.xeonrobotframeworkplugin.ide.icons.RobotIcons;
+import dev.xeonkryptos.xeonrobotframeworkplugin.config.RobotOptionsProvider;
+import dev.xeonkryptos.xeonrobotframeworkplugin.icons.RobotIcons;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.dto.ParameterDto;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.DefinedParameter;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotArgument;
@@ -25,6 +27,7 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLocalArgumentsS
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotParameter;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotUserKeywordStatement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableDefinition;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.folding.RobotFoldingComputationUtil;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotKeywordCallStub;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotStubPsiElementBase;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.QualifiedNameBuilder;
@@ -114,10 +117,8 @@ public abstract class RobotKeywordCallExtension extends RobotStubPsiElementBase<
         Collator parameterNameCollator = robotOptionsProvider.getParameterNameCollator();
 
         PsiElement reference = getAvailableParameters().stream()
-                                                       .filter(param -> parameterNameCollator.equals(parameterName, param.getLookup())
-                                                                        || param.isKeywordContainer())
-                                                       .min(Comparator.comparing(DefinedParameter::isKeywordContainer,
-                                                                                 (kc1, kc2) -> kc1 == kc2 ? 0 : kc1 ? 1 : -1))
+                                                       .filter(param -> parameterNameCollator.equals(parameterName, param.getLookup()) || param.isKeywordContainer())
+                                                       .min(Comparator.comparing(DefinedParameter::isKeywordContainer, (kc1, kc2) -> kc1 == kc2 ? 0 : kc1 ? 1 : -1))
                                                        .map(DefinedParameter::reference)
                                                        .orElse(null);
         if (reference == null) {
@@ -197,6 +198,20 @@ public abstract class RobotKeywordCallExtension extends RobotStubPsiElementBase<
         }
         return startOfKeywordsOnlyIndex != null ? OptionalInt.of(startOfKeywordsOnlyIndex) : OptionalInt.empty();
     }
+
+    @Nullable
+    @Override
+    public FoldingDescriptor[] fold(@NotNull Document document) {
+        if (!RobotFoldingComputationUtil.isFoldingUseful(this, document)) {
+            return null;
+        }
+        var foldingDescriptors = RobotFoldingComputationUtil.computeFoldingDescriptorsForListing(getNode(), "KeywordCallArgumentsListFolding", getKeywordCallName(), getAllCallArguments(), document);
+        return !foldingDescriptors.isEmpty() ? foldingDescriptors.toArray(FoldingDescriptor.EMPTY_ARRAY) : null;
+    }
+
+    @NotNull
+    @Override
+    public abstract String getName();
 
     @Override
     public PsiElement setName(@NotNull String newName) throws IncorrectOperationException {

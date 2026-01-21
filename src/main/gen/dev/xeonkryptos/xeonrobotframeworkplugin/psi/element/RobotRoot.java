@@ -8,9 +8,6 @@ import com.intellij.psi.PsiElement;
 public interface RobotRoot extends RobotElement {
 
   @NotNull
-  List<RobotLanguage> getLanguageList();
-
-  @NotNull
   List<RobotSection> getSectionList();
 
 }

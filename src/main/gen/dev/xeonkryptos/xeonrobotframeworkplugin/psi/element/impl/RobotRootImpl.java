@@ -29,12 +29,6 @@ public class RobotRootImpl extends RobotPsiElementBase implements RobotRoot {
 
   @Override
   @NotNull
-  public List<RobotLanguage> getLanguageList() {
-    return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotLanguage.class);
-  }
-
-  @Override
-  @NotNull
   public List<RobotSection> getSectionList() {
     return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotSection.class);
   }

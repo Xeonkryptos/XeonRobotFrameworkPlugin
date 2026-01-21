@@ -1,9 +1,10 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.psi;
 
-import com.intellij.psi.tree.IElementType;
-import dev.xeonkryptos.xeonrobotframeworkplugin.util.RobotTailTypes;
 import com.intellij.codeInsight.TailType;
 import com.intellij.codeInsight.TailTypes;
+import com.intellij.psi.tree.IElementType;
+import dev.xeonkryptos.xeonrobotframeworkplugin.util.RobotNames;
+import dev.xeonkryptos.xeonrobotframeworkplugin.util.RobotTailTypes;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -76,14 +77,14 @@ public class RobotKeywordProvider {
         KEYWORD_TABLE.addSyntax(RobotTypes.LOCAL_SETTING, "[Timeout]");
         KEYWORD_TABLE.addSyntax(RobotTypes.LOCAL_SETTING, "[Return]");
 
-        addRecommendation(RobotTypes.LOCAL_SETTING, "[Documentation]", "Documentation", RobotTailTypes.TAB);
-        addRecommendation(RobotTypes.LOCAL_SETTING, "[Tags]", "Tags", RobotTailTypes.TAB);
+        addRecommendation(RobotTypes.LOCAL_SETTING, "[Documentation]", RobotNames.DOCUMENTATION_LOCAL_SETTING_NAME, RobotTailTypes.TAB);
+        addRecommendation(RobotTypes.LOCAL_SETTING, "[Tags]", RobotNames.TAGS_LOCAL_SETTING_NAME, RobotTailTypes.TAB);
         addRecommendation(RobotTypes.LOCAL_SETTING, "[Setup]", "Setup", RobotTailTypes.TAB);
-        addRecommendation(RobotTypes.LOCAL_SETTING, "[Teardown]", "Teardown", RobotTailTypes.TAB);
-        addRecommendation(RobotTypes.LOCAL_SETTING, "[Template]", "Template", RobotTailTypes.TAB);
+        addRecommendation(RobotTypes.LOCAL_SETTING, "[Teardown]", RobotNames.TEARDOWN_LOCAL_SETTING_NAME, RobotTailTypes.TAB);
+        addRecommendation(RobotTypes.LOCAL_SETTING, "[Template]", RobotNames.TEMPLATE_LOCAL_SETTING_NAME, RobotTailTypes.TAB);
         addRecommendation(RobotTypes.LOCAL_SETTING, "[Timeout]", "Timeout", RobotTailTypes.TAB);
         addRecommendation(RobotTypes.LOCAL_SETTING, "[Arguments]", "Arguments", RobotTailTypes.TAB);
-        addRecommendation(RobotTypes.LOCAL_SETTING, "[Return]", "Return", RobotTailTypes.TAB);
+        addRecommendation(RobotTypes.LOCAL_SETTING, "[Return]", RobotNames.RETURN_LOCAL_SETTING_NAME, RobotTailTypes.TAB);
 
         KEYWORD_TABLE.addSyntax(IMPORT, "Library");
         KEYWORD_TABLE.addSyntax(IMPORT, "Resource");
@@ -93,16 +94,16 @@ public class RobotKeywordProvider {
         addRecommendation(IMPORT, "Resource", "Resource", RobotTailTypes.TAB);
         addRecommendation(IMPORT, "Variables", "Variables", RobotTailTypes.TAB);
 
-        KEYWORD_TABLE.addSyntax(GHERKIN, "Given");
-        KEYWORD_TABLE.addSyntax(GHERKIN, "When");
-        KEYWORD_TABLE.addSyntax(GHERKIN, "Then");
-        KEYWORD_TABLE.addSyntax(GHERKIN, "And");
+        KEYWORD_TABLE.addSyntax(GHERKIN, "GIVEN");
+        KEYWORD_TABLE.addSyntax(GHERKIN, "WHEN");
+        KEYWORD_TABLE.addSyntax(GHERKIN, "THEN");
+        KEYWORD_TABLE.addSyntax(GHERKIN, "AND");
         KEYWORD_TABLE.addSyntax(GHERKIN, "BUT");
 
-        addRecommendation(GHERKIN, "Given", "Given", TailTypes.spaceType());
-        addRecommendation(GHERKIN, "When", "When", TailTypes.spaceType());
-        addRecommendation(GHERKIN, "Then", "Then", TailTypes.spaceType());
-        addRecommendation(GHERKIN, "And", "And", TailTypes.spaceType());
+        addRecommendation(GHERKIN, "GIVEN", "Given", TailTypes.spaceType());
+        addRecommendation(GHERKIN, "WHEN", "WHEN", TailTypes.spaceType());
+        addRecommendation(GHERKIN, "THEN", "THEN", TailTypes.spaceType());
+        addRecommendation(GHERKIN, "AND", "AND", TailTypes.spaceType());
         addRecommendation(GHERKIN, "BUT", "BUT", TailTypes.spaceType());
 
         KEYWORD_TABLE.addSyntax(SYNTAX_MARKER, "IF");
@@ -120,24 +121,26 @@ public class RobotKeywordProvider {
         KEYWORD_TABLE.addSyntax(SYNTAX_MARKER, "IN");
         KEYWORD_TABLE.addSyntax(SYNTAX_MARKER, "IN RANGE");
         KEYWORD_TABLE.addSyntax(SYNTAX_MARKER, "IN ENUMERATE");
+        KEYWORD_TABLE.addSyntax(SYNTAX_MARKER, "IN ZIP");
         KEYWORD_TABLE.addSyntax(SYNTAX_MARKER, "AS");
         KEYWORD_TABLE.addSyntax(SYNTAX_MARKER, "VAR");
 
         addRecommendation(SYNTAX_MARKER, "IF", "IF", RobotTailTypes.TAB);
-        addRecommendation(SYNTAX_MARKER, "END", "END", TailTypes.noneType());
-        addRecommendation(SYNTAX_MARKER, "ELSE", "ELSE", TailTypes.noneType());
-        addRecommendation(SYNTAX_MARKER, "ELSE IF", "ELSE IF", RobotTailTypes.TAB);
+        addRecommendation(RobotTypes.CONDITIONAL_STRUCTURE, "ELSE IF", "ELSE IF", RobotTailTypes.TAB);
+        addRecommendation(RobotTypes.CONDITIONAL_STRUCTURE, "ELSE", "ELSE", TailTypes.noneType());
         addRecommendation(SYNTAX_MARKER, "WHILE", "WHILE", RobotTailTypes.TAB);
-        addRecommendation(SYNTAX_MARKER, "CONTINUE", "CONTINUE", TailTypes.noneType());
-        addRecommendation(SYNTAX_MARKER, "BREAK", "BREAK", TailTypes.noneType());
         addRecommendation(SYNTAX_MARKER, "FOR", "FOR", RobotTailTypes.TAB);
+        addRecommendation(RobotTypes.LOOP_CONTROL_STRUCTURE, "CONTINUE", "CONTINUE", TailTypes.noneType());
+        addRecommendation(RobotTypes.LOOP_CONTROL_STRUCTURE, "BREAK", "BREAK", TailTypes.noneType());
         addRecommendation(SYNTAX_MARKER, "TRY", "TRY", TailTypes.noneType());
-        addRecommendation(SYNTAX_MARKER, "EXCEPT", "EXCEPT", RobotTailTypes.TAB);
-        addRecommendation(SYNTAX_MARKER, "FINALLY", "FINALLY", TailTypes.noneType());
-        addRecommendation(SYNTAX_MARKER, "RETURN", "RETURN", TailTypes.noneType());
-        addRecommendation(SYNTAX_MARKER, "IN", "IN", RobotTailTypes.TAB);
-        addRecommendation(SYNTAX_MARKER, "IN RANGE", "IN RANGE", RobotTailTypes.TAB);
-        addRecommendation(SYNTAX_MARKER, "IN ENUMERATE", "IN ENUMERATE", RobotTailTypes.TAB);
+        addRecommendation(RobotTypes.EXCEPTION_HANDLING_STRUCTURE, "EXCEPT", "EXCEPT", RobotTailTypes.TAB);
+        addRecommendation(RobotTypes.EXCEPTION_HANDLING_STRUCTURE, "ELSE", "ELSE", TailTypes.noneType());
+        addRecommendation(RobotTypes.EXCEPTION_HANDLING_STRUCTURE, "FINALLY", "FINALLY", TailTypes.noneType());
+        addRecommendation(RobotTypes.USER_KEYWORD_STATEMENT, "RETURN", "RETURN", TailTypes.noneType());
+        addRecommendation(RobotTypes.FOR_IN, "IN", "IN", RobotTailTypes.TAB);
+        addRecommendation(RobotTypes.FOR_IN, "IN RANGE", "IN RANGE", RobotTailTypes.TAB);
+        addRecommendation(RobotTypes.FOR_IN, "IN ENUMERATE", "IN ENUMERATE", RobotTailTypes.TAB);
+        addRecommendation(RobotTypes.FOR_IN, "IN ZIP", "IN ZIP", RobotTailTypes.TAB);
         addRecommendation(SYNTAX_MARKER, "AS", "AS", RobotTailTypes.TAB);
         addRecommendation(SYNTAX_MARKER, "VAR", "VAR", RobotTailTypes.TAB);
     }

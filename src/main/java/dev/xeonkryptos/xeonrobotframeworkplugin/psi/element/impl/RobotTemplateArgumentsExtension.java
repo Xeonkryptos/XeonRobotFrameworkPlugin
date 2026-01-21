@@ -1,14 +1,13 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl;
 
 import com.intellij.lang.ASTNode;
-import com.intellij.openapi.project.Project;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.DefinedParameter;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotArgument;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCall;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTemplateArguments;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTemplateParameter;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.KeywordUtil;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.visitor.RobotCallArgumentsCollector;
+import dev.xeonkryptos.xeonrobotframeworkplugin.util.KeywordUtil;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
@@ -48,8 +47,7 @@ public abstract class RobotTemplateArgumentsExtension extends RobotPsiElementBas
 
     @Override
     public Collection<DefinedParameter> computeMissingParameters() {
-        Project project = getProject();
-        RobotKeywordCall templateKeywordCall = KeywordUtil.getInstance(project).findTemplateKeywordCall(this);
+        RobotKeywordCall templateKeywordCall = KeywordUtil.findTemplateKeywordCall(this);
         if (templateKeywordCall == null) {
             return List.of();
         }
@@ -58,8 +56,7 @@ public abstract class RobotTemplateArgumentsExtension extends RobotPsiElementBas
 
     @Override
     public Collection<String> computeMissingRequiredParameters() {
-        Project project = getProject();
-        RobotKeywordCall templateKeywordCall = KeywordUtil.getInstance(project).findTemplateKeywordCall(this);
+        RobotKeywordCall templateKeywordCall = KeywordUtil.findTemplateKeywordCall(this);
         if (templateKeywordCall == null) {
             return List.of();
         }

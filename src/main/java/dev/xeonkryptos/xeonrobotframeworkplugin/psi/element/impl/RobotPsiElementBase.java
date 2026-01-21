@@ -11,6 +11,8 @@ import javax.swing.Icon;
 
 public abstract class RobotPsiElementBase extends ASTWrapperPsiElement implements RobotElement {
 
+    private String text;
+
     public RobotPsiElementBase(@NotNull ASTNode node) {
         super(node);
     }
@@ -39,6 +41,20 @@ public abstract class RobotPsiElementBase extends ASTWrapperPsiElement implement
                 return RobotPsiElementBase.this.getIcon(ICON_FLAG_VISIBILITY);
             }
         };
+    }
+
+    @Override
+    public void subtreeChanged() {
+        super.subtreeChanged();
+        text = null;
+    }
+
+    @Override
+    public String getText() {
+        if (text == null) {
+            text = super.getText();
+        }
+        return text;
     }
 
     @Override

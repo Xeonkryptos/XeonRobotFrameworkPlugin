@@ -36,7 +36,7 @@ public class RobotParserUtil extends GeneratedParserUtilBase {
         int settingEndOffset = latestDoneMarker.getEndOffset();
         int settingNameEndOffset = Math.min(originalTextLength, settingStartOffset + TEMPLATE_LOCAL_SETTING_NAME.length());
 
-        String localSettingName = originalText.subSequence(settingStartOffset, settingNameEndOffset).toString();
+        String localSettingName = originalText.subSequence(settingStartOffset, settingNameEndOffset).toString().replaceAll("\\s+", "");
         if (TEMPLATE_LOCAL_SETTING_NAME.equalsIgnoreCase(localSettingName)) {
             updateLocalTemplateState(builder, settingStartOffset, settingEndOffset, originalText);
         }

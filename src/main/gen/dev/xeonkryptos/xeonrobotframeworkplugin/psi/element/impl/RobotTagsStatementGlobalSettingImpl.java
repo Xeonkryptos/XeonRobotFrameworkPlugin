@@ -30,12 +30,6 @@ public class RobotTagsStatementGlobalSettingImpl extends RobotGlobalSettingState
 
   @Override
   @NotNull
-  public List<RobotPositionalArgument> getPositionalArgumentList() {
-    return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotPositionalArgument.class);
-  }
-
-  @Override
-  @NotNull
   public PsiElement getNameElement() {
     return notNullChild(findChildByType(TAGS_KEYWORDS));
   }

@@ -7,4 +7,6 @@ import com.intellij.psi.PsiElement;
 
 public interface RobotLocalArgumentsSettingId extends RobotElement {
 
+  @NotNull String getSettingName();
+
 }

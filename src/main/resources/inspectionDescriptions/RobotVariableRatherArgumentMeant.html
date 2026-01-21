@@ -1,0 +1,36 @@
+<html lang="en">
+    <body>
+        <p>
+            Reports positional arguments that match the name of a reserved Robot Framework variable but are written as plain text instead of as a variable.
+        </p>
+
+        <p>
+            This inspection detects cases where a single literal constant in an argument has the same name as a reserved variable
+            (for example <code>${TEMPDIR}</code>, <code>${EXECDIR}</code>) but is used without the variable syntax.
+            Such usage is often a typo or misunderstanding and may cause the test to use a hardcoded string instead of the intended dynamic value.
+        </p>
+
+        <p><b>Examples:</b></p>
+
+        <pre><code># False (likely unintended usage)
+Log    TEMPDIR
+
+# False (likely unintended usage)
+Create Directory    EXECDIR
+
+# True (intended usage with reserved variables)
+Log    ${TEMPDIR}
+
+# True (intended usage with reserved variables)
+Create Directory    ${EXECDIR}
+    </code></pre>
+
+        <!-- tooltip end -->
+
+        <p>
+            The inspection only considers single-child positional arguments that are literal constants and compares them
+            case-insensitively against the set of known reserved variables.
+            If a match is found, it highlights the argument to help you replace it with the correct variable form.
+        </p>
+    </body>
+</html>
