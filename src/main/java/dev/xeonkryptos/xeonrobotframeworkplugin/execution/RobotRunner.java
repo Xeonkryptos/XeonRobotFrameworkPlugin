@@ -4,7 +4,6 @@ import com.intellij.execution.configurations.RunProfile;
 import com.intellij.execution.configurations.RunProfileState;
 import com.intellij.execution.configurations.RunnerSettings;
 import com.intellij.execution.executors.DefaultRunExecutor;
-import com.intellij.execution.process.ProcessHandler;
 import com.intellij.execution.runners.AsyncProgramRunner;
 import com.intellij.execution.runners.ExecutionEnvironment;
 import com.intellij.execution.ui.RunContentDescriptor;
@@ -41,19 +40,10 @@ public class RobotRunner extends AsyncProgramRunner<RunnerSettings> {
         @NotNull
         @Override
         public Promise<@Nullable RunContentDescriptor> execute(@NotNull ExecutionEnvironment env, @NotNull RunProfileState state) {
-            if (state instanceof RobotCommandLineState) {
-                state = new RobotPythonCommandLineState(((RobotCommandLineState) state).getRobotRunConfiguration(), env);
+            if (state instanceof RobotCommandLineState robotState) {
+                state = new RobotPythonCommandLineState(robotState.getRobotRunConfiguration(), env);
             }
-            RobotPythonCommandLineState robotPythonState = (RobotPythonCommandLineState) state;
-            return super.execute(env, robotPythonState).then(contentDescriptor -> {
-                if (contentDescriptor != null) {
-                    ProcessHandler processHandler = contentDescriptor.getProcessHandler();
-                    if (processHandler != null) {
-                        robotPythonState.initRobotDebugCommunicatorProcess(processHandler);
-                    }
-                }
-                return contentDescriptor;
-            });
+            return super.execute(env, state);
         }
     }
 }

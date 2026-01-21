@@ -45,6 +45,7 @@
 - Fixed issue leading to deprecation marking not shown to keyword calls referencing a python function with deprecation prefix **\*DEPRECATED** in documentation
 - Detection of continuations with empty line
 - Fixed variable lookup with variables names containing non-latin but still word characters (characters with diacritics or Greek, Japanese, Cyrillic characters, etc.)
+- Stabilized process start/cancel workflows to execute tests/tasks
 
 ## 0.5.16
 

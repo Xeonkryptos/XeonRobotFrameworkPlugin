@@ -10,11 +10,12 @@ import com.intellij.xdebugger.breakpoints.XLineBreakpoint
 import com.intellij.xdebugger.frame.XSuspendContext
 import com.jetbrains.rd.util.lifetime.Lifetime
 import com.jetbrains.rd.util.threading.coroutines.adviseSuspend
-import dev.xeonkryptos.xeonrobotframeworkplugin.debugger.breakpoint.RobotExceptionBreakpointHandler
-import dev.xeonkryptos.xeonrobotframeworkplugin.debugger.breakpoint.RobotExceptionBreakpointProperties
-import dev.xeonkryptos.xeonrobotframeworkplugin.debugger.breakpoint.RobotLineBreakpointHandler
-import dev.xeonkryptos.xeonrobotframeworkplugin.debugger.breakpoint.RobotLineBreakpointProperties
 import dev.xeonkryptos.xeonrobotframeworkplugin.execution.dap.RobotDebugAdapterProtocolCommunicator
+import dev.xeonkryptos.xeonrobotframeworkplugin.execution.debugger.RobotSuspendContext
+import dev.xeonkryptos.xeonrobotframeworkplugin.execution.debugger.breakpoint.RobotExceptionBreakpointHandler
+import dev.xeonkryptos.xeonrobotframeworkplugin.execution.debugger.breakpoint.RobotExceptionBreakpointProperties
+import dev.xeonkryptos.xeonrobotframeworkplugin.execution.debugger.breakpoint.RobotLineBreakpointHandler
+import dev.xeonkryptos.xeonrobotframeworkplugin.execution.debugger.breakpoint.RobotLineBreakpointProperties
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.future.await
 import kotlinx.coroutines.runBlocking

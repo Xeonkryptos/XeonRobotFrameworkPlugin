@@ -1,4 +1,4 @@
-package dev.xeonkryptos.xeonrobotframeworkplugin.debugger;
+package dev.xeonkryptos.xeonrobotframeworkplugin.execution.debugger;
 
 import com.intellij.execution.ExecutionException;
 import com.intellij.execution.ExecutionResult;

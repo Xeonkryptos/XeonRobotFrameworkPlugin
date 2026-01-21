@@ -11,6 +11,7 @@ import com.intellij.execution.executors.DefaultRunExecutor;
 import com.intellij.execution.process.ProcessEvent;
 import com.intellij.execution.process.ProcessHandler;
 import com.intellij.execution.runners.ExecutionEnvironment;
+import com.intellij.execution.runners.ProgramRunner;
 import com.intellij.execution.target.TargetEnvironment;
 import com.intellij.execution.target.value.TargetEnvironmentFunctions;
 import com.intellij.execution.testframework.autotest.ToggleAutoTestAction;
@@ -101,12 +102,44 @@ public class RobotPythonCommandLineState extends PythonScriptCommandLineState {
                 }
             }));
             enrichExecutionResult(executionResult);
+            if (executionResult != null) {
+                ProcessHandler processHandler = executionResult.getProcessHandler();
+                initRobotDebugCommunicatorProcess(processHandler);
+            }
             return executionResult;
         } catch (ExecutionException e) {
             throw e;
         } catch (Exception e) {
             MyLogger.logger.error(e);
             return null;
+        }
+    }
+
+    @Override
+    public @NotNull ExecutionResult execute(@NotNull Executor executor, @NotNull ProgramRunner<?> runner) throws ExecutionException {
+        ExecutionResult executionResult = super.execute(executor, runner);
+        startRobotDebugCommunicatorProcess(executionResult);
+        return executionResult;
+    }
+
+    @Override
+    public ExecutionResult execute(Executor executor, CommandLinePatcher... patchers) throws ExecutionException {
+        ExecutionResult executionResult = super.execute(executor, patchers);
+        startRobotDebugCommunicatorProcess(executionResult);
+        return executionResult;
+    }
+
+    @Override
+    public @Nullable ExecutionResult execute(@NotNull Executor executor) throws ExecutionException {
+        ExecutionResult executionResult = super.execute(executor);
+        startRobotDebugCommunicatorProcess(executionResult);
+        return executionResult;
+    }
+
+    private void startRobotDebugCommunicatorProcess(@Nullable ExecutionResult executionResult) {
+        if (executionResult != null) {
+            ProcessHandler processHandler = executionResult.getProcessHandler();
+            initRobotDebugCommunicatorProcess(processHandler);
         }
     }
 
@@ -205,8 +238,7 @@ public class RobotPythonCommandLineState extends PythonScriptCommandLineState {
     }
 
     private void enrichExecutionResult(@Nullable ExecutionResult executionResult) {
-        if (runConfiguration.getPythonRunConfiguration().emulateTerminal() && executionResult != null
-            && executionResult.getExecutionConsole() instanceof ConsoleView consoleView) {
+        if (runConfiguration.getPythonRunConfiguration().emulateTerminal() && executionResult != null && executionResult.getExecutionConsole() instanceof ConsoleView consoleView) {
             consoleView.addMessageFilter(new RobotReportsFilter());
         }
         if (executionResult != null && executionResult.getExecutionConsole() instanceof SMTRunnerConsoleView consoleView) {
@@ -227,9 +259,7 @@ public class RobotPythonCommandLineState extends PythonScriptCommandLineState {
         private final RobotRunConfiguration configuration;
         private final RobotExecutionMode executionMode;
 
-        private MyPythonScriptTargetedCommandLineBuilder(@NotNull PythonScriptTargetedCommandLineBuilder parentBuilder,
-                                                         RobotRunConfiguration configuration,
-                                                         RobotExecutionMode executionMode) {
+        private MyPythonScriptTargetedCommandLineBuilder(@NotNull PythonScriptTargetedCommandLineBuilder parentBuilder, RobotRunConfiguration configuration, RobotExecutionMode executionMode) {
             this.parentBuilder = parentBuilder;
             this.configuration = configuration;
             this.executionMode = executionMode;
@@ -237,8 +267,7 @@ public class RobotPythonCommandLineState extends PythonScriptCommandLineState {
 
         @NotNull
         @Override
-        public PythonExecution build(@NotNull HelpersAwareTargetEnvironmentRequest helpersAwareTargetEnvironmentRequest,
-                                     @NotNull PythonExecution pythonExecution) {
+        public PythonExecution build(@NotNull HelpersAwareTargetEnvironmentRequest helpersAwareTargetEnvironmentRequest, @NotNull PythonExecution pythonExecution) {
             PythonScriptExecution delegateExecution = createCopiedPythonScriptExecution(pythonExecution);
             delegateExecution.setPythonScriptPath(TargetEnvironmentFunctions.constant(BundleUtil.ROBOTCODE_DIR.toString()));
             List<Function<TargetEnvironment, String>> parameters = delegateExecution.getParameters();
@@ -309,10 +338,7 @@ public class RobotPythonCommandLineState extends PythonScriptCommandLineState {
             argumentConsumer.accept("--test");
             argumentConsumer.accept(testCaseInfo.getUnitName());
 
-            String file = computeFileLocation(project,
-                                              testCaseInfo,
-                                              expandedWorkingDirVFile,
-                                              () -> TestCaseNameIndex.find(unitName, project, contextAnchor.getScope()));
+            String file = computeFileLocation(project, testCaseInfo, expandedWorkingDirVFile, () -> TestCaseNameIndex.find(unitName, project, contextAnchor.getScope()));
             directories.add(file);
         }
         for (RobotRunnableUnitExecutionInfo taskInfo : tasks) {
@@ -320,10 +346,7 @@ public class RobotPythonCommandLineState extends PythonScriptCommandLineState {
             argumentConsumer.accept("--task");
             argumentConsumer.accept(unitName);
 
-            String file = computeFileLocation(project,
-                                              taskInfo,
-                                              expandedWorkingDirVFile,
-                                              () -> TaskNameIndex.find(unitName, project, contextAnchor.getScope()));
+            String file = computeFileLocation(project, taskInfo, expandedWorkingDirVFile, () -> TaskNameIndex.find(unitName, project, contextAnchor.getScope()));
             directories.add(file);
         }
         for (String directory : directories) {
@@ -337,18 +360,14 @@ public class RobotPythonCommandLineState extends PythonScriptCommandLineState {
                                               Supplier<Collection<? extends RobotQualifiedNameOwner>> qualifiedNameOwnerSupplier) {
         Optional<VirtualFile> virtualFileStmtOptional = ReadAction.nonBlocking(() -> qualifiedNameOwnerSupplier.get()
                                                                                                                .stream()
-                                                                                                               .filter(stmt -> execInfo.getFqdn()
-                                                                                                                                       .equals(stmt.getQualifiedName()))
+                                                                                                               .filter(stmt -> execInfo.getFqdn().equals(stmt.getQualifiedName()))
                                                                                                                .findFirst()
-                                                                                                               .map(stmt -> stmt.getContainingFile()
-                                                                                                                                .getOriginalFile()
-                                                                                                                                .getVirtualFile()))
+                                                                                                               .map(stmt -> stmt.getContainingFile().getOriginalFile().getVirtualFile()))
                                                                   .inSmartMode(project)
                                                                   .executeSynchronously();
         return virtualFileStmtOptional.map(vfile -> VfsUtil.getCommonAncestor(expandedWorkingDirVFile, vfile))
                                       .map(vfile -> VfsUtil.getRelativePath(vfile, virtualFileStmtOptional.get(), '/'))
-                                      .orElseGet(() -> execInfo.getLocation().replace('.', '/') + "." + RobotFeatureFileType.getInstance()
-                                                                                                                            .getDefaultExtension());
+                                      .orElseGet(() -> execInfo.getLocation().replace('.', '/') + "." + RobotFeatureFileType.getInstance().getDefaultExtension());
     }
 
     private static RobotExecutionMode computeRobotExecutionMode(Executor executor) {

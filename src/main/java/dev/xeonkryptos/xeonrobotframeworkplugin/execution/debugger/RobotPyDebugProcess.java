@@ -1,4 +1,4 @@
-package dev.xeonkryptos.xeonrobotframeworkplugin.debugger;
+package dev.xeonkryptos.xeonrobotframeworkplugin.execution.debugger;
 
 import com.intellij.execution.ExecutionResult;
 import com.intellij.execution.process.ProcessHandler;
@@ -9,6 +9,7 @@ import com.intellij.xdebugger.XSourcePosition;
 import com.intellij.xdebugger.breakpoints.XBreakpointHandler;
 import com.intellij.xdebugger.frame.XSuspendContext;
 import com.jetbrains.python.debugger.PyDebugProcess;
+import dev.xeonkryptos.xeonrobotframeworkplugin.debugger.RobotDebugProcess;
 import dev.xeonkryptos.xeonrobotframeworkplugin.execution.RobotPythonCommandLineState;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;

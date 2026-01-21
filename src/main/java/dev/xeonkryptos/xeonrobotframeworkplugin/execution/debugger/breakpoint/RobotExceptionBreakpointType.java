@@ -1,4 +1,4 @@
-package dev.xeonkryptos.xeonrobotframeworkplugin.debugger.breakpoint;
+package dev.xeonkryptos.xeonrobotframeworkplugin.execution.debugger.breakpoint;
 
 import com.intellij.icons.AllIcons;
 import com.intellij.xdebugger.breakpoints.XBreakpoint;

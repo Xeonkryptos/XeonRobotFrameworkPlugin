@@ -19,8 +19,10 @@ import java.io.IOException;
 import java.net.Socket;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static com.intellij.openapi.progress.util.ProgressIndicatorUtils.withTimeout;
 
@@ -33,11 +35,12 @@ public class RobotDebugAdapterProtocolCommunicator implements ProcessListener {
     private final Signal<Void> afterInitialize = new Signal<>();
 
     private final AtomicBoolean initializing = new AtomicBoolean(false);
+    private final AtomicReference<Socket> socket = new AtomicReference<>();
 
-    private volatile Socket socket;
     private RobotDebugProtocolServer robotDebugServer;
 
     private volatile boolean initialized;
+    private volatile Future<?> initializationFuture;
 
     public RobotDebugAdapterProtocolCommunicator(int robotDebugPort) {
         this.robotDebugPort = robotDebugPort;
@@ -46,14 +49,15 @@ public class RobotDebugAdapterProtocolCommunicator implements ProcessListener {
 
     @Override
     public void startNotified(@NotNull ProcessEvent event) {
-        if (!initializing.getAndSet(true)) {
-            ApplicationManager.getApplication().executeOnPooledThread(this::connect);
+        boolean initializationInProcess = initializing.getAndSet(true);
+        if (!initializationInProcess) {
+            initializationFuture = ApplicationManager.getApplication().executeOnPooledThread(this::connect);
         }
     }
 
     private void connect() {
         Socket localSocket = tryConnectToServerWithTimeout(robotDebugPort);
-        socket = localSocket;
+        socket.set(localSocket);
         if (localSocket == null) {
             MyLogger.logger.error("Couldn't connect to Robot debug server at port %d".formatted(robotDebugPort));
             initializing.set(false);
@@ -106,8 +110,8 @@ public class RobotDebugAdapterProtocolCommunicator implements ProcessListener {
     @Override
     public void processTerminated(@NotNull ProcessEvent event) {
         event.getProcessHandler().removeProcessListener(this);
-        Socket localSocket = socket;
-        socket = null;
+        initializationFuture.cancel(true);
+        Socket localSocket = socket.getAndSet(null);
         if (localSocket != null) {
             try {
                 localSocket.close();

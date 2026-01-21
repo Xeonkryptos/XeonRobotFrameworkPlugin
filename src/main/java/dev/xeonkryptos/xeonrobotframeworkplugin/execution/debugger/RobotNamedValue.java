@@ -1,4 +1,4 @@
-package dev.xeonkryptos.xeonrobotframeworkplugin.debugger;
+package dev.xeonkryptos.xeonrobotframeworkplugin.execution.debugger;
 
 import com.intellij.icons.AllIcons;
 import com.intellij.xdebugger.XDebugSession;
