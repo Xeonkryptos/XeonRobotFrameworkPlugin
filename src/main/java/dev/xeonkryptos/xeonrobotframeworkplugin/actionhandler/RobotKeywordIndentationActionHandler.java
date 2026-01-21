@@ -7,15 +7,42 @@ import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.actionSystem.EditorActionHandler;
 import com.intellij.openapi.util.Ref;
 import com.intellij.openapi.util.TextRange;
+import com.intellij.psi.PsiDocumentManager;
+import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
+import com.intellij.psi.tree.TokenSet;
+import com.intellij.psi.util.PsiTreeUtil;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotElseIfStructure;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotElseStructure;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotExceptStructure;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotFinallyStructure;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotForLoopStructure;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotIfStructure;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTryStructure;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotWhileLoopStructure;
 import dev.xeonkryptos.xeonrobotframeworkplugin.util.GlobalConstants;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.List;
-
 public class RobotKeywordIndentationActionHandler extends EnterHandlerDelegateAdapter {
 
-    private static final List<String> INTERACTION_WORDS = List.of("IF", "ELSE IF", "ELSE", "FOR", "WHILE", "TRY", "EXCEPT", "FINALLY");
+    private static final TokenSet TOKEN_TYPES = TokenSet.create(RobotTypes.IF,
+                                                                RobotTypes.ELSE_IF,
+                                                                RobotTypes.ELSE,
+                                                                RobotTypes.FOR,
+                                                                RobotTypes.WHILE,
+                                                                RobotTypes.TRY,
+                                                                RobotTypes.EXCEPT,
+                                                                RobotTypes.FINALLY);
+    @SuppressWarnings("unchecked")
+    private static final Class<PsiElement>[] TYPES = new Class[] { RobotIfStructure.class,
+                                                                   RobotElseIfStructure.class,
+                                                                   RobotElseStructure.class,
+                                                                   RobotForLoopStructure.class,
+                                                                   RobotWhileLoopStructure.class,
+                                                                   RobotTryStructure.class,
+                                                                   RobotExceptStructure.class,
+                                                                   RobotFinallyStructure.class };
 
     private boolean addDefaultIndentation;
 
@@ -28,25 +55,38 @@ public class RobotKeywordIndentationActionHandler extends EnterHandlerDelegateAd
                                   EditorActionHandler originalHandler) {
         addDefaultIndentation = false;
 
-        int currentCaretOffset = editor.getCaretModel().getOffset();
         Document document = editor.getDocument();
-        int lineNumber = document.getLineNumber(currentCaretOffset);
-        int lineStartOffset = document.getLineStartOffset(lineNumber);
-        int lineEndOffset = document.getLineEndOffset(lineNumber);
-        String lineText = document.getText(new TextRange(lineStartOffset, lineEndOffset));
-        for (int i = 0; i < lineText.length(); i++) {
-            if (!Character.isWhitespace(lineText.codePointAt(i))) {
-                String lineTextUpperCase = lineText.toUpperCase();
-                for (String interactionWord : INTERACTION_WORDS) {
-                    if (lineTextUpperCase.startsWith(interactionWord, i)) {
-                        addDefaultIndentation = Character.isWhitespace(lineTextUpperCase.codePointAt(i + interactionWord.length()));
-                        break;
-                    }
-                }
-                break;
+        PsiDocumentManager.getInstance(file.getProject()).commitDocument(document);
+
+        PsiElement elementAt;
+        int currentCaretOffset = editor.getCaretModel().getOffset();
+        do {
+            elementAt = file.findElementAt(currentCaretOffset);
+            currentCaretOffset--;
+        } while (elementAt == null && currentCaretOffset > 0);
+        ++currentCaretOffset;
+
+        if (elementAt == null) {
+            return Result.Continue;
+        }
+
+        PsiElement parentElement = PsiTreeUtil.getParentOfType(elementAt, TYPES);
+        if (parentElement != null) {
+            PsiElement firstChild = parentElement.getFirstChild();
+            if (firstChild != null) {
+                updateDefaultIndentationAddFlag(currentCaretOffset, firstChild, document);
             }
+        } else if (TOKEN_TYPES.contains(elementAt.getNode().getElementType())) {
+            updateDefaultIndentationAddFlag(currentCaretOffset, elementAt, document);
         }
         return Result.Continue;
+    }
+
+    private void updateDefaultIndentationAddFlag(int caretOffset, PsiElement element, Document document) {
+        TextRange textRange = element.getTextRange();
+        int lineNumberOfFirstChild = document.getLineNumber(textRange.getStartOffset());
+        int lineNumberOfCaret = document.getLineNumber(caretOffset);
+        addDefaultIndentation = lineNumberOfFirstChild == lineNumberOfCaret;
     }
 
     @Override
