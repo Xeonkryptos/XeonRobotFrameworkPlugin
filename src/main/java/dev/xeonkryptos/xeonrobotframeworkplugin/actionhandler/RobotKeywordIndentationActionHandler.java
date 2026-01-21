@@ -18,6 +18,7 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotElseStructure;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotExceptStructure;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotFinallyStructure;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotForLoopStructure;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotGroupStructure;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotIfStructure;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTryStructure;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotWhileLoopStructure;
@@ -33,7 +34,8 @@ public class RobotKeywordIndentationActionHandler extends EnterHandlerDelegateAd
                                                                 RobotTypes.WHILE,
                                                                 RobotTypes.TRY,
                                                                 RobotTypes.EXCEPT,
-                                                                RobotTypes.FINALLY);
+                                                                RobotTypes.FINALLY,
+                                                                RobotTypes.GROUP);
     @SuppressWarnings("unchecked")
     private static final Class<PsiElement>[] TYPES = new Class[] { RobotIfStructure.class,
                                                                    RobotElseIfStructure.class,
@@ -42,7 +44,8 @@ public class RobotKeywordIndentationActionHandler extends EnterHandlerDelegateAd
                                                                    RobotWhileLoopStructure.class,
                                                                    RobotTryStructure.class,
                                                                    RobotExceptStructure.class,
-                                                                   RobotFinallyStructure.class };
+                                                                   RobotFinallyStructure.class,
+                                                                   RobotGroupStructure.class };
 
     private boolean addDefaultIndentation;
 
