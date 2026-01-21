@@ -2544,7 +2544,7 @@ public class RobotParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // TRY eol_marker executable_statement+
+  // TRY eol_marker executable_statement*
   public static boolean try_structure(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "try_structure")) return false;
     if (!nextTokenIs(b, TRY)) return false;
@@ -2557,19 +2557,15 @@ public class RobotParser implements PsiParser, LightPsiParser {
     return r;
   }
 
-  // executable_statement+
+  // executable_statement*
   private static boolean try_structure_2(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "try_structure_2")) return false;
-    boolean r;
-    Marker m = enter_section_(b);
-    r = executable_statement(b, l + 1);
-    while (r) {
+    while (true) {
       int c = current_position_(b);
       if (!executable_statement(b, l + 1)) break;
       if (!empty_element_parsed_guard_(b, "try_structure_2", c)) break;
     }
-    exit_section_(b, m, null, r);
-    return r;
+    return true;
   }
 
   /* ********************************************************** */

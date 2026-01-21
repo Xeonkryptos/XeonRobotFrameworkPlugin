@@ -300,7 +300,7 @@ exception_handling_structure ::= try_structure
     else_structure?
     finally_structure?
     END eol_marker {pin=1}
-try_structure ::= TRY eol_marker executable_statement+ {
+try_structure ::= TRY eol_marker executable_statement* {
     implements=[
         "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotBlockOpeningStructure"
         "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotFoldable"

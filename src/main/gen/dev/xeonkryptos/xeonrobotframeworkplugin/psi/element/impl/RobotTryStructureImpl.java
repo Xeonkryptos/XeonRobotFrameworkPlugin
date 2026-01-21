@@ -28,10 +28,4 @@ public class RobotTryStructureImpl extends RobotTryStructureExtension implements
     else super.accept(visitor);
   }
 
-  @Override
-  @NotNull
-  public List<RobotExecutableStatement> getExecutableStatementList() {
-    return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotExecutableStatement.class);
-  }
-
 }
