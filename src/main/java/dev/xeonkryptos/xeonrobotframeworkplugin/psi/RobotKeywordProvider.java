@@ -134,6 +134,7 @@ public class RobotKeywordProvider {
         addRecommendation(RobotTypes.LOOP_CONTROL_STRUCTURE, "BREAK", "BREAK", TailTypes.noneType());
         addRecommendation(SYNTAX_MARKER, "TRY", "TRY", TailTypes.noneType());
         addRecommendation(RobotTypes.EXCEPTION_HANDLING_STRUCTURE, "EXCEPT", "EXCEPT", RobotTailTypes.TAB);
+        addRecommendation(RobotTypes.EXCEPTION_HANDLING_STRUCTURE, "ELSE", "ELSE", TailTypes.noneType());
         addRecommendation(RobotTypes.EXCEPTION_HANDLING_STRUCTURE, "FINALLY", "FINALLY", TailTypes.noneType());
         addRecommendation(RobotTypes.USER_KEYWORD_STATEMENT, "RETURN", "RETURN", TailTypes.noneType());
         addRecommendation(RobotTypes.FOR_IN, "IN", "IN", RobotTailTypes.TAB);
