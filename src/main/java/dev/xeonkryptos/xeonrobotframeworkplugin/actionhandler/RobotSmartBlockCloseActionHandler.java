@@ -13,6 +13,9 @@ import com.intellij.psi.PsiFile;
 import com.intellij.psi.tree.TokenSet;
 import com.intellij.psi.util.PsiTreeUtil;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotConditionalStructure;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotExceptionHandlingStructure;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotExecutableStatement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotForLoopStructure;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotGroupStructure;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotIfStructure;
@@ -50,6 +53,10 @@ public class RobotSmartBlockCloseActionHandler extends EnterHandlerDelegateAdapt
 
         PsiElement endBasedElement = PsiTreeUtil.getParentOfType(elementAt, TYPES);
         if (endBasedElement != null) {
+            RobotExecutableStatement specialWrappingParent = PsiTreeUtil.getParentOfType(endBasedElement, RobotConditionalStructure.class, RobotExceptionHandlingStructure.class);
+            if (specialWrappingParent != null) {
+                endBasedElement = specialWrappingParent;
+            }
             ASTNode endTokenNode = endBasedElement.getNode().findChildByType(RobotTypes.END);
             if (endTokenNode == null) {
                 addEndTokenText(currentCaretOffset, endBasedElement, document);
