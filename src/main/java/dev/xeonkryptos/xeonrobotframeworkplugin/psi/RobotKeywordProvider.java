@@ -108,8 +108,8 @@ public class RobotKeywordProvider {
 
         KEYWORD_TABLE.addSyntax(SYNTAX_MARKER, "IF");
         KEYWORD_TABLE.addSyntax(SYNTAX_MARKER, "END");
-        KEYWORD_TABLE.addSyntax(SYNTAX_MARKER, "ELSE");
         KEYWORD_TABLE.addSyntax(SYNTAX_MARKER, "ELSE IF");
+        KEYWORD_TABLE.addSyntax(SYNTAX_MARKER, "ELSE");
         KEYWORD_TABLE.addSyntax(SYNTAX_MARKER, "FOR");
         KEYWORD_TABLE.addSyntax(SYNTAX_MARKER, "WHILE");
         KEYWORD_TABLE.addSyntax(SYNTAX_MARKER, "CONTINUE");

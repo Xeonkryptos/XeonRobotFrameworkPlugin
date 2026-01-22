@@ -10,14 +10,11 @@ import com.intellij.codeInsight.lookup.TailTypeDecorator;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.util.Key;
-import com.intellij.psi.PsiElement;
 import com.intellij.psi.tree.IElementType;
-import com.intellij.psi.util.PsiTreeUtil;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RecommendationWord;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotKeywordProvider;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.LookupElementMarker;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotSection;
 import dev.xeonkryptos.xeonrobotframeworkplugin.util.LookupElementUtil;
 import org.apache.commons.text.WordUtils;
 import org.jetbrains.annotations.NotNull;
@@ -34,13 +31,6 @@ final class CompletionProviderUtils {
 
     private CompletionProviderUtils() {
         throw new UnsupportedOperationException("Utility class");
-    }
-
-    static RobotSection getSection(PsiElement current) {
-        if (current == null) {
-            return null;
-        }
-        return PsiTreeUtil.getParentOfType(current, RobotSection.class, false);
     }
 
     static void addSyntaxLookup(@NotNull IElementType elementType, @NotNull CompletionResultSet resultSet) {

@@ -11,7 +11,6 @@ import com.intellij.icons.AllIcons.Nodes;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiElement;
-import com.intellij.psi.PsiFile;
 import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.psi.stubs.StubIndex;
 import com.intellij.psi.util.PsiTreeUtil;
@@ -38,7 +37,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedHashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -49,7 +47,7 @@ class KeywordCompletionProvider extends CompletionProvider<CompletionParameters>
     @Override
     protected void addCompletions(@NotNull CompletionParameters parameters, @NotNull ProcessingContext context, @NotNull CompletionResultSet result) {
         PsiElement position = parameters.getPosition();
-        RobotSection section = CompletionProviderUtils.getSection(position);
+        RobotSection section = PsiTreeUtil.getParentOfType(position, RobotSection.class, false);
         if (section == null) {
             return;
         }
@@ -71,49 +69,37 @@ class KeywordCompletionProvider extends CompletionProvider<CompletionParameters>
         }
         Collection<DefinedParameter> alreadyAddedParameters = keywordCall.getParameterList().stream().map(param -> new ParameterDto(param, param.getParameterName(), null)).collect(Collectors.toSet());
 
-        Collection<LookupElement> lookupElements = new LinkedList<>();
-        addDefinedKeywordsFromFile(lookupElements, parameters.getOriginalFile(), keywordCompletionModification, alreadyAddedParameters);
-        result.addAllElements(lookupElements);
+        RobotFile robotFile = (RobotFile) parameters.getOriginalFile();
+        addDefinedKeywords(result, robotFile, keywordCompletionModification, alreadyAddedParameters);
     }
 
-    private void addDefinedKeywordsFromFile(Collection<LookupElement> lookupElements,
-                                            PsiFile file,
-                                            KeywordCompletionModification keywordCompletionModification,
-                                            Collection<DefinedParameter> alreadyAddedParameters) {
-        RobotFile robotFile = (RobotFile) file;
-        RobotOptionsProvider robotOptionsProvider = RobotOptionsProvider.getInstance(robotFile.getProject());
-        boolean capitalizeKeywords = robotOptionsProvider.capitalizeKeywords();
-
-        Collection<DefinedKeyword> definedKeywordsFromRobotFile = collectDefinedKeywords(robotFile);
-        addDefinedKeywords(definedKeywordsFromRobotFile, capitalizeKeywords, keywordCompletionModification, alreadyAddedParameters).forEach(lookupElement -> {
-            lookupElement.putUserData(CompletionKeys.ROBOT_LOOKUP_CONTEXT, RobotLookupContext.KEYWORDS);
-            lookupElement.putUserData(CompletionKeys.ROBOT_LOOKUP_ELEMENT_TYPE, RobotLookupElementType.KEYWORD);
-            lookupElements.add(lookupElement);
-        });
-    }
-
-    private Collection<DefinedKeyword> collectDefinedKeywords(RobotFile robotFile) {
-        Collection<VirtualFile> importedFiles = collectImportedVirtualFilesOneselfIncluded(robotFile);
-
+    private void addDefinedKeywords(CompletionResultSet result, RobotFile robotFile, KeywordCompletionModification keywordCompletionModification, Collection<DefinedParameter> alreadyAddedParameters) {
         Project project = robotFile.getProject();
-        GlobalSearchScope searchScope = GlobalSearchScope.filesWithLibrariesScope(project, importedFiles);
-
-        Set<DefinedKeyword> definedKeywords = new LinkedHashSet<>();
-        collectUserKeywords(project, searchScope, definedKeywords);
-
-        Collection<DefinedKeyword> constructedPythonKeywords = PyRobotKeywordDefinitionIndexUtil.getKeywordNames(project, searchScope, null);
-        definedKeywords.addAll(constructedPythonKeywords);
-        return definedKeywords;
-    }
-
-    private static @NotNull Collection<VirtualFile> collectImportedVirtualFilesOneselfIncluded(RobotFile robotFile) {
-        Collection<VirtualFile> importedFiles = robotFile.collectImportedFiles(true, ImportType.LIBRARY).stream().map(KeywordFile::getVirtualFile).collect(Collectors.toSet());
         VirtualFile virtualFile = robotFile.getVirtualFile();
         if (virtualFile == null) {
             virtualFile = robotFile.getOriginalFile().getVirtualFile();
         }
-        importedFiles.add(virtualFile);
-        return importedFiles;
+
+        RobotOptionsProvider robotOptionsProvider = RobotOptionsProvider.getInstance(project);
+        boolean capitalizeKeywords = robotOptionsProvider.capitalizeKeywords();
+
+        Stream<VirtualFile> importedFilesStream = robotFile.collectImportedFiles(true, ImportType.LIBRARY).stream().map(KeywordFile::getVirtualFile);
+        Stream.concat(Stream.of(virtualFile), importedFilesStream).forEach(importedFile -> {
+            GlobalSearchScope searchScope = GlobalSearchScope.fileScope(project, importedFile);
+
+            Set<DefinedKeyword> definedKeywords = new LinkedHashSet<>();
+            collectUserKeywords(project, searchScope, definedKeywords);
+
+            Collection<DefinedKeyword> constructedPythonKeywords = PyRobotKeywordDefinitionIndexUtil.getKeywordNames(project, searchScope, null);
+            definedKeywords.addAll(constructedPythonKeywords);
+
+            Collection<LookupElement> wrappedKeywords = wrapDefinedKeywordsIntoLookupElements(definedKeywords, capitalizeKeywords, keywordCompletionModification, alreadyAddedParameters);
+            wrappedKeywords.forEach(lookupElement -> {
+                lookupElement.putUserData(CompletionKeys.ROBOT_LOOKUP_CONTEXT, RobotLookupContext.KEYWORDS);
+                lookupElement.putUserData(CompletionKeys.ROBOT_LOOKUP_ELEMENT_TYPE, RobotLookupElementType.KEYWORD);
+            });
+            result.addAllElements(wrappedKeywords);
+        });
     }
 
     private static void collectUserKeywords(Project project, GlobalSearchScope searchScope, Set<DefinedKeyword> definedKeywords) {
@@ -133,10 +119,10 @@ class KeywordCompletionProvider extends CompletionProvider<CompletionParameters>
         }
     }
 
-    private Collection<LookupElement> addDefinedKeywords(Collection<DefinedKeyword> keywords,
-                                                         boolean capitalize,
-                                                         KeywordCompletionModification keywordCompletionModification,
-                                                         Collection<DefinedParameter> alreadyAddedParameters) {
+    private Collection<LookupElement> wrapDefinedKeywordsIntoLookupElements(Collection<DefinedKeyword> keywords,
+                                                                            boolean capitalize,
+                                                                            KeywordCompletionModification keywordCompletionModification,
+                                                                            Collection<DefinedParameter> alreadyAddedParameters) {
         List<LookupElement> lookupElementKeywords = new ArrayList<>();
         for (DefinedKeyword keyword : keywords) {
             String keywordName = keyword.getKeywordName();
