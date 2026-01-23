@@ -7,6 +7,7 @@ import com.intellij.codeInsight.completion.CompletionProvider;
 import com.intellij.codeInsight.completion.CompletionResultSet;
 import com.intellij.codeInsight.lookup.LookupElement;
 import com.intellij.icons.AllIcons.Nodes;
+import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.util.PsiTreeUtil;
@@ -26,6 +27,7 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTemplateArgumen
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTemplateParameter;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTestCaseStatement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotUserKeywordStatement;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.reference.RobotFileManager;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.visitor.RecursiveRobotVisitor;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.visitor.RobotInStatementVariableCollector;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.visitor.RobotSectionVariablesCollector;
@@ -78,9 +80,18 @@ class VariableCompletionProvider extends CompletionProvider<CompletionParameters
             }
         }
 
+        addGlobalVariables(result, psiElement);
         addDefinedVariablesFromOwnSection(result, psiElement);
         addDefinedVariablesFromImportedFiles(result, parameters.getOriginalFile(), psiElement);
         addArgumentsFromUserKeyword(result, psiElement);
+    }
+
+    private void addGlobalVariables(@NotNull CompletionResultSet result, @NotNull PsiElement element) {
+        Project project = element.getProject();
+        Collection<DefinedVariable> globalVariables = RobotFileManager.getGlobalVariables(project);
+        Collection<LookupElement> lookupElements = wrapDefinedVariables(globalVariables, element);
+        lookupElements.forEach(lookupElement -> lookupElement.putUserData(CompletionKeys.ROBOT_LOOKUP_ELEMENT_TYPE, RobotLookupElementType.VARIABLE));
+        result.addAllElements(lookupElements);
     }
 
     private void addDefinedVariablesFromOwnSection(@NotNull CompletionResultSet result, @NotNull PsiElement element) {
@@ -93,16 +104,14 @@ class VariableCompletionProvider extends CompletionProvider<CompletionParameters
         robotStatement.accept(variableCollector);
 
         Collection<DefinedVariable> definedVariables = variableCollector.getAvailableVariables();
-        if (!definedVariables.isEmpty()) {
-            Collection<LookupElement> lookupElements = wrapDefinedVariables(definedVariables, element);
-            lookupElements.forEach(lookupElement -> lookupElement.putUserData(CompletionKeys.ROBOT_LOOKUP_ELEMENT_TYPE, RobotLookupElementType.VARIABLE));
-            result.addAllElements(lookupElements);
-        }
+        Collection<LookupElement> lookupElements = wrapDefinedVariables(definedVariables, element);
+        lookupElements.forEach(lookupElement -> lookupElement.putUserData(CompletionKeys.ROBOT_LOOKUP_ELEMENT_TYPE, RobotLookupElementType.VARIABLE));
+        result.addAllElements(lookupElements);
     }
 
     private void addDefinedVariablesFromImportedFiles(@NotNull CompletionResultSet result, @NotNull PsiFile file, @NotNull PsiElement element) {
         RobotFile robotFile = (RobotFile) file;
-        Collection<DefinedVariable> variablesInCurrentFile = robotFile.getDefinedVariables();
+        Collection<DefinedVariable> variablesInCurrentFile = robotFile.getLocallyDefinedVariables();
 
         Collection<LookupElement> wrappedVariablesInCurrentFile = wrapDefinedVariables(variablesInCurrentFile, element);
         wrappedVariablesInCurrentFile.forEach(lookupElement -> lookupElement.putUserData(CompletionKeys.ROBOT_LOOKUP_ELEMENT_TYPE, RobotLookupElementType.VARIABLE));
@@ -111,7 +120,7 @@ class VariableCompletionProvider extends CompletionProvider<CompletionParameters
 
         Collection<KeywordFile> importedFiles = robotFile.collectImportedFiles(true, ImportType.VARIABLES, ImportType.RESOURCE);
         for (KeywordFile importedFile : importedFiles) {
-            Collection<DefinedVariable> variablesInImportedFile = importedFile.getDefinedVariables();
+            Collection<DefinedVariable> variablesInImportedFile = importedFile.getLocallyDefinedVariables();
 
             Collection<LookupElement> wrappedVariablesInImportedFile = wrapDefinedVariables(variablesInImportedFile, element);
             wrappedVariablesInImportedFile.forEach(lookupElement -> lookupElement.putUserData(CompletionKeys.ROBOT_LOOKUP_ELEMENT_TYPE, RobotLookupElementType.VARIABLE));
@@ -130,19 +139,26 @@ class VariableCompletionProvider extends CompletionProvider<CompletionParameters
                 localArgumentsSetting.acceptChildren(variablesCollector);
 
                 Collection<DefinedVariable> definedVariables = variablesCollector.getVariables();
-                List<LookupElement> wrappedVariables = definedVariables.stream()
-                                                                       .map(variable -> CompletionProviderUtils.createLookupElement(variable, Nodes.Variable, false, TailTypes.noneType()))
-                                                                       .filter(Optional::isPresent)
-                                                                       .map(optional -> {
-                                                                           LookupElement lookupElement = optional.get();
-                                                                           lookupElement.putUserData(CompletionKeys.ROBOT_LOOKUP_CONTEXT, RobotLookupContext.WITHIN_KEYWORD_STATEMENT);
-                                                                           lookupElement.putUserData(CompletionKeys.ROBOT_LOOKUP_ELEMENT_TYPE, RobotLookupElementType.VARIABLE);
-                                                                           return lookupElement;
-                                                                       })
-                                                                       .toList();
-                result.addAllElements(wrappedVariables);
+                addCollectedVariablesWithinKeyword(result, definedVariables);
+
+                definedVariables = variablesCollector.computeUserKeywordVariables();
+                addCollectedVariablesWithinKeyword(result, definedVariables);
             }
         }
+    }
+
+    private static void addCollectedVariablesWithinKeyword(@NotNull CompletionResultSet result, Collection<DefinedVariable> definedVariables) {
+        List<LookupElement> wrappedVariables = definedVariables.stream()
+                                                               .map(variable -> CompletionProviderUtils.createLookupElement(variable, Nodes.Variable, false, TailTypes.noneType()))
+                                                               .filter(Optional::isPresent)
+                                                               .map(optional -> {
+                                                                   LookupElement lookupElement = optional.get();
+                                                                   lookupElement.putUserData(CompletionKeys.ROBOT_LOOKUP_CONTEXT, RobotLookupContext.WITHIN_KEYWORD_STATEMENT);
+                                                                   lookupElement.putUserData(CompletionKeys.ROBOT_LOOKUP_ELEMENT_TYPE, RobotLookupElementType.VARIABLE);
+                                                                   return lookupElement;
+                                                               })
+                                                               .toList();
+        result.addAllElements(wrappedVariables);
     }
 
     private Collection<LookupElement> wrapDefinedVariables(@NotNull Collection<DefinedVariable> variables, @NotNull PsiElement element) {

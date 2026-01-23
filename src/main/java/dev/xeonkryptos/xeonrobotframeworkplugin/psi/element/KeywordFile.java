@@ -12,6 +12,8 @@ public interface KeywordFile {
 
     Collection<DefinedVariable> findDefinedVariable(@NotNull String variableName);
 
+    Collection<DefinedVariable> getLocallyDefinedVariables();
+
     @NotNull Collection<DefinedVariable> getDefinedVariables();
 
     @NotNull Collection<DefinedVariable> getDefinedVariables(Collection<KeywordFile> visitedFiles);

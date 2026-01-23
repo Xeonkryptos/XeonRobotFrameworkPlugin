@@ -24,5 +24,7 @@ public interface RobotFile extends PsiFile {
 
     @NotNull Collection<VirtualFile> findImportedFilesWithLibraryName(@NotNull String libraryName);
 
+    Collection<DefinedVariable> getLocallyDefinedVariables();
+
     @NotNull Collection<DefinedVariable> getDefinedVariables();
 }

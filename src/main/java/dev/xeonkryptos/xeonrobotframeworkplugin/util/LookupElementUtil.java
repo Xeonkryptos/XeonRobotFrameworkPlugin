@@ -18,22 +18,20 @@ public final class LookupElementUtil {
     }
 
     public static LookupElementBuilder addReferenceType(PsiElement element, LookupElementBuilder builder) {
-        PsiFile containingFile = element.getContainingFile();
+        PsiFile containingFile = element.getContainingFile().getOriginalFile();
         VirtualFile virtualFile = containingFile.getVirtualFile();
-        if (virtualFile != null) {
-            FileType fileType = virtualFile.getFileType();
-            if (fileType == RobotResourceFileType.getInstance()) {
-                builder = builder.withTypeText(getBaseName(virtualFile), RobotIcons.RESOURCE, true);
-            } else if (fileType == RobotFeatureFileType.getInstance()) {
-                builder = builder.withTypeText(getBaseName(virtualFile), RobotIcons.FILE, true);
-            } else if (containingFile instanceof PyiFile pyiFile && pyiFile.getContainingDirectory() != null) {
-                String directoryName = pyiFile.getContainingDirectory().getName();
-                builder = builder.withTypeText(directoryName, RobotIcons.PYTHON, true);
-            } else if (containingFile instanceof PyFile) {
-                builder = builder.withTypeText(getBaseName(virtualFile), RobotIcons.PYTHON, true);
-            } else {
-                builder = builder.withTypeText(getBaseName(virtualFile), true);
-            }
+        FileType fileType = virtualFile.getFileType();
+        if (fileType == RobotResourceFileType.getInstance()) {
+            builder = builder.withTypeText(getBaseName(virtualFile), RobotIcons.RESOURCE, true);
+        } else if (fileType == RobotFeatureFileType.getInstance()) {
+            builder = builder.withTypeText(getBaseName(virtualFile), RobotIcons.FILE, true);
+        } else if (containingFile instanceof PyiFile pyiFile && pyiFile.getContainingDirectory() != null) {
+            String directoryName = pyiFile.getContainingDirectory().getName();
+            builder = builder.withTypeText(directoryName, RobotIcons.PYTHON, true);
+        } else if (containingFile instanceof PyFile) {
+            builder = builder.withTypeText(getBaseName(virtualFile), RobotIcons.PYTHON, true);
+        } else {
+            builder = builder.withTypeText(getBaseName(virtualFile), true);
         }
         return builder;
     }

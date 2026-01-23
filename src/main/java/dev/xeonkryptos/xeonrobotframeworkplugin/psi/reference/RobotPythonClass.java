@@ -43,6 +43,11 @@ public class RobotPythonClass implements KeywordFile {
     @NotNull
     @Override
     public final Collection<DefinedVariable> getDefinedVariables() {
+        return getLocallyDefinedVariables();
+    }
+
+    @Override
+    public Collection<DefinedVariable> getLocallyDefinedVariables() {
         if (importType == ImportType.VARIABLES) {
             return RobotKeywordFileResolver.resolveVariables(pythonClass);
         }

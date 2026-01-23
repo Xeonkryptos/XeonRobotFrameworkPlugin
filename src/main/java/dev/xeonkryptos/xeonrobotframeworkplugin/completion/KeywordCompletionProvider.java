@@ -113,6 +113,7 @@ class KeywordCompletionProvider extends CompletionProvider<CompletionParameters>
             for (RobotUserKeywordStatement userKeywordStatement : KeywordDefinitionNameIndex.getUserKeywordStatements(normalizedKeywordName, project, searchScope)) {
                 RobotUserKeywordsCollector robotUserKeywordsCollector = new RobotUserKeywordsCollector();
                 userKeywordStatement.accept(robotUserKeywordsCollector);
+
                 Collection<DefinedKeyword> constructedUserKeywords = robotUserKeywordsCollector.getKeywords();
                 definedKeywords.addAll(constructedUserKeywords);
             }

@@ -93,6 +93,18 @@ public class RobotFileImpl extends PsiFileBase implements KeywordFile, RobotFile
         return List.of();
     }
 
+    @Override
+    public Collection<DefinedVariable> getLocallyDefinedVariables() {
+        if (sectionVariables == null) {
+            RobotSectionVariablesCollector visitor = new RobotSectionVariablesCollector();
+            acceptChildren(visitor);
+            sectionVariables = new LinkedHashSet<>(visitor.getVariables());
+
+            Collection<DefinedVariable> additionalVariables = visitor.computeUserKeywordVariables();
+            sectionVariables.addAll(additionalVariables);
+        } return sectionVariables;
+    }
+
     @NotNull
     @Override
     public final Collection<DefinedVariable> getDefinedVariables() {
@@ -104,7 +116,7 @@ public class RobotFileImpl extends PsiFileBase implements KeywordFile, RobotFile
     @NotNull
     @Override
     public Collection<DefinedVariable> getDefinedVariables(Collection<KeywordFile> visitedFiles) {
-        Collection<DefinedVariable> sectionVariables = getSectionVariables();
+        Collection<DefinedVariable> sectionVariables = getLocallyDefinedVariables();
         Collection<DefinedVariable> globalVariables = RobotFileManager.getGlobalVariables(getProject());
         Collection<KeywordFile> importedFiles = getImportedFiles(false, ImportType.VARIABLES);
         Set<DefinedVariable> importedVariables = new HashSet<>();
@@ -121,15 +133,6 @@ public class RobotFileImpl extends PsiFileBase implements KeywordFile, RobotFile
         variables.addAll(globalVariables);
         variables.addAll(importedVariables);
         return variables;
-    }
-
-    private Collection<DefinedVariable> getSectionVariables() {
-        if (sectionVariables == null) {
-            RobotSectionVariablesCollector visitor = new RobotSectionVariablesCollector();
-            acceptChildren(visitor);
-            sectionVariables = visitor.getVariables();
-        }
-        return sectionVariables;
     }
 
     @NotNull
