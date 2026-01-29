@@ -1,5 +1,6 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.index
 
+import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.psi.PsiManager
@@ -80,20 +81,28 @@ class PyRobotKeywordDefinitionIndex : FileBasedIndexExtension<String, PyRobotKey
         ): Collection<DefinedKeyword> {
             val fileBasedIndex = FileBasedIndex.getInstance()
             val virtualFiles = mutableSetOf<VirtualFile>()
+            val fileKeys = mutableSetOf<String>()
             fileBasedIndex.processAllKeys(INDEX_ID, { key ->
-                val containingFiles = fileBasedIndex.getContainingFiles(INDEX_ID, key, scope)
-                virtualFiles.addAll(containingFiles)
+                ProgressManager.checkCanceled()
+                fileKeys.add(key)
                 return@processAllKeys true
             }, scope, null)
+            for (key in fileKeys) {
+                ProgressManager.checkCanceled()
+                val files = fileBasedIndex.getContainingFiles(INDEX_ID, key, scope)
+                virtualFiles.addAll(files)
+            }
             if (virtualFiles.isEmpty()) return emptyList()
 
             val psiManager = PsiManager.getInstance(project)
             val result = mutableSetOf<DefinedKeyword>()
             for (virtualFile in virtualFiles) {
+                ProgressManager.checkCanceled()
                 val pyFile = psiManager.findFile(virtualFile) as? PyFile ?: continue
                 val fileData = fileBasedIndex.getFileData(INDEX_ID, virtualFile, project)
                 fileData.forEach { (_, offsets) ->
                     for (offset in offsets.array) {
+                        ProgressManager.checkCanceled()
                         val elementAt = pyFile.findElementAt(offset.coerceAtMost(pyFile.textLength - 1))
                         val pyFunction = PsiTreeUtil.getParentOfType(elementAt, PyFunction::class.java, false) ?: continue
                         RobotPyUtil.getPythonKeywordName(pyFunction).ifPresent(Consumer { keywordName ->
