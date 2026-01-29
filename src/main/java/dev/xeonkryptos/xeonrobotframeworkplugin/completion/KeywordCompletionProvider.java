@@ -84,22 +84,22 @@ class KeywordCompletionProvider extends CompletionProvider<CompletionParameters>
         boolean capitalizeKeywords = robotOptionsProvider.capitalizeKeywords();
 
         Stream<VirtualFile> importedFilesStream = robotFile.collectImportedFiles(true, ImportType.LIBRARY).stream().map(KeywordFile::getVirtualFile);
-        Stream.concat(Stream.of(virtualFile), importedFilesStream).forEach(importedFile -> {
-            GlobalSearchScope searchScope = GlobalSearchScope.fileScope(project, importedFile);
+        Set<VirtualFile> virtualFiles = Stream.concat(Stream.of(virtualFile), importedFilesStream).collect(Collectors.toSet());
 
-            Set<DefinedKeyword> definedKeywords = new LinkedHashSet<>();
-            collectUserKeywords(project, searchScope, definedKeywords);
+        Set<DefinedKeyword> definedKeywords = new LinkedHashSet<>();
+        GlobalSearchScope searchScope = GlobalSearchScope.filesWithLibrariesScope(project, virtualFiles);
 
-            Collection<DefinedKeyword> constructedPythonKeywords = PyRobotKeywordDefinitionIndexUtil.getKeywordNames(project, searchScope, null);
-            definedKeywords.addAll(constructedPythonKeywords);
+        collectUserKeywords(project, searchScope, definedKeywords);
 
-            Collection<LookupElement> wrappedKeywords = wrapDefinedKeywordsIntoLookupElements(definedKeywords, capitalizeKeywords, keywordCompletionModification, alreadyAddedParameters);
-            wrappedKeywords.forEach(lookupElement -> {
-                lookupElement.putUserData(CompletionKeys.ROBOT_LOOKUP_CONTEXT, RobotLookupContext.KEYWORDS);
-                lookupElement.putUserData(CompletionKeys.ROBOT_LOOKUP_ELEMENT_TYPE, RobotLookupElementType.KEYWORD);
-            });
-            result.addAllElements(wrappedKeywords);
+        Collection<DefinedKeyword> constructedPythonKeywords = PyRobotKeywordDefinitionIndexUtil.getKeywordNames(project, searchScope, null);
+        definedKeywords.addAll(constructedPythonKeywords);
+
+        Collection<LookupElement> wrappedKeywords = wrapDefinedKeywordsIntoLookupElements(definedKeywords, capitalizeKeywords, keywordCompletionModification, alreadyAddedParameters);
+        wrappedKeywords.forEach(lookupElement -> {
+            lookupElement.putUserData(CompletionKeys.ROBOT_LOOKUP_CONTEXT, RobotLookupContext.KEYWORDS);
+            lookupElement.putUserData(CompletionKeys.ROBOT_LOOKUP_ELEMENT_TYPE, RobotLookupElementType.KEYWORD);
         });
+        result.addAllElements(wrappedKeywords);
     }
 
     private static void collectUserKeywords(Project project, GlobalSearchScope searchScope, Set<DefinedKeyword> definedKeywords) {
