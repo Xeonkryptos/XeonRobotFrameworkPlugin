@@ -1,9 +1,5 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.psi.dto;
 
-import com.intellij.codeInsight.completion.InsertHandler;
-import com.intellij.codeInsight.lookup.LookupElement;
-import com.intellij.openapi.editor.Document;
-import com.intellij.openapi.util.TextRange;
 import com.intellij.psi.PsiElement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.DefinedVariable;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.VariableScope;
@@ -20,18 +16,20 @@ public class VariableDto implements DefinedVariable {
     private final String name;
     private final String matchingVariableName;
     private final VariableScope scope;
+    private final VariableType variableType;
 
     private final Set<String> variableNameVariants;
 
-    public VariableDto(@NotNull PsiElement reference, @NotNull String name, @Nullable VariableScope scope) {
-        this(reference, "${%s}".formatted(name.trim()), name, scope);
+    public VariableDto(@NotNull PsiElement reference, @NotNull String name, @NotNull VariableType variableType, @Nullable VariableScope scope) {
+        this(reference, name.trim(), name, variableType, scope);
     }
 
-    public VariableDto(@NotNull PsiElement reference, @NotNull String name, @NotNull String matchingVariableName, @Nullable VariableScope scope) {
+    public VariableDto(@NotNull PsiElement reference, @NotNull String name, @NotNull String matchingVariableName, VariableType variableType, @Nullable VariableScope scope) {
         this.reference = reference;
         this.name = normalizeName(name.trim());
         this.matchingVariableName = matchingVariableName.trim();
         this.scope = scope;
+        this.variableType = variableType;
 
         this.variableNameVariants = VariableNameUtil.INSTANCE.computeVariableNameVariants(this.matchingVariableName);
     }
@@ -70,6 +68,11 @@ public class VariableDto implements DefinedVariable {
         return this.reference;
     }
 
+    @Override
+    public @NotNull VariableType getVariableType() {
+        return variableType;
+    }
+
     @Nullable
     @Override
     public final String getLookup() {
@@ -78,38 +81,12 @@ public class VariableDto implements DefinedVariable {
 
     @Override
     public String getPresentableText() {
-        return this.name;
+        return variableType.prefixed(name);
     }
 
     @Override
     public String[] getLookupWords() {
-        return new String[] { name, matchingVariableName };
-    }
-
-    @Override
-    public InsertHandler<LookupElement> getInsertHandler() {
-        return (context, item) -> {
-            Document document = context.getDocument();
-            String lookupString = item.getLookupString();
-
-            int startOffset = context.getStartOffset();
-            int selectionEndOffset = context.getSelectionEndOffset();
-
-            int targetStartOffset = Math.max(startOffset - 2, 0);
-            int targetEndOffset = Math.min(selectionEndOffset + 1, document.getTextLength());
-
-            String text = document.getText(new TextRange(targetStartOffset, targetEndOffset));
-            if (text.startsWith("${") || text.startsWith("%{") || text.startsWith("@{") || text.startsWith("&{")) {
-                startOffset -= 2;
-            } else if (text.startsWith("$") || text.startsWith("%") || text.startsWith("@") || text.startsWith("&")) {
-                startOffset -= 1;
-            }
-            if (text.endsWith("}")) {
-                selectionEndOffset += 1;
-            }
-
-            document.replaceString(startOffset, selectionEndOffset, lookupString);
-        };
+        return new String[] { name, matchingVariableName, variableType.prefixed(name), variableType.prefixed(matchingVariableName) };
     }
 
     @Override

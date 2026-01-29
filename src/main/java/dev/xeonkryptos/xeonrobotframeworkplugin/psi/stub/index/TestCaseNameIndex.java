@@ -8,7 +8,6 @@ import com.intellij.psi.stubs.StubIndexKey;
 import com.intellij.util.Processor;
 import com.intellij.util.indexing.IdFilter;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTestCaseStatement;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotStubFileElementType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -34,6 +33,6 @@ public class TestCaseNameIndex extends StringStubIndexExtension<RobotTestCaseSta
 
     @Override
     public int getVersion() {
-        return RobotStubFileElementType.STUB_FILE_VERSION + super.getVersion() + 1;
+        return super.getVersion() + 1;
     }
 }

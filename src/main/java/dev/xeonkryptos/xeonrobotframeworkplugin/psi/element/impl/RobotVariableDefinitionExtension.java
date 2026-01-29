@@ -3,8 +3,11 @@ package dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl;
 import com.intellij.lang.ASTNode;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.stubs.IStubElementType;
+import com.intellij.psi.tree.IElementType;
 import com.intellij.util.IncorrectOperationException;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotPsiImplUtil;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.dto.VariableType;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableBodyId;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableDefinition;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotStubPsiElementBase;
@@ -15,6 +18,7 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.util.VariableNameUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import javax.swing.Icon;
 import java.util.Set;
 
 public abstract class RobotVariableDefinitionExtension extends RobotStubPsiElementBase<RobotVariableDefinitionStub, RobotVariableDefinition>
@@ -58,13 +62,13 @@ public abstract class RobotVariableDefinitionExtension extends RobotStubPsiEleme
 
     @Override
     public int getTextOffset() {
-        return super.getTextOffset() + 2; // to skip the ${, @%, &% or %% at the beginning of the variable
+        return super.getTextOffset() + 2; // to skip the ${, @{, &{ or %{ at the beginning of the variable
     }
 
     @Override
     public PsiElement setName(@NotNull String newName) throws IncorrectOperationException {
         RobotVariableBodyId newVariableBodyId = RobotElementGenerator.getInstance(getProject()).createNewVariableBodyId(newName);
-        RobotVariableBodyId variableBodyId = RobotPsiImplUtil.getVariableBodyId(getVariable());
+        RobotVariableBodyId variableBodyId = RobotPsiImplUtil.getVariableBodyId(this);
         if (variableBodyId != null && newVariableBodyId != null) {
             variableBodyId.replace(newVariableBodyId);
         }
@@ -72,13 +76,48 @@ public abstract class RobotVariableDefinitionExtension extends RobotStubPsiEleme
     }
 
     @Override
+    public @NotNull VariableType getVariableType() {
+        RobotVariableDefinitionStub stub = getStub();
+        if (stub != null) {
+            return stub.getVariableType();
+        }
+        PsiElement firstChild = getFirstChild();
+        if (firstChild == null) {
+            return VariableType.SCALAR;
+        }
+        IElementType elementType = firstChild.getNode().getElementType();
+        if (elementType == RobotTypes.LIST_VARIABLE_START) {
+            return VariableType.LIST;
+        } else if (elementType == RobotTypes.DICT_VARIABLE_START) {
+            return VariableType.DICTIONARY;
+        }
+        return VariableType.SCALAR;
+    }
+
+    @Override
     public String getLookup() {
-        return getText();
+        return getName();
+    }
+
+    @Override
+    public String getPresentableText() {
+        String name = getName();
+        if (name == null) {
+            return getText();
+        }
+        return getVariableType().prefixed(name);
     }
 
     @Override
     public String[] getLookupWords() {
-        return new String[] { getName(), getText() };
+        String name = getName();
+        String text = getText();
+        if (name == null) {
+            return new String[] { text };
+        }
+
+        VariableType variableType = getVariableType();
+        return new String[] { name, variableType.prefixed(name), text };
     }
 
     @NotNull
@@ -95,6 +134,10 @@ public abstract class RobotVariableDefinitionExtension extends RobotStubPsiEleme
         }
         return scope;
     }
+
+    @NotNull
+    @Override
+    public abstract Icon getIcon(int flags);
 
     @Override
     public PsiElement reference() {

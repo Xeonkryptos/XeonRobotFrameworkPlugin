@@ -21,7 +21,7 @@ class RobotVariableRatherArgumentMeantInspection : LocalInspectionTool(), DumbAw
             override fun visitLiteralConstantValue(o: RobotLiteralConstantValue) {
                 if (o.parent is RobotPositionalArgument) {
                     val argumentText = o.text
-                    val reservedVariableFound = ReservedVariable.entries.any { it.unwrappedVariable.contentEquals(argumentText, true) }
+                    val reservedVariableFound = ReservedVariable.entries.any { it.variable.contentEquals(argumentText, true) }
                     if (reservedVariableFound) {
                         holder.registerProblem(
                             o,

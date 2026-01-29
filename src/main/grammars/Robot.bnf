@@ -417,9 +417,9 @@ reduced_positional_argument ::= <<parsePositionalArgument reduced_positional_arg
 }
 private reduced_positional_argument_content ::= literal_constant_value | variable | conditional_content
 
-variable_definition ::= variable {
+variable_definition ::= scalar_variable_definition | list_variable_definition | dict_variable_definition {
     implements = [
-        "com.intellij.psi.PsiNameIdentifierOwner"
+        "com.intellij.psi.PsiNamedElement"
         "com.intellij.navigation.NavigationItem"
         "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.DefinedVariable"
         "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotQualifiedNameOwner"
@@ -427,28 +427,32 @@ variable_definition ::= variable {
     mixin = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotVariableDefinitionExtension"
     stubClass = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotVariableDefinitionStub"
     elementTypeFactory = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotVariableDefinitionStubElement.create"
-    methods = [getNameIdentifier getName getIcon getQualifiedName]
+    methods = [getName getIcon getQualifiedName]
 }
 
 variable ::= scalar_variable | list_variable | dict_variable | environment_variable {
     methods = [getVariableName]
 }
-scalar_variable ::= SCALAR_VARIABLE_START (variable_content | python_expression)? VARIABLE_END (extended_variable_slice_access | extended_variable_index_access | extended_variable_nested_access)* {
+scalar_variable ::= scalar_variable_definition {
     mixin = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotScalarVariableExtension"
     stubClass = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotScalarVariableStub"
     elementTypeFactory = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotScalarVariableStubElement.create"
 }
-list_variable ::= LIST_VARIABLE_START (variable_content | python_expression) VARIABLE_END (extended_variable_slice_access | extended_variable_index_access | extended_variable_nested_access)* {
+list_variable ::= list_variable_definition {
     mixin = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotListVariableExtension"
     stubClass = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotListVariableStub"
     elementTypeFactory = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotListVariableStubElement.create"
 }
-dict_variable ::= DICT_VARIABLE_START (variable_content | python_expression) VARIABLE_END extended_variable_nested_access* {
+dict_variable ::= dict_variable_definition {
     mixin = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotDictVariableExtension"
     stubClass = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotDictVariableStub"
     elementTypeFactory = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotDictVariableStubElement.create"
 }
 environment_variable ::= ENV_VARIABLE_START variable_content VARIABLE_END
+
+private scalar_variable_definition ::= SCALAR_VARIABLE_START (variable_content | python_expression)? VARIABLE_END (extended_variable_slice_access | extended_variable_index_access | extended_variable_nested_access)* {pin=1}
+private list_variable_definition ::= LIST_VARIABLE_START (variable_content | python_expression) VARIABLE_END (extended_variable_slice_access | extended_variable_index_access | extended_variable_nested_access)* {pin=1}
+private dict_variable_definition ::= DICT_VARIABLE_START (variable_content | python_expression) VARIABLE_END extended_variable_nested_access* {pin=1}
 
 variable_content ::= (variable | variable_body_id)+ {
     methods=[content="/variable_body_id[0]"]

@@ -6,6 +6,7 @@ import com.intellij.psi.util.PsiTreeUtil;
 import dev.xeonkryptos.xeonrobotframeworkplugin.icons.RobotIcons;
 import dev.xeonkryptos.xeonrobotframeworkplugin.misc.RobotReadWriteAccessDetector;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotCommentsSection;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotDictVariable;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotImportArgument;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotInlineVariableStatement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCall;
@@ -13,6 +14,7 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCallLibr
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCallName;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordVariableStatement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordsSection;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotListVariable;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLocalArgumentsSetting;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLocalArgumentsSettingId;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLocalSetting;
@@ -20,6 +22,7 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLocalSettingId;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotParameter;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotParameterId;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotPositionalArgument;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotScalarVariable;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotSection;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotSettingsSection;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTaskId;
@@ -46,6 +49,14 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.reference.RobotParameterRefe
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.reference.RobotPositionalArgumentReference;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.reference.RobotTemplateParameterReference;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.reference.RobotVariableBodyReference;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotDictVariableStub;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotKeywordCallStub;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotListVariableStub;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotScalarVariableStub;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotTaskStatementStub;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotTestCaseStatementStub;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotUserKeywordStub;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotVariableDefinitionStub;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.QualifiedNameBuilder;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.VariableScope;
 import org.jetbrains.annotations.NotNull;
@@ -59,30 +70,50 @@ public class RobotPsiImplUtil {
 
     @NotNull
     public static String getName(@NotNull RobotKeywordCall robotKeywordCall) {
+        RobotKeywordCallStub stub = robotKeywordCall.getStub();
+        if (stub != null) {
+            return stub.getName();
+        }
         RobotKeywordCallName keywordCallName = getNameIdentifier(robotKeywordCall);
         return keywordCallName.getText();
     }
 
     @NotNull
     public static String getName(@NotNull RobotUserKeywordStatement userKeywordStatement) {
+        RobotUserKeywordStub stub = userKeywordStatement.getStub();
+        if (stub != null) {
+            return stub.getName();
+        }
         RobotUserKeywordStatementId userKeywordStatementId = getNameIdentifier(userKeywordStatement);
         return userKeywordStatementId.getText();
     }
 
     @Nullable
     public static String getName(@NotNull RobotVariableDefinition variableDefinition) {
-        RobotVariable variable = getNameIdentifier(variableDefinition);
-        return variable.getVariableName();
+        RobotVariableDefinitionStub stub = variableDefinition.getStub();
+        if (stub != null) {
+            return stub.getName();
+        }
+        RobotVariableBodyId variableBodyId = getVariableBodyId(variableDefinition);
+        return variableBodyId != null ? variableBodyId.getText() : null;
     }
 
     @NotNull
     public static String getName(@NotNull RobotTestCaseStatement testCaseStatement) {
+        RobotTestCaseStatementStub stub = testCaseStatement.getStub();
+        if (stub != null) {
+            return stub.getName();
+        }
         RobotTestCaseId testCaseId = testCaseStatement.getTestCaseId();
         return testCaseId.getText();
     }
 
     @NotNull
     public static String getName(@NotNull RobotTaskStatement taskStatement) {
+        RobotTaskStatementStub stub = taskStatement.getStub();
+        if (stub != null) {
+            return stub.getName();
+        }
         RobotTaskId taskId = taskStatement.getTaskId();
         return taskId.getText();
     }
@@ -107,15 +138,47 @@ public class RobotPsiImplUtil {
         return testCaseStatement.getTestCaseId();
     }
 
-    @NotNull
-    public static RobotVariable getNameIdentifier(@NotNull RobotVariableDefinition variableDefinition) {
-        return variableDefinition.getVariable();
+    @Nullable
+    public static String getVariableName(@NotNull RobotScalarVariable variable) {
+        RobotScalarVariableStub stub = variable.getStub();
+        if (stub != null) {
+            return stub.getVariableName();
+        }
+        RobotVariableBodyId variableBodyId = getVariableBodyId(variable);
+        return variableBodyId != null ? variableBodyId.getText() : null;
+    }
+
+    @Nullable
+    public static String getVariableName(@NotNull RobotListVariable variable) {
+        RobotListVariableStub stub = variable.getStub();
+        if (stub != null) {
+            return stub.getVariableName();
+        }
+        RobotVariableBodyId variableBodyId = getVariableBodyId(variable);
+        return variableBodyId != null ? variableBodyId.getText() : null;
+    }
+
+    @Nullable
+    public static String getVariableName(@NotNull RobotDictVariable variable) {
+        RobotDictVariableStub stub = variable.getStub();
+        if (stub != null) {
+            return stub.getVariableName();
+        }
+        RobotVariableBodyId variableBodyId = getVariableBodyId(variable);
+        return variableBodyId != null ? variableBodyId.getText() : null;
     }
 
     @Nullable
     public static String getVariableName(@NotNull RobotVariable variable) {
-        RobotVariableBodyId variableBodyId = getVariableBodyId(variable);
-        return variableBodyId != null ? variableBodyId.getText() : null;
+        return switch (variable) {
+            case RobotScalarVariable robotScalarVariable -> getVariableName(robotScalarVariable);
+            case RobotListVariable robotListVariable -> getVariableName(robotListVariable);
+            case RobotDictVariable robotDictVariable -> getVariableName(robotDictVariable);
+            default -> {
+                RobotVariableBodyId variableBodyId = getVariableBodyId(variable);
+                yield variableBodyId != null ? variableBodyId.getText() : null;
+            }
+        };
     }
 
     @NotNull
@@ -241,6 +304,15 @@ public class RobotPsiImplUtil {
         return null;
     }
 
+    @Nullable
+    public static RobotVariableBodyId getVariableBodyId(RobotVariableDefinition variableDefinition) {
+        RobotVariableContent variableContent = PsiTreeUtil.getChildOfType(variableDefinition, RobotVariableContent.class);
+        if (variableContent != null) {
+            return PsiTreeUtil.getChildOfType(variableContent, RobotVariableBodyId.class);
+        }
+        return null;
+    }
+
     @NotNull
     public static List<RobotLocalSetting> getLocalSettings(@NotNull RobotTestCaseStatement element) {
         return PsiTreeUtil.getChildrenOfTypeAsList(element, RobotLocalSetting.class);
@@ -289,6 +361,10 @@ public class RobotPsiImplUtil {
 
     @NotNull
     public static VariableScope getScope(@NotNull RobotVariableDefinition variableDefinition) {
+        RobotVariableDefinitionStub stub = variableDefinition.getStub();
+        if (stub != null) {
+            return stub.getScope();
+        }
         RobotInlineVariableStatement inlineVariableStatement = PsiTreeUtil.getParentOfType(variableDefinition, RobotInlineVariableStatement.class, true);
         Optional<VariableScope> variableScopeOpt = Optional.ofNullable(inlineVariableStatement)
                                                            .map(RobotInlineVariableStatement::getParameter)

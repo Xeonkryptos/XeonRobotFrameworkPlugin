@@ -38,40 +38,46 @@ public class RobotUnusedVariableDefinitionInspection extends LocalInspectionTool
     @Override
     public void inspectionFinished(@NotNull LocalInspectionToolSession session, @NotNull ProblemsHolder problemsHolder) {
         RobotVariableUsageVisitor variableUsageVisitor = session.getUserData(VARIABLE_USAGE_VISITOR_KEY);
-        if (variableUsageVisitor != null) {
-            Iterator<RobotVariableDefinition> definitionsIterator = variableUsageVisitor.foundVariableDefinitions.iterator();
-            while (definitionsIterator.hasNext()) {
-                RobotVariableDefinition variableDefinition = definitionsIterator.next();
-                Iterator<RobotVariable> variableIterator = variableUsageVisitor.foundVariableUsages.iterator();
-                while (variableIterator.hasNext()) {
-                    RobotVariable variable = variableIterator.next();
-                    String variableName = variable.getVariableName();
-                    if (variableDefinition.isInScope(variable) && variableDefinition.matches(variableName)) {
-                        variableIterator.remove();
-                        definitionsIterator.remove();
-                        break;
-                    }
-                }
+        if (variableUsageVisitor == null) {
+            return;
+        }
+
+        filterOutUsedVariableDefinitions(variableUsageVisitor);
+        SearchScope scope = GlobalSearchScope.projectScope(problemsHolder.getProject());
+        for (RobotVariableDefinition unusedVariableDefinition : variableUsageVisitor.foundVariableDefinitions) {
+            @SuppressWarnings("UnstableApiUsage")
+            boolean problemDetected = ReferencesSearch.search(unusedVariableDefinition, scope)
+                                                      .allowParallelProcessing()
+                                                      .mapping(ref -> PsiTreeUtil.getParentOfType(ref.getElement(),
+                                                                                                  RobotVariable.class,
+                                                                                                  RobotVariableDefinition.class))
+                                                      .filtering(Objects::nonNull)
+                                                      .filtering(element -> {
+                                                          ReadWriteAccessDetector detector = ReadWriteAccessDetector.findDetector(element);
+                                                          return detector != null && !detector.isDeclarationWriteAccess(element);
+                                                      })
+                                                      .findFirst() == null;
+            if (problemDetected) {
+                problemsHolder.registerProblem(unusedVariableDefinition,
+                                               RobotBundle.message("INSP.variable.unused"),
+                                               ProblemHighlightType.LIKE_UNUSED_SYMBOL,
+                                               new RemoveUnusedVariableDefinitionQuickFix(unusedVariableDefinition));
             }
-            SearchScope scope = GlobalSearchScope.projectScope(problemsHolder.getProject());
-            for (RobotVariableDefinition unusedVariableDefinition : variableUsageVisitor.foundVariableDefinitions) {
-                @SuppressWarnings("UnstableApiUsage")
-                boolean problemDetected = ReferencesSearch.search(unusedVariableDefinition, scope)
-                                                          .allowParallelProcessing()
-                                                          .mapping(ref -> PsiTreeUtil.getParentOfType(ref.getElement(),
-                                                                                                      RobotVariable.class,
-                                                                                                      RobotVariableDefinition.class))
-                                                          .filtering(Objects::nonNull)
-                                                          .filtering(element -> {
-                                                              ReadWriteAccessDetector detector = ReadWriteAccessDetector.findDetector(element);
-                                                              return detector != null && !detector.isDeclarationWriteAccess(element);
-                                                          })
-                                                          .findFirst() == null;
-                if (problemDetected) {
-                    problemsHolder.registerProblem(unusedVariableDefinition,
-                                                   RobotBundle.message("INSP.variable.unused"),
-                                                   ProblemHighlightType.LIKE_UNUSED_SYMBOL,
-                                                   new RemoveUnusedVariableDefinitionQuickFix(unusedVariableDefinition));
+        }
+    }
+
+    private static void filterOutUsedVariableDefinitions(RobotVariableUsageVisitor variableUsageVisitor) {
+        Iterator<RobotVariableDefinition> definitionsIterator = variableUsageVisitor.foundVariableDefinitions.iterator();
+        while (definitionsIterator.hasNext()) {
+            RobotVariableDefinition variableDefinition = definitionsIterator.next();
+            Iterator<RobotVariable> variableIterator = variableUsageVisitor.foundVariableUsages.iterator();
+            while (variableIterator.hasNext()) {
+                RobotVariable variable = variableIterator.next();
+                String variableName = variable.getVariableName();
+                if (variableDefinition.isInScope(variable) && variableDefinition.matches(variableName)) {
+                    variableIterator.remove();
+                    definitionsIterator.remove();
+                    break;
                 }
             }
         }

@@ -3,7 +3,6 @@ package dev.xeonkryptos.xeonrobotframeworkplugin.misc;
 import com.intellij.codeInsight.highlighting.ReadWriteAccessDetector;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiReference;
-import com.intellij.psi.util.PsiTreeUtil;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariable;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableDefinition;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.VariableScope;
@@ -43,7 +42,7 @@ public class RobotReadWriteAccessDetector extends ReadWriteAccessDetector {
 
     @Override
     public boolean isDeclarationWriteAccess(@NotNull PsiElement element) {
-        return element instanceof RobotVariable && element.getParent() instanceof RobotVariableDefinition || element instanceof RobotVariableDefinition;
+        return element instanceof RobotVariableDefinition;
     }
 
     @NotNull
@@ -55,11 +54,6 @@ public class RobotReadWriteAccessDetector extends ReadWriteAccessDetector {
     @NotNull
     @Override
     public Access getExpressionAccess(@NotNull PsiElement expression) {
-        PsiElement parentElement = PsiTreeUtil.getParentOfType(expression, false, RobotVariable.class, RobotVariableDefinition.class);
-        if (parentElement instanceof RobotVariable && parentElement.getParent() instanceof RobotVariableDefinition
-            || parentElement instanceof RobotVariableDefinition) {
-            return Access.Write;
-        }
-        return Access.Read;
+        return expression instanceof RobotVariableDefinition ? Access.Write : Access.Read;
     }
 }

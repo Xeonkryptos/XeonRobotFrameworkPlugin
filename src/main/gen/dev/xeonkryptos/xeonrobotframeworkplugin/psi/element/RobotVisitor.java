@@ -6,6 +6,7 @@ import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiNameIdentifierOwner;
 import com.intellij.navigation.NavigationItem;
+import com.intellij.psi.PsiNamedElement;
 
 public class RobotVisitor extends PsiElementVisitor {
 
@@ -413,7 +414,7 @@ public class RobotVisitor extends PsiElementVisitor {
   }
 
   public void visitVariableDefinition(@NotNull RobotVariableDefinition o) {
-    visitPsiNameIdentifierOwner(o);
+    visitPsiNamedElement(o);
     // visitNavigationItem(o);
     // visitDefinedVariable(o);
     // visitQualifiedNameOwner(o);
@@ -461,7 +462,7 @@ public class RobotVisitor extends PsiElementVisitor {
     // visitFoldable(o);
   }
 
-  public void visitPsiNameIdentifierOwner(@NotNull PsiNameIdentifierOwner o) {
+  public void visitPsiNamedElement(@NotNull PsiNamedElement o) {
     visitElement(o);
   }
 

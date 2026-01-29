@@ -6,7 +6,6 @@ import com.intellij.psi.stubs.StringStubIndexExtension;
 import com.intellij.psi.stubs.StubIndex;
 import com.intellij.psi.stubs.StubIndexKey;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotImportArgument;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotStubFileElementType;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
@@ -35,6 +34,6 @@ public class ImportArgumentIndex extends StringStubIndexExtension<RobotImportArg
 
     @Override
     public int getVersion() {
-        return RobotStubFileElementType.STUB_FILE_VERSION + super.getVersion() + 1;
+        return super.getVersion() + 1;
     }
 }

@@ -6,7 +6,6 @@ import com.intellij.psi.stubs.StringStubIndexExtension;
 import com.intellij.psi.stubs.StubIndex;
 import com.intellij.psi.stubs.StubIndexKey;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCall;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotStubFileElementType;
 import dev.xeonkryptos.xeonrobotframeworkplugin.util.KeywordUtil;
 import org.jetbrains.annotations.NotNull;
 
@@ -36,6 +35,6 @@ public class KeywordCallNameIndex extends StringStubIndexExtension<RobotKeywordC
 
     @Override
     public int getVersion() {
-        return RobotStubFileElementType.STUB_FILE_VERSION + super.getVersion() + 3;
+        return super.getVersion() + 3;
     }
 }

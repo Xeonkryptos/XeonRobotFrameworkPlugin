@@ -35,14 +35,33 @@ public class RobotVariableDefinitionImpl extends RobotVariableDefinitionExtensio
   }
 
   @Override
-  @NotNull
-  public RobotVariable getVariable() {
-    return notNullChild(PsiTreeUtil.getChildOfType(this, RobotVariable.class));
+  @Nullable
+  public RobotPythonExpression getPythonExpression() {
+    return PsiTreeUtil.getChildOfType(this, RobotPythonExpression.class);
   }
 
   @Override
-  public @NotNull RobotVariable getNameIdentifier() {
-    return RobotPsiImplUtil.getNameIdentifier(this);
+  @Nullable
+  public RobotVariableContent getVariableContent() {
+    return PsiTreeUtil.getChildOfType(this, RobotVariableContent.class);
+  }
+
+  @Override
+  @NotNull
+  public List<RobotVariableIndexAccessContent> getVariableIndexAccessContentList() {
+    return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotVariableIndexAccessContent.class);
+  }
+
+  @Override
+  @NotNull
+  public List<RobotVariableNestedAccessContent> getVariableNestedAccessContentList() {
+    return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotVariableNestedAccessContent.class);
+  }
+
+  @Override
+  @NotNull
+  public List<RobotVariableSliceAccessContent> getVariableSliceAccessContentList() {
+    return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotVariableSliceAccessContent.class);
   }
 
   @Override

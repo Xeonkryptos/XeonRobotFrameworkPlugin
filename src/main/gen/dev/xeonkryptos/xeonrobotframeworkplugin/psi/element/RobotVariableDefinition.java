@@ -4,18 +4,28 @@ package dev.xeonkryptos.xeonrobotframeworkplugin.psi.element;
 import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
-import com.intellij.psi.PsiNameIdentifierOwner;
+import com.intellij.psi.PsiNamedElement;
 import com.intellij.navigation.NavigationItem;
 import com.intellij.psi.StubBasedPsiElement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotVariableDefinitionStub;
 import javax.swing.Icon;
 
-public interface RobotVariableDefinition extends PsiNameIdentifierOwner, NavigationItem, DefinedVariable, RobotQualifiedNameOwner, RobotElement, StubBasedPsiElement<RobotVariableDefinitionStub> {
+public interface RobotVariableDefinition extends PsiNamedElement, NavigationItem, DefinedVariable, RobotQualifiedNameOwner, RobotElement, StubBasedPsiElement<RobotVariableDefinitionStub> {
+
+  @Nullable
+  RobotPythonExpression getPythonExpression();
+
+  @Nullable
+  RobotVariableContent getVariableContent();
 
   @NotNull
-  RobotVariable getVariable();
+  List<RobotVariableIndexAccessContent> getVariableIndexAccessContentList();
 
-  @NotNull RobotVariable getNameIdentifier();
+  @NotNull
+  List<RobotVariableNestedAccessContent> getVariableNestedAccessContentList();
+
+  @NotNull
+  List<RobotVariableSliceAccessContent> getVariableSliceAccessContentList();
 
   @Nullable String getName();
 
