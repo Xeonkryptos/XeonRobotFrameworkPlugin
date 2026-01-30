@@ -229,13 +229,13 @@ LineComment = {LineCommentSign} {NON_EOL}*
 %%
 
 // Define a comment when it is the only thing on the line
-^ {LineComment}                                    { pushBackTrailingWhitespace(); return COMMENT; }
-{LineComment}                                      { pushBackTrailingWhitespace(); return COMMENT; }
+^ {LineComment}                                          { pushBackTrailingWhitespace(); return COMMENT; }
+{LineComment}                                            { pushBackTrailingWhitespace(); return COMMENT; }
 
 {EOL} {WhitespaceIncludingNewline}* {LineCommentSign}    { handleStateChangeOnMultiLineDetection(); yypushback(1); return WHITE_SPACE; }
 {MultiLine} {WhitespaceIncludingNewline}*                { handleStateChangeOnMultiLineDetection(); return WHITE_SPACE; }
 
-{ExtendedKeywordFinishedMarker} {LineCommentSign}  { yypushback(1); return WHITE_SPACE; }
+{ExtendedKeywordFinishedMarker} {LineCommentSign}        { yypushback(1); return WHITE_SPACE; }
 
 ^ {SettingsSectionIdentifier}   { resetInternalState(); yybegin(SETTINGS_SECTION); return SETTINGS_HEADER; }
 ^ {VariablesSectionIdentifier}  { resetInternalState(); yybegin(VARIABLES_SECTION); return VARIABLES_HEADER; }

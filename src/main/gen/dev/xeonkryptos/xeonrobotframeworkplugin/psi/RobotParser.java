@@ -37,8 +37,7 @@ public class RobotParser implements PsiParser, LightPsiParser {
   }
 
   public static final TokenSet[] EXTENDS_SETS_ = new TokenSet[] {
-    create_token_set_(EMPTY_VARIABLE_STATEMENT, IF_VARIABLE_STATEMENT, INLINE_VARIABLE_STATEMENT, KEYWORD_VARIABLE_STATEMENT,
-      SINGLE_VARIABLE_STATEMENT),
+    create_token_set_(IF_VARIABLE_STATEMENT, INLINE_VARIABLE_STATEMENT, KEYWORD_VARIABLE_STATEMENT, SINGLE_VARIABLE_STATEMENT),
     create_token_set_(DICT_VARIABLE, ENVIRONMENT_VARIABLE, LIST_VARIABLE, SCALAR_VARIABLE,
       VARIABLE),
     create_token_set_(COMMENTS_SECTION, KEYWORDS_SECTION, SECTION, SETTINGS_SECTION,
@@ -203,7 +202,7 @@ public class RobotParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // eol_based_keyword_call | inline_variable_statement | keyword_variable_statement | if_variable_statement | empty_variable_statement
+  // eol_based_keyword_call | inline_variable_statement | keyword_variable_statement | if_variable_statement
   static boolean call_structure(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "call_structure")) return false;
     boolean r;
@@ -211,7 +210,6 @@ public class RobotParser implements PsiParser, LightPsiParser {
     if (!r) r = inline_variable_statement(b, l + 1);
     if (!r) r = keyword_variable_statement(b, l + 1);
     if (!r) r = if_variable_statement(b, l + 1);
-    if (!r) r = empty_variable_statement(b, l + 1);
     return r;
   }
 
@@ -476,35 +474,6 @@ public class RobotParser implements PsiParser, LightPsiParser {
       if (!executable_statement(b, l + 1)) break;
       if (!empty_element_parsed_guard_(b, "else_structure_2", c)) break;
     }
-    return true;
-  }
-
-  /* ********************************************************** */
-  // variable_definition ASSIGNMENT? "${EMPTY}" eol_marker?
-  public static boolean empty_variable_statement(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "empty_variable_statement")) return false;
-    boolean r, p;
-    Marker m = enter_section_(b, l, _NONE_, EMPTY_VARIABLE_STATEMENT, "<empty variable statement>");
-    r = variable_definition(b, l + 1);
-    r = r && empty_variable_statement_1(b, l + 1);
-    r = r && consumeToken(b, "${EMPTY}");
-    p = r; // pin = 3
-    r = r && empty_variable_statement_3(b, l + 1);
-    exit_section_(b, l, m, r, p, null);
-    return r || p;
-  }
-
-  // ASSIGNMENT?
-  private static boolean empty_variable_statement_1(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "empty_variable_statement_1")) return false;
-    consumeToken(b, ASSIGNMENT);
-    return true;
-  }
-
-  // eol_marker?
-  private static boolean empty_variable_statement_3(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "empty_variable_statement_3")) return false;
-    eol_marker(b, l + 1);
     return true;
   }
 

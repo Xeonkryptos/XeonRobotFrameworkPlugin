@@ -241,7 +241,7 @@ private executable_statement_recover ::= !(FOR | WHILE | IF | ELSE_IF | ELSE | T
 
 private control_structure ::= conditional_structure | conditional_inline_structure | exception_handling_structure | group_structure
 private loop_structure ::= for_loop_structure | while_loop_structure
-private call_structure ::= eol_based_keyword_call | inline_variable_statement | keyword_variable_statement | if_variable_statement | empty_variable_statement
+private call_structure ::= eol_based_keyword_call | inline_variable_statement | keyword_variable_statement | if_variable_statement
 loop_control_structure ::= (BREAK | CONTINUE) eol_marker?
 return_structure ::= RETURN positional_argument* eol_marker? {pin=1}
 
@@ -371,9 +371,6 @@ parameter_id ::= PARAMETER_NAME {methods = [getReference]}
 
 fake variable_statement ::= DUMMY {methods = [getIcon]}
 single_variable_statement ::= variable_definition ASSIGNMENT? variable_value* parameter? eol_marker? {pin=3}
-// TODO: Extra token for ${EMPTY}? Spaces and underscores in-between, before and after the word are ignored by default. Nothing that can be handled by string matching in the parser.
-//  Or define a custom parser rule to detect the empty variable itself
-empty_variable_statement ::= variable_definition ASSIGNMENT? "${EMPTY}" eol_marker? {pin=3}
 inline_variable_statement ::= VAR variable_definition ASSIGNMENT? variable_value+ parameter? eol_marker? {pin=1}
 keyword_variable_statement ::= variable_definition+ ASSIGNMENT? eol_based_keyword_call {pin=3} // Without EOL as it is handled at a lower level
 if_variable_statement ::= variable_definition+ ASSIGNMENT? conditional_inline_structure {pin=3}

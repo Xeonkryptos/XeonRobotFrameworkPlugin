@@ -48,10 +48,6 @@ public class RobotVisitor extends PsiElementVisitor {
     // visitFoldable(o);
   }
 
-  public void visitEmptyVariableStatement(@NotNull RobotEmptyVariableStatement o) {
-    visitVariableStatement(o);
-  }
-
   public void visitEnvironmentVariable(@NotNull RobotEnvironmentVariable o) {
     visitVariable(o);
   }
