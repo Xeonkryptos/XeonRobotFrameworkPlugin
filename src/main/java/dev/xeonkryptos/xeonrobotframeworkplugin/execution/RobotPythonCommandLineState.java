@@ -68,8 +68,6 @@ import java.util.function.Supplier;
 
 public class RobotPythonCommandLineState extends PythonScriptCommandLineState {
 
-    private static final int DEBUGGER_DEFAULT_PORT = 6611;
-
     @NotNull
     private final RobotRunConfiguration runConfiguration;
 
@@ -147,7 +145,7 @@ public class RobotPythonCommandLineState extends PythonScriptCommandLineState {
         ParametersList parametersList = paramsGroup.getParametersList();
         parametersList.set(1, BundleUtil.ROBOTCODE_DIR.resolve("robotcode").toString());
 
-        int robotDebugPort = NetworkUtil.findAvailableSocketPort(DEBUGGER_DEFAULT_PORT);
+        int robotDebugPort = NetworkUtil.findAvailableSocketPort();
         dapCommunicator = new RobotDebugAdapterProtocolCommunicator(robotDebugPort);
 
         if (robotExecutionMode == RobotExecutionMode.DRY_RUN) {
@@ -273,7 +271,7 @@ public class RobotPythonCommandLineState extends PythonScriptCommandLineState {
             List<Function<TargetEnvironment, String>> parameters = delegateExecution.getParameters();
 
             List<Function<TargetEnvironment, String>> additionalParameters = new ArrayList<>();
-            int robotDebugPort = NetworkUtil.findAvailableSocketPort(DEBUGGER_DEFAULT_PORT);
+            int robotDebugPort = NetworkUtil.findAvailableSocketPort();
             dapCommunicator = new RobotDebugAdapterProtocolCommunicator(robotDebugPort);
 
             additionalParameters.add(TargetEnvironmentFunctions.constant("debug"));

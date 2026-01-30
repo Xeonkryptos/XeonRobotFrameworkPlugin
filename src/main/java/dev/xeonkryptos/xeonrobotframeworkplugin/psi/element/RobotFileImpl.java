@@ -102,7 +102,8 @@ public class RobotFileImpl extends PsiFileBase implements KeywordFile, RobotFile
 
             Collection<DefinedVariable> additionalVariables = visitor.computeUserKeywordVariables();
             sectionVariables.addAll(additionalVariables);
-        } return sectionVariables;
+        }
+        return sectionVariables;
     }
 
     @NotNull
