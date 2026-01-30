@@ -6,5 +6,5 @@ public interface RobotUserKeywordStatementExpression {
 
     Collection<DefinedParameter> getInputParameters();
 
-    Collection<DefinedVariable> getGlobalVariables();
+    Collection<DefinedVariable> getDynamicGlobalVariables();
 }

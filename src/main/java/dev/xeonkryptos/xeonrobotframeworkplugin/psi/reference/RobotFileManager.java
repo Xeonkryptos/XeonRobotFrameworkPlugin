@@ -19,7 +19,7 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.ReservedVariable;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
-import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.Map;
 
 public class RobotFileManager {
@@ -81,7 +81,8 @@ public class RobotFileManager {
                     }
                 }
             }
+            // Return a new collection to prevent external modification and concurrent modification issues
+            return new LinkedHashSet<>(globalVariables);
         }
-        return Collections.unmodifiableCollection(globalVariables);
     }
 }

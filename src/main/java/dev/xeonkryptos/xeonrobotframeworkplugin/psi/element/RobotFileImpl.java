@@ -25,7 +25,6 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.reference.RobotPythonClass;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.index.VariableDefinitionNameIndex;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.VariableScope;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.visitor.RobotImportFilesCollector;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.visitor.RobotSectionVariablesCollector;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.visitor.RobotUsedFilesCollector;
 import dev.xeonkryptos.xeonrobotframeworkplugin.util.DisposableSupplier;
 import org.jetbrains.annotations.NotNull;
@@ -95,12 +94,13 @@ public class RobotFileImpl extends PsiFileBase implements KeywordFile, RobotFile
     @Override
     public Collection<DefinedVariable> getLocallyDefinedVariables() {
         if (sectionVariables == null) {
-            RobotSectionVariablesCollector visitor = new RobotSectionVariablesCollector();
-            acceptChildren(visitor);
-            sectionVariables = new LinkedHashSet<>(visitor.getVariables());
-
-            Collection<DefinedVariable> additionalVariables = visitor.computeUserKeywordVariables();
-            sectionVariables.addAll(additionalVariables);
+            Project project = getProject();
+            GlobalSearchScope fileScope = GlobalSearchScope.fileScope(getContainingFile());
+            sectionVariables = VariableDefinitionNameIndex.getInstance()
+                                                          .getVariableDefinitions(project, fileScope)
+                                                          .stream()
+                                                          .map(DefinedVariable.class::cast)
+                                                          .collect(Collectors.toCollection(LinkedHashSet::new));
         }
         return sectionVariables;
     }

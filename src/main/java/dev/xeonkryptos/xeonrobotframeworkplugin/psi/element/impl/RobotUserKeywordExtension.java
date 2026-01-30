@@ -3,23 +3,22 @@ package dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl;
 import com.intellij.lang.ASTNode;
 import com.intellij.lang.folding.FoldingDescriptor;
 import com.intellij.openapi.editor.Document;
+import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiElement;
+import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.psi.stubs.IStubElementType;
 import com.intellij.util.IncorrectOperationException;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.DefinedParameter;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.DefinedVariable;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotBddStatement;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotExecutableStatement;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCall;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLocalArgumentsSetting;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotUserKeywordStatement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotUserKeywordStatementExpression;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotUserKeywordStatementId;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableDefinition;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVisitor;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.folding.RobotFoldingComputationUtil;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotStubPsiElementBase;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotUserKeywordStub;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.index.KeywordCallNameIndex;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.index.VariableDefinitionNameIndex;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.RobotElementGenerator;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.VariableScope;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.visitor.RobotUserKeywordInputArgumentCollector;
@@ -27,10 +26,11 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public abstract class RobotUserKeywordExtension extends RobotStubPsiElementBase<RobotUserKeywordStub, RobotUserKeywordStatement> implements RobotUserKeywordStatement {
 
@@ -70,39 +70,26 @@ public abstract class RobotUserKeywordExtension extends RobotStubPsiElementBase<
     }
 
     @Override
-    public Collection<DefinedVariable> getGlobalVariables() {
+    public Collection<DefinedVariable> getDynamicGlobalVariables() {
         if (globalVariables == null) {
-            Set<DefinedVariable> variables = new HashSet<>();
-            Set<RobotUserKeywordStatement> userKeywords = new HashSet<>();
-            acceptChildren(new RobotVisitor() {
-                @Override
-                public void visitBddStatement(@NotNull RobotBddStatement o) {
-                    o.acceptChildren(this);
-                }
+            Project project = getProject();
+            GlobalSearchScope fileScope = GlobalSearchScope.fileScope(getContainingFile());
+            Set<DefinedVariable> variables = VariableDefinitionNameIndex.getInstance()
+                                                                        .getVariableDefinitions(project, fileScope)
+                                                                        .stream()
+                                                                        .filter(variableDefinition -> variableDefinition.getScope() == VariableScope.Global && variableDefinition.getParent() == this)
+                                                                        .collect(Collectors.toCollection(LinkedHashSet::new));
 
-                @Override
-                public void visitExecutableStatement(@NotNull RobotExecutableStatement o) {
-                    o.acceptChildren(this);
-                }
+            KeywordCallNameIndex.getInstance()
+                                .getKeywordCalls(project, fileScope)
+                                .stream()
+                                .filter(keywordCall -> keywordCall.getParent() == this)
+                                .map(keywordCall -> keywordCall.getKeywordCallName().getReference().resolve())
+                                .filter(resolvedElement -> resolvedElement instanceof RobotUserKeywordStatement)
+                                .map(resolvedElement -> (RobotUserKeywordStatement) resolvedElement)
+                                .map(RobotUserKeywordStatementExpression::getDynamicGlobalVariables)
+                                .forEach(variables::addAll);
 
-                @Override
-                public void visitVariableDefinition(@NotNull RobotVariableDefinition o) {
-                    VariableScope scope = o.getScope();
-                    if (scope == VariableScope.Global) {
-                        variables.add(o);
-                    }
-                }
-
-                @Override
-                public void visitKeywordCall(@NotNull RobotKeywordCall o) {
-                    PsiElement calledKeyword = o.getKeywordCallName().getReference().resolve();
-                    if (calledKeyword instanceof RobotUserKeywordStatement userKeywordStatement) {
-                        userKeywords.add(userKeywordStatement);
-                    }
-                }
-            });
-
-            userKeywords.stream().map(RobotUserKeywordStatementExpression::getGlobalVariables).flatMap(Collection::stream).forEach(variables::add);
             globalVariables = variables;
         }
         return globalVariables;

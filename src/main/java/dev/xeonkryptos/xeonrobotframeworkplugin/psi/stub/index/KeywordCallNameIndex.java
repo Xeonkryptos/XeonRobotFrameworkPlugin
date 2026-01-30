@@ -10,6 +10,8 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.util.KeywordUtil;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 public class KeywordCallNameIndex extends StringStubIndexExtension<RobotKeywordCall> {
 
@@ -31,6 +33,20 @@ public class KeywordCallNameIndex extends StringStubIndexExtension<RobotKeywordC
         StubIndexKey<String, RobotKeywordCall> stubIndexKey = getKey();
         String normalizedKeywordName = KeywordUtil.normalizeKeywordName(keywordName);
         return StubIndex.getElements(stubIndexKey, normalizedKeywordName, project, scope, RobotKeywordCall.class);
+    }
+
+    public Collection<RobotKeywordCall> getKeywordCalls(@NotNull Project project, @NotNull GlobalSearchScope scope) {
+        Set<String> potentialKeywordCallNames = new LinkedHashSet<>();
+        StubIndex.getInstance().processAllKeys(KEY, key -> {
+            potentialKeywordCallNames.add(key);
+            return true;
+        }, scope);
+        Set<RobotKeywordCall> locatedKeywordCalls = new LinkedHashSet<>();
+        for (String potentialKeywordCallName : potentialKeywordCallNames) {
+            Collection<RobotKeywordCall> keywordCalls = StubIndex.getElements(KEY, potentialKeywordCallName, project, scope, RobotKeywordCall.class);
+            locatedKeywordCalls.addAll(keywordCalls);
+        }
+        return locatedKeywordCalls;
     }
 
     @Override
