@@ -5,6 +5,7 @@ import com.intellij.openapi.application.ReadAction;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiReference;
+import com.intellij.psi.PsiReferenceBase;
 import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.psi.search.searches.ReferencesSearch.SearchParameters;
 import com.intellij.util.Processor;
@@ -47,12 +48,10 @@ public class RobotVariableReferenceSearch extends QueryExecutorBase<PsiReference
         Collection<RobotVariable> variables = ReadAction.compute(() -> variableNameIndex.getVariables(variableName, project, globalSearchScope));
         for (RobotVariable variable : variables) {
             RobotVariableBodyId variableBodyId = RobotPsiImplUtil.getVariableBodyId(variable);
-            if (variableBodyId != null && !(variable.getParent() instanceof RobotVariableDefinition)) {
+            if (variableBodyId != null) {
                 PsiReference reference = variableBodyId.getReference();
-                if (reference.isReferenceTo(variableDefinition)) {
-                    if (!consumer.process(reference)) {
-                        break;
-                    }
+                if (reference.isReferenceTo(variableDefinition) && !consumer.process(new PsiReferenceBase.Immediate<>(variableBodyId, variableDefinition))) {
+                    break;
                 }
             }
         }

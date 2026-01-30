@@ -37,6 +37,7 @@
     - The variables with their braces (something like ${variable}) are added only when the cursor isn't placed in a variable itself, otherwise just the name of the variable without the braces and
       variable type are added. This change explicitly provides a predictable behavior for code completions, especially with TAB insertion (replacing the element the cursor is placed at)
     - When typing the variable type prefix ($, @, & or %) the code completion shows only variables of this type
+- Optimized performance for find usages, especially when looking for keyword usages in large projects
 
 ### Fixed
 
