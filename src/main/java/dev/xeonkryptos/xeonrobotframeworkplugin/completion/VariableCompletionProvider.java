@@ -111,7 +111,7 @@ class VariableCompletionProvider extends CompletionProvider<CompletionParameters
 
     private void addDefinedVariablesFromOneself(@NotNull CompletionResultSet result, @NotNull PsiElement element, int completionOffset, boolean wrapVariableNames) {
         Project project = element.getProject();
-        GlobalSearchScope fileScope = GlobalSearchScope.fileScope(element.getContainingFile());
+        GlobalSearchScope fileScope = GlobalSearchScope.fileScope(element.getContainingFile().getOriginalFile());
 
         RobotQualifiedNameOwner relevantParent = PsiTreeUtil.getParentOfType(element, RobotTestCaseStatement.class, RobotTaskStatement.class, RobotUserKeywordStatement.class);
         RobotVariableStatement variableStatementParent = PsiTreeUtil.getParentOfType(element, RobotVariableStatement.class);
@@ -139,7 +139,8 @@ class VariableCompletionProvider extends CompletionProvider<CompletionParameters
                                                                     RobotTaskStatement.class,
                                                                     RobotUserKeywordStatement.class,
                                                                     RobotVariablesSection.class);
-        if (parent == obligatoryStatementParent && variableDefinition.getTextRange().getStartOffset() < completionOffset) {
+        if (obligatoryStatementParent != null && parent != null && obligatoryStatementParent.getTextOffset() == parent.getTextOffset()
+            && variableDefinition.getTextRange().getStartOffset() < completionOffset) {
             return true;
         }
         return parent instanceof RobotVariablesSection;
@@ -159,27 +160,33 @@ class VariableCompletionProvider extends CompletionProvider<CompletionParameters
 
     private void addGlobalVariablesFromPreviousUserKeywordCalls(@NotNull CompletionResultSet result, @NotNull PsiElement element, int completionOffset, boolean wrapVariableNames) {
         Project project = element.getProject();
-        GlobalSearchScope fileScope = GlobalSearchScope.fileScope(element.getContainingFile());
+        GlobalSearchScope fileScope = GlobalSearchScope.fileScope(element.getContainingFile().getOriginalFile());
         RobotQualifiedNameOwner relevantParent = PsiTreeUtil.getParentOfType(element, RobotTestCaseStatement.class, RobotTaskStatement.class, RobotUserKeywordStatement.class);
         RobotKeywordCall keywordCallParent = PsiTreeUtil.getParentOfType(element, RobotKeywordCall.class);
         if (keywordCallParent != null) {
             completionOffset = keywordCallParent.getTextRange().getStartOffset();
         }
         int finalizedCompletionOffset = completionOffset;
+        int parentOffset = relevantParent != null ? relevantParent.getTextOffset() : -1;
         KeywordCallNameIndex.getInstance()
                             .getKeywordCalls(project, fileScope)
                             .stream()
-                            .filter(keywordCall -> keywordCall.getTextRange().getStartOffset() < finalizedCompletionOffset
-                                                   && PsiTreeUtil.getParentOfType(keywordCall, RobotTestCaseStatement.class, RobotTaskStatement.class, RobotUserKeywordStatement.class)
-                                                      == relevantParent)
-                            .map(keywordCall -> keywordCall.getKeywordCallName().getReference().resolve())
-                            .distinct()
-                            .filter(resolvedElement -> resolvedElement instanceof RobotUserKeywordStatement)
-                            .map(resolvedElement -> (RobotUserKeywordStatement) resolvedElement)
-                            .forEach(userKeywordStatement -> {
-                                Collection<DefinedVariable> definedVariables = userKeywordStatement.getDynamicGlobalVariables();
-                                addCollectedVariablesWithinKeyword(result, definedVariables, wrapVariableNames);
-                            });
+                            .filter(keywordCall -> isRelevantKeywordCall(keywordCall, finalizedCompletionOffset, parentOffset))
+                            .map(keywordCall -> keywordCall.getKeywordCallName().getReference().resolve()).distinct()
+                                                                                                          .filter(resolvedElement -> resolvedElement instanceof RobotUserKeywordStatement)
+                                                                                                          .map(resolvedElement -> (RobotUserKeywordStatement) resolvedElement)
+                                                                                                          .forEach(userKeywordStatement -> {
+                                                                                                              Collection<DefinedVariable> definedVariables = userKeywordStatement.getDynamicGlobalVariables();
+                                                                                                              addCollectedVariablesWithinKeyword(result, definedVariables, wrapVariableNames);
+                                                                                                          });
+    }
+
+    private boolean isRelevantKeywordCall(RobotKeywordCall keywordCall, int completionOffset, int parentOffset) {
+        if (keywordCall.getTextRange().getStartOffset() < completionOffset) {
+            RobotQualifiedNameOwner keywordParent = PsiTreeUtil.getParentOfType(keywordCall, RobotTestCaseStatement.class, RobotTaskStatement.class, RobotUserKeywordStatement.class);
+            return keywordParent != null && parentOffset == keywordParent.getTextOffset();
+        }
+        return false;
     }
 
     private void addDefinedVariablesFromImportedFiles(@NotNull CompletionResultSet result, @NotNull PsiFile file, @NotNull PsiElement element, boolean wrapVariableNames) {

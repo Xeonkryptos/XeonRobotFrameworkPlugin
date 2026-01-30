@@ -106,7 +106,12 @@ public enum VariableScope {
     private static boolean isInSameTestCase(@NotNull PsiElement sourceElement, @NotNull PsiElement position) {
         RobotTestCaseStatement sourceTestCaseStatement = PsiTreeUtil.getParentOfType(sourceElement, RobotTestCaseStatement.class, false);
         RobotTestCaseStatement targetTestCaseStatement = PsiTreeUtil.getParentOfType(position, RobotTestCaseStatement.class, false);
-        return sourceTestCaseStatement == targetTestCaseStatement;
+        if (sourceTestCaseStatement == null || targetTestCaseStatement == null) {
+            return false;
+        }
+        int sourceTextOffset = sourceTestCaseStatement.getTextOffset();
+        int targetTextOffset = targetTestCaseStatement.getTextOffset();
+        return sourceTextOffset == targetTextOffset;
     }
 
     /**

@@ -45,7 +45,7 @@ public final class QualifiedNameBuilder {
     public static String computeQualifiedPath(PsiElement element) {
         return CachedValuesManager.getCachedValue(element, QUALIFIED_PATH_KEY, () -> {
             PsiFile containingFile = element.getContainingFile();
-            VirtualFile virtualFile = containingFile.getVirtualFile();
+            VirtualFile virtualFile = containingFile.getOriginalFile().getVirtualFile();
             Project project = containingFile.getProject();
             RobotQualifiedNameOwner qualifiedNameOwner = PsiTreeUtil.getParentOfType(element, RobotQualifiedNameOwner.class);
             String qualifiedName;

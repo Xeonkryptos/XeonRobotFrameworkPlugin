@@ -62,7 +62,7 @@ public class RobotVariableBodyReference extends PsiPolyVariantReferenceBase<Robo
             VariableDefinitionNameIndex.getInstance()
                                        .getVariableDefinitions(variableName,
                                                                variableBodyId.getProject(),
-                                                               GlobalSearchScope.fileScope(variableBodyId.getContainingFile()))
+                                                               GlobalSearchScope.fileScope(variableBodyId.getContainingFile().getOriginalFile()))
                                        .stream()
                                        .filter(variableDefinition -> variableDefinition.isInScope(variable))
                                        .forEach(foundElements::add);

@@ -95,7 +95,7 @@ public class RobotFileImpl extends PsiFileBase implements KeywordFile, RobotFile
     public Collection<DefinedVariable> getLocallyDefinedVariables() {
         if (sectionVariables == null) {
             Project project = getProject();
-            GlobalSearchScope fileScope = GlobalSearchScope.fileScope(getContainingFile());
+            GlobalSearchScope fileScope = GlobalSearchScope.fileScope(getContainingFile().getOriginalFile());
             sectionVariables = VariableDefinitionNameIndex.getInstance()
                                                           .getVariableDefinitions(project, fileScope)
                                                           .stream()

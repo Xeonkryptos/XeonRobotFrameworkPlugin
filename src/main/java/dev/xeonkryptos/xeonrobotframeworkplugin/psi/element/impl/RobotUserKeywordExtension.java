@@ -73,11 +73,14 @@ public abstract class RobotUserKeywordExtension extends RobotStubPsiElementBase<
     public Collection<DefinedVariable> getDynamicGlobalVariables() {
         if (globalVariables == null) {
             Project project = getProject();
-            GlobalSearchScope fileScope = GlobalSearchScope.fileScope(getContainingFile());
+            GlobalSearchScope fileScope = GlobalSearchScope.fileScope(getContainingFile().getOriginalFile());
+            int textOffset = getTextOffset();
             Set<DefinedVariable> variables = VariableDefinitionNameIndex.getInstance()
                                                                         .getVariableDefinitions(project, fileScope)
                                                                         .stream()
-                                                                        .filter(variableDefinition -> variableDefinition.getScope() == VariableScope.Global && variableDefinition.getParent() == this)
+                                                                        .filter(variableDefinition -> variableDefinition.getScope() == VariableScope.Global
+                                                                                                      && Optional.ofNullable(variableDefinition.getParent()).map(PsiElement::getTextOffset).orElse(-1)
+                                                                                                         == textOffset)
                                                                         .collect(Collectors.toCollection(LinkedHashSet::new));
 
             KeywordCallNameIndex.getInstance()
