@@ -18,8 +18,8 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.DefinedVariable;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.ReservedVariable;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Map;
 
 public class RobotFileManager {
@@ -81,7 +81,7 @@ public class RobotFileManager {
                     }
                 }
             }
-            return new ArrayList<>(globalVariables);
         }
+        return Collections.unmodifiableCollection(globalVariables);
     }
 }

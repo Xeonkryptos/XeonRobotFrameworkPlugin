@@ -87,8 +87,8 @@ class VariableCompletionProvider extends CompletionProvider<CompletionParameters
 
         addGlobalVariables(result, psiElement, wrapVariableNames);
         addDefinedVariablesFromOwnSection(result, psiElement, wrapVariableNames);
-        addDefinedVariablesFromImportedFiles(result, parameters.getOriginalFile(), psiElement, wrapVariableNames);
         addArgumentsFromUserKeyword(result, psiElement, wrapVariableNames);
+        addDefinedVariablesFromImportedFiles(result, parameters.getOriginalFile(), psiElement, wrapVariableNames);
     }
 
     private void addGlobalVariables(@NotNull CompletionResultSet result, @NotNull PsiElement element, boolean wrapVariableNames) {

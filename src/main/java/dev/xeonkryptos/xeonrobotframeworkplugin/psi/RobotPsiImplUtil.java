@@ -373,8 +373,8 @@ public class RobotPsiImplUtil {
                                                            .map(scope -> switch (scope.toUpperCase()) {
                                                                case "LOCAL" -> VariableScope.Local;
                                                                case "TEST", "TASK" -> VariableScope.TestCase;
-                                                               case "SUITE", "SUITES" -> VariableScope.TestSuite;
-                                                               case "GLOBAL" -> VariableScope.Global;
+                                                               case "SUITE" -> VariableScope.TestSuite;
+                                                               case "GLOBAL", "SUITES" -> VariableScope.Global;
                                                                default -> null;
                                                            })
                                                            .or(() -> {

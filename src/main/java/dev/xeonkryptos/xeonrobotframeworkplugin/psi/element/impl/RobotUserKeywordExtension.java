@@ -7,25 +7,35 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.stubs.IStubElementType;
 import com.intellij.util.IncorrectOperationException;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.DefinedParameter;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.DefinedVariable;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotBddStatement;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotExecutableStatement;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCall;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLocalArgumentsSetting;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotUserKeywordStatement;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotUserKeywordStatementExpression;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotUserKeywordStatementId;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableDefinition;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVisitor;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.folding.RobotFoldingComputationUtil;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotStubPsiElementBase;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotUserKeywordStub;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.RobotElementGenerator;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.VariableScope;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.visitor.RobotUserKeywordInputArgumentCollector;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
-public abstract class RobotUserKeywordExtension extends RobotStubPsiElementBase<RobotUserKeywordStub, RobotUserKeywordStatement>
-        implements RobotUserKeywordStatement {
+public abstract class RobotUserKeywordExtension extends RobotStubPsiElementBase<RobotUserKeywordStub, RobotUserKeywordStatement> implements RobotUserKeywordStatement {
 
     private Collection<DefinedParameter> inputParameters;
+    private Collection<DefinedVariable> globalVariables;
 
     public RobotUserKeywordExtension(@NotNull ASTNode node) {
         super(node);
@@ -40,6 +50,7 @@ public abstract class RobotUserKeywordExtension extends RobotStubPsiElementBase<
         super.subtreeChanged();
 
         inputParameters = null;
+        globalVariables = null;
     }
 
     @Override
@@ -56,6 +67,45 @@ public abstract class RobotUserKeywordExtension extends RobotStubPsiElementBase<
             }
         }
         return inputParameters;
+    }
+
+    @Override
+    public Collection<DefinedVariable> getGlobalVariables() {
+        if (globalVariables == null) {
+            Set<DefinedVariable> variables = new HashSet<>();
+            Set<RobotUserKeywordStatement> userKeywords = new HashSet<>();
+            acceptChildren(new RobotVisitor() {
+                @Override
+                public void visitBddStatement(@NotNull RobotBddStatement o) {
+                    o.acceptChildren(this);
+                }
+
+                @Override
+                public void visitExecutableStatement(@NotNull RobotExecutableStatement o) {
+                    o.acceptChildren(this);
+                }
+
+                @Override
+                public void visitVariableDefinition(@NotNull RobotVariableDefinition o) {
+                    VariableScope scope = o.getScope();
+                    if (scope == VariableScope.Global) {
+                        variables.add(o);
+                    }
+                }
+
+                @Override
+                public void visitKeywordCall(@NotNull RobotKeywordCall o) {
+                    PsiElement calledKeyword = o.getKeywordCallName().getReference().resolve();
+                    if (calledKeyword instanceof RobotUserKeywordStatement userKeywordStatement) {
+                        userKeywords.add(userKeywordStatement);
+                    }
+                }
+            });
+
+            userKeywords.stream().map(RobotUserKeywordStatementExpression::getGlobalVariables).flatMap(Collection::stream).forEach(variables::add);
+            globalVariables = variables;
+        }
+        return globalVariables;
     }
 
     @Nullable

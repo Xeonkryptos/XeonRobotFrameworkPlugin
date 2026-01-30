@@ -21,7 +21,6 @@ import com.jetbrains.python.psi.PyClass;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotLanguage;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.dto.ImportType;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.reference.PythonResolver;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.reference.RobotFileManager;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.reference.RobotPythonClass;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.index.VariableDefinitionNameIndex;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.VariableScope;
@@ -118,7 +117,6 @@ public class RobotFileImpl extends PsiFileBase implements KeywordFile, RobotFile
     @Override
     public Collection<DefinedVariable> getDefinedVariables(Collection<KeywordFile> visitedFiles) {
         Collection<DefinedVariable> sectionVariables = getLocallyDefinedVariables();
-        Collection<DefinedVariable> globalVariables = RobotFileManager.getGlobalVariables(getProject());
         Collection<KeywordFile> importedFiles = getImportedFiles(false, ImportType.VARIABLES);
         Set<DefinedVariable> importedVariables = new HashSet<>();
         for (KeywordFile keywordFile : importedFiles) {
@@ -129,9 +127,8 @@ public class RobotFileImpl extends PsiFileBase implements KeywordFile, RobotFile
             }
         }
 
-        Set<DefinedVariable> variables = new LinkedHashSet<>(sectionVariables.size() + globalVariables.size() + importedVariables.size());
+        Set<DefinedVariable> variables = new LinkedHashSet<>(sectionVariables.size() + importedVariables.size());
         variables.addAll(sectionVariables);
-        variables.addAll(globalVariables);
         variables.addAll(importedVariables);
         return variables;
     }

@@ -16,9 +16,12 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTestCaseStateme
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTestCasesSection;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariable;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.reference.PythonResolver;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.reference.RobotFileManager;
 import dev.xeonkryptos.xeonrobotframeworkplugin.util.RobotNames;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.Collection;
 
 public enum VariableScope {
     Global {
@@ -34,7 +37,14 @@ public enum VariableScope {
                 RobotVariable variable = PsiTreeUtil.getParentOfType(element, RobotVariable.class, false);
                 if (variable != null) {
                     String variableName = variable.getVariableName();
-                    for (DefinedVariable definedVariable : robotFile.getDefinedVariables()) {
+                    Collection<DefinedVariable> globalVariables = RobotFileManager.getGlobalVariables(element.getProject());
+                    for (DefinedVariable globalVariable : globalVariables) {
+                        if (globalVariable.matches(variableName)) {
+                            return true;
+                        }
+                    }
+                    Collection<DefinedVariable> definedVariables = robotFile.getDefinedVariables();
+                    for (DefinedVariable definedVariable : definedVariables) {
                         if (definedVariable.matches(variableName)) {
                             return true;
                         }

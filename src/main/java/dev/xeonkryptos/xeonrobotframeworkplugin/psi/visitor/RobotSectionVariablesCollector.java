@@ -8,6 +8,7 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLocalSetting;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotSetupTeardownStatementsGlobalSetting;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTemplateArguments;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotUserKeywordStatement;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotUserKeywordStatementExpression;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableDefinition;
 import dev.xeonkryptos.xeonrobotframeworkplugin.util.RobotNames;
 import org.jetbrains.annotations.NotNull;
@@ -24,8 +25,6 @@ public final class RobotSectionVariablesCollector extends RecursiveRobotVisitor 
 
     private final Set<DefinedVariable> variables = new LinkedHashSet<>();
     private final Set<DefinedVariable> userKeywordVariables = ConcurrentHashMap.newKeySet();
-
-    private volatile boolean computeUserKeywordVariables = false;
 
     @Override
     public void visitCommentsSection(@NotNull RobotCommentsSection o) {
@@ -52,13 +51,7 @@ public final class RobotSectionVariablesCollector extends RecursiveRobotVisitor 
 
     @Override
     public void visitVariableDefinition(@NotNull RobotVariableDefinition o) {
-        if (computeUserKeywordVariables) {
-            if (!variables.contains(o)) {
-                userKeywordVariables.add(o);
-            }
-        } else {
-            variables.add(o);
-        }
+        variables.add(o);
     }
 
     @Override
@@ -69,17 +62,15 @@ public final class RobotSectionVariablesCollector extends RecursiveRobotVisitor 
     }
 
     public Collection<DefinedVariable> computeUserKeywordVariables() {
-        computeUserKeywordVariables = true;
-        try {
-            potentialKeywordCalls.values()
-                                 .stream()
-                                 .map(keywordCall -> keywordCall.getKeywordCallName().getReference().resolve())
-                                 .filter(referenceCall -> referenceCall instanceof RobotUserKeywordStatement)
-                                 .forEach(stmt -> stmt.acceptChildren(this));
-            return userKeywordVariables;
-        } finally {
-            computeUserKeywordVariables = false;
-        }
+        potentialKeywordCalls.values()
+                             .stream()
+                             .map(keywordCall -> keywordCall.getKeywordCallName().getReference().resolve())
+                             .filter(referenceCall -> referenceCall instanceof RobotUserKeywordStatement)
+                             .map(referenceCall -> (RobotUserKeywordStatement) referenceCall)
+                             .distinct()
+                             .map(RobotUserKeywordStatementExpression::getGlobalVariables)
+                             .forEach(userKeywordVariables::addAll);
+        return userKeywordVariables;
     }
 
     public Collection<DefinedVariable> getVariables() {

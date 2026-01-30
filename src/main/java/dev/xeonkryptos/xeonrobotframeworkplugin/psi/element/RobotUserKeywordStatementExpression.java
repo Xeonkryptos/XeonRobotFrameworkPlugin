@@ -5,4 +5,6 @@ import java.util.Collection;
 public interface RobotUserKeywordStatementExpression {
 
     Collection<DefinedParameter> getInputParameters();
+
+    Collection<DefinedVariable> getGlobalVariables();
 }
