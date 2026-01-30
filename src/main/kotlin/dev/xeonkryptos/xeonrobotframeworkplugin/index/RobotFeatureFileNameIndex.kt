@@ -17,6 +17,7 @@ import java.util.Collections
 
 class RobotFeatureFileNameIndex : ScalarIndexExtension<String>() {
 
+    @Suppress("CompanionObjectInExtension")
     companion object {
         @JvmField
         val NAME = ID.create<String, Void?>("Robot.module.name")
@@ -50,6 +51,8 @@ class RobotFeatureFileNameIndex : ScalarIndexExtension<String>() {
     }
 
     override fun dependsOnFileContent(): Boolean = false
+
+    override fun traceKeyHashToVirtualFileMapping(): Boolean = true
 
     override fun getVersion(): Int = 0
 }
