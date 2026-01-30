@@ -29,42 +29,30 @@ public class RobotKeywordReferenceSearch extends QueryExecutorBase<PsiReference,
     @SuppressWarnings("UnstableApiUsage")
     public void processQuery(@NotNull SearchParameters queryParameters, @NotNull Processor<? super PsiReference> consumer) {
         PsiElement element = queryParameters.getElementToSearch();
-        if (!element.isValid()) {
-            return;
-        }
         Project project = queryParameters.getProject();
 
         GlobalSearchScope globalSearchScope = QueryExecutorUtil.convertToGlobalSearchScope(queryParameters.getEffectiveSearchScope(), project);
         if (element instanceof PyFunction pyFunction) {
             String functionName = pyFunction.getName();
-            if (functionName == null || pyFunction.isValid() && searchForKeywordsInIndex(functionName, project, globalSearchScope, consumer)) {
+            if (functionName == null || searchForKeywordsInIndex(functionName, project, globalSearchScope, consumer)) {
                 return;
             }
-            Optional<String> customKeywordNameOpt = RobotPyUtil.findCustomKeywordNameDecoratorExpression(pyFunction)
-                                                               .filter(PsiElement::isValid)
-                                                               .map(StringLiteralExpression::getStringValue);
+            Optional<String> customKeywordNameOpt = RobotPyUtil.findCustomKeywordNameDecoratorExpression(pyFunction).map(StringLiteralExpression::getStringValue);
             customKeywordNameOpt.ifPresent(customKeywordName -> searchForKeywordsInIndex(customKeywordName, project, globalSearchScope, consumer));
         } else if (element instanceof RobotUserKeywordStatement userKeywordStatement) {
-            if (userKeywordStatement.isValid()) {
-                String keywordName = userKeywordStatement.getName();
-                searchForKeywordsInIndex(keywordName, project, globalSearchScope, consumer);
-            }
+            String keywordName = userKeywordStatement.getName();
+            searchForKeywordsInIndex(keywordName, project, globalSearchScope, consumer);
         }
     }
 
-    private static boolean searchForKeywordsInIndex(String keywordName,
-                                                    Project project,
-                                                    GlobalSearchScope globalSearchScope,
-                                                    @NotNull Processor<? super PsiReference> consumer) {
+    private static boolean searchForKeywordsInIndex(String keywordName, Project project, GlobalSearchScope globalSearchScope, @NotNull Processor<? super PsiReference> consumer) {
         KeywordCallNameIndex keywordCallNameIndex = KeywordCallNameIndex.getInstance();
         Collection<RobotKeywordCall> keywordStatements = keywordCallNameIndex.getKeywordCalls(keywordName, project, globalSearchScope);
         for (RobotKeywordCall keywordStatement : keywordStatements) {
-            if (keywordStatement.isValid()) {
-                RobotKeywordCallName keywordCallName = keywordStatement.getKeywordCallName();
-                PsiReference reference = keywordCallName.getReference();
-                if (reference.isReferenceTo(keywordStatement) && !consumer.process(reference)) {
-                    return true;
-                }
+            RobotKeywordCallName keywordCallName = keywordStatement.getKeywordCallName();
+            PsiReference reference = keywordCallName.getReference();
+            if (reference.isReferenceTo(keywordStatement) && !consumer.process(reference)) {
+                return true;
             }
         }
         return false;

@@ -27,9 +27,6 @@ public class RobotVariableReferenceSearch extends QueryExecutorBase<PsiReference
     @Override
     public void processQuery(@NotNull SearchParameters queryParameters, @NotNull Processor<? super PsiReference> consumer) {
         PsiElement element = queryParameters.getElementToSearch();
-        if (!element.isValid()) {
-            return;
-        }
         Project project = queryParameters.getProject();
 
         GlobalSearchScope globalSearchScope = QueryExecutorUtil.convertToGlobalSearchScope(queryParameters.getEffectiveSearchScope(), project);
