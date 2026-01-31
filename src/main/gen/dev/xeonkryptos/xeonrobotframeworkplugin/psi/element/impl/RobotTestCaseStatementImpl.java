@@ -2,14 +2,14 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl;
 
 import java.util.List;
+
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotPsiUtil;
 import org.jetbrains.annotations.*;
 import com.intellij.lang.ASTNode;
-import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.*;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.*;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotPsiImplUtil;
+
 import javax.swing.Icon;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotTestCaseStatementStub;
 import com.intellij.psi.stubs.IStubElementType;
@@ -48,27 +48,27 @@ public class RobotTestCaseStatementImpl extends RobotTestCaseExtension implement
 
   @Override
   public @NotNull String getName() {
-    return RobotPsiImplUtil.getName(this);
+    return RobotPsiUtil.getName(this);
   }
 
   @Override
   public @NotNull RobotTestCaseId getNameIdentifier() {
-    return RobotPsiImplUtil.getNameIdentifier(this);
+    return RobotPsiUtil.getNameIdentifier(this);
   }
 
   @Override
   public @NotNull Icon getIcon(int flags) {
-    return RobotPsiImplUtil.getIcon(this, flags);
+    return RobotPsiUtil.getIcon(this, flags);
   }
 
   @Override
   public @NotNull String getQualifiedName() {
-    return RobotPsiImplUtil.getQualifiedName(this);
+    return RobotPsiUtil.getQualifiedName(this);
   }
 
   @Override
   public @NotNull List<RobotLocalSetting> getLocalSettings() {
-    return RobotPsiImplUtil.getLocalSettings(this);
+    return RobotPsiUtil.getLocalSettings(this);
   }
 
 }

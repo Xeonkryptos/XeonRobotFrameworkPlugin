@@ -4,8 +4,9 @@ import com.intellij.lang.ASTNode;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.stubs.IStubElementType;
 import com.intellij.psi.tree.IElementType;
+import com.intellij.psi.util.PsiUtilCore;
 import com.intellij.util.IncorrectOperationException;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotPsiImplUtil;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotPsiUtil;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.dto.VariableType;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableBodyId;
@@ -68,7 +69,7 @@ public abstract class RobotVariableDefinitionExtension extends RobotStubPsiEleme
     @Override
     public PsiElement setName(@NotNull String newName) throws IncorrectOperationException {
         RobotVariableBodyId newVariableBodyId = RobotElementGenerator.getInstance(getProject()).createNewVariableBodyId(newName);
-        RobotVariableBodyId variableBodyId = RobotPsiImplUtil.getVariableBodyId(this);
+        RobotVariableBodyId variableBodyId = RobotPsiUtil.getVariableBodyId(this);
         if (variableBodyId != null && newVariableBodyId != null) {
             variableBodyId.replace(newVariableBodyId);
         }
@@ -85,7 +86,7 @@ public abstract class RobotVariableDefinitionExtension extends RobotStubPsiEleme
         if (firstChild == null) {
             return VariableType.SCALAR;
         }
-        IElementType elementType = firstChild.getNode().getElementType();
+        IElementType elementType = PsiUtilCore.getElementType(firstChild);
         if (elementType == RobotTypes.LIST_VARIABLE_START) {
             return VariableType.LIST;
         } else if (elementType == RobotTypes.DICT_VARIABLE_START) {
@@ -129,7 +130,7 @@ public abstract class RobotVariableDefinitionExtension extends RobotStubPsiEleme
                 scope = stub.getScope();
             }
             if (scope == null) {
-                scope = RobotPsiImplUtil.getScope(this);
+                scope = RobotPsiUtil.getScope(this);
             }
         }
         return scope;

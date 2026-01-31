@@ -10,6 +10,7 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiWhiteSpace;
 import com.intellij.psi.codeStyle.CodeStyleManager;
 import com.intellij.psi.util.PsiTreeUtil;
+import com.intellij.psi.util.PsiUtilCore;
 import com.intellij.util.IncorrectOperationException;
 import dev.xeonkryptos.xeonrobotframeworkplugin.RobotBundle;
 import dev.xeonkryptos.xeonrobotframeworkplugin.annotator.RobotAnnotator;
@@ -56,7 +57,7 @@ public class RobotUserKeywordStatementAnnotator extends RobotAnnotator {
                     while (prevSibling instanceof PsiWhiteSpace) {
                         prevSibling = prevSibling.getPrevSibling();
                     }
-                    if (prevSibling != null && prevSibling.getLastChild() != null && prevSibling.getLastChild().getNode().getElementType() == RobotTypes.EOL) {
+                    if (prevSibling != null && prevSibling.getLastChild() != null && PsiUtilCore.getElementType(prevSibling.getLastChild()) == RobotTypes.EOL) {
                         prevEolElement = prevSibling.getLastChild();
                         int newLineCount = prevEolElement.getTextLength() + eolChild.getTextLength() - 1;
                         newEolElement = RobotElementGenerator.getInstance(project).createEolElement(newLineCount);

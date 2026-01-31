@@ -12,6 +12,7 @@ import com.intellij.psi.PsiDocumentManager;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.tree.IElementType;
+import com.intellij.psi.util.PsiUtilCore;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotResourceFileType;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes;
 import org.jetbrains.annotations.NotNull;
@@ -30,7 +31,7 @@ public class RobotRunLineMarkerProvider extends RunLineMarkerContributor impleme
     @Nullable
     @Override
     public Info getInfo(@NotNull PsiElement element) {
-        IElementType type = element.getNode().getElementType();
+        IElementType type = PsiUtilCore.getElementType(element);
         PsiFile containingFile = element.getContainingFile();
         FileType fileType = containingFile.getFileType();
         if (EXECUTABLE_ELEMENT_TYPES.contains(type) && fileType != RobotResourceFileType.getInstance()) {

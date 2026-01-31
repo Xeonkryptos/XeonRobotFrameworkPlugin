@@ -6,6 +6,7 @@ import com.intellij.navigation.ItemPresentation;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.stubs.IStubElementType;
 import com.intellij.psi.stubs.StubElement;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotPsiUtil;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.QualifiedNameBuilder;
 import org.jetbrains.annotations.NotNull;
 
@@ -61,6 +62,11 @@ public abstract class RobotStubPsiElementBase<T extends StubElement<P>, P extend
             text = super.getText();
         }
         return text;
+    }
+
+    @Override
+    public boolean isEquivalentTo(PsiElement another) {
+        return RobotPsiUtil.areElementsEquivalent(this, another);
     }
 
     @Override

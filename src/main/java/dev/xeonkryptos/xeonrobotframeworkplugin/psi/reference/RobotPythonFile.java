@@ -34,18 +34,6 @@ public class RobotPythonFile implements KeywordFile {
         return List.of();
     }
 
-    @NotNull
-    @Override
-    public Collection<DefinedVariable> getDefinedVariables(Collection<KeywordFile> visitedFiles) {
-        return getDefinedVariables();
-    }
-
-    @NotNull
-    @Override
-    public final Collection<DefinedVariable> getDefinedVariables() {
-        return getLocallyDefinedVariables();
-    }
-
     @Override
     public Collection<DefinedVariable> getLocallyDefinedVariables() {
         if (importType == ImportType.VARIABLES) {

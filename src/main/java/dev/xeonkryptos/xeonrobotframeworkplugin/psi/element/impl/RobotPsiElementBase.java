@@ -3,6 +3,8 @@ package dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl;
 import com.intellij.extapi.psi.ASTWrapperPsiElement;
 import com.intellij.lang.ASTNode;
 import com.intellij.navigation.ItemPresentation;
+import com.intellij.psi.PsiElement;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotPsiUtil;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotElement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.QualifiedNameBuilder;
 import org.jetbrains.annotations.NotNull;
@@ -55,6 +57,11 @@ public abstract class RobotPsiElementBase extends ASTWrapperPsiElement implement
             text = super.getText();
         }
         return text;
+    }
+
+    @Override
+    public boolean isEquivalentTo(PsiElement another) {
+        return RobotPsiUtil.areElementsEquivalent(this, another);
     }
 
     @Override

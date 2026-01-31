@@ -12,6 +12,7 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.tree.TokenSet;
 import com.intellij.psi.util.PsiTreeUtil;
+import com.intellij.psi.util.PsiUtilCore;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotConditionalStructure;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotExceptionHandlingStructure;
@@ -61,7 +62,7 @@ public class RobotSmartBlockCloseActionHandler extends EnterHandlerDelegateAdapt
             if (endTokenNode == null) {
                 addEndTokenText(currentCaretOffset, endBasedElement, document);
             }
-        } else if (TOKEN_TYPES.contains(elementAt.getNode().getElementType())) {
+        } else if (TOKEN_TYPES.contains(PsiUtilCore.getElementType(elementAt))) {
             addEndTokenText(currentCaretOffset, elementAt, document);
         }
         return Result.Continue;

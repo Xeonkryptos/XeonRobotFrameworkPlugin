@@ -8,6 +8,7 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.TokenType;
 import com.intellij.psi.util.PsiTreeUtil;
+import com.intellij.psi.util.PsiUtilCore;
 import com.intellij.xdebugger.XDebuggerUtil;
 import com.intellij.xdebugger.breakpoints.SuspendPolicy;
 import com.intellij.xdebugger.breakpoints.XLineBreakpointType;
@@ -60,7 +61,7 @@ public class RobotLineBreakpointType extends XLineBreakpointType<RobotLineBreakp
 
     protected void lineHasStoppablePsi(@NotNull Project project, int line, Document document, Ref<? super Boolean> stoppable) {
         XDebuggerUtil.getInstance().iterateLine(project, document, line, psiElement -> {
-            if (psiElement.getNode() != null && TokenType.WHITE_SPACE == psiElement.getNode().getElementType()) {
+            if (psiElement.getNode() != null && TokenType.WHITE_SPACE == PsiUtilCore.getElementType(psiElement)) {
                 return true;
             } else {
                 if (isPsiElementStoppable(psiElement)) {

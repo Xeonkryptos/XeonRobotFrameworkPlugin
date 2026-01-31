@@ -2,7 +2,7 @@ package dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl;
 
 import com.intellij.lang.ASTNode;
 import com.intellij.psi.stubs.IStubElementType;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotPsiImplUtil;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotPsiUtil;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotDictVariable;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotDictVariableStub;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotStubPsiElementBase;
@@ -22,6 +22,6 @@ public abstract class RobotDictVariableExtension extends RobotStubPsiElementBase
     @Nullable
     @Override
     public String getVariableName() {
-        return RobotPsiImplUtil.getVariableName(this);
+        return RobotPsiUtil.getVariableName(this);
     }
 }

@@ -3,7 +3,6 @@ package dev.xeonkryptos.xeonrobotframeworkplugin.psi.element;
 import com.intellij.extapi.psi.PsiFileBase;
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.fileTypes.FileType;
-import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Key;
 import com.intellij.openapi.vfs.VirtualFile;
@@ -12,7 +11,6 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiReference;
 import com.intellij.psi.search.GlobalSearchScope;
-import com.intellij.psi.util.CachedValue;
 import com.intellij.psi.util.CachedValueProvider.Result;
 import com.intellij.psi.util.CachedValuesManager;
 import com.intellij.psi.util.ParameterizedCachedValue;
@@ -46,7 +44,6 @@ import java.util.stream.Stream;
 public class RobotFileImpl extends PsiFileBase implements KeywordFile, RobotFile {
 
     private static final Key<ParameterizedCachedValue<Collection<VirtualFile>, Boolean>> IMPORTED_VIRTUAL_FILES_CACHE_KEY = Key.create("IMPORTED_VIRTUAL_FILES_CACHE");
-    private static final Key<CachedValue<Collection<DefinedVariable>>> TEST_SUITE_VARIABLES_CACHE_KEY = Key.create("TEST_SUITE_VARIABLES_CACHE");
 
     private final FileType fileType;
 
@@ -103,34 +100,6 @@ public class RobotFileImpl extends PsiFileBase implements KeywordFile, RobotFile
                                                           .collect(Collectors.toCollection(LinkedHashSet::new));
         }
         return sectionVariables;
-    }
-
-    @NotNull
-    @Override
-    public final Collection<DefinedVariable> getDefinedVariables() {
-        return CachedValuesManager.getCachedValue(this,
-                                                  TEST_SUITE_VARIABLES_CACHE_KEY,
-                                                  () -> Result.createSingleDependency(getDefinedVariables(new LinkedHashSet<>()), PsiModificationTracker.MODIFICATION_COUNT));
-    }
-
-    @NotNull
-    @Override
-    public Collection<DefinedVariable> getDefinedVariables(Collection<KeywordFile> visitedFiles) {
-        Collection<DefinedVariable> sectionVariables = getLocallyDefinedVariables();
-        Collection<KeywordFile> importedFiles = getImportedFiles(false, ImportType.VARIABLES);
-        Set<DefinedVariable> importedVariables = new HashSet<>();
-        for (KeywordFile keywordFile : importedFiles) {
-            ProgressManager.checkCanceled();
-            if (visitedFiles.add(keywordFile)) {
-                Collection<DefinedVariable> subVariables = keywordFile.getDefinedVariables(visitedFiles);
-                importedVariables.addAll(subVariables);
-            }
-        }
-
-        Set<DefinedVariable> variables = new LinkedHashSet<>(sectionVariables.size() + importedVariables.size());
-        variables.addAll(sectionVariables);
-        variables.addAll(importedVariables);
-        return variables;
     }
 
     @NotNull

@@ -9,7 +9,7 @@ import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.*;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.*;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotPsiImplUtil;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotPsiUtil;
 
 public class RobotSettingsSectionImpl extends RobotSectionImpl implements RobotSettingsSection {
 
@@ -42,7 +42,7 @@ public class RobotSettingsSectionImpl extends RobotSectionImpl implements RobotS
 
   @Override
   public @NotNull String getSectionName() {
-    return RobotPsiImplUtil.getSectionName(this);
+    return RobotPsiUtil.getSectionName(this);
   }
 
 }

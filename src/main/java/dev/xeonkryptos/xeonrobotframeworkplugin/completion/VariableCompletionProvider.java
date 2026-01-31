@@ -12,6 +12,7 @@ import com.intellij.psi.PsiFile;
 import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.psi.tree.IElementType;
 import com.intellij.psi.util.PsiTreeUtil;
+import com.intellij.psi.util.PsiUtilCore;
 import com.intellij.util.ProcessingContext;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.dto.ImportType;
@@ -91,7 +92,7 @@ class VariableCompletionProvider extends CompletionProvider<CompletionParameters
         }
 
         int completionOffset = parameters.getOffset();
-        IElementType elementType = psiElement.getNode().getElementType();
+        IElementType elementType = PsiUtilCore.getElementType(psiElement);
         boolean wrapVariableNames = elementType != RobotTypes.VARIABLE_BODY;
 
         addGlobalVariables(result, psiElement, wrapVariableNames);
@@ -172,13 +173,14 @@ class VariableCompletionProvider extends CompletionProvider<CompletionParameters
                             .getKeywordCalls(project, fileScope)
                             .stream()
                             .filter(keywordCall -> isRelevantKeywordCall(keywordCall, finalizedCompletionOffset, parentOffset))
-                            .map(keywordCall -> keywordCall.getKeywordCallName().getReference().resolve()).distinct()
-                                                                                                          .filter(resolvedElement -> resolvedElement instanceof RobotUserKeywordStatement)
-                                                                                                          .map(resolvedElement -> (RobotUserKeywordStatement) resolvedElement)
-                                                                                                          .forEach(userKeywordStatement -> {
-                                                                                                              Collection<DefinedVariable> definedVariables = userKeywordStatement.getDynamicGlobalVariables();
-                                                                                                              addCollectedVariablesWithinKeyword(result, definedVariables, wrapVariableNames);
-                                                                                                          });
+                            .map(keywordCall -> keywordCall.getKeywordCallName().getReference().resolve())
+                            .distinct()
+                            .filter(resolvedElement -> resolvedElement instanceof RobotUserKeywordStatement)
+                            .map(resolvedElement -> (RobotUserKeywordStatement) resolvedElement)
+                            .forEach(userKeywordStatement -> {
+                                Collection<DefinedVariable> definedVariables = userKeywordStatement.getDynamicGlobalVariables();
+                                addCollectedVariablesWithinKeyword(result, definedVariables, wrapVariableNames);
+                            });
     }
 
     private boolean isRelevantKeywordCall(RobotKeywordCall keywordCall, int completionOffset, int parentOffset) {

@@ -12,6 +12,7 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.tree.TokenSet;
 import com.intellij.psi.util.PsiTreeUtil;
+import com.intellij.psi.util.PsiUtilCore;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotElseIfStructure;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotElseStructure;
@@ -79,7 +80,7 @@ public class RobotKeywordIndentationActionHandler extends EnterHandlerDelegateAd
             if (firstChild != null) {
                 updateDefaultIndentationAddFlag(currentCaretOffset, firstChild, document);
             }
-        } else if (TOKEN_TYPES.contains(elementAt.getNode().getElementType())) {
+        } else if (TOKEN_TYPES.contains(PsiUtilCore.getElementType(elementAt))) {
             updateDefaultIndentationAddFlag(currentCaretOffset, elementAt, document);
         }
         return Result.Continue;

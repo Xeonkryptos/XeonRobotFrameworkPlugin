@@ -8,7 +8,7 @@ import com.intellij.psi.stubs.StubElement;
 import com.intellij.psi.stubs.StubInputStream;
 import com.intellij.psi.stubs.StubOutputStream;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotLanguage;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotPsiImplUtil;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotPsiUtil;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotListVariable;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableBodyId;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableDefinition;
@@ -38,7 +38,7 @@ public class RobotListVariableStubElement extends IStubElementType<RobotListVari
     @NotNull
     @Override
     public RobotListVariableStub createStub(@NotNull RobotListVariable psi, StubElement<? extends PsiElement> parentStub) {
-        RobotVariableBodyId variableBodyId = RobotPsiImplUtil.getVariableBodyId(psi);
+        RobotVariableBodyId variableBodyId = RobotPsiUtil.getVariableBodyId(psi);
         String variableName = variableBodyId != null ? variableBodyId.getText() : null;
         return new RobotListVariableStubImpl(parentStub, variableName);
     }

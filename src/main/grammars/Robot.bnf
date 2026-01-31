@@ -11,7 +11,7 @@
   psiImplClassSuffix="Impl"
   psiPackage="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element"
   psiImplPackage="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl"
-  psiImplUtilClass="dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotPsiImplUtil"
+  psiImplUtilClass="dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotPsiUtil"
 
   elementTypeHolderClass="dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes"
   elementTypeClass="dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotElementType"

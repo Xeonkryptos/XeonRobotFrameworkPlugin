@@ -14,10 +14,6 @@ public interface KeywordFile {
 
     Collection<DefinedVariable> getLocallyDefinedVariables();
 
-    @NotNull Collection<DefinedVariable> getDefinedVariables();
-
-    @NotNull Collection<DefinedVariable> getDefinedVariables(Collection<KeywordFile> visitedFiles);
-
     @NotNull ImportType getImportType();
 
     @NotNull Collection<KeywordFile> getImportedFiles(boolean includeTransitive, ImportType... importTypes);

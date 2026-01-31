@@ -1,8 +1,10 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.psi;
 
 import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiNamedElement;
 import com.intellij.psi.PsiReference;
 import com.intellij.psi.util.PsiTreeUtil;
+import com.intellij.psi.util.PsiUtilCore;
 import dev.xeonkryptos.xeonrobotframeworkplugin.icons.RobotIcons;
 import dev.xeonkryptos.xeonrobotframeworkplugin.misc.RobotReadWriteAccessDetector;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotCommentsSection;
@@ -66,7 +68,7 @@ import javax.swing.Icon;
 import java.util.List;
 import java.util.Optional;
 
-public class RobotPsiImplUtil {
+public class RobotPsiUtil {
 
     @NotNull
     public static String getName(@NotNull RobotKeywordCall robotKeywordCall) {
@@ -209,7 +211,7 @@ public class RobotPsiImplUtil {
     public static String getSettingName(@NotNull RobotLocalArgumentsSettingId localArgumentsSettingId) {
         PsiElement[] children = localArgumentsSettingId.getChildren();
         for (PsiElement child : children) {
-            if (child.getNode().getElementType() == RobotTypes.LOCAL_SETTING_NAME) {
+            if (PsiUtilCore.getElementType(child) == RobotTypes.LOCAL_SETTING_NAME) {
                 return child.getText();
             }
         }
@@ -357,6 +359,22 @@ public class RobotPsiImplUtil {
     @NotNull
     public static String getSectionName(@NotNull RobotKeywordsSection section) {
         return section.getNameIdentifier().getText();
+    }
+
+    public static boolean areElementsEquivalent(PsiElement current, PsiElement another) {
+        String qualifiedName;
+        if (another instanceof PsiNamedElement namedElement) {
+            qualifiedName = QualifiedNameBuilder.computeQualifiedName(namedElement);
+        } else {
+            qualifiedName = QualifiedNameBuilder.computeQualifiedPath(another) + "." + another.getText();
+        }
+        String thisQualifiedName;
+        if (current instanceof PsiNamedElement namedElement) {
+            thisQualifiedName = QualifiedNameBuilder.computeQualifiedName(namedElement);
+        } else {
+            thisQualifiedName = QualifiedNameBuilder.computeQualifiedPath(current) + "." + current.getText();
+        }
+        return qualifiedName.equals(thisQualifiedName);
     }
 
     @NotNull

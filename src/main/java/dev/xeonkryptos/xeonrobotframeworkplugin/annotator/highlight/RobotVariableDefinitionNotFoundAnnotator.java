@@ -6,7 +6,7 @@ import com.intellij.psi.PsiPolyVariantReference;
 import com.intellij.psi.ResolveResult;
 import com.jetbrains.python.psi.PyElement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.RobotBundle;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotPsiImplUtil;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotPsiUtil;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotPythonExpression;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariable;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableBodyId;
@@ -23,7 +23,7 @@ public class RobotVariableDefinitionNotFoundAnnotator extends AbstractRobotVaria
 
     @Override
     protected void evaluateAnnotation(@NotNull RobotVariable variable) {
-        RobotVariableBodyId variableBodyId = RobotPsiImplUtil.getVariableBodyId(variable);
+        RobotVariableBodyId variableBodyId = RobotPsiUtil.getVariableBodyId(variable);
         if (variableBodyId != null && Arrays.stream(((PsiPolyVariantReference) variableBodyId.getReference()).multiResolve(false))
                                             .filter(ResolveResult::isValidResult)
                                             .map(ResolveResult::getElement)

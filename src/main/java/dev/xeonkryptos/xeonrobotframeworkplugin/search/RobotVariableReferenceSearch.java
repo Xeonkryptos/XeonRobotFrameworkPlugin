@@ -9,7 +9,7 @@ import com.intellij.psi.PsiReferenceBase;
 import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.psi.search.searches.ReferencesSearch.SearchParameters;
 import com.intellij.util.Processor;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotPsiImplUtil;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotPsiUtil;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariable;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableBodyId;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableDefinition;
@@ -47,7 +47,7 @@ public class RobotVariableReferenceSearch extends QueryExecutorBase<PsiReference
         VariableNameIndex variableNameIndex = VariableNameIndex.getInstance();
         Collection<RobotVariable> variables = ReadAction.compute(() -> variableNameIndex.getVariables(variableName, project, globalSearchScope));
         for (RobotVariable variable : variables) {
-            RobotVariableBodyId variableBodyId = RobotPsiImplUtil.getVariableBodyId(variable);
+            RobotVariableBodyId variableBodyId = RobotPsiUtil.getVariableBodyId(variable);
             if (variableBodyId != null) {
                 PsiReference reference = variableBodyId.getReference();
                 if (reference.isReferenceTo(variableDefinition) && !consumer.process(new PsiReferenceBase.Immediate<>(variableBodyId, variableDefinition))) {

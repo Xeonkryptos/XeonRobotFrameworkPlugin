@@ -1,6 +1,7 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.completion;
 
 import com.intellij.codeInsight.completion.CompletionContributor;
+import com.intellij.codeInsight.completion.CompletionInitializationContext;
 import com.intellij.codeInsight.completion.CompletionParameters;
 import com.intellij.codeInsight.completion.CompletionResultSet;
 import com.intellij.codeInsight.completion.CompletionType;
@@ -121,6 +122,11 @@ public class RobotCompletionContributor extends CompletionContributor {
         extend(CompletionType.BASIC,
                psiElement(RobotTypes.LITERAL_CONSTANT).inside(true, withElementInLocalSetting("[Tags]")).inFile(psiElement(RobotFile.class)),
                new StandardTagCompletionProvider());
+    }
+
+    @Override
+    public void beforeCompletion(@NotNull CompletionInitializationContext context) {
+        super.beforeCompletion(context);
     }
 
     @Override

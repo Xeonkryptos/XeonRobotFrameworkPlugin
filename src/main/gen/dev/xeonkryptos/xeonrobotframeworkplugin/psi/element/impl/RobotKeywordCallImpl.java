@@ -4,12 +4,10 @@ package dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl;
 import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.lang.ASTNode;
-import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.*;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.*;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotPsiImplUtil;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotPsiUtil;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotKeywordCallStub;
 import com.intellij.psi.stubs.IStubElementType;
 
@@ -53,12 +51,12 @@ public class RobotKeywordCallImpl extends RobotKeywordCallExtension implements R
 
   @Override
   public @NotNull String getName() {
-    return RobotPsiImplUtil.getName(this);
+    return RobotPsiUtil.getName(this);
   }
 
   @Override
   public @NotNull RobotKeywordCallName getNameIdentifier() {
-    return RobotPsiImplUtil.getNameIdentifier(this);
+    return RobotPsiUtil.getNameIdentifier(this);
   }
 
 }
