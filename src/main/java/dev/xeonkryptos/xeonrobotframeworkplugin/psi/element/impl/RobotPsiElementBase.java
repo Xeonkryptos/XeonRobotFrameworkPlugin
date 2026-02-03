@@ -61,6 +61,9 @@ public abstract class RobotPsiElementBase extends ASTWrapperPsiElement implement
 
     @Override
     public boolean isEquivalentTo(PsiElement another) {
+        if (getContainingFile() == null || another.getContainingFile() == null) {
+            return super.isEquivalentTo(another);
+        }
         return RobotPsiUtil.areElementsEquivalent(this, another);
     }
 

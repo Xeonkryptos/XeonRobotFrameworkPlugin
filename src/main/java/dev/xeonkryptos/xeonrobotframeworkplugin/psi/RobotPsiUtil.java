@@ -363,9 +363,6 @@ public class RobotPsiUtil {
 
     public static boolean areElementsEquivalent(PsiElement current, PsiElement another) {
         String qualifiedName;
-        if (current.getContainingFile() == null || another.getContainingFile() == null) {
-            return current.isEquivalentTo(another);
-        }
         if (another instanceof PsiNamedElement namedElement) {
             qualifiedName = QualifiedNameBuilder.computeQualifiedName(namedElement);
         } else {
