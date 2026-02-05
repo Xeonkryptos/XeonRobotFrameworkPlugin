@@ -485,7 +485,7 @@ public class RobotPsiUtil {
         int endOffset = variableEndNode.getTextRange().getEndOffset();
         TextRange textRange = variable.getTextRange();
         textRange = new TextRange(textRange.getStartOffset(), endOffset);
-        return new FoldingDescriptor[] { new FoldingDescriptor(variable.getNode(), textRange, null, foldingText, true, Set.copyOf(assignedValues.dependants())) };
+        return new FoldingDescriptor[] { new FoldingDescriptor(variable.getNode(), textRange, null, foldingText, false, Set.copyOf(assignedValues.dependants())) };
     }
 
     public static boolean areElementsEquivalent(PsiElement current, PsiElement another) {
