@@ -471,9 +471,6 @@ public class RobotPsiUtil {
         if (quick) {
             return FoldingDescriptor.EMPTY_ARRAY;
         }
-        /*if (variable.getParent() instanceof RobotConditionalContent) {
-            return FoldingDescriptor.EMPTY_ARRAY;
-        }*/
         FoldingText assignedValues = DumbModeAccessType.RELIABLE_DATA_ONLY.ignoreDumbMode(() -> getAssignedValues(variable));
         if (assignedValues == null) {
             return FoldingDescriptor.EMPTY_ARRAY;
