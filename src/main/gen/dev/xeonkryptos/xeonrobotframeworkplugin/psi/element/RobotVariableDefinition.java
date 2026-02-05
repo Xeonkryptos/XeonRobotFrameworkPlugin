@@ -10,7 +10,7 @@ import com.intellij.psi.StubBasedPsiElement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotVariableDefinitionStub;
 import javax.swing.Icon;
 
-public interface RobotVariableDefinition extends PsiNamedElement, NavigationItem, DefinedVariable, RobotQualifiedNameOwner, RobotElement, StubBasedPsiElement<RobotVariableDefinitionStub> {
+public interface RobotVariableDefinition extends PsiNamedElement, NavigationItem, DefinedVariable, RobotQualifiedNameOwner, RobotAssignedVariable, RobotElement, StubBasedPsiElement<RobotVariableDefinitionStub> {
 
   @Nullable
   RobotPythonExpression getPythonExpression();

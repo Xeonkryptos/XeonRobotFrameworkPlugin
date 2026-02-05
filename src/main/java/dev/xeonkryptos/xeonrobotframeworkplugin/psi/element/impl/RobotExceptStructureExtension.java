@@ -8,7 +8,6 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotExceptStructure
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotExecutableStatement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.folding.RobotFoldingComputationUtil;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
@@ -18,10 +17,10 @@ public abstract class RobotExceptStructureExtension extends RobotExecutableState
     }
 
     @Override
-    public @Nullable FoldingDescriptor[] fold(@NotNull Document document) {
+    public @NotNull FoldingDescriptor @NotNull [] fold(@NotNull Document document, boolean quick) {
         RobotExceptHeader exceptHeader = getExceptHeader();
         List<RobotExecutableStatement> executableStatements = getExecutableStatementList();
         List<FoldingDescriptor> foldingDescriptors = RobotFoldingComputationUtil.computeFoldingDescriptorsForBlockStructure(this, exceptHeader, executableStatements, document);
-        return !foldingDescriptors.isEmpty() ? foldingDescriptors.toArray(FoldingDescriptor.EMPTY_ARRAY) : null;
+        return !foldingDescriptors.isEmpty() ? foldingDescriptors.toArray(FoldingDescriptor.EMPTY_ARRAY) : FoldingDescriptor.EMPTY_ARRAY;
     }
 }

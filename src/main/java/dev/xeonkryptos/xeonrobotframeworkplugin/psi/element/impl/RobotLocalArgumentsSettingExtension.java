@@ -8,7 +8,6 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLocalArgumentsS
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLocalArgumentsSettingParameter;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.folding.RobotFoldingComputationUtil;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
@@ -18,9 +17,9 @@ public abstract class RobotLocalArgumentsSettingExtension extends RobotPsiElemen
     }
 
     @Override
-    public @Nullable FoldingDescriptor[] fold(@NotNull Document document) {
+    public @NotNull FoldingDescriptor @NotNull [] fold(@NotNull Document document, boolean quick) {
         if (!RobotFoldingComputationUtil.isFoldingUseful(this, document)) {
-            return null;
+            return FoldingDescriptor.EMPTY_ARRAY;
         }
         RobotLocalArgumentsSettingId localArgumentsSettingId = getLocalArgumentsSettingId();
         List<RobotLocalArgumentsSettingParameter> localArgumentsSettingParameters = getLocalArgumentsSettingParameterList();
@@ -29,6 +28,6 @@ public abstract class RobotLocalArgumentsSettingExtension extends RobotPsiElemen
                                                                                                                      localArgumentsSettingId,
                                                                                                                      localArgumentsSettingParameters,
                                                                                                                      document);
-        return !foldingDescriptors.isEmpty() ? foldingDescriptors.toArray(FoldingDescriptor.EMPTY_ARRAY) : null;
+        return !foldingDescriptors.isEmpty() ? foldingDescriptors.toArray(FoldingDescriptor.EMPTY_ARRAY) : FoldingDescriptor.EMPTY_ARRAY;
     }
 }

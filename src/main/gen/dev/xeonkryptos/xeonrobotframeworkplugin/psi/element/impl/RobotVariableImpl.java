@@ -1,11 +1,17 @@
 // This is a generated file. Not intended for manual editing.
 package dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl;
 
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotPsiUtil;
+import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.lang.ASTNode;
+import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiElementVisitor;
+import com.intellij.psi.util.PsiTreeUtil;
+import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.*;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.*;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotPsiUtil;
+import com.intellij.lang.folding.FoldingDescriptor;
+import com.intellij.openapi.editor.Document;
 
 public abstract class RobotVariableImpl extends RobotPsiElementBase implements RobotVariable {
 
@@ -26,6 +32,16 @@ public abstract class RobotVariableImpl extends RobotPsiElementBase implements R
   @Override
   public @Nullable String getVariableName() {
     return RobotPsiUtil.getVariableName(this);
+  }
+
+  @Override
+  public FoldingDescriptor[] fold(@NotNull Document ignoredDocument, boolean quick) {
+    return RobotPsiUtil.fold(this, ignoredDocument, quick);
+  }
+
+  @Override
+  public FoldingText getAssignedValues() {
+    return RobotPsiUtil.getAssignedValues(this);
   }
 
 }

@@ -1,5 +1,6 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.psi.reference;
 
+import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiElementResolveResult;
 import com.intellij.psi.PsiPolyVariantReferenceBase;
@@ -12,13 +13,10 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.DefinedVariable;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotFile;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariable;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableBodyId;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableDefinition;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.index.VariableDefinitionNameIndex;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.VariableScope;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -32,17 +30,6 @@ public class RobotVariableBodyReference extends PsiPolyVariantReferenceBase<Robo
         super(element, false);
     }
 
-    @Nullable
-    @Override
-    public PsiElement resolve() {
-        ResolveResult[] resolveResults = multiResolve(false);
-        return Arrays.stream(resolveResults)
-                     .filter(result -> result.isValidResult() && result.getElement() instanceof RobotVariableDefinition)
-                     .findFirst()
-                     .map(ResolveResult::getElement)
-                     .orElse(null);
-    }
-
     @Override
     public ResolveResult @NotNull [] multiResolve(boolean incompleteCode) {
         RobotVariableBodyId variableBodyId = getElement();
@@ -51,18 +38,17 @@ public class RobotVariableBodyReference extends PsiPolyVariantReferenceBase<Robo
             return ResolveResult.EMPTY_ARRAY;
         }
 
-        ResolveCache resolveCache = ResolveCache.getInstance(variableBodyId.getProject());
+        Project project = variableBodyId.getProject();
+        ResolveCache resolveCache = ResolveCache.getInstance(project);
         return resolveCache.resolveWithCaching(this, (robotVariableReference, incompCode) -> {
             String variableName = variable.getVariableName();
-            if (variableName == null) { // e.g. ${}, thus empty representation of a variable. There can be no reference.
+            if (variableName == null) {
                 return ResolveResult.EMPTY_ARRAY;
             }
 
             Collection<PsiElement> foundElements = new LinkedHashSet<>();
             VariableDefinitionNameIndex.getInstance()
-                                       .getVariableDefinitions(variableName,
-                                                               variableBodyId.getProject(),
-                                                               GlobalSearchScope.fileScope(variableBodyId.getContainingFile().getOriginalFile()))
+                                       .getVariableDefinitions(variableName, project, GlobalSearchScope.fileScope(variableBodyId.getContainingFile().getOriginalFile()))
                                        .stream()
                                        .filter(variableDefinition -> variableDefinition.isInScope(variable))
                                        .forEach(foundElements::add);

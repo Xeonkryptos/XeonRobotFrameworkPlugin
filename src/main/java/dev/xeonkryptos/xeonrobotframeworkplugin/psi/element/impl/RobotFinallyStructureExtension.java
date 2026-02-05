@@ -8,7 +8,6 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotExecutableState
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotFinallyStructure;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.folding.RobotFoldingComputationUtil;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
@@ -18,10 +17,10 @@ public abstract class RobotFinallyStructureExtension extends RobotExecutableStat
     }
 
     @Override
-    public @Nullable FoldingDescriptor[] fold(@NotNull Document document) {
+    public @NotNull FoldingDescriptor @NotNull [] fold(@NotNull Document document, boolean quick) {
         PsiElement firstChild = getFirstChild(); // FINALLY token
         List<RobotExecutableStatement> executableStatements = getExecutableStatementList();
         List<FoldingDescriptor> foldingDescriptors = RobotFoldingComputationUtil.computeFoldingDescriptorsForBlockStructure(this, firstChild, executableStatements, document);
-        return !foldingDescriptors.isEmpty() ? foldingDescriptors.toArray(FoldingDescriptor.EMPTY_ARRAY) : null;
+        return !foldingDescriptors.isEmpty() ? foldingDescriptors.toArray(FoldingDescriptor.EMPTY_ARRAY) : FoldingDescriptor.EMPTY_ARRAY;
     }
 }

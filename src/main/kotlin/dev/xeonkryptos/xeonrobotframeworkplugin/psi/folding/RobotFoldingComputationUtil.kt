@@ -19,6 +19,7 @@ object RobotFoldingComputationUtil {
     const val CONTAINER_FOLDING_PLACEHOLDER_WITH_SUPER_SPACE_SEPARATOR = "${GlobalConstants.SUPER_SPACE}${CONTAINER_FOLDING_PLACEHOLDER}"
 
     const val MAX_LIST_FOLDING_LENGTH = 100
+    const val MAX_VARIABLE_FOLDING_LENGTH: Int = 50
 
     @JvmStatic
     fun isFoldingUseful(psiElement: PsiElement, document: Document): Boolean {

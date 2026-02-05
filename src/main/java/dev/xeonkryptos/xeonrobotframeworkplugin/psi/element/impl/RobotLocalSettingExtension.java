@@ -9,7 +9,6 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotPositionalArgum
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.folding.RobotFoldingComputationUtil;
 import dev.xeonkryptos.xeonrobotframeworkplugin.util.RobotNames;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
@@ -19,18 +18,17 @@ public abstract class RobotLocalSettingExtension extends RobotPsiElementBase imp
         super(node);
     }
 
-    @Nullable
     @Override
-    public FoldingDescriptor[] fold(@NotNull Document document) {
+    public @NotNull FoldingDescriptor @NotNull [] fold(@NotNull Document document, boolean quick) {
         if (!RobotFoldingComputationUtil.isFoldingUseful(this, document)) {
-            return null;
+            return FoldingDescriptor.EMPTY_ARRAY;
         }
         RobotLocalSettingId localSettingId = getLocalSettingId();
         String settingName = getSettingName();
         List<RobotPositionalArgument> positionalArguments = getPositionalArgumentList();
         if (positionalArguments.isEmpty() || !settingName.equalsIgnoreCase(RobotNames.TAGS_LOCAL_SETTING_NAME)) {
             FoldingDescriptor foldingDescriptor = RobotFoldingComputationUtil.computeFoldingDescriptorForContainer(this, localSettingId, document);
-            return foldingDescriptor != null ? new FoldingDescriptor[] { foldingDescriptor } : null;
+            return foldingDescriptor != null ? new FoldingDescriptor[] { foldingDescriptor } : FoldingDescriptor.EMPTY_ARRAY;
         }
 
         List<FoldingDescriptor> foldingDescriptors = RobotFoldingComputationUtil.computeFoldingDescriptorsForListing(getNode(),
@@ -38,6 +36,6 @@ public abstract class RobotLocalSettingExtension extends RobotPsiElementBase imp
                                                                                                                      localSettingId,
                                                                                                                      positionalArguments,
                                                                                                                      document);
-        return !foldingDescriptors.isEmpty() ? foldingDescriptors.toArray(FoldingDescriptor.EMPTY_ARRAY) : null;
+        return !foldingDescriptors.isEmpty() ? foldingDescriptors.toArray(FoldingDescriptor.EMPTY_ARRAY) : FoldingDescriptor.EMPTY_ARRAY;
     }
 }

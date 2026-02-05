@@ -1,29 +1,51 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl;
 
 import com.intellij.lang.ASTNode;
+import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.stubs.IStubElementType;
 import com.intellij.psi.tree.IElementType;
+import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.psi.util.PsiUtilCore;
 import com.intellij.util.IncorrectOperationException;
+import dev.xeonkryptos.xeonrobotframeworkplugin.misc.RobotReadWriteAccessDetector;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotPsiUtil;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.dto.VariableType;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.FoldingText;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotArgument;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotElement;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotIfVariableStatement;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCall;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLocalArgumentsSettingParameterOptional;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableBodyId;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableDefinition;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableStatement;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableValue;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVisitor;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.folding.RobotFoldingComputationUtil;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotStubPsiElementBase;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotVariableDefinitionStub;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.RobotElementGenerator;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.VariableScope;
+import dev.xeonkryptos.xeonrobotframeworkplugin.util.GlobalConstants;
+import dev.xeonkryptos.xeonrobotframeworkplugin.util.KeywordUtil;
+import dev.xeonkryptos.xeonrobotframeworkplugin.util.RobotNames;
 import dev.xeonkryptos.xeonrobotframeworkplugin.util.VariableNameUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.Icon;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 
-public abstract class RobotVariableDefinitionExtension extends RobotStubPsiElementBase<RobotVariableDefinitionStub, RobotVariableDefinition>
-        implements RobotVariableDefinition {
+public abstract class RobotVariableDefinitionExtension extends RobotStubPsiElementBase<RobotVariableDefinitionStub, RobotVariableDefinition> implements RobotVariableDefinition {
+
+    private static final Set<String> CREATE_LIST_KEYWORD_NAMES = Set.of(RobotNames.CREATE_LIST_KEYWORD_NAME, RobotNames.BUILTIN_NAMESPACE + "." + RobotNames.CREATE_LIST_KEYWORD_NAME);
+    private static final Set<String> CREATE_DICTIONARY_KEYWORD_NAMES = Set.of(RobotNames.CREATE_DICTIONARY_KEYWORD_NAME,
+                                                                              RobotNames.BUILTIN_NAMESPACE + "." + RobotNames.CREATE_DICTIONARY_KEYWORD_NAME);
 
     private Set<String> variableNameVariants;
     private VariableScope scope;
@@ -134,6 +156,85 @@ public abstract class RobotVariableDefinitionExtension extends RobotStubPsiEleme
             }
         }
         return scope;
+    }
+
+    public @Nullable FoldingText getAssignedValues() {
+        PsiElement parent = getParent();
+        StringBuilder builder = new StringBuilder();
+        List<PsiElement> dependants = new ArrayList<>();
+        RobotVisitor visitor = new RobotVisitor() {
+            @Override
+            public void visitLocalArgumentsSettingParameterOptional(@NotNull RobotLocalArgumentsSettingParameterOptional o) {
+                String text = o.getPositionalArgument().getText().trim();
+                builder.append(text);
+                dependants.add(o.getPositionalArgument());
+            }
+
+            @Override
+            public void visitVariableStatement(@NotNull RobotVariableStatement o) {
+                Collection<RobotElement> children = PsiTreeUtil.findChildrenOfAnyType(o, true, RobotVariableValue.class, RobotKeywordCall.class);
+                for (RobotElement child : children) {
+                    child.accept(this);
+                }
+            }
+
+            @Override
+            public void visitVariableValue(@NotNull RobotVariableValue o) {
+                appendFoldableText(o);
+            }
+
+            @Override
+            public void visitKeywordCall(@NotNull RobotKeywordCall o) {
+                String keywordName = o.getName();
+                String normalizeKeywordName = KeywordUtil.normalizeKeywordName(keywordName);
+                if (RobotReadWriteAccessDetector.isVariableSetterKeyword(keywordName)) {
+                    Collection<RobotArgument> allCallArguments = o.getAllCallArguments();
+                    for (RobotArgument argument : allCallArguments) {
+                        appendFoldableText(argument);
+                    }
+                } else if (CREATE_LIST_KEYWORD_NAMES.contains(normalizeKeywordName)) {
+                    builder.append("[");
+                    Collection<RobotArgument> allCallArguments = o.getAllCallArguments();
+                    for (RobotArgument argument : allCallArguments) {
+                        appendFoldableText(argument);
+                    }
+                    if (builder.length() - 1 >= RobotFoldingComputationUtil.MAX_VARIABLE_FOLDING_LENGTH) {
+                        String text = builder.deleteCharAt(0).toString();
+                        text = StringUtil.shortenTextWithEllipsis(text, RobotFoldingComputationUtil.MAX_VARIABLE_FOLDING_LENGTH, 0);
+                        builder.replace(1, builder.length(), text);
+                    }
+                    builder.append("]");
+                } else if (CREATE_DICTIONARY_KEYWORD_NAMES.contains(normalizeKeywordName)) {
+                    builder.append("{");
+                    Collection<RobotArgument> allCallArguments = o.getAllCallArguments();
+                    for (RobotArgument argument : allCallArguments) {
+                        appendFoldableText(argument);
+                    }
+                    if (builder.length() - 1 >= RobotFoldingComputationUtil.MAX_VARIABLE_FOLDING_LENGTH) {
+                        String text = builder.deleteCharAt(0).toString();
+                        text = StringUtil.shortenTextWithEllipsis(text, RobotFoldingComputationUtil.MAX_VARIABLE_FOLDING_LENGTH, 0);
+                        builder.replace(1, builder.length(), text);
+                    }
+                    builder.append("}");
+                }
+            }
+
+            private void appendFoldableText(RobotElement element) {
+                String text = element.getText().trim();
+                if (!builder.isEmpty()) {
+                    builder.append(GlobalConstants.SUPER_SPACE);
+                }
+                builder.append(text);
+                dependants.add(element);
+            }
+
+            @Override
+            public void visitIfVariableStatement(@NotNull RobotIfVariableStatement o) {
+                // Not supporting this case
+            }
+        };
+        parent.accept(visitor);
+        return !builder.isEmpty() ? new FoldingText(builder.toString(), dependants) : null;
     }
 
     @NotNull

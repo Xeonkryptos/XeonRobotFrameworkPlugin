@@ -398,7 +398,9 @@ public class RobotVisitor extends PsiElementVisitor {
   }
 
   public void visitVariable(@NotNull RobotVariable o) {
-    visitElement(o);
+    visitFoldable(o);
+    // visitAssignedVariable(o);
+    // visitElement(o);
   }
 
   public void visitVariableBodyId(@NotNull RobotVariableBodyId o) {
@@ -414,6 +416,7 @@ public class RobotVisitor extends PsiElementVisitor {
     // visitNavigationItem(o);
     // visitDefinedVariable(o);
     // visitQualifiedNameOwner(o);
+    // visitAssignedVariable(o);
     // visitElement(o);
   }
 

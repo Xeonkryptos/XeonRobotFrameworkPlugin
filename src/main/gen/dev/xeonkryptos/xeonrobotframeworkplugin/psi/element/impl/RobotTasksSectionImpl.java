@@ -2,8 +2,6 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl;
 
 import java.util.List;
-
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotPsiUtil;
 import org.jetbrains.annotations.*;
 import com.intellij.lang.ASTNode;
 import com.intellij.psi.PsiElement;
@@ -11,6 +9,7 @@ import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.*;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.*;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotPsiUtil;
 
 public class RobotTasksSectionImpl extends RobotSectionImpl implements RobotTasksSection {
 

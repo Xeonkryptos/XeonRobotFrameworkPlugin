@@ -13,7 +13,6 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotStubPsiElementBase
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotTaskStatementStub;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.RobotElementGenerator;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import javax.swing.Icon;
 
@@ -27,14 +26,13 @@ public abstract class RobotTaskExtension extends RobotStubPsiElementBase<RobotTa
         super(stub, nodeType);
     }
 
-    @Nullable
     @Override
-    public FoldingDescriptor[] fold(@NotNull Document document) {
+    public @NotNull FoldingDescriptor @NotNull [] fold(@NotNull Document document, boolean quick) {
         if (!RobotFoldingComputationUtil.isFoldingUseful(this, document)) {
-            return null;
+            return FoldingDescriptor.EMPTY_ARRAY;
         }
         var foldingDescriptor = RobotFoldingComputationUtil.computeFoldingDescriptorForContainer(this, getTaskId(), document);
-        return foldingDescriptor != null ? new FoldingDescriptor[] { foldingDescriptor } : null;
+        return foldingDescriptor != null ? new FoldingDescriptor[] { foldingDescriptor } : FoldingDescriptor.EMPTY_ARRAY;
     }
 
     @NotNull

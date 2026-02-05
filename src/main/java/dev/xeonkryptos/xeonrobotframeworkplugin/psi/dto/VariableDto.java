@@ -20,17 +20,12 @@ public class VariableDto implements DefinedVariable {
 
     private final Set<String> variableNameVariants;
 
-    public VariableDto(@NotNull PsiElement reference, @NotNull String name, @NotNull VariableType variableType, @Nullable VariableScope scope) {
-        this(reference, name.trim(), name, variableType, scope);
-    }
-
-    public VariableDto(@NotNull PsiElement reference, @NotNull String name, @NotNull String matchingVariableName, VariableType variableType, @Nullable VariableScope scope) {
+    public VariableDto(@NotNull PsiElement reference, @NotNull String name, VariableType variableType, @Nullable VariableScope scope) {
         this.reference = reference;
         this.name = normalizeName(name.trim());
-        this.matchingVariableName = matchingVariableName.trim();
+        this.matchingVariableName = name.trim();
         this.scope = scope;
         this.variableType = variableType;
-
         this.variableNameVariants = VariableNameUtil.INSTANCE.computeVariableNameVariants(this.matchingVariableName);
     }
 

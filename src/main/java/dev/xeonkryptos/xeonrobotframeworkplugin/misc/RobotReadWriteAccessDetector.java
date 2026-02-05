@@ -6,33 +6,37 @@ import com.intellij.psi.PsiReference;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariable;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableDefinition;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.VariableScope;
+import dev.xeonkryptos.xeonrobotframeworkplugin.util.KeywordUtil;
+import dev.xeonkryptos.xeonrobotframeworkplugin.util.RobotNames;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
 
 public class RobotReadWriteAccessDetector extends ReadWriteAccessDetector {
 
-    private static final Map<String, VariableScope> VARIABLE_SETTERS = Map.of("set variable",
-                                                                              VariableScope.TestCase,
-                                                                              "set global variable",
-                                                                              VariableScope.Global,
-                                                                              "set local variable",
-                                                                              VariableScope.Local,
-                                                                              "set test variable",
-                                                                              VariableScope.TestCase,
-                                                                              "set task variable",
-                                                                              VariableScope.TestCase,
-                                                                              "set suite variable",
-                                                                              VariableScope.TestSuite,
-                                                                              "set variable if",
-                                                                              VariableScope.Local);
+    private static final Map<String, VariableScope> VARIABLE_SETTERS = Map.ofEntries(Map.entry("setvariable", VariableScope.TestCase),
+                                                                                     Map.entry("setglobalvariable", VariableScope.Global),
+                                                                                     Map.entry("setlocalvariable", VariableScope.Local),
+                                                                                     Map.entry("settestvariable", VariableScope.TestCase),
+                                                                                     Map.entry("settaskvariable", VariableScope.TestCase),
+                                                                                     Map.entry("setsuitevariable", VariableScope.TestSuite),
+                                                                                     Map.entry("setvariableif", VariableScope.Local),
+                                                                                     Map.entry(RobotNames.BUILTIN_NAMESPACE.toLowerCase() + ".setvariable", VariableScope.TestCase),
+                                                                                     Map.entry(RobotNames.BUILTIN_NAMESPACE.toLowerCase() + ".setglobalvariable", VariableScope.Global),
+                                                                                     Map.entry(RobotNames.BUILTIN_NAMESPACE.toLowerCase() + ".setlocalvariable", VariableScope.Local),
+                                                                                     Map.entry(RobotNames.BUILTIN_NAMESPACE.toLowerCase() + ".settestvariable", VariableScope.TestCase),
+                                                                                     Map.entry(RobotNames.BUILTIN_NAMESPACE.toLowerCase() + ".settaskvariable", VariableScope.TestCase),
+                                                                                     Map.entry(RobotNames.BUILTIN_NAMESPACE.toLowerCase() + ".setsuitevariable", VariableScope.TestSuite),
+                                                                                     Map.entry(RobotNames.BUILTIN_NAMESPACE.toLowerCase() + ".setvariableif", VariableScope.Local));
 
     public static boolean isVariableSetterKeyword(@NotNull String keywordName) {
-        return VARIABLE_SETTERS.containsKey(keywordName.toLowerCase());
+        String normalizeKeywordName = KeywordUtil.normalizeKeywordName(keywordName);
+        return VARIABLE_SETTERS.containsKey(normalizeKeywordName);
     }
 
     public static VariableScope getVariableSetterScope(@NotNull String keywordName) {
-        return VARIABLE_SETTERS.getOrDefault(keywordName.toLowerCase(), VariableScope.Local);
+        String normalizeKeywordName = KeywordUtil.normalizeKeywordName(keywordName);
+        return VARIABLE_SETTERS.getOrDefault(normalizeKeywordName, VariableScope.Local);
     }
 
     @Override

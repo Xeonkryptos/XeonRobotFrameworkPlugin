@@ -199,14 +199,13 @@ public abstract class RobotKeywordCallExtension extends RobotStubPsiElementBase<
         return startOfKeywordsOnlyIndex != null ? OptionalInt.of(startOfKeywordsOnlyIndex) : OptionalInt.empty();
     }
 
-    @Nullable
     @Override
-    public FoldingDescriptor[] fold(@NotNull Document document) {
+    public @NotNull FoldingDescriptor @NotNull [] fold(@NotNull Document document, boolean quick) {
         if (!RobotFoldingComputationUtil.isFoldingUseful(this, document)) {
-            return null;
+            return FoldingDescriptor.EMPTY_ARRAY;
         }
         var foldingDescriptors = RobotFoldingComputationUtil.computeFoldingDescriptorsForListing(getNode(), "KeywordCallArgumentsListFolding", getKeywordCallName(), getAllCallArguments(), document);
-        return !foldingDescriptors.isEmpty() ? foldingDescriptors.toArray(FoldingDescriptor.EMPTY_ARRAY) : null;
+        return !foldingDescriptors.isEmpty() ? foldingDescriptors.toArray(FoldingDescriptor.EMPTY_ARRAY) : FoldingDescriptor.EMPTY_ARRAY;
     }
 
     @NotNull

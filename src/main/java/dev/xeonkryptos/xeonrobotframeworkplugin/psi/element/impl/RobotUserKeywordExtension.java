@@ -23,7 +23,6 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.RobotElementGenerator;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.VariableScope;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.visitor.RobotUserKeywordInputArgumentCollector;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
 import java.util.LinkedHashSet;
@@ -98,14 +97,13 @@ public abstract class RobotUserKeywordExtension extends RobotStubPsiElementBase<
         return globalVariables;
     }
 
-    @Nullable
     @Override
-    public FoldingDescriptor[] fold(@NotNull Document document) {
+    public @NotNull FoldingDescriptor @NotNull [] fold(@NotNull Document document, boolean quick) {
         if (!RobotFoldingComputationUtil.isFoldingUseful(this, document)) {
-            return null;
+            return FoldingDescriptor.EMPTY_ARRAY;
         }
         var foldingDescriptor = RobotFoldingComputationUtil.computeFoldingDescriptorForContainer(this, getUserKeywordStatementId(), document);
-        return foldingDescriptor != null ? new FoldingDescriptor[] { foldingDescriptor } : null;
+        return foldingDescriptor != null ? new FoldingDescriptor[] { foldingDescriptor } : FoldingDescriptor.EMPTY_ARRAY;
     }
 
     @NotNull

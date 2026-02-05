@@ -9,7 +9,8 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.FileViewProvider;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
-import com.intellij.psi.PsiReference;
+import com.intellij.psi.PsiPolyVariantReference;
+import com.intellij.psi.ResolveResult;
 import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.psi.util.CachedValueProvider.Result;
 import com.intellij.psi.util.CachedValuesManager;
@@ -115,12 +116,13 @@ public class RobotFileImpl extends PsiFileBase implements KeywordFile, RobotFile
             RobotUsedFilesCollector robotUsedFilesCollector = new RobotUsedFilesCollector();
             acceptChildren(robotUsedFilesCollector);
 
-            Collection<PsiFile> results = robotUsedFilesCollector.getReferences()
-                                                                 .stream()
-                                                                 .map(PsiReference::resolve)
-                                                                 .filter(Objects::nonNull)
-                                                                 .map(PsiElement::getContainingFile)
-                                                                 .collect(Collectors.toCollection(ArrayList::new));
+            Collection<PsiFile> results = robotUsedFilesCollector.getReferences().stream().flatMap(reference -> {
+                if (reference instanceof PsiPolyVariantReference polyRef) {
+                    ResolveResult[] resolveResults = polyRef.multiResolve(false);
+                    return Arrays.stream(resolveResults).map(ResolveResult::getElement);
+                }
+                return Stream.of(reference.resolve());
+            }).filter(Objects::nonNull).map(PsiElement::getContainingFile).collect(Collectors.toCollection(ArrayList::new));
             Collection<KeywordFile> importedFiles = collectImportedFiles(false);
             Collection<VirtualFile> virtualFiles = getVirtualFiles(false);
 

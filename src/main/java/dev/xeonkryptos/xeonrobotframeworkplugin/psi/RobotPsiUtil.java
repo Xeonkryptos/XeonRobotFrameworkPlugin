@@ -1,12 +1,30 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.psi;
 
+import com.intellij.lang.ASTNode;
+import com.intellij.lang.folding.FoldingDescriptor;
+import com.intellij.openapi.editor.Document;
+import com.intellij.openapi.util.TextRange;
+import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiNamedElement;
 import com.intellij.psi.PsiReference;
 import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.psi.util.PsiUtilCore;
+import com.intellij.util.indexing.DumbModeAccessType;
+import com.jetbrains.python.psi.PyBoolLiteralExpression;
+import com.jetbrains.python.psi.PyDictLiteralExpression;
+import com.jetbrains.python.psi.PyElementVisitor;
+import com.jetbrains.python.psi.PyExpression;
+import com.jetbrains.python.psi.PyKeyValueExpression;
+import com.jetbrains.python.psi.PyNoneLiteralExpression;
+import com.jetbrains.python.psi.PyNumericLiteralExpression;
+import com.jetbrains.python.psi.PySequenceExpression;
+import com.jetbrains.python.psi.PyStringLiteralExpression;
+import com.jetbrains.python.psi.PyTargetExpression;
+import com.jetbrains.python.psi.PyTupleExpression;
 import dev.xeonkryptos.xeonrobotframeworkplugin.icons.RobotIcons;
 import dev.xeonkryptos.xeonrobotframeworkplugin.misc.RobotReadWriteAccessDetector;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.FoldingText;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotCommentsSection;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotDictVariable;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotImportArgument;
@@ -44,6 +62,7 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableDefinit
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableStatement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariablesSection;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotTestCaseExtension;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.folding.RobotFoldingComputationUtil;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.reference.RobotImportArgumentReference;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.reference.RobotKeywordCallLibraryReference;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.reference.RobotKeywordCallNameReference;
@@ -61,13 +80,16 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotUserKeywordStub;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotVariableDefinitionStub;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.QualifiedNameBuilder;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.VariableScope;
+import dev.xeonkryptos.xeonrobotframeworkplugin.util.GlobalConstants;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.Icon;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
+@SuppressWarnings("UnstableApiUsage")
 public class RobotPsiUtil {
 
     @NotNull
@@ -361,6 +383,114 @@ public class RobotPsiUtil {
         return section.getNameIdentifier().getText();
     }
 
+    public static FoldingText getAssignedValues(@NotNull RobotVariable variable) {
+        RobotVariableBodyId variableBodyId = RobotPsiUtil.getVariableBodyId(variable);
+        Optional<PsiElement> resolvedElementOpt = Optional.ofNullable(variableBodyId).map(RobotVariableBodyId::getReference).map(PsiReference::resolve);
+        if (resolvedElementOpt.isPresent()) {
+            PsiElement psiElement = resolvedElementOpt.get();
+            if (psiElement instanceof RobotVariableDefinition variableDefinition) {
+                return variableDefinition.getAssignedValues();
+            }
+            if (psiElement instanceof PyTargetExpression targetExpression) {
+                PyExpression assignedValue = targetExpression.findAssignedValue();
+                if (assignedValue != null) {
+                    StringBuilder builder = new StringBuilder();
+                    PyElementVisitor visitor = new PyElementVisitor() {
+                        @Override
+                        public void visitPyStringLiteralExpression(@NotNull PyStringLiteralExpression node) {
+                            String stringLiteral = node.getStringValue();
+                            builder.append(stringLiteral);
+                        }
+
+                        @Override
+                        public void visitPyBoolLiteralExpression(@NotNull PyBoolLiteralExpression node) {
+                            boolean value = node.getValue();
+                            builder.append(value ? "True" : "False");
+                        }
+
+                        @Override
+                        public void visitPyNumericLiteralExpression(@NotNull PyNumericLiteralExpression node) {
+                            String numberLiteral = node.getBigDecimalValue().toPlainString();
+                            builder.append(numberLiteral);
+                        }
+
+                        @Override
+                        public void visitPyNoneLiteralExpression(@NotNull PyNoneLiteralExpression node) {
+                            builder.append("None");
+                        }
+
+                        @Override
+                        public void visitPyDictLiteralExpression(@NotNull PyDictLiteralExpression node) {
+                            builder.append("{");
+                            int startLength = builder.length();
+                            PyKeyValueExpression[] elements = node.getElements();
+                            for (PyKeyValueExpression element : elements) {
+                                if (builder.length() > startLength) {
+                                    builder.append(GlobalConstants.SUPER_SPACE);
+                                }
+                                PyExpression keyExpression = element.getKey();
+                                keyExpression.accept(this);
+
+                                builder.append("=");
+                                PyExpression valueExpression = element.getValue();
+                                if (valueExpression != null) {
+                                    valueExpression.accept(this);
+                                }
+                            }
+                            builder.append("}");
+                        }
+
+                        @Override
+                        public void visitPySequenceExpression(@NotNull PySequenceExpression node) {
+                            builder.append("[");
+                            int startLength = builder.length();
+                            PyExpression[] elements = node.getElements();
+                            for (PyExpression element : elements) {
+                                if (builder.length() > startLength) {
+                                    builder.append(GlobalConstants.SUPER_SPACE);
+                                }
+                                element.accept(this);
+                            }
+                            builder.append("]");
+                        }
+
+                        @Override
+                        public void visitPyTupleExpression(@NotNull PyTupleExpression node) {
+                            node.acceptChildren(this);
+                        }
+                    };
+                    assignedValue.accept(visitor);
+                    return new FoldingText(builder.toString(), Set.of(assignedValue));
+                }
+            }
+        }
+        return null;
+    }
+
+    public static FoldingDescriptor[] fold(RobotVariable variable, @NotNull Document ignoredDocument, boolean quick) {
+        if (quick) {
+            return FoldingDescriptor.EMPTY_ARRAY;
+        }
+        /*if (variable.getParent() instanceof RobotConditionalContent) {
+            return FoldingDescriptor.EMPTY_ARRAY;
+        }*/
+        FoldingText assignedValues = DumbModeAccessType.RELIABLE_DATA_ONLY.ignoreDumbMode(() -> getAssignedValues(variable));
+        if (assignedValues == null) {
+            return FoldingDescriptor.EMPTY_ARRAY;
+        }
+        ASTNode variableEndNode = variable.getNode().findChildByType(RobotTypes.VARIABLE_END);
+        if (variableEndNode == null) {
+            return FoldingDescriptor.EMPTY_ARRAY;
+        }
+
+        String foldingText = StringUtil.shortenTextWithEllipsis(assignedValues.foldingText().trim(), RobotFoldingComputationUtil.MAX_VARIABLE_FOLDING_LENGTH, 0);
+
+        int endOffset = variableEndNode.getTextRange().getEndOffset();
+        TextRange textRange = variable.getTextRange();
+        textRange = new TextRange(textRange.getStartOffset(), endOffset);
+        return new FoldingDescriptor[] { new FoldingDescriptor(variable.getNode(), textRange, null, foldingText, true, Set.copyOf(assignedValues.dependants())) };
+    }
+
     public static boolean areElementsEquivalent(PsiElement current, PsiElement another) {
         String qualifiedName;
         if (another instanceof PsiNamedElement namedElement) {
@@ -396,20 +526,16 @@ public class RobotPsiUtil {
                                                                default -> null;
                                                            })
                                                            .or(() -> {
-                                                               RobotVariablesSection variablesSection = PsiTreeUtil.getParentOfType(variableDefinition,
-                                                                                                                                    RobotVariablesSection.class,
-                                                                                                                                    true);
+                                                               RobotVariablesSection variablesSection = PsiTreeUtil.getParentOfType(variableDefinition, RobotVariablesSection.class, true);
                                                                return Optional.ofNullable(variablesSection).map(ignored -> VariableScope.TestSuite);
                                                            })
                                                            .or(() -> {
-                                                               RobotKeywordVariableStatement keywordVariableStatement = PsiTreeUtil.getParentOfType(
-                                                                       variableDefinition,
-                                                                       RobotKeywordVariableStatement.class,
-                                                                       true);
+                                                               RobotKeywordVariableStatement keywordVariableStatement = PsiTreeUtil.getParentOfType(variableDefinition,
+                                                                                                                                                    RobotKeywordVariableStatement.class,
+                                                                                                                                                    true);
                                                                return Optional.ofNullable(keywordVariableStatement)
                                                                               .map(RobotKeywordVariableStatement::getKeywordCall)
-                                                                              .map(RobotKeywordCall::getKeywordCallName)
-                                                                              .map(PsiElement::getText)
+                                                                              .map(RobotKeywordCall::getName)
                                                                               .filter(RobotReadWriteAccessDetector::isVariableSetterKeyword)
                                                                               .map(RobotReadWriteAccessDetector::getVariableSetterScope);
                                                            });
