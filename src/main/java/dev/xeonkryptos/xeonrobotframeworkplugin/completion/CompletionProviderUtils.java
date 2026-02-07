@@ -68,10 +68,10 @@ final class CompletionProviderUtils {
         String lookupString = word.presentation();
         String[] lookupStrings = { text, WordUtils.capitalize(text), lookupString, WordUtils.capitalize(lookupString), lookupString.toLowerCase() };
         return TailTypeDecorator.withTail(LookupElementBuilder.create(lookupString)
-                                                                               .withLookupStrings(Arrays.asList(lookupStrings))
-                                                                               .withPresentableText(lookupString)
-                                                                               .withInsertHandler(insertHandler)
-                                                                               .withCaseSensitivity(true), word.tailType());
+                                                              .withLookupStrings(Arrays.asList(lookupStrings))
+                                                              .withPresentableText(lookupString)
+                                                              .withInsertHandler(insertHandler)
+                                                              .withCaseSensitivity(true), word.tailType());
     }
 
     static Optional<LookupElement> createLookupElement(LookupElementMarker lookupElementMarker, @Nullable Icon icon, boolean bold, @NotNull TailType tailType) {
