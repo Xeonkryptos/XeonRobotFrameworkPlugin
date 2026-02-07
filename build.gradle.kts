@@ -84,7 +84,7 @@ intellijPlatform {
         id = properties("pluginGroup")
         name = properties("pluginName")
         version = properties("pluginVersion")
-        description = File("./README.md").readText().lines().run {
+        description = File("README.md").readText().lines().run {
             val start = "<!-- Plugin description -->"
             val end = "<!-- Plugin description end -->"
 
