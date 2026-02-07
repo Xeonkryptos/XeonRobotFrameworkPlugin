@@ -23,6 +23,4 @@ public interface RobotFile extends PsiFile {
     @NotNull Collection<KeywordFile> collectImportedFiles(boolean includeTransitive, ImportType... importTypes);
 
     @NotNull Collection<VirtualFile> findImportedFilesWithLibraryName(@NotNull String libraryName);
-
-    Collection<DefinedVariable> getLocallyDefinedVariables();
 }
