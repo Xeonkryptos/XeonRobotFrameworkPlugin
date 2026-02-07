@@ -24,3 +24,9 @@ jobs:
       gradleVersion: ${{ matrix.gradleVersion }}
       os: ${{ matrix.os }}
       cacheReadOnly: true
+
+    strategy:
+      fail-fast: false
+      matrix:
+        gradleVersion:
+          - "9.2.1"
