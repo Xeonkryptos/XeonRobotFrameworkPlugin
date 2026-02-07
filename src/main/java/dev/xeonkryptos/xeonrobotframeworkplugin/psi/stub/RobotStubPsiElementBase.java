@@ -66,7 +66,7 @@ public abstract class RobotStubPsiElementBase<T extends StubElement<P>, P extend
 
     @Override
     public boolean isEquivalentTo(PsiElement another) {
-        if (another.getContainingFile() == null) {
+        if (another.getContainingFile() == null || another.getContainingFile().getOriginalFile().getVirtualFile() == null) {
             return super.isEquivalentTo(another);
         }
         return RobotPsiUtil.areElementsEquivalent(this, another);
