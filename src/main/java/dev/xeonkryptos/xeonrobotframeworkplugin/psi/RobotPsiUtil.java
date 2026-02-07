@@ -460,7 +460,7 @@ public class RobotPsiUtil {
                         }
                     };
                     assignedValue.accept(visitor);
-                    return new FoldingText(builder.toString(), Set.of(assignedValue));
+                    return !builder.isEmpty() ? new FoldingText(builder.toString(), Set.of(assignedValue)) : null;
                 }
             }
         }

@@ -194,28 +194,24 @@ public abstract class RobotVariableDefinitionExtension extends RobotStubPsiEleme
                     }
                 } else if (CREATE_LIST_KEYWORD_NAMES.contains(normalizeKeywordName)) {
                     builder.append("[");
-                    Collection<RobotArgument> allCallArguments = o.getAllCallArguments();
-                    for (RobotArgument argument : allCallArguments) {
-                        appendFoldableText(argument);
-                    }
-                    if (builder.length() - 1 >= RobotFoldingComputationUtil.MAX_VARIABLE_FOLDING_LENGTH) {
-                        String text = builder.deleteCharAt(0).toString();
-                        text = StringUtil.shortenTextWithEllipsis(text, RobotFoldingComputationUtil.MAX_VARIABLE_FOLDING_LENGTH, 0);
-                        builder.replace(1, builder.length(), text);
-                    }
+                    foldKeywordCallArguments(o);
                     builder.append("]");
                 } else if (CREATE_DICTIONARY_KEYWORD_NAMES.contains(normalizeKeywordName)) {
                     builder.append("{");
-                    Collection<RobotArgument> allCallArguments = o.getAllCallArguments();
-                    for (RobotArgument argument : allCallArguments) {
-                        appendFoldableText(argument);
-                    }
-                    if (builder.length() - 1 >= RobotFoldingComputationUtil.MAX_VARIABLE_FOLDING_LENGTH) {
-                        String text = builder.deleteCharAt(0).toString();
-                        text = StringUtil.shortenTextWithEllipsis(text, RobotFoldingComputationUtil.MAX_VARIABLE_FOLDING_LENGTH, 0);
-                        builder.replace(1, builder.length(), text);
-                    }
+                    foldKeywordCallArguments(o);
                     builder.append("}");
+                }
+            }
+
+            private void foldKeywordCallArguments(@NotNull RobotKeywordCall o) {
+                Collection<RobotArgument> allCallArguments = o.getAllCallArguments();
+                for (RobotArgument argument : allCallArguments) {
+                    appendFoldableText(argument);
+                }
+                if (builder.length() - 1 >= RobotFoldingComputationUtil.MAX_VARIABLE_FOLDING_LENGTH) {
+                    String text = builder.deleteCharAt(0).toString();
+                    text = StringUtil.shortenTextWithEllipsis(text, RobotFoldingComputationUtil.MAX_VARIABLE_FOLDING_LENGTH, 0);
+                    builder.replace(1, builder.length(), text);
                 }
             }
 
