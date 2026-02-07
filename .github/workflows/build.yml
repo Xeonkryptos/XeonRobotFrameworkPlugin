@@ -94,13 +94,6 @@ jobs:
           echo "$CHANGELOG" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
 
-      - name: Download RobotCode Debugger
-        shell: bash
-        run: |
-          mkdir -p bundled/libs
-          pip install --upgrade -t bundled/libs robotcode[debugger]
-          rm -rf bundled/libs/robot && rm -rf bundled/libs/robotframework*
-
       - name: Build Plugin
         run: ./gradlew buildPlugin -x test
 
