@@ -93,7 +93,7 @@ intellijPlatform {
             }
             subList(indexOf(start) + 1, indexOf(end))
         }.joinToString("\n").run { markdownToHTML(this) }
-        changeNotes = changelog.renderItem(changelog.getLatest(), Changelog.OutputType.HTML)
+        changeNotes = changelog.renderItem(changelog.getUnreleased(), Changelog.OutputType.HTML)
 
         ideaVersion {
             sinceBuild = properties("pluginSinceBuild")
