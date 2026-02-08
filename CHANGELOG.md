@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+## 0.6.0
+
 ### Added
 
 - Update gutter icon based on robot execution results
