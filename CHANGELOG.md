@@ -4,6 +4,10 @@
 
 ## Unreleased
 
+### Changed
+
+- Modifications to stay compatible with the upcoming PyCharm version 2026.1
+
 ## 0.6.0
 
 ### Added

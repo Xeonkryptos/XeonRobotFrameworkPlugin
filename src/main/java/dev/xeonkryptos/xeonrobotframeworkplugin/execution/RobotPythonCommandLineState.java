@@ -22,6 +22,7 @@ import com.intellij.openapi.module.Module;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.projectRoots.Sdk;
 import com.intellij.openapi.vfs.VfsUtil;
+import com.intellij.openapi.vfs.VfsUtilCore;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.util.ArrayUtil;
 import com.jetbrains.python.actions.PyExecuteInConsole;
@@ -71,13 +72,12 @@ public class RobotPythonCommandLineState extends PythonScriptCommandLineState {
     @NotNull
     private final RobotRunConfiguration runConfiguration;
 
-    private volatile RobotDebugAdapterProtocolCommunicator dapCommunicator;
+    private RobotDebugAdapterProtocolCommunicator dapCommunicator;
 
     public RobotPythonCommandLineState(RobotRunConfiguration runConfiguration, ExecutionEnvironment env) {
         super(runConfiguration.getPythonRunConfiguration(), env);
 
         this.runConfiguration = runConfiguration;
-        this.setMultiprocessDebug(true);
     }
 
     // Overridden to provide access to the method from another class (it is protected otherwise)
@@ -363,8 +363,8 @@ public class RobotPythonCommandLineState extends PythonScriptCommandLineState {
                                                                                                                .map(stmt -> stmt.getContainingFile().getOriginalFile().getVirtualFile()))
                                                                   .inSmartMode(project)
                                                                   .executeSynchronously();
-        return virtualFileStmtOptional.map(vfile -> VfsUtil.getCommonAncestor(expandedWorkingDirVFile, vfile))
-                                      .map(vfile -> VfsUtil.getRelativePath(vfile, virtualFileStmtOptional.get(), '/'))
+        return virtualFileStmtOptional.map(vfile -> VfsUtilCore.getCommonAncestor(expandedWorkingDirVFile, vfile))
+                                      .map(vfile -> VfsUtilCore.getRelativePath(vfile, virtualFileStmtOptional.get(), '/'))
                                       .orElseGet(() -> execInfo.getLocation().replace('.', '/') + "." + RobotFeatureFileType.getInstance().getDefaultExtension());
     }
 
