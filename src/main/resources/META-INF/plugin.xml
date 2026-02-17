@@ -146,9 +146,9 @@
         <localInspection language="Robot" shortName="RobotVariableRatherArgumentMeant" bundle="messages.RobotBundle"
                          key="INSP.NAME.variable.rather.argument.meant" groupKey="INSP.GROUP.robot" enabledByDefault="true" level="WARNING" dumbAware="true"
                          implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.inspections.maintainability.RobotVariableRatherArgumentMeantInspection"/>
-        <localInspection language="Robot" enabledByDefault="true" level="WARNING" shortName="TestFailedLine" bundle="messages.RobotBundle"
+        <localInspection language="Robot" enabledByDefault="true" level="WARNING" shortName="RobotTestFailedLine" bundle="messages.RobotBundle"
                          groupKey="INSP.GROUP.robot" key="INSP.NAME.execution.test.failed.line"
-                         implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.inspections.TestFailedLineInspection"/>
+                         implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.inspections.RobotTestFailedLineInspection"/>
         <localInspection language="Robot" shortName="ReplaceBuiltInKeywordsWithNativeExpressions" bundle="messages.RobotBundle" key="INSP.NAME.keyword.replace.with.native.expressions"
                          groupKey="INSP.GROUP.robot" enabledByDefault="true" level="WARNING" dumbAware="true"
                          implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.inspections.maintainability.ReplaceBuiltInKeywordsWithNativeExpressionsInspection"/>

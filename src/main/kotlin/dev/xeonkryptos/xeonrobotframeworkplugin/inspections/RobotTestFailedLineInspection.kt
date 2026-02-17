@@ -10,7 +10,7 @@ import com.intellij.psi.PsiElementVisitor
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCall
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVisitor
 
-class TestFailedLineInspection : LocalInspectionTool() {
+class RobotTestFailedLineInspection : LocalInspectionTool() {
 
     companion object {
         private const val TEST_FAILED_MAGNITUDE = 6 // see TestStateInfo#Magnitude
