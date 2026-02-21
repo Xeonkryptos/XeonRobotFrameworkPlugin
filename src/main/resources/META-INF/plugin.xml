@@ -211,6 +211,8 @@
                                    order="first, before pyvar"/>
         <renamePsiElementProcessor implementation="dev.xeonkryptos.xeonrobotframeworkplugin.rename.RobotVariableDefinitionRenameElementProcessor"/>
         <renameHandler implementation="dev.xeonkryptos.xeonrobotframeworkplugin.rename.RobotMemberInplaceRenameHandler"/>
+
+        <codeFoldingOptionsProvider instance="dev.xeonkryptos.xeonrobotframeworkplugin.config.RobotCodeFoldingOptionsProvider"/>
     </extensions>
     <actions>
         <action id="XeonRobotFrameworkPlugin.CreateNew" class="dev.xeonkryptos.xeonrobotframeworkplugin.actions.RobotCreateAction">

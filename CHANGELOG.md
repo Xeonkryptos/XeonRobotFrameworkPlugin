@@ -4,6 +4,10 @@
 
 ## Unreleased
 
+### Added
+
+- Support to configure new code folding under `Settings -> Editor -> General -> Code Folding -> Robot`
+
 ## 0.6.1
 
 ### Changed

@@ -22,6 +22,8 @@ import com.jetbrains.python.psi.PySequenceExpression;
 import com.jetbrains.python.psi.PyStringLiteralExpression;
 import com.jetbrains.python.psi.PyTargetExpression;
 import com.jetbrains.python.psi.PyTupleExpression;
+import dev.xeonkryptos.xeonrobotframeworkplugin.config.RobotFoldingSettings;
+import dev.xeonkryptos.xeonrobotframeworkplugin.config.RobotFoldingSettings.State;
 import dev.xeonkryptos.xeonrobotframeworkplugin.icons.RobotIcons;
 import dev.xeonkryptos.xeonrobotframeworkplugin.misc.RobotReadWriteAccessDetector;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.FoldingText;
@@ -62,7 +64,6 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableDefinit
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableStatement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariablesSection;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotTestCaseExtension;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.folding.RobotFoldingComputationUtil;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.reference.RobotImportArgumentReference;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.reference.RobotKeywordCallLibraryReference;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.reference.RobotKeywordCallNameReference;
@@ -480,12 +481,22 @@ public class RobotPsiUtil {
             return FoldingDescriptor.EMPTY_ARRAY;
         }
 
-        String foldingText = StringUtil.shortenTextWithEllipsis(assignedValues.foldingText().trim(), RobotFoldingComputationUtil.MAX_VARIABLE_FOLDING_LENGTH, 0);
+        State foldingState = RobotFoldingSettings.getInstance().getState();
+        boolean collapseVariables = foldingState.getCollapseVariables();
+        boolean showVariableNamesInFolding = foldingState.getShowVariableNamesInFolding();
+        int maxVariableFoldingLength = foldingState.getMaxVariablePlaceholderValueLength();
+        String foldingText = StringUtil.shortenTextWithEllipsis(assignedValues.foldingText().trim(), maxVariableFoldingLength, 0);
+        if (showVariableNamesInFolding) {
+            String variableName = getVariableName(variable);
+            if (variableName != null) {
+                foldingText = variableName + " = " + foldingText;
+            }
+        }
 
         int endOffset = variableEndNode.getTextRange().getEndOffset();
         TextRange textRange = variable.getTextRange();
         textRange = new TextRange(textRange.getStartOffset(), endOffset);
-        return new FoldingDescriptor[] { new FoldingDescriptor(variable.getNode(), textRange, null, foldingText, false, Set.copyOf(assignedValues.dependants())) };
+        return new FoldingDescriptor[] { new FoldingDescriptor(variable.getNode(), textRange, null, foldingText, collapseVariables, Set.copyOf(assignedValues.dependants())) };
     }
 
     public static boolean areElementsEquivalent(PsiElement current, PsiElement another) {

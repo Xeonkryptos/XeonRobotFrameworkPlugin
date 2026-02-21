@@ -8,6 +8,7 @@ import com.intellij.psi.tree.IElementType;
 import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.psi.util.PsiUtilCore;
 import com.intellij.util.IncorrectOperationException;
+import dev.xeonkryptos.xeonrobotframeworkplugin.config.RobotFoldingSettings;
 import dev.xeonkryptos.xeonrobotframeworkplugin.misc.RobotReadWriteAccessDetector;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotPsiUtil;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes;
@@ -23,7 +24,6 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableDefinit
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableStatement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableValue;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVisitor;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.folding.RobotFoldingComputationUtil;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotStubPsiElementBase;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotVariableDefinitionStub;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.RobotElementGenerator;
@@ -208,9 +208,10 @@ public abstract class RobotVariableDefinitionExtension extends RobotStubPsiEleme
                 for (RobotArgument argument : allCallArguments) {
                     appendFoldableText(argument);
                 }
-                if (builder.length() - 1 >= RobotFoldingComputationUtil.MAX_VARIABLE_FOLDING_LENGTH) {
+                int maxVariablePlaceholderValueLength = RobotFoldingSettings.getInstance().getState().getMaxVariablePlaceholderValueLength();
+                if (builder.length() - 1 >= maxVariablePlaceholderValueLength) {
                     String text = builder.deleteCharAt(0).toString();
-                    text = StringUtil.shortenTextWithEllipsis(text, RobotFoldingComputationUtil.MAX_VARIABLE_FOLDING_LENGTH, 0);
+                    text = StringUtil.shortenTextWithEllipsis(text, maxVariablePlaceholderValueLength, 0);
                     builder.replace(1, builder.length(), text);
                 }
             }

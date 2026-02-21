@@ -7,6 +7,7 @@ import com.intellij.openapi.editor.FoldingGroup
 import com.intellij.openapi.util.TextRange
 import com.intellij.psi.PsiElement
 import com.intellij.psi.TokenType
+import dev.xeonkryptos.xeonrobotframeworkplugin.config.RobotFoldingSettings
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotBlockOpeningStructure
 import dev.xeonkryptos.xeonrobotframeworkplugin.util.GlobalConstants
@@ -17,9 +18,6 @@ object RobotFoldingComputationUtil {
     const val CONTAINER_FOLDING_PLACEHOLDER = "..."
     const val CONTAINER_FOLDING_PLACEHOLDER_WITH_SINGLE_SPACE_SEPARATOR = "${SINGLE_SPACE}${CONTAINER_FOLDING_PLACEHOLDER}"
     const val CONTAINER_FOLDING_PLACEHOLDER_WITH_SUPER_SPACE_SEPARATOR = "${GlobalConstants.SUPER_SPACE}${CONTAINER_FOLDING_PLACEHOLDER}"
-
-    const val MAX_LIST_FOLDING_LENGTH = 100
-    const val MAX_VARIABLE_FOLDING_LENGTH: Int = 50
 
     @JvmStatic
     fun isFoldingUseful(psiElement: PsiElement, document: Document): Boolean {
@@ -47,11 +45,7 @@ object RobotFoldingComputationUtil {
     @JvmStatic
     @JvmOverloads
     fun computeFoldingDescriptorsForBlockStructure(
-        element: PsiElement,
-        lastHeaderElement: PsiElement,
-        items: Collection<PsiElement>,
-        document: Document,
-        endOffset: Int? = null
+        element: PsiElement, lastHeaderElement: PsiElement, items: Collection<PsiElement>, document: Document, endOffset: Int? = null
     ): List<FoldingDescriptor> {
         if (items.isEmpty()) return emptyList()
 
@@ -78,8 +72,9 @@ object RobotFoldingComputationUtil {
             val endMarkerFoldableTextRange = TextRange.create(bodyElement.textRange.endOffset, endOffset)
             val foldingGroup = FoldingGroup.newGroup("SingleItemBlockStructureFolding")
 
-            FoldingDescriptor(node, headerMarkerFoldableTextRange, foldingGroup, GlobalConstants.SUPER_SPACE).let { foldingDescriptors.add(it) }
-            FoldingDescriptor(node, endMarkerFoldableTextRange, foldingGroup, GlobalConstants.SUPER_SPACE).let { foldingDescriptors.add(it) }
+            val collapseToSingleLine = RobotFoldingSettings.getInstance().state.collapseToSingleLine
+            FoldingDescriptor(node, headerMarkerFoldableTextRange, foldingGroup, GlobalConstants.SUPER_SPACE, collapseToSingleLine, emptySet()).let { foldingDescriptors.add(it) }
+            FoldingDescriptor(node, endMarkerFoldableTextRange, foldingGroup, GlobalConstants.SUPER_SPACE, collapseToSingleLine, emptySet()).let { foldingDescriptors.add(it) }
         } else {
             val foldableTextRange = TextRange.create(headerElement.textRange.endOffset, endOffset)
             val placeholderText = computeMethodLikeFoldingPlaceholder(headerElement) + GlobalConstants.SUPER_SPACE
@@ -89,13 +84,14 @@ object RobotFoldingComputationUtil {
     }
 
     @JvmStatic
-    fun computeFoldingDescriptorForContainer(element: PsiElement, startElement: PsiElement, document: Document): FoldingDescriptor? {
+    @JvmOverloads
+    fun computeFoldingDescriptorForContainer(element: PsiElement, startElement: PsiElement, document: Document, collapsedByDefault: Boolean = false): FoldingDescriptor? {
         val identifiedFoldableTextRange = computeFoldableTextRange(element, document)
         val foldableTextRange = TextRange.create(identifiedFoldableTextRange.startOffset + startElement.textLength, identifiedFoldableTextRange.endOffset)
         if (foldableTextRange.isEmpty) return null
 
         val placeholderText = computeMethodLikeFoldingPlaceholder(startElement)
-        return FoldingDescriptor(element.node, foldableTextRange, null, placeholderText, !placeholderText.endsWith(CONTAINER_FOLDING_PLACEHOLDER), emptySet())
+        return FoldingDescriptor(element.node, foldableTextRange, null, placeholderText, collapsedByDefault, emptySet())
     }
 
     @JvmStatic
@@ -104,18 +100,21 @@ object RobotFoldingComputationUtil {
         val foldingGroup = FoldingGroup.newGroup(foldingGroupName)
 
         val foldingDescriptors = mutableListOf<FoldingDescriptor>()
+        val collapseToSingleLine = RobotFoldingSettings.getInstance().state.collapseToSingleLine
         for (item in listItems) {
             val previousTextRange = currentTextRange
             currentTextRange = item.textRange
 
             val foldableTextRange = TextRange.create(previousTextRange.endOffset, currentTextRange.startOffset)
             if (foldableTextRange.isEmpty) continue
-            val foldingDescriptor = FoldingDescriptor(node, foldableTextRange, foldingGroup, GlobalConstants.SUPER_SPACE)
+            val foldingDescriptor = FoldingDescriptor(node, foldableTextRange, foldingGroup, GlobalConstants.SUPER_SPACE, collapseToSingleLine, emptySet())
             foldingDescriptors.add(foldingDescriptor)
         }
         if (foldingDescriptors.size > 1) {
             var completeFoldingRange = TextRange.create(foldingDescriptors.first().range.startOffset, listItems.last().textRange.endOffset)
-            if (completeFoldingRange.length > MAX_LIST_FOLDING_LENGTH) {
+            val maxListPlaceholderValueLength = RobotFoldingSettings.getInstance().state.maxListPlaceholderValueLength
+            if (completeFoldingRange.length > maxListPlaceholderValueLength) {
+                // Maximum length of one-line folding exceeded. Shrink folding down to a reduced version with container placeholder text
                 foldingDescriptors.clear()
 
                 val lineNumber = document.getLineNumber(completeFoldingRange.endOffset)
