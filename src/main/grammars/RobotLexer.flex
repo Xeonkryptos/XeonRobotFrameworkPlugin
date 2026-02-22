@@ -208,7 +208,8 @@ SimpleConditionalKeywordCall = {SetVariableIf} | {ForLoopIf} | {PassExecutionIf}
 
 RepeatKeywordCall = "Repeat" {IntraKeywordSeparator}? "Keyword"
 
-MultiLine = {EOL}+ {NonNewlineWhitespace}* ({MultiLineContinuation} {NonNewlineWhitespace}*)+
+MultiLineStart = {EOL}+ {NonNewlineWhitespace}*
+MultiLine = {MultiLineStart} ({MultiLineContinuation} {NonNewlineWhitespace}*)+
 
 LineComment = {LineCommentSign} {NON_EOL}*
 
@@ -225,6 +226,7 @@ LineComment = {LineCommentSign} {NON_EOL}*
 %xstate COMMENTS_SECTION, LITERAL_CONSTANT_ONLY, LOCAL_SETTING_DEFINITION
 %xstate PARAMETER_ASSIGNMENT, TEMPLATE_PARAMETER_ASSIGNMENT
 %xstate KEYWORD_LIBRARY_NAME_SEPARATOR, KEYWORD_CALL_NAME, KEYWORD_LIBRARY_NAME_SEPARATOR_FOR_SPECIAL_KEYWORD
+%xstate CONTINUATION, AFTER_CONTINUATION
 
 %%
 
@@ -233,7 +235,7 @@ LineComment = {LineCommentSign} {NON_EOL}*
 {LineComment}                                            { pushBackTrailingWhitespace(); return COMMENT; }
 
 {EOL} {WhitespaceIncludingNewline}* {LineCommentSign}    { handleStateChangeOnMultiLineDetection(); yypushback(1); return WHITE_SPACE; }
-{MultiLine} {WhitespaceIncludingNewline}*                { handleStateChangeOnMultiLineDetection(); return WHITE_SPACE; }
+{MultiLine} {WhitespaceIncludingNewline}*                { yypushback(yylength()); enterNewState(CONTINUATION); break; }
 
 {ExtendedKeywordFinishedMarker} {LineCommentSign}        { yypushback(1); return WHITE_SPACE; }
 
@@ -243,6 +245,25 @@ LineComment = {LineCommentSign} {NON_EOL}*
 ^ {TestcaseSectionIdentifier}   { resetInternalState(); yybegin(TESTCASE_NAME_DEFINITION); return TEST_CASES_HEADER; }
 ^ {TasksSectionIdentifier}      { resetInternalState(); yybegin(TASK_NAME_DEFINITION); return TASKS_HEADER; }
 ^ {CommentSectionIdentifier}    { resetInternalState(); yybegin(COMMENTS_SECTION); return COMMENTS_HEADER; }
+
+<CONTINUATION>  {
+    {MultiLineStart}            { return WHITE_SPACE; }
+    {MultiLineContinuation}     {
+          int initialLength = yylength();
+          pushBackTrailingWhitespace();
+          int lengthAfterPushback = yylength();
+          if (initialLength == lengthAfterPushback) {
+              leaveState();
+              handleStateChangeOnMultiLineDetection();
+          } else {
+              yybegin(AFTER_CONTINUATION);
+          }
+          return WHITE_SPACE;
+    }
+}
+<AFTER_CONTINUATION> {
+    {WhitespaceIncludingNewline}+  { leaveState(); handleStateChangeOnMultiLineDetection(); return WHITE_SPACE; }
+}
 
 <VARIABLES_SECTION> {
     {ScalarVariableStart}       { enterNewState(VARIABLE_DEFINITION); return SCALAR_VARIABLE_START; }
@@ -347,9 +368,17 @@ LineComment = {LineCommentSign} {NON_EOL}*
     {EqualSign} {KeywordFinishedMarker}           { pushBackTrailingWhitespace(); return ASSIGNMENT; }
 }
 <INTERMEDIATE_TEMPLATE_CONFIGURATION> {
-    ({ExtendedSpaceBasedEndMarker} | ({NonNewlineWhitespace}* {MultiLine})) "NONE" {ExtendedKeywordFinishedMarker}  {
+    {ExtendedSpaceBasedEndMarker} "NONE" {ExtendedKeywordFinishedMarker}  {
           pushBackTrailingWhitespace();
           yypushback("NONE".length());
+          return WHITE_SPACE;
+    }
+    {NonNewlineWhitespace}* {MultiLine} "NONE" {ExtendedKeywordFinishedMarker}  {
+          pushBackTrailingWhitespace();
+          yypushback("NONE".length());
+          pushBackTrailingWhitespace();
+          yypushback("...".length());
+          enterNewState(CONTINUATION);
           return WHITE_SPACE;
     }
     "NONE" {ExtendedKeywordFinishedMarker}  {
@@ -611,7 +640,7 @@ LineComment = {LineCommentSign} {NON_EOL}*
     {LineComment}                                            { pushBackTrailingWhitespace(); return COMMENT; }
 
     {EOL} {WhitespaceIncludingNewline}* {LineCommentSign}    { yypushback(1); return WHITE_SPACE; }
-    {MultiLine} {WhitespaceIncludingNewline}*                { return WHITE_SPACE; }
+    {MultiLine} {WhitespaceIncludingNewline}*                { yypushback(yylength()); enterNewState(CONTINUATION); break; }
 
     {NonNewlineWhitespace}+                                      { return WHITE_SPACE; }
     {ExtendedSpaceBasedEndMarker} {LineCommentSign}              { yypushback(1); return WHITE_SPACE; }

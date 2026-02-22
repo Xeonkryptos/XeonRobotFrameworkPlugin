@@ -54,6 +54,11 @@
 
         <lang.commenter language="Robot" implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.misc.RobotCommenter"/>
         <lang.foldingBuilder language="Robot" implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.misc.RobotFoldingBuilder"/>
+
+        <lang.formatter language="Robot" implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.formatter.RobotFormattingModelBuilder"/>
+        <codeStyleSettingsProvider implementation="dev.xeonkryptos.xeonrobotframeworkplugin.formatter.RobotCodeStyleSettingsProvider"/>
+        <langCodeStyleSettingsProvider implementation="dev.xeonkryptos.xeonrobotframeworkplugin.formatter.RobotLanguageCodeStyleSettingsProvider"/>
+
         <lang.parserDefinition language="Robot" implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotParserDefinition"/>
         <lang.braceMatcher language="Robot" implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.misc.RobotPairedBraceMatcher"/>
 
