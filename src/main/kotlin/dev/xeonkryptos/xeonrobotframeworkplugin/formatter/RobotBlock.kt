@@ -4,23 +4,22 @@ import com.intellij.formatting.Alignment
 import com.intellij.formatting.Block
 import com.intellij.formatting.Indent
 import com.intellij.formatting.Spacing
-import com.intellij.formatting.SpacingBuilder
 import com.intellij.formatting.Wrap
 import com.intellij.lang.ASTNode
 import com.intellij.lang.tree.util.children
 import com.intellij.psi.TokenType
 import com.intellij.psi.formatter.common.AbstractBlock
-import com.intellij.psi.tree.IElementType
+import com.intellij.psi.tree.TokenSet
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes
 import dev.xeonkryptos.xeonrobotframeworkplugin.util.GlobalConstants
 
 class RobotBlock(
-    node: ASTNode, private val spacingBuilder: SpacingBuilder, wrap: Wrap? = null, alignment: Alignment? = null, private val indent: Indent? = null, private val sharedAlignmentMap: Map<Int, Alignment>? = null
+    node: ASTNode, private val context: RobotBlockContext, wrap: Wrap? = null, alignment: Alignment? = null, private val indent: Indent? = null
 ) : AbstractBlock(node, wrap, alignment) {
-
     companion object {
-        private val WHITESPACE_TYPES = setOf(TokenType.WHITE_SPACE, RobotTypes.EOL, RobotTypes.EOS)
-        private val LEAF_TYPES = setOf<IElementType>(
+        // Differs from whitespace set of RobotTokenSets because it also includes EOL and EOS, which are treated as whitespace for formatting purposes, but not for parsing.
+        private val WHITESPACE_TYPES = TokenSet.create(TokenType.WHITE_SPACE, RobotTypes.EOL, RobotTypes.EOS)
+        private val LEAF_TYPES = TokenSet.create(
             RobotTypes.IMPORT_ARGUMENT,
             RobotTypes.USER_KEYWORD_STATEMENT_ID,
             RobotTypes.TEST_CASE_ID,
@@ -30,11 +29,10 @@ class RobotBlock(
             RobotTypes.TEMPLATE_PARAMETER_ID,
             RobotTypes.LOCAL_SETTING_ID,
             RobotTypes.VARIABLE_CONTENT,
-            RobotTypes.POSITIONAL_ARGUMENT,
             RobotTypes.LITERAL_CONSTANT_VALUE,
             RobotTypes.KEYWORD_CALL_NAME
         )
-        private val BLOCK_OPENING_TYPES = setOf(
+        private val BLOCK_OPENING_TYPES = TokenSet.create(
             RobotTypes.TEST_CASE_STATEMENT,
             RobotTypes.USER_KEYWORD_STATEMENT,
             RobotTypes.TASK_STATEMENT,
@@ -48,7 +46,7 @@ class RobotBlock(
             RobotTypes.FINALLY_STRUCTURE,
             RobotTypes.GROUP_STRUCTURE
         )
-        private val BLOCK_OPENING_PART_TYPES = setOf(
+        private val BLOCK_OPENING_PART_TYPES = TokenSet.create(
             RobotTypes.FOR_LOOP_HEADER,
             RobotTypes.WHILE_LOOP_HEADER,
             RobotTypes.IF,
@@ -60,68 +58,38 @@ class RobotBlock(
             RobotTypes.END,
             RobotTypes.USER_KEYWORD_STATEMENT_ID,
             RobotTypes.TEST_CASE_NAME,
-            RobotTypes.TASK_NAME
+            RobotTypes.TEST_CASE_ID,
+            RobotTypes.TASK_NAME,
+            RobotTypes.TASK_ID
         )
     }
 
     override fun buildChildren(): List<Block> {
-        val blocks = ArrayList<Block>()
+        val blocks = mutableListOf<Block>()
         if (isLeaf) return blocks
 
-        // Prepare alignment map for children if this is a section
-        val childrenAlignmentMap = if (isAlignableSection(myNode)) {
-            // Create alignments for columns. We assume up to 20 columns max.
-            (0..20).associateWith { Alignment.createAlignment(true) }
-        } else {
-            null
-        }
-
         for (child in myNode.children()) {
-            if (!WHITESPACE_TYPES.contains(child.elementType) && child.textRange.length > 0) {
+            val block = if (!WHITESPACE_TYPES.contains(child.elementType) && child.textLength > 0) {
+                val wrap: Wrap? = createWrapIfNecessary(child)
                 val indent = if (BLOCK_OPENING_TYPES.contains(myNode.elementType) && !BLOCK_OPENING_PART_TYPES.contains(child.elementType)) Indent.getNormalIndent() else Indent.getNoneIndent()
-                // Determine alignment for the child
-                // If we are inside a Statement (which has a sharedAlignmentMap from parent Section),
-                // we apply the alignment based on child index.
-                var childAlignment: Alignment? = null
-
-                if (sharedAlignmentMap != null) {
-                    val columnIndex = getColumnIndex(child)
-                    if (columnIndex >= 0) {
-                        childAlignment = sharedAlignmentMap[columnIndex]
-                    }
-                }
-
-                val robotBlock = RobotBlock(child, null, childAlignment, spacingBuilder, indent = indent, sharedAlignmentMap = childrenAlignmentMap)
-                blocks.add(robotBlock)
-            } else if (child.text == GlobalConstants.CONTINUATION) {
-                // Handle continuation lines. They should align with the first column of the previous line.
-                val continuationAlignment = sharedAlignmentMap?.get(0) ?: Alignment.createAlignment(true)
-                val robotBlock = RobotBlock(child, null, continuationAlignment, spacingBuilder, indent = Indent.getContinuationIndent(), sharedAlignmentMap = childrenAlignmentMap)
-                blocks.add(robotBlock)
-            }
+                RobotBlock(child, context, indent = indent, wrap = wrap)
+            } else if (child.text == GlobalConstants.CONTINUATION) RobotBlock(child, context, indent = Indent.getContinuationIndent()) else null
+            block?.let { blocks.add(it) }
         }
         return blocks
     }
 
-    private fun getColumnIndex(node: ASTNode): Int {
-        // This is a simplified heuristic. To do this properly, we need to know the semantic index.
-        // Count preceding siblings that are not whitespace/comments.
-        var index = 0
-        var prev = node.treePrev
-        while (prev != null) {
-            if (!WHITESPACE_TYPES.contains(prev.elementType) && prev.elementType !== RobotTypes.COMMENT) {
-                index++
-            }
-            prev = prev.treePrev
-        }
-        return index
+    private fun createWrapIfNecessary(node: ASTNode): Wrap? = when (node.elementType) {
+        RobotTypes.KEYWORD_CALL -> Wrap.createWrap(context.commonCodeStyleSettings.CALL_PARAMETERS_WRAP, false)
+        RobotTypes.LOCAL_ARGUMENTS_SETTING, RobotTypes.LOCAL_SETTING -> Wrap.createWrap(context.commonCodeStyleSettings.METHOD_PARAMETERS_WRAP, false)
+        RobotTypes.PARAMETER, RobotTypes.LOCAL_ARGUMENTS_SETTING_PARAMETER -> wrap
+        RobotTypes.POSITIONAL_ARGUMENT -> if (node.treeParent?.elementType !== RobotTypes.PARAMETER) wrap else null
+        else -> null
     }
-
-    private fun isAlignableSection(node: ASTNode): Boolean = node.elementType == RobotTypes.VARIABLES_SECTION || node.elementType == RobotTypes.SETTINGS_SECTION || node.elementType == RobotTypes.TEST_CASES_SECTION || node.elementType == RobotTypes.KEYWORDS_SECTION
 
     override fun getIndent(): Indent? = indent
 
-    override fun getSpacing(child1: Block?, child2: Block): Spacing? = spacingBuilder.getSpacing(this, child1, child2)
+    override fun getSpacing(child1: Block?, child2: Block): Spacing? = context.spacingBuilder.getSpacing(this, child1, child2)
 
     override fun isLeaf(): Boolean = LEAF_TYPES.contains(myNode.elementType) || myNode.firstChildNode === null
 }

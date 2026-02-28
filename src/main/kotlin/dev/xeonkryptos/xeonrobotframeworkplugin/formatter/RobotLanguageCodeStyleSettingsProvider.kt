@@ -4,30 +4,33 @@ import com.intellij.application.options.IndentOptionsEditor
 import com.intellij.application.options.SmartIndentOptionsEditor
 import com.intellij.lang.Language
 import com.intellij.psi.codeStyle.CodeStyleSettingsCustomizable
-import com.intellij.psi.codeStyle.CommonCodeStyleSettings
+import com.intellij.psi.codeStyle.CodeStyleSettingsCustomizableOptions
 import com.intellij.psi.codeStyle.LanguageCodeStyleSettingsProvider
+import dev.xeonkryptos.xeonrobotframeworkplugin.RobotBundle
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotLanguage
 
 class RobotLanguageCodeStyleSettingsProvider : LanguageCodeStyleSettingsProvider() {
-
     override fun getLanguage(): Language = RobotLanguage.INSTANCE
 
     override fun getIndentOptionsEditor(): IndentOptionsEditor = SmartIndentOptionsEditor()
 
-    override fun customizeDefaults(commonSettings: CommonCodeStyleSettings, indentOptions: CommonCodeStyleSettings.IndentOptions) {
-        indentOptions.INDENT_SIZE = 4
-    }
-
     override fun customizeSettings(consumer: CodeStyleSettingsCustomizable, settingsType: SettingsType) {
-        if (settingsType == SettingsType.SPACING_SETTINGS) {
-            consumer.showStandardOptions("SPACE_AROUND_ASSIGNMENT_OPERATORS")
-            consumer.showStandardOptions("SPACE_BEFORE_COMMA")
-            consumer.showStandardOptions("SPACE_AFTER_COMMA")
-        } else if (settingsType == SettingsType.WRAPPING_AND_BRACES_SETTINGS) {
-            consumer.showCustomOption(RobotCodeStyleSettings::class.java, "ALIGN_SETTINGS", "Align Settings", "Alignment")
-            consumer.showCustomOption(RobotCodeStyleSettings::class.java, "ALIGN_VARIABLES", "Align Variables", "Alignment")
-            consumer.showCustomOption(RobotCodeStyleSettings::class.java, "ALIGN_TEST_CASES", "Align Test Cases", "Alignment")
-            consumer.showCustomOption(RobotCodeStyleSettings::class.java, "ALIGN_KEYWORDS", "Align Keywords", "Alignment")
+        when (settingsType) {
+            SettingsType.SPACING_SETTINGS -> {
+                consumer.showStandardOptions("SPACE_AROUND_ASSIGNMENT_OPERATORS")
+                consumer.showCustomOption(
+                    RobotCodeStyleSettings::class.java,
+                    "SPACE_AROUND_VARIABLE_BODY",
+                    RobotBundle.message("formatter.space.around.variable.body"),
+                    CodeStyleSettingsCustomizableOptions.getInstance().SPACES_AROUND_OPERATORS
+                )
+            }
+
+            SettingsType.WRAPPING_AND_BRACES_SETTINGS -> {
+                consumer.showStandardOptions("KEEP_BLANK_LINES_IN_CODE", "CALL_PARAMETERS_WRAP", "METHOD_PARAMETERS_WRAP")
+            }
+
+            else -> {}
         }
     }
 

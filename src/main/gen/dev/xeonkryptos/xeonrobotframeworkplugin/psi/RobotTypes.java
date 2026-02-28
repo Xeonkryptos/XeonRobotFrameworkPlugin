@@ -142,6 +142,7 @@ public interface RobotTypes {
   IElementType LOCAL_SETTING_NAME = new RobotTokenType("LOCAL_SETTING_NAME");
   IElementType LOCAL_SETTING_START = new RobotTokenType("LOCAL_SETTING_START");
   IElementType METADATA_KEYWORD = new RobotTokenType("METADATA_KEYWORD");
+  IElementType PARAMETER_ASSIGNMENT = new RobotTokenType("PARAMETER_ASSIGNMENT");
   IElementType PARAMETER_NAME = new RobotTokenType("PARAMETER_NAME");
   IElementType PYTHON_EXPRESSION_CONTENT = new RobotTokenType("PYTHON_EXPRESSION_CONTENT");
   IElementType PYTHON_EXPRESSION_END = new RobotTokenType("PYTHON_EXPRESSION_END");

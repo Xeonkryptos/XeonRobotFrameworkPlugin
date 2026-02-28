@@ -9,6 +9,10 @@
 - Support for code formatting
 - Support to configure new code folding under `Settings -> Editor -> General -> Code Folding -> Robot`
 
+### Fixed
+
+- Not correctly detected variables in some cases like local settings
+
 ## 0.6.1
 
 ### Changed

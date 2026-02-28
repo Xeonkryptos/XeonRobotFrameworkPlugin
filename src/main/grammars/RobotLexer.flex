@@ -224,7 +224,7 @@ LineComment = {LineCommentSign} {NON_EOL}*
 %state PYTHON_EXECUTED_CONDITION, PYTHON_EVALUATED_CONTROL_STRUCTURE_START, LITERAL_CONSTANT_ONLY_LIST
 
 %xstate COMMENTS_SECTION, LITERAL_CONSTANT_ONLY, LOCAL_SETTING_DEFINITION
-%xstate PARAMETER_ASSIGNMENT, TEMPLATE_PARAMETER_ASSIGNMENT
+%xstate NORMAL_PARAMETER_ASSIGNMENT, TEMPLATE_PARAMETER_ASSIGNMENT
 %xstate KEYWORD_LIBRARY_NAME_SEPARATOR, KEYWORD_CALL_NAME, KEYWORD_LIBRARY_NAME_SEPARATOR_FOR_SPECIAL_KEYWORD
 %xstate CONTINUATION, AFTER_CONTINUATION
 
@@ -288,9 +288,9 @@ LineComment = {LineCommentSign} {NON_EOL}*
 }
 
 <VARIABLE_DEFINITION_ARGUMENTS> {
-    {EqualSign} !{SpaceBasedEndMarker}              { yypushback(yylength() - 1); return ASSIGNMENT; }
-    "scope" {EqualSign} !{KeywordFinishedMarker}    { yypushback(yylength() - "scope".length()); enterNewState(PARAMETER_ASSIGNMENT); return PARAMETER_NAME; }
-    {EverythingButVariableValue}                    { return LITERAL_CONSTANT; }
+    {EqualSign} {NonNewlineWhitespace}* {EverythingButVariableValue}?       { yypushback(yylength() - 1); return ASSIGNMENT; }
+    "scope" {EqualSign} !{KeywordFinishedMarker}                            { yypushback(yylength() - "scope".length()); enterNewState(NORMAL_PARAMETER_ASSIGNMENT); return PARAMETER_NAME; }
+    {EverythingButVariableValue}                                            { return LITERAL_CONSTANT; }
 }
 
 <VARIABLE_USAGE> {
@@ -351,17 +351,17 @@ LineComment = {LineCommentSign} {NON_EOL}*
 <TASK_DEFINITION>              ^ {LiteralValue}    { localTemplateEnabled = globalTemplateEnabled; pushBackTrailingWhitespace(); return TASK_NAME; }
 <USER_KEYWORD_DEFINITION>      ^ {LiteralValue}    { pushBackTrailingWhitespace(); return USER_KEYWORD_NAME; }
 
-<KEYWORD_ARGUMENTS, TESTCASE_DEFINITION, TASK_DEFINITION, USER_KEYWORD_DEFINITION, VARIABLE_DEFINITION, SETTINGS_SECTION> {
+<KEYWORD_ARGUMENTS, TESTCASE_DEFINITION, TASK_DEFINITION, USER_KEYWORD_DEFINITION, SETTINGS_SECTION> {
     <SETTING, FOR_STRUCTURE_LOOP> {
         {EverythingButVariableValue} {EqualSign} {
               yypushback(1);
-              enterNewState(PARAMETER_ASSIGNMENT);
+              enterNewState(NORMAL_PARAMETER_ASSIGNMENT);
               return PARAMETER_NAME;
         }
         {EverythingButVariableValue} {EqualSign} {EverythingButVariableValue} {
               int assignmentPos = indexOf('=');
               yypushback(yylength() - assignmentPos);
-              enterNewState(PARAMETER_ASSIGNMENT);
+              enterNewState(NORMAL_PARAMETER_ASSIGNMENT);
               return PARAMETER_NAME;
         }
     }
@@ -429,7 +429,7 @@ LineComment = {LineCommentSign} {NON_EOL}*
           enterNewState(TEMPLATE_PARAMETER_ASSIGNMENT);
           return TEMPLATE_PARAMETER_NAME;
     }
-    <TEMPLATE_PARAMETER_ASSIGNMENT>  {EqualSign}         { yybegin(TEMPLATE_PARAMETER_VALUE); return ASSIGNMENT; }
+    <TEMPLATE_PARAMETER_ASSIGNMENT>  {EqualSign}         { yybegin(TEMPLATE_PARAMETER_VALUE); return PARAMETER_ASSIGNMENT; }
     {EverythingButVariableValue}                         { return TEMPLATE_ARGUMENT_VALUE; }
 }
 <TEMPLATE_PARAMETER_VALUE>  {EverythingButVariableValue} { return TEMPLATE_ARGUMENT_VALUE; }
@@ -573,7 +573,7 @@ LineComment = {LineCommentSign} {NON_EOL}*
 <SETTING, KEYWORD_CALL, KEYWORD_ARGUMENTS, VARIABLE_DEFINITION, USER_KEYWORD_RETURN_STATEMENT, FOR_STRUCTURE_LOOP, PYTHON_EXECUTED_CONDITION, LITERAL_CONSTANT_ONLY, LITERAL_CONSTANT_ONLY_LIST, VARIABLE_DEFINITION_ARGUMENTS, SETTING_TEMPLATE_START, FOR_STRUCTURE> {EOL}+   { leaveState(); return EOL; }
 <TESTCASE_DEFINITION, TASK_DEFINITION, USER_KEYWORD_DEFINITION, VARIABLE_DEFINITION, TEMPLATE_DEFINITION> {EOL}+   { return EOL; }
 
-<PARAMETER_ASSIGNMENT>  {EqualSign}       { yybegin(PARAMETER_VALUE); return ASSIGNMENT; }
+<NORMAL_PARAMETER_ASSIGNMENT> {EqualSign} { yybegin(PARAMETER_VALUE); return PARAMETER_ASSIGNMENT; }
 <PARAMETER_VALUE>       {
     {EverythingButVariableValue}          { return LITERAL_CONSTANT; }
     <TEMPLATE_PARAMETER_VALUE> {
@@ -631,10 +631,10 @@ LineComment = {LineCommentSign} {NON_EOL}*
 }
 
 <LITERAL_CONSTANT_ONLY> {
-    {ScalarVariableStart}                       { enterNewState(VARIABLE_USAGE); return SCALAR_VARIABLE_START; }
-    {ListVariableStart}                         { enterNewState(VARIABLE_USAGE); return LIST_VARIABLE_START; }
-    {DictVariableStart}                         { enterNewState(VARIABLE_USAGE); return DICT_VARIABLE_START; }
-    {EnvVariableStart}                          { enterNewState(VARIABLE_USAGE); return ENV_VARIABLE_START; }
+    {ScalarVariableStart} {NON_EOL}+                         { yypushback(yylength() - 2); enterNewState(VARIABLE_USAGE); return SCALAR_VARIABLE_START; }
+    {ListVariableStart}   {NON_EOL}+                         { yypushback(yylength() - 2); enterNewState(VARIABLE_USAGE); return LIST_VARIABLE_START; }
+    {DictVariableStart}   {NON_EOL}+                         { yypushback(yylength() - 2); enterNewState(VARIABLE_USAGE); return DICT_VARIABLE_START; }
+    {EnvVariableStart}    {NON_EOL}+                         { yypushback(yylength() - 2); enterNewState(VARIABLE_USAGE); return ENV_VARIABLE_START; }
 
     ^ {LineComment}                                          { pushBackTrailingWhitespace(); return COMMENT; }
     {LineComment}                                            { pushBackTrailingWhitespace(); return COMMENT; }
@@ -642,10 +642,10 @@ LineComment = {LineCommentSign} {NON_EOL}*
     {EOL} {WhitespaceIncludingNewline}* {LineCommentSign}    { yypushback(1); return WHITE_SPACE; }
     {MultiLine} {WhitespaceIncludingNewline}*                { yypushback(yylength()); enterNewState(CONTINUATION); break; }
 
-    {NonNewlineWhitespace}+                                      { return WHITE_SPACE; }
-    {ExtendedSpaceBasedEndMarker} {LineCommentSign}              { yypushback(1); return WHITE_SPACE; }
-    {NonNewlineWhitespace}+ {NON_EOL}+                           { pushBackEverythingExceptLeadingWhitespace(); return WHITE_SPACE; }
-    {NON_EOL}+                                                   { pushBackTrailingWhitespace(); return LITERAL_CONSTANT; }
+    {NonNewlineWhitespace}+                                  { return WHITE_SPACE; }
+    {ExtendedSpaceBasedEndMarker} {LineCommentSign}          { yypushback(1); return WHITE_SPACE; }
+    {NonNewlineWhitespace}+ {NON_EOL}+                       { pushBackEverythingExceptLeadingWhitespace(); return WHITE_SPACE; }
+    {NON_EOL}+                                               { pushBackTrailingWhitespace(); return LITERAL_CONSTANT; }
 }
 
 <SETTINGS_SECTION, SETTING, KEYWORD_ARGUMENTS, USER_KEYWORD_RETURN_STATEMENT, SINGLE_LITERAL_CONSTANT, LITERAL_CONSTANT_ONLY_LIST>  {EverythingButVariableValue}  { return LITERAL_CONSTANT; }

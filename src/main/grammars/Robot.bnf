@@ -179,7 +179,7 @@ template_arguments ::= (template_argument | template_parameter)+ eol_marker {
     mixin="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotTemplateArgumentsExtension"
 }
 
-template_parameter ::= template_parameter_id ASSIGNMENT template_argument {
+template_parameter ::= template_parameter_id PARAMETER_ASSIGNMENT template_argument {
     pin=2
     methods=[getParameterName]
     implements="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotArgument"
@@ -363,7 +363,7 @@ keyword_call_name ::= keyword_call_library? KEYWORD_NAME { methods = [getReferen
 keyword_call_library ::= keyword_call_library_name KEYWORD_LIBRARY_SEPARATOR
 keyword_call_library_name ::= KEYWORD_LIBRARY_NAME {methods = [getReference]}
 
-parameter ::= parameter_id ASSIGNMENT positional_argument? {
+parameter ::= parameter_id PARAMETER_ASSIGNMENT positional_argument? {
     methods=[getParameterName]
     implements="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotArgument"
 }

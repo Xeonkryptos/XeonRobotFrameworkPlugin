@@ -1732,14 +1732,14 @@ public class RobotParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // parameter_id ASSIGNMENT positional_argument?
+  // parameter_id PARAMETER_ASSIGNMENT positional_argument?
   public static boolean parameter(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "parameter")) return false;
     if (!nextTokenIs(b, PARAMETER_NAME)) return false;
     boolean r;
     Marker m = enter_section_(b);
     r = parameter_id(b, l + 1);
-    r = r && consumeToken(b, ASSIGNMENT);
+    r = r && consumeToken(b, PARAMETER_ASSIGNMENT);
     r = r && parameter_2(b, l + 1);
     exit_section_(b, m, PARAMETER, r);
     return r;
@@ -2358,14 +2358,14 @@ public class RobotParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // template_parameter_id ASSIGNMENT template_argument
+  // template_parameter_id PARAMETER_ASSIGNMENT template_argument
   public static boolean template_parameter(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "template_parameter")) return false;
     if (!nextTokenIs(b, TEMPLATE_PARAMETER_NAME)) return false;
     boolean r, p;
     Marker m = enter_section_(b, l, _NONE_, TEMPLATE_PARAMETER, null);
     r = template_parameter_id(b, l + 1);
-    r = r && consumeToken(b, ASSIGNMENT);
+    r = r && consumeToken(b, PARAMETER_ASSIGNMENT);
     p = r; // pin = 2
     r = r && template_argument(b, l + 1);
     exit_section_(b, l, m, r, p, null);
