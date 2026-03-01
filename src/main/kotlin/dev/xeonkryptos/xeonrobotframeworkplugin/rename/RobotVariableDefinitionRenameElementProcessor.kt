@@ -6,7 +6,7 @@ import com.intellij.refactoring.rename.RenamePsiElementProcessor
 import com.intellij.refactoring.rename.RenameUtil
 import com.intellij.usageView.UsageInfo
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariable
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableBodyId
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableContent
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableDefinition
 import dev.xeonkryptos.xeonrobotframeworkplugin.util.VariableNameUtil
 
@@ -21,7 +21,7 @@ class RobotVariableDefinitionRenameElementProcessor : RenamePsiElementProcessor(
         val namesForUsages = mutableMapOf<String, MutableList<UsageInfo>>()
         usages.forEach { usage ->
             val variableName = when (usage.element) {
-                is RobotVariableBodyId -> (usage.element as RobotVariableBodyId).text
+                is RobotVariableContent -> (usage.element as RobotVariableContent).text
                 is RobotVariable -> (usage.element as RobotVariable).variableName
                 is RobotVariableDefinition -> (usage.element as RobotVariableDefinition).name
                 else -> null

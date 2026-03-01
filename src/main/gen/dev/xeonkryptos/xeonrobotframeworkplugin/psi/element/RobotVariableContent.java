@@ -4,16 +4,13 @@ package dev.xeonkryptos.xeonrobotframeworkplugin.psi.element;
 import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiReference;
 
 public interface RobotVariableContent extends RobotElement {
 
   @NotNull
   List<RobotVariable> getVariableList();
 
-  @NotNull
-  List<RobotVariableBodyId> getVariableBodyIdList();
-
-  @Nullable
-  RobotVariableBodyId getContent();
+  @NotNull PsiReference getReference();
 
 }

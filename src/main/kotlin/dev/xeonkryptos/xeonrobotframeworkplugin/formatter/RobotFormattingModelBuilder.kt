@@ -6,7 +6,8 @@ import com.intellij.formatting.FormattingModelBuilder
 import com.intellij.formatting.FormattingModelProvider
 import com.intellij.formatting.SpacingBuilder
 import com.intellij.psi.TokenType
-import com.intellij.psi.codeStyle.CommonCodeStyleSettings
+import com.intellij.psi.codeStyle.CodeStyleSettings
+import com.intellij.psi.tree.TokenSet
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotLanguage
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTokenSets
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes
@@ -14,26 +15,49 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes
 class RobotFormattingModelBuilder : FormattingModelBuilder {
     override fun createModel(context: FormattingContext): FormattingModel {
         val element = context.psiElement
-        val settings = context.codeStyleSettings
-        val commonSettings = settings.getCommonSettings(RobotLanguage.INSTANCE)
-        val customSettings = settings.getCustomSettings(RobotCodeStyleSettings::class.java)
-        val spaceBuilder = createSpaceBuilder(commonSettings, customSettings)
+        val commonSettings = context.codeStyleSettings.getCommonSettings(RobotLanguage.INSTANCE)
+        val customSettings = context.codeStyleSettings.getCustomSettings(RobotCodeStyleSettings::class.java)
+        val spaceBuilder = createSpaceBuilder(context.codeStyleSettings)
         val blockContext = RobotBlockContext(commonSettings, customSettings, spaceBuilder)
         val robotBlock = RobotBlock(element.node, blockContext)
-
-        return FormattingModelProvider.createFormattingModelForPsiFile(element.containingFile, robotBlock, settings)
+        return FormattingModelProvider.createFormattingModelForPsiFile(element.containingFile, robotBlock, context.codeStyleSettings)
     }
 
-    private fun createSpaceBuilder(commonSettings: CommonCodeStyleSettings, customSettings: RobotCodeStyleSettings): SpacingBuilder {
-        return SpacingBuilder(commonSettings).before(RobotTypes.ASSIGNMENT)
+    private fun createSpaceBuilder(codeStyleSettings: CodeStyleSettings): SpacingBuilder {
+        val commonSettings = codeStyleSettings.getCommonSettings(RobotLanguage.INSTANCE)
+        val customSettings = codeStyleSettings.getCustomSettings(RobotCodeStyleSettings::class.java)
+        val maximumSpacesAfterTemplateValues = if (customSettings.KEEP_ADDITIONAL_SPACES_BETWEEN_TEMPLATE_VALUES) Integer.MAX_VALUE else RobotCodeStyleSettings.SUPER_SPACE_SIZE
+        val maximumSpacesAfterVariableAssignment = if (customSettings.KEEP_ADDITIONAL_SPACES_AFTER_VARIABLE_ASSIGNMENTS) Integer.MAX_VALUE else RobotCodeStyleSettings.SUPER_SPACE_SIZE
+
+        return SpacingBuilder(codeStyleSettings, RobotLanguage.INSTANCE).before(RobotTypes.ASSIGNMENT)
             .spaceIf(commonSettings.SPACE_AROUND_ASSIGNMENT_OPERATORS)
             .after(RobotTypes.ASSIGNMENT)
-            .spaces(RobotCodeStyleSettings.SUPER_SPACE_SIZE)
-            .around(RobotTypes.VARIABLE_BODY)
-            .spaceIf(customSettings.SPACE_AROUND_VARIABLE_BODY)
+            .spacing(RobotCodeStyleSettings.SUPER_SPACE_SIZE, maximumSpacesAfterVariableAssignment, 0, commonSettings.KEEP_LINE_BREAKS, commonSettings.KEEP_BLANK_LINES_IN_CODE)
+            .withinPair(RobotTypes.VARIABLE_LBRACE, RobotTypes.VARIABLE_RBRACE)
+            .spaceIf(commonSettings.SPACE_WITHIN_BRACES)
+            .withinPair(RobotTypes.VARIABLE_ACCESS_START, RobotTypes.VARIABLE_ACCESS_END)
+            .spaceIf(commonSettings.SPACE_WITHIN_BRACKETS)
             .after(TokenType.WHITE_SPACE)
             .spacing(RobotCodeStyleSettings.SUPER_SPACE_SIZE, RobotCodeStyleSettings.SUPER_SPACE_SIZE * 2, 0, false, 0)
-            .after(RobotTokenSets.SUPER_SPACE_SETS)
-            .spacing(RobotCodeStyleSettings.SUPER_SPACE_SIZE, RobotCodeStyleSettings.SUPER_SPACE_SIZE, 0, commonSettings.KEEP_LINE_BREAKS, commonSettings.KEEP_BLANK_LINES_IN_CODE)
+            .after(RobotTokenSets.TEMPLATE_VALUES_HOLDER_SET)
+            .spacing(
+                RobotCodeStyleSettings.SUPER_SPACE_SIZE,
+                maximumSpacesAfterTemplateValues,
+                0,
+                commonSettings.KEEP_LINE_BREAKS,
+                commonSettings.KEEP_BLANK_LINES_IN_CODE
+            )
+            .after(SUPER_SPACE_SETS)
+            .spaces(RobotCodeStyleSettings.SUPER_SPACE_SIZE)
     }
 }
+
+private val SUPER_SPACE_SETS: TokenSet = TokenSet.orSet(
+    RobotTokenSets.GHERKIN_SET,
+    RobotTokenSets.LOOP_KEYWORDS_SET,
+    RobotTokenSets.CONTROL_KEYWORDS_SET,
+    RobotTokenSets.EXCEPTION_KEYWORDS_SET,
+    RobotTokenSets.LOCAL_SETTING_NAMES_SET,
+    RobotTokenSets.GLOBAL_SETTING_NAMES_SET,
+    TokenSet.create(RobotTypes.KEYWORD_NAME, RobotTypes.PARAMETER, RobotTypes.POSITIONAL_ARGUMENT)
+)

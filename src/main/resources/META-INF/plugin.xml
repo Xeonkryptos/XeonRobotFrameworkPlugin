@@ -32,8 +32,6 @@
         <!--suppress PluginXmlValidity -->
         <additionalTextAttributes scheme="Light" file="colorSchemes/RobotLightColorScheme.xml"/>
         <!--suppress PluginXmlValidity -->
-        <additionalTextAttributes scheme="Classic Light" file="colorSchemes/RobotLightColorScheme.xml"/>
-        <!--suppress PluginXmlValidity -->
         <additionalTextAttributes scheme="Darcula" file="colorSchemes/RobotColorScheme.xml"/>
 
         <!-- IDE Hooks -->
@@ -86,8 +84,8 @@
                                  implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.manipulator.RobotKeywordCallNameElementManipulator"/>
         <lang.elementManipulator forClass="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCallLibraryName"
                                  implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.manipulator.RobotKeywordCallLibraryNameElementManipulator"/>
-        <lang.elementManipulator forClass="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableBodyId"
-                                 implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.manipulator.RobotVariableBodyIdManipulator"/>
+        <lang.elementManipulator forClass="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableContent"
+                                 implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.manipulator.RobotVariableContentManipulator"/>
         <lang.elementManipulator forClass="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotParameterId"
                                  implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.manipulator.RobotParameterIdManipulator"/>
         <lang.elementManipulator forClass="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTemplateParameterId"

@@ -9,7 +9,7 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.RobotBundle;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotPsiUtil;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotPythonExpression;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariable;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableBodyId;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableContent;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableDefinition;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVisitor;
 import org.jetbrains.annotations.NotNull;
@@ -23,19 +23,18 @@ public class RobotVariableDefinitionNotFoundAnnotator extends AbstractRobotVaria
 
     @Override
     protected void evaluateAnnotation(@NotNull RobotVariable variable) {
-        RobotVariableBodyId variableBodyId = RobotPsiUtil.getVariableBodyId(variable);
-        if (variableBodyId != null && Arrays.stream(((PsiPolyVariantReference) variableBodyId.getReference()).multiResolve(false))
-                                            .filter(ResolveResult::isValidResult)
-                                            .map(ResolveResult::getElement)
-                                            .noneMatch(result -> result instanceof RobotVariableDefinition || result instanceof PyElement)) {
+        RobotVariableContent variableContent = RobotPsiUtil.getVariableContent(variable);
+        if (variableContent != null && Arrays.stream(((PsiPolyVariantReference) variableContent.getReference()).multiResolve(false))
+                                             .filter(ResolveResult::isValidResult)
+                                             .map(ResolveResult::getElement)
+                                             .noneMatch(result -> result instanceof RobotVariableDefinition || result instanceof PyElement)) {
             RobotVariableAnalyser robotVariableAnalyser = new RobotVariableAnalyser();
             variable.accept(robotVariableAnalyser);
 
             String variableName = variable.getVariableName();
             assert variableName != null;
 
-            if (!robotVariableAnalyser.variableDefinitionAsParent && !robotVariableAnalyser.pythonExpressionVariableBodyFound && !NUMBERS_PATTERN.matcher(
-                    variableName).matches()) {
+            if (!robotVariableAnalyser.variableDefinitionAsParent && !robotVariableAnalyser.pythonExpressionVariableBodyFound && !NUMBERS_PATTERN.matcher(variableName).matches()) {
                 getHolder().newAnnotation(HighlightSeverity.WEAK_WARNING, RobotBundle.message("annotation.variable.not-found")).range(variable).create();
             }
         }

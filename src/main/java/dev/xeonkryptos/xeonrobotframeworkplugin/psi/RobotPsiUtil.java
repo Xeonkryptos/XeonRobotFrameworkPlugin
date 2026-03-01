@@ -58,7 +58,6 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTestCasesSectio
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotUserKeywordStatement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotUserKeywordStatementId;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariable;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableBodyId;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableContent;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableDefinition;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableStatement;
@@ -70,7 +69,7 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.reference.RobotKeywordCallNa
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.reference.RobotParameterReference;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.reference.RobotPositionalArgumentReference;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.reference.RobotTemplateParameterReference;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.reference.RobotVariableBodyReference;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.reference.RobotVariableContentReference;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotDictVariableStub;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotKeywordCallStub;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotListVariableStub;
@@ -119,8 +118,8 @@ public class RobotPsiUtil {
         if (stub != null) {
             return stub.getName();
         }
-        RobotVariableBodyId variableBodyId = getVariableBodyId(variableDefinition);
-        return variableBodyId != null ? variableBodyId.getText() : null;
+        RobotVariableContent variableContent = variableDefinition.getVariableContent();
+        return variableContent != null ? variableContent.getText() : null;
     }
 
     @NotNull
@@ -169,8 +168,8 @@ public class RobotPsiUtil {
         if (stub != null) {
             return stub.getVariableName();
         }
-        RobotVariableBodyId variableBodyId = getVariableBodyId(variable);
-        return variableBodyId != null ? variableBodyId.getText() : null;
+        RobotVariableContent variableContent = getVariableContent(variable);
+        return variableContent != null ? variableContent.getText() : null;
     }
 
     @Nullable
@@ -179,8 +178,8 @@ public class RobotPsiUtil {
         if (stub != null) {
             return stub.getVariableName();
         }
-        RobotVariableBodyId variableBodyId = getVariableBodyId(variable);
-        return variableBodyId != null ? variableBodyId.getText() : null;
+        RobotVariableContent variableContent = getVariableContent(variable);
+        return variableContent != null ? variableContent.getText() : null;
     }
 
     @Nullable
@@ -189,21 +188,14 @@ public class RobotPsiUtil {
         if (stub != null) {
             return stub.getVariableName();
         }
-        RobotVariableBodyId variableBodyId = getVariableBodyId(variable);
-        return variableBodyId != null ? variableBodyId.getText() : null;
+        RobotVariableContent variableContent = getVariableContent(variable);
+        return variableContent != null ? variableContent.getText() : null;
     }
 
     @Nullable
     public static String getVariableName(@NotNull RobotVariable variable) {
-        return switch (variable) {
-            case RobotScalarVariable robotScalarVariable -> getVariableName(robotScalarVariable);
-            case RobotListVariable robotListVariable -> getVariableName(robotListVariable);
-            case RobotDictVariable robotDictVariable -> getVariableName(robotDictVariable);
-            default -> {
-                RobotVariableBodyId variableBodyId = getVariableBodyId(variable);
-                yield variableBodyId != null ? variableBodyId.getText() : null;
-            }
-        };
+        RobotVariableContent variableContent = getVariableContent(variable);
+        return variableContent != null ? variableContent.getText() : null;
     }
 
     @NotNull
@@ -242,8 +234,8 @@ public class RobotPsiUtil {
     }
 
     @NotNull
-    public static PsiReference getReference(RobotVariableBodyId variableBodyId) {
-        return new RobotVariableBodyReference(variableBodyId);
+    public static PsiReference getReference(RobotVariableContent variableContent) {
+        return new RobotVariableContentReference(variableContent);
     }
 
     @NotNull
@@ -321,21 +313,8 @@ public class RobotPsiUtil {
     }
 
     @Nullable
-    public static RobotVariableBodyId getVariableBodyId(RobotVariable variable) {
-        RobotVariableContent variableContent = PsiTreeUtil.getChildOfType(variable, RobotVariableContent.class);
-        if (variableContent != null) {
-            return PsiTreeUtil.getChildOfType(variableContent, RobotVariableBodyId.class);
-        }
-        return null;
-    }
-
-    @Nullable
-    public static RobotVariableBodyId getVariableBodyId(RobotVariableDefinition variableDefinition) {
-        RobotVariableContent variableContent = PsiTreeUtil.getChildOfType(variableDefinition, RobotVariableContent.class);
-        if (variableContent != null) {
-            return PsiTreeUtil.getChildOfType(variableContent, RobotVariableBodyId.class);
-        }
-        return null;
+    public static RobotVariableContent getVariableContent(RobotVariable variable) {
+        return PsiTreeUtil.getChildOfType(variable, RobotVariableContent.class);
     }
 
     @NotNull
@@ -385,8 +364,8 @@ public class RobotPsiUtil {
     }
 
     public static FoldingText getAssignedValues(@NotNull RobotVariable variable) {
-        RobotVariableBodyId variableBodyId = RobotPsiUtil.getVariableBodyId(variable);
-        Optional<PsiElement> resolvedElementOpt = Optional.ofNullable(variableBodyId).map(RobotVariableBodyId::getReference).map(PsiReference::resolve);
+        RobotVariableContent variableContent = RobotPsiUtil.getVariableContent(variable);
+        Optional<PsiElement> resolvedElementOpt = Optional.ofNullable(variableContent).map(RobotVariableContent::getReference).map(PsiReference::resolve);
         if (resolvedElementOpt.isPresent()) {
             PsiElement psiElement = resolvedElementOpt.get();
             if (psiElement instanceof RobotVariableDefinition variableDefinition) {
@@ -476,7 +455,7 @@ public class RobotPsiUtil {
         if (assignedValues == null) {
             return FoldingDescriptor.EMPTY_ARRAY;
         }
-        ASTNode variableEndNode = variable.getNode().findChildByType(RobotTypes.VARIABLE_END);
+        ASTNode variableEndNode = variable.getNode().findChildByType(RobotTypes.VARIABLE_RBRACE);
         if (variableEndNode == null) {
             return FoldingDescriptor.EMPTY_ARRAY;
         }

@@ -10,6 +10,10 @@ public class RobotTokenSets {
     public static final TokenSet STRING_SET = TokenSet.create(RobotTypes.LITERAL_CONSTANT_VALUE, RobotTypes.LITERAL_CONSTANT);
 
     public static final TokenSet GHERKIN_SET = TokenSet.create(RobotTypes.GIVEN, RobotTypes.WHEN, RobotTypes.THEN, RobotTypes.AND, RobotTypes.BUT);
+    public static final TokenSet LOOP_KEYWORDS_SET = TokenSet.create(RobotTypes.FOR, RobotTypes.FOR_IN, RobotTypes.WHILE, RobotTypes.END);
+    public static final TokenSet CONTROL_KEYWORDS_SET = TokenSet.create(RobotTypes.IF, RobotTypes.ELSE_IF, RobotTypes.ELSE, RobotTypes.END);
+    public static final TokenSet EXCEPTION_KEYWORDS_SET = TokenSet.create(RobotTypes.TRY, RobotTypes.EXCEPT, RobotTypes.ELSE, RobotTypes.FINALLY, RobotTypes.END);
+
     public static final TokenSet LOCAL_SETTING_NAMES_SET = TokenSet.create(RobotTypes.LOCAL_ARGUMENTS_SETTING_ID, RobotTypes.LOCAL_SETTING_ID);
     public static final TokenSet GLOBAL_SETTING_NAMES_SET = TokenSet.create(RobotTypes.RESOURCE_IMPORT_KEYWORD,
                                                                             RobotTypes.LIBRARY_IMPORT_KEYWORD,
@@ -23,8 +27,5 @@ public class RobotTokenSets {
                                                                             RobotTypes.SUITE_NAME_KEYWORD,
                                                                             RobotTypes.UNKNOWN_SETTING_KEYWORD);
 
-    public static final TokenSet SUPER_SPACE_SETS = TokenSet.orSet(LOCAL_SETTING_NAMES_SET,
-                                                                   GHERKIN_SET,
-                                                                   GLOBAL_SETTING_NAMES_SET,
-                                                                   TokenSet.create(RobotTypes.KEYWORD_NAME, RobotTypes.PARAMETER, RobotTypes.POSITIONAL_ARGUMENT));
+    public static final TokenSet TEMPLATE_VALUES_HOLDER_SET = TokenSet.create(RobotTypes.TEMPLATE_PARAMETER, RobotTypes.TEMPLATE_ARGUMENT);
 }

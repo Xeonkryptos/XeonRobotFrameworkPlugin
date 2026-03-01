@@ -24,7 +24,7 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTemplateStateme
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTestCaseStatement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotUserKeywordStatement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariable;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableBodyId;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableContent;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableStatement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableValue;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariablesImportGlobalSetting;
@@ -163,10 +163,10 @@ public final class RobotUsedFilesCollector extends RobotVisitor {
 
     @Override
     public void visitVariable(@NotNull RobotVariable o) {
-        PsiElement variableBodyId = PsiTreeUtil.getChildOfType(o, RobotVariableBodyId.class);
-        if (variableBodyId != null) {
+        PsiElement variableContent = PsiTreeUtil.getChildOfType(o, RobotVariableContent.class);
+        if (variableContent != null) {
             String variableName = o.getVariableName();
-            PsiReference reference = variableBodyId.getReference();
+            PsiReference reference = variableContent.getReference();
             references.put(variableName, reference);
         }
     }

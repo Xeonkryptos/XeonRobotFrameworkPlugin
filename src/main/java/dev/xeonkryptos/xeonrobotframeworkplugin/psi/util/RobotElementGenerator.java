@@ -27,7 +27,7 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTemplateParamet
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTestCaseId;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotUserKeywordStatementId;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariable;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableBodyId;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableContent;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.visitor.RecursiveRobotVisitor;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -214,19 +214,19 @@ public record RobotElementGenerator(Project project) {
         return variableFinder.variable;
     }
 
-    public RobotVariableBodyId createNewVariableBodyId(String variableBodyId) {
+    public RobotVariableContent createNewVariableContent(String variableContent) {
         String fileContent = """
                              *** Variables ***
                              ${%s}=  DUMMY
-                             """.formatted(variableBodyId);
+                             """.formatted(variableContent);
 
         PsiFile psiFile = createDummyPsiFile(fileContent);
         if (psiFile == null) {
             return null;
         }
-        RobotVariableBodyIdFinder variableBodyFinder = new RobotVariableBodyIdFinder();
-        psiFile.acceptChildren(variableBodyFinder);
-        return variableBodyFinder.variableBodyId;
+        RobotVariableContentFinder variableContentFinder = new RobotVariableContentFinder();
+        psiFile.acceptChildren(variableContentFinder);
+        return variableContentFinder.variableContent;
     }
 
     public RobotKeywordVariableStatement createNewKeywordVariableDefinition(String variableName, String keywordCall) {
@@ -480,13 +480,13 @@ public record RobotElementGenerator(Project project) {
         }
     }
 
-    private static final class RobotVariableBodyIdFinder extends RecursiveRobotVisitor {
+    private static final class RobotVariableContentFinder extends RecursiveRobotVisitor {
 
-        private RobotVariableBodyId variableBodyId;
+        private RobotVariableContent variableContent;
 
         @Override
-        public void visitVariableBodyId(@NotNull RobotVariableBodyId o) {
-            variableBodyId = o;
+        public void visitVariableContent(@NotNull RobotVariableContent o) {
+            variableContent = o;
         }
     }
 

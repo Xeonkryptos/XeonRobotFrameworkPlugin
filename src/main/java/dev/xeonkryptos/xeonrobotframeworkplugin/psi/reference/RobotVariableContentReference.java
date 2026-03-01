@@ -12,7 +12,7 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.dto.ImportType;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.DefinedVariable;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotFile;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariable;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableBodyId;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableContent;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.index.VariableDefinitionNameIndex;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.VariableScope;
 import org.jetbrains.annotations.NotNull;
@@ -22,23 +22,23 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class RobotVariableBodyReference extends PsiPolyVariantReferenceBase<RobotVariableBodyId> {
+public class RobotVariableContentReference extends PsiPolyVariantReferenceBase<RobotVariableContent> {
 
     private static final Set<VariableScope> EASY_SCOPES = Set.of(VariableScope.Global, VariableScope.TestSuite);
 
-    public RobotVariableBodyReference(@NotNull RobotVariableBodyId element) {
+    public RobotVariableContentReference(@NotNull RobotVariableContent element) {
         super(element, false);
     }
 
     @Override
     public ResolveResult @NotNull [] multiResolve(boolean incompleteCode) {
-        RobotVariableBodyId variableBodyId = getElement();
-        RobotVariable variable = PsiTreeUtil.getParentOfType(variableBodyId, RobotVariable.class);
+        RobotVariableContent variableContent = getElement();
+        RobotVariable variable = PsiTreeUtil.getParentOfType(variableContent, RobotVariable.class);
         if (variable == null) {
             return ResolveResult.EMPTY_ARRAY;
         }
 
-        Project project = variableBodyId.getProject();
+        Project project = variableContent.getProject();
         ResolveCache resolveCache = ResolveCache.getInstance(project);
         return resolveCache.resolveWithCaching(this, (robotVariableReference, incompCode) -> {
             String variableName = variable.getVariableName();
@@ -48,7 +48,7 @@ public class RobotVariableBodyReference extends PsiPolyVariantReferenceBase<Robo
 
             Collection<PsiElement> foundElements = new LinkedHashSet<>();
             VariableDefinitionNameIndex.getInstance()
-                                       .getVariableDefinitions(variableName, project, GlobalSearchScope.fileScope(variableBodyId.getContainingFile().getOriginalFile()))
+                                       .getVariableDefinitions(variableName, project, GlobalSearchScope.fileScope(variableContent.getContainingFile().getOriginalFile()))
                                        .stream()
                                        .filter(variableDefinition -> variableDefinition.isInScope(variable))
                                        .forEach(foundElements::add);

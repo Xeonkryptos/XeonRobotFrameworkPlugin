@@ -19,7 +19,7 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotElement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotIfVariableStatement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCall;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLocalArgumentsSettingParameterOptional;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableBodyId;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableContent;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableDefinition;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableStatement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableValue;
@@ -90,10 +90,10 @@ public abstract class RobotVariableDefinitionExtension extends RobotStubPsiEleme
 
     @Override
     public PsiElement setName(@NotNull String newName) throws IncorrectOperationException {
-        RobotVariableBodyId newVariableBodyId = RobotElementGenerator.getInstance(getProject()).createNewVariableBodyId(newName);
-        RobotVariableBodyId variableBodyId = RobotPsiUtil.getVariableBodyId(this);
-        if (variableBodyId != null && newVariableBodyId != null) {
-            variableBodyId.replace(newVariableBodyId);
+        RobotVariableContent newVariableContent = RobotElementGenerator.getInstance(getProject()).createNewVariableContent(newName);
+        RobotVariableContent variableContent = getVariableContent();
+        if (variableContent != null && newVariableContent != null) {
+            variableContent.replace(newVariableContent);
         }
         return this;
     }

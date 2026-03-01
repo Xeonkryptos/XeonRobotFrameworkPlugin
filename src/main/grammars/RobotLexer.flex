@@ -2,8 +2,6 @@ package dev.xeonkryptos.xeonrobotframeworkplugin.psi;
 
 import com.intellij.psi.tree.IElementType;
 
-import java.util.Stack;
-
 import static com.intellij.psi.TokenType.*;
 import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.*;
 import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.ExtendedRobotTypes.*;
@@ -155,7 +153,7 @@ AllowedEverythingButVariableSeq = {AllowedEverythingButVariableChar}+
 AllowedExtendedVariableAccessChar = [^\s\[\]$@%&] | {EscapeChar}{1} "[" | {EscapeChar}{1} "]" | {ExceptionForAllowedVariableChar}
 AllowedExtendedVariableAccessSeq = {AllowedExtendedVariableAccessChar}+
 
-VariableLiteralValue =   ([^}$@&%] | {ExceptionForAllowedVariableChar} | {OpeningVariable})+
+VariableLiteralValue =   ([^}$@&%\s] | {ExceptionForAllowedVariableChar} | {OpeningVariable})+
 LiteralValue =           [^\s]+([ ][^\s]+)*[ ]?
 EverythingButVariableValue = {AllowedEverythingButVariableSeq} ({Space} {AllowedEverythingButVariableSeq})*
 KeywordLibraryNameLiteralValue = [/*]? {EverythingButVariableValue} "."
@@ -227,6 +225,7 @@ LineComment = {LineCommentSign} {NON_EOL}*
 %xstate NORMAL_PARAMETER_ASSIGNMENT, TEMPLATE_PARAMETER_ASSIGNMENT
 %xstate KEYWORD_LIBRARY_NAME_SEPARATOR, KEYWORD_CALL_NAME, KEYWORD_LIBRARY_NAME_SEPARATOR_FOR_SPECIAL_KEYWORD
 %xstate CONTINUATION, AFTER_CONTINUATION
+%xstate VARIABLE_OPENING_BRACE
 
 %%
 
@@ -266,24 +265,24 @@ LineComment = {LineCommentSign} {NON_EOL}*
 }
 
 <VARIABLES_SECTION> {
-    {ScalarVariableStart}       { enterNewState(VARIABLE_DEFINITION); return SCALAR_VARIABLE_START; }
-    {ListVariableStart}         { enterNewState(VARIABLE_DEFINITION); return LIST_VARIABLE_START; }
-    {DictVariableStart}         { enterNewState(VARIABLE_DEFINITION); return DICT_VARIABLE_START; }
-    {EnvVariableStart}          { enterNewState(VARIABLE_DEFINITION); return ENV_VARIABLE_START; }
+    {ScalarVariableStart}       { enterNewState(VARIABLE_DEFINITION); enterNewState(VARIABLE_OPENING_BRACE); yypushback(yylength() - 1); return SCALAR_VARIABLE_START; }
+    {ListVariableStart}         { enterNewState(VARIABLE_DEFINITION); enterNewState(VARIABLE_OPENING_BRACE); yypushback(yylength() - 1); return LIST_VARIABLE_START; }
+    {DictVariableStart}         { enterNewState(VARIABLE_DEFINITION); enterNewState(VARIABLE_OPENING_BRACE); yypushback(yylength() - 1); return DICT_VARIABLE_START; }
+    {EnvVariableStart}          { enterNewState(VARIABLE_DEFINITION); enterNewState(VARIABLE_OPENING_BRACE); yypushback(yylength() - 1); return ENV_VARIABLE_START; }
 }
 
 <INLINE_VARIABLE_DEFINITION> {
-    {ScalarVariableStart}       { yybegin(VARIABLE_DEFINITION); return SCALAR_VARIABLE_START; }
-    {ListVariableStart}         { yybegin(VARIABLE_DEFINITION); return LIST_VARIABLE_START; }
-    {DictVariableStart}         { yybegin(VARIABLE_DEFINITION); return DICT_VARIABLE_START; }
-    {EnvVariableStart}          { yybegin(VARIABLE_DEFINITION); return ENV_VARIABLE_START; }
+    {ScalarVariableStart}       { yybegin(VARIABLE_DEFINITION); enterNewState(VARIABLE_OPENING_BRACE); yypushback(yylength() - 1); return SCALAR_VARIABLE_START; }
+    {ListVariableStart}         { yybegin(VARIABLE_DEFINITION); enterNewState(VARIABLE_OPENING_BRACE); yypushback(yylength() - 1); return LIST_VARIABLE_START; }
+    {DictVariableStart}         { yybegin(VARIABLE_DEFINITION); enterNewState(VARIABLE_OPENING_BRACE); yypushback(yylength() - 1); return DICT_VARIABLE_START; }
+    {EnvVariableStart}          { yybegin(VARIABLE_DEFINITION); enterNewState(VARIABLE_OPENING_BRACE); yypushback(yylength() - 1); return ENV_VARIABLE_START; }
 }
 
 <VARIABLE_DEFINITION> {
-    {ClosingVariable}                                        { yybegin(VARIABLE_DEFINITION_ARGUMENTS); return VARIABLE_END; }
-    {ClosingVariable} {NonNewlineWhitespace}* {EqualSign}    { yybegin(VARIABLE_DEFINITION_ARGUMENTS); yypushback(yylength() - 1); return VARIABLE_END; }
-    {ClosingVariable} "["                                    { enterNewState(EXTENDED_VARIABLE_ACCESS); yypushback(1); return VARIABLE_END; }
-    {ClosingVariable} "]"                                    { yybegin(VARIABLE_DEFINITION_ARGUMENTS); yypushback(1); return VARIABLE_END; }
+    {ClosingVariable}                                        { yybegin(VARIABLE_DEFINITION_ARGUMENTS); return VARIABLE_RBRACE; }
+    {ClosingVariable} {NonNewlineWhitespace}? {EqualSign}    { yybegin(VARIABLE_DEFINITION_ARGUMENTS); yypushback(yylength() - 1); return VARIABLE_RBRACE; }
+    {ClosingVariable} "["                                    { enterNewState(EXTENDED_VARIABLE_ACCESS); yypushback(1); return VARIABLE_RBRACE; }
+    {ClosingVariable} "]"                                    { yybegin(VARIABLE_DEFINITION_ARGUMENTS); yypushback(1); return VARIABLE_RBRACE; }
     {EqualSign}                                              { yybegin(VARIABLE_DEFINITION_ARGUMENTS); return ASSIGNMENT; }
 }
 
@@ -294,16 +293,14 @@ LineComment = {LineCommentSign} {NON_EOL}*
 }
 
 <VARIABLE_USAGE> {
-    {ClosingVariable} "["                         { leaveState(); enterNewState(EXTENDED_VARIABLE_ACCESS); yypushback(1); return VARIABLE_END; }
-    {ClosingVariable} "]"                         { leaveState(); yypushback(1); return VARIABLE_END; }
-    {ClosingVariable}                             { leaveState(); return VARIABLE_END; }
+    {ClosingVariable} "["                         { leaveState(); enterNewState(EXTENDED_VARIABLE_ACCESS); yypushback(1); return VARIABLE_RBRACE; }
+    {ClosingVariable} "]"                         { leaveState(); yypushback(1); return VARIABLE_RBRACE; }
+    {ClosingVariable}                             { leaveState(); return VARIABLE_RBRACE; }
     {OpeningVariable} (!{ClosingVariable}{2})+    { enterNewState(PYTHON_EXPRESSION); yypushback(yylength() - 1); return PYTHON_EXPRESSION_START; }
 }
 
 <VARIABLE_DEFINITION, VARIABLE_USAGE> {
-    {VariableLiteralValue} {ClosingVariable}                 { yypushback(1); return VARIABLE_BODY; }
-    {VariableLiteralValue} {ClosingVariable} {EqualSign}     { yypushback(2); return VARIABLE_BODY; }
-    {VariableLiteralValue} {VariableStart}                   { yypushback(2); return VARIABLE_BODY; }
+    {VariableLiteralValue}                 { return VARIABLE_BODY; }
 }
 
 <EXTENDED_VARIABLE_ACCESS> {
@@ -631,10 +628,10 @@ LineComment = {LineCommentSign} {NON_EOL}*
 }
 
 <LITERAL_CONSTANT_ONLY> {
-    {ScalarVariableStart} {NON_EOL}+                         { yypushback(yylength() - 2); enterNewState(VARIABLE_USAGE); return SCALAR_VARIABLE_START; }
-    {ListVariableStart}   {NON_EOL}+                         { yypushback(yylength() - 2); enterNewState(VARIABLE_USAGE); return LIST_VARIABLE_START; }
-    {DictVariableStart}   {NON_EOL}+                         { yypushback(yylength() - 2); enterNewState(VARIABLE_USAGE); return DICT_VARIABLE_START; }
-    {EnvVariableStart}    {NON_EOL}+                         { yypushback(yylength() - 2); enterNewState(VARIABLE_USAGE); return ENV_VARIABLE_START; }
+    {ScalarVariableStart} {NON_EOL}+                         { yypushback(yylength() - 1); enterNewState(VARIABLE_USAGE); enterNewState(VARIABLE_OPENING_BRACE); return SCALAR_VARIABLE_START; }
+    {ListVariableStart}   {NON_EOL}+                         { yypushback(yylength() - 1); enterNewState(VARIABLE_USAGE); enterNewState(VARIABLE_OPENING_BRACE); return LIST_VARIABLE_START; }
+    {DictVariableStart}   {NON_EOL}+                         { yypushback(yylength() - 1); enterNewState(VARIABLE_USAGE); enterNewState(VARIABLE_OPENING_BRACE); return DICT_VARIABLE_START; }
+    {EnvVariableStart}    {NON_EOL}+                         { yypushback(yylength() - 1); enterNewState(VARIABLE_USAGE); enterNewState(VARIABLE_OPENING_BRACE); return ENV_VARIABLE_START; }
 
     ^ {LineComment}                                          { pushBackTrailingWhitespace(); return COMMENT; }
     {LineComment}                                            { pushBackTrailingWhitespace(); return COMMENT; }
@@ -653,6 +650,11 @@ LineComment = {LineCommentSign} {NON_EOL}*
 <SINGLE_LITERAL_CONSTANT_START>  {SpaceBasedEndMarker}       { yybegin(SINGLE_LITERAL_CONSTANT); return WHITE_SPACE; }
 <SINGLE_LITERAL_CONSTANT>        {SpaceBasedEndMarker}       { leaveState(); return WHITE_SPACE; }
 
+<VARIABLE_OPENING_BRACE> {
+    {OpeningVariable}        { leaveState(); return VARIABLE_LBRACE; }
+    [^]                      { leaveState(); yypushback(yylength()); break; }
+}
+
 <COMMENTS_SECTION> {
     ^ {SettingsSectionIdentifier}            { resetInternalState(); yybegin(SETTINGS_SECTION); pushBackTrailingWhitespace(); return SETTINGS_HEADER; }
     ^ {TestcaseSectionIdentifier}            { resetInternalState(); yybegin(TESTCASE_NAME_DEFINITION); pushBackTrailingWhitespace(); return TEST_CASES_HEADER; }
@@ -666,15 +668,15 @@ LineComment = {LineCommentSign} {NON_EOL}*
     }
 }
 
-{ScalarVariableStart}                        { enterNewState(VARIABLE_USAGE); return SCALAR_VARIABLE_START; }
-{ListVariableStart}                          { enterNewState(VARIABLE_USAGE); return LIST_VARIABLE_START; }
-{DictVariableStart}                          { enterNewState(VARIABLE_USAGE); return DICT_VARIABLE_START; }
-{EnvVariableStart}                           { enterNewState(VARIABLE_USAGE); return ENV_VARIABLE_START; }
+{ScalarVariableStart}                           { enterNewState(VARIABLE_USAGE); enterNewState(VARIABLE_OPENING_BRACE); yypushback(1); return SCALAR_VARIABLE_START; }
+{ListVariableStart}                             { enterNewState(VARIABLE_USAGE); enterNewState(VARIABLE_OPENING_BRACE); yypushback(1); return LIST_VARIABLE_START; }
+{DictVariableStart}                             { enterNewState(VARIABLE_USAGE); enterNewState(VARIABLE_OPENING_BRACE); yypushback(1); return DICT_VARIABLE_START; }
+{EnvVariableStart}                              { enterNewState(VARIABLE_USAGE); enterNewState(VARIABLE_OPENING_BRACE); yypushback(1); return ENV_VARIABLE_START; }
 
-{EmptyValue} {WhitespaceIncludingNewline}*   { yypushback(yylength() - 2); return LITERAL_CONSTANT; }
+{EmptyValue} {WhitespaceIncludingNewline}*      { yypushback(yylength() - 2); return LITERAL_CONSTANT; }
 
 // Can't be combined to {WhitespaceIncludingNewline}+ because then it would override the EOL handling in various states if there is a newline followed by
 // whitespace. It is just a fallback for any whitespace that is not handled in other states.
-{NonNewlineWhitespace}+ | {EOL}+             { return WHITE_SPACE; }
+{NonNewlineWhitespace}+ | {EOL}+                { return WHITE_SPACE; }
 
 [^] { return BAD_CHARACTER; }

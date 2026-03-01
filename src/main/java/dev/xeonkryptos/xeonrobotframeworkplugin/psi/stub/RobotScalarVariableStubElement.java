@@ -10,7 +10,7 @@ import com.intellij.psi.stubs.StubOutputStream;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotLanguage;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotPsiUtil;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotScalarVariable;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableBodyId;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableContent;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableDefinition;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotScalarVariableImpl;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.index.VariableNameIndex;
@@ -38,8 +38,8 @@ public class RobotScalarVariableStubElement extends IStubElementType<RobotScalar
     @NotNull
     @Override
     public RobotScalarVariableStub createStub(@NotNull RobotScalarVariable psi, StubElement<? extends PsiElement> parentStub) {
-        RobotVariableBodyId variableBodyId = RobotPsiUtil.getVariableBodyId(psi);
-        String variableName = variableBodyId != null ? variableBodyId.getText() : null;
+        RobotVariableContent variableContent = RobotPsiUtil.getVariableContent(psi);
+        String variableName = variableContent != null ? variableContent.getText() : null;
         return new RobotScalarVariableStubImpl(parentStub, variableName);
     }
 

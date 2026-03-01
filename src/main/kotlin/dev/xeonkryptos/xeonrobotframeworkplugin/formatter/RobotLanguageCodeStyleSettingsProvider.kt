@@ -5,6 +5,7 @@ import com.intellij.application.options.SmartIndentOptionsEditor
 import com.intellij.lang.Language
 import com.intellij.psi.codeStyle.CodeStyleSettingsCustomizable
 import com.intellij.psi.codeStyle.CodeStyleSettingsCustomizableOptions
+import com.intellij.psi.codeStyle.CommonCodeStyleSettings
 import com.intellij.psi.codeStyle.LanguageCodeStyleSettingsProvider
 import dev.xeonkryptos.xeonrobotframeworkplugin.RobotBundle
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotLanguage
@@ -14,20 +15,45 @@ class RobotLanguageCodeStyleSettingsProvider : LanguageCodeStyleSettingsProvider
 
     override fun getIndentOptionsEditor(): IndentOptionsEditor = SmartIndentOptionsEditor()
 
+    override fun customizeDefaults(commonSettings: CommonCodeStyleSettings, indentOptions: CommonCodeStyleSettings.IndentOptions) {
+        commonSettings.KEEP_BLANK_LINES_IN_CODE = 1
+    }
+
     override fun customizeSettings(consumer: CodeStyleSettingsCustomizable, settingsType: SettingsType) {
+        val customizableOptions = CodeStyleSettingsCustomizableOptions.getInstance()
         when (settingsType) {
             SettingsType.SPACING_SETTINGS -> {
-                consumer.showStandardOptions("SPACE_AROUND_ASSIGNMENT_OPERATORS")
+                consumer.showStandardOptions("SPACE_AROUND_ASSIGNMENT_OPERATORS", "SPACE_WITHIN_BRACES", "SPACE_WITHIN_BRACKETS")
+                consumer.renameStandardOption("SPACE_AROUND_ASSIGNMENT_OPERATORS", RobotBundle.message("formatter.space.around.assignment.operators"))
+                consumer.renameStandardOption("SPACE_WITHIN_BRACKETS", RobotBundle.message("formatter.space.within.variables.array"))
                 consumer.showCustomOption(
                     RobotCodeStyleSettings::class.java,
-                    "SPACE_AROUND_VARIABLE_BODY",
-                    RobotBundle.message("formatter.space.around.variable.body"),
-                    CodeStyleSettingsCustomizableOptions.getInstance().SPACES_AROUND_OPERATORS
+                    "KEEP_ADDITIONAL_SPACES_AFTER_VARIABLE_ASSIGNMENTS",
+                    RobotBundle.message("formatter.keep.additional.spaces.after.variable.assignments"),
+                    customizableOptions.SPACES_OTHER
+                )
+                consumer.showCustomOption(
+                    RobotCodeStyleSettings::class.java,
+                    "KEEP_ADDITIONAL_SPACES_BETWEEN_TEMPLATE_VALUES",
+                    RobotBundle.message("formatter.keep.additional.spaces.between.template.values"),
+                    customizableOptions.SPACES_OTHER
                 )
             }
 
             SettingsType.WRAPPING_AND_BRACES_SETTINGS -> {
-                consumer.showStandardOptions("KEEP_BLANK_LINES_IN_CODE", "CALL_PARAMETERS_WRAP", "METHOD_PARAMETERS_WRAP")
+                consumer.showStandardOptions("RIGHT_MARGIN", "KEEP_LINE_BREAKS", "WRAP_LONG_LINES", "WRAP_ON_TYPING", "CALL_PARAMETERS_WRAP", "METHOD_PARAMETERS_WRAP")
+                consumer.renameStandardOption("METHOD_PARAMETERS_WRAP", RobotBundle.message("formatter.wrap.keyword.definition.arguments"))
+                consumer.renameStandardOption("CALL_PARAMETERS_WRAP", RobotBundle.message("formatter.wrap.keyword.call.arguments"))
+                consumer.showCustomOption(
+                    RobotCodeStyleSettings::class.java,
+                    "ALIGN_CONTINUATION_WITH_VARIABLE_DEFINITION",
+                    RobotBundle.message("formatter.align.continuation.with.variable.definition"),
+                    customizableOptions.WRAPPING_METHOD_ARGUMENTS_WRAPPING
+                )
+            }
+
+            SettingsType.BLANK_LINES_SETTINGS -> {
+                consumer.showStandardOptions("KEEP_BLANK_LINES_IN_CODE")
             }
 
             else -> {}

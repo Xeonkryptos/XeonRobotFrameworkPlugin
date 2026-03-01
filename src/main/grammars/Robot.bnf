@@ -454,16 +454,13 @@ dict_variable ::= dict_variable_definition {
     elementTypeFactory = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotDictVariableStubElement.create"
     methods = [getVariableName fold getAssignedValues]
 }
-environment_variable ::= ENV_VARIABLE_START variable_content VARIABLE_END
+environment_variable ::= ENV_VARIABLE_START VARIABLE_LBRACE variable_content VARIABLE_RBRACE
 
-private scalar_variable_definition ::= SCALAR_VARIABLE_START (variable_content | python_expression)? VARIABLE_END (extended_variable_slice_access | extended_variable_index_access | extended_variable_nested_access)* {pin=1}
-private list_variable_definition ::= LIST_VARIABLE_START (variable_content | python_expression) VARIABLE_END (extended_variable_slice_access | extended_variable_index_access | extended_variable_nested_access)* {pin=1}
-private dict_variable_definition ::= DICT_VARIABLE_START (variable_content | python_expression) VARIABLE_END extended_variable_nested_access* {pin=1}
+private scalar_variable_definition ::= SCALAR_VARIABLE_START VARIABLE_LBRACE (variable_content | python_expression)? VARIABLE_RBRACE (extended_variable_slice_access | extended_variable_index_access | extended_variable_nested_access)* {pin=1}
+private list_variable_definition ::= LIST_VARIABLE_START VARIABLE_LBRACE (variable_content | python_expression) VARIABLE_RBRACE (extended_variable_slice_access | extended_variable_index_access | extended_variable_nested_access)* {pin=1}
+private dict_variable_definition ::= DICT_VARIABLE_START VARIABLE_LBRACE (variable_content | python_expression) VARIABLE_RBRACE extended_variable_nested_access* {pin=1}
 
-variable_content ::= (variable | variable_body_id)+ {
-    methods=[content="/variable_body_id[0]"]
-}
-variable_body_id ::= VARIABLE_BODY {
+variable_content ::= (variable | VARIABLE_BODY)+ {
     methods = [getReference]
 }
 python_expression ::= PYTHON_EXPRESSION_START PYTHON_EXPRESSION_CONTENT PYTHON_EXPRESSION_END { methods = [expressionContent="PYTHON_EXPRESSION_CONTENT"] }
