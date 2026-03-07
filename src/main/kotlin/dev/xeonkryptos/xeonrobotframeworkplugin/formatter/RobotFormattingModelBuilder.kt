@@ -38,7 +38,7 @@ class RobotFormattingModelBuilder : FormattingModelBuilder {
             .withinPair(RobotTypes.VARIABLE_ACCESS_START, RobotTypes.VARIABLE_ACCESS_END)
             .spaceIf(commonSettings.SPACE_WITHIN_BRACKETS)
             .after(TokenType.WHITE_SPACE)
-            .spacing(RobotCodeStyleSettings.SUPER_SPACE_SIZE, RobotCodeStyleSettings.SUPER_SPACE_SIZE * 2, 0, false, 0)
+            .spacing(customSettings.AFTER_CONTINUATION_INDENT_SIZE, customSettings.AFTER_CONTINUATION_INDENT_SIZE, 0, false, 0)
             .after(RobotTokenSets.TEMPLATE_VALUES_HOLDER_SET)
             .spacing(
                 RobotCodeStyleSettings.SUPER_SPACE_SIZE,

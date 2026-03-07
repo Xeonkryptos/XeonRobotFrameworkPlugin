@@ -9,7 +9,6 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiNamedElement;
 import com.intellij.psi.PsiReference;
 import com.intellij.psi.util.PsiTreeUtil;
-import com.intellij.psi.util.PsiUtilCore;
 import com.intellij.util.indexing.DumbModeAccessType;
 import com.jetbrains.python.psi.PyBoolLiteralExpression;
 import com.jetbrains.python.psi.PyDictLiteralExpression;
@@ -224,11 +223,10 @@ public class RobotPsiUtil {
 
     @NotNull
     public static String getSettingName(@NotNull RobotLocalArgumentsSettingId localArgumentsSettingId) {
-        PsiElement[] children = localArgumentsSettingId.getChildren();
-        for (PsiElement child : children) {
-            if (PsiUtilCore.getElementType(child) == RobotTypes.LOCAL_SETTING_NAME) {
-                return child.getText();
-            }
+        ASTNode node = localArgumentsSettingId.getNode();
+        ASTNode localSettingNameNode = node.findChildByType(RobotTypes.LOCAL_SETTING_NAME);
+        if (localSettingNameNode != null) {
+            return localSettingNameNode.getText();
         }
         throw new IllegalArgumentException("LocalArgumentsSettingId has no LOCAL_SETTING_NAME child");
     }

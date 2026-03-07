@@ -92,13 +92,13 @@ class RobotBlock(
         } else if (myNode.elementType === RobotTypes.KEYWORD_VARIABLE_STATEMENT) {
             myNode.putUserData(KEYWORD_VARIABLE_STATEMENT_VARIABLE_ALIGNMENT_KEY, Alignment.createAlignment())
         }
-        val wrap = createWrapIfNecessary()
+        val parentWrap = createWrapIfNecessary()
         fun addNewRobotBlock(alignmentIndex: Int, child: ASTNode) {
             if (shouldCreateBlockForNode(child)) {
                 val indent = getIndentation(child)
                 val alignment = getAlignment(child, alignmentIndex)
-                val wrap = if (shouldAssignWrapToNode(child)) wrap else null
-                RobotBlock(child, context, indent = indent, wrap = wrap, alignment = alignment).apply { blocks.add(this) }
+                val childWrap = if (shouldAssignWrapToNode(child)) parentWrap else null
+                RobotBlock(child, context, indent = indent, wrap = childWrap, alignment = alignment).apply { blocks.add(this) }
             }
         }
 

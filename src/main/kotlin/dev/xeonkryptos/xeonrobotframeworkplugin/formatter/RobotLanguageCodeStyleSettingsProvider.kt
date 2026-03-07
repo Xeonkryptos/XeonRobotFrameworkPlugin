@@ -1,7 +1,6 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.formatter
 
 import com.intellij.application.options.IndentOptionsEditor
-import com.intellij.application.options.SmartIndentOptionsEditor
 import com.intellij.lang.Language
 import com.intellij.psi.codeStyle.CodeStyleSettingsCustomizable
 import com.intellij.psi.codeStyle.CodeStyleSettingsCustomizableOptions
@@ -13,7 +12,7 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotLanguage
 class RobotLanguageCodeStyleSettingsProvider : LanguageCodeStyleSettingsProvider() {
     override fun getLanguage(): Language = RobotLanguage.INSTANCE
 
-    override fun getIndentOptionsEditor(): IndentOptionsEditor = SmartIndentOptionsEditor()
+    override fun getIndentOptionsEditor(): IndentOptionsEditor = RobotIndentOptionsEditor()
 
     override fun customizeDefaults(commonSettings: CommonCodeStyleSettings, indentOptions: CommonCodeStyleSettings.IndentOptions) {
         commonSettings.KEEP_BLANK_LINES_IN_CODE = 1
@@ -41,9 +40,10 @@ class RobotLanguageCodeStyleSettingsProvider : LanguageCodeStyleSettingsProvider
             }
 
             SettingsType.WRAPPING_AND_BRACES_SETTINGS -> {
-                consumer.showStandardOptions("RIGHT_MARGIN", "KEEP_LINE_BREAKS", "WRAP_LONG_LINES", "WRAP_ON_TYPING", "CALL_PARAMETERS_WRAP", "METHOD_PARAMETERS_WRAP")
-                consumer.renameStandardOption("METHOD_PARAMETERS_WRAP", RobotBundle.message("formatter.wrap.keyword.definition.arguments"))
-                consumer.renameStandardOption("CALL_PARAMETERS_WRAP", RobotBundle.message("formatter.wrap.keyword.call.arguments"))
+                // TODO: Re-enable options related to wrapping when a solution is available for the missing continuation marker on wrapped lines
+                consumer.showStandardOptions("RIGHT_MARGIN", "KEEP_LINE_BREAKS"/*, "WRAP_LONG_LINES", "WRAP_ON_TYPING", "CALL_PARAMETERS_WRAP", "METHOD_PARAMETERS_WRAP"*/)
+                /*consumer.renameStandardOption("METHOD_PARAMETERS_WRAP", RobotBundle.message("formatter.wrap.keyword.definition.arguments"))
+                consumer.renameStandardOption("CALL_PARAMETERS_WRAP", RobotBundle.message("formatter.wrap.keyword.call.arguments"))*/
                 consumer.showCustomOption(
                     RobotCodeStyleSettings::class.java,
                     "ALIGN_CONTINUATION_WITH_VARIABLE_DEFINITION",
