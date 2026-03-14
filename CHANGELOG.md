@@ -13,6 +13,7 @@
 
 - Not correctly detected variables in some cases like local settings
 - QuickFix to insert missing mandatory parameters for keyword calls
+- Fixed rename-refactor when triggered on keyword calls in Robot files referencing a python function
 
 ## 0.6.1
 

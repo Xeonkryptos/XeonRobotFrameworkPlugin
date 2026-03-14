@@ -37,16 +37,29 @@ public class RobotKeywordReferenceSearch extends QueryExecutorBase<PsiReference,
         Project project = queryParameters.getProject();
 
         GlobalSearchScope globalSearchScope = QueryExecutorUtil.convertToGlobalSearchScope(queryParameters.getEffectiveSearchScope(), project);
-        if (element instanceof PyFunction pyFunction) {
-            String functionName = pyFunction.getName();
-            if (functionName == null || searchForKeywordsInIndex(functionName, project, globalSearchScope, pyFunction, consumer)) {
-                return;
+        switch (element) {
+            case PyFunction pyFunction -> {
+                String functionName = pyFunction.getName();
+                if (functionName == null || searchForKeywordsInIndex(functionName, project, globalSearchScope, pyFunction, consumer)) {
+                    return;
+                }
+                Optional<String> customKeywordNameOpt = RobotPyUtil.findCustomKeywordNameDecoratorExpression(pyFunction).map(StringLiteralExpression::getStringValue);
+                customKeywordNameOpt.ifPresent(customKeywordName -> searchForKeywordsInIndex(customKeywordName, project, globalSearchScope, pyFunction, consumer));
             }
-            Optional<String> customKeywordNameOpt = RobotPyUtil.findCustomKeywordNameDecoratorExpression(pyFunction).map(StringLiteralExpression::getStringValue);
-            customKeywordNameOpt.ifPresent(customKeywordName -> searchForKeywordsInIndex(customKeywordName, project, globalSearchScope, pyFunction, consumer));
-        } else if (element instanceof RobotUserKeywordStatement userKeywordStatement) {
-            String keywordName = userKeywordStatement.getName();
-            searchForKeywordsInIndex(keywordName, project, globalSearchScope, userKeywordStatement, consumer);
+            case RobotUserKeywordStatement userKeywordStatement -> {
+                String keywordName = userKeywordStatement.getName();
+                searchForKeywordsInIndex(keywordName, project, globalSearchScope, userKeywordStatement, consumer);
+            }
+            // Special case for rename-refactor where the rename-refactor process got started within a Robot file on a keyword call referencing a python function.
+            case RobotKeywordCall keywordCall -> {
+                String keywordName = keywordCall.getName();
+                PsiElement referencedElement = keywordCall.getKeywordCallName().getReference().resolve();
+                if (referencedElement != null) {
+                    searchForKeywordsInIndex(keywordName, project, globalSearchScope, referencedElement, consumer);
+                }
+            }
+            default -> {
+            }
         }
     }
 
@@ -79,7 +92,13 @@ public class RobotKeywordReferenceSearch extends QueryExecutorBase<PsiReference,
     private static boolean consumeAllKeywordCalls(PsiElement referencedElement, List<RobotKeywordCall> sameNameKeywordCalls, @NotNull Processor<? super PsiReference> consumer) {
         for (RobotKeywordCall keywordCall : sameNameKeywordCalls) {
             RobotKeywordCallName keywordCallName = keywordCall.getKeywordCallName();
-            PsiReference optimizedRef = new PsiReferenceBase.Immediate<>(keywordCallName, referencedElement);
+            PsiReference optimizedRef = new PsiReferenceBase<>(keywordCallName) {
+                @NotNull
+                @Override
+                public PsiElement resolve() {
+                    return referencedElement;
+                }
+            };
             if (!consumer.process(optimizedRef)) {
                 return false; // Signal to stop consuming anything more
             }
