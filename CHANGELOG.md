@@ -12,6 +12,7 @@
 ### Fixed
 
 - Not correctly detected variables in some cases like local settings
+- QuickFix to insert missing mandatory parameters for keyword calls
 
 ## 0.6.1
 

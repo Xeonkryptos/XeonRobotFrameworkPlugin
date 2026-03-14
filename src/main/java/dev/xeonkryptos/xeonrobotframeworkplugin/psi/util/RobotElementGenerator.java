@@ -117,10 +117,10 @@ public record RobotElementGenerator(Project project) {
 
     public RobotParameter createNewParameter(String parameterId) {
         String fileContent = """
-                              *** Test Case ***
-                              Dummy
-                                  Keyword  %s=\s\s
-                             \s""".formatted(parameterId);
+                             *** Test Case ***
+                             Dummy
+                                 Keyword  %s=\s\s
+                             """.formatted(parameterId);
 
         PsiFile psiFile = createDummyPsiFile(fileContent);
         if (psiFile == null) {
