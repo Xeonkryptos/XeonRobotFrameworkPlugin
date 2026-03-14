@@ -9,6 +9,10 @@
 - Support for code formatting
 - Support to configure new code folding under `Settings -> Editor -> General -> Code Folding -> Robot`
 
+### Changed
+
+- Changed matching logic for code completion suggestions. They are based now on Camel Humps matching
+
 ### Fixed
 
 - Not correctly detected variables in some cases like local settings

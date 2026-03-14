@@ -1,18 +1,17 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.completion
 
 import com.intellij.codeInsight.completion.PrefixMatcher
+import com.intellij.codeInsight.completion.impl.CamelHumpMatcher
 
-class RobotPrefixMatcher(prefix: String) : PrefixMatcher(prefix) {
-
-    private val normalizedPrefix = normalize(prefix)
+class RobotPrefixMatcher(prefix: String) : CamelHumpMatcher(prefix, true) {
 
     override fun prefixMatches(name: String): Boolean {
         if (prefix.isEmpty()) return true
-        val normalizedName = normalize(name)
-        return normalizedName.startsWith(normalizedPrefix, ignoreCase = true)
+        return super.prefixMatches(normalize(name))
     }
 
     override fun cloneWithPrefix(prefix: String): PrefixMatcher {
+        if (prefix == myPrefix) return this
         return RobotPrefixMatcher(prefix)
     }
 
