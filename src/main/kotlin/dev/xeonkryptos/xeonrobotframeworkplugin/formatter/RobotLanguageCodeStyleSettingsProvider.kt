@@ -16,6 +16,7 @@ class RobotLanguageCodeStyleSettingsProvider : LanguageCodeStyleSettingsProvider
 
     override fun customizeDefaults(commonSettings: CommonCodeStyleSettings, indentOptions: CommonCodeStyleSettings.IndentOptions) {
         commonSettings.KEEP_BLANK_LINES_IN_CODE = 1
+        commonSettings.ALIGN_MULTILINE_PARAMETERS = false
     }
 
     override fun customizeSettings(consumer: CodeStyleSettingsCustomizable, settingsType: SettingsType) {
@@ -40,10 +41,17 @@ class RobotLanguageCodeStyleSettingsProvider : LanguageCodeStyleSettingsProvider
             }
 
             SettingsType.WRAPPING_AND_BRACES_SETTINGS -> {
-                // TODO: Re-enable options related to wrapping when a solution is available for the missing continuation marker on wrapped lines
-                consumer.showStandardOptions("RIGHT_MARGIN", "KEEP_LINE_BREAKS"/*, "WRAP_LONG_LINES", "WRAP_ON_TYPING", "CALL_PARAMETERS_WRAP", "METHOD_PARAMETERS_WRAP"*/)
-                /*consumer.renameStandardOption("METHOD_PARAMETERS_WRAP", RobotBundle.message("formatter.wrap.keyword.definition.arguments"))
-                consumer.renameStandardOption("CALL_PARAMETERS_WRAP", RobotBundle.message("formatter.wrap.keyword.call.arguments"))*/
+                consumer.showStandardOptions(
+                    "RIGHT_MARGIN",
+                    "KEEP_LINE_BREAKS",
+                    "WRAP_LONG_LINES",
+                    "CALL_PARAMETERS_WRAP",
+                    "METHOD_PARAMETERS_WRAP",
+                    "ALIGN_MULTILINE_PARAMETERS",
+                    "ALIGN_MULTILINE_PARAMETERS_IN_CALLS"
+                )
+                consumer.renameStandardOption("METHOD_PARAMETERS_WRAP", RobotBundle.message("formatter.wrap.keyword.definition.arguments"))
+                consumer.renameStandardOption("CALL_PARAMETERS_WRAP", RobotBundle.message("formatter.wrap.keyword.call.arguments"))
                 consumer.showCustomOption(
                     RobotCodeStyleSettings::class.java,
                     "ALIGN_CONTINUATION_WITH_VARIABLE_DEFINITION",
@@ -77,7 +85,19 @@ Example Test
 
 Another Test
     [Documentation]    Another example
-    Do Stuff    arg1    arg2
+    Do Stuff    arg1    arg2    arg3    arg4    arg5
+
+Template Test
+    [Template]    My Keyword
+    arg1    arg2    arg3    arg4    arg5
+    val1    val2    val3    val4    val5
+
+*** Keywords ***
+My Keyword
+    [Arguments]    ${'$'}{arg1}    ${'$'}{arg2}    ${'$'}{arg3}    ${'$'}{arg4}    ${'$'}{arg5}
+    Log    ${'$'}{arg1}
+    Some Long Keyword Name    ${'$'}{arg1}    ${'$'}{arg2}    ${'$'}{arg3}    ${'$'}{arg4}    ${'$'}{arg5}
+    ${'$'}{result}=    Another Keyword    ${'$'}{arg1}    ${'$'}{arg2}    ${'$'}{arg3}
 """
     }
 }
