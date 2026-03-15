@@ -42,7 +42,7 @@ public class RobotRunLineMarkerProvider extends RunLineMarkerContributor impleme
             if (EXECUTABLE_ELEMENT_TYPES.contains(type)) {
                 return constructExecutableInfoIcon(element, project, containingFile, false);
             } else if (EXECUTABLE_SECTION_TYPES.contains(type)) {
-                Collection<? extends RobotQualifiedNameOwner> children = PsiTreeUtil.findChildrenOfAnyType(element, true, RobotTestCaseStatement.class, RobotTaskStatement.class);
+                Collection<? extends RobotQualifiedNameOwner> children = PsiTreeUtil.findChildrenOfAnyType(element.getParent(), true, RobotTestCaseStatement.class, RobotTaskStatement.class);
                 if (!children.isEmpty()) {
                     return constructExecutableInfoIcon(element, project, containingFile, true);
                 }
