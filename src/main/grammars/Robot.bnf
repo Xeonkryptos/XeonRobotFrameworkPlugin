@@ -373,8 +373,8 @@ fake variable_statement ::= DUMMY {methods = [getIcon]}
 single_variable_statement ::= variable_definition ASSIGNMENT? variable_value* parameter? eol_marker? {pin=3}
 inline_variable_statement ::= VAR variable_definition ASSIGNMENT? variable_value+ parameter? eol_marker? {pin=1}
 empty_variable_statement ::= variable_definition ASSIGNMENT? "${EMPTY}" eol_marker? {pin=3}
-keyword_variable_statement ::= variable_definition+ ASSIGNMENT? eol_based_keyword_call {pin=3} // Without EOL as it is handled at a lower level
-if_variable_statement ::= variable_definition+ ASSIGNMENT? conditional_inline_structure {pin=3}
+keyword_variable_statement ::= variable_definition+ ASSIGNMENT? eol_based_keyword_call // Without EOL as it is handled at a lower level
+if_variable_statement ::= variable_definition+ ASSIGNMENT? conditional_inline_structure
 variable_value ::= variable | positional_argument
 
 import_argument ::= external_positional_argument EOS? {
@@ -475,4 +475,4 @@ variable_nested_access_content ::= (variable | literal_constant_value)+
 
 literal_constant_value ::= LITERAL_CONSTANT
 
-private eol_marker ::= EOL+ | <<eof>>
+private eol_marker ::= EOL | <<eof>>

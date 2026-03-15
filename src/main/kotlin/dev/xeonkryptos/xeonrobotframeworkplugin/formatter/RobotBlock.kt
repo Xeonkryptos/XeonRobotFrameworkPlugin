@@ -87,6 +87,7 @@ class RobotBlock(
     override fun buildChildren(): List<Block> {
         val blocks = mutableListOf<Block>()
         if (isLeaf) return blocks
+
         val parentWrap = createWrapIfNecessary()
         if (myNode.elementType === RobotTypes.KEYWORD_CALL && context.commonCodeStyleSettings.ALIGN_MULTILINE_PARAMETERS_IN_CALLS) {
             myNode.putUserData(ARGUMENT_ALIGNMENT_KEY, Alignment.createAlignment(true))

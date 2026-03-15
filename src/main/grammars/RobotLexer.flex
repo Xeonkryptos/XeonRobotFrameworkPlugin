@@ -64,6 +64,28 @@ import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.ExtendedRobotTypes.*;
       }
   }
 
+  protected void handleStateChangeOnFakeMultilineDetection() {
+      leaveState();
+      int currentState = yystate();
+      switch (currentState) {
+          case SETTING,
+               KEYWORD_CALL,
+               KEYWORD_ARGUMENTS,
+               VARIABLE_DEFINITION,
+               USER_KEYWORD_RETURN_STATEMENT,
+               FOR_STRUCTURE_LOOP,
+               LITERAL_CONSTANT_ONLY,
+               LITERAL_CONSTANT_ONLY_LIST,
+               VARIABLE_DEFINITION_ARGUMENTS,
+               SETTING_TEMPLATE_START,
+               FOR_STRUCTURE,
+               PARAMETER_VALUE,
+               TEMPLATE_PARAMETER_VALUE,
+               SINGLE_LITERAL_CONSTANT,
+               PYTHON_EXECUTED_CONDITION -> handleStateChangeOnFakeMultilineDetection();
+      }
+  }
+
   protected boolean shouldLeaveStateOnMultilineDetection(int currentState) {
       return currentState == SINGLE_LITERAL_CONSTANT
             || currentState == PARAMETER_VALUE
@@ -130,8 +152,6 @@ ScalarVariableStart = "$" {OpeningVariable}
 ListVariableStart = "@" {OpeningVariable}
 DictVariableStart = "&" {OpeningVariable}
 EnvVariableStart = "%" {OpeningVariable}
-
-VariableStart = ("$" | "@" | "&" | "%") {OpeningVariable}
 
 LibraryImportKeyword = "Library"
 ResourceImportKeyword = "Resource"
@@ -224,19 +244,34 @@ LineComment = {LineCommentSign} {NON_EOL}*
 %xstate COMMENTS_SECTION, LITERAL_CONSTANT_ONLY, LOCAL_SETTING_DEFINITION
 %xstate NORMAL_PARAMETER_ASSIGNMENT, TEMPLATE_PARAMETER_ASSIGNMENT
 %xstate KEYWORD_LIBRARY_NAME_SEPARATOR, KEYWORD_CALL_NAME, KEYWORD_LIBRARY_NAME_SEPARATOR_FOR_SPECIAL_KEYWORD
-%xstate CONTINUATION, AFTER_CONTINUATION
+%xstate CONTINUATION, AFTER_CONTINUATION, FAKE_MULTILINE, SAME_LINE_FAKE_LINE, AFTER_COMMENT
 %xstate VARIABLE_OPENING_BRACE
 
 %%
 
+^ {NonNewlineWhitespace}+ {LineComment} {WhitespaceIncludingNewline}*      { enterNewState(AFTER_COMMENT); pushBackEverythingExceptLeadingWhitespace(); return WHITE_SPACE; }
 // Define a comment when it is the only thing on the line
-^ {LineComment}                                          { pushBackTrailingWhitespace(); return COMMENT; }
-{LineComment}                                            { pushBackTrailingWhitespace(); return COMMENT; }
+^ {LineComment}                                   { enterNewState(AFTER_COMMENT); return COMMENT; }
+{LineComment}                                     { enterNewState(AFTER_COMMENT); return COMMENT; }
 
-{EOL} {WhitespaceIncludingNewline}* {LineCommentSign}    { handleStateChangeOnMultiLineDetection(); yypushback(1); return WHITE_SPACE; }
-{MultiLine} {WhitespaceIncludingNewline}*                { yypushback(yylength()); enterNewState(CONTINUATION); break; }
+{EOL} {WhitespaceIncludingNewline}* {LineComment} {WhitespaceIncludingNewline}*   { enterNewState(FAKE_MULTILINE); yypushback(yylength()); break; }
+({EOL} {WhitespaceIncludingNewline}* {LineComment})+ {WhitespaceIncludingNewline}+ {MultiLineContinuation}   { pushBackEverythingExceptLeadingWhitespace(); return WHITE_SPACE; }
 
-{ExtendedKeywordFinishedMarker} {LineCommentSign}        { yypushback(1); return WHITE_SPACE; }
+{SpaceBasedEndMarker} {NonNewlineWhitespace}* {LineComment} {WhitespaceIncludingNewline}+  { pushBackEverythingExceptLeadingWhitespace(); enterNewState(SAME_LINE_FAKE_LINE); return WHITE_SPACE; }
+{SpaceBasedEndMarker} {NonNewlineWhitespace}* {LineComment} {WhitespaceIncludingNewline}+ {MultiLineContinuation} { pushBackEverythingExceptLeadingWhitespace(); return WHITE_SPACE; }
+
+<FAKE_MULTILINE, SAME_LINE_FAKE_LINE>  {EOL}+               { handleStateChangeOnFakeMultilineDetection(); return EOL; }
+<AFTER_COMMENT>   {
+    {WhitespaceIncludingNewline}+                           { leaveState(); return WHITE_SPACE; }
+    {WhitespaceIncludingNewline}+ {MultiLineContinuation}   { yypushback(yylength()); leaveState(); break; }
+    {LineComment}                                           { return COMMENT; }
+    .                                                       { yypushback(yylength()); leaveState(); break; }
+}
+<SAME_LINE_FAKE_LINE> {LineComment}                         { return COMMENT; }
+
+{MultiLine} {WhitespaceIncludingNewline}*                   { yypushback(yylength()); enterNewState(CONTINUATION); break; }
+
+{ExtendedKeywordFinishedMarker} {LineCommentSign}           { yypushback(1); return WHITE_SPACE; }
 
 ^ {SettingsSectionIdentifier}   { resetInternalState(); yybegin(SETTINGS_SECTION); return SETTINGS_HEADER; }
 ^ {VariablesSectionIdentifier}  { resetInternalState(); yybegin(VARIABLES_SECTION); return VARIABLES_HEADER; }

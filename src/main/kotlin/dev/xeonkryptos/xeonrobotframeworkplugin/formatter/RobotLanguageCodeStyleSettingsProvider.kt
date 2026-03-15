@@ -48,15 +48,53 @@ class RobotLanguageCodeStyleSettingsProvider : LanguageCodeStyleSettingsProvider
                     "CALL_PARAMETERS_WRAP",
                     "METHOD_PARAMETERS_WRAP",
                     "ALIGN_MULTILINE_PARAMETERS",
-                    "ALIGN_MULTILINE_PARAMETERS_IN_CALLS"
+                    "ALIGN_MULTILINE_PARAMETERS_IN_CALLS",
+                    "FOR_STATEMENT_WRAP"
                 )
                 consumer.renameStandardOption("METHOD_PARAMETERS_WRAP", RobotBundle.message("formatter.wrap.keyword.definition.arguments"))
                 consumer.renameStandardOption("CALL_PARAMETERS_WRAP", RobotBundle.message("formatter.wrap.keyword.call.arguments"))
+                consumer.renameStandardOption("FOR_STATEMENT_WRAP", RobotBundle.message("formatter.for.statement.wrapping.expression"))
                 consumer.showCustomOption(
                     RobotCodeStyleSettings::class.java,
                     "ALIGN_CONTINUATION_WITH_VARIABLE_DEFINITION",
                     RobotBundle.message("formatter.align.continuation.with.variable.definition"),
                     customizableOptions.WRAPPING_METHOD_ARGUMENTS_WRAPPING
+                )
+                consumer.showCustomOption(
+                    RobotCodeStyleSettings::class.java,
+                    "CALL_PARAMETERS_FIRST_ARGUMENT_ON_NEW_LINE",
+                    RobotBundle.message("formatter.place.call.arguments.first.parameter.on.newline"),
+                    customizableOptions.WRAPPING_METHOD_PARAMETERS
+                )
+                consumer.showCustomOption(
+                    RobotCodeStyleSettings::class.java,
+                    "METHOD_PARAMETERS_FIRST_ARGUMENT_ON_NEW_LINE",
+                    RobotBundle.message("formatter.place.call.arguments.first.parameter"),
+                    customizableOptions.WRAPPING_METHOD_ARGUMENTS_WRAPPING
+                )
+                consumer.showCustomOption(
+                    RobotCodeStyleSettings::class.java,
+                    "WHILE_STATEMENT_WRAP",
+                    RobotBundle.message("formatter.while.statement.wrapping.expression"),
+                    null
+                )
+                consumer.showCustomOption(
+                    RobotCodeStyleSettings::class.java,
+                    "WHILE_FIRST_ARGUMENT_ON_NEW_LINE",
+                    RobotBundle.message("formatter.while.first.argument.on.newline"),
+                    RobotBundle.message("formatter.while.statement.wrapping.expression")
+                )
+                consumer.showCustomOption(
+                    RobotCodeStyleSettings::class.java,
+                    "LOCAL_SETTINGS_WRAP",
+                    RobotBundle.message("formatter.local.settings.wrap"),
+                    null
+                )
+                consumer.showCustomOption(
+                    RobotCodeStyleSettings::class.java,
+                    "LOCAL_SETTINGS_FIRST_ARGUMENT_ON_NEW_LINE",
+                    RobotBundle.message("formatter.local.settings.first.argument.on.newline"),
+                    RobotBundle.message("formatter.local.settings.wrap")
                 )
             }
 
