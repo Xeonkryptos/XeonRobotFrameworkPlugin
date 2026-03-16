@@ -1,6 +1,7 @@
 import org.jetbrains.changelog.Changelog
 import org.jetbrains.changelog.markdownToHTML
 import org.jetbrains.intellij.platform.gradle.TestFrameworkType
+import org.jetbrains.intellij.platform.gradle.extensions.intellijPlatform
 import org.jetbrains.intellij.platform.gradle.models.ProductRelease
 import org.jetbrains.intellij.platform.gradle.tasks.PrepareSandboxTask
 
@@ -84,7 +85,7 @@ intellijPlatform {
         id = properties("pluginGroup")
         name = properties("pluginName")
         version = properties("pluginVersion")
-        description = File("README.md").readText().lines().run {
+        description = file("README.md").readText().lines().run {
             val start = "<!-- Plugin description -->"
             val end = "<!-- Plugin description end -->"
 

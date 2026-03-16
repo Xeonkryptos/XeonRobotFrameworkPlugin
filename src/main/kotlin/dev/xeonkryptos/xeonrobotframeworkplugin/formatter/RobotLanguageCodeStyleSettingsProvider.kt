@@ -76,7 +76,9 @@ class RobotLanguageCodeStyleSettingsProvider : LanguageCodeStyleSettingsProvider
                     RobotCodeStyleSettings::class.java,
                     "WHILE_STATEMENT_WRAP",
                     RobotBundle.message("formatter.while.statement.wrapping.expression"),
-                    null
+                    null,
+                    CodeStyleSettingsCustomizableOptions.getInstance().WRAP_OPTIONS,
+                    CodeStyleSettingsCustomizable.WRAP_VALUES
                 )
                 consumer.showCustomOption(
                     RobotCodeStyleSettings::class.java,
@@ -88,7 +90,9 @@ class RobotLanguageCodeStyleSettingsProvider : LanguageCodeStyleSettingsProvider
                     RobotCodeStyleSettings::class.java,
                     "LOCAL_SETTINGS_WRAP",
                     RobotBundle.message("formatter.local.settings.wrap"),
-                    null
+                    null,
+                    CodeStyleSettingsCustomizableOptions.getInstance().WRAP_OPTIONS,
+                    CodeStyleSettingsCustomizable.WRAP_VALUES
                 )
                 consumer.showCustomOption(
                     RobotCodeStyleSettings::class.java,
@@ -102,7 +106,9 @@ class RobotLanguageCodeStyleSettingsProvider : LanguageCodeStyleSettingsProvider
                 consumer.showStandardOptions("KEEP_BLANK_LINES_IN_CODE")
             }
 
-            else -> {}
+            else -> {
+                // Ignore
+            }
         }
     }
 
