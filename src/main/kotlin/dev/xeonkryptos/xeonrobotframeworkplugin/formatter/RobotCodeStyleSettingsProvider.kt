@@ -3,6 +3,7 @@ package dev.xeonkryptos.xeonrobotframeworkplugin.formatter
 import com.intellij.application.options.CodeStyleAbstractConfigurable
 import com.intellij.application.options.CodeStyleAbstractPanel
 import com.intellij.application.options.TabbedLanguageCodeStylePanel
+import com.intellij.lang.Language
 import com.intellij.openapi.util.NlsContexts
 import com.intellij.psi.codeStyle.CodeStyleConfigurable
 import com.intellij.psi.codeStyle.CodeStyleSettings
@@ -26,4 +27,6 @@ class RobotCodeStyleSettingsProvider : CodeStyleSettingsProvider() {
         }
 
     private class RobotCodeStyleMainPanel(currentSettings: CodeStyleSettings, settings: CodeStyleSettings) : TabbedLanguageCodeStylePanel(RobotLanguage.INSTANCE, currentSettings, settings)
+
+    override fun getLanguage(): Language = RobotLanguage.INSTANCE
 }
