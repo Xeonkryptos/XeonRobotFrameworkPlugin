@@ -226,7 +226,7 @@ SimpleConditionalKeywordCall = {SetVariableIf} | {ForLoopIf} | {PassExecutionIf}
 
 RepeatKeywordCall = "Repeat" {IntraKeywordSeparator}? "Keyword"
 
-MultiLineStart = {EOL}+ {NonNewlineWhitespace}*
+MultiLineStart = ({EOL} {NonNewlineWhitespace}*)+
 MultiLine = {MultiLineStart} ({MultiLineContinuation} {NonNewlineWhitespace}*)+
 
 LineComment = {LineCommentSign} {NON_EOL}*
@@ -250,24 +250,25 @@ LineComment = {LineCommentSign} {NON_EOL}*
 %%
 
 ^ {NonNewlineWhitespace}+ {LineComment} {WhitespaceIncludingNewline}*      { enterNewState(AFTER_COMMENT); pushBackEverythingExceptLeadingWhitespace(); return WHITE_SPACE; }
-// Define a comment when it is the only thing on the line
 ^ {LineComment}                                   { enterNewState(AFTER_COMMENT); return COMMENT; }
 {LineComment}                                     { enterNewState(AFTER_COMMENT); return COMMENT; }
 
-{EOL} {WhitespaceIncludingNewline}* {LineComment} {WhitespaceIncludingNewline}*   { enterNewState(FAKE_MULTILINE); yypushback(yylength()); break; }
-({EOL} {WhitespaceIncludingNewline}* {LineComment})+ {WhitespaceIncludingNewline}+ {MultiLineContinuation}   { pushBackEverythingExceptLeadingWhitespace(); return WHITE_SPACE; }
+{EOL} {WhitespaceIncludingNewline}* {LineComment} ({EOL} {NonNewlineWhitespace}*)+ ({MultiLineContinuation} | {LineCommentSign})   { pushBackEverythingExceptLeadingWhitespace(); return WHITE_SPACE; }
+{LineComment} ({EOL} {NonNewlineWhitespace}*)+ {LineCommentSign}   { yypushback(1); pushBackTrailingWhitespace(); return COMMENT; }
+{LineComment} ({EOL} {NonNewlineWhitespace}*)+ {MultiLineContinuation}   { pushBackTrailingWhitespace(); yypushback(3); pushBackTrailingWhitespace(); return COMMENT; }
+({EOL} {WhitespaceIncludingNewline}*)? {LineComment} ({EOL} {NonNewlineWhitespace}*)+ .?  { enterNewState(FAKE_MULTILINE); yypushback(yylength()); break; }
 
-{SpaceBasedEndMarker} {NonNewlineWhitespace}* {LineComment} {WhitespaceIncludingNewline}+  { pushBackEverythingExceptLeadingWhitespace(); enterNewState(SAME_LINE_FAKE_LINE); return WHITE_SPACE; }
-{SpaceBasedEndMarker} {NonNewlineWhitespace}* {LineComment} {WhitespaceIncludingNewline}+ {MultiLineContinuation} { pushBackEverythingExceptLeadingWhitespace(); return WHITE_SPACE; }
+{SpaceBasedEndMarker} {NonNewlineWhitespace}* {LineComment} {EOL} {WhitespaceIncludingNewline}* ({MultiLineContinuation} | {LineCommentSign}) { pushBackEverythingExceptLeadingWhitespace(); return WHITE_SPACE; }
+{SpaceBasedEndMarker} {NonNewlineWhitespace}* {LineComment} {EOL} {WhitespaceIncludingNewline}* .? { pushBackEverythingExceptLeadingWhitespace(); enterNewState(SAME_LINE_FAKE_LINE); return WHITE_SPACE; }
 
 <FAKE_MULTILINE, SAME_LINE_FAKE_LINE>  {EOL}+               { handleStateChangeOnFakeMultilineDetection(); return EOL; }
 <AFTER_COMMENT>   {
     {WhitespaceIncludingNewline}+                           { leaveState(); return WHITE_SPACE; }
     {WhitespaceIncludingNewline}+ {MultiLineContinuation}   { yypushback(yylength()); leaveState(); break; }
     {LineComment}                                           { return COMMENT; }
-    .                                                       { yypushback(yylength()); leaveState(); break; }
+    [^]                                                     { yypushback(yylength()); leaveState(); break; }
 }
-<SAME_LINE_FAKE_LINE> {LineComment}                         { return COMMENT; }
+<FAKE_MULTILINE, SAME_LINE_FAKE_LINE> {LineComment}         { return COMMENT; }
 
 {MultiLine} {WhitespaceIncludingNewline}*                   { yypushback(yylength()); enterNewState(CONTINUATION); break; }
 
@@ -663,21 +664,20 @@ LineComment = {LineCommentSign} {NON_EOL}*
 }
 
 <LITERAL_CONSTANT_ONLY> {
-    {ScalarVariableStart} {NON_EOL}+                         { yypushback(yylength() - 1); enterNewState(VARIABLE_USAGE); enterNewState(VARIABLE_OPENING_BRACE); return SCALAR_VARIABLE_START; }
-    {ListVariableStart}   {NON_EOL}+                         { yypushback(yylength() - 1); enterNewState(VARIABLE_USAGE); enterNewState(VARIABLE_OPENING_BRACE); return LIST_VARIABLE_START; }
-    {DictVariableStart}   {NON_EOL}+                         { yypushback(yylength() - 1); enterNewState(VARIABLE_USAGE); enterNewState(VARIABLE_OPENING_BRACE); return DICT_VARIABLE_START; }
-    {EnvVariableStart}    {NON_EOL}+                         { yypushback(yylength() - 1); enterNewState(VARIABLE_USAGE); enterNewState(VARIABLE_OPENING_BRACE); return ENV_VARIABLE_START; }
+    {ScalarVariableStart}                                    { yypushback(yylength() - 1); enterNewState(VARIABLE_USAGE); enterNewState(VARIABLE_OPENING_BRACE); return SCALAR_VARIABLE_START; }
+    {ListVariableStart}                                      { yypushback(yylength() - 1); enterNewState(VARIABLE_USAGE); enterNewState(VARIABLE_OPENING_BRACE); return LIST_VARIABLE_START; }
+    {DictVariableStart}                                      { yypushback(yylength() - 1); enterNewState(VARIABLE_USAGE); enterNewState(VARIABLE_OPENING_BRACE); return DICT_VARIABLE_START; }
+    {EnvVariableStart}                                       { yypushback(yylength() - 1); enterNewState(VARIABLE_USAGE); enterNewState(VARIABLE_OPENING_BRACE); return ENV_VARIABLE_START; }
 
-    ^ {LineComment}                                          { pushBackTrailingWhitespace(); return COMMENT; }
-    {LineComment}                                            { pushBackTrailingWhitespace(); return COMMENT; }
+    ^ {LineComment}                                          { return COMMENT; }
+    {LineComment}                                            { return COMMENT; }
 
     {EOL} {WhitespaceIncludingNewline}* {LineCommentSign}    { yypushback(1); return WHITE_SPACE; }
     {MultiLine} {WhitespaceIncludingNewline}*                { yypushback(yylength()); enterNewState(CONTINUATION); break; }
 
     {NonNewlineWhitespace}+                                  { return WHITE_SPACE; }
     {ExtendedSpaceBasedEndMarker} {LineCommentSign}          { yypushback(1); return WHITE_SPACE; }
-    {NonNewlineWhitespace}+ {NON_EOL}+                       { pushBackEverythingExceptLeadingWhitespace(); return WHITE_SPACE; }
-    {NON_EOL}+                                               { pushBackTrailingWhitespace(); return LITERAL_CONSTANT; }
+    {EverythingButVariableValue}                             { pushBackTrailingWhitespace(); return LITERAL_CONSTANT; }
 }
 
 <SETTINGS_SECTION, SETTING, KEYWORD_ARGUMENTS, USER_KEYWORD_RETURN_STATEMENT, SINGLE_LITERAL_CONSTANT, LITERAL_CONSTANT_ONLY_LIST>  {EverythingButVariableValue}  { return LITERAL_CONSTANT; }
