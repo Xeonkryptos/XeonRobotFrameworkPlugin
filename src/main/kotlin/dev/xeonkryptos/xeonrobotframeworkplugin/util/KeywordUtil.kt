@@ -21,7 +21,6 @@ fun RobotKeywordCall.matchesNormalizedName(normalizedName: String): Boolean = Ke
 class KeywordUtil(private val project: Project) {
 
     companion object {
-        private val keywordNormalizerRegex = Regex("[_\\s]+")
 
         const val SPACE = " "
         const val UNDERSCORE = "_"
@@ -30,7 +29,7 @@ class KeywordUtil(private val project: Project) {
         fun getInstance(project: Project): KeywordUtil = project.service<KeywordUtil>()
 
         @JvmStatic
-        fun normalizeKeywordName(name: String): String = name.lowercase().replace(keywordNormalizerRegex, "")
+        fun normalizeKeywordName(name: String): String = RobotUtil.normalizeRobotIdentifier(name) ?: ""
 
         @JvmStatic
         fun findTemplateKeywordCall(element: PsiElement): RobotKeywordCall? {

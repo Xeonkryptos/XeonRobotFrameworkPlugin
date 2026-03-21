@@ -24,8 +24,7 @@ object VariableNameUtil {
         if (matcher.find()) {
             val baseVariableName = matcher.group()
             variableNameVariants.add(baseVariableName.lowercase().trim())
-            val reducedVariableName = baseVariableName.lowercase().replace(Regex("[_\\s]"), "")
-            variableNameVariants.add(reducedVariableName)
+            RobotUtil.normalizeRobotIdentifier(baseVariableName)?.let { variableNameVariants.add(it) }
         }
         return variableNameVariants
     }

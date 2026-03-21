@@ -120,7 +120,7 @@ public class RobotCompletionContributor extends CompletionContributor {
                            .inFile(psiElement(RobotFile.class)),
                new VariableCompletionProvider());
         extend(CompletionType.BASIC,
-               psiElement(RobotTypes.LITERAL_CONSTANT).inside(true, withElementInLocalSetting("[Tags]")).inFile(psiElement(RobotFile.class)),
+               psiElement(RobotTypes.LITERAL_CONSTANT).inside(true, withElementInLocalSetting("Tags")).inFile(psiElement(RobotFile.class)),
                new StandardTagCompletionProvider());
     }
 

@@ -25,11 +25,11 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.DefinedParameter;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.KeywordFile;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotFile;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCall;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotSection;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotUserKeywordStatement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.index.KeywordDefinitionNameIndex;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.visitor.RobotUserKeywordsCollector;
 import dev.xeonkryptos.xeonrobotframeworkplugin.util.LookupElementUtil;
+import dev.xeonkryptos.xeonrobotframeworkplugin.util.RobotUtil;
 import org.apache.commons.text.WordUtils;
 import org.jetbrains.annotations.NotNull;
 
@@ -47,11 +47,6 @@ class KeywordCompletionProvider extends CompletionProvider<CompletionParameters>
     @Override
     protected void addCompletions(@NotNull CompletionParameters parameters, @NotNull ProcessingContext context, @NotNull CompletionResultSet result) {
         PsiElement position = parameters.getPosition();
-        RobotSection section = PsiTreeUtil.getParentOfType(position, RobotSection.class, false);
-        if (section == null) {
-            return;
-        }
-
         PsiElement positionContext = position.getContext();
         RobotKeywordCall keywordCall = PsiTreeUtil.getParentOfType(positionContext, RobotKeywordCall.class);
         if (keywordCall == null) {
@@ -134,11 +129,12 @@ class KeywordCompletionProvider extends CompletionProvider<CompletionParameters>
             }
             List<String> lookupStrings = Stream.of(keywordName, WordUtils.capitalize(keywordName), keywordName.toLowerCase()).flatMap(lookup -> {
                 Character identifier = keywordCompletionModification.getIdentifier();
+                String identifierText = identifier != null ? String.valueOf(identifier) : "";
                 if (libraryName != null) {
-                    return Stream.of(identifier + libraryName + "." + lookup, identifier + lookup);
+                    return Stream.of(identifierText + libraryName + "." + lookup, identifierText + lookup);
                 }
-                return Stream.of(identifier + lookup);
-            }).toList();
+                return Stream.of(identifierText + lookup);
+            }).flatMap(lookup -> Stream.of(lookup, RobotUtil.normalizeRobotIdentifier(lookup))).toList();
             LookupElementBuilder lookupElement = LookupElementBuilder.create(displayName)
                                                                      .withLookupStrings(lookupStrings)
                                                                      .withPresentableText(displayName)
