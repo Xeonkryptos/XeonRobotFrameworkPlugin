@@ -244,7 +244,7 @@ LineComment = {LineCommentSign} {NON_EOL}*
 %xstate COMMENTS_SECTION, LITERAL_CONSTANT_ONLY, SETTING_VALUES, LOCAL_SETTING_DEFINITION
 %xstate NORMAL_PARAMETER_ASSIGNMENT, TEMPLATE_PARAMETER_ASSIGNMENT
 %xstate KEYWORD_LIBRARY_NAME_SEPARATOR, KEYWORD_CALL_NAME, KEYWORD_LIBRARY_NAME_SEPARATOR_FOR_SPECIAL_KEYWORD
-%xstate CONTINUATION, AFTER_CONTINUATION, FAKE_MULTILINE, SAME_LINE_FAKE_LINE, AFTER_COMMENT
+%xstate IN_CONTINUATION, AFTER_CONTINUATION, FAKE_MULTILINE, SAME_LINE_FAKE_MULTILINE, AFTER_COMMENT
 %xstate VARIABLE_OPENING_BRACE
 
 %%
@@ -254,16 +254,16 @@ LineComment = {LineCommentSign} {NON_EOL}*
 {LineComment}                                                              { enterNewState(AFTER_COMMENT); return COMMENT; }
 
 <SETTING, SETTING_VALUES, VARIABLE_DEFINITION_ARGUMENTS, KEYWORD_ARGUMENTS, KEYWORD_CALL, USER_KEYWORD_RETURN_STATEMENT, FOR_STRUCTURE_LOOP, SIMPLE_CONTROL_STRUCTURE, LITERAL_CONSTANT_ONLY, VARIABLE_DEFINITION, INLINE_VARIABLE_DEFINITION> {
-    {EOL} {NonNewlineWhitespace}* ({LineComment} ({EOL} {NonNewlineWhitespace}*)+)+ {MultiLineContinuation}                 { enterNewState(CONTINUATION); pushBackEverythingExceptLeadingWhitespace(); return WHITE_SPACE; }
+    {EOL} {NonNewlineWhitespace}* ({LineComment} ({EOL} {NonNewlineWhitespace}*)+)+ {MultiLineContinuation}                 { enterNewState(IN_CONTINUATION); pushBackEverythingExceptLeadingWhitespace(); return WHITE_SPACE; }
     {EOL} {NonNewlineWhitespace}* {LineComment} ({EOL} {NonNewlineWhitespace}*)+ .?                                         { enterNewState(FAKE_MULTILINE); yypushback(yylength()); break; }
 
-    {SpaceBasedEndMarker} {NonNewlineWhitespace}* ({LineComment} ({EOL} {NonNewlineWhitespace}*)+)+ {MultiLineContinuation} { enterNewState(CONTINUATION); pushBackEverythingExceptLeadingWhitespace(); return WHITE_SPACE; }
-    {SpaceBasedEndMarker} {NonNewlineWhitespace}* {LineComment} ({EOL} {NonNewlineWhitespace}*)+ .?                         { pushBackEverythingExceptLeadingWhitespace(); enterNewState(SAME_LINE_FAKE_LINE); return WHITE_SPACE; }
+    {SpaceBasedEndMarker} {NonNewlineWhitespace}* ({LineComment} ({EOL} {NonNewlineWhitespace}*)+)+ {MultiLineContinuation} { enterNewState(IN_CONTINUATION); pushBackEverythingExceptLeadingWhitespace(); return WHITE_SPACE; }
+    {SpaceBasedEndMarker} {NonNewlineWhitespace}* {LineComment} ({EOL} {NonNewlineWhitespace}*)+ .?                         { pushBackEverythingExceptLeadingWhitespace(); enterNewState(SAME_LINE_FAKE_MULTILINE); return WHITE_SPACE; }
 
-    {MultiLine} {WhitespaceIncludingNewline}*                                                                               { yypushback(yylength()); enterNewState(CONTINUATION); break; }
+    {MultiLine} {WhitespaceIncludingNewline}*                                                                               { yypushback(yylength()); enterNewState(IN_CONTINUATION); break; }
 }
 
-<FAKE_MULTILINE, SAME_LINE_FAKE_LINE>  {
+<FAKE_MULTILINE, SAME_LINE_FAKE_MULTILINE>  {
     {EOL}+               { handleStateChangeOnFakeMultilineDetection(); return EOL; }
     {LineComment}        { return COMMENT; }
 }
@@ -281,7 +281,7 @@ LineComment = {LineCommentSign} {NON_EOL}*
 ^ {TasksSectionIdentifier}      { resetInternalState(); yybegin(TASK_NAME_DEFINITION); return TASKS_HEADER; }
 ^ {CommentSectionIdentifier}    { resetInternalState(); yybegin(COMMENTS_SECTION); return COMMENTS_HEADER; }
 
-<CONTINUATION>  {
+<IN_CONTINUATION>  {
     {LineComment}                                     { return COMMENT; }
     {MultiLineStart} | {NonNewlineWhitespace}+        { return WHITE_SPACE; }
     {Continuation} {NonNewlineWhitespace}* ({EOL} {NonNewlineWhitespace}*)+ {MultiLineContinuation}    {
@@ -423,7 +423,7 @@ LineComment = {LineCommentSign} {NON_EOL}*
           yypushback("NONE".length());
           pushBackTrailingWhitespace();
           yypushback("...".length());
-          enterNewState(CONTINUATION);
+          enterNewState(IN_CONTINUATION);
           return WHITE_SPACE;
     }
     "NONE" {ExtendedKeywordFinishedMarker}  {

@@ -61,10 +61,10 @@ public class RobotLexer extends AbstractRobotLexer {
   public static final int KEYWORD_LIBRARY_NAME_SEPARATOR = 80;
   public static final int KEYWORD_CALL_NAME = 82;
   public static final int KEYWORD_LIBRARY_NAME_SEPARATOR_FOR_SPECIAL_KEYWORD = 84;
-  public static final int CONTINUATION = 86;
+  public static final int IN_CONTINUATION = 86;
   public static final int AFTER_CONTINUATION = 88;
   public static final int FAKE_MULTILINE = 90;
-  public static final int SAME_LINE_FAKE_LINE = 92;
+  public static final int SAME_LINE_FAKE_MULTILINE = 92;
   public static final int AFTER_COMMENT = 94;
   public static final int VARIABLE_OPENING_BRACE = 96;
 
@@ -7085,7 +7085,7 @@ public class RobotLexer extends AbstractRobotLexer {
           // fall through
           case 236: break;
           case 85:
-            { pushBackEverythingExceptLeadingWhitespace(); enterNewState(SAME_LINE_FAKE_LINE); return WHITE_SPACE;
+            { pushBackEverythingExceptLeadingWhitespace(); enterNewState(SAME_LINE_FAKE_MULTILINE); return WHITE_SPACE;
             }
           // fall through
           case 237: break;
@@ -7226,7 +7226,7 @@ public class RobotLexer extends AbstractRobotLexer {
           // fall through
           case 257: break;
           case 106:
-            { yypushback(yylength()); enterNewState(CONTINUATION); break;
+            { yypushback(yylength()); enterNewState(IN_CONTINUATION); break;
             }
           // fall through
           case 258: break;
@@ -7300,7 +7300,7 @@ public class RobotLexer extends AbstractRobotLexer {
           // fall through
           case 269: break;
           case 118:
-            { enterNewState(CONTINUATION); pushBackEverythingExceptLeadingWhitespace(); return WHITE_SPACE;
+            { enterNewState(IN_CONTINUATION); pushBackEverythingExceptLeadingWhitespace(); return WHITE_SPACE;
             }
           // fall through
           case 270: break;
@@ -7408,7 +7408,7 @@ public class RobotLexer extends AbstractRobotLexer {
           yypushback("NONE".length());
           pushBackTrailingWhitespace();
           yypushback("...".length());
-          enterNewState(CONTINUATION);
+          enterNewState(IN_CONTINUATION);
           return WHITE_SPACE;
             }
           // fall through

@@ -17,6 +17,8 @@ class RobotLanguageCodeStyleSettingsProvider : LanguageCodeStyleSettingsProvider
     override fun customizeDefaults(commonSettings: CommonCodeStyleSettings, indentOptions: CommonCodeStyleSettings.IndentOptions) {
         commonSettings.KEEP_BLANK_LINES_IN_CODE = 1
         commonSettings.ALIGN_MULTILINE_PARAMETERS = false
+        commonSettings.KEEP_FIRST_COLUMN_COMMENT = false
+        commonSettings.KEEP_LINE_BREAKS = true
     }
 
     override fun customizeSettings(consumer: CodeStyleSettingsCustomizable, settingsType: SettingsType) {
@@ -49,7 +51,8 @@ class RobotLanguageCodeStyleSettingsProvider : LanguageCodeStyleSettingsProvider
                     "METHOD_PARAMETERS_WRAP",
                     "ALIGN_MULTILINE_PARAMETERS",
                     "ALIGN_MULTILINE_PARAMETERS_IN_CALLS",
-                    "FOR_STATEMENT_WRAP"
+                    "FOR_STATEMENT_WRAP",
+                    "KEEP_FIRST_COLUMN_COMMENT"
                 )
                 consumer.renameStandardOption("METHOD_PARAMETERS_WRAP", RobotBundle.message("formatter.wrap.keyword.definition.arguments"))
                 consumer.renameStandardOption("CALL_PARAMETERS_WRAP", RobotBundle.message("formatter.wrap.keyword.call.arguments"))

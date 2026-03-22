@@ -1,13 +1,12 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.misc;
 
-import com.intellij.codeInsight.generation.IndentedCommenter;
 import com.intellij.lang.CodeDocumentationAwareCommenter;
 import com.intellij.psi.PsiComment;
 import com.intellij.psi.tree.IElementType;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes;
 import org.jetbrains.annotations.Nullable;
 
-public class RobotCommenter implements CodeDocumentationAwareCommenter, IndentedCommenter {
+public class RobotCommenter implements CodeDocumentationAwareCommenter {
 
    @Nullable
    @Override
@@ -72,11 +71,5 @@ public class RobotCommenter implements CodeDocumentationAwareCommenter, Indented
     @Override
     public boolean isDocumentationComment(PsiComment element) {
         return false;
-    }
-
-    @Nullable
-    @Override
-    public Boolean forceIndentedLineComment() {
-        return true;
     }
 }

@@ -95,9 +95,6 @@ class RobotPreFormatProcessor : PreFormatProcessor {
         val file = psi.containingFile ?: return range
         if (file.language !== RobotLanguage.INSTANCE) return range
 
-        val commonSettings = CodeStyle.getLanguageSettings(file, RobotLanguage.INSTANCE)
-        if (!hasWrappingEnabled(commonSettings)) return range
-
         val customSettings = CodeStyle.getCustomSettings(file, RobotCodeStyleSettings::class.java)
 
         // ── Collect statement metadata from the intact AST ──
@@ -109,24 +106,23 @@ class RobotPreFormatProcessor : PreFormatProcessor {
         // Use the AST to find statement boundaries, then collect continuation sequences
         // only within each statement's text range. This prevents cross-statement collapsing.
         val sequences = collectContinuationSequencesFromAST(element, document, range)
-        if (sequences.isEmpty()) {
-            // Even if there's nothing to collapse, attach metadata (wrapping may still
-            // apply to single-line statements that are too long).
-            file.putUserData(STATEMENT_METADATA_KEY, metadata)
-            return range
-        }
+        // Even if there's nothing to collapse, attach metadata (wrapping may still
+        // apply to single-line statements that are too long).
+        file.putUserData(STATEMENT_METADATA_KEY, metadata)
+        if (sequences.isEmpty()) return range
 
         var totalDelta = 0
-        for (seq in sequences.sortedByDescending { it.startOffset }) {
-            val originalLength = seq.endOffset - seq.startOffset
-            document.replaceString(seq.startOffset, seq.endOffset, GlobalConstants.SUPER_SPACE)
-            totalDelta += originalLength - GlobalConstants.SUPER_SPACE.length
+        val commonSettings = CodeStyle.getLanguageSettings(file, RobotLanguage.INSTANCE)
+        if (!commonSettings.KEEP_LINE_BREAKS) {
+            for (seq in sequences.sortedByDescending { it.startOffset }) {
+                val originalLength = seq.endOffset - seq.startOffset
+                document.replaceString(seq.startOffset, seq.endOffset, GlobalConstants.SUPER_SPACE)
+                totalDelta += originalLength - GlobalConstants.SUPER_SPACE.length
+            }
+            PsiDocumentManager.getInstance(file.project).commitDocument(document)
         }
 
-        PsiDocumentManager.getInstance(file.project).commitDocument(document)
-
         file.putUserData(STATEMENT_METADATA_KEY, metadata)
-
         return if (totalDelta > 0) range.grown(-totalDelta) else range
     }
 
@@ -163,9 +159,12 @@ class RobotPreFormatProcessor : PreFormatProcessor {
             val seqsForStatement = collectContinuationSequencesInRange(text, stmtRange, range)
             if (seqsForStatement.isEmpty()) continue
 
-            val hasComment = seqsForStatement.any { it.hasInlineComment }
-            if (!hasComment) {
-                result.addAll(seqsForStatement)
+            var previousStatementWithComment = false
+            for (sequence in seqsForStatement) {
+                if (!previousStatementWithComment) {
+                    result.add(sequence)
+                }
+                previousStatementWithComment = sequence.hasInlineComment
             }
         }
 
@@ -273,10 +272,6 @@ class RobotPreFormatProcessor : PreFormatProcessor {
 
         return sequences
     }
-
-    private fun hasWrappingEnabled(commonSettings: CommonCodeStyleSettings): Boolean =
-        commonSettings.CALL_PARAMETERS_WRAP != CommonCodeStyleSettings.DO_NOT_WRAP ||
-                commonSettings.METHOD_PARAMETERS_WRAP != CommonCodeStyleSettings.DO_NOT_WRAP
 
     private fun precedingLineHasInlineComment(text: String, newlineOffset: Int): Boolean {
         var lineStart = newlineOffset
@@ -567,7 +562,6 @@ class RobotPostFormatProcessor : PostFormatProcessor {
 
         val commonSettings = settings.getCommonSettings(RobotLanguage.INSTANCE)
         val customSettings = settings.getCustomSettings(RobotCodeStyleSettings::class.java)
-        if (!hasWrappingEnabled(commonSettings, customSettings)) return rangeToReformat
 
         val continuationIndentation = commonSettings.indentOptions?.CONTINUATION_INDENT_SIZE ?: 0
         val separatorSize = customSettings.AFTER_CONTINUATION_INDENT_SIZE
@@ -583,53 +577,11 @@ class RobotPostFormatProcessor : PostFormatProcessor {
         val range = if (removedChars > 0) TextRange(rangeToReformat.startOffset, (rangeToReformat.endOffset - removedChars).coerceAtLeast(rangeToReformat.startOffset))
         else rangeToReformat
 
-        val insertions = collectContinuationInsertions(document, range, statementMetadata)
-        if (insertions.isEmpty()) return range
+        val lineProcessors = collectContinuationInsertions(document, range, commonSettings, statementMetadata)
+        if (lineProcessors.isEmpty()) return range
 
         // Insert in reverse document order to keep earlier offsets stable
-        var totalDelta = 0
-        for (insertion in insertions.sortedDescending()) {
-            val replaceableTextRange = TextRange(insertion, insertion + continuationIndentation + GlobalConstants.CONTINUATION.length + separatorSize)
-            val textToReplace = document.getText(replaceableTextRange)
-            val separator = " ".repeat(separatorSize)
-            if (textToReplace.isBlank() || textToReplace.trimStart().length <= RobotCodeStyleSettings.SUPER_SPACE_SIZE) {
-                /*
-                 * Calculating the whitespace length before the first real character occurrence in this line (starting from the previously calculated insertion point). The end goal of this approach
-                 * is removing any unnecessary whitespaces added by the formatter due to block structure and missing CONTINUATION tokens.
-                 * It is usually relevant for variable assignments based on keywords, so something like
-                 *
-                 * ${Variable}=  My keyword  arg1   arg2
-                 *
-                 * That would me formatted to
-                 *
-                 * ${Variable}=  My keyword
-                 * ...           arg1
-                 * ...           arg2
-                 *
-                 * rather than
-                 *
-                 * ${Variable}=  My keyword
-                 * ...    arg1
-                 * ...    arg2
-                 *
-                 * because the CONTINUATION markers are added by this processor AFTER the formatting with the formatting rules are executed and the arguments are part of the keyword call which is part
-                 * of the variable definition. Wrapping and alignment are handled relative to the parent's positioning. Thus, it needs to be taken care of here by us.
-                 */
-                val lineNumber = document.getLineNumber(insertion)
-                val lineEndOffset = document.getLineEndOffset(lineNumber)
-                val lineTextRange = TextRange(insertion, lineEndOffset)
-                val lineText = document.getText(lineTextRange)
-                val whitespaceLength = lineTextRange.length - lineText.trimStart().length
-
-                val startOffset = insertion + continuationIndentation
-                document.replaceString(startOffset, insertion + whitespaceLength, GlobalConstants.CONTINUATION + separator)
-            } else {
-                // Not enough whitespaces available to put us into without changing too much (adding more whitespaces). Therefore, simply insert the required string with every whitespace requested.
-                val continuationIndent = " ".repeat(continuationIndentation)
-                document.insertString(insertion, continuationIndent + GlobalConstants.CONTINUATION + separator)
-                totalDelta += continuationIndentation + GlobalConstants.CONTINUATION.length + separator.length
-            }
-        }
+        val totalDelta = lineProcessors.sortedDescending().sumOf { it.processLine(document, commonSettings, customSettings) }
 
         // Clean up user data after use
         source.removeUserData(STATEMENT_METADATA_KEY)
@@ -741,12 +693,12 @@ class RobotPostFormatProcessor : PostFormatProcessor {
      *   breaking the boundary detection
      */
     private fun collectContinuationInsertions(
-        document: Document, range: TextRange, statementMetadata: List<StatementMetadata>
-    ): List<Int> {
+        document: Document, range: TextRange, commonSettings: CommonCodeStyleSettings, statementMetadata: List<StatementMetadata>
+    ): List<LineProcessor> {
         val text = document.text
         if (text.isEmpty()) return emptyList()
 
-        val insertions = mutableListOf<Int>()
+        val lineProcessors = mutableListOf<LineProcessor>()
         val statementMetadataCopy = statementMetadata.toMutableList()
 
         val safeEndOffset = minOf(range.endOffset, text.length).coerceAtLeast(0)
@@ -769,16 +721,8 @@ class RobotPostFormatProcessor : PostFormatProcessor {
             val trimmed = lineText.trimStart()
             val leadingWs = lineText.length - trimmed.length
 
-            // --- Empty line: breaks any ongoing statement ---
-            if (trimmed.isEmpty()) {
-                insideWrappableStatement = false
-                currentMetadata = null
-                continuationLinesEmitted = 0
-                continue
-            }
-
-            // --- Section header (e.g. "*** Keywords ***"): always resets ---
-            if (trimmed.startsWith("*")) {
+            // --- Empty line: breaks any ongoing statement or Section header (e.g. "*** Keywords ***"): always resets ---
+            if (trimmed.isEmpty() || trimmed.startsWith("*")) {
                 insideWrappableStatement = false
                 currentMetadata = null
                 continuationLinesEmitted = 0
@@ -787,6 +731,10 @@ class RobotPostFormatProcessor : PostFormatProcessor {
 
             // --- Comment line: skip without changing state ---
             if (trimmed.startsWith("#")) {
+                if (!commonSettings.KEEP_FIRST_COLUMN_COMMENT) {
+                    val safeStatementIndent = if (statementIndent > 0) statementIndent else 0
+                    lineProcessors.add(ContinuationIndentFixer(lineStart + safeStatementIndent, lineStart + leadingWs))
+                }
                 continue
             }
 
@@ -815,10 +763,13 @@ class RobotPostFormatProcessor : PostFormatProcessor {
             if (trimmed.startsWith(GlobalConstants.CONTINUATION)) {
                 if (!insideWrappableStatement) {
                     insideWrappableStatement = true
-                    statementIndent = leadingWs
                 }
                 // Count this as a continuation line (it already has "...")
                 continuationLinesEmitted++
+
+                val safeStatementIndent = if (statementIndent > 0) statementIndent else 0
+                // Add a continuation indent fixer here to ensure correct indentation even for variable statements based on the statementIndent
+                lineProcessors.add(ContinuationIndentFixer(lineStart + safeStatementIndent, lineStart + leadingWs))
                 continue
             }
 
@@ -859,7 +810,7 @@ class RobotPostFormatProcessor : PostFormatProcessor {
 
             // We ARE inside a wrappable statement. This line needs a continuation marker.
             if (leadingWs >= statementIndent) {
-                insertions.add(lineStart + statementIndent)
+                lineProcessors.add(ContinuationInserter(lineStart + statementIndent))
                 continuationLinesEmitted++
             } else {
                 insideWrappableStatement = true
@@ -869,7 +820,7 @@ class RobotPostFormatProcessor : PostFormatProcessor {
             }
         }
 
-        return insertions
+        return lineProcessors
     }
 
     /**
@@ -944,14 +895,98 @@ class RobotPostFormatProcessor : PostFormatProcessor {
         return false
     }
 
-    private fun hasWrappingEnabled(commonSettings: CommonCodeStyleSettings, customSettings: RobotCodeStyleSettings): Boolean =
-        commonSettings.CALL_PARAMETERS_WRAP != CommonCodeStyleSettings.DO_NOT_WRAP ||
-                commonSettings.METHOD_PARAMETERS_WRAP != CommonCodeStyleSettings.DO_NOT_WRAP ||
-                commonSettings.FOR_STATEMENT_WRAP != CommonCodeStyleSettings.DO_NOT_WRAP ||
-                customSettings.LOCAL_SETTINGS_WRAP != CommonCodeStyleSettings.DO_NOT_WRAP ||
-                customSettings.WHILE_STATEMENT_WRAP != CommonCodeStyleSettings.DO_NOT_WRAP
-}
+    interface LineProcessor : Comparable<LineProcessor> {
 
+        val offset: Int
+
+        fun processLine(document: Document, commonSettings: CommonCodeStyleSettings, customSettings: RobotCodeStyleSettings): Int
+
+        override fun compareTo(other: LineProcessor): Int = offset.compareTo(other.offset)
+    }
+
+    class ContinuationInserter(override val offset: Int) : LineProcessor {
+
+        override fun processLine(document: Document, commonSettings: CommonCodeStyleSettings, customSettings: RobotCodeStyleSettings): Int {
+            val continuationIndentation = commonSettings.indentOptions?.CONTINUATION_INDENT_SIZE ?: 0
+            val separatorSize = customSettings.AFTER_CONTINUATION_INDENT_SIZE
+
+            val replaceableTextRange = TextRange(offset, offset + continuationIndentation + GlobalConstants.CONTINUATION.length + separatorSize)
+            val textToReplace = document.getText(replaceableTextRange)
+            val separator = " ".repeat(separatorSize)
+            if (textToReplace.isBlank() || textToReplace.trimStart().length <= RobotCodeStyleSettings.SUPER_SPACE_SIZE) {
+                /*
+                 * Calculating the whitespace length before the first real character occurrence in this line (starting from the previously calculated insertion point). The end goal of this approach
+                 * is removing any unnecessary whitespaces added by the formatter due to block structure and missing CONTINUATION tokens.
+                 * It is usually relevant for variable assignments based on keywords, so something like
+                 *
+                 * ${Variable}=  My keyword  arg1   arg2
+                 *
+                 * That would me formatted to
+                 *
+                 * ${Variable}=  My keyword
+                 * ...           arg1
+                 * ...           arg2
+                 *
+                 * rather than
+                 *
+                 * ${Variable}=  My keyword
+                 * ...    arg1
+                 * ...    arg2
+                 *
+                 * because the CONTINUATION markers are added by this processor AFTER the formatting with the formatting rules are executed and the arguments are part of the keyword call which is part
+                 * of the variable definition. Wrapping and alignment are handled relative to the parent's positioning. Thus, it needs to be taken care of here by us.
+                 */
+                val lineNumber = document.getLineNumber(offset)
+                val lineEndOffset = document.getLineEndOffset(lineNumber)
+                val lineTextRange = TextRange(offset, lineEndOffset)
+                val lineText = document.getText(lineTextRange)
+                val whitespaceLength = lineTextRange.length - lineText.trimStart().length
+
+                val startOffset = offset + continuationIndentation
+                document.replaceString(startOffset, offset + whitespaceLength, GlobalConstants.CONTINUATION + separator)
+                return 0
+            }
+                // Not enough whitespaces available to put us into without changing too much (adding more whitespaces). Therefore, simply insert the required string with every whitespace requested.
+                val continuationIndent = " ".repeat(continuationIndentation)
+                document.insertString(offset, continuationIndent + GlobalConstants.CONTINUATION + separator)
+                return continuationIndentation + GlobalConstants.CONTINUATION.length + separator.length
+        }
+
+        override fun equals(other: Any?): Boolean {
+            if (this === other) return true
+            if (javaClass != other?.javaClass) return false
+            val that = other as ContinuationInserter
+            return offset == that.offset
+        }
+
+        override fun hashCode(): Int {
+            return offset
+        }
+    }
+
+    class ContinuationIndentFixer(override val offset: Int, private val continuationOffset: Int) : LineProcessor {
+
+        override fun processLine(document: Document, commonSettings: CommonCodeStyleSettings, customSettings: RobotCodeStyleSettings): Int {
+            val continuationIndentation = commonSettings.indentOptions?.CONTINUATION_INDENT_SIZE ?: 0
+            val diff = continuationOffset - offset
+            return if (diff > continuationIndentation) {
+                document.replaceString(offset, continuationOffset, " ".repeat(continuationIndentation))
+                continuationIndentation - diff
+            } else 0
+        }
+
+        override fun equals(other: Any?): Boolean {
+            if (this === other) return true
+            if (javaClass != other?.javaClass) return false
+            val that = other as ContinuationIndentFixer
+            return offset == that.offset
+        }
+
+        override fun hashCode(): Int {
+            return offset
+        }
+    }
+}
 /**
  * Set of Robot Framework keywords that start their own statement block and therefore
  * must NOT be treated as wrapped continuations of a preceding statement.
@@ -1030,6 +1065,16 @@ private val COLLAPSIBLE_STATEMENT_TYPES: Set<IElementType> = setOf(
     RobotTypes.EMPTY_VARIABLE_STATEMENT,
     RobotTypes.IF_VARIABLE_STATEMENT,
     RobotTypes.EXECUTABLE_STATEMENT,
+    RobotTypes.DOCUMENTATION_STATEMENT_GLOBAL_SETTING,
+    RobotTypes.TAGS_STATEMENT_GLOBAL_SETTING,
+    RobotTypes.TEMPLATE_STATEMENTS_GLOBAL_SETTING,
+    RobotTypes.METADATA_STATEMENT_GLOBAL_SETTING,
+    RobotTypes.SUITE_NAME_STATEMENT_GLOBAL_SETTING,
+    RobotTypes.TIMEOUT_STATEMENTS_GLOBAL_SETTING,
+    RobotTypes.UNKNOWN_SETTING_STATEMENTS_GLOBAL_SETTING,
+    RobotTypes.VARIABLES_IMPORT_GLOBAL_SETTING,
+    RobotTypes.LIBRARY_IMPORT_GLOBAL_SETTING,
+    RobotTypes.RESOURCE_IMPORT_GLOBAL_SETTING,
     // Control flow headers can also have continuations (e.g. FOR with many items)
     RobotTypes.FOR_LOOP_HEADER,
     RobotTypes.WHILE_LOOP_HEADER,
