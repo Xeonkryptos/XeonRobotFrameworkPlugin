@@ -16,6 +16,8 @@ object RobotNames {
     const val SETTING_SECTION_NAME = "Setting"
     const val COMMENT_SECTION_NAME = "Comment"
 
+    const val SETTINGS_SECTION_NAME = "Settings"
+
     const val TAGS_LOCAL_SETTING_NAME = "Tags"
     const val DOCUMENTATION_LOCAL_SETTING_NAME = "Documentation"
     const val TEARDOWN_LOCAL_SETTING_NAME = "Teardown"

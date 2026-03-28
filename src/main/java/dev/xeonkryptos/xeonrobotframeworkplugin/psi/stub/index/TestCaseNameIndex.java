@@ -33,6 +33,6 @@ public class TestCaseNameIndex extends StringStubIndexExtension<RobotTestCaseSta
 
     @Override
     public int getVersion() {
-        return super.getVersion() + 1;
+        return super.getVersion() + 2;
     }
 }

@@ -18,6 +18,7 @@ import com.intellij.psi.tree.IElementType
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotLanguage
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes
 import dev.xeonkryptos.xeonrobotframeworkplugin.util.GlobalConstants
+import dev.xeonkryptos.xeonrobotframeworkplugin.util.RobotNames
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Shared data model for Pre→Post processor communication
@@ -61,7 +62,6 @@ data class StatementMetadata(
 val STATEMENT_METADATA_KEY: Key<List<StatementMetadata>> = Key.create("ROBOT_STATEMENT_METADATA")
 
 val WHITESPACE_REGEX = Regex("\\s*")
-val LOCAL_ARGUMENTS_SETTING_REGEX = Regex("^\\[\\s*Arguments\\s*].*", RegexOption.IGNORE_CASE)
 
 /**
  * PreFormatProcessor for Robot Framework files.
@@ -356,6 +356,17 @@ class RobotPreFormatProcessor : PreFormatProcessor {
      */
     private fun extractMetadata(node: ASTNode, customSettings: RobotCodeStyleSettings): StatementMetadata? {
         return when (node.elementType) {
+            RobotTypes.SETUP_TEARDOWN_STATEMENTS_GLOBAL_SETTING,
+            RobotTypes.DOCUMENTATION_STATEMENT_GLOBAL_SETTING,
+            RobotTypes.SUITE_NAME_STATEMENT_GLOBAL_SETTING,
+            RobotTypes.LIBRARY_IMPORT_GLOBAL_SETTING,
+            RobotTypes.METADATA_STATEMENT_GLOBAL_SETTING,
+            RobotTypes.TAGS_STATEMENT_GLOBAL_SETTING,
+            RobotTypes.TEMPLATE_STATEMENTS_GLOBAL_SETTING,
+            RobotTypes.VARIABLES_IMPORT_GLOBAL_SETTING,
+            RobotTypes.TIMEOUT_STATEMENTS_GLOBAL_SETTING,
+            RobotTypes.RESOURCE_IMPORT_GLOBAL_SETTING,
+            RobotTypes.UNKNOWN_SETTING_STATEMENTS_GLOBAL_SETTING -> extractSimpleGlobalSettingMetadata(node)
             RobotTypes.KEYWORD_CALL -> extractKeywordCallMetadata(node, customSettings)
             RobotTypes.LOCAL_ARGUMENTS_SETTING -> extractLocalArgumentsSettingMetadata(node, customSettings)
             RobotTypes.KEYWORD_VARIABLE_STATEMENT -> extractKeywordVariableStatementMetadata(node, customSettings)
@@ -373,6 +384,22 @@ class RobotPreFormatProcessor : PreFormatProcessor {
             RobotTypes.GROUP_HEADER -> extractControlFlowHeaderMetadata(node, "GROUP")
             else -> null
         }
+    }
+
+    /**
+     * GLOBAL SETTING: `simple_global_setting_name (parameter | positional_argument)*`
+     *
+     * Identification text = the global setting name.
+     *
+     * Wrappable argument count = number of PARAMETER + POSITIONAL_ARGUMENT children
+     * (flattened through EXECUTABLE_STATEMENT wrappers).
+     */
+    private fun extractSimpleGlobalSettingMetadata(node: ASTNode): StatementMetadata {
+        val idText = node.firstChildNode?.text?.trim() ?: ""
+        val keywordCallNode = findChildOfType(node, RobotTypes.KEYWORD_CALL)
+        val argCount = if (keywordCallNode != null) collectWrappableArguments(keywordCallNode, KEYWORD_CALL_ARGUMENT_TYPES)
+        else  collectWrappableArguments(node, KEYWORD_CALL_ARGUMENT_TYPES)
+        return StatementMetadata(idText, argCount, false)
     }
 
     /**
@@ -555,6 +582,9 @@ class RobotPreFormatProcessor : PreFormatProcessor {
  */
 class RobotPostFormatProcessor : PostFormatProcessor {
 
+    private val sectionNameNormalizationRegex = Regex("[\\s*]")
+    private val continuationLineArgumentsSplitRegex = Regex("\\s{2,}")
+
     override fun processElement(source: PsiElement, settings: CodeStyleSettings): PsiElement = source
 
     override fun processText(source: PsiFile, rangeToReformat: TextRange, settings: CodeStyleSettings): TextRange {
@@ -562,9 +592,6 @@ class RobotPostFormatProcessor : PostFormatProcessor {
 
         val commonSettings = settings.getCommonSettings(RobotLanguage.INSTANCE)
         val customSettings = settings.getCustomSettings(RobotCodeStyleSettings::class.java)
-
-        val continuationIndentation = commonSettings.indentOptions?.CONTINUATION_INDENT_SIZE ?: 0
-        val separatorSize = customSettings.AFTER_CONTINUATION_INDENT_SIZE
 
         // Read statement metadata collected by the PreFormatProcessor. Without it, correct insertion locations can't be identified
         val statementMetadata = source.getUserData(STATEMENT_METADATA_KEY) ?: return rangeToReformat
@@ -710,7 +737,8 @@ class RobotPostFormatProcessor : PostFormatProcessor {
         var insideWrappableStatement = false
         var statementIndent = -1
         var currentMetadata: StatementMetadata? = null
-        var continuationLinesEmitted = 0
+        var identifiedArgumentsCount = 0
+        var settingsSection = false
 
         for (lineIdx in startLine..endLine) {
             if (currentMetadata == null && statementMetadataCopy.isEmpty()) break
@@ -721,11 +749,21 @@ class RobotPostFormatProcessor : PostFormatProcessor {
             val trimmed = lineText.trimStart()
             val leadingWs = lineText.length - trimmed.length
 
-            // --- Empty line: breaks any ongoing statement or Section header (e.g. "*** Keywords ***"): always resets ---
-            if (trimmed.isEmpty() || trimmed.startsWith("*")) {
+            // --- Empty line: breaks any ongoing statement ---
+            if (trimmed.isEmpty()) {
                 insideWrappableStatement = false
                 currentMetadata = null
-                continuationLinesEmitted = 0
+                identifiedArgumentsCount = 0
+                continue
+            }
+
+            // --- Section header (e.g. "*** Keywords ***"): always resets. Settings section is remembered to look for wrapping keywords in it being place at the start of the line ---
+            if (lineText.startsWith("*")) {
+                val sectionName = trimmed.replace(sectionNameNormalizationRegex, "")
+                settingsSection = sectionName.equals(RobotNames.SETTING_SECTION_NAME, ignoreCase = true) || sectionName.equals(RobotNames.SETTINGS_SECTION_NAME, ignoreCase = true)
+                insideWrappableStatement = false
+                currentMetadata = null
+                identifiedArgumentsCount = 0
                 continue
             }
 
@@ -739,10 +777,10 @@ class RobotPostFormatProcessor : PostFormatProcessor {
             }
 
             // --- Top-level definition (no indentation): resets ---
-            if (leadingWs == 0) {
+            if (leadingWs == 0 && !settingsSection) {
                 insideWrappableStatement = false
                 currentMetadata = null
-                continuationLinesEmitted = 0
+                identifiedArgumentsCount = 0
                 continue
             }
 
@@ -754,7 +792,7 @@ class RobotPostFormatProcessor : PostFormatProcessor {
                     insideWrappableStatement = nextStatementMetadata.wrappableArgumentCount > 0
                     statementIndent = leadingWs
                     currentMetadata = nextStatementMetadata
-                    continuationLinesEmitted = computeArgumentCountOnSameLineAsStatement(trimmed, currentMetadata)
+                    identifiedArgumentsCount = computeArgumentCountOnSameLineAsStatement(trimmed, currentMetadata)
                     continue
                 }
             }
@@ -764,8 +802,9 @@ class RobotPostFormatProcessor : PostFormatProcessor {
                 if (!insideWrappableStatement) {
                     insideWrappableStatement = true
                 }
-                // Count this as a continuation line (it already has "...")
-                continuationLinesEmitted++
+                // Check for arguments/parameters within this continuation line - excluding any commentary. Arguments have to be separated by at least a SUPER SPACE
+                val continuationFreeLineText = trimmed.substring(GlobalConstants.CONTINUATION.length).trimStart()
+                identifiedArgumentsCount += continuationFreeLineText.split(continuationLineArgumentsSplitRegex).filterNot { it.startsWith('#') }.count()
 
                 val safeStatementIndent = if (statementIndent > 0) statementIndent else 0
                 // Add a continuation indent fixer here to ensure correct indentation even for variable statements based on the statementIndent
@@ -773,50 +812,26 @@ class RobotPostFormatProcessor : PostFormatProcessor {
                 continue
             }
 
-            // --- Structural keyword or setting (FOR, IF, [Tags], etc.): new statement ---
-            if (isStructuralKeywordLine(trimmed)) {
-                if (trimmed.matches(LOCAL_ARGUMENTS_SETTING_REGEX)) {
-                    insideWrappableStatement = true
-                    statementIndent = leadingWs
-                    currentMetadata = statementMetadataCopy.removeFirst()
-                    continuationLinesEmitted = 0
-                } else {
-                    insideWrappableStatement = false
-                    currentMetadata = null
-                    continuationLinesEmitted = 0
-                }
-                continue
-            }
-
-            // --- Indented, non-structural, non-comment, no "..." ---
-            if (!insideWrappableStatement) {
-                currentMetadata = findMetadataForLine(trimmed, statementMetadataCopy)
-                insideWrappableStatement = currentMetadata != null && currentMetadata.wrappableArgumentCount > 0
-                statementIndent = leadingWs
-                continuationLinesEmitted = computeArgumentCountOnSameLineAsStatement(trimmed, currentMetadata)
-                continue
-            }
-
             // Check argument count limit: if we have metadata and have already emitted
             // enough continuation lines, this must be a new statement.
-            if (currentMetadata != null && continuationLinesEmitted >= currentMetadata.wrappableArgumentCount) {
+            if (currentMetadata != null && identifiedArgumentsCount >= currentMetadata.wrappableArgumentCount) {
                 // We've exhausted the expected arguments → this is a new statement.
                 currentMetadata = findMetadataForLine(trimmed, statementMetadataCopy)
                 insideWrappableStatement = currentMetadata != null && currentMetadata.wrappableArgumentCount > 0
                 statementIndent = leadingWs
-                continuationLinesEmitted = computeArgumentCountOnSameLineAsStatement(trimmed, currentMetadata)
+                identifiedArgumentsCount = computeArgumentCountOnSameLineAsStatement(trimmed, currentMetadata)
                 continue
             }
 
             // We ARE inside a wrappable statement. This line needs a continuation marker.
             if (leadingWs >= statementIndent) {
                 lineProcessors.add(ContinuationInserter(lineStart + statementIndent))
-                continuationLinesEmitted++
+                identifiedArgumentsCount++
             } else {
                 insideWrappableStatement = true
                 statementIndent = leadingWs
                 currentMetadata = findMetadataForLine(trimmed, statementMetadataCopy)
-                continuationLinesEmitted = 0
+                identifiedArgumentsCount = 0
             }
         }
 
@@ -829,15 +844,10 @@ class RobotPostFormatProcessor : PostFormatProcessor {
      * line number based lookup doesn't match (e.g. because the formatter shifted lines).
      */
     private fun findMetadataForLine(lineContent: String, metadata: MutableList<StatementMetadata>): StatementMetadata? {
-        val iterator = metadata.iterator()
-        while (iterator.hasNext()) {
-            val metadataForLine = iterator.next()
-            if (metadataForLine.normalizedIdentificationText.isNotEmpty() && lineContent.replace(WHITESPACE_REGEX, "").startsWith(metadataForLine.normalizedIdentificationText)) {
-                iterator.remove()
-                return metadataForLine
-            }
-        }
-        return null
+        val nextMetadata = metadata.removeFirst()
+        if (nextMetadata.normalizedIdentificationText.isEmpty() || !lineContent.replace(WHITESPACE_REGEX, "").startsWith(nextMetadata.normalizedIdentificationText))
+            throw IllegalStateException("Collected metadata doesn't match with the current line. Expected metadata entry $nextMetadata for line $lineContent")
+        return nextMetadata
     }
 
     private fun computeArgumentCountOnSameLineAsStatement(lineContent: String, metadata: StatementMetadata?): Int {
@@ -858,41 +868,6 @@ class RobotPostFormatProcessor : PostFormatProcessor {
             }
             argumentCount
         }
-    }
-
-    /**
-     * Determines whether [trimmed] (a line with leading whitespace already stripped) starts
-     * with a Robot Framework structural keyword that indicates a new statement rather than
-     * a continuation of the previous one.
-     *
-     * Structural keywords include:
-     * - Local settings: `[Arguments]`, `[Return]`, `[Documentation]`, `[Tags]`, `[Setup]`,
-     *   `[Teardown]`, `[Timeout]`, `[Template]`
-     * - Control flow: FOR, WHILE, IF, ELSE IF, ELSE, TRY, EXCEPT, FINALLY, END
-     * - Other: BREAK, CONTINUE, RETURN, VAR, GROUP
-     */
-    private fun isStructuralKeywordLine(trimmed: String): Boolean {
-        // Local settings always start with '['
-        if (trimmed.startsWith("[")) return true
-
-        // Check if the line starts with a known structural keyword followed by either
-        // whitespace (indicating arguments) or end of line (keyword alone on a line).
-        // We must be careful not to match keyword CALL names that happen to start with
-        // a structural keyword prefix, e.g. "IF Connection Exists" is a keyword call,
-        // not a structural IF. Robot Framework structural keywords must be followed by
-        // at least 2 spaces (super-space separator) or end of line.
-        for (keyword in STRUCTURAL_KEYWORDS) {
-            if (trimmed.startsWith(keyword)) {
-                val afterKeyword = trimmed.length - keyword.length
-                if (afterKeyword == 0) return true // keyword alone on line
-                val charAfter = trimmed[keyword.length]
-                // In Robot Framework, structural keywords are separated from their arguments
-                // by at least 2 spaces or a tab
-                if (charAfter == '\t') return true
-                if (charAfter == ' ' && afterKeyword >= 2 && trimmed[keyword.length + 1] == ' ') return true
-            }
-        }
-        return false
     }
 
     interface LineProcessor : Comparable<LineProcessor> {
@@ -987,14 +962,6 @@ class RobotPostFormatProcessor : PostFormatProcessor {
         }
     }
 }
-/**
- * Set of Robot Framework keywords that start their own statement block and therefore
- * must NOT be treated as wrapped continuations of a preceding statement.
- */
-private val STRUCTURAL_KEYWORDS = setOf(
-    "FOR", "WHILE", "IF", "ELSE", "ELSE IF", "TRY", "EXCEPT", "FINALLY", "END",
-    "BREAK", "CONTINUE", "RETURN", "VAR", "GROUP"
-)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Argument type sets for counting wrappable arguments per statement type
@@ -1075,6 +1042,7 @@ private val COLLAPSIBLE_STATEMENT_TYPES: Set<IElementType> = setOf(
     RobotTypes.VARIABLES_IMPORT_GLOBAL_SETTING,
     RobotTypes.LIBRARY_IMPORT_GLOBAL_SETTING,
     RobotTypes.RESOURCE_IMPORT_GLOBAL_SETTING,
+    RobotTypes.SETUP_TEARDOWN_STATEMENTS_GLOBAL_SETTING,
     // Control flow headers can also have continuations (e.g. FOR with many items)
     RobotTypes.FOR_LOOP_HEADER,
     RobotTypes.WHILE_LOOP_HEADER,
