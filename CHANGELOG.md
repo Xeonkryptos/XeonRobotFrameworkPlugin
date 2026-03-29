@@ -20,6 +20,7 @@
 - Fixed rename-refactor when triggered on keyword calls in Robot files referencing a python function
 - Fixed missing execute icon on test case headers when the test case is a data-driven one
 - Fixed inconsistent code completion suggestions for keywords (some keywords weren't shown in the results list even though they matched the input)
+- Fixed resolving of template parameter names in data driven tests
 
 ## 0.6.1
 

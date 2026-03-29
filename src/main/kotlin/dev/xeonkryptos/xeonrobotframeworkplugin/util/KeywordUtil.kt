@@ -8,6 +8,8 @@ import com.intellij.psi.util.PsiTreeUtil
 import dev.xeonkryptos.xeonrobotframeworkplugin.config.RobotOptionsProvider
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotFile
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCall
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLocalSetting
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotPositionalArgument
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotRoot
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotSettingsSection
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTemplateStatementsGlobalSetting
@@ -38,11 +40,17 @@ class KeywordUtil(private val project: Project) {
 
             val testCaseStatement = PsiTreeUtil.getParentOfType(element, RobotTestCaseStatement::class.java)
             if (testCaseStatement != null) {
-                for (localSetting in testCaseStatement.getLocalSettings()) {
-                    if (RobotNames.TEMPLATE_LOCAL_SETTING_NAME.equals(localSetting.getSettingName(), ignoreCase = true)) {
-                        return PsiTreeUtil.getChildOfType(localSetting, RobotKeywordCall::class.java)
+                var referencedKeywordCall: RobotKeywordCall? = null
+                val visitor = object : RobotVisitor() {
+                    override fun visitLocalSetting(o: RobotLocalSetting) = o.acceptChildren(this)
+                    override fun visitPositionalArgument(o: RobotPositionalArgument) = o.acceptChildren(this)
+
+                    override fun visitKeywordCall(o: RobotKeywordCall) {
+                        referencedKeywordCall = o
                     }
                 }
+                testCaseStatement.acceptChildren(visitor)
+                if (referencedKeywordCall != null) return referencedKeywordCall
             }
             val testTemplateFinder = TestTemplateFinder()
             robotFile.acceptChildren(testTemplateFinder)
