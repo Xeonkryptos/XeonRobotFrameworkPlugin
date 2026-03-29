@@ -28,6 +28,9 @@ class RobotCodeStyleSettings(container: CodeStyleSettings) : CustomCodeStyleSett
     var ALIGN_CONTINUATION_WITH_VARIABLE_DEFINITION: Boolean = false
 
     @JvmField
+    var FOR_FIRST_ARGUMENT_ON_NEW_LINE: Boolean = false
+
+    @JvmField
     @WrapConstant
     var WHILE_STATEMENT_WRAP: Int = CommonCodeStyleSettings.DO_NOT_WRAP
 
@@ -46,4 +49,7 @@ class RobotCodeStyleSettings(container: CodeStyleSettings) : CustomCodeStyleSett
 
     @JvmField
     var METHOD_PARAMETERS_FIRST_ARGUMENT_ON_NEW_LINE: Boolean = false
+
+    @JvmField
+    var KEEP_BLANK_LINES_IN_LOCAL_SETTINGS: Int = 1
 }

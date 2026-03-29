@@ -1,10 +1,6 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.formatter
 
-import com.intellij.formatting.FormattingContext
-import com.intellij.formatting.FormattingModel
-import com.intellij.formatting.FormattingModelBuilder
-import com.intellij.formatting.FormattingModelProvider
-import com.intellij.formatting.SpacingBuilder
+import com.intellij.formatting.*
 import com.intellij.psi.TokenType
 import com.intellij.psi.codeStyle.CodeStyleSettings
 import com.intellij.psi.tree.TokenSet
@@ -29,7 +25,11 @@ class RobotFormattingModelBuilder : FormattingModelBuilder {
         val maximumSpacesAfterTemplateValues = if (customSettings.KEEP_ADDITIONAL_SPACES_BETWEEN_TEMPLATE_VALUES) Integer.MAX_VALUE else RobotCodeStyleSettings.SUPER_SPACE_SIZE
         val maximumSpacesAfterVariableAssignment = if (customSettings.KEEP_ADDITIONAL_SPACES_AFTER_VARIABLE_ASSIGNMENTS) Integer.MAX_VALUE else RobotCodeStyleSettings.SUPER_SPACE_SIZE
 
-        return SpacingBuilder(codeStyleSettings, RobotLanguage.INSTANCE).before(RobotTypes.ASSIGNMENT)
+        return SpacingBuilder(codeStyleSettings, RobotLanguage.INSTANCE)
+            // We need to make absolutely sure, any newlines after a template value holder is preserved. Otherwise, we might break test cases by putting everything into the same line
+            .after(RobotTokenSets.TEMPLATE_VALUES_HOLDER_SET)
+            .spacing(RobotCodeStyleSettings.SUPER_SPACE_SIZE, maximumSpacesAfterTemplateValues, 0, true, commonSettings.KEEP_BLANK_LINES_IN_CODE)
+            .before(RobotTypes.ASSIGNMENT)
             .spaceIf(commonSettings.SPACE_AROUND_ASSIGNMENT_OPERATORS)
             .after(RobotTypes.ASSIGNMENT)
             .spacing(RobotCodeStyleSettings.SUPER_SPACE_SIZE, maximumSpacesAfterVariableAssignment, 0, commonSettings.KEEP_LINE_BREAKS, commonSettings.KEEP_BLANK_LINES_IN_CODE)
@@ -37,16 +37,16 @@ class RobotFormattingModelBuilder : FormattingModelBuilder {
             .spaceIf(commonSettings.SPACE_WITHIN_BRACES)
             .withinPair(RobotTypes.VARIABLE_ACCESS_START, RobotTypes.VARIABLE_ACCESS_END)
             .spaceIf(commonSettings.SPACE_WITHIN_BRACKETS)
-            .after(TokenType.WHITE_SPACE)
-            .spacing(customSettings.AFTER_CONTINUATION_INDENT_SIZE, customSettings.AFTER_CONTINUATION_INDENT_SIZE, 0, true, commonSettings.KEEP_BLANK_LINES_IN_CODE)
-            .after(RobotTokenSets.TEMPLATE_VALUES_HOLDER_SET)
+            .afterInside(TokenType.WHITE_SPACE, RobotTypes.LOCAL_SETTING)
             .spacing(
-                RobotCodeStyleSettings.SUPER_SPACE_SIZE,
-                maximumSpacesAfterTemplateValues,
+                customSettings.AFTER_CONTINUATION_INDENT_SIZE,
+                customSettings.AFTER_CONTINUATION_INDENT_SIZE,
                 0,
                 commonSettings.KEEP_LINE_BREAKS,
-                commonSettings.KEEP_BLANK_LINES_IN_CODE
+                customSettings.KEEP_BLANK_LINES_IN_LOCAL_SETTINGS
             )
+            .after(TokenType.WHITE_SPACE)
+            .spacing(customSettings.AFTER_CONTINUATION_INDENT_SIZE, customSettings.AFTER_CONTINUATION_INDENT_SIZE, 0, commonSettings.KEEP_LINE_BREAKS, commonSettings.KEEP_BLANK_LINES_IN_CODE)
             .after(SUPER_SPACE_SETS)
             .spaces(RobotCodeStyleSettings.SUPER_SPACE_SIZE)
     }

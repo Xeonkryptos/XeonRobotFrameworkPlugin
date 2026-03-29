@@ -77,6 +77,12 @@ class RobotLanguageCodeStyleSettingsProvider : LanguageCodeStyleSettingsProvider
                 )
                 consumer.showCustomOption(
                     RobotCodeStyleSettings::class.java,
+                    "FOR_FIRST_ARGUMENT_ON_NEW_LINE",
+                    RobotBundle.message("formatter.for.first.argument.on.newline"),
+                    customizableOptions.WRAPPING_FOR_STATEMENT
+                )
+                consumer.showCustomOption(
+                    RobotCodeStyleSettings::class.java,
                     "WHILE_STATEMENT_WRAP",
                     RobotBundle.message("formatter.while.statement.wrapping.expression"),
                     null,
@@ -107,6 +113,7 @@ class RobotLanguageCodeStyleSettingsProvider : LanguageCodeStyleSettingsProvider
 
             SettingsType.BLANK_LINES_SETTINGS -> {
                 consumer.showStandardOptions("KEEP_BLANK_LINES_IN_CODE")
+                consumer.showCustomOption(RobotCodeStyleSettings::class.java, "KEEP_BLANK_LINES_IN_LOCAL_SETTINGS", RobotBundle.message("formatter.blank.lines.in.local.settings"), null)
             }
 
             else -> {

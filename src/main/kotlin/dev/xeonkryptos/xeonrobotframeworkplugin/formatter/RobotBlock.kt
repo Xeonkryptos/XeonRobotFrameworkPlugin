@@ -1,10 +1,6 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.formatter
 
-import com.intellij.formatting.Alignment
-import com.intellij.formatting.Block
-import com.intellij.formatting.Indent
-import com.intellij.formatting.Spacing
-import com.intellij.formatting.Wrap
+import com.intellij.formatting.*
 import com.intellij.lang.ASTNode
 import com.intellij.lang.tree.util.children
 import com.intellij.openapi.util.Key
@@ -87,7 +83,6 @@ class RobotBlock(
     override fun buildChildren(): List<Block> {
         val blocks = mutableListOf<Block>()
         if (isLeaf) return blocks
-
         val parentWrap = createWrapIfNecessary()
         if (myNode.elementType === RobotTypes.KEYWORD_CALL && context.commonCodeStyleSettings.ALIGN_MULTILINE_PARAMETERS_IN_CALLS) {
             myNode.putUserData(ARGUMENT_ALIGNMENT_KEY, Alignment.createAlignment(true))
@@ -152,6 +147,21 @@ class RobotBlock(
             if (wrapType != CommonCodeStyleSettings.DO_NOT_WRAP) Wrap.createWrap(wrapType, isChopOrAlways(wrapType)) else null
         }
 
+        RobotTypes.LOCAL_SETTING -> {
+            val wrapType = context.robotCodeStyleSettings.LOCAL_SETTINGS_WRAP
+            if (wrapType != CommonCodeStyleSettings.DO_NOT_WRAP) Wrap.createWrap(wrapType, isChopOrAlways(wrapType)) else null
+        }
+
+        RobotTypes.FOR_LOOP_HEADER -> {
+            val wrapType = context.commonCodeStyleSettings.FOR_STATEMENT_WRAP
+            if (wrapType != CommonCodeStyleSettings.DO_NOT_WRAP) Wrap.createWrap(wrapType, isChopOrAlways(wrapType)) else null
+        }
+
+        RobotTypes.WHILE_LOOP_HEADER -> {
+            val wrapType = context.robotCodeStyleSettings.WHILE_STATEMENT_WRAP
+            if (wrapType != CommonCodeStyleSettings.DO_NOT_WRAP) Wrap.createWrap(wrapType, isChopOrAlways(wrapType)) else null
+        }
+
         else -> null
     }
 
@@ -164,6 +174,9 @@ class RobotBlock(
 
     private fun shouldAssignWrapToNode(node: ASTNode): Boolean = when (node.elementType) {
         RobotTypes.PARAMETER, RobotTypes.POSITIONAL_ARGUMENT -> myNode.elementType === RobotTypes.KEYWORD_CALL
+                || myNode.elementType === RobotTypes.FOR_LOOP_HEADER
+                || myNode.elementType === RobotTypes.WHILE_LOOP_HEADER
+                || myNode.elementType === RobotTypes.LOCAL_SETTING
         RobotTypes.LOCAL_ARGUMENTS_SETTING_PARAMETER_MANDATORY, RobotTypes.LOCAL_ARGUMENTS_SETTING_PARAMETER_OPTIONAL -> true
         else -> false
     }
