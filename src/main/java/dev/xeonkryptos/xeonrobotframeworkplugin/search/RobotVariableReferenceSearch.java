@@ -1,7 +1,6 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.search;
 
 import com.intellij.openapi.application.QueryExecutorBase;
-import com.intellij.openapi.application.ReadAction;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiReference;
@@ -45,7 +44,7 @@ public class RobotVariableReferenceSearch extends QueryExecutorBase<PsiReference
                                                   @Nullable GlobalSearchScope globalSearchScope,
                                                   @NotNull Processor<? super PsiReference> consumer) {
         VariableNameIndex variableNameIndex = VariableNameIndex.getInstance();
-        Collection<RobotVariable> variables = ReadAction.compute(() -> variableNameIndex.getVariables(variableName, project, globalSearchScope));
+        Collection<RobotVariable> variables = variableNameIndex.getVariables(variableName, project, globalSearchScope);
         for (RobotVariable variable : variables) {
             RobotVariableContent variableContent = RobotPsiUtil.getVariableContent(variable);
             if (variableContent != null) {
