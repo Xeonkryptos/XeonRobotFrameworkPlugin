@@ -366,7 +366,8 @@ class RobotPreFormatProcessor : PreFormatProcessor {
             RobotTypes.VARIABLES_IMPORT_GLOBAL_SETTING,
             RobotTypes.TIMEOUT_STATEMENTS_GLOBAL_SETTING,
             RobotTypes.RESOURCE_IMPORT_GLOBAL_SETTING,
-            RobotTypes.UNKNOWN_SETTING_STATEMENTS_GLOBAL_SETTING -> extractSimpleGlobalSettingMetadata(node)
+            RobotTypes.UNKNOWN_SETTING_STATEMENTS_GLOBAL_SETTING -> extractSimpleGlobalSettingMetadata(node, customSettings)
+
             RobotTypes.KEYWORD_CALL -> extractKeywordCallMetadata(node, customSettings)
             RobotTypes.LOCAL_ARGUMENTS_SETTING -> extractLocalArgumentsSettingMetadata(node, customSettings)
             RobotTypes.KEYWORD_VARIABLE_STATEMENT -> extractKeywordVariableStatementMetadata(node, customSettings)
@@ -382,6 +383,7 @@ class RobotPreFormatProcessor : PreFormatProcessor {
             RobotTypes.ELSE_IF,
             RobotTypes.EXCEPT,
             RobotTypes.GROUP_HEADER -> extractControlFlowHeaderMetadata(node)
+
             RobotTypes.TEMPLATE_ARGUMENTS -> extractTemplateArgumentsMetadata(node)
             else -> null
         }
@@ -395,10 +397,10 @@ class RobotPreFormatProcessor : PreFormatProcessor {
      * Wrappable argument count = number of PARAMETER + POSITIONAL_ARGUMENT children
      * (flattened through EXECUTABLE_STATEMENT wrappers).
      */
-    private fun extractSimpleGlobalSettingMetadata(node: ASTNode): StatementMetadata {
+    private fun extractSimpleGlobalSettingMetadata(node: ASTNode, customSettings: RobotCodeStyleSettings): StatementMetadata {
         val idText = node.firstChildNode?.text?.trim() ?: ""
         val argCount = collectWrappableArguments(node, KEYWORD_CALL_ARGUMENT_TYPES)
-        return StatementMetadata(idText, argCount, false)
+        return StatementMetadata(idText, argCount, customSettings.LOCAL_SETTINGS_FIRST_ARGUMENT_ON_NEW_LINE)
     }
 
     /**
@@ -587,7 +589,7 @@ class RobotPostFormatProcessor : PostFormatProcessor {
     private val sectionNameNormalizationRegex = Regex("[\\s*]")
     private val continuationLineArgumentsSplitRegex = Regex("\\s{2,}")
 
-    override fun processElement(source: PsiElement, settings: CodeStyleSettings): PsiElement = source
+    override fun processElement(source: PsiElement, settings: CodeStyleSettings): PsiElement = source.also { processText(it.containingFile, it.textRange, settings) }
 
     override fun processText(source: PsiFile, rangeToReformat: TextRange, settings: CodeStyleSettings): TextRange {
         if (source.language !== RobotLanguage.INSTANCE) return rangeToReformat
@@ -740,7 +742,7 @@ class RobotPostFormatProcessor : PostFormatProcessor {
         var statementIndent = -1
         var currentMetadata: StatementMetadata? = null
         var identifiedArgumentsCount = 0
-        var settingsSection = false
+        var metadataSection = false
 
         for (lineIdx in startLine..endLine) {
             if (currentMetadata == null && statementMetadataCopy.isEmpty()) break
@@ -762,7 +764,7 @@ class RobotPostFormatProcessor : PostFormatProcessor {
             // --- Section header (e.g. "*** Keywords ***"): always resets. Settings section is remembered to look for wrapping keywords in it being place at the start of the line ---
             if (lineText.startsWith("*")) {
                 val sectionName = trimmed.replace(sectionNameNormalizationRegex, "")
-                settingsSection = sectionName.equals(RobotNames.SETTING_SECTION_NAME, ignoreCase = true) || sectionName.equals(RobotNames.SETTINGS_SECTION_NAME, ignoreCase = true)
+                metadataSection = isMetadataSection(sectionName)
                 insideWrappableStatement = false
                 currentMetadata = null
                 identifiedArgumentsCount = 0
@@ -779,7 +781,7 @@ class RobotPostFormatProcessor : PostFormatProcessor {
             }
 
             // --- Top-level definition (no indentation): resets ---
-            if (leadingWs == 0 && !settingsSection) {
+            if (leadingWs == 0 && !metadataSection) {
                 insideWrappableStatement = false
                 currentMetadata = null
                 identifiedArgumentsCount = 0
@@ -795,6 +797,12 @@ class RobotPostFormatProcessor : PostFormatProcessor {
                     statementIndent = leadingWs
                     currentMetadata = nextStatementMetadata
                     identifiedArgumentsCount = computeArgumentCountOnSameLineAsStatement(trimmed, currentMetadata)
+                    if (currentMetadata.firstArgumentOnNextLine && identifiedArgumentsCount > 0) {
+                        val commandEndOffset = lineStart + statementIndent + currentMetadata.identificationText.length
+                        val afterStatementText = trimmed.substring(currentMetadata.identificationText.length)
+                        val statementArgumentSeparatorSpace = afterStatementText.length - afterStatementText.trimStart().length
+                        lineProcessors.add(ArgumentOnNextLineMover(commandEndOffset, commandEndOffset + statementArgumentSeparatorSpace, statementIndent))
+                    }
                     continue
                 }
             }
@@ -840,6 +848,10 @@ class RobotPostFormatProcessor : PostFormatProcessor {
         return lineProcessors
     }
 
+    private fun isMetadataSection(sectionName: String): Boolean =
+        sectionName.equals(RobotNames.SETTING_SECTION_NAME, ignoreCase = true) || sectionName.equals(RobotNames.SETTINGS_SECTION_NAME, ignoreCase = true)
+                || sectionName.equals(RobotNames.VARIABLE_SECTION_NAME, ignoreCase = true) || sectionName.equals(RobotNames.VARIABLES_SECTION_NAME, ignoreCase = true)
+
     /**
      * Attempts to find a [StatementMetadata] whose [StatementMetadata.identificationText]
      * appears at the beginning of [lineContent]. This is used as a fallback when the
@@ -878,9 +890,22 @@ class RobotPostFormatProcessor : PostFormatProcessor {
 
     interface LineProcessor : Comparable<LineProcessor> {
 
+        companion object {
+            const val TAB_CHARACTER_SPACE_SIZE = 4
+        }
+
         val offset: Int
 
         fun processLine(document: Document, commonSettings: CommonCodeStyleSettings, customSettings: RobotCodeStyleSettings): Int
+
+        fun createInsertableSpace(spaceCount: Int, commonSettings: CommonCodeStyleSettings): String {
+            val useTabCharacter = commonSettings.indentOptions?.USE_TAB_CHARACTER ?: false
+            return if (useTabCharacter) {
+                val tabCharacterCount = spaceCount / TAB_CHARACTER_SPACE_SIZE
+                val spaceCharacterCount = spaceCount % TAB_CHARACTER_SPACE_SIZE
+                "${"\t".repeat(tabCharacterCount)}${" ".repeat(spaceCharacterCount)}"
+            } else " ".repeat(spaceCount)
+        }
 
         override fun compareTo(other: LineProcessor): Int = offset.compareTo(other.offset)
     }
@@ -893,7 +918,7 @@ class RobotPostFormatProcessor : PostFormatProcessor {
 
             val replaceableTextRange = TextRange(offset, offset + continuationIndentation + GlobalConstants.CONTINUATION.length + separatorSize)
             val textToReplace = document.getText(replaceableTextRange)
-            val separator = " ".repeat(separatorSize)
+            val separator = createInsertableSpace(separatorSize, commonSettings)
             if (textToReplace.isBlank() || textToReplace.trimStart().length <= RobotCodeStyleSettings.SUPER_SPACE_SIZE) {
                 /*
                  * Calculating the whitespace length before the first real character occurrence in this line (starting from the previously calculated insertion point). The end goal of this approach
@@ -927,10 +952,10 @@ class RobotPostFormatProcessor : PostFormatProcessor {
                 document.replaceString(startOffset, offset + whitespaceLength, GlobalConstants.CONTINUATION + separator)
                 return 0
             }
-                // Not enough whitespaces available to put us into without changing too much (adding more whitespaces). Therefore, simply insert the required string with every whitespace requested.
-                val continuationIndent = " ".repeat(continuationIndentation)
-                document.insertString(offset, continuationIndent + GlobalConstants.CONTINUATION + separator)
-                return continuationIndentation + GlobalConstants.CONTINUATION.length + separator.length
+            // Not enough whitespaces available to put us into without changing too much (adding more whitespaces). Therefore, simply insert the required string with every whitespace requested.
+            val continuationIndent = createInsertableSpace(continuationIndentation, commonSettings)
+            document.insertString(offset, continuationIndent + GlobalConstants.CONTINUATION + separator)
+            return continuationIndentation + GlobalConstants.CONTINUATION.length + separator.length
         }
 
         override fun equals(other: Any?): Boolean {
@@ -951,7 +976,7 @@ class RobotPostFormatProcessor : PostFormatProcessor {
             val continuationIndentation = commonSettings.indentOptions?.CONTINUATION_INDENT_SIZE ?: 0
             val diff = continuationOffset - offset
             return if (diff > continuationIndentation) {
-                document.replaceString(offset, continuationOffset, " ".repeat(continuationIndentation))
+                document.replaceString(offset, continuationOffset, createInsertableSpace(continuationIndentation, commonSettings))
                 continuationIndentation - diff
             } else 0
         }
@@ -960,6 +985,33 @@ class RobotPostFormatProcessor : PostFormatProcessor {
             if (this === other) return true
             if (javaClass != other?.javaClass) return false
             val that = other as ContinuationIndentFixer
+            return offset == that.offset
+        }
+
+        override fun hashCode(): Int {
+            return offset
+        }
+    }
+
+    class ArgumentOnNextLineMover(override val offset: Int, val argumentStartOffset: Int, val statementIndentation: Int) : LineProcessor {
+
+        override fun processLine(
+            document: Document,
+            commonSettings: CommonCodeStyleSettings,
+            customSettings: RobotCodeStyleSettings
+        ): Int {
+            val continuationIndentSize = commonSettings.indentOptions?.CONTINUATION_INDENT_SIZE ?: 0
+
+            val indentText = createInsertableSpace(statementIndentation + continuationIndentSize, commonSettings)
+            val afterContinuationText = createInsertableSpace(customSettings.AFTER_CONTINUATION_INDENT_SIZE, commonSettings)
+            document.replaceString(offset, argumentStartOffset, "\n$indentText${GlobalConstants.CONTINUATION}$afterContinuationText")
+            return statementIndentation + continuationIndentSize + GlobalConstants.CONTINUATION.length + customSettings.AFTER_CONTINUATION_INDENT_SIZE
+        }
+
+        override fun equals(other: Any?): Boolean {
+            if (this === other) return true
+            if (javaClass != other?.javaClass) return false
+            val that = other as ContinuationInserter
             return offset == that.offset
         }
 
