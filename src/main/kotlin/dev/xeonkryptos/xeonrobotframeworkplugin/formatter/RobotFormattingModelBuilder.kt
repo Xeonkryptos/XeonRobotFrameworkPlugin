@@ -25,8 +25,8 @@ class RobotFormattingModelBuilder : FormattingModelBuilder {
         val maximumSpacesAfterTemplateValues = if (customSettings.KEEP_ADDITIONAL_SPACES_BETWEEN_TEMPLATE_VALUES) Integer.MAX_VALUE else RobotCodeStyleSettings.SUPER_SPACE_SIZE
         val maximumSpacesAfterVariableAssignment = if (customSettings.KEEP_ADDITIONAL_SPACES_AFTER_VARIABLE_ASSIGNMENTS) Integer.MAX_VALUE else RobotCodeStyleSettings.SUPER_SPACE_SIZE
 
-        return SpacingBuilder(codeStyleSettings, RobotLanguage.INSTANCE)
-            // We need to make absolutely sure, any newlines after a template value holder is preserved. Otherwise, we might break test cases by putting everything into the same line
+        return SpacingBuilder(codeStyleSettings,
+            RobotLanguage.INSTANCE) // We need to make absolutely sure, any newlines after a template value holder is preserved. Otherwise, we might break test cases by putting everything into the same line
             .after(RobotTokenSets.TEMPLATE_VALUES_HOLDER_SET)
             .spacing(RobotCodeStyleSettings.SUPER_SPACE_SIZE, maximumSpacesAfterTemplateValues, 0, true, commonSettings.KEEP_BLANK_LINES_IN_CODE)
             .before(RobotTypes.ASSIGNMENT)
@@ -38,13 +38,11 @@ class RobotFormattingModelBuilder : FormattingModelBuilder {
             .withinPair(RobotTypes.VARIABLE_ACCESS_START, RobotTypes.VARIABLE_ACCESS_END)
             .spaceIf(commonSettings.SPACE_WITHIN_BRACKETS)
             .afterInside(TokenType.WHITE_SPACE, RobotTypes.LOCAL_SETTING)
-            .spacing(
-                customSettings.AFTER_CONTINUATION_INDENT_SIZE,
+            .spacing(customSettings.AFTER_CONTINUATION_INDENT_SIZE,
                 customSettings.AFTER_CONTINUATION_INDENT_SIZE,
                 0,
                 commonSettings.KEEP_LINE_BREAKS,
-                customSettings.KEEP_BLANK_LINES_IN_LOCAL_SETTINGS
-            )
+                customSettings.KEEP_BLANK_LINES_IN_LOCAL_SETTINGS)
             .after(TokenType.WHITE_SPACE)
             .spacing(customSettings.AFTER_CONTINUATION_INDENT_SIZE, customSettings.AFTER_CONTINUATION_INDENT_SIZE, 0, commonSettings.KEEP_LINE_BREAKS, commonSettings.KEEP_BLANK_LINES_IN_CODE)
             .after(SUPER_SPACE_SETS)
@@ -52,12 +50,10 @@ class RobotFormattingModelBuilder : FormattingModelBuilder {
     }
 }
 
-private val SUPER_SPACE_SETS: TokenSet = TokenSet.orSet(
-    RobotTokenSets.GHERKIN_SET,
+private val SUPER_SPACE_SETS: TokenSet = TokenSet.orSet(RobotTokenSets.GHERKIN_SET,
     RobotTokenSets.LOOP_KEYWORDS_SET,
     RobotTokenSets.CONTROL_KEYWORDS_SET,
     RobotTokenSets.EXCEPTION_KEYWORDS_SET,
     RobotTokenSets.LOCAL_SETTING_NAMES_SET,
     RobotTokenSets.GLOBAL_SETTING_NAMES_SET,
-    TokenSet.create(RobotTypes.KEYWORD_NAME, RobotTypes.PARAMETER, RobotTypes.POSITIONAL_ARGUMENT)
-)
+    TokenSet.create(RobotTypes.KEYWORD_NAME, RobotTypes.PARAMETER, RobotTypes.POSITIONAL_ARGUMENT))

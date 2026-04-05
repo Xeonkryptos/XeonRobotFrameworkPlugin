@@ -50,8 +50,7 @@ class RobotLanguageCodeStyleSettingsProvider : LanguageCodeStyleSettingsProvider
                     "CALL_PARAMETERS_WRAP",
                     "METHOD_PARAMETERS_WRAP",
                     "ALIGN_MULTILINE_PARAMETERS",
-                    "FOR_STATEMENT_WRAP",
-                    "KEEP_FIRST_COLUMN_COMMENT"
+                    "FOR_STATEMENT_WRAP"
                 )
                 consumer.renameStandardOption("METHOD_PARAMETERS_WRAP", RobotBundle.message("formatter.wrap.keyword.definition.arguments"))
                 consumer.renameStandardOption("CALL_PARAMETERS_WRAP", RobotBundle.message("formatter.wrap.keyword.call.arguments"))
