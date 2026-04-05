@@ -475,4 +475,4 @@ variable_nested_access_content ::= (variable | literal_constant_value)+
 
 literal_constant_value ::= LITERAL_CONSTANT
 
-private eol_marker ::= EOL | <<eof>>
+private eol_marker ::= EOL+ | <<eof>>
