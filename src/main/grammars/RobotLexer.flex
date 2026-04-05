@@ -251,7 +251,7 @@ LineComment = {LineCommentSign} {NON_EOL}*
 
 ^ {NonNewlineWhitespace}+ {LineComment} {WhitespaceIncludingNewline}*      { enterNewState(AFTER_COMMENT); pushBackEverythingExceptLeadingWhitespace(); return WHITE_SPACE; }
 ^ {LineComment}                                                            { enterNewState(AFTER_COMMENT); return COMMENT; }
-{LineComment}                                                              { enterNewState(AFTER_COMMENT); return COMMENT; }
+{LineComment}                                                              { return COMMENT; }
 
 <SETTING, SETTING_VALUES, VARIABLE_DEFINITION_ARGUMENTS, KEYWORD_ARGUMENTS, KEYWORD_CALL, USER_KEYWORD_RETURN_STATEMENT, FOR_STRUCTURE_LOOP, SIMPLE_CONTROL_STRUCTURE, LITERAL_CONSTANT_ONLY, VARIABLE_DEFINITION, INLINE_VARIABLE_DEFINITION> {
     {EOL} {NonNewlineWhitespace}* ({LineComment} ({EOL} {NonNewlineWhitespace}*)+)+ {MultiLineContinuation}                 { enterNewState(IN_CONTINUATION); pushBackEverythingExceptLeadingWhitespace(); return WHITE_SPACE; }
