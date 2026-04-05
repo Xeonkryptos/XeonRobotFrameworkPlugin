@@ -1,5 +1,6 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.actionhandler;
 
+import com.intellij.application.options.CodeStyle;
 import com.intellij.codeInsight.editorActions.enter.EnterHandlerDelegateAdapter;
 import com.intellij.openapi.actionSystem.DataContext;
 import com.intellij.openapi.editor.Document;
@@ -8,6 +9,7 @@ import com.intellij.openapi.editor.actionSystem.EditorActionHandler;
 import com.intellij.openapi.fileTypes.FileType;
 import com.intellij.openapi.util.Ref;
 import com.intellij.openapi.util.TextRange;
+import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.psi.PsiComment;
 import com.intellij.psi.PsiDocumentManager;
 import com.intellij.psi.PsiElement;
@@ -15,15 +17,12 @@ import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiWhiteSpace;
 import com.intellij.psi.util.PsiTreeUtil;
 import dev.xeonkryptos.xeonrobotframeworkplugin.config.RobotOptionsProvider;
+import dev.xeonkryptos.xeonrobotframeworkplugin.formatter.RobotCodeStyleSettings;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotFeatureFileType;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotResourceFileType;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotQualifiedNameOwner;
 import dev.xeonkryptos.xeonrobotframeworkplugin.util.GlobalConstants;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 public abstract class AbstractRobotSmartMultilineEnterActionHandler<T extends PsiElement> extends EnterHandlerDelegateAdapter {
 
@@ -66,7 +65,7 @@ public abstract class AbstractRobotSmartMultilineEnterActionHandler<T extends Ps
 
             if (expectedElementClass.isInstance(element)) {
                 foundElement = expectedElementClass.cast(element);
-                return super.preprocessEnter(file, editor, caretOffset, caretAdvance, dataContext, originalHandler);
+                return Result.Continue;
             }
 
             int lineNumber = document.getLineNumber(currentCaretOffset);
@@ -78,14 +77,18 @@ public abstract class AbstractRobotSmartMultilineEnterActionHandler<T extends Ps
 
             boolean lookAtPreviousLine = false;
             while (element instanceof PsiWhiteSpace || element instanceof PsiComment) {
-                if (element instanceof PsiWhiteSpace whiteSpace && whiteSpace.getText().contains(GlobalConstants.CONTINUATION)) {
+                if (element instanceof PsiWhiteSpace whiteSpace && whiteSpace.textMatches(GlobalConstants.CONTINUATION)) {
                     lookAtPreviousLine = true;
                 }
                 int textOffset = element.getTextOffset();
                 if (textOffset <= lineStartOffset && (!lookAtPreviousLine || textOffset <= previousLineStartOffset) || textOffset == 0) {
                     return Result.Continue;
                 }
-                element = file.findElementAt(textOffset - 1);
+                PsiElement currentElement = element;
+                element = element.getPrevSibling();
+                if (element == null) {
+                    element = currentElement.getParent();
+                }
             }
 
             foundElement = getExpectedElement(element, lineNumber, document);
@@ -96,7 +99,7 @@ public abstract class AbstractRobotSmartMultilineEnterActionHandler<T extends Ps
     @Override
     public Result postProcessEnter(@NotNull PsiFile file, @NotNull Editor editor, @NotNull DataContext dataContext) {
         if (foundElement != null) {
-            handleSmartMultilineIndentation(file, editor, foundElement);
+            handleSmartMultilineIndentation(file, editor);
             foundElement = null;
             return Result.Stop;
         }
@@ -108,7 +111,7 @@ public abstract class AbstractRobotSmartMultilineEnterActionHandler<T extends Ps
         if (expectedElementClass.isInstance(element)) {
             return expectedElementClass.cast(element);
         }
-        T foundElement = PsiTreeUtil.getParentOfType(element, expectedElementClass, false, RobotQualifiedNameOwner.class);
+        T foundElement = PsiTreeUtil.getParentOfType(element, expectedElementClass, false);
         if (foundElement != null) {
             int textOffset = foundElement.getTextOffset();
             int keywordCallLineNumber = document.getLineNumber(textOffset);
@@ -137,7 +140,7 @@ public abstract class AbstractRobotSmartMultilineEnterActionHandler<T extends Ps
         return false;
     }
 
-    private void handleSmartMultilineIndentation(@NotNull PsiFile file, @NotNull Editor editor, T multilineElement) {
+    private void handleSmartMultilineIndentation(@NotNull PsiFile file, @NotNull Editor editor) {
         int caretOffset = editor.getCaretModel().getOffset();
         Document document = editor.getDocument();
         int lineNumber = document.getLineNumber(caretOffset) - 1;
@@ -153,51 +156,19 @@ public abstract class AbstractRobotSmartMultilineEnterActionHandler<T extends Ps
                 document.deleteString(lineStartOffset, newLineStartOffset);
             }
         } else {
-            addEllipsisAndIndentationIntoNewLine(file, editor, multilineElement, lineNumber);
+            addEllipsisAndIndentationIntoNewLine(file, editor);
         }
     }
 
-    private void addEllipsisAndIndentationIntoNewLine(@NotNull PsiFile file, @NotNull Editor editor, T multilinePsiElement, int lineNumber) {
+    private void addEllipsisAndIndentationIntoNewLine(@NotNull PsiFile file, @NotNull Editor editor) {
         String textToInsert = GlobalConstants.CONTINUATION;
-        String whitespacesToInsert = GlobalConstants.DEFAULT_INDENTATION;
+        RobotCodeStyleSettings customSettings = CodeStyle.getCustomSettings(file, RobotCodeStyleSettings.class);
+        String whitespacesToInsert = StringUtil.repeatSymbol(' ', customSettings.AFTER_CONTINUATION_INDENT_SIZE);
         Document document = editor.getDocument();
-        int lineStartOffset = document.getLineStartOffset(lineNumber);
-        int lineEndOffset = document.getLineEndOffset(lineNumber);
-        int bracketSettingTextOffset = multilinePsiElement.getTextOffset();
-        int bracketSettingLineNumber = document.getLineNumber(bracketSettingTextOffset);
         int caretOffset = editor.getCaretModel().getOffset();
-        if (lineNumber != bracketSettingLineNumber) {
-            // When there is already a text in a new line after the bracket setting definition, extract the indentation from there by finding the argument
-            // of that line and its start offset and the diff to the ellipsis. This is then to be used as indentation for after the ellipsis.
-            whitespacesToInsert = evaluateCustomIndentationBasedOnFirstNonWhitespaceElement(file, lineStartOffset, lineEndOffset);
-        }
 
         textToInsert = textToInsert + whitespacesToInsert;
         document.insertString(caretOffset, textToInsert);
         editor.getCaretModel().moveToOffset(caretOffset + textToInsert.length());
-    }
-
-    private String evaluateCustomIndentationBasedOnFirstNonWhitespaceElement(@NotNull PsiFile file, int lineStartOffset, int lineEndOffset) {
-        String whitespacesToInsert = GlobalConstants.DEFAULT_INDENTATION;
-        PsiElement elementForIndentation = file.findElementAt(lineStartOffset);
-        while ((elementForIndentation instanceof PsiWhiteSpace || elementForIndentation instanceof PsiComment)
-               && elementForIndentation.getTextOffset() <= lineEndOffset) {
-            elementForIndentation = elementForIndentation.getNextSibling();
-        }
-
-        if (elementForIndentation != null && !(elementForIndentation instanceof PsiWhiteSpace || elementForIndentation instanceof PsiComment)) {
-            int argumentForIndentationOffset = elementForIndentation.getTextOffset();
-            PsiElement ellipsisElement = elementForIndentation;
-            do {
-                ellipsisElement = ellipsisElement.getPrevSibling();
-            } while (ellipsisElement instanceof PsiWhiteSpace && !ellipsisElement.textMatches(GlobalConstants.CONTINUATION)
-                     || ellipsisElement instanceof PsiComment);
-
-            if (ellipsisElement != null && ellipsisElement.textMatches(GlobalConstants.CONTINUATION)) {
-                int ellipsesEndOffset = ellipsisElement.getTextOffset() + ellipsisElement.getTextLength();
-                whitespacesToInsert = IntStream.range(0, argumentForIndentationOffset - ellipsesEndOffset).mapToObj(n -> " ").collect(Collectors.joining());
-            }
-        }
-        return whitespacesToInsert;
     }
 }
