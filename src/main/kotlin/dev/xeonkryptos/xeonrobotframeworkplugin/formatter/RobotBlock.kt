@@ -12,21 +12,22 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTokenSets
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes
 import dev.xeonkryptos.xeonrobotframeworkplugin.util.GlobalConstants
 
-class RobotBlock(
-    node: ASTNode, private val context: RobotBlockContext, wrap: Wrap? = null, alignment: Alignment? = null, private val indent: Indent? = null
-) : AbstractBlock(node, wrap, alignment) {
+class RobotBlock(node: ASTNode, private val context: RobotBlockContext, wrap: Wrap? = null, alignment: Alignment? = null, private val indent: Indent? = null, private val childIndent: Indent? = null) :
+    AbstractBlock(node, wrap, alignment) {
     companion object {
+        private val PARENT_BLOCK_KEY = Key.create<RobotBlock>("PARENT_BLOCK")
+        private val CURRENT_BLOCK_KEY = Key.create<RobotBlock>("CURRENT_BLOCK")
         private val TEMPLATE_VALUES_ALIGNMENT_KEY = Key.create<Array<Alignment>>("TEMPLATE_VALUE_ALIGNMENT")
-        private val KEYWORD_ALIGNMENT_KEY = Key.create<Alignment>("KEYWORD_ALIGNMENT")
-        private val ARGUMENT_ALIGNMENT_KEY = Key.create<Alignment>("ARGUMENT_ALIGNMENT")
         private val USER_KEYWORD_PARAMETER_ALIGNMENT = Key.create<Alignment>("USER_KEYWORD_PARAMETER_ALIGNMENT")
         private val KEYWORD_VARIABLE_STATEMENT_VARIABLE_ALIGNMENT_KEY = Key.create<Alignment>("KEYWORD_VARIABLE_STATEMENT_VARIABLE_ALIGNMENT")
         private val CONTINUATION_TOKEN = TokenType.WHITE_SPACE
 
         // Differs from whitespace set of RobotTokenSets because it also includes EOL and EOS, which are treated as whitespace for formatting purposes, but not for parsing.
-        private val WHITESPACE_TYPES = TokenSet.create(TokenType.WHITE_SPACE, RobotTypes.EOL, RobotTypes.EOS)
-        private val LEAF_TYPES = TokenSet.create(
-            RobotTypes.IMPORT_ARGUMENT,
+        private val WHITESPACE_TYPES = TokenSet.create(CONTINUATION_TOKEN, RobotTypes.EOL, RobotTypes.EOS)
+        private val SECTION_HEADER_TYPES =
+            TokenSet.create(RobotTypes.SETTINGS_HEADER, RobotTypes.VARIABLES_HEADER, RobotTypes.TEST_CASES_HEADER, RobotTypes.TASKS_HEADER, RobotTypes.USER_KEYWORDS_HEADER, RobotTypes.COMMENTS_HEADER)
+        private val CHILD_INDENTED_SECTION_TYPES = TokenSet.create(RobotTypes.TEST_CASES_SECTION, RobotTypes.TASKS_SECTION, RobotTypes.KEYWORDS_SECTION)
+        private val LEAF_TYPES = TokenSet.create(RobotTypes.IMPORT_ARGUMENT,
             RobotTypes.USER_KEYWORD_STATEMENT_ID,
             RobotTypes.TEST_CASE_ID,
             RobotTypes.TASK_ID,
@@ -34,10 +35,8 @@ class RobotBlock(
             RobotTypes.PARAMETER_ID,
             RobotTypes.TEMPLATE_PARAMETER_ID,
             RobotTypes.LOCAL_SETTING_ID,
-            RobotTypes.KEYWORD_CALL_NAME
-        )
-        private val BLOCK_OPENING_TYPES = TokenSet.create(
-            RobotTypes.TEST_CASE_STATEMENT,
+            RobotTypes.KEYWORD_CALL_NAME)
+        private val BLOCK_OPENING_TYPES = TokenSet.create(RobotTypes.TEST_CASE_STATEMENT,
             RobotTypes.USER_KEYWORD_STATEMENT,
             RobotTypes.TASK_STATEMENT,
             RobotTypes.FOR_LOOP_STRUCTURE,
@@ -48,10 +47,8 @@ class RobotBlock(
             RobotTypes.TRY_STRUCTURE,
             RobotTypes.EXCEPT_STRUCTURE,
             RobotTypes.FINALLY_STRUCTURE,
-            RobotTypes.GROUP_STRUCTURE
-        )
-        private val BLOCK_OPENING_PART_TYPES = TokenSet.create(
-            RobotTypes.FOR_LOOP_HEADER,
+            RobotTypes.GROUP_STRUCTURE)
+        private val BLOCK_OPENING_PART_TYPES = TokenSet.create(RobotTypes.FOR_LOOP_HEADER,
             RobotTypes.WHILE_LOOP_HEADER,
             RobotTypes.IF,
             RobotTypes.ELSE_IF,
@@ -64,29 +61,19 @@ class RobotBlock(
             RobotTypes.TEST_CASE_NAME,
             RobotTypes.TEST_CASE_ID,
             RobotTypes.TASK_NAME,
-            RobotTypes.TASK_ID
-        )
-        private val CHILD_INDENTATION_TYPES = TokenSet.create(
-            RobotTypes.FOR_LOOP_STRUCTURE,
-            RobotTypes.WHILE_LOOP_STRUCTURE,
-            RobotTypes.IF_STRUCTURE,
-            RobotTypes.ELSE_STRUCTURE,
-            RobotTypes.ELSE_STRUCTURE,
-            RobotTypes.TRY_STRUCTURE,
-            RobotTypes.EXCEPT_STRUCTURE,
-            RobotTypes.FINALLY_STRUCTURE,
-            RobotTypes.GROUP_STRUCTURE
-        )
+            RobotTypes.TASK_ID)
         private val FLATTENABLE_TYPES = TokenSet.create(RobotTypes.EXECUTABLE_STATEMENT, RobotTypes.LOCAL_ARGUMENTS_SETTING_PARAMETER, RobotTypes.LITERAL_CONSTANT_VALUE)
     }
+
+    private val parent: RobotBlock?
+        get() = myNode.getUserData(PARENT_BLOCK_KEY)
 
     override fun buildChildren(): List<Block> {
         val blocks = mutableListOf<Block>()
         if (isLeaf) return blocks
+
         val parentWrap = createWrapIfNecessary()
-        if (myNode.elementType === RobotTypes.KEYWORD_CALL && context.commonCodeStyleSettings.ALIGN_MULTILINE_PARAMETERS_IN_CALLS) {
-            myNode.putUserData(ARGUMENT_ALIGNMENT_KEY, Alignment.createAlignment(true))
-        } else if (myNode.elementType === RobotTypes.KEYWORD_VARIABLE_STATEMENT) {
+        if (myNode.elementType === RobotTypes.KEYWORD_VARIABLE_STATEMENT) {
             myNode.putUserData(KEYWORD_VARIABLE_STATEMENT_VARIABLE_ALIGNMENT_KEY, Alignment.createAlignment())
         } else if (myNode.elementType === RobotTypes.LOCAL_ARGUMENTS_SETTING && context.commonCodeStyleSettings.ALIGN_MULTILINE_PARAMETERS) {
             myNode.putUserData(USER_KEYWORD_PARAMETER_ALIGNMENT, Alignment.createAlignment(true))
@@ -97,7 +84,12 @@ class RobotBlock(
                 val indent = getIndentation(child)
                 val childWrap = if (shouldAssignWrapToNode(child)) parentWrap else null
                 val alignment = getAlignment(child, alignmentIndex)
-                RobotBlock(child, context, indent = indent, wrap = childWrap, alignment = alignment).apply { blocks.add(this) }
+                val childIndent = getChildIndent(child)
+                RobotBlock(child, context, indent = indent, wrap = childWrap, alignment = alignment, childIndent = childIndent).apply {
+                    blocks.add(this)
+                    myNode.putUserData(CURRENT_BLOCK_KEY, this)
+                    myNode.putUserData(PARENT_BLOCK_KEY, this@RobotBlock)
+                }
             }
         }
 
@@ -172,12 +164,19 @@ class RobotBlock(
      */
     private fun isChopOrAlways(wrapType: Int): Boolean = wrapType == CommonCodeStyleSettings.WRAP_ALWAYS || wrapType == CommonCodeStyleSettings.WRAP_ON_EVERY_ITEM
 
+    private fun getChildIndent(child: ASTNode): Indent? = when {
+        BLOCK_OPENING_TYPES.contains(child.elementType) || CHILD_INDENTED_SECTION_TYPES.contains(child.elementType) -> Indent.getNormalIndent()
+
+        SECTION_HEADER_TYPES.contains(child.elementType) || child.elementType === CONTINUATION_TOKEN -> Indent.getNoneIndent()
+
+        else -> Indent.getContinuationIndent()
+    }
+
     private fun shouldAssignWrapToNode(node: ASTNode): Boolean = when (node.elementType) {
-        RobotTypes.PARAMETER, RobotTypes.POSITIONAL_ARGUMENT -> myNode.elementType === RobotTypes.KEYWORD_CALL
-                || myNode.elementType === RobotTypes.FOR_LOOP_HEADER
-                || myNode.elementType === RobotTypes.WHILE_LOOP_HEADER
-                || myNode.elementType === RobotTypes.LOCAL_SETTING
+        RobotTypes.PARAMETER, RobotTypes.POSITIONAL_ARGUMENT -> myNode.elementType === RobotTypes.KEYWORD_CALL || myNode.elementType === RobotTypes.FOR_LOOP_HEADER || myNode.elementType === RobotTypes.WHILE_LOOP_HEADER || myNode.elementType === RobotTypes.LOCAL_SETTING
+
         RobotTypes.LOCAL_ARGUMENTS_SETTING_PARAMETER_MANDATORY, RobotTypes.LOCAL_ARGUMENTS_SETTING_PARAMETER_OPTIONAL -> true
+
         else -> false
     }
 
@@ -198,12 +197,9 @@ class RobotBlock(
 
     private fun getAlignment(node: ASTNode, index: Int): Alignment? = when {
         RobotTokenSets.TEMPLATE_VALUES_HOLDER_SET.contains(node.elementType) -> myNode.getUserData(TEMPLATE_VALUES_ALIGNMENT_KEY)?.let { if (index < it.size) it[index] else null }
-        node.elementType === RobotTypes.KEYWORD_CALL -> Alignment.createAlignment().apply { node.putUserData(KEYWORD_ALIGNMENT_KEY, this) }
-        node.elementType === RobotTypes.PARAMETER || node.elementType === RobotTypes.POSITIONAL_ARGUMENT -> myNode.getUserData(ARGUMENT_ALIGNMENT_KEY)
         node.elementType === RobotTypes.VARIABLE_DEFINITION -> myNode.getUserData(KEYWORD_VARIABLE_STATEMENT_VARIABLE_ALIGNMENT_KEY)
         node.elementType === RobotTypes.LOCAL_ARGUMENTS_SETTING_PARAMETER_MANDATORY || node.elementType === RobotTypes.LOCAL_ARGUMENTS_SETTING_PARAMETER_OPTIONAL -> myNode.getUserData(
-            USER_KEYWORD_PARAMETER_ALIGNMENT
-        )
+            USER_KEYWORD_PARAMETER_ALIGNMENT)
 
         node.elementType === CONTINUATION_TOKEN -> myNode.treeParent?.getUserData(KEYWORD_VARIABLE_STATEMENT_VARIABLE_ALIGNMENT_KEY)
         else -> null
@@ -216,10 +212,24 @@ class RobotBlock(
         else -> super.alignment
     }
 
-    override fun getChildIndent(): Indent? = when {
-        CHILD_INDENTATION_TYPES.contains(myNode.elementType) -> Indent.getNormalIndent()
-        else -> Indent.getNoneIndent()
+    override fun getChildAttributes(newChildIndex: Int): ChildAttributes {
+        val myParent = parent
+        if (myParent == null && newChildIndex >= subBlocks.size) {
+            return ChildAttributes.DELEGATE_TO_PREV_CHILD
+        } else if (myParent != null && isChildAttributesForContinuationTokenRequested(newChildIndex)) {
+            return ChildAttributes.DELEGATE_TO_PREV_CHILD
+        } else if (myNode.elementType === RobotTypes.ROOT) {
+            val lastSubBlock = subBlocks.lastOrNull()
+            val childAttributes = lastSubBlock?.getChildAttributes(lastSubBlock.subBlocks.size)
+            if (childAttributes != null) return childAttributes
+        }
+        return super.getChildAttributes(newChildIndex)
     }
+
+    private fun isChildAttributesForContinuationTokenRequested(newChildIndex: Int): Boolean =
+        newChildIndex > 0 && ((subBlocks[newChildIndex - 1] as ASTBlock).node?.elementType === CONTINUATION_TOKEN || newChildIndex < subBlocks.size && (subBlocks[newChildIndex] as ASTBlock).node?.elementType === CONTINUATION_TOKEN)
+
+    override fun getChildIndent(): Indent? = childIndent
 
     override fun getSpacing(child1: Block?, child2: Block): Spacing? = context.spacingBuilder.getSpacing(this, child1, child2)
 

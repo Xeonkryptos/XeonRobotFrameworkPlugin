@@ -2,6 +2,7 @@ package dev.xeonkryptos.xeonrobotframeworkplugin.formatter
 
 import com.intellij.application.options.CodeStyle
 import com.intellij.lang.ASTNode
+import com.intellij.lang.tree.util.children
 import com.intellij.openapi.editor.Document
 import com.intellij.openapi.util.Key
 import com.intellij.openapi.util.TextRange
@@ -177,7 +178,7 @@ class RobotPreFormatProcessor : PreFormatProcessor {
      */
     private fun collectStatementTextRanges(node: ASTNode, range: TextRange, result: MutableList<TextRange>) {
         val elementType = node.elementType
-        if (elementType in COLLAPSIBLE_STATEMENT_TYPES) {
+        if (elementType in STATEMENT_TYPES) {
             val nodeRange = node.textRange
             if (nodeRange.intersects(range)) {
                 result.add(nodeRange)
@@ -322,7 +323,7 @@ class RobotPreFormatProcessor : PreFormatProcessor {
 
     private fun collectMetadataRecursive(node: ASTNode, range: TextRange, customSettings: RobotCodeStyleSettings, result: MutableList<StatementMetadata>) {
         val elementType = node.elementType
-        if (elementType in COLLAPSIBLE_STATEMENT_TYPES) {
+        if (elementType in STATEMENT_TYPES) {
             val nodeRange = node.textRange
             if (range.contains(nodeRange)) {
                 val metadata = extractMetadata(node, customSettings)
@@ -377,12 +378,20 @@ class RobotPreFormatProcessor : PreFormatProcessor {
             RobotTypes.INLINE_VARIABLE_STATEMENT -> extractSimpleVariableStatementMetadata(node)
             RobotTypes.EMPTY_VARIABLE_STATEMENT -> extractSimpleVariableStatementMetadata(node)
             RobotTypes.IF_VARIABLE_STATEMENT -> extractSimpleVariableStatementMetadata(node)
-            RobotTypes.FOR_LOOP_HEADER -> extractControlFlowHeaderMetadata(node, customSettings.FOR_FIRST_ARGUMENT_ON_NEW_LINE)
-            RobotTypes.WHILE_LOOP_HEADER -> extractControlFlowHeaderMetadata(node, customSettings.WHILE_FIRST_ARGUMENT_ON_NEW_LINE)
+            RobotTypes.FOR_LOOP_HEADER -> extractForLoopHeaderMetadata(node, customSettings.FOR_FIRST_ARGUMENT_ON_NEW_LINE)
+            RobotTypes.WHILE_LOOP_HEADER -> extractWhileLoopHeaderMetadata(node, customSettings.WHILE_FIRST_ARGUMENT_ON_NEW_LINE)
+
             RobotTypes.IF,
             RobotTypes.ELSE_IF,
+            RobotTypes.ELSE,
+            RobotTypes.TRY,
             RobotTypes.EXCEPT,
-            RobotTypes.GROUP_HEADER -> extractControlFlowHeaderMetadata(node)
+            RobotTypes.FINALLY,
+            RobotTypes.GROUP_HEADER,
+            RobotTypes.END,
+            RobotTypes.BREAK,
+            RobotTypes.CONTINUE,
+            RobotTypes.RETURN -> extractControlFlowHeaderMetadata(node)
 
             RobotTypes.TEMPLATE_ARGUMENTS -> extractTemplateArgumentsMetadata(node)
             else -> null
@@ -499,20 +508,54 @@ class RobotPreFormatProcessor : PreFormatProcessor {
      */
     private fun extractSimpleVariableStatementMetadata(node: ASTNode): StatementMetadata {
         val varDef = findChildOfType(node, RobotTypes.VARIABLE_DEFINITION)
-        val idText = varDef?.text?.trim() ?: ""
+        val assignmentNode = findChildOfType(node, RobotTypes.ASSIGNMENT)
+
+        val variableDefinitionText = varDef?.text?.trim() ?: ""
+        val assignmentText = assignmentNode?.text?.trim() ?: ""
+        val idText = variableDefinitionText + assignmentText
         val argCount = collectWrappableArguments(node, VARIABLE_STATEMENT_ARGUMENT_TYPES)
         return StatementMetadata(idText, argCount, false)
     }
 
     /**
-     * Control flow headers (FOR, WHILE, IF, ELSE IF, EXCEPT, GROUP):
+     * Control flow headers (IF, ELSE IF, EXCEPT, GROUP):
      *
      * Identification text = the structural keyword text.
      * Wrappable argument count = POSITIONAL_ARGUMENT + VARIABLE_DEFINITION + CONDITIONAL_CONTENT children.
      */
     private fun extractControlFlowHeaderMetadata(node: ASTNode, firstArgumentOnNextLine: Boolean = false): StatementMetadata {
         val argCount = collectWrappableArguments(node, CONTROL_FLOW_ARGUMENT_TYPES)
-        val idText = node.firstChildNode.text
+        val idText = node.text
+        return StatementMetadata(idText, argCount, firstArgumentOnNextLine)
+    }
+
+    private fun extractForLoopHeaderMetadata(node: ASTNode, firstArgumentOnNextLine: Boolean = false): StatementMetadata {
+        val argCount = collectWrappableArguments(node, CONTROL_FLOW_ARGUMENT_TYPES, RobotTypes.FOR_IN)
+        var idText = ""
+        var child = node.firstChildNode
+        while (child != null) {
+            if (child.elementType == RobotTypes.FOR_IN) {
+                idText += child.text
+                break
+            }
+            idText += child.text
+            child = child.treeNext
+        }
+        return StatementMetadata(idText, argCount, firstArgumentOnNextLine)
+    }
+
+    private fun extractWhileLoopHeaderMetadata(node: ASTNode, firstArgumentOnNextLine: Boolean = false): StatementMetadata {
+        val argCount = node.children().filter { it.elementType == RobotTypes.PARAMETER }.map { it.text }.toList()
+        var idText = ""
+        var child = node.firstChildNode
+        while (child != null) {
+            if (child.elementType == RobotTypes.CONDITIONAL_CONTENT) {
+                idText += child.text
+                break
+            }
+            idText += child.text
+            child = child.treeNext
+        }
         return StatementMetadata(idText, argCount, firstArgumentOnNextLine)
     }
 
@@ -523,11 +566,15 @@ class RobotPreFormatProcessor : PreFormatProcessor {
      * Recurses into EXECUTABLE_STATEMENT and LITERAL_CONSTANT_VALUE (flattened types) to
      * count nested arguments.
      */
-    private fun collectWrappableArguments(node: ASTNode, argumentTypes: Set<IElementType>): List<String> {
+    private fun collectWrappableArguments(node: ASTNode, argumentTypes: Set<IElementType>, takeAfterElementType: IElementType? = null): List<String> {
         val wrappableArguments = mutableListOf<String>()
         var child = node.firstChildNode
+        var afterElement = takeAfterElementType == null
         while (child != null) {
-            if (child.elementType in argumentTypes) {
+            if (!afterElement && (takeAfterElementType == null || child.elementType === takeAfterElementType)) {
+                afterElement = true
+            }
+            if (afterElement && child.elementType in argumentTypes) {
                 wrappableArguments.add(child.text.trim())
             }
             child = child.treeNext
@@ -1073,15 +1120,17 @@ private val CONTROL_FLOW_ARGUMENT_TYPES: Set<IElementType> = setOf(
 
 /**
  * Set of Robot Framework element types whose AST nodes may contain continuation markers
- * ("..."). The [RobotPreFormatProcessor] scopes its continuation scanning to within
- * each of these nodes, preventing cross-statement collapsing.
+ * ("...") or need to be identified as a statement in a line. The [RobotPreFormatProcessor]
+ * scopes its continuation scanning to within each of these nodes, preventing cross-statement
+ * collapsing.
  *
  * This includes all statement types that can span multiple lines using "...":
  * - Keyword calls (with or without variable assignments)
  * - Local settings ([Arguments], [Documentation], etc.)
  * - Variable definitions in the *** Variables *** section
+ * But also everything else that represents a single statement in a line
  */
-private val COLLAPSIBLE_STATEMENT_TYPES: Set<IElementType> = setOf(
+private val STATEMENT_TYPES: Set<IElementType> = setOf(
     RobotTypes.KEYWORD_CALL,
     RobotTypes.LOCAL_ARGUMENTS_SETTING,
     RobotTypes.LOCAL_SETTING,
@@ -1108,7 +1157,14 @@ private val COLLAPSIBLE_STATEMENT_TYPES: Set<IElementType> = setOf(
     RobotTypes.WHILE_LOOP_HEADER,
     RobotTypes.IF,
     RobotTypes.ELSE_IF,
+    RobotTypes.ELSE,
+    RobotTypes.TRY,
     RobotTypes.EXCEPT,
-    RobotTypes.GROUP_HEADER
+    RobotTypes.FINALLY,
+    RobotTypes.GROUP_HEADER,
+    RobotTypes.END,
+    RobotTypes.BREAK,
+    RobotTypes.CONTINUE,
+    RobotTypes.RETURN
 )
 

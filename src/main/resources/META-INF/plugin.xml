@@ -176,7 +176,6 @@
 
         <iconProvider implementation="dev.xeonkryptos.xeonrobotframeworkplugin.RobotDirectoryIconProvider"/>
 
-        <enterHandlerDelegate implementation="dev.xeonkryptos.xeonrobotframeworkplugin.actionhandler.RobotKeywordIndentationActionHandler"/>
         <enterHandlerDelegate implementation="dev.xeonkryptos.xeonrobotframeworkplugin.actionhandler.RobotLocalSettingEnterActionHandler"/>
         <enterHandlerDelegate implementation="dev.xeonkryptos.xeonrobotframeworkplugin.actionhandler.RobotLocalArgumentsSettingEnterActionHandler"/>
         <enterHandlerDelegate implementation="dev.xeonkryptos.xeonrobotframeworkplugin.actionhandler.RobotKeywordCallEnterActionHandler"/>

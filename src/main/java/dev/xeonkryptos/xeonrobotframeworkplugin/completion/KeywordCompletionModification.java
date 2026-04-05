@@ -1,5 +1,6 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.completion;
 
+import com.intellij.application.options.CodeStyle;
 import com.intellij.codeInsight.TailType;
 import com.intellij.codeInsight.TailTypes;
 import com.intellij.codeInsight.lookup.LookupElementBuilder;
@@ -7,6 +8,8 @@ import com.intellij.codeInsight.lookup.TailTypeDecorator;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.util.TextRange;
+import com.intellij.psi.PsiFile;
+import dev.xeonkryptos.xeonrobotframeworkplugin.formatter.RobotCodeStyleSettings;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.DefinedKeyword;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.DefinedParameter;
 import dev.xeonkryptos.xeonrobotframeworkplugin.util.GlobalConstants;
@@ -117,7 +120,9 @@ public enum KeywordCompletionModification {
         String textBeforeKeyword = document.getText(new TextRange(lineStartOffset, keywordStartOffset));
         int numberOfWhitespaceCharacters = textBeforeKeyword.length() - textBeforeKeyword.stripLeading().length();
         String indentationWhitespace = " ".repeat(numberOfWhitespaceCharacters);
-        return "\n" + indentationWhitespace + GlobalConstants.CONTINUATION + GlobalConstants.DEFAULT_INDENTATION;
+        PsiFile containingFile = keyword.reference().getContainingFile();
+        RobotCodeStyleSettings customSettings = CodeStyle.getCustomSettings(containingFile, RobotCodeStyleSettings.class);
+        return "\n" + indentationWhitespace + GlobalConstants.CONTINUATION + customSettings.AFTER_CONTINUATION_INDENT_SIZE;
     }
 
     public static boolean isKeywordStartsWithModifier(String keywordName) {
