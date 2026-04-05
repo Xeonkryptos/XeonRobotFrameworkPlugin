@@ -1694,7 +1694,7 @@ public class RobotParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // METADATA_KEYWORD parameter* eol_marker
+  // METADATA_KEYWORD positional_argument positional_argument eol_marker
   public static boolean metadata_statement_global_setting(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "metadata_statement_global_setting")) return false;
     if (!nextTokenIs(b, METADATA_KEYWORD)) return false;
@@ -1702,21 +1702,11 @@ public class RobotParser implements PsiParser, LightPsiParser {
     Marker m = enter_section_(b, l, _NONE_, METADATA_STATEMENT_GLOBAL_SETTING, null);
     r = consumeToken(b, METADATA_KEYWORD);
     p = r; // pin = 1
-    r = r && report_error_(b, metadata_statement_global_setting_1(b, l + 1));
+    r = r && report_error_(b, positional_argument(b, l + 1));
+    r = p && report_error_(b, positional_argument(b, l + 1)) && r;
     r = p && eol_marker(b, l + 1) && r;
     exit_section_(b, l, m, r, p, null);
     return r || p;
-  }
-
-  // parameter*
-  private static boolean metadata_statement_global_setting_1(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "metadata_statement_global_setting_1")) return false;
-    while (true) {
-      int c = current_position_(b);
-      if (!parameter(b, l + 1)) break;
-      if (!empty_element_parsed_guard_(b, "metadata_statement_global_setting_1", c)) break;
-    }
-    return true;
   }
 
   /* ********************************************************** */

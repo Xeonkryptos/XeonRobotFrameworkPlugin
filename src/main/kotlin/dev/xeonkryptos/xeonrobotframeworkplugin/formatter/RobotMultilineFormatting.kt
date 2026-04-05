@@ -43,15 +43,8 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.util.RobotNames
  *   may distribute across multiple lines. After this many continuation lines have been
  *   emitted for a statement, the PostFormatProcessor knows that the next indented line
  *   must belong to a **new** statement.
- * @property firstArgumentOnNextLine Indicates that the formatter is configured to place
- *   the first argument on the next line rather to "keep" it on the same line as the
- *   statement
  */
-data class StatementMetadata(
-    val identificationText: String,
-    val wrappableArguments: List<String>,
-    var firstArgumentOnNextLine: Boolean
-) {
+data class StatementMetadata(val identificationText: String, val wrappableArguments: List<String>) {
     val wrappableArgumentCount: Int = wrappableArguments.size
     val normalizedIdentificationText: String = identificationText.replace(WHITESPACE_REGEX, "").trim()
 }
@@ -103,11 +96,9 @@ class RobotPreFormatProcessor : PreFormatProcessor {
         // the AST will be reparsed and statement structure may differ.
         val metadata = collectStatementMetadata(element, range, customSettings)
 
-        val document = file.fileDocument
-        // Use the AST to find statement boundaries, then collect continuation sequences
+        val document = file.fileDocument // Use the AST to find statement boundaries, then collect continuation sequences
         // only within each statement's text range. This prevents cross-statement collapsing.
-        val sequences = collectContinuationSequencesFromAST(element, document, range)
-        // Even if there's nothing to collapse, attach metadata (wrapping may still
+        val sequences = collectContinuationSequencesFromAST(element, document, range) // Even if there's nothing to collapse, attach metadata (wrapping may still
         // apply to single-line statements that are too long).
         file.putUserData(STATEMENT_METADATA_KEY, metadata)
         if (sequences.isEmpty()) return range
@@ -182,8 +173,7 @@ class RobotPreFormatProcessor : PreFormatProcessor {
             val nodeRange = node.textRange
             if (nodeRange.intersects(range)) {
                 result.add(nodeRange)
-            }
-            // Don't recurse into children of matching statements — continuations within
+            } // Don't recurse into children of matching statements — continuations within
             // are handled by the text scanner scoped to this range.
             return
         }
@@ -201,9 +191,7 @@ class RobotPreFormatProcessor : PreFormatProcessor {
      * Returns a list of [ContinuationSequence] objects, each tagged with whether the
      * continuation line's content contains an inline comment.
      */
-    private fun collectContinuationSequencesInRange(
-        text: String, statementRange: TextRange, formattingRange: TextRange
-    ): List<ContinuationSequence> {
+    private fun collectContinuationSequencesInRange(text: String, statementRange: TextRange, formattingRange: TextRange): List<ContinuationSequence> {
         val sequences = mutableListOf<ContinuationSequence>()
         val scanEnd = minOf(statementRange.endOffset, formattingRange.endOffset, text.length)
 
@@ -248,8 +236,7 @@ class RobotPreFormatProcessor : PreFormatProcessor {
                 break
             }
             val charAfterDots = text[afterDots]
-            val isValid = charAfterDots == '\t' || charAfterDots == '\n' || charAfterDots == '\r' ||
-                    (charAfterDots == ' ' && afterDots + 1 < text.length && text[afterDots + 1] == ' ')
+            val isValid = charAfterDots == '\t' || charAfterDots == '\n' || charAfterDots == '\r' || (charAfterDots == ' ' && afterDots + 1 < text.length && text[afterDots + 1] == ' ')
             if (!isValid) {
                 searchFrom = afterDots
                 continue
@@ -367,19 +354,19 @@ class RobotPreFormatProcessor : PreFormatProcessor {
             RobotTypes.VARIABLES_IMPORT_GLOBAL_SETTING,
             RobotTypes.TIMEOUT_STATEMENTS_GLOBAL_SETTING,
             RobotTypes.RESOURCE_IMPORT_GLOBAL_SETTING,
-            RobotTypes.UNKNOWN_SETTING_STATEMENTS_GLOBAL_SETTING -> extractSimpleGlobalSettingMetadata(node, customSettings)
+            RobotTypes.UNKNOWN_SETTING_STATEMENTS_GLOBAL_SETTING -> extractSimpleGlobalSettingMetadata(node)
 
-            RobotTypes.KEYWORD_CALL -> extractKeywordCallMetadata(node, customSettings)
-            RobotTypes.LOCAL_ARGUMENTS_SETTING -> extractLocalArgumentsSettingMetadata(node, customSettings)
-            RobotTypes.KEYWORD_VARIABLE_STATEMENT -> extractKeywordVariableStatementMetadata(node, customSettings)
-            RobotTypes.LOCAL_SETTING -> extractLocalSettingMetadata(node, customSettings)
+            RobotTypes.KEYWORD_CALL -> extractKeywordCallMetadata(node)
+            RobotTypes.LOCAL_ARGUMENTS_SETTING -> extractLocalArgumentsSettingMetadata(node)
+            RobotTypes.KEYWORD_VARIABLE_STATEMENT -> extractKeywordVariableStatementMetadata(node)
+            RobotTypes.LOCAL_SETTING -> extractLocalSettingMetadata(node)
             RobotTypes.EXECUTABLE_STATEMENT -> extractExecutableStatementMetadata(node, customSettings)
             RobotTypes.SINGLE_VARIABLE_STATEMENT -> extractSimpleVariableStatementMetadata(node)
             RobotTypes.INLINE_VARIABLE_STATEMENT -> extractSimpleVariableStatementMetadata(node)
             RobotTypes.EMPTY_VARIABLE_STATEMENT -> extractSimpleVariableStatementMetadata(node)
             RobotTypes.IF_VARIABLE_STATEMENT -> extractSimpleVariableStatementMetadata(node)
-            RobotTypes.FOR_LOOP_HEADER -> extractForLoopHeaderMetadata(node, customSettings.FOR_FIRST_ARGUMENT_ON_NEW_LINE)
-            RobotTypes.WHILE_LOOP_HEADER -> extractWhileLoopHeaderMetadata(node, customSettings.WHILE_FIRST_ARGUMENT_ON_NEW_LINE)
+            RobotTypes.FOR_LOOP_HEADER -> extractForLoopHeaderMetadata(node)
+            RobotTypes.WHILE_LOOP_HEADER -> extractWhileLoopHeaderMetadata(node)
 
             RobotTypes.IF,
             RobotTypes.ELSE_IF,
@@ -406,10 +393,10 @@ class RobotPreFormatProcessor : PreFormatProcessor {
      * Wrappable argument count = number of PARAMETER + POSITIONAL_ARGUMENT children
      * (flattened through EXECUTABLE_STATEMENT wrappers).
      */
-    private fun extractSimpleGlobalSettingMetadata(node: ASTNode, customSettings: RobotCodeStyleSettings): StatementMetadata {
+    private fun extractSimpleGlobalSettingMetadata(node: ASTNode): StatementMetadata {
         val idText = node.firstChildNode?.text?.trim() ?: ""
-        val argCount = collectWrappableArguments(node, KEYWORD_CALL_ARGUMENT_TYPES)
-        return StatementMetadata(idText, argCount, customSettings.LOCAL_SETTINGS_FIRST_ARGUMENT_ON_NEW_LINE)
+        val args = collectWrappableArguments(node, GLOBAL_SETTING_CALL_ARGUMENT_TYPES, nestedWrappableArgumentTypes = KEYWORD_CALL_ARGUMENT_NESTED_TYPES)
+        return StatementMetadata(idText, args)
     }
 
     /**
@@ -421,11 +408,11 @@ class RobotPreFormatProcessor : PreFormatProcessor {
      * Wrappable argument count = number of PARAMETER + POSITIONAL_ARGUMENT children
      * (flattened through EXECUTABLE_STATEMENT wrappers).
      */
-    private fun extractKeywordCallMetadata(node: ASTNode, customSettings: RobotCodeStyleSettings): StatementMetadata {
+    private fun extractKeywordCallMetadata(node: ASTNode): StatementMetadata {
         val keywordNameNode = findChildOfType(node, RobotTypes.KEYWORD_CALL_NAME)
         val idText = keywordNameNode?.text?.trim() ?: node.firstChildNode?.text?.trim() ?: ""
-        val args = collectWrappableArguments(node, KEYWORD_CALL_ARGUMENT_TYPES)
-        return StatementMetadata(idText, args, customSettings.CALL_PARAMETERS_FIRST_ARGUMENT_ON_NEW_LINE)
+        val args = collectWrappableArguments(node, KEYWORD_CALL_ARGUMENT_TYPES, takeAfterElementType = RobotTypes.KEYWORD_CALL_NAME, nestedWrappableArgumentTypes = KEYWORD_CALL_ARGUMENT_NESTED_TYPES)
+        return StatementMetadata(idText, args)
     }
 
     /**
@@ -434,11 +421,11 @@ class RobotPreFormatProcessor : PreFormatProcessor {
      * Identification text = `[Arguments]` (the setting marker).
      * Wrappable argument count = number of mandatory + optional parameter children.
      */
-    private fun extractLocalArgumentsSettingMetadata(node: ASTNode, customSettings: RobotCodeStyleSettings): StatementMetadata {
+    private fun extractLocalArgumentsSettingMetadata(node: ASTNode): StatementMetadata {
         val settingIdNode = findChildOfType(node, RobotTypes.LOCAL_ARGUMENTS_SETTING_ID)
         val idText = settingIdNode?.text?.trim() ?: "[Arguments]"
         val args = collectWrappableArguments(node, LOCAL_ARGUMENTS_PARAMETER_TYPES)
-        return StatementMetadata(idText, args, customSettings.METHOD_PARAMETERS_FIRST_ARGUMENT_ON_NEW_LINE)
+        return StatementMetadata(idText, args)
     }
 
     /**
@@ -450,25 +437,18 @@ class RobotPreFormatProcessor : PreFormatProcessor {
      *
      * Wrappable argument count = arguments of the embedded KEYWORD_CALL.
      */
-    private fun extractKeywordVariableStatementMetadata(node: ASTNode, customSettings: RobotCodeStyleSettings): StatementMetadata {
-        val parts = mutableListOf<String>()
-        var embeddedKeywordCall: ASTNode? = null
+    private fun extractKeywordVariableStatementMetadata(node: ASTNode): StatementMetadata {
         var child = node.firstChildNode
-        while (child != null) {
-            when (child.elementType) {
-                RobotTypes.VARIABLE_DEFINITION -> parts.add(child.text.trim())
-                RobotTypes.ASSIGNMENT -> parts.add(child.text.trim())
-                RobotTypes.KEYWORD_CALL -> {
-                    embeddedKeywordCall = child
-                    val kcName = findChildOfType(child, RobotTypes.KEYWORD_CALL_NAME)
-                    if (kcName != null) parts.add(kcName.text.trim())
-                }
-            }
+        var idText = ""
+        while (child != null && child.elementType !== RobotTypes.KEYWORD_CALL) {
+            idText += child.text
             child = child.treeNext
         }
-        val idText = parts.joinToString(GlobalConstants.SUPER_SPACE)
-        val args = if (embeddedKeywordCall != null) collectWrappableArguments(embeddedKeywordCall, KEYWORD_CALL_ARGUMENT_TYPES) else emptyList()
-        return StatementMetadata(idText, args, customSettings.CALL_PARAMETERS_FIRST_ARGUMENT_ON_NEW_LINE)
+        val args = if (child?.elementType === RobotTypes.KEYWORD_CALL) {
+            idText += child.firstChildNode?.text ?: ""
+            collectWrappableArguments(child, KEYWORD_CALL_ARGUMENT_TYPES, takeAfterElementType = RobotTypes.KEYWORD_CALL_NAME, nestedWrappableArgumentTypes = KEYWORD_CALL_ARGUMENT_NESTED_TYPES)
+        } else emptyList()
+        return StatementMetadata(idText, args)
     }
 
     /**
@@ -477,11 +457,11 @@ class RobotPreFormatProcessor : PreFormatProcessor {
      * Identification text = the setting name text (e.g. `[Tags]`).
      * Wrappable argument count = POSITIONAL_ARGUMENT + KEYWORD_CALL children.
      */
-    private fun extractLocalSettingMetadata(node: ASTNode, customSettings: RobotCodeStyleSettings): StatementMetadata {
+    private fun extractLocalSettingMetadata(node: ASTNode): StatementMetadata {
         val settingIdNode = findChildOfType(node, RobotTypes.LOCAL_SETTING_ID)
         val idText = settingIdNode?.text?.trim() ?: ""
-        val args = collectWrappableArguments(node, LOCAL_SETTING_ARGUMENT_TYPES)
-        return StatementMetadata(idText, args, customSettings.LOCAL_SETTINGS_FIRST_ARGUMENT_ON_NEW_LINE)
+        val args = collectWrappableArguments(node, LOCAL_SETTING_ARGUMENT_TYPES, nestedWrappableArgumentTypes = KEYWORD_CALL_ARGUMENT_NESTED_TYPES)
+        return StatementMetadata(idText, args)
     }
 
     /**
@@ -514,7 +494,7 @@ class RobotPreFormatProcessor : PreFormatProcessor {
         val assignmentText = assignmentNode?.text?.trim() ?: ""
         val idText = variableDefinitionText + assignmentText
         val argCount = collectWrappableArguments(node, VARIABLE_STATEMENT_ARGUMENT_TYPES)
-        return StatementMetadata(idText, argCount, false)
+        return StatementMetadata(idText, argCount)
     }
 
     /**
@@ -523,14 +503,14 @@ class RobotPreFormatProcessor : PreFormatProcessor {
      * Identification text = the structural keyword text.
      * Wrappable argument count = POSITIONAL_ARGUMENT + VARIABLE_DEFINITION + CONDITIONAL_CONTENT children.
      */
-    private fun extractControlFlowHeaderMetadata(node: ASTNode, firstArgumentOnNextLine: Boolean = false): StatementMetadata {
+    private fun extractControlFlowHeaderMetadata(node: ASTNode): StatementMetadata {
         val argCount = collectWrappableArguments(node, CONTROL_FLOW_ARGUMENT_TYPES)
         val idText = node.text
-        return StatementMetadata(idText, argCount, firstArgumentOnNextLine)
+        return StatementMetadata(idText, argCount)
     }
 
-    private fun extractForLoopHeaderMetadata(node: ASTNode, firstArgumentOnNextLine: Boolean = false): StatementMetadata {
-        val argCount = collectWrappableArguments(node, CONTROL_FLOW_ARGUMENT_TYPES, RobotTypes.FOR_IN)
+    private fun extractForLoopHeaderMetadata(node: ASTNode): StatementMetadata {
+        val args = collectWrappableArguments(node, CONTROL_FLOW_ARGUMENT_TYPES, RobotTypes.FOR_IN)
         var idText = ""
         var child = node.firstChildNode
         while (child != null) {
@@ -541,11 +521,11 @@ class RobotPreFormatProcessor : PreFormatProcessor {
             idText += child.text
             child = child.treeNext
         }
-        return StatementMetadata(idText, argCount, firstArgumentOnNextLine)
+        return StatementMetadata(idText, args)
     }
 
-    private fun extractWhileLoopHeaderMetadata(node: ASTNode, firstArgumentOnNextLine: Boolean = false): StatementMetadata {
-        val argCount = node.children().filter { it.elementType == RobotTypes.PARAMETER }.map { it.text }.toList()
+    private fun extractWhileLoopHeaderMetadata(node: ASTNode): StatementMetadata {
+        val args = node.children().filter { it.elementType == RobotTypes.PARAMETER }.map { it.text }.toList()
         var idText = ""
         var child = node.firstChildNode
         while (child != null) {
@@ -556,26 +536,36 @@ class RobotPreFormatProcessor : PreFormatProcessor {
             idText += child.text
             child = child.treeNext
         }
-        return StatementMetadata(idText, argCount, firstArgumentOnNextLine)
+        return StatementMetadata(idText, args)
     }
 
-    private fun extractTemplateArgumentsMetadata(node: ASTNode): StatementMetadata = StatementMetadata(node.text, emptyList(), false)
+    private fun extractTemplateArgumentsMetadata(node: ASTNode): StatementMetadata = StatementMetadata(node.text, emptyList())
 
     /**
      * Collects wrappable argument children of [node] whose element type is in [argumentTypes].
      * Recurses into EXECUTABLE_STATEMENT and LITERAL_CONSTANT_VALUE (flattened types) to
      * count nested arguments.
      */
-    private fun collectWrappableArguments(node: ASTNode, argumentTypes: Set<IElementType>, takeAfterElementType: IElementType? = null): List<String> {
-        val wrappableArguments = mutableListOf<String>()
+    private fun collectWrappableArguments(node: ASTNode,
+                                          argumentTypes: Set<IElementType>?,
+                                          takeAfterElementType: IElementType? = null,
+                                          nestedWrappableArgumentTypes: Set<IElementType> = emptySet(),
+                                          wrappableArguments: MutableList<String> = mutableListOf()): List<String> {
         var child = node.firstChildNode
         var afterElement = takeAfterElementType == null
         while (child != null) {
             if (!afterElement && (takeAfterElementType == null || child.elementType === takeAfterElementType)) {
                 afterElement = true
+                child = child.treeNext
+                continue
             }
-            if (afterElement && child.elementType in argumentTypes) {
-                wrappableArguments.add(child.text.trim())
+            if (afterElement && argumentTypes?.contains(child.elementType) ?: true) {
+                if (child.elementType in nestedWrappableArgumentTypes) {
+                    collectWrappableArguments(child, null, nestedWrappableArgumentTypes = nestedWrappableArgumentTypes, wrappableArguments = wrappableArguments)
+                } else {
+                    val content = child.text.trim()
+                    if (!content.isBlank()) wrappableArguments.add(content)
+                }
             }
             child = child.treeNext
         }
@@ -647,8 +637,7 @@ class RobotPostFormatProcessor : PostFormatProcessor {
         // Read statement metadata collected by the PreFormatProcessor. Without it, correct insertion locations can't be identified
         val statementMetadata = source.getUserData(STATEMENT_METADATA_KEY) ?: return rangeToReformat
 
-        val document = source.fileDocument
-        // Remove dangling continuation markers ("..." lines with no arguments) that were
+        val document = source.fileDocument // Remove dangling continuation markers ("..." lines with no arguments) that were
         // left behind after the PreFormatProcessor preserved a chain (e.g. due to inline
         // comments) and the formatter then wrapped arguments onto new lines.
         val removedChars = removeDanglingContinuationMarkers(document, rangeToReformat)
@@ -732,12 +721,10 @@ class RobotPostFormatProcessor : PostFormatProcessor {
             val deleteFrom: Int
             val deleteTo: Int
 
-            if (lineStart > 0) {
-                // Delete the newline before this line + the entire line content
+            if (lineStart > 0) { // Delete the newline before this line + the entire line content
                 // This effectively removes the line without leaving a blank line
                 deleteFrom = lineStart - 1 // include the \n (or last char of \r\n)
-                deleteTo = lineEnd
-                // Handle \r\n: if the character before \n is \r, include it too
+                deleteTo = lineEnd // Handle \r\n: if the character before \n is \r, include it too
                 val adjustedFrom = if (deleteFrom > 0 && text[deleteFrom] == '\n' && text[deleteFrom - 1] == '\r') {
                     deleteFrom - 1
                 } else {
@@ -745,8 +732,7 @@ class RobotPostFormatProcessor : PostFormatProcessor {
                 }
                 document.deleteString(adjustedFrom, deleteTo)
                 totalRemoved += deleteTo - adjustedFrom
-            } else {
-                // First line in document — delete the line content + trailing newline
+            } else { // First line in document — delete the line content + trailing newline
                 deleteTo = if (lineEnd < text.length) lineEnd + 1 else lineEnd
                 document.deleteString(lineStart, deleteTo)
                 totalRemoved += deleteTo - lineStart
@@ -770,9 +756,7 @@ class RobotPostFormatProcessor : PostFormatProcessor {
      * - Future features (like "first argument on next line") can be accommodated without
      *   breaking the boundary detection
      */
-    private fun collectContinuationInsertions(
-        document: Document, range: TextRange, commonSettings: CommonCodeStyleSettings, statementMetadata: List<StatementMetadata>
-    ): List<LineProcessor> {
+    private fun collectContinuationInsertions(document: Document, range: TextRange, commonSettings: CommonCodeStyleSettings, statementMetadata: List<StatementMetadata>): List<LineProcessor> {
         val text = document.text
         if (text.isEmpty()) return emptyList()
 
@@ -835,21 +819,13 @@ class RobotPostFormatProcessor : PostFormatProcessor {
                 continue
             }
 
-            if (currentMetadata == null) {
-                // --- Check if this line matches a known statement from metadata ---
+            if (currentMetadata == null) { // --- Check if this line matches a known statement from metadata ---
                 val nextStatementMetadata = findMetadataForLine(trimmed, statementMetadataCopy)
-                if (nextStatementMetadata != null) {
-                    // This line is a known statement start
+                if (nextStatementMetadata != null) { // This line is a known statement start
                     insideWrappableStatement = nextStatementMetadata.wrappableArgumentCount > 0
                     statementIndent = leadingWs
                     currentMetadata = nextStatementMetadata
                     identifiedArgumentsCount = computeArgumentCountOnSameLineAsStatement(trimmed, currentMetadata)
-                    if (currentMetadata.firstArgumentOnNextLine && identifiedArgumentsCount > 0) {
-                        val commandEndOffset = lineStart + statementIndent + currentMetadata.identificationText.length
-                        val afterStatementText = trimmed.substring(currentMetadata.identificationText.length)
-                        val statementArgumentSeparatorSpace = afterStatementText.length - afterStatementText.trimStart().length
-                        lineProcessors.add(ArgumentOnNextLineMover(commandEndOffset, commandEndOffset + statementArgumentSeparatorSpace, statementIndent))
-                    }
                     continue
                 }
             }
@@ -858,21 +834,19 @@ class RobotPostFormatProcessor : PostFormatProcessor {
             if (trimmed.startsWith(GlobalConstants.CONTINUATION)) {
                 if (!insideWrappableStatement) {
                     insideWrappableStatement = true
-                }
-                // Check for arguments/parameters within this continuation line - excluding any commentary. Arguments have to be separated by at least a SUPER SPACE
+                } // Check for arguments/parameters within this continuation line - excluding any commentary. Arguments have to be separated by at least a SUPER SPACE
                 val continuationFreeLineText = trimmed.substring(GlobalConstants.CONTINUATION.length).trimStart()
-                identifiedArgumentsCount += computeArgumentCountOnFollowingLines(continuationFreeLineText)
+                identifiedArgumentsCount += computeArgumentCountOnLine(continuationFreeLineText, currentMetadata)
 
-                val safeStatementIndent = if (statementIndent > 0) statementIndent else 0
-                // Add a continuation indent fixer here to ensure correct indentation even for variable statements based on the statementIndent
+                val safeStatementIndent =
+                    if (statementIndent > 0) statementIndent else 0 // Add a continuation indent fixer here to ensure correct indentation even for variable statements based on the statementIndent
                 lineProcessors.add(ContinuationIndentFixer(lineStart + safeStatementIndent, lineStart + leadingWs))
                 continue
             }
 
             // Check argument count limit: if we have metadata and have already emitted
             // enough continuation lines, this must be a new statement.
-            if (currentMetadata != null && identifiedArgumentsCount >= currentMetadata.wrappableArgumentCount) {
-                // We've exhausted the expected arguments → this is a new statement.
+            if (currentMetadata != null && identifiedArgumentsCount >= currentMetadata.wrappableArgumentCount) { // We've exhausted the expected arguments → this is a new statement.
                 currentMetadata = findMetadataForLine(trimmed, statementMetadataCopy)
                 insideWrappableStatement = currentMetadata != null && currentMetadata.wrappableArgumentCount > 0
                 statementIndent = leadingWs
@@ -883,7 +857,7 @@ class RobotPostFormatProcessor : PostFormatProcessor {
             // We ARE inside a wrappable statement. This line needs a continuation marker.
             if (leadingWs >= statementIndent) {
                 lineProcessors.add(ContinuationInserter(lineStart + statementIndent))
-                identifiedArgumentsCount += computeArgumentCountOnFollowingLines(trimmed)
+                identifiedArgumentsCount += computeArgumentCountOnLine(trimmed, currentMetadata, identifiedArgumentsCount)
             } else {
                 insideWrappableStatement = true
                 statementIndent = leadingWs
@@ -895,9 +869,8 @@ class RobotPostFormatProcessor : PostFormatProcessor {
         return lineProcessors
     }
 
-    private fun isMetadataSection(sectionName: String): Boolean =
-        sectionName.equals(RobotNames.SETTING_SECTION_NAME, ignoreCase = true) || sectionName.equals(RobotNames.SETTINGS_SECTION_NAME, ignoreCase = true)
-                || sectionName.equals(RobotNames.VARIABLE_SECTION_NAME, ignoreCase = true) || sectionName.equals(RobotNames.VARIABLES_SECTION_NAME, ignoreCase = true)
+    private fun isMetadataSection(sectionName: String): Boolean = sectionName.equals(RobotNames.SETTING_SECTION_NAME, ignoreCase = true) || sectionName.equals(RobotNames.SETTINGS_SECTION_NAME,
+        ignoreCase = true) || sectionName.equals(RobotNames.VARIABLE_SECTION_NAME, ignoreCase = true) || sectionName.equals(RobotNames.VARIABLES_SECTION_NAME, ignoreCase = true)
 
     /**
      * Attempts to find a [StatementMetadata] whose [StatementMetadata.identificationText]
@@ -917,22 +890,25 @@ class RobotPostFormatProcessor : PostFormatProcessor {
         val normalizedLineContent = lineContent.replace(WHITESPACE_REGEX, "")
         val normalizedLineContentWithoutStatement = normalizedLineContent.substring(metadata.normalizedIdentificationText.length)
         return if (normalizedLineContentWithoutStatement.isEmpty() || normalizedLineContentWithoutStatement.startsWith('#')) 0
-        else {
-            var argumentCount = 0
-            var workableLineContent = normalizedLineContentWithoutStatement
-            for (argument in metadata.wrappableArguments) {
-                val normalizedArgument = argument.replace(WHITESPACE_REGEX, "")
-                if (workableLineContent.startsWith(normalizedArgument)) {
-                    argumentCount++
-                    workableLineContent = workableLineContent.substring(normalizedArgument.length)
-                } else break
-            }
-            argumentCount
-        }
+        else computeArgumentCountOnLine(normalizedLineContentWithoutStatement, metadata)
     }
 
-    private fun computeArgumentCountOnFollowingLines(lineContent: String): Int {
-        return lineContent.split(continuationLineArgumentsSplitRegex).filterNot { it.startsWith('#') }.count()
+    private fun computeArgumentCountOnLine(lineContent: String, metadata: StatementMetadata?, argumentStartIndex: Int = 0): Int {
+        if (metadata == null) return 0
+
+        val normalizedLineContent = lineContent.replace(WHITESPACE_REGEX, "")
+        var argumentCount = 0
+        var workableLineContent = normalizedLineContent
+        for ((index, argument) in metadata.wrappableArguments.withIndex()) {
+            if (argumentStartIndex > index) continue
+
+            val normalizedArgument = argument.replace(WHITESPACE_REGEX, "")
+            if (workableLineContent.startsWith(normalizedArgument)) {
+                argumentCount++
+                workableLineContent = workableLineContent.substring(normalizedArgument.length)
+            } else break
+        }
+        return argumentCount
     }
 
     interface LineProcessor : Comparable<LineProcessor> {
@@ -966,8 +942,7 @@ class RobotPostFormatProcessor : PostFormatProcessor {
             val replaceableTextRange = TextRange(offset, offset + continuationIndentation + GlobalConstants.CONTINUATION.length + separatorSize)
             val textToReplace = document.getText(replaceableTextRange)
             val separator = createInsertableSpace(separatorSize, commonSettings)
-            if (textToReplace.isBlank() || textToReplace.trimStart().length <= RobotCodeStyleSettings.SUPER_SPACE_SIZE) {
-                /*
+            if (textToReplace.isBlank() || textToReplace.trimStart().length <= RobotCodeStyleSettings.SUPER_SPACE_SIZE) {/*
                  * Calculating the whitespace length before the first real character occurrence in this line (starting from the previously calculated insertion point). The end goal of this approach
                  * is removing any unnecessary whitespaces added by the formatter due to block structure and missing CONTINUATION tokens.
                  * It is usually relevant for variable assignments based on keywords, so something like
@@ -998,8 +973,7 @@ class RobotPostFormatProcessor : PostFormatProcessor {
                 val startOffset = offset + continuationIndentation
                 document.replaceString(startOffset, offset + whitespaceLength, GlobalConstants.CONTINUATION + separator)
                 return 0
-            }
-            // Not enough whitespaces available to put us into without changing too much (adding more whitespaces). Therefore, simply insert the required string with every whitespace requested.
+            } // Not enough whitespaces available to put us into without changing too much (adding more whitespaces). Therefore, simply insert the required string with every whitespace requested.
             val continuationIndent = createInsertableSpace(continuationIndentation, commonSettings)
             document.insertString(offset, continuationIndent + GlobalConstants.CONTINUATION + separator)
             return continuationIndentation + GlobalConstants.CONTINUATION.length + separator.length
@@ -1039,33 +1013,6 @@ class RobotPostFormatProcessor : PostFormatProcessor {
             return offset
         }
     }
-
-    class ArgumentOnNextLineMover(override val offset: Int, val argumentStartOffset: Int, val statementIndentation: Int) : LineProcessor {
-
-        override fun processLine(
-            document: Document,
-            commonSettings: CommonCodeStyleSettings,
-            customSettings: RobotCodeStyleSettings
-        ): Int {
-            val continuationIndentSize = commonSettings.indentOptions?.CONTINUATION_INDENT_SIZE ?: 0
-
-            val indentText = createInsertableSpace(statementIndentation + continuationIndentSize, commonSettings)
-            val afterContinuationText = createInsertableSpace(customSettings.AFTER_CONTINUATION_INDENT_SIZE, commonSettings)
-            document.replaceString(offset, argumentStartOffset, "\n$indentText${GlobalConstants.CONTINUATION}$afterContinuationText")
-            return statementIndentation + continuationIndentSize + GlobalConstants.CONTINUATION.length + customSettings.AFTER_CONTINUATION_INDENT_SIZE
-        }
-
-        override fun equals(other: Any?): Boolean {
-            if (this === other) return true
-            if (javaClass != other?.javaClass) return false
-            val that = other as ContinuationInserter
-            return offset == that.offset
-        }
-
-        override fun hashCode(): Int {
-            return offset
-        }
-    }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -1073,50 +1020,51 @@ class RobotPostFormatProcessor : PostFormatProcessor {
 // ─────────────────────────────────────────────────────────────────────────────
 
 /**
- * For KEYWORD_CALL: wrappable arguments are PARAMETER and POSITIONAL_ARGUMENT children.
+ * For Global settings: wrappable arguments are PARAMETER, POSITIONAL_ARGUMENT, KEYWORD_CALL and LITERAL_CONSTANT children.
  */
-private val KEYWORD_CALL_ARGUMENT_TYPES: Set<IElementType> = setOf(
-    RobotTypes.PARAMETER,
+private val GLOBAL_SETTING_CALL_ARGUMENT_TYPES: Set<IElementType> = setOf(RobotTypes.PARAMETER,
     RobotTypes.POSITIONAL_ARGUMENT,
-    RobotTypes.KEYWORD_CALL
+    RobotTypes.KEYWORD_CALL,
+    RobotTypes.LITERAL_CONSTANT_VALUE,
+    RobotTypes.LITERAL_CONSTANT,
+    RobotTypes.IMPORT_ARGUMENT,
+    RobotTypes.WITH_NAME,
+    RobotTypes.NEW_LIBRARY_NAME)
+
+/**
+ * For KEYWORD_CALL: wrappable arguments are PARAMETER, POSITIONAL_ARGUMENT and KEYWORD_CALL children.
+ */
+private val KEYWORD_CALL_ARGUMENT_TYPES: Set<IElementType> =
+    setOf(RobotTypes.PARAMETER, RobotTypes.POSITIONAL_ARGUMENT, RobotTypes.KEYWORD_CALL, RobotTypes.KEYWORD_CALL_NAME, RobotTypes.ELSE_IF, RobotTypes.PYTHON_EXPRESSION_CONTENT, RobotTypes.ELSE)
+private val KEYWORD_CALL_ARGUMENT_NESTED_TYPES: Set<IElementType> = setOf(
+    RobotTypes.KEYWORD_CALL,
+    RobotTypes.POSITIONAL_ARGUMENT,
+    RobotTypes.INLINE_ELSE_IF_STRUCTURE,
+    RobotTypes.INLINE_ELSE_STRUCTURE
 )
 
 /**
  * For LOCAL_ARGUMENTS_SETTING: wrappable arguments are the mandatory and optional parameter children.
  */
-private val LOCAL_ARGUMENTS_PARAMETER_TYPES: Set<IElementType> = setOf(
-    RobotTypes.LOCAL_ARGUMENTS_SETTING_PARAMETER_MANDATORY,
-    RobotTypes.LOCAL_ARGUMENTS_SETTING_PARAMETER_OPTIONAL,
-    RobotTypes.LOCAL_ARGUMENTS_SETTING_PARAMETER
-)
+private val LOCAL_ARGUMENTS_PARAMETER_TYPES: Set<IElementType> =
+    setOf(RobotTypes.LOCAL_ARGUMENTS_SETTING_PARAMETER_MANDATORY, RobotTypes.LOCAL_ARGUMENTS_SETTING_PARAMETER_OPTIONAL, RobotTypes.LOCAL_ARGUMENTS_SETTING_PARAMETER)
 
 /**
  * For LOCAL_SETTING: wrappable arguments are positional arguments and embedded keyword calls.
  */
-private val LOCAL_SETTING_ARGUMENT_TYPES: Set<IElementType> = setOf(
-    RobotTypes.POSITIONAL_ARGUMENT,
-    RobotTypes.KEYWORD_CALL
-)
+private val LOCAL_SETTING_ARGUMENT_TYPES: Set<IElementType> = setOf(RobotTypes.POSITIONAL_ARGUMENT, RobotTypes.KEYWORD_CALL)
 
 /**
  * For variable statements (SINGLE_VARIABLE_STATEMENT, etc.): wrappable arguments are
  * variable values and parameters.
  */
-private val VARIABLE_STATEMENT_ARGUMENT_TYPES: Set<IElementType> = setOf(
-    RobotTypes.VARIABLE_VALUE,
-    RobotTypes.PARAMETER
-)
+private val VARIABLE_STATEMENT_ARGUMENT_TYPES: Set<IElementType> = setOf(RobotTypes.VARIABLE_VALUE, RobotTypes.PARAMETER)
 
 /**
  * For control flow headers: wrappable arguments are positional arguments, variable
  * definitions, and conditional content.
  */
-private val CONTROL_FLOW_ARGUMENT_TYPES: Set<IElementType> = setOf(
-    RobotTypes.POSITIONAL_ARGUMENT,
-    RobotTypes.VARIABLE_DEFINITION,
-    RobotTypes.CONDITIONAL_CONTENT,
-    RobotTypes.PARAMETER
-)
+private val CONTROL_FLOW_ARGUMENT_TYPES: Set<IElementType> = setOf(RobotTypes.POSITIONAL_ARGUMENT, RobotTypes.VARIABLE_DEFINITION, RobotTypes.CONDITIONAL_CONTENT, RobotTypes.PARAMETER)
 
 /**
  * Set of Robot Framework element types whose AST nodes may contain continuation markers
@@ -1130,8 +1078,7 @@ private val CONTROL_FLOW_ARGUMENT_TYPES: Set<IElementType> = setOf(
  * - Variable definitions in the *** Variables *** section
  * But also everything else that represents a single statement in a line
  */
-private val STATEMENT_TYPES: Set<IElementType> = setOf(
-    RobotTypes.KEYWORD_CALL,
+private val STATEMENT_TYPES: Set<IElementType> = setOf(RobotTypes.KEYWORD_CALL,
     RobotTypes.LOCAL_ARGUMENTS_SETTING,
     RobotTypes.LOCAL_SETTING,
     RobotTypes.KEYWORD_VARIABLE_STATEMENT,
@@ -1151,8 +1098,7 @@ private val STATEMENT_TYPES: Set<IElementType> = setOf(
     RobotTypes.LIBRARY_IMPORT_GLOBAL_SETTING,
     RobotTypes.RESOURCE_IMPORT_GLOBAL_SETTING,
     RobotTypes.SETUP_TEARDOWN_STATEMENTS_GLOBAL_SETTING,
-    RobotTypes.TEMPLATE_ARGUMENTS,
-    // Control flow headers can also have continuations (e.g. FOR with many items)
+    RobotTypes.TEMPLATE_ARGUMENTS, // Control flow headers can also have continuations (e.g. FOR with many items)
     RobotTypes.FOR_LOOP_HEADER,
     RobotTypes.WHILE_LOOP_HEADER,
     RobotTypes.IF,
@@ -1165,6 +1111,5 @@ private val STATEMENT_TYPES: Set<IElementType> = setOf(
     RobotTypes.END,
     RobotTypes.BREAK,
     RobotTypes.CONTINUE,
-    RobotTypes.RETURN
-)
+    RobotTypes.RETURN)
 

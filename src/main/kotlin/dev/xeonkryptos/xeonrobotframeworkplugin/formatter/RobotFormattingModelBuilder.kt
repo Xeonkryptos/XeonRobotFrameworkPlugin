@@ -37,6 +37,8 @@ class RobotFormattingModelBuilder : FormattingModelBuilder {
             .spaceIf(commonSettings.SPACE_WITHIN_BRACES)
             .withinPair(RobotTypes.VARIABLE_ACCESS_START, RobotTypes.VARIABLE_ACCESS_END)
             .spaceIf(commonSettings.SPACE_WITHIN_BRACKETS)
+            .withinPair(RobotTypes.LOCAL_SETTING_START, RobotTypes.LOCAL_SETTING_END)
+            .spaceIf(commonSettings.SPACE_WITHIN_BRACKETS)
             .afterInside(TokenType.WHITE_SPACE, RobotTypes.LOCAL_SETTING)
             .spacing(customSettings.AFTER_CONTINUATION_INDENT_SIZE,
                 customSettings.AFTER_CONTINUATION_INDENT_SIZE,
@@ -45,6 +47,8 @@ class RobotFormattingModelBuilder : FormattingModelBuilder {
                 customSettings.KEEP_BLANK_LINES_IN_LOCAL_SETTINGS)
             .after(TokenType.WHITE_SPACE)
             .spacing(customSettings.AFTER_CONTINUATION_INDENT_SIZE, customSettings.AFTER_CONTINUATION_INDENT_SIZE, 0, commonSettings.KEEP_LINE_BREAKS, commonSettings.KEEP_BLANK_LINES_IN_CODE)
+            .between(TokenSet.create(RobotTypes.KEYWORD_CALL_NAME), TokenSet.create(RobotTypes.PARAMETER, RobotTypes.POSITIONAL_ARGUMENT))
+            .spaces(RobotCodeStyleSettings.SUPER_SPACE_SIZE)
             .after(SUPER_SPACE_SETS)
             .spaces(RobotCodeStyleSettings.SUPER_SPACE_SIZE)
     }

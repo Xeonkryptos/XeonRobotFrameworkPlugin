@@ -39,6 +39,13 @@ class RobotCodeStyleSettings(container: CodeStyleSettings) : CustomCodeStyleSett
 
     @JvmField
     @WrapConstant
+    var GLOBAL_SETTINGS_WRAP: Int = CommonCodeStyleSettings.DO_NOT_WRAP
+
+    @JvmField
+    var GLOBAL_SETTINGS_FIRST_ARGUMENT_ON_NEW_LINE: Boolean = false
+
+    @JvmField
+    @WrapConstant
     var LOCAL_SETTINGS_WRAP: Int = CommonCodeStyleSettings.DO_NOT_WRAP
 
     @JvmField
@@ -49,6 +56,13 @@ class RobotCodeStyleSettings(container: CodeStyleSettings) : CustomCodeStyleSett
 
     @JvmField
     var METHOD_PARAMETERS_FIRST_ARGUMENT_ON_NEW_LINE: Boolean = false
+
+    @JvmField
+    @WrapConstant
+    var VARIABLE_DEFINITIONS_WRAP: Int = CommonCodeStyleSettings.DO_NOT_WRAP
+
+    @JvmField
+    var VARIABLE_DEFINITIONS_FIRST_ARGUMENT_ON_NEW_LINE: Boolean = false
 
     @JvmField
     var KEEP_BLANK_LINES_IN_LOCAL_SETTINGS: Int = 1

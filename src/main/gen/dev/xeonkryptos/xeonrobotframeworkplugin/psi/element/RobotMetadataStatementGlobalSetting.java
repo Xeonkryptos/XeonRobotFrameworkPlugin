@@ -8,9 +8,9 @@ import com.intellij.psi.PsiElement;
 public interface RobotMetadataStatementGlobalSetting extends RobotGlobalSettingStatement, GlobalSettingStatementExpression {
 
   @NotNull
-  List<RobotParameter> getParameterList();
+  PsiElement getNameElement();
 
   @NotNull
-  PsiElement getNameElement();
+  List<RobotPositionalArgument> getMetadataValue();
 
 }

@@ -102,9 +102,9 @@ documentation_statement_global_setting ::= DOCUMENTATION_KEYWORD LITERAL_CONSTAN
     pin=1
     methods = [nameElement="DOCUMENTATION_KEYWORD"]
 }
-metadata_statement_global_setting ::= METADATA_KEYWORD parameter* eol_marker {
+metadata_statement_global_setting ::= METADATA_KEYWORD positional_argument positional_argument eol_marker {
     pin=1
-    methods = [nameElement="METADATA_KEYWORD"]
+    methods = [nameElement="METADATA_KEYWORD" metadataName="literal_constant_value" metadataValue="positional_argument"]
 }
 setup_teardown_statements_global_setting ::= SETUP_TEARDOWN_STATEMENT_KEYWORDS (eol_based_keyword_call | variable) {
     pin=1

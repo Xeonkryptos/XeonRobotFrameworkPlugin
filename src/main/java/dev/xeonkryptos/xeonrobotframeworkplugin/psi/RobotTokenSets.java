@@ -26,6 +26,17 @@ public class RobotTokenSets {
                                                                             RobotTypes.SETUP_TEARDOWN_STATEMENT_KEYWORDS,
                                                                             RobotTypes.SUITE_NAME_KEYWORD,
                                                                             RobotTypes.UNKNOWN_SETTING_KEYWORD);
+    public static final TokenSet GLOBAL_SETTING_SET = TokenSet.create(RobotTypes.RESOURCE_IMPORT_GLOBAL_SETTING,
+                                                                      RobotTypes.LIBRARY_IMPORT_GLOBAL_SETTING,
+                                                                      RobotTypes.DOCUMENTATION_STATEMENT_GLOBAL_SETTING,
+                                                                      RobotTypes.TAGS_STATEMENT_GLOBAL_SETTING,
+                                                                      RobotTypes.METADATA_STATEMENT_GLOBAL_SETTING,
+                                                                      RobotTypes.TEMPLATE_STATEMENTS_GLOBAL_SETTING,
+                                                                      RobotTypes.TIMEOUT_STATEMENTS_GLOBAL_SETTING,
+                                                                      RobotTypes.VARIABLES_IMPORT_GLOBAL_SETTING,
+                                                                      RobotTypes.SETUP_TEARDOWN_STATEMENTS_GLOBAL_SETTING,
+                                                                      RobotTypes.SUITE_NAME_STATEMENT_GLOBAL_SETTING,
+                                                                      RobotTypes.UNKNOWN_SETTING_STATEMENTS_GLOBAL_SETTING);
 
     public static final TokenSet TEMPLATE_VALUES_HOLDER_SET = TokenSet.create(RobotTypes.TEMPLATE_PARAMETER, RobotTypes.TEMPLATE_ARGUMENT);
 }
