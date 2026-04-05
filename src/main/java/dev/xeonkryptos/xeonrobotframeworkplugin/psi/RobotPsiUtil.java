@@ -449,12 +449,20 @@ public class RobotPsiUtil {
         if (quick) {
             return FoldingDescriptor.EMPTY_ARRAY;
         }
-        FoldingText assignedValues = DumbModeAccessType.RELIABLE_DATA_ONLY.ignoreDumbMode(() -> getAssignedValues(variable));
-        if (assignedValues == null) {
+        RobotVariableContent variableContent = getVariableContent(variable);
+        if (variableContent == null || variableContent.getNode().getChildren(null).length > 1) {
+            return FoldingDescriptor.EMPTY_ARRAY;
+        }
+        ASTNode variableAccessStartNode = variable.getNode().findChildByType(RobotTypes.VARIABLE_ACCESS_START);
+        if (variableAccessStartNode != null) {
             return FoldingDescriptor.EMPTY_ARRAY;
         }
         ASTNode variableEndNode = variable.getNode().findChildByType(RobotTypes.VARIABLE_RBRACE);
         if (variableEndNode == null) {
+            return FoldingDescriptor.EMPTY_ARRAY;
+        }
+        FoldingText assignedValues = DumbModeAccessType.RELIABLE_DATA_ONLY.ignoreDumbMode(() -> getAssignedValues(variable));
+        if (assignedValues == null) {
             return FoldingDescriptor.EMPTY_ARRAY;
         }
 

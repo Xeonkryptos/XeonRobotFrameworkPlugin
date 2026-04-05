@@ -12,6 +12,7 @@
 ### Changed
 
 - Changed matching logic for code completion suggestions. They are based now on Camel Humps matching
+- Don't fold variables with a complex variable content (i.e. nested variables)
 
 ### Fixed
 
