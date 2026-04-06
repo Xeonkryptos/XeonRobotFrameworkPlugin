@@ -1,5 +1,6 @@
 import org.jetbrains.changelog.Changelog
 import org.jetbrains.changelog.markdownToHTML
+import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.TestFrameworkType
 import org.jetbrains.intellij.platform.gradle.extensions.intellijPlatform
 import org.jetbrains.intellij.platform.gradle.models.ProductRelease
@@ -39,7 +40,6 @@ repositories {
 
     intellijPlatform {
         defaultRepositories()
-        jetbrainsRuntime()
     }
 }
 
@@ -117,6 +117,7 @@ intellijPlatform {
         ides {
             recommended()
             select {
+                types = listOf(IntelliJPlatformType.IntellijIdea, IntelliJPlatformType.PyCharm)
                 channels = listOf(ProductRelease.Channel.EAP, ProductRelease.Channel.RELEASE)
                 sinceBuild = properties("pluginSinceBuild")
                 untilBuild = properties("pluginUntilBuild")
@@ -147,7 +148,7 @@ tasks {
     patchPluginXml {
         changeNotes.set(provider {
             changelog.renderItem(
-                changelog.getLatest().withHeader(false).withEmptySections(false), Changelog.OutputType.HTML
+                changelog.getUnreleased().withHeader(false).withEmptySections(false), Changelog.OutputType.HTML
             )
         })
     }

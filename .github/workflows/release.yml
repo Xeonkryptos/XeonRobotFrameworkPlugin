@@ -21,7 +21,7 @@ jobs:
 
       # Setup Java 21 environment for the next steps
       - name: Setup Java
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5.2.0
         with:
           distribution: jetbrains
           java-version: 21
@@ -71,3 +71,39 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: gh release upload ${{ github.event.release.tag_name }} ./build/distributions/*
+
+  prepareNextVersion:
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: Fetch Sources
+        uses: actions/checkout@v6.0.2
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+
+      - name: Setup Java
+        uses: actions/setup-java@v5.2.0
+        with:
+          distribution: jetbrains
+          java-version: 21
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          cache-read-only: true
+
+      - name: Make gradlew executable
+        run: chmod +x ./gradlew
+
+      - name: Patch Changelog
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: ./gradlew patchChangelog
+
+      - name: Commit & Push changes
+        uses: actions-js/push@v1.5
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          message: Commit patched changelog
