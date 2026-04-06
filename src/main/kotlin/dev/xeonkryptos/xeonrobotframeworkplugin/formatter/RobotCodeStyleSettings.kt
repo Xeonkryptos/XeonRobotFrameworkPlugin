@@ -63,7 +63,4 @@ class RobotCodeStyleSettings(container: CodeStyleSettings) : CustomCodeStyleSett
 
     @JvmField
     var VARIABLE_DEFINITIONS_FIRST_ARGUMENT_ON_NEW_LINE: Boolean = false
-
-    @JvmField
-    var KEEP_BLANK_LINES_IN_LOCAL_SETTINGS: Int = 1
 }

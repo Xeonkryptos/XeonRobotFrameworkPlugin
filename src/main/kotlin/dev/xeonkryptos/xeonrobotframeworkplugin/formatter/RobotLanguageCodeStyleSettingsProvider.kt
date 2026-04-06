@@ -116,7 +116,6 @@ class RobotLanguageCodeStyleSettingsProvider : LanguageCodeStyleSettingsProvider
 
             SettingsType.BLANK_LINES_SETTINGS -> {
                 consumer.showStandardOptions("KEEP_BLANK_LINES_IN_CODE")
-                consumer.showCustomOption(RobotCodeStyleSettings::class.java, "KEEP_BLANK_LINES_IN_LOCAL_SETTINGS", RobotBundle.message("formatter.blank.lines.in.local.settings"), null)
             }
 
             else -> { // Ignore
