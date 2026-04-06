@@ -149,56 +149,56 @@ ${'$'}{LONG_TEXT}           This is a very long text value that can exceed the c
 *** Test Cases ***
 Formatter Options Showcase
     [Documentation]    This local setting is intentionally very long so local setting wrapping and first argument on new line can be inspected in the preview
-
-
+    
+    
     [Tags]    smoke    formatter    local_setting_wrap_demo    right_margin_sensitive
     [Timeout]    2 minutes
     [Setup]    Open Browser With Extended Options    ${'$'}{BASE_URL}    browser=chromium    headless=${'$'}{TRUE}    viewport=1920x1080
-
+    
     ${'$'}{result}=       Execute Complex Keyword Chain    ${'$'}{LONG_TEXT}    level=1    retry=3    mode=fast
     ...                   nested=true    preserveState=${'$'}{TRUE}    output=full
-
+    
     Should Be Equal    ${'$'}{result}    expected_value
     Run Keyword If    '${'$'}{USER}[role]' == 'admin'    Log    Admin execution path enabled
-
-    FOR    ${'$'}{index}    IN RANGE    0    1    2    3    4    5    6    7    8    9
+    
+    FOR    ${'$'}{index}    IN RANGE    5  20  5
         Log Many    loop    value    ${'$'}{index}    ${'$'}{LONG_TEXT}
     END
-
+    
     WHILE    ${'$'}{index} < 20    limit=100    on_limit=pass    on_limit_message=Reached loop limit in formatter sample
         ${'$'}{index}=    Evaluate    ${'$'}{index} + 1
         Log    Current index is ${'$'}{index}
     END
-
+    
     [Teardown]    Close Browser And Collect Artifacts    screenshot=${'$'}{TRUE}    logs=${'$'}{TRUE}    traces=${'$'}{TRUE}
-
+    
 Template Spacing Showcase
     [Template]      Validate Pair With Optional Context
     alpha           beta           optional=true
     gamma             delta         optional=false
     epsilon         zeta             optional=true
-
+    
 *** Keywords ***
 Initialize Suite Context
     [Arguments]    ${'$'}{env}    ${'$'}{browser}=chromium    ${'$'}{region}=eu-central-1    ${'$'}{retries}=1    ${'$'}{timeout}=60s
     Log    Initializing suite in ${'$'}{env} using ${'$'}{browser} at ${'$'}{region}
-
+    
 Execute Complex Keyword Chain
     [Arguments]    ${'$'}{text}    ${'$'}{level}=0    ${'$'}{retry}=1    ${'$'}{mode}=normal    ${'$'}{nested}=${'$'}{FALSE}    ${'$'}{preserveState}=${'$'}{FALSE}    ${'$'}{output}=summary
     ${'$'}{prepared}=    Prepare Payload For Execution    ${'$'}{text}    level=${'$'}{level}    mode=${'$'}{mode}
     ${'$'}{handled}=     Nested Dispatcher Keyword    ${'$'}{prepared}    retry=${'$'}{retry}    nested=${'$'}{nested}    preserveState=${'$'}{preserveState}
     [Return]    ${'$'}{handled}
-
+    
 Nested Dispatcher Keyword
     [Arguments]    ${'$'}{payload}    ${'$'}{retry}=1    ${'$'}{nested}=${'$'}{FALSE}    ${'$'}{preserveState}=${'$'}{FALSE}
     Run Keyword If    ${'$'}{nested}    Call Inner Worker Keyword    ${'$'}{payload}    retry=${'$'}{retry}    preserveState=${'$'}{preserveState}
     ...    ELSE    Log    Nested mode disabled
     [Return]    expected_value
-
+    
 Call Inner Worker Keyword
     [Arguments]    ${'$'}{payload}    ${'$'}{retry}=1    ${'$'}{preserveState}=${'$'}{FALSE}
     Log Many    worker    payload    ${'$'}{payload}    retry    ${'$'}{retry}    preserve    ${'$'}{preserveState}
-
+    
 Validate Pair With Optional Context
     [Arguments]    ${'$'}{left}    ${'$'}{right}    ${'$'}{optional}=${'$'}{FALSE}
     Should Not Be Empty    ${'$'}{left}

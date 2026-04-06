@@ -24,17 +24,11 @@ class RobotBlock(node: ASTNode, private val context: RobotBlockContext, wrap: Wr
 
         // Differs from whitespace set of RobotTokenSets because it also includes EOL and EOS, which are treated as whitespace for formatting purposes, but not for parsing.
         private val WHITESPACE_TYPES = TokenSet.create(CONTINUATION_TOKEN, RobotTypes.EOL, RobotTypes.EOS)
-        private val SECTION_TYPES = TokenSet.create(RobotTypes.SETTINGS_HEADER,
-            RobotTypes.VARIABLES_HEADER,
-            RobotTypes.TEST_CASES_HEADER,
-            RobotTypes.TASKS_HEADER,
-            RobotTypes.USER_KEYWORDS_HEADER,
-            RobotTypes.COMMENTS_HEADER,
-            RobotTypes.TEST_CASES_SECTION,
+        private val SECTION_TYPES = TokenSet.orSet(RobotTokenSets.SECTIONS_HEADER_SET, TokenSet.create(RobotTypes.TEST_CASES_SECTION,
             RobotTypes.TASKS_SECTION,
             RobotTypes.KEYWORDS_SECTION,
             RobotTypes.VARIABLES_SECTION,
-            RobotTypes.COMMENTS_SECTION)
+            RobotTypes.COMMENTS_SECTION))
         private val LEAF_TYPES = TokenSet.create(RobotTypes.IMPORT_ARGUMENT,
             RobotTypes.USER_KEYWORD_STATEMENT_ID,
             RobotTypes.TEST_CASE_ID,

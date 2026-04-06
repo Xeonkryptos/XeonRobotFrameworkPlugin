@@ -38,6 +38,13 @@ public class RobotTokenSets {
                                                                       RobotTypes.SUITE_NAME_STATEMENT_GLOBAL_SETTING,
                                                                       RobotTypes.UNKNOWN_SETTING_STATEMENTS_GLOBAL_SETTING);
 
+    public static final TokenSet SECTIONS_HEADER_SET = TokenSet.create(RobotTypes.SETTINGS_HEADER,
+                                                                        RobotTypes.VARIABLES_HEADER,
+                                                                        RobotTypes.TEST_CASES_HEADER,
+                                                                        RobotTypes.TASKS_HEADER,
+                                                                        RobotTypes.USER_KEYWORDS_HEADER,
+                                                                        RobotTypes.COMMENTS_HEADER);
+
     public static final TokenSet TEMPLATE_VALUES_HOLDER_SET = TokenSet.create(RobotTypes.TEMPLATE_PARAMETER, RobotTypes.TEMPLATE_ARGUMENT);
 
     public static final TokenSet FOR_LOOP_IN_TYPES = TokenSet.create(RobotTypes.FOR_IN, RobotTypes.FOR_IN_RANGE, RobotTypes.FOR_IN_ENUMERATE, RobotTypes.FOR_IN_ZIP);
