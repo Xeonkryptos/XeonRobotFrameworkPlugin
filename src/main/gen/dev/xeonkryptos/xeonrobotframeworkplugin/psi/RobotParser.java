@@ -54,6 +54,12 @@ public class RobotParser implements PsiParser, LightPsiParser {
   };
 
   /* ********************************************************** */
+  // CONTINUATION
+  static boolean CONTINUATION_MARKER(PsiBuilder b, int l) {
+    return consumeToken(b, CONTINUATION);
+  }
+
+  /* ********************************************************** */
   // keyword_call_name (parameter | extended_positional_argument)*
   static boolean base_keyword_call(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "base_keyword_call")) return false;
@@ -867,71 +873,245 @@ public class RobotParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // FOR variable_definition+ FOR_IN positional_argument+ for_loop_structure_parameter*
-  public static boolean for_loop_header(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "for_loop_header")) return false;
+  // FOR variable_definition+ FOR_IN_ENUMERATE positional_argument+ for_loop_structure_parameter*
+  public static boolean for_in_enumerate_loop_header(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "for_in_enumerate_loop_header")) return false;
     if (!nextTokenIs(b, FOR)) return false;
     boolean r, p;
     Marker m = enter_section_(b, l, _NONE_, FOR_LOOP_HEADER, null);
     r = consumeToken(b, FOR);
-    p = r; // pin = 1
-    r = r && report_error_(b, for_loop_header_1(b, l + 1));
-    r = p && report_error_(b, consumeToken(b, FOR_IN)) && r;
-    r = p && report_error_(b, for_loop_header_3(b, l + 1)) && r;
-    r = p && for_loop_header_4(b, l + 1) && r;
+    r = r && for_in_enumerate_loop_header_1(b, l + 1);
+    r = r && consumeToken(b, FOR_IN_ENUMERATE);
+    p = r; // pin = 3
+    r = r && report_error_(b, for_in_enumerate_loop_header_3(b, l + 1));
+    r = p && for_in_enumerate_loop_header_4(b, l + 1) && r;
     exit_section_(b, l, m, r, p, null);
     return r || p;
   }
 
   // variable_definition+
-  private static boolean for_loop_header_1(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "for_loop_header_1")) return false;
+  private static boolean for_in_enumerate_loop_header_1(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "for_in_enumerate_loop_header_1")) return false;
     boolean r;
     Marker m = enter_section_(b);
     r = variable_definition(b, l + 1);
     while (r) {
       int c = current_position_(b);
       if (!variable_definition(b, l + 1)) break;
-      if (!empty_element_parsed_guard_(b, "for_loop_header_1", c)) break;
+      if (!empty_element_parsed_guard_(b, "for_in_enumerate_loop_header_1", c)) break;
     }
     exit_section_(b, m, null, r);
     return r;
   }
 
   // positional_argument+
-  private static boolean for_loop_header_3(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "for_loop_header_3")) return false;
+  private static boolean for_in_enumerate_loop_header_3(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "for_in_enumerate_loop_header_3")) return false;
     boolean r;
     Marker m = enter_section_(b);
     r = positional_argument(b, l + 1);
     while (r) {
       int c = current_position_(b);
       if (!positional_argument(b, l + 1)) break;
-      if (!empty_element_parsed_guard_(b, "for_loop_header_3", c)) break;
+      if (!empty_element_parsed_guard_(b, "for_in_enumerate_loop_header_3", c)) break;
     }
     exit_section_(b, m, null, r);
     return r;
   }
 
   // for_loop_structure_parameter*
-  private static boolean for_loop_header_4(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "for_loop_header_4")) return false;
+  private static boolean for_in_enumerate_loop_header_4(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "for_in_enumerate_loop_header_4")) return false;
     while (true) {
       int c = current_position_(b);
       if (!for_loop_structure_parameter(b, l + 1)) break;
-      if (!empty_element_parsed_guard_(b, "for_loop_header_4", c)) break;
+      if (!empty_element_parsed_guard_(b, "for_in_enumerate_loop_header_4", c)) break;
     }
     return true;
   }
 
   /* ********************************************************** */
-  // for_loop_header eol_marker executable_statement* END eol_marker
+  // FOR variable_definition+ FOR_IN positional_argument+ for_loop_structure_parameter*
+  public static boolean for_in_loop_header(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "for_in_loop_header")) return false;
+    if (!nextTokenIs(b, FOR)) return false;
+    boolean r, p;
+    Marker m = enter_section_(b, l, _NONE_, FOR_LOOP_HEADER, null);
+    r = consumeToken(b, FOR);
+    r = r && for_in_loop_header_1(b, l + 1);
+    r = r && consumeToken(b, FOR_IN);
+    p = r; // pin = 3
+    r = r && report_error_(b, for_in_loop_header_3(b, l + 1));
+    r = p && for_in_loop_header_4(b, l + 1) && r;
+    exit_section_(b, l, m, r, p, null);
+    return r || p;
+  }
+
+  // variable_definition+
+  private static boolean for_in_loop_header_1(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "for_in_loop_header_1")) return false;
+    boolean r;
+    Marker m = enter_section_(b);
+    r = variable_definition(b, l + 1);
+    while (r) {
+      int c = current_position_(b);
+      if (!variable_definition(b, l + 1)) break;
+      if (!empty_element_parsed_guard_(b, "for_in_loop_header_1", c)) break;
+    }
+    exit_section_(b, m, null, r);
+    return r;
+  }
+
+  // positional_argument+
+  private static boolean for_in_loop_header_3(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "for_in_loop_header_3")) return false;
+    boolean r;
+    Marker m = enter_section_(b);
+    r = positional_argument(b, l + 1);
+    while (r) {
+      int c = current_position_(b);
+      if (!positional_argument(b, l + 1)) break;
+      if (!empty_element_parsed_guard_(b, "for_in_loop_header_3", c)) break;
+    }
+    exit_section_(b, m, null, r);
+    return r;
+  }
+
+  // for_loop_structure_parameter*
+  private static boolean for_in_loop_header_4(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "for_in_loop_header_4")) return false;
+    while (true) {
+      int c = current_position_(b);
+      if (!for_loop_structure_parameter(b, l + 1)) break;
+      if (!empty_element_parsed_guard_(b, "for_in_loop_header_4", c)) break;
+    }
+    return true;
+  }
+
+  /* ********************************************************** */
+  // FOR variable_definition FOR_IN_RANGE positional_argument positional_argument? positional_argument? for_loop_structure_parameter*
+  public static boolean for_in_range_loop_header(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "for_in_range_loop_header")) return false;
+    if (!nextTokenIs(b, FOR)) return false;
+    boolean r, p;
+    Marker m = enter_section_(b, l, _NONE_, FOR_LOOP_HEADER, null);
+    r = consumeToken(b, FOR);
+    r = r && variable_definition(b, l + 1);
+    r = r && consumeToken(b, FOR_IN_RANGE);
+    p = r; // pin = 3
+    r = r && report_error_(b, positional_argument(b, l + 1));
+    r = p && report_error_(b, for_in_range_loop_header_4(b, l + 1)) && r;
+    r = p && report_error_(b, for_in_range_loop_header_5(b, l + 1)) && r;
+    r = p && for_in_range_loop_header_6(b, l + 1) && r;
+    exit_section_(b, l, m, r, p, null);
+    return r || p;
+  }
+
+  // positional_argument?
+  private static boolean for_in_range_loop_header_4(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "for_in_range_loop_header_4")) return false;
+    positional_argument(b, l + 1);
+    return true;
+  }
+
+  // positional_argument?
+  private static boolean for_in_range_loop_header_5(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "for_in_range_loop_header_5")) return false;
+    positional_argument(b, l + 1);
+    return true;
+  }
+
+  // for_loop_structure_parameter*
+  private static boolean for_in_range_loop_header_6(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "for_in_range_loop_header_6")) return false;
+    while (true) {
+      int c = current_position_(b);
+      if (!for_loop_structure_parameter(b, l + 1)) break;
+      if (!empty_element_parsed_guard_(b, "for_in_range_loop_header_6", c)) break;
+    }
+    return true;
+  }
+
+  /* ********************************************************** */
+  // FOR variable_definition+ FOR_IN_ZIP positional_argument positional_argument+ for_loop_structure_parameter*
+  public static boolean for_in_zip_loop_header(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "for_in_zip_loop_header")) return false;
+    if (!nextTokenIs(b, FOR)) return false;
+    boolean r, p;
+    Marker m = enter_section_(b, l, _NONE_, FOR_LOOP_HEADER, null);
+    r = consumeToken(b, FOR);
+    r = r && for_in_zip_loop_header_1(b, l + 1);
+    r = r && consumeToken(b, FOR_IN_ZIP);
+    p = r; // pin = 3
+    r = r && report_error_(b, positional_argument(b, l + 1));
+    r = p && report_error_(b, for_in_zip_loop_header_4(b, l + 1)) && r;
+    r = p && for_in_zip_loop_header_5(b, l + 1) && r;
+    exit_section_(b, l, m, r, p, null);
+    return r || p;
+  }
+
+  // variable_definition+
+  private static boolean for_in_zip_loop_header_1(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "for_in_zip_loop_header_1")) return false;
+    boolean r;
+    Marker m = enter_section_(b);
+    r = variable_definition(b, l + 1);
+    while (r) {
+      int c = current_position_(b);
+      if (!variable_definition(b, l + 1)) break;
+      if (!empty_element_parsed_guard_(b, "for_in_zip_loop_header_1", c)) break;
+    }
+    exit_section_(b, m, null, r);
+    return r;
+  }
+
+  // positional_argument+
+  private static boolean for_in_zip_loop_header_4(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "for_in_zip_loop_header_4")) return false;
+    boolean r;
+    Marker m = enter_section_(b);
+    r = positional_argument(b, l + 1);
+    while (r) {
+      int c = current_position_(b);
+      if (!positional_argument(b, l + 1)) break;
+      if (!empty_element_parsed_guard_(b, "for_in_zip_loop_header_4", c)) break;
+    }
+    exit_section_(b, m, null, r);
+    return r;
+  }
+
+  // for_loop_structure_parameter*
+  private static boolean for_in_zip_loop_header_5(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "for_in_zip_loop_header_5")) return false;
+    while (true) {
+      int c = current_position_(b);
+      if (!for_loop_structure_parameter(b, l + 1)) break;
+      if (!empty_element_parsed_guard_(b, "for_in_zip_loop_header_5", c)) break;
+    }
+    return true;
+  }
+
+  /* ********************************************************** */
+  // for_in_loop_header | for_in_range_loop_header | for_in_enumerate_loop_header | for_in_zip_loop_header
+  static boolean for_loop_header_base(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "for_loop_header_base")) return false;
+    if (!nextTokenIs(b, FOR)) return false;
+    boolean r;
+    r = for_in_loop_header(b, l + 1);
+    if (!r) r = for_in_range_loop_header(b, l + 1);
+    if (!r) r = for_in_enumerate_loop_header(b, l + 1);
+    if (!r) r = for_in_zip_loop_header(b, l + 1);
+    return r;
+  }
+
+  /* ********************************************************** */
+  // for_loop_header_base eol_marker executable_statement* END eol_marker
   public static boolean for_loop_structure(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "for_loop_structure")) return false;
     if (!nextTokenIs(b, FOR)) return false;
     boolean r, p;
     Marker m = enter_section_(b, l, _NONE_, FOR_LOOP_STRUCTURE, null);
-    r = for_loop_header(b, l + 1);
+    r = for_loop_header_base(b, l + 1);
     p = r; // pin = 1
     r = r && report_error_(b, eol_marker(b, l + 1));
     r = p && report_error_(b, for_loop_structure_2(b, l + 1)) && r;

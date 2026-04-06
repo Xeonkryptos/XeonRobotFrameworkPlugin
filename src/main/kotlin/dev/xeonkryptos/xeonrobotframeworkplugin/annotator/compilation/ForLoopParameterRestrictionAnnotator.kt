@@ -3,6 +3,7 @@ package dev.xeonkryptos.xeonrobotframeworkplugin.annotator.compilation
 import com.intellij.lang.annotation.HighlightSeverity
 import dev.xeonkryptos.xeonrobotframeworkplugin.RobotBundle
 import dev.xeonkryptos.xeonrobotframeworkplugin.annotator.RobotAnnotator
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotForLoopStructure
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotForLoopStructureFillParameter
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotForLoopStructureModeParameter
@@ -27,7 +28,7 @@ class ForLoopParameterRestrictionAnnotator : RobotAnnotator() {
 
         startParameter?.let { startParam ->
             val forInElementText = forLoopHeader.forInElement?.text
-            if (forInElementText != null && forInElementText != RobotNames.FOR_IN_ENUMERATE_RESERVED_NAME) {
+            if (forLoopHeader.forInElement != RobotTypes.FOR_IN_ENUMERATE) {
                 holder.newAnnotation(HighlightSeverity.ERROR, RobotBundle.message("annotation.for-loop.parameter.unsupported.for.loop.type", "start", forInElementText, RobotNames.FOR_IN_ENUMERATE_RESERVED_NAME))
                     .range(startParam)
                     .create()
@@ -35,7 +36,7 @@ class ForLoopParameterRestrictionAnnotator : RobotAnnotator() {
         }
         modeParameter?.let { modeParam ->
             val forInElementText = forLoopHeader.forInElement?.text
-            if (forInElementText != null && forInElementText != RobotNames.FOR_IN_ZIP_RESERVED_NAME) {
+            if (forLoopHeader.forInElement != RobotTypes.FOR_IN_ZIP) {
                 holder.newAnnotation(HighlightSeverity.ERROR, RobotBundle.message("annotation.for-loop.parameter.unsupported.for.loop.type", "mode", forInElementText, RobotNames.FOR_IN_ZIP_RESERVED_NAME))
                     .range(modeParam)
                     .create()
@@ -43,7 +44,7 @@ class ForLoopParameterRestrictionAnnotator : RobotAnnotator() {
         }
         fillParameter?.let { modeParam ->
             val forInElementText = forLoopHeader.forInElement?.text
-            if (forInElementText != null && forInElementText != RobotNames.FOR_IN_ZIP_RESERVED_NAME) {
+            if (forLoopHeader.forInElement != RobotTypes.FOR_IN_ZIP) {
                 holder.newAnnotation(HighlightSeverity.ERROR, RobotBundle.message("annotation.for-loop.parameter.unsupported.for.loop.type", "fill", forInElementText, RobotNames.FOR_IN_ZIP_RESERVED_NAME))
                     .range(modeParam)
                     .create()

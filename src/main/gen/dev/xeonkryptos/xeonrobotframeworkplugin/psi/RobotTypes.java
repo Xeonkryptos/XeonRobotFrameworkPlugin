@@ -115,6 +115,7 @@ public interface RobotTypes {
   IElementType BUT = new RobotTokenType("BUT");
   IElementType COMMENT = new RobotTokenType("COMMENT");
   IElementType COMMENTS_HEADER = new RobotTokenType("COMMENTS_HEADER");
+  IElementType CONTINUATION = new RobotTokenType("CONTINUATION");
   IElementType CONTINUE = new RobotTokenType("CONTINUE");
   IElementType DICT_VARIABLE_START = new RobotTokenType("DICT_VARIABLE_START");
   IElementType DOCUMENTATION_KEYWORD = new RobotTokenType("DOCUMENTATION_KEYWORD");
@@ -128,6 +129,9 @@ public interface RobotTypes {
   IElementType FINALLY = new RobotTokenType("FINALLY");
   IElementType FOR = new RobotTokenType("FOR");
   IElementType FOR_IN = new RobotTokenType("FOR_IN");
+  IElementType FOR_IN_ENUMERATE = new RobotTokenType("FOR_IN_ENUMERATE");
+  IElementType FOR_IN_RANGE = new RobotTokenType("FOR_IN_RANGE");
+  IElementType FOR_IN_ZIP = new RobotTokenType("FOR_IN_ZIP");
   IElementType GIVEN = new RobotTokenType("GIVEN");
   IElementType GROUP = new RobotTokenType("GROUP");
   IElementType IF = new RobotTokenType("IF");

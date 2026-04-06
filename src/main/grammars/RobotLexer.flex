@@ -74,7 +74,9 @@ import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.ExtendedRobotTypes.*;
                KEYWORD_ARGUMENTS,
                VARIABLE_DEFINITION,
                USER_KEYWORD_RETURN_STATEMENT,
+               FOR_STRUCTURE_LOOP_START,
                FOR_STRUCTURE_LOOP,
+               WHILE_CONFIGURATION,
                LITERAL_CONSTANT_ONLY,
                VARIABLE_DEFINITION_ARGUMENTS,
                SETTING_TEMPLATE_START,
@@ -238,7 +240,7 @@ LineComment = {LineCommentSign} {NON_EOL}*
 %state KEYWORD_CALL, KEYWORD_ARGUMENTS, SINGLE_LITERAL_CONSTANT_START, SINGLE_LITERAL_CONSTANT
 %state INLINE_VARIABLE_DEFINITION, VARIABLE_DEFINITION, VARIABLE_DEFINITION_ARGUMENTS, VARIABLE_USAGE, EXTENDED_VARIABLE_ACCESS, PYTHON_EXPRESSION
 %state PARAMETER_VALUE, TEMPLATE_PARAMETER_VALUE
-%state FOR_STRUCTURE, SIMPLE_CONTROL_STRUCTURE_START, FOR_STRUCTURE_LOOP_START, SIMPLE_CONTROL_STRUCTURE, FOR_STRUCTURE_LOOP
+%state FOR_STRUCTURE, SIMPLE_CONTROL_STRUCTURE_START, FOR_STRUCTURE_LOOP_START, SIMPLE_CONTROL_STRUCTURE, FOR_STRUCTURE_LOOP, WHILE_CONFIGURATION
 %state PYTHON_EXECUTED_CONDITION, PYTHON_EVALUATED_CONTROL_STRUCTURE_START
 
 %xstate COMMENTS_SECTION, LITERAL_CONSTANT_ONLY, SETTING_VALUES, LOCAL_SETTING_DEFINITION
@@ -253,7 +255,7 @@ LineComment = {LineCommentSign} {NON_EOL}*
 ^ {LineComment}                                                            { enterNewState(AFTER_COMMENT); return COMMENT; }
 {LineComment}                                                              { return COMMENT; }
 
-<SETTING, SETTING_VALUES, VARIABLE_DEFINITION_ARGUMENTS, KEYWORD_ARGUMENTS, KEYWORD_CALL, USER_KEYWORD_RETURN_STATEMENT, FOR_STRUCTURE_LOOP, SIMPLE_CONTROL_STRUCTURE, LITERAL_CONSTANT_ONLY, VARIABLE_DEFINITION, INLINE_VARIABLE_DEFINITION> {
+<SETTING, SETTING_VALUES, VARIABLE_DEFINITION_ARGUMENTS, KEYWORD_ARGUMENTS, KEYWORD_CALL, USER_KEYWORD_RETURN_STATEMENT, FOR_STRUCTURE_LOOP_START, FOR_STRUCTURE_LOOP, WHILE_CONFIGURATION, SIMPLE_CONTROL_STRUCTURE, LITERAL_CONSTANT_ONLY, VARIABLE_DEFINITION, INLINE_VARIABLE_DEFINITION, SETTING_TEMPLATE_START> {
     {EOL} {NonNewlineWhitespace}* ({LineComment} ({EOL} {NonNewlineWhitespace}*)+)+ {MultiLineContinuation}                 { enterNewState(IN_CONTINUATION); pushBackEverythingExceptLeadingWhitespace(); return WHITE_SPACE; }
     {EOL} {NonNewlineWhitespace}* {LineComment} ({EOL} {NonNewlineWhitespace}*)+ .?                                         { enterNewState(FAKE_MULTILINE); yypushback(yylength()); break; }
 
@@ -286,7 +288,7 @@ LineComment = {LineCommentSign} {NON_EOL}*
     {MultiLineStart} | {NonNewlineWhitespace}+        { return WHITE_SPACE; }
     {Continuation} {NonNewlineWhitespace}* ({EOL} {NonNewlineWhitespace}*)+ {MultiLineContinuation}    {
           yypushback(yylength() - 3);
-          return WHITE_SPACE;
+          return CONTINUATION;
     }
     {MultiLineContinuation}     {
           int initialLength = yylength();
@@ -397,7 +399,7 @@ LineComment = {LineCommentSign} {NON_EOL}*
 <USER_KEYWORD_DEFINITION>      ^ {LiteralValue}    { pushBackTrailingWhitespace(); return USER_KEYWORD_NAME; }
 
 <KEYWORD_ARGUMENTS, KEYWORD_ARGUMENTS, TESTCASE_DEFINITION, TASK_DEFINITION, USER_KEYWORD_DEFINITION, SETTINGS_SECTION> {
-    <SETTING, FOR_STRUCTURE_LOOP> {
+    <SETTING, FOR_STRUCTURE_LOOP, WHILE_CONFIGURATION> {
         {EverythingButVariableValue} {EqualSign} {
               yypushback(1);
               enterNewState(NORMAL_PARAMETER_ASSIGNMENT);
@@ -529,7 +531,7 @@ LineComment = {LineCommentSign} {NON_EOL}*
         }
 
         "FOR" {ExtendedSpaceBasedEndMarker}?         { yypushback(yylength() - "FOR".length()); enterNewState(FOR_STRUCTURE); return FOR; }
-        "WHILE" {ExtendedSpaceBasedEndMarker}?       { yypushback(yylength() - "WHILE".length()); enterNewState(PYTHON_EVALUATED_CONTROL_STRUCTURE_START); return WHILE; }
+        "WHILE" {ExtendedSpaceBasedEndMarker}?       { yypushback(yylength() - "WHILE".length()); enterNewState(WHILE_CONFIGURATION); enterNewState(PYTHON_EVALUATED_CONTROL_STRUCTURE_START); return WHILE; }
         "IF" {ExtendedSpaceBasedEndMarker}?          { yypushback(yylength() - "IF".length()); enterNewState(PYTHON_EVALUATED_CONTROL_STRUCTURE_START); return IF; }
         "ELSE IF" {ExtendedSpaceBasedEndMarker}?     { yypushback(yylength() - "ELSE IF".length()); enterNewState(PYTHON_EVALUATED_CONTROL_STRUCTURE_START); return ELSE_IF; }
         "ELSE" {ExtendedKeywordFinishedMarker}?      { yypushback(yylength() - "ELSE".length()); return ELSE; }
@@ -595,21 +597,45 @@ LineComment = {LineCommentSign} {NON_EOL}*
 }
 
 <FOR_STRUCTURE>  {
-    "IN" {ExtendedSpaceBasedEndMarker}            { yypushback(yylength() - "IN".length()); yybegin(FOR_STRUCTURE_LOOP_START); return FOR_IN; }
-    "IN ENUMERATE" {ExtendedSpaceBasedEndMarker}  { yypushback(yylength() - "IN ENUMERATE".length()); yybegin(FOR_STRUCTURE_LOOP_START); return FOR_IN; }
-    "IN RANGE" {ExtendedSpaceBasedEndMarker}      { yypushback(yylength() - "IN RANGE".length()); yybegin(FOR_STRUCTURE_LOOP_START); return FOR_IN; }
-    "IN ZIP" {ExtendedSpaceBasedEndMarker}        { yypushback(yylength() - "IN ZIP".length()); yybegin(FOR_STRUCTURE_LOOP_START); return FOR_IN; }
-    "END" {EOL}                                   { yypushback(1); leaveState(); return END; }
-    {EOL}+                                        { leaveState(); return EOL; }
+    "IN" {ExtendedKeywordFinishedMarker}            { yypushback(yylength() - "IN".length()); yybegin(FOR_STRUCTURE_LOOP_START); return FOR_IN; }
+    "IN ENUMERATE" {ExtendedKeywordFinishedMarker}  { yypushback(yylength() - "IN ENUMERATE".length()); yybegin(FOR_STRUCTURE_LOOP_START); return FOR_IN_ENUMERATE; }
+    "IN RANGE" {ExtendedKeywordFinishedMarker}      { yypushback(yylength() - "IN RANGE".length()); yybegin(FOR_STRUCTURE_LOOP_START); return FOR_IN_RANGE; }
+    "IN ZIP" {ExtendedKeywordFinishedMarker}        { yypushback(yylength() - "IN ZIP".length()); yybegin(FOR_STRUCTURE_LOOP_START); return FOR_IN_ZIP; }
+    "END" {EOL}                                     { yypushback(1); leaveState(); return END; }
+    {EOL}+                                          { leaveState(); return EOL; }
 }
 
 <SIMPLE_CONTROL_STRUCTURE_START>            {ExtendedSpaceBasedEndMarker}      { yybegin(SIMPLE_CONTROL_STRUCTURE); return WHITE_SPACE; }
-<FOR_STRUCTURE_LOOP_START>                  {ExtendedSpaceBasedEndMarker}      { yybegin(FOR_STRUCTURE_LOOP); return WHITE_SPACE; }
-<PYTHON_EVALUATED_CONTROL_STRUCTURE_START>  {ExtendedSpaceBasedEndMarker}      { yybegin(PYTHON_EXECUTED_CONDITION); return WHITE_SPACE; }
+<FOR_STRUCTURE_LOOP_START> {
+    {ExtendedSpaceBasedEndMarker}           { yybegin(FOR_STRUCTURE_LOOP); return WHITE_SPACE; }
+    [^]                                     { yypushback(yylength()); yybegin(FOR_STRUCTURE_LOOP); break; }
+}
+<PYTHON_EVALUATED_CONTROL_STRUCTURE_START>  {
+    {ExtendedSpaceBasedEndMarker}           { yybegin(PYTHON_EXECUTED_CONDITION); return WHITE_SPACE; }
+    [^]                                     { yypushback(yylength()); yybegin(PYTHON_EXECUTED_CONDITION); break; }
+}
 <PYTHON_EXECUTED_CONDITION>  {
     {EverythingButVariableValue}            { return PYTHON_EXPRESSION_CONTENT; }
     {ExtendedSpaceBasedEndMarker}           { leaveState(); return EOS; }
     {EOL}+                                  { leaveState(); yypushback(yylength()); break; }
+    {MultiLine}                             {
+      if (previousStates[currentIndex] == WHILE_CONFIGURATION) {
+          pushBackTrailingWhitespace();
+          yypushback(3);
+          leaveState();
+          return EOS;
+      } else {
+          yypushback(yylength());
+          leaveState();
+          break;
+      }
+    }
+}
+
+<WHILE_CONFIGURATION> {
+    {Continuation}                          { return CONTINUATION; }
+    {NonNewlineWhitespace}+                 { return WHITE_SPACE; }
+    [^]                                     { yypushback(yylength()); leaveState(); break; }
 }
 
 <SIMPLE_CONTROL_STRUCTURE> {

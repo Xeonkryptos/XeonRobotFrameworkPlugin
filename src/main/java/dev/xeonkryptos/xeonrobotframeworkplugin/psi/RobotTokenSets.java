@@ -5,9 +5,9 @@ import com.intellij.psi.tree.TokenSet;
 
 public class RobotTokenSets {
 
-    public static final TokenSet WHITESPACE_SET = TokenSet.create(TokenType.WHITE_SPACE);
+    public static final TokenSet WHITESPACE_SET = TokenSet.create(TokenType.WHITE_SPACE, RobotTypes.CONTINUATION);
     public static final TokenSet COMMENTS_SET = TokenSet.create(RobotTypes.COMMENT);
-    public static final TokenSet STRING_SET = TokenSet.create(RobotTypes.LITERAL_CONSTANT_VALUE, RobotTypes.LITERAL_CONSTANT);
+    public static final TokenSet STRING_SET = TokenSet.create(RobotTypes.LITERAL_CONSTANT);
 
     public static final TokenSet GHERKIN_SET = TokenSet.create(RobotTypes.GIVEN, RobotTypes.WHEN, RobotTypes.THEN, RobotTypes.AND, RobotTypes.BUT);
     public static final TokenSet LOOP_KEYWORDS_SET = TokenSet.create(RobotTypes.FOR, RobotTypes.FOR_IN, RobotTypes.WHILE, RobotTypes.END);
@@ -39,4 +39,6 @@ public class RobotTokenSets {
                                                                       RobotTypes.UNKNOWN_SETTING_STATEMENTS_GLOBAL_SETTING);
 
     public static final TokenSet TEMPLATE_VALUES_HOLDER_SET = TokenSet.create(RobotTypes.TEMPLATE_PARAMETER, RobotTypes.TEMPLATE_ARGUMENT);
+
+    public static final TokenSet FOR_LOOP_IN_TYPES = TokenSet.create(RobotTypes.FOR_IN, RobotTypes.FOR_IN_RANGE, RobotTypes.FOR_IN_ENUMERATE, RobotTypes.FOR_IN_ZIP);
 }

@@ -80,6 +80,9 @@ public class RobotHighlighter extends SyntaxHighlighterBase {
         keys.put(RobotTypes.VAR, STRUCTURAL_KEYWORDS);
         keys.put(RobotTypes.FOR, STRUCTURAL_KEYWORDS);
         keys.put(RobotTypes.FOR_IN, STRUCTURAL_KEYWORDS);
+        keys.put(RobotTypes.FOR_IN_ENUMERATE, STRUCTURAL_KEYWORDS);
+        keys.put(RobotTypes.FOR_IN_RANGE, STRUCTURAL_KEYWORDS);
+        keys.put(RobotTypes.FOR_IN_ZIP, STRUCTURAL_KEYWORDS);
         keys.put(RobotTypes.WHILE, STRUCTURAL_KEYWORDS);
         keys.put(RobotTypes.TRY, STRUCTURAL_KEYWORDS);
         keys.put(RobotTypes.EXCEPT, STRUCTURAL_KEYWORDS);

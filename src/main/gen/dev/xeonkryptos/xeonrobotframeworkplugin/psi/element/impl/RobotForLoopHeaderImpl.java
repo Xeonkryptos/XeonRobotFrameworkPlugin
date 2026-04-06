@@ -46,9 +46,8 @@ public class RobotForLoopHeaderImpl extends RobotPsiElementBase implements Robot
   }
 
   @Override
-  @Nullable
   public PsiElement getForInElement() {
-    return findChildByType(FOR_IN);
+    return RobotPsiUtil.getForInElement(this);
   }
 
 }

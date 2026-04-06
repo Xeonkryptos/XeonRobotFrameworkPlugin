@@ -245,7 +245,7 @@ private call_structure ::= eol_based_keyword_call | inline_variable_statement | 
 loop_control_structure ::= (BREAK | CONTINUE) eol_marker?
 return_structure ::= RETURN positional_argument* eol_marker? {pin=1}
 
-for_loop_structure ::= for_loop_header eol_marker executable_statement* END eol_marker {
+for_loop_structure ::= for_loop_header_base eol_marker executable_statement* END eol_marker {
     pin=1
     implements=[
         "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotBlockOpeningStructure"
@@ -253,11 +253,22 @@ for_loop_structure ::= for_loop_header eol_marker executable_statement* END eol_
     ]
     mixin="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotForLoopStructureExtension"
 }
-for_loop_header ::= FOR variable_definition+ FOR_IN positional_argument+ for_loop_structure_parameter* {pin=1 methods=[forInElement="FOR_IN"]}
+
+private for_loop_header_base ::= for_in_loop_header | for_in_range_loop_header | for_in_enumerate_loop_header | for_in_zip_loop_header
+fake for_loop_header ::= FOR variable_definition+ (FOR_IN | FOR_IN_RANGE | FOR_IN_ENUMERATE | FOR_IN_ZIP) positional_argument+ for_loop_structure_parameter* {methods=[getForInElement]}
+for_in_loop_header ::= FOR variable_definition+ FOR_IN positional_argument+ for_loop_structure_parameter* {pin=3 elementType=for_loop_header}
+for_in_range_loop_header ::= FOR variable_definition FOR_IN_RANGE positional_argument positional_argument? positional_argument? for_loop_structure_parameter* {
+    pin=3
+    elementType=for_loop_header
+}
+for_in_enumerate_loop_header ::= FOR variable_definition+ FOR_IN_ENUMERATE positional_argument+ for_loop_structure_parameter* {pin=3 elementType=for_loop_header}
+for_in_zip_loop_header ::= FOR variable_definition+ FOR_IN_ZIP positional_argument positional_argument+ for_loop_structure_parameter* {pin=3 elementType=for_loop_header}
+
 for_loop_structure_parameter ::= for_loop_structure_fill_parameter | for_loop_structure_mode_parameter | for_loop_structure_start_parameter
 for_loop_structure_mode_parameter ::= "mode" ASSIGNMENT ("STRICT" | "SHORTEST" | "LONGEST") {pin=2}
 for_loop_structure_fill_parameter ::= "fill" ASSIGNMENT positional_argument {pin=2}
 for_loop_structure_start_parameter ::= "start" ASSIGNMENT positional_argument {pin=2}
+
 while_loop_structure ::= while_loop_header eol_marker executable_statement* END eol_marker {
     pin=1
     implements=[
@@ -476,3 +487,5 @@ variable_nested_access_content ::= (variable | literal_constant_value)+
 literal_constant_value ::= LITERAL_CONSTANT
 
 private eol_marker ::= EOL+ | <<eof>>
+//noinspection BnfUnusedRule - Simply need the token to be generated, nothing else. It will be handled as a WHITESPACE token
+private CONTINUATION_MARKER ::= CONTINUATION

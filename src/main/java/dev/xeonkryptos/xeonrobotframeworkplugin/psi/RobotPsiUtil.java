@@ -28,6 +28,7 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.misc.RobotReadWriteAccessDetecto
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.FoldingText;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotCommentsSection;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotDictVariable;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotForLoopHeader;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotImportArgument;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotInlineVariableStatement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCall;
@@ -359,6 +360,11 @@ public class RobotPsiUtil {
     @NotNull
     public static String getSectionName(@NotNull RobotKeywordsSection section) {
         return section.getNameIdentifier().getText();
+    }
+
+    public static PsiElement getForInElement(@NotNull RobotForLoopHeader header) {
+        ASTNode node = header.getNode().findChildByType(RobotTokenSets.FOR_LOOP_IN_TYPES);
+        return node == null ? null : node.getPsi();
     }
 
     public static FoldingText getAssignedValues(@NotNull RobotVariable variable) {

@@ -16,7 +16,6 @@ public interface RobotForLoopHeader extends RobotElement {
   @NotNull
   List<RobotVariableDefinition> getVariableDefinitionList();
 
-  @Nullable
   PsiElement getForInElement();
 
 }
