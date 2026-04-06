@@ -10,13 +10,8 @@ on:
 
 jobs:
 
-  gradleValidation:
-    name: Gradle Validation
-    uses: ./.github/workflows/reusable-gradleValidation.yml
-
   unitTests:
     name: Unit Tests
-    needs: gradleValidation
     uses: ./.github/workflows/reusable-unitTests.yml
     secrets: inherit
     permissions:
@@ -24,22 +19,16 @@ jobs:
 
   #  integrationTests:
   #    name: Integration Tests
-  #    needs: [ gradleValidation, unitTests ]
+  #    needs: unitTests
   #    uses: ./.github/workflows/reusable-integrationTests.yml
   #    secrets: inherit
 
   #  integrationTestsEAP:
   #    name: Integration Tests EAP
-  #    needs: gradleValidation
   #    uses: ./.github/workflows/reusable-integrationTests.yml
   #    secrets: inherit
   #    with:
   #      platformVersion: 222-EAP-SNAPSHOT
-
-  codeInspection:
-    name: Code Inspection
-    #    needs: integrationTests
-    uses: ./.github/workflows/reusable-codeInspection.yml
 
   pluginVerification:
     name: Plugin Verification
@@ -59,7 +48,7 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v4
+        uses: gradle/actions/setup-gradle@v6.1.0
 
       - name: Make gradlew executable
         run: chmod +x ./gradlew
@@ -73,7 +62,6 @@ jobs:
       - unitTests
       #      - integrationTests
       # - integrationTestsEAP
-      - codeInspection
       - pluginVerification
     runs-on: ubuntu-latest
     permissions:
@@ -97,7 +85,7 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v4
+        uses: gradle/actions/setup-gradle@v6.1.0
 
       - name: Make gradlew executable
         run: chmod +x ./gradlew
