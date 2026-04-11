@@ -47,6 +47,9 @@ class KeywordParameterEvaluator {
         // Removing the first parameters based on defined positional arguments. With positional arguments given, the first parameters can't be available anymore
         // As an addition, RobotParameter's isFakeParameter() does handle any keyword container logic for us
         for (long i = 0; i < positionalArgumentsCount; i++) {
+            if (availableParameters.isEmpty()) {
+                break;
+            }
             availableParameters.removeFirst();
         }
         removeMatchingParameters(definedParameters, availableParameters, project);
