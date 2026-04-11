@@ -19,9 +19,7 @@ import com.intellij.util.Processor;
 import dev.xeonkryptos.xeonrobotframeworkplugin.config.RobotOptionsProvider;
 import dev.xeonkryptos.xeonrobotframeworkplugin.index.PyRobotKeywordDefinitionIndex.PyRobotKeywordDefinitionIndexUtil;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.dto.ImportType;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.dto.ParameterDto;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.DefinedKeyword;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.DefinedParameter;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.KeywordFile;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotFile;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCall;
@@ -52,13 +50,11 @@ class KeywordCompletionProvider extends CompletionProvider<CompletionParameters>
             return;
         }
 
-        Collection<DefinedParameter> alreadyAddedParameters = keywordCall.getParameterList().stream().map(param -> new ParameterDto(param, param.getParameterName(), null)).collect(Collectors.toSet());
-
         RobotFile robotFile = (RobotFile) parameters.getOriginalFile();
-        addDefinedKeywords(result, robotFile, alreadyAddedParameters);
+        addDefinedKeywords(result, robotFile);
     }
 
-    private void addDefinedKeywords(CompletionResultSet result, RobotFile robotFile, Collection<DefinedParameter> alreadyAddedParameters) {
+    private void addDefinedKeywords(CompletionResultSet result, RobotFile robotFile) {
         Project project = robotFile.getProject();
         VirtualFile virtualFile = robotFile.getVirtualFile();
         if (virtualFile == null) {
@@ -79,7 +75,7 @@ class KeywordCompletionProvider extends CompletionProvider<CompletionParameters>
         Collection<DefinedKeyword> constructedPythonKeywords = PyRobotKeywordDefinitionIndexUtil.getKeywordNames(project, searchScope, null);
         definedKeywords.addAll(constructedPythonKeywords);
 
-        Collection<LookupElement> wrappedKeywords = wrapDefinedKeywordsIntoLookupElements(definedKeywords, capitalizeKeywords, alreadyAddedParameters);
+        Collection<LookupElement> wrappedKeywords = wrapDefinedKeywordsIntoLookupElements(definedKeywords, capitalizeKeywords);
         wrappedKeywords.forEach(lookupElement -> {
             lookupElement.putUserData(CompletionKeys.ROBOT_LOOKUP_CONTEXT, RobotLookupContext.KEYWORDS);
             lookupElement.putUserData(CompletionKeys.ROBOT_LOOKUP_ELEMENT_TYPE, RobotLookupElementType.KEYWORD);
@@ -105,7 +101,7 @@ class KeywordCompletionProvider extends CompletionProvider<CompletionParameters>
         }
     }
 
-    private Collection<LookupElement> wrapDefinedKeywordsIntoLookupElements(Collection<DefinedKeyword> keywords, boolean capitalize, Collection<DefinedParameter> alreadyAddedParameters) {
+    private Collection<LookupElement> wrapDefinedKeywordsIntoLookupElements(Collection<DefinedKeyword> keywords, boolean capitalize) {
         List<LookupElement> lookupElementKeywords = new ArrayList<>();
         for (DefinedKeyword keyword : keywords) {
             String keywordName = keyword.getKeywordName();
