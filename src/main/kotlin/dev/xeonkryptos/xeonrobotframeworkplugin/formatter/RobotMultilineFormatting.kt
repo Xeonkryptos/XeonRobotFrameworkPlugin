@@ -105,7 +105,7 @@ class RobotPreFormatProcessor : PreFormatProcessor {
         val sequences = collectContinuationSequencesFromAST(element, document, currentRange) // Even if there's nothing to collapse, attach metadata (wrapping may still
         // apply to single-line statements that are too long).
         file.putUserData(STATEMENT_METADATA_KEY, metadata)
-        if (sequences.isEmpty()) return currentRange
+        if (sequences.isEmpty()) return range
 
         var totalDelta = 0
         val commonSettings = CodeStyle.getLanguageSettings(file, RobotLanguage.INSTANCE)
@@ -635,7 +635,11 @@ class RobotPostFormatProcessor : PostFormatProcessor {
 
     private val sectionNameNormalizationRegex = Regex("[\\s*]")
 
-    override fun processElement(source: PsiElement, settings: CodeStyleSettings): PsiElement = source.also { processText(it.containingFile, it.textRange, settings) }
+    override fun processElement(source: PsiElement, settings: CodeStyleSettings): PsiElement {
+        val psiFile = source.containingFile
+        val textRange = processText(psiFile, source.textRange, settings)
+        return psiFile.findElementAt(textRange.startOffset) ?: source
+    }
 
     override fun processText(source: PsiFile, rangeToReformat: TextRange, settings: CodeStyleSettings): TextRange {
         if (source.language !== RobotLanguage.INSTANCE) return rangeToReformat

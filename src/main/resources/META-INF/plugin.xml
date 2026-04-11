@@ -217,6 +217,12 @@
         <renameHandler implementation="dev.xeonkryptos.xeonrobotframeworkplugin.rename.RobotMemberInplaceRenameHandler"/>
 
         <codeFoldingOptionsProvider instance="dev.xeonkryptos.xeonrobotframeworkplugin.config.RobotCodeFoldingOptionsProvider"/>
+
+        <intentionAction>
+            <language>Robot</language>
+            <className>dev.xeonkryptos.xeonrobotframeworkplugin.actions.OptionalKeywordParametersInserterIntentionAction</className>
+            <categoryKey>options.entrypoint</categoryKey>
+        </intentionAction>
     </extensions>
     <actions>
         <action id="XeonRobotFrameworkPlugin.CreateNew" class="dev.xeonkryptos.xeonrobotframeworkplugin.actions.RobotCreateAction">

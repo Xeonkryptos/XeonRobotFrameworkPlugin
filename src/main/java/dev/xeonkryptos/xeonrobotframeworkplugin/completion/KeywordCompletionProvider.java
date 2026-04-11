@@ -34,7 +34,6 @@ import org.apache.commons.text.WordUtils;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -53,22 +52,13 @@ class KeywordCompletionProvider extends CompletionProvider<CompletionParameters>
             return;
         }
 
-        String name = keywordCall.getName();
-        KeywordCompletionModification keywordCompletionModification = KeywordCompletionModification.NONE;
-        if (!name.isEmpty()) {
-            char firstCharacter = name.charAt(0);
-            keywordCompletionModification = Arrays.stream(KeywordCompletionModification.values())
-                                                  .filter(modification -> modification.getIdentifier() != null && firstCharacter == modification.getIdentifier())
-                                                  .findFirst()
-                                                  .orElse(KeywordCompletionModification.NONE);
-        }
         Collection<DefinedParameter> alreadyAddedParameters = keywordCall.getParameterList().stream().map(param -> new ParameterDto(param, param.getParameterName(), null)).collect(Collectors.toSet());
 
         RobotFile robotFile = (RobotFile) parameters.getOriginalFile();
-        addDefinedKeywords(result, robotFile, keywordCompletionModification, alreadyAddedParameters);
+        addDefinedKeywords(result, robotFile, alreadyAddedParameters);
     }
 
-    private void addDefinedKeywords(CompletionResultSet result, RobotFile robotFile, KeywordCompletionModification keywordCompletionModification, Collection<DefinedParameter> alreadyAddedParameters) {
+    private void addDefinedKeywords(CompletionResultSet result, RobotFile robotFile, Collection<DefinedParameter> alreadyAddedParameters) {
         Project project = robotFile.getProject();
         VirtualFile virtualFile = robotFile.getVirtualFile();
         if (virtualFile == null) {
@@ -89,7 +79,7 @@ class KeywordCompletionProvider extends CompletionProvider<CompletionParameters>
         Collection<DefinedKeyword> constructedPythonKeywords = PyRobotKeywordDefinitionIndexUtil.getKeywordNames(project, searchScope, null);
         definedKeywords.addAll(constructedPythonKeywords);
 
-        Collection<LookupElement> wrappedKeywords = wrapDefinedKeywordsIntoLookupElements(definedKeywords, capitalizeKeywords, keywordCompletionModification, alreadyAddedParameters);
+        Collection<LookupElement> wrappedKeywords = wrapDefinedKeywordsIntoLookupElements(definedKeywords, capitalizeKeywords, alreadyAddedParameters);
         wrappedKeywords.forEach(lookupElement -> {
             lookupElement.putUserData(CompletionKeys.ROBOT_LOOKUP_CONTEXT, RobotLookupContext.KEYWORDS);
             lookupElement.putUserData(CompletionKeys.ROBOT_LOOKUP_ELEMENT_TYPE, RobotLookupElementType.KEYWORD);
@@ -115,10 +105,7 @@ class KeywordCompletionProvider extends CompletionProvider<CompletionParameters>
         }
     }
 
-    private Collection<LookupElement> wrapDefinedKeywordsIntoLookupElements(Collection<DefinedKeyword> keywords,
-                                                                            boolean capitalize,
-                                                                            KeywordCompletionModification keywordCompletionModification,
-                                                                            Collection<DefinedParameter> alreadyAddedParameters) {
+    private Collection<LookupElement> wrapDefinedKeywordsIntoLookupElements(Collection<DefinedKeyword> keywords, boolean capitalize, Collection<DefinedParameter> alreadyAddedParameters) {
         List<LookupElement> lookupElementKeywords = new ArrayList<>();
         for (DefinedKeyword keyword : keywords) {
             String keywordName = keyword.getKeywordName();
@@ -127,14 +114,10 @@ class KeywordCompletionProvider extends CompletionProvider<CompletionParameters>
             if (libraryName != null) {
                 displayName = libraryName + "." + displayName;
             }
-            List<String> lookupStrings = Stream.of(keywordName, WordUtils.capitalize(keywordName), keywordName.toLowerCase()).flatMap(lookup -> {
-                Character identifier = keywordCompletionModification.getIdentifier();
-                String identifierText = identifier != null ? String.valueOf(identifier) : "";
-                if (libraryName != null) {
-                    return Stream.of(identifierText + libraryName + "." + lookup, identifierText + lookup);
-                }
-                return Stream.of(identifierText + lookup);
-            }).flatMap(lookup -> Stream.of(lookup, RobotUtil.normalizeRobotIdentifier(lookup))).toList();
+            List<String> lookupStrings = Stream.of(keywordName, WordUtils.capitalize(keywordName), keywordName.toLowerCase())
+                                               .flatMap(lookup -> libraryName != null ? Stream.of(libraryName + "." + lookup, lookup) : Stream.of(lookup))
+                                               .flatMap(lookup -> Stream.of(lookup, RobotUtil.normalizeRobotIdentifier(lookup)))
+                                               .toList();
             LookupElementBuilder lookupElement = LookupElementBuilder.create(displayName)
                                                                      .withLookupStrings(lookupStrings)
                                                                      .withPresentableText(displayName)
@@ -147,12 +130,7 @@ class KeywordCompletionProvider extends CompletionProvider<CompletionParameters>
                 decoratedElement = decoratedElement.withTailText(displayName);
             }
 
-            TailTypeDecorator<LookupElementBuilder> tailTypeDecorator;
-            if (keyword.hasParameters()) {
-                tailTypeDecorator = keywordCompletionModification.createTail(decoratedElement, keyword, alreadyAddedParameters);
-            } else {
-                tailTypeDecorator = TailTypeDecorator.withTail(decoratedElement, TailTypes.noneType());
-            }
+            TailTypeDecorator<LookupElementBuilder> tailTypeDecorator = TailTypeDecorator.withTail(decoratedElement, TailTypes.noneType());
             lookupElementKeywords.add(tailTypeDecorator);
         }
         return lookupElementKeywords;

@@ -36,20 +36,6 @@ Inspect your code, find things to improve/optimize, find potential bugs and more
 
 ### Code Completion
 
-Besides the normal suggestion of keywords, imports, variables and whatever can be code completed, for keywords you can prefix them with
-\* (star) or / (slash) to extend the code completion feature by changing what is added on acceptance of the code completion.
-
-* With the \* (star) you can add the keyword with its mandatory parameter names already added for you. Mandatory parameters are identified
-  by taking a look at the python function, searching for keyword arguments and checking if they have a default value or not. With a missing
-  default value, they're considered mandatory.
-* With the / (slash) you can add the keyword with all its defined parameter names already added for you.
-
-It can be used in combination with the TAB feature of the IDE too. Especially useful for an already defined keyword, you can add the
-mandatory or all parameters.
-
-If you also use type hints in your Python code and one of the parameters you want to fill references to an enum, the enum values are added
-to the completion list for the parameter.
-
 ![](https://raw.githubusercontent.com/xeonkryptos/XeonRobotFrameworkPlugin/main/docs/imgs/code-completion.jpg)
 
 ### SMT Console View

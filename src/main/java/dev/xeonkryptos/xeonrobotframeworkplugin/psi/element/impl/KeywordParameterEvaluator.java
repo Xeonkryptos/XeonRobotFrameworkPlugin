@@ -5,6 +5,8 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.config.RobotOptionsProvider;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.DefinedParameter;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotCallArgumentsContainer;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCall;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotParameter;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotPositionalArgument;
 
 import java.text.Collator;
 import java.util.Collection;
@@ -37,7 +39,16 @@ class KeywordParameterEvaluator {
     public static Collection<DefinedParameter> computeMissingParameters(RobotKeywordCall keywordCall, RobotCallArgumentsContainer container) {
         Project project = keywordCall.getProject();
         Collection<String> definedParameters = container.getDefinedParameterNames();
-        Collection<DefinedParameter> availableParameters = new LinkedHashSet<>(keywordCall.getAvailableParameters());
+        LinkedHashSet<DefinedParameter> availableParameters = new LinkedHashSet<>(keywordCall.getAvailableParameters());
+        long positionalArgumentsCount = keywordCall.getAllCallArguments()
+                                                   .stream()
+                                                   .filter(argument -> argument instanceof RobotPositionalArgument || ((RobotParameter) argument).isFakeParameter())
+                                                   .count();
+        // Removing the first parameters based on defined positional arguments. With positional arguments given, the first parameters can't be available anymore
+        // As an addition, RobotParameter's isFakeParameter() does handle any keyword container logic for us
+        for (long i = 0; i < positionalArgumentsCount; i++) {
+            availableParameters.removeFirst();
+        }
         removeMatchingParameters(definedParameters, availableParameters, project);
         return availableParameters;
     }

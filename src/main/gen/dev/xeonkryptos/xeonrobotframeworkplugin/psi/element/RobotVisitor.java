@@ -245,6 +245,7 @@ public class RobotVisitor extends PsiElementVisitor {
 
   public void visitParameter(@NotNull RobotParameter o) {
     visitArgument(o);
+    // visitFakeParameterIdentifier(o);
     // visitElement(o);
   }
 

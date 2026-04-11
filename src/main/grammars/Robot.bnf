@@ -376,7 +376,8 @@ keyword_call_library_name ::= KEYWORD_LIBRARY_NAME {methods = [getReference]}
 
 parameter ::= parameter_id PARAMETER_ASSIGNMENT positional_argument? {
     methods=[getParameterName]
-    implements="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotArgument"
+    implements=["dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotArgument" "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.FakeParameterIdentifier"]
+    mixin="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotParameterExtension"
 }
 parameter_id ::= PARAMETER_NAME {methods = [getReference]}
 

@@ -29,6 +29,7 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotUserKeywordStat
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariable;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableContent;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.visitor.RecursiveRobotVisitor;
+import dev.xeonkryptos.xeonrobotframeworkplugin.util.GlobalConstants;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -116,11 +117,15 @@ public record RobotElementGenerator(Project project) {
     }
 
     public RobotParameter createNewParameter(String parameterId) {
+        return createNewParameter(parameterId, GlobalConstants.SUPER_SPACE);
+    }
+
+    public RobotParameter createNewParameter(String parameterId, String parameterValue) {
         String fileContent = """
                              *** Test Case ***
                              Dummy
-                                 Keyword  %s=\s\s
-                             """.formatted(parameterId);
+                                 Keyword  %s=%s
+                             """.formatted(parameterId, parameterValue);
 
         PsiFile psiFile = createDummyPsiFile(fileContent);
         if (psiFile == null) {
