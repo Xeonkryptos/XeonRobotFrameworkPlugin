@@ -8,6 +8,7 @@
 
 - Support for code formatting
 - Support to configure new code folding under `Settings -> Editor -> General -> Code Folding -> Robot`
+- Support for variables in test case and task names
 
 ### Changed
 
@@ -23,6 +24,7 @@
 - Fixed inconsistent code completion suggestions for keywords (some keywords weren't shown in the results list even though they matched the input)
 - Fixed resolving of template parameter names in data driven tests
 - Fixed parsing of global setting metadata
+- Fixed incorrect testcase, task and keyword name detection in some constellations with special characters in their names
 
 ## 0.6.1
 

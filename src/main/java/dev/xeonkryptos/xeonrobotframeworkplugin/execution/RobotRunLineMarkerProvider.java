@@ -12,6 +12,7 @@ import com.intellij.psi.PsiDocumentManager;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.tree.IElementType;
+import com.intellij.psi.tree.TokenSet;
 import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.psi.util.PsiUtilCore;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotResourceFileType;
@@ -24,12 +25,11 @@ import org.jetbrains.annotations.Nullable;
 
 import javax.swing.Icon;
 import java.util.Collection;
-import java.util.Set;
 
 public class RobotRunLineMarkerProvider extends RunLineMarkerContributor implements DumbAware {
 
-    private static final Set<IElementType> EXECUTABLE_SECTION_TYPES = Set.of(RobotTypes.TEST_CASES_HEADER, RobotTypes.TASKS_HEADER);
-    private static final Set<IElementType> EXECUTABLE_ELEMENT_TYPES = Set.of(RobotTypes.TEST_CASE_NAME, RobotTypes.TASK_NAME);
+    private static final TokenSet EXECUTABLE_SECTION_TYPES = TokenSet.create(RobotTypes.TEST_CASES_HEADER, RobotTypes.TASKS_HEADER);
+    private static final TokenSet EXECUTABLE_ELEMENT_TYPES = TokenSet.create(RobotTypes.TEST_CASE_NAME_PART, RobotTypes.TASK_NAME_PART);
 
     @Nullable
     @Override

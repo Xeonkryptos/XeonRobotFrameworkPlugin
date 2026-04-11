@@ -60,9 +60,7 @@ class RobotBlock(node: ASTNode, private val context: RobotBlockContext, wrap: Wr
             RobotTypes.FINALLY,
             RobotTypes.END,
             RobotTypes.USER_KEYWORD_STATEMENT_ID,
-            RobotTypes.TEST_CASE_NAME,
             RobotTypes.TEST_CASE_ID,
-            RobotTypes.TASK_NAME,
             RobotTypes.TASK_ID)
         private val FLATTENABLE_TYPES = TokenSet.create(RobotTypes.EXECUTABLE_STATEMENT, RobotTypes.LOCAL_ARGUMENTS_SETTING_PARAMETER, RobotTypes.LITERAL_CONSTANT_VALUE)
     }
@@ -252,14 +250,18 @@ class RobotBlock(node: ASTNode, private val context: RobotBlockContext, wrap: Wr
 
     override fun getChildAttributes(newChildIndex: Int): ChildAttributes {
         val myParent = parent
-        if (myParent == null && newChildIndex >= subBlocks.size) {
-            return ChildAttributes.DELEGATE_TO_PREV_CHILD
-        } else if (myParent != null && isChildAttributesForContinuationTokenRequested(newChildIndex)) {
-            return ChildAttributes.DELEGATE_TO_PREV_CHILD
-        } else if (myNode.elementType === RobotTypes.ROOT) {
-            val lastSubBlock = subBlocks.lastOrNull()
-            val childAttributes = lastSubBlock?.getChildAttributes(lastSubBlock.subBlocks.size)
-            if (childAttributes != null) return childAttributes
+        when {
+            myParent == null && newChildIndex >= subBlocks.size -> {
+                return ChildAttributes.DELEGATE_TO_PREV_CHILD
+            }
+            myParent != null && isChildAttributesForContinuationTokenRequested(newChildIndex) -> {
+                return ChildAttributes.DELEGATE_TO_PREV_CHILD
+            }
+            myNode.elementType === RobotTypes.ROOT -> {
+                val lastSubBlock = subBlocks.lastOrNull()
+                val childAttributes = lastSubBlock?.getChildAttributes(lastSubBlock.subBlocks.size)
+                if (childAttributes != null) return childAttributes
+            }
         }
         return super.getChildAttributes(newChildIndex)
     }

@@ -390,15 +390,24 @@ LineComment = {LineCommentSign} {NON_EOL}*
     {EOL}+                                             { leaveState(); return EOL; }
 }
 
-<TESTCASE_NAME_DEFINITION>     ^ {LiteralValue}    { enterNewState(TESTCASE_DEFINITION); pushBackTrailingWhitespace(); return TEST_CASE_NAME; }
-<TASK_NAME_DEFINITION>         ^ {LiteralValue}    { enterNewState(TASK_DEFINITION); pushBackTrailingWhitespace(); return TASK_NAME; }
-<USER_KEYWORD_NAME_DEFINITION> ^ {LiteralValue}    { enterNewState(USER_KEYWORD_DEFINITION); pushBackTrailingWhitespace(); return USER_KEYWORD_NAME; }
+<TESTCASE_NAME_DEFINITION>     {
+    {EverythingButVariableValue}    { pushBackTrailingWhitespace(); return TEST_CASE_NAME_PART; }
+    {EOL}+                          { yybegin(TESTCASE_DEFINITION); return EOL; }
+}
+<TASK_NAME_DEFINITION>         {
+    {EverythingButVariableValue}    { pushBackTrailingWhitespace(); return TASK_NAME_PART; }
+    {EOL}+                          { yybegin(TASK_DEFINITION); return EOL; }
+}
+<USER_KEYWORD_NAME_DEFINITION> {
+    {EverythingButVariableValue}    { pushBackTrailingWhitespace(); return USER_KEYWORD_NAME_PART; }
+    {EOL}+                          { yybegin(USER_KEYWORD_DEFINITION); return EOL; }
+}
 
-<TESTCASE_DEFINITION>          ^ {LiteralValue}    { localTemplateEnabled = globalTemplateEnabled; pushBackTrailingWhitespace(); return TEST_CASE_NAME; }
-<TASK_DEFINITION>              ^ {LiteralValue}    { localTemplateEnabled = globalTemplateEnabled; pushBackTrailingWhitespace(); return TASK_NAME; }
-<USER_KEYWORD_DEFINITION>      ^ {LiteralValue}    { pushBackTrailingWhitespace(); return USER_KEYWORD_NAME; }
+<TESTCASE_DEFINITION>          ^ [^\s#] {NON_EOL}+ {EOL}*    { localTemplateEnabled = globalTemplateEnabled; yypushback(yylength()); yybegin(TESTCASE_NAME_DEFINITION); break; }
+<TASK_DEFINITION>              ^ [^\s#] {NON_EOL}+ {EOL}*    { localTemplateEnabled = globalTemplateEnabled; yypushback(yylength()); yybegin(TASK_NAME_DEFINITION); break; }
+<USER_KEYWORD_DEFINITION>      ^ [^\s#] {NON_EOL}+ {EOL}*    { yypushback(yylength()); yybegin(USER_KEYWORD_NAME_DEFINITION); break; }
 
-<KEYWORD_ARGUMENTS, KEYWORD_ARGUMENTS, TESTCASE_DEFINITION, TASK_DEFINITION, USER_KEYWORD_DEFINITION, SETTINGS_SECTION> {
+<KEYWORD_ARGUMENTS, SETTINGS_SECTION> {
     <SETTING, FOR_STRUCTURE_LOOP, WHILE_CONFIGURATION> {
         {EverythingButVariableValue} {EqualSign} {
               yypushback(1);
@@ -412,7 +421,9 @@ LineComment = {LineCommentSign} {NON_EOL}*
               return PARAMETER_NAME;
         }
     }
-    {EqualSign} {KeywordFinishedMarker}           { pushBackTrailingWhitespace(); return ASSIGNMENT; }
+    <TESTCASE_DEFINITION, TASK_DEFINITION, USER_KEYWORD_DEFINITION> {
+        {EqualSign} {KeywordFinishedMarker}           { pushBackTrailingWhitespace(); return ASSIGNMENT; }
+    }
 }
 <INTERMEDIATE_TEMPLATE_CONFIGURATION> {
     {ExtendedSpaceBasedEndMarker} "NONE" {ExtendedKeywordFinishedMarker}  {
@@ -462,11 +473,16 @@ LineComment = {LineCommentSign} {NON_EOL}*
               return LOCAL_SETTING_START;
         }
     }
-    ^ {LiteralValue}    {
+    ^ [^\s#] {NON_EOL}+ {EOL}*    {
         localTemplateEnabled = globalTemplateEnabled;
         leaveState();
-        pushBackTrailingWhitespace();
-        return yystate() == TESTCASE_DEFINITION ? TEST_CASE_NAME : TASK_NAME;
+        yypushback(yylength());
+        if (yystate() == TESTCASE_DEFINITION) {
+            yybegin(TESTCASE_NAME_DEFINITION);
+        } else {
+            yybegin(TASK_NAME_DEFINITION);
+        }
+        break;
     }
     {EverythingButVariableValue} {EqualSign}       {
           yypushback(1);

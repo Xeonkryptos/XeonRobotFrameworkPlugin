@@ -56,12 +56,12 @@ section ::= settings_section
     mixin="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotSectionExtension"
 }
 
-settings_section ::= SETTINGS_HEADER global_setting_statement* {methods=[nameIdentifier="SETTINGS_HEADER" getSectionName]}
-variables_section ::= VARIABLES_HEADER single_variable_statement* {methods=[nameIdentifier="VARIABLES_HEADER" getSectionName]}
-test_cases_section ::= TEST_CASES_HEADER test_case_statement* {methods=[nameIdentifier="TEST_CASES_HEADER" getSectionName] implements="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotScopeOwner"}
-tasks_section ::= TASKS_HEADER task_statement* {methods=[nameIdentifier="TASKS_HEADER" getSectionName] implements="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotScopeOwner"}
-keywords_section ::= USER_KEYWORDS_HEADER user_keyword_statement* {methods=[nameIdentifier="USER_KEYWORDS_HEADER" getSectionName] implements="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotScopeOwner"}
-comments_section ::= COMMENTS_HEADER COMMENT* {methods=[nameIdentifier="COMMENTS_HEADER" getSectionName]}
+settings_section ::= SETTINGS_HEADER eol_marker? global_setting_statement* {methods=[nameIdentifier="SETTINGS_HEADER" getSectionName]}
+variables_section ::= VARIABLES_HEADER eol_marker? single_variable_statement* {methods=[nameIdentifier="VARIABLES_HEADER" getSectionName]}
+test_cases_section ::= TEST_CASES_HEADER eol_marker? test_case_statement* {methods=[nameIdentifier="TEST_CASES_HEADER" getSectionName] implements="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotScopeOwner"}
+tasks_section ::= TASKS_HEADER eol_marker? task_statement* {methods=[nameIdentifier="TASKS_HEADER" getSectionName] implements="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotScopeOwner"}
+keywords_section ::= USER_KEYWORDS_HEADER eol_marker? user_keyword_statement* {methods=[nameIdentifier="USER_KEYWORDS_HEADER" getSectionName] implements="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotScopeOwner"}
+comments_section ::= COMMENTS_HEADER eol_marker? COMMENT* {methods=[nameIdentifier="COMMENTS_HEADER" getSectionName]}
 private section_recover ::= !(SETTINGS_HEADER | VARIABLES_HEADER | TEST_CASES_HEADER | TASKS_HEADER | USER_KEYWORDS_HEADER | COMMENTS_HEADER)
 
 global_setting_statement ::= library_import_global_setting
@@ -144,7 +144,7 @@ test_case_statement ::= test_case_id eol_marker? testcase_task_statement* {
     recoverWhile=test_case_statement_recover
     hooks=[clearTemplateStateHook]
 }
-test_case_id ::= TEST_CASE_NAME
+test_case_id ::= (TEST_CASE_NAME_PART | variable)+
 private test_case_statement_recover ::= !test_case_id & section_recover
 task_statement ::= task_id eol_marker? testcase_task_statement* {
     pin=1
@@ -162,7 +162,7 @@ task_statement ::= task_id eol_marker? testcase_task_statement* {
     recoverWhile=task_statement_recover
     hooks=[clearTemplateStateHook]
 }
-task_id ::= TASK_NAME
+task_id ::= (TASK_NAME_PART | variable)+
 private task_statement_recover ::= !task_id & section_recover
 
 private testcase_task_statement ::= local_setting | <<parseTestcaseTaskStatement template_arguments bdd_statement executable_statement>> {
@@ -213,7 +213,7 @@ user_keyword_statement ::= user_keyword_statement_id eol_marker (local_arguments
     methods = [getNameIdentifier getName getQualifiedName]
     recoverWhile=user_keyword_statement_recover
 }
-user_keyword_statement_id ::= USER_KEYWORD_NAME
+user_keyword_statement_id ::= (USER_KEYWORD_NAME_PART | variable)+
 private user_keyword_statement_recover ::= !user_keyword_statement_id & section_recover
 
 local_setting ::= local_setting_id (positional_argument | eol_free_keyword_call)* eol_marker {
