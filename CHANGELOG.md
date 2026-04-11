@@ -9,6 +9,7 @@
 - Support for code formatting
 - Support to configure new code folding under `Settings -> Editor -> General -> Code Folding -> Robot`
 - Support for variables in test case and task names
+- Highlight for, while, try, group and if with their corresponding end statement
 
 ### Changed
 
