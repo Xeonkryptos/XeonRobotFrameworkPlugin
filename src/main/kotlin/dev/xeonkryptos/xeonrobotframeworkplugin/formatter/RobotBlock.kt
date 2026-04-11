@@ -24,11 +24,8 @@ class RobotBlock(node: ASTNode, private val context: RobotBlockContext, wrap: Wr
 
         // Differs from whitespace set of RobotTokenSets because it also includes EOL and EOS, which are treated as whitespace for formatting purposes, but not for parsing.
         private val WHITESPACE_TYPES = TokenSet.create(CONTINUATION_TOKEN, RobotTypes.EOL, RobotTypes.EOS)
-        private val SECTION_TYPES = TokenSet.orSet(RobotTokenSets.SECTIONS_HEADER_SET, TokenSet.create(RobotTypes.TEST_CASES_SECTION,
-            RobotTypes.TASKS_SECTION,
-            RobotTypes.KEYWORDS_SECTION,
-            RobotTypes.VARIABLES_SECTION,
-            RobotTypes.COMMENTS_SECTION))
+        private val SECTION_TYPES = TokenSet.orSet(RobotTokenSets.SECTIONS_HEADER_SET,
+            TokenSet.create(RobotTypes.TEST_CASES_SECTION, RobotTypes.TASKS_SECTION, RobotTypes.KEYWORDS_SECTION, RobotTypes.VARIABLES_SECTION, RobotTypes.COMMENTS_SECTION))
         private val LEAF_TYPES = TokenSet.create(RobotTypes.IMPORT_ARGUMENT,
             RobotTypes.USER_KEYWORD_STATEMENT_ID,
             RobotTypes.TEST_CASE_ID,
@@ -165,17 +162,7 @@ class RobotBlock(node: ASTNode, private val context: RobotBlockContext, wrap: Wr
             Wrap.createWrap(wrapType, context.robotCodeStyleSettings.VARIABLE_DEFINITIONS_FIRST_ARGUMENT_ON_NEW_LINE)
         }
 
-        RobotTypes.LIBRARY_IMPORT_GLOBAL_SETTING,
-        RobotTypes.RESOURCE_IMPORT_GLOBAL_SETTING,
-        RobotTypes.VARIABLES_IMPORT_GLOBAL_SETTING,
-        RobotTypes.TAGS_STATEMENT_GLOBAL_SETTING,
-        RobotTypes.SUITE_NAME_STATEMENT_GLOBAL_SETTING,
-        RobotTypes.TIMEOUT_STATEMENTS_GLOBAL_SETTING,
-        RobotTypes.METADATA_STATEMENT_GLOBAL_SETTING,
-        RobotTypes.DOCUMENTATION_STATEMENT_GLOBAL_SETTING,
-        RobotTypes.TEMPLATE_STATEMENTS_GLOBAL_SETTING,
-        RobotTypes.UNKNOWN_SETTING_STATEMENTS_GLOBAL_SETTING,
-        RobotTypes.SETUP_TEARDOWN_STATEMENTS_GLOBAL_SETTING -> {
+        RobotTypes.LIBRARY_IMPORT_GLOBAL_SETTING, RobotTypes.RESOURCE_IMPORT_GLOBAL_SETTING, RobotTypes.VARIABLES_IMPORT_GLOBAL_SETTING, RobotTypes.TAGS_STATEMENT_GLOBAL_SETTING, RobotTypes.SUITE_NAME_STATEMENT_GLOBAL_SETTING, RobotTypes.TIMEOUT_STATEMENTS_GLOBAL_SETTING, RobotTypes.METADATA_STATEMENT_GLOBAL_SETTING, RobotTypes.DOCUMENTATION_STATEMENT_GLOBAL_SETTING, RobotTypes.TEMPLATE_STATEMENTS_GLOBAL_SETTING, RobotTypes.UNKNOWN_SETTING_STATEMENTS_GLOBAL_SETTING, RobotTypes.SETUP_TEARDOWN_STATEMENTS_GLOBAL_SETTING -> {
             val wrapType = context.robotCodeStyleSettings.GLOBAL_SETTINGS_WRAP
             Wrap.createWrap(wrapType, context.robotCodeStyleSettings.GLOBAL_SETTINGS_FIRST_ARGUMENT_ON_NEW_LINE)
         }
@@ -192,20 +179,7 @@ class RobotBlock(node: ASTNode, private val context: RobotBlockContext, wrap: Wr
     }
 
     private fun shouldAssignWrapToNode(node: ASTNode): Boolean = when (node.elementType) {
-        RobotTypes.PARAMETER, RobotTypes.POSITIONAL_ARGUMENT -> myNode.elementType === RobotTypes.KEYWORD_CALL
-                || myNode.elementType === RobotTypes.FOR_LOOP_HEADER
-                || myNode.elementType === RobotTypes.WHILE_LOOP_HEADER
-                || myNode.elementType === RobotTypes.LOCAL_SETTING
-                || myNode.elementType === RobotTypes.LIBRARY_IMPORT_GLOBAL_SETTING
-                || myNode.elementType === RobotTypes.RESOURCE_IMPORT_GLOBAL_SETTING
-                || myNode.elementType === RobotTypes.VARIABLES_IMPORT_GLOBAL_SETTING
-                || myNode.elementType === RobotTypes.TAGS_STATEMENT_GLOBAL_SETTING
-                || myNode.elementType === RobotTypes.SUITE_NAME_STATEMENT_GLOBAL_SETTING
-                || myNode.elementType === RobotTypes.TIMEOUT_STATEMENTS_GLOBAL_SETTING
-                || myNode.elementType === RobotTypes.METADATA_STATEMENT_GLOBAL_SETTING
-                || myNode.elementType === RobotTypes.DOCUMENTATION_STATEMENT_GLOBAL_SETTING
-                || myNode.elementType === RobotTypes.TEMPLATE_STATEMENTS_GLOBAL_SETTING
-                || myNode.elementType === RobotTypes.UNKNOWN_SETTING_STATEMENTS_GLOBAL_SETTING
+        RobotTypes.PARAMETER, RobotTypes.POSITIONAL_ARGUMENT -> myNode.elementType === RobotTypes.KEYWORD_CALL || myNode.elementType === RobotTypes.FOR_LOOP_HEADER || myNode.elementType === RobotTypes.WHILE_LOOP_HEADER || myNode.elementType === RobotTypes.LOCAL_SETTING || myNode.elementType === RobotTypes.LIBRARY_IMPORT_GLOBAL_SETTING || myNode.elementType === RobotTypes.RESOURCE_IMPORT_GLOBAL_SETTING || myNode.elementType === RobotTypes.VARIABLES_IMPORT_GLOBAL_SETTING || myNode.elementType === RobotTypes.TAGS_STATEMENT_GLOBAL_SETTING || myNode.elementType === RobotTypes.SUITE_NAME_STATEMENT_GLOBAL_SETTING || myNode.elementType === RobotTypes.TIMEOUT_STATEMENTS_GLOBAL_SETTING || myNode.elementType === RobotTypes.METADATA_STATEMENT_GLOBAL_SETTING || myNode.elementType === RobotTypes.DOCUMENTATION_STATEMENT_GLOBAL_SETTING || myNode.elementType === RobotTypes.TEMPLATE_STATEMENTS_GLOBAL_SETTING || myNode.elementType === RobotTypes.UNKNOWN_SETTING_STATEMENTS_GLOBAL_SETTING
 
         RobotTypes.LOCAL_ARGUMENTS_SETTING_PARAMETER_MANDATORY, RobotTypes.LOCAL_ARGUMENTS_SETTING_PARAMETER_OPTIONAL -> true
 
@@ -254,9 +228,11 @@ class RobotBlock(node: ASTNode, private val context: RobotBlockContext, wrap: Wr
             myParent == null && newChildIndex >= subBlocks.size -> {
                 return ChildAttributes.DELEGATE_TO_PREV_CHILD
             }
+
             myParent != null && isChildAttributesForContinuationTokenRequested(newChildIndex) -> {
                 return ChildAttributes.DELEGATE_TO_PREV_CHILD
             }
+
             myNode.elementType === RobotTypes.ROOT -> {
                 val lastSubBlock = subBlocks.lastOrNull()
                 val childAttributes = lastSubBlock?.getChildAttributes(lastSubBlock.subBlocks.size)

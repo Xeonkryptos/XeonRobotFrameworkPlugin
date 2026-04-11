@@ -38,12 +38,12 @@ public interface RobotTypes {
   IElementType FOR_LOOP_STRUCTURE_MODE_PARAMETER = new RobotElementType("FOR_LOOP_STRUCTURE_MODE_PARAMETER");
   IElementType FOR_LOOP_STRUCTURE_PARAMETER = new RobotElementType("FOR_LOOP_STRUCTURE_PARAMETER");
   IElementType FOR_LOOP_STRUCTURE_START_PARAMETER = new RobotElementType("FOR_LOOP_STRUCTURE_START_PARAMETER");
-  IElementType GLOBAL_SETTING_STATEMENT = new RobotElementType("GLOBAL_SETTING_STATEMENT");
   IElementType GROUP_HEADER = new RobotElementType("GROUP_HEADER");
   IElementType GROUP_STRUCTURE = new RobotElementType("GROUP_STRUCTURE");
   IElementType IF_STRUCTURE = new RobotElementType("IF_STRUCTURE");
   IElementType IF_VARIABLE_STATEMENT = new RobotElementType("IF_VARIABLE_STATEMENT");
   IElementType IMPORT_ARGUMENT = RobotImportArgumentStubElement.create("IMPORT_ARGUMENT");
+  IElementType IMPORT_SETTINGS = new RobotElementType("IMPORT_SETTINGS");
   IElementType INLINE_ELSE_IF_STRUCTURE = new RobotElementType("INLINE_ELSE_IF_STRUCTURE");
   IElementType INLINE_ELSE_STRUCTURE = new RobotElementType("INLINE_ELSE_STRUCTURE");
   IElementType INLINE_IF_STRUCTURE = new RobotElementType("INLINE_IF_STRUCTURE");
@@ -77,6 +77,7 @@ public interface RobotTypes {
   IElementType SCALAR_VARIABLE = RobotScalarVariableStubElement.create("SCALAR_VARIABLE");
   IElementType SECTION = new RobotElementType("SECTION");
   IElementType SETTINGS_SECTION = new RobotElementType("SETTINGS_SECTION");
+  IElementType SETUP_TEARDOWN_SETTINGS = new RobotElementType("SETUP_TEARDOWN_SETTINGS");
   IElementType SETUP_TEARDOWN_STATEMENTS_GLOBAL_SETTING = new RobotElementType("SETUP_TEARDOWN_STATEMENTS_GLOBAL_SETTING");
   IElementType SINGLE_VARIABLE_STATEMENT = new RobotElementType("SINGLE_VARIABLE_STATEMENT");
   IElementType SUITE_NAME_STATEMENT_GLOBAL_SETTING = new RobotElementType("SUITE_NAME_STATEMENT_GLOBAL_SETTING");
@@ -250,9 +251,6 @@ public interface RobotTypes {
       else if (type == FOR_LOOP_STRUCTURE_START_PARAMETER) {
         return new RobotForLoopStructureStartParameterImpl(node);
       }
-      else if (type == GLOBAL_SETTING_STATEMENT) {
-        return new RobotGlobalSettingStatementImpl(node);
-      }
       else if (type == GROUP_HEADER) {
         return new RobotGroupHeaderImpl(node);
       }
@@ -267,6 +265,9 @@ public interface RobotTypes {
       }
       else if (type == IMPORT_ARGUMENT) {
         return new RobotImportArgumentImpl(node);
+      }
+      else if (type == IMPORT_SETTINGS) {
+        return new RobotImportSettingsImpl(node);
       }
       else if (type == INLINE_ELSE_IF_STRUCTURE) {
         return new RobotInlineElseIfStructureImpl(node);
@@ -363,6 +364,9 @@ public interface RobotTypes {
       }
       else if (type == SETTINGS_SECTION) {
         return new RobotSettingsSectionImpl(node);
+      }
+      else if (type == SETUP_TEARDOWN_SETTINGS) {
+        return new RobotSetupTeardownSettingsImpl(node);
       }
       else if (type == SETUP_TEARDOWN_STATEMENTS_GLOBAL_SETTING) {
         return new RobotSetupTeardownStatementsGlobalSettingImpl(node);

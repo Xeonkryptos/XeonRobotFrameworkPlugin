@@ -27,4 +27,22 @@ public class RobotGlobalSettingStatementImpl extends RobotGlobalSettingExtension
     else super.accept(visitor);
   }
 
+  @Override
+  @Nullable
+  public RobotGlobalSettingStatement getGlobalSettingStatement() {
+    return PsiTreeUtil.getChildOfType(this, RobotGlobalSettingStatement.class);
+  }
+
+  @Override
+  @Nullable
+  public RobotImportSettings getImportSettings() {
+    return PsiTreeUtil.getChildOfType(this, RobotImportSettings.class);
+  }
+
+  @Override
+  @Nullable
+  public RobotSetupTeardownSettings getSetupTeardownSettings() {
+    return PsiTreeUtil.getChildOfType(this, RobotSetupTeardownSettings.class);
+  }
+
 }

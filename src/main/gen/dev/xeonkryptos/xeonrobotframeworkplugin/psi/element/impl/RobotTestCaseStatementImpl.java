@@ -52,7 +52,7 @@ public class RobotTestCaseStatementImpl extends RobotTestCaseExtension implement
   }
 
   @Override
-  public @NotNull RobotTestCaseId getNameIdentifier() {
+  public RobotTestCaseId getNameIdentifier() {
     return RobotPsiUtil.getNameIdentifier(this);
   }
 

@@ -33,7 +33,12 @@ class RobotCodeFoldingOptionsProvider : BoundConfigurable(RobotBundle.message("o
             row {
                 checkBox(RobotBundle.message("options.code.folding.collapse.section.comments")).bindSelected(instance::collapseCommentSection)
             }
-
+            row {
+                checkBox(RobotBundle.message("options.code.folding.collapse.imports")).bindSelected(instance::collapseImports)
+            }
+            row {
+                checkBox(RobotBundle.message("options.code.folding.collapse.global.setup.teardown")).bindSelected(instance::collapseGlobalSetupTeardown)
+            }
             row {
                 checkBox(RobotBundle.message("options.code.folding.collapse.variables")).bindSelected(instance::collapseVariables)
             }

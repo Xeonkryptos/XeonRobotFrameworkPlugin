@@ -20,6 +20,8 @@ class RobotFoldingSettings : PersistentStateComponent<RobotFoldingSettings.State
         var collapseKeywordsSection: Boolean = false,
         var collapseVariablesSection: Boolean = false,
         var collapseVariables: Boolean = true,
+        var collapseImports: Boolean = true,
+        var collapseGlobalSetupTeardown: Boolean = false,
         var showVariableNamesInFolding: Boolean = false,
         var maxVariablePlaceholderValueLength: Int = 50,
         var collapseToSingleLine: Boolean = false,

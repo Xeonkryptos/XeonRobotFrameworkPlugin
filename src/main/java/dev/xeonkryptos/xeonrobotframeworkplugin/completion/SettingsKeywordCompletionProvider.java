@@ -12,7 +12,7 @@ class SettingsKeywordCompletionProvider extends CompletionProvider<CompletionPar
 
     @Override
     protected void addCompletions(@NotNull CompletionParameters parameters, @NotNull ProcessingContext context, @NotNull CompletionResultSet result) {
-        CompletionProviderUtils.addSyntaxLookup(RobotTypes.GLOBAL_SETTING_STATEMENT, result);
+        CompletionProviderUtils.addSyntaxLookup(RobotKeywordProvider.GLOBAL_SETTING_STATEMENT, result);
         CompletionProviderUtils.addSyntaxLookup(RobotKeywordProvider.IMPORT, result);
     }
 }

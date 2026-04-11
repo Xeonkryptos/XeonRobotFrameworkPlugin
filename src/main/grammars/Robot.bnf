@@ -56,7 +56,7 @@ section ::= settings_section
     mixin="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotSectionExtension"
 }
 
-settings_section ::= SETTINGS_HEADER eol_marker? global_setting_statement* {methods=[nameIdentifier="SETTINGS_HEADER" getSectionName]}
+settings_section ::= SETTINGS_HEADER eol_marker? setting_statement* {methods=[nameIdentifier="SETTINGS_HEADER" getSectionName]}
 variables_section ::= VARIABLES_HEADER eol_marker? single_variable_statement* {methods=[nameIdentifier="VARIABLES_HEADER" getSectionName]}
 test_cases_section ::= TEST_CASES_HEADER eol_marker? test_case_statement* {methods=[nameIdentifier="TEST_CASES_HEADER" getSectionName] implements="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotScopeOwner"}
 tasks_section ::= TASKS_HEADER eol_marker? task_statement* {methods=[nameIdentifier="TASKS_HEADER" getSectionName] implements="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotScopeOwner"}
@@ -64,13 +64,11 @@ keywords_section ::= USER_KEYWORDS_HEADER eol_marker? user_keyword_statement* {m
 comments_section ::= COMMENTS_HEADER eol_marker? COMMENT* {methods=[nameIdentifier="COMMENTS_HEADER" getSectionName]}
 private section_recover ::= !(SETTINGS_HEADER | VARIABLES_HEADER | TEST_CASES_HEADER | TASKS_HEADER | USER_KEYWORDS_HEADER | COMMENTS_HEADER)
 
-global_setting_statement ::= library_import_global_setting
-    | resource_import_global_setting
-    | variables_import_global_setting
+fake global_setting_statement ::= import_settings
     | metadata_statement_global_setting
     | documentation_statement_global_setting
     | suite_name_statement_global_setting
-    | setup_teardown_statements_global_setting
+    | setup_teardown_settings
     | tags_statement_global_setting
     | template_statements_global_setting_wrapper
     | timeout_statements_global_setting
@@ -78,6 +76,28 @@ global_setting_statement ::= library_import_global_setting
     implements="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotFoldable"
     mixin="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotGlobalSettingExtension"
     name="Resource, Library, Variables, Metadata, Documentation, Name, Suite (Setup | Teardown), Force Tags, (Test | Task) Template, (Test | Task) Timeout"
+}
+
+private setting_statement ::= import_settings
+    | metadata_statement_global_setting
+    | documentation_statement_global_setting
+    | suite_name_statement_global_setting
+    | setup_teardown_settings
+    | tags_statement_global_setting
+    | template_statements_global_setting_wrapper
+    | timeout_statements_global_setting
+    | unknown_setting_statements_global_setting
+
+import_settings ::= (library_import_global_setting
+    | resource_import_global_setting
+    | variables_import_global_setting)+ {
+    implements="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotFoldable"
+    mixin="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotImportSettingsExtension"
+}
+
+setup_teardown_settings ::= setup_teardown_statements_global_setting+ {
+    implements="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotFoldable"
+    mixin="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotSetupTeardownSettingsExtension"
 }
 
 library_import_global_setting ::= LIBRARY_IMPORT_KEYWORD import_argument (parameter | positional_argument)* (WITH_NAME new_library_name)? eol_marker {

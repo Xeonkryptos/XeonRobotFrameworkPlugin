@@ -23,7 +23,7 @@ public interface RobotUserKeywordStatement extends RobotQualifiedNameOwner, Robo
   @NotNull
   RobotUserKeywordStatementId getUserKeywordStatementId();
 
-  @NotNull RobotUserKeywordStatementId getNameIdentifier();
+  RobotUserKeywordStatementId getNameIdentifier();
 
   @NotNull String getName();
 

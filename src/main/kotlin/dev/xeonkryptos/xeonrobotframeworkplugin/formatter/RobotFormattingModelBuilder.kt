@@ -55,16 +55,27 @@ class RobotFormattingModelBuilder : FormattingModelBuilder {
             .spaceIf(commonSettings.SPACE_WITHIN_BRACKETS)
             .between(TokenSet.create(TokenType.WHITE_SPACE), TokenSet.ANY)
             .spacing(customSettings.AFTER_CONTINUATION_INDENT_SIZE, customSettings.AFTER_CONTINUATION_INDENT_SIZE, 0, commonSettings.KEEP_LINE_BREAKS, commonSettings.KEEP_BLANK_LINES_IN_CODE)
-            .between(TokenSet.create(RobotTypes.KEYWORD_CALL_NAME), TokenSet.create(RobotTypes.PARAMETER, RobotTypes.POSITIONAL_ARGUMENT))
+            .between(TokenSet.create(RobotTypes.KEYWORD_CALL_NAME), RobotTokenSets.ARGUMENTS_TYPE_SET)
             .spaces(RobotCodeStyleSettings.SUPER_SPACE_SIZE)
+            .before(RobotTypes.IMPORT_SETTINGS)
+            .blankLines(commonSettings.BLANK_LINES_BEFORE_IMPORTS)
+            .after(RobotTypes.IMPORT_SETTINGS)
+            .blankLines(commonSettings.BLANK_LINES_AFTER_IMPORTS)
+            .before(RobotTypes.SETUP_TEARDOWN_SETTINGS)
+            .blankLines(customSettings.BLANK_LINES_BEFORE_GLOBAL_SETUP_TEARDOWN)
+            .after(RobotTypes.SETUP_TEARDOWN_SETTINGS)
+            .blankLines(customSettings.BLANK_LINES_AFTER_GLOBAL_SETUP_TEARDOWN)
             .after(SUPER_SPACE_SETS)
             .spaces(RobotCodeStyleSettings.SUPER_SPACE_SIZE)
             .after(LINE_FEED_SETS)
-            .spacing(0, 0, 1, commonSettings.KEEP_LINE_BREAKS, commonSettings.KEEP_BLANK_LINES_IN_CODE)
+            .lineBreakInCode()
+            .beforeInside(RobotTypes.VARIABLE_VALUE, RobotTypes.SINGLE_VARIABLE_STATEMENT)
+            .spaces(RobotCodeStyleSettings.SUPER_SPACE_SIZE)
     }
 }
 
 private val LINE_FEED_SETS: TokenSet = TokenSet.orSet(TokenSet.create(RobotTypes.LOCAL_SETTING,
+    RobotTypes.LOCAL_ARGUMENTS_SETTING,
     RobotTypes.SINGLE_VARIABLE_STATEMENT,
     RobotTypes.EMPTY_VARIABLE_STATEMENT,
     RobotTypes.IF_VARIABLE_STATEMENT,
@@ -79,7 +90,10 @@ private val LINE_FEED_SETS: TokenSet = TokenSet.orSet(TokenSet.create(RobotTypes
     RobotTypes.FINALLY,
     RobotTypes.END,
     RobotTypes.GROUP_HEADER,
-    RobotTypes.RETURN_STRUCTURE), RobotTokenSets.GLOBAL_SETTING_SET, RobotTokenSets.SECTIONS_HEADER_SET)
+    RobotTypes.RETURN_STRUCTURE,
+    RobotTypes.USER_KEYWORD_STATEMENT_ID,
+    RobotTypes.TEST_CASE_ID,
+    RobotTypes.TASK_ID), RobotTokenSets.GLOBAL_SETTING_SET, RobotTokenSets.SECTIONS_HEADER_SET)
 
 private val SUPER_SPACE_SETS: TokenSet = TokenSet.orSet(RobotTokenSets.GHERKIN_SET,
     RobotTokenSets.LOOP_KEYWORDS_SET,
@@ -87,4 +101,5 @@ private val SUPER_SPACE_SETS: TokenSet = TokenSet.orSet(RobotTokenSets.GHERKIN_S
     RobotTokenSets.EXCEPTION_KEYWORDS_SET,
     RobotTokenSets.LOCAL_SETTING_NAMES_SET,
     RobotTokenSets.GLOBAL_SETTING_NAMES_SET,
-    TokenSet.create(RobotTypes.KEYWORD_NAME, RobotTypes.PARAMETER, RobotTypes.POSITIONAL_ARGUMENT))
+    RobotTokenSets.ARGUMENTS_TYPE_SET,
+    TokenSet.create(RobotTypes.KEYWORD_NAME))

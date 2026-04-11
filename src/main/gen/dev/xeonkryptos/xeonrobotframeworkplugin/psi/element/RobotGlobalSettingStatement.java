@@ -7,4 +7,13 @@ import com.intellij.psi.PsiElement;
 
 public interface RobotGlobalSettingStatement extends RobotFoldable, RobotElement {
 
+  @Nullable
+  RobotGlobalSettingStatement getGlobalSettingStatement();
+
+  @Nullable
+  RobotImportSettings getImportSettings();
+
+  @Nullable
+  RobotSetupTeardownSettings getSetupTeardownSettings();
+
 }

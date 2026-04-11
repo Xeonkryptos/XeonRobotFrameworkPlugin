@@ -17,7 +17,6 @@ public class RobotExceptStructureImpl extends RobotExceptStructureExtension impl
     super(node);
   }
 
-  @Override
   public void accept(@NotNull RobotVisitor visitor) {
     visitor.visitExceptStructure(this);
   }

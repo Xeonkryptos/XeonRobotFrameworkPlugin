@@ -20,7 +20,7 @@ public interface RobotTaskStatement extends RobotQualifiedNameOwner, PsiNameIden
 
   @NotNull String getName();
 
-  @NotNull RobotTaskId getNameIdentifier();
+  RobotTaskId getNameIdentifier();
 
   @NotNull Icon getIcon(int flags);
 

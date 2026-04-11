@@ -638,7 +638,7 @@ class RobotPostFormatProcessor : PostFormatProcessor {
     override fun processElement(source: PsiElement, settings: CodeStyleSettings): PsiElement {
         val psiFile = source.containingFile
         val textRange = processText(psiFile, source.textRange, settings)
-        return psiFile.findElementAt(textRange.startOffset) ?: source
+        return if (source === psiFile) source else psiFile.findElementAt(textRange.startOffset) ?: source
     }
 
     override fun processText(source: PsiFile, rangeToReformat: TextRange, settings: CodeStyleSettings): TextRange {

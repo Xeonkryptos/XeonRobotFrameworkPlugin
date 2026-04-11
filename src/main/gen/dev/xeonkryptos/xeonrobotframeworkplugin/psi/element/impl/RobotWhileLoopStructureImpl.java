@@ -17,7 +17,6 @@ public class RobotWhileLoopStructureImpl extends RobotWhileLoopStructureExtensio
     super(node);
   }
 
-  @Override
   public void accept(@NotNull RobotVisitor visitor) {
     visitor.visitWhileLoopStructure(this);
   }

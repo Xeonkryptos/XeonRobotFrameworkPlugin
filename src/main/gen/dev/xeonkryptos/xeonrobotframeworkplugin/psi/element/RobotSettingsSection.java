@@ -11,6 +11,12 @@ public interface RobotSettingsSection extends RobotSection, NameIdentifierHolder
   List<RobotGlobalSettingStatement> getGlobalSettingStatementList();
 
   @NotNull
+  List<RobotImportSettings> getImportSettingsList();
+
+  @NotNull
+  List<RobotSetupTeardownSettings> getSetupTeardownSettingsList();
+
+  @NotNull
   PsiElement getNameIdentifier();
 
   @NotNull String getSectionName();

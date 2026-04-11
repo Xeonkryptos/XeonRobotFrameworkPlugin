@@ -14,6 +14,8 @@ public class RobotTokenSets {
     public static final TokenSet CONTROL_KEYWORDS_SET = TokenSet.create(RobotTypes.IF, RobotTypes.ELSE_IF, RobotTypes.ELSE, RobotTypes.END);
     public static final TokenSet EXCEPTION_KEYWORDS_SET = TokenSet.create(RobotTypes.TRY, RobotTypes.EXCEPT, RobotTypes.ELSE, RobotTypes.FINALLY, RobotTypes.END);
 
+    public static final TokenSet ARGUMENTS_TYPE_SET = TokenSet.create(RobotTypes.PARAMETER, RobotTypes.POSITIONAL_ARGUMENT);
+
     public static final TokenSet LOCAL_SETTING_NAMES_SET = TokenSet.create(RobotTypes.LOCAL_ARGUMENTS_SETTING_ID, RobotTypes.LOCAL_SETTING_ID);
     public static final TokenSet GLOBAL_SETTING_NAMES_SET = TokenSet.create(RobotTypes.RESOURCE_IMPORT_KEYWORD,
                                                                             RobotTypes.LIBRARY_IMPORT_KEYWORD,
@@ -39,11 +41,15 @@ public class RobotTokenSets {
                                                                       RobotTypes.UNKNOWN_SETTING_STATEMENTS_GLOBAL_SETTING);
 
     public static final TokenSet SECTIONS_HEADER_SET = TokenSet.create(RobotTypes.SETTINGS_HEADER,
-                                                                        RobotTypes.VARIABLES_HEADER,
-                                                                        RobotTypes.TEST_CASES_HEADER,
-                                                                        RobotTypes.TASKS_HEADER,
-                                                                        RobotTypes.USER_KEYWORDS_HEADER,
-                                                                        RobotTypes.COMMENTS_HEADER);
+                                                                       RobotTypes.VARIABLES_HEADER,
+                                                                       RobotTypes.TEST_CASES_HEADER,
+                                                                       RobotTypes.TASKS_HEADER,
+                                                                       RobotTypes.USER_KEYWORDS_HEADER,
+                                                                       RobotTypes.COMMENTS_HEADER);
+
+    public static final TokenSet IMPORT_GLOBAL_SETTING_STATEMENTS = TokenSet.create(RobotTypes.RESOURCE_IMPORT_GLOBAL_SETTING,
+                                                                                    RobotTypes.LIBRARY_IMPORT_GLOBAL_SETTING,
+                                                                                    RobotTypes.VARIABLES_IMPORT_GLOBAL_SETTING);
 
     public static final TokenSet TEMPLATE_VALUES_HOLDER_SET = TokenSet.create(RobotTypes.TEMPLATE_PARAMETER, RobotTypes.TEMPLATE_ARGUMENT);
 

@@ -43,9 +43,9 @@ public class RobotParser implements PsiParser, LightPsiParser {
       VARIABLE),
     create_token_set_(COMMENTS_SECTION, KEYWORDS_SECTION, SECTION, SETTINGS_SECTION,
       TASKS_SECTION, TEST_CASES_SECTION, VARIABLES_SECTION),
-    create_token_set_(DOCUMENTATION_STATEMENT_GLOBAL_SETTING, GLOBAL_SETTING_STATEMENT, LIBRARY_IMPORT_GLOBAL_SETTING, METADATA_STATEMENT_GLOBAL_SETTING,
-      RESOURCE_IMPORT_GLOBAL_SETTING, SETUP_TEARDOWN_STATEMENTS_GLOBAL_SETTING, SUITE_NAME_STATEMENT_GLOBAL_SETTING, TAGS_STATEMENT_GLOBAL_SETTING,
-      TEMPLATE_STATEMENTS_GLOBAL_SETTING, TIMEOUT_STATEMENTS_GLOBAL_SETTING, UNKNOWN_SETTING_STATEMENTS_GLOBAL_SETTING, VARIABLES_IMPORT_GLOBAL_SETTING),
+    create_token_set_(DOCUMENTATION_STATEMENT_GLOBAL_SETTING, LIBRARY_IMPORT_GLOBAL_SETTING, METADATA_STATEMENT_GLOBAL_SETTING, RESOURCE_IMPORT_GLOBAL_SETTING,
+      SETUP_TEARDOWN_STATEMENTS_GLOBAL_SETTING, SUITE_NAME_STATEMENT_GLOBAL_SETTING, TAGS_STATEMENT_GLOBAL_SETTING, TEMPLATE_STATEMENTS_GLOBAL_SETTING,
+      TIMEOUT_STATEMENTS_GLOBAL_SETTING, UNKNOWN_SETTING_STATEMENTS_GLOBAL_SETTING, VARIABLES_IMPORT_GLOBAL_SETTING),
     create_token_set_(CONDITIONAL_STRUCTURE, ELSE_IF_STRUCTURE, ELSE_STRUCTURE, EXCEPTION_HANDLING_STRUCTURE,
       EXCEPT_STRUCTURE, EXECUTABLE_STATEMENT, FINALLY_STRUCTURE, FOR_LOOP_STRUCTURE,
       GROUP_STRUCTURE, IF_STRUCTURE, INLINE_ELSE_IF_STRUCTURE, INLINE_ELSE_STRUCTURE,
@@ -1206,37 +1206,6 @@ public class RobotParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // library_import_global_setting
-  //     | resource_import_global_setting
-  //     | variables_import_global_setting
-  //     | metadata_statement_global_setting
-  //     | documentation_statement_global_setting
-  //     | suite_name_statement_global_setting
-  //     | setup_teardown_statements_global_setting
-  //     | tags_statement_global_setting
-  //     | template_statements_global_setting_wrapper
-  //     | timeout_statements_global_setting
-  //     | unknown_setting_statements_global_setting
-  public static boolean global_setting_statement(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "global_setting_statement")) return false;
-    boolean r;
-    Marker m = enter_section_(b, l, _COLLAPSE_, GLOBAL_SETTING_STATEMENT, "<Resource, Library, Variables, Metadata, Documentation, Name, Suite (Setup | Teardown), Force Tags, (Test | Task) Template, (Test | Task) Timeout>");
-    r = library_import_global_setting(b, l + 1);
-    if (!r) r = resource_import_global_setting(b, l + 1);
-    if (!r) r = variables_import_global_setting(b, l + 1);
-    if (!r) r = metadata_statement_global_setting(b, l + 1);
-    if (!r) r = documentation_statement_global_setting(b, l + 1);
-    if (!r) r = suite_name_statement_global_setting(b, l + 1);
-    if (!r) r = setup_teardown_statements_global_setting(b, l + 1);
-    if (!r) r = tags_statement_global_setting(b, l + 1);
-    if (!r) r = parseTemplateStatementsGlobalSetting(b, l + 1, RobotParser::template_statements_global_setting);
-    if (!r) r = timeout_statements_global_setting(b, l + 1);
-    if (!r) r = unknown_setting_statements_global_setting(b, l + 1);
-    exit_section_(b, l, m, r, false, null);
-    return r;
-  }
-
-  /* ********************************************************** */
   // GROUP positional_argument?
   public static boolean group_header(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "group_header")) return false;
@@ -1364,6 +1333,36 @@ public class RobotParser implements PsiParser, LightPsiParser {
     if (!recursion_guard_(b, l, "import_argument_1")) return false;
     consumeToken(b, EOS);
     return true;
+  }
+
+  /* ********************************************************** */
+  // (library_import_global_setting
+  //     | resource_import_global_setting
+  //     | variables_import_global_setting)+
+  public static boolean import_settings(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "import_settings")) return false;
+    boolean r;
+    Marker m = enter_section_(b, l, _NONE_, IMPORT_SETTINGS, "<import settings>");
+    r = import_settings_0(b, l + 1);
+    while (r) {
+      int c = current_position_(b);
+      if (!import_settings_0(b, l + 1)) break;
+      if (!empty_element_parsed_guard_(b, "import_settings", c)) break;
+    }
+    exit_section_(b, l, m, r, false, null);
+    return r;
+  }
+
+  // library_import_global_setting
+  //     | resource_import_global_setting
+  //     | variables_import_global_setting
+  private static boolean import_settings_0(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "import_settings_0")) return false;
+    boolean r;
+    r = library_import_global_setting(b, l + 1);
+    if (!r) r = resource_import_global_setting(b, l + 1);
+    if (!r) r = variables_import_global_setting(b, l + 1);
+    return r;
   }
 
   /* ********************************************************** */
@@ -2196,7 +2195,34 @@ public class RobotParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // SETTINGS_HEADER eol_marker? global_setting_statement*
+  // import_settings
+  //     | metadata_statement_global_setting
+  //     | documentation_statement_global_setting
+  //     | suite_name_statement_global_setting
+  //     | setup_teardown_settings
+  //     | tags_statement_global_setting
+  //     | template_statements_global_setting_wrapper
+  //     | timeout_statements_global_setting
+  //     | unknown_setting_statements_global_setting
+  static boolean setting_statement(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "setting_statement")) return false;
+    boolean r;
+    Marker m = enter_section_(b);
+    r = import_settings(b, l + 1);
+    if (!r) r = metadata_statement_global_setting(b, l + 1);
+    if (!r) r = documentation_statement_global_setting(b, l + 1);
+    if (!r) r = suite_name_statement_global_setting(b, l + 1);
+    if (!r) r = setup_teardown_settings(b, l + 1);
+    if (!r) r = tags_statement_global_setting(b, l + 1);
+    if (!r) r = parseTemplateStatementsGlobalSetting(b, l + 1, RobotParser::template_statements_global_setting);
+    if (!r) r = timeout_statements_global_setting(b, l + 1);
+    if (!r) r = unknown_setting_statements_global_setting(b, l + 1);
+    exit_section_(b, m, null, r);
+    return r;
+  }
+
+  /* ********************************************************** */
+  // SETTINGS_HEADER eol_marker? setting_statement*
   public static boolean settings_section(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "settings_section")) return false;
     boolean r, p;
@@ -2216,15 +2242,32 @@ public class RobotParser implements PsiParser, LightPsiParser {
     return true;
   }
 
-  // global_setting_statement*
+  // setting_statement*
   private static boolean settings_section_2(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "settings_section_2")) return false;
     while (true) {
       int c = current_position_(b);
-      if (!global_setting_statement(b, l + 1)) break;
+      if (!setting_statement(b, l + 1)) break;
       if (!empty_element_parsed_guard_(b, "settings_section_2", c)) break;
     }
     return true;
+  }
+
+  /* ********************************************************** */
+  // setup_teardown_statements_global_setting+
+  public static boolean setup_teardown_settings(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "setup_teardown_settings")) return false;
+    if (!nextTokenIs(b, SETUP_TEARDOWN_STATEMENT_KEYWORDS)) return false;
+    boolean r;
+    Marker m = enter_section_(b);
+    r = setup_teardown_statements_global_setting(b, l + 1);
+    while (r) {
+      int c = current_position_(b);
+      if (!setup_teardown_statements_global_setting(b, l + 1)) break;
+      if (!empty_element_parsed_guard_(b, "setup_teardown_settings", c)) break;
+    }
+    exit_section_(b, m, SETUP_TEARDOWN_SETTINGS, r);
+    return r;
   }
 
   /* ********************************************************** */

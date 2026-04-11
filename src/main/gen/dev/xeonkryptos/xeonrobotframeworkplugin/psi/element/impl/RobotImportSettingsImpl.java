@@ -11,15 +11,14 @@ import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.*;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.*;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotPsiUtil;
 
-public class RobotSettingsSectionImpl extends RobotSectionImpl implements RobotSettingsSection {
+public class RobotImportSettingsImpl extends RobotImportSettingsExtension implements RobotImportSettings {
 
-  public RobotSettingsSectionImpl(@NotNull ASTNode node) {
+  public RobotImportSettingsImpl(@NotNull ASTNode node) {
     super(node);
   }
 
-  @Override
   public void accept(@NotNull RobotVisitor visitor) {
-    visitor.visitSettingsSection(this);
+    visitor.visitImportSettings(this);
   }
 
   @Override
@@ -32,29 +31,6 @@ public class RobotSettingsSectionImpl extends RobotSectionImpl implements RobotS
   @NotNull
   public List<RobotGlobalSettingStatement> getGlobalSettingStatementList() {
     return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotGlobalSettingStatement.class);
-  }
-
-  @Override
-  @NotNull
-  public List<RobotImportSettings> getImportSettingsList() {
-    return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotImportSettings.class);
-  }
-
-  @Override
-  @NotNull
-  public List<RobotSetupTeardownSettings> getSetupTeardownSettingsList() {
-    return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotSetupTeardownSettings.class);
-  }
-
-  @Override
-  @NotNull
-  public PsiElement getNameIdentifier() {
-    return notNullChild(findChildByType(SETTINGS_HEADER));
-  }
-
-  @Override
-  public @NotNull String getSectionName() {
-    return RobotPsiUtil.getSectionName(this);
   }
 
 }

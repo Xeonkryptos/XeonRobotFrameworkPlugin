@@ -11,14 +11,14 @@ import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.*;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.*;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotPsiUtil;
 
-public class RobotForLoopStructureImpl extends RobotForLoopStructureExtension implements RobotForLoopStructure {
+public class RobotSetupTeardownSettingsImpl extends RobotSetupTeardownSettingsExtension implements RobotSetupTeardownSettings {
 
-  public RobotForLoopStructureImpl(@NotNull ASTNode node) {
+  public RobotSetupTeardownSettingsImpl(@NotNull ASTNode node) {
     super(node);
   }
 
   public void accept(@NotNull RobotVisitor visitor) {
-    visitor.visitForLoopStructure(this);
+    visitor.visitSetupTeardownSettings(this);
   }
 
   @Override
@@ -29,8 +29,8 @@ public class RobotForLoopStructureImpl extends RobotForLoopStructureExtension im
 
   @Override
   @NotNull
-  public RobotForLoopHeader getForLoopHeader() {
-    return notNullChild(PsiTreeUtil.getChildOfType(this, RobotForLoopHeader.class));
+  public List<RobotSetupTeardownStatementsGlobalSetting> getSetupTeardownStatementsGlobalSettingList() {
+    return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotSetupTeardownStatementsGlobalSetting.class);
   }
 
 }

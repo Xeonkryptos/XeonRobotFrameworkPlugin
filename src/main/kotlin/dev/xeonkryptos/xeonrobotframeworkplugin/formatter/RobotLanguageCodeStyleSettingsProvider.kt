@@ -15,7 +15,6 @@ class RobotLanguageCodeStyleSettingsProvider : LanguageCodeStyleSettingsProvider
     override fun getIndentOptionsEditor(): IndentOptionsEditor = RobotIndentOptionsEditor()
 
     override fun customizeDefaults(commonSettings: CommonCodeStyleSettings, indentOptions: CommonCodeStyleSettings.IndentOptions) {
-        commonSettings.KEEP_BLANK_LINES_IN_CODE = 1
         commonSettings.ALIGN_MULTILINE_PARAMETERS = false
         commonSettings.KEEP_FIRST_COLUMN_COMMENT = false
         commonSettings.KEEP_LINE_BREAKS = true
@@ -115,7 +114,16 @@ class RobotLanguageCodeStyleSettingsProvider : LanguageCodeStyleSettingsProvider
             }
 
             SettingsType.BLANK_LINES_SETTINGS -> {
-                consumer.showStandardOptions("KEEP_BLANK_LINES_IN_CODE")
+                consumer.showStandardOptions("KEEP_BLANK_LINES_IN_CODE", "BLANK_LINES_BEFORE_IMPORTS", "BLANK_LINES_AFTER_IMPORTS", "KEEP_BLANK_LINES_IN_DECLARATIONS")
+
+                consumer.showCustomOption(RobotCodeStyleSettings::class.java,
+                    "BLANK_LINES_BEFORE_GLOBAL_SETUP_TEARDOWN",
+                    RobotBundle.message("formatter.blank.lines.before.global.setup.teardown"),
+                    CodeStyleSettingsCustomizableOptions.getInstance().BLANK_LINES)
+                consumer.showCustomOption(RobotCodeStyleSettings::class.java,
+                    "BLANK_LINES_AFTER_GLOBAL_SETUP_TEARDOWN",
+                    RobotBundle.message("formatter.blank.lines.after.global.setup.teardown"),
+                    CodeStyleSettingsCustomizableOptions.getInstance().BLANK_LINES)
             }
 
             else -> { // Ignore

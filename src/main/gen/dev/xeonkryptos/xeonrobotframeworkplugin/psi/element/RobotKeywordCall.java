@@ -22,6 +22,6 @@ public interface RobotKeywordCall extends RobotQualifiedNameOwner, RobotKeywordC
 
   @NotNull String getName();
 
-  @NotNull RobotKeywordCallName getNameIdentifier();
+  RobotKeywordCallName getNameIdentifier();
 
 }

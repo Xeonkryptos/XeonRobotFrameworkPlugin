@@ -135,6 +135,11 @@ public class RobotVisitor extends PsiElementVisitor {
     // visitElement(o);
   }
 
+  public void visitImportSettings(@NotNull RobotImportSettings o) {
+    visitFoldable(o);
+    // visitElement(o);
+  }
+
   public void visitInlineElseIfStructure(@NotNull RobotInlineElseIfStructure o) {
     visitExecutableStatement(o);
     // visitBlockOpeningStructure(o);
@@ -288,6 +293,11 @@ public class RobotVisitor extends PsiElementVisitor {
   public void visitSettingsSection(@NotNull RobotSettingsSection o) {
     visitSection(o);
     // visitNameIdentifierHolder(o);
+  }
+
+  public void visitSetupTeardownSettings(@NotNull RobotSetupTeardownSettings o) {
+    visitFoldable(o);
+    // visitElement(o);
   }
 
   public void visitSetupTeardownStatementsGlobalSetting(@NotNull RobotSetupTeardownStatementsGlobalSetting o) {
