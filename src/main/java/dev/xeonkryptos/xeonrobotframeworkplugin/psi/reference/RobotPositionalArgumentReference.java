@@ -78,7 +78,7 @@ public class RobotPositionalArgumentReference extends PsiReferenceBase<RobotPosi
                 PyReferenceExpressionVisitor pyReferenceExpressionVisitor = new PyReferenceExpressionVisitor();
                 pyExpression.accept(pyReferenceExpressionVisitor);
                 pyExpression.acceptChildren(pyReferenceExpressionVisitor);
-                return pyReferenceExpressionVisitor.resolvedExpressions.stream().flatMap(this::handleResolvedEnumExpression).toArray();
+                return pyReferenceExpressionVisitor.resolvedExpressions.stream().filter(PsiElement::isValid).flatMap(this::handleResolvedEnumExpression).toArray();
             }
         }
         return ArrayUtilRt.EMPTY_OBJECT_ARRAY;
