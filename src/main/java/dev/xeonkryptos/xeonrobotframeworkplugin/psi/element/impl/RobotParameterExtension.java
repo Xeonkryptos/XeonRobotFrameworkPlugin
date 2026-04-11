@@ -31,6 +31,9 @@ public abstract class RobotParameterExtension extends RobotPsiElementBase implem
         if (keywordCall != null) {
             CachedValuesManager.getManager(getProject()).getParameterizedCachedValue(this, IS_FAKE_PARAMETER_CACHE_KEY, kc -> {
                 PsiElement resolvedReference = kc.getNameIdentifier().getReference().resolve();
+                if (resolvedReference == null) {
+                    return null;
+                }
                 Collection<DefinedParameter> availableParameters = kc.getAvailableParameters();
                 String parameterName = getParameterName();
 
