@@ -16,9 +16,11 @@ class RobotBlock(node: ASTNode, private val context: RobotBlockContext, wrap: Wr
     companion object {
         private val PARENT_BLOCK_KEY = Key.create<RobotBlock>("PARENT_BLOCK")
         private val CURRENT_BLOCK_KEY = Key.create<RobotBlock>("CURRENT_BLOCK")
+
         private val TEMPLATE_VALUES_ALIGNMENT_KEY = Key.create<Array<Alignment>>("TEMPLATE_VALUE_ALIGNMENT")
-        private val USER_KEYWORD_PARAMETER_ALIGNMENT_KEY = Key.create<Alignment>("USER_KEYWORD_PARAMETER_ALIGNMENT")
         private val KEYWORD_VARIABLE_STATEMENT_VARIABLE_ALIGNMENT_KEY = Key.create<Alignment>("KEYWORD_VARIABLE_STATEMENT_VARIABLE_ALIGNMENT")
+        private val KEYWORD_CALL_ALIGNMENT_KEY = Key.create<Alignment>("KEYWORD_CALL_ALIGNMENT")
+
         private val PARENT_WRAP_KEY = Key.create<Wrap>("PARENT_WRAP")
         private val CONTINUATION_TOKEN = TokenType.WHITE_SPACE
 
@@ -27,9 +29,6 @@ class RobotBlock(node: ASTNode, private val context: RobotBlockContext, wrap: Wr
         private val SECTION_TYPES = TokenSet.orSet(RobotTokenSets.SECTIONS_HEADER_SET,
             TokenSet.create(RobotTypes.TEST_CASES_SECTION, RobotTypes.TASKS_SECTION, RobotTypes.KEYWORDS_SECTION, RobotTypes.VARIABLES_SECTION, RobotTypes.COMMENTS_SECTION))
         private val LEAF_TYPES = TokenSet.create(RobotTypes.IMPORT_ARGUMENT,
-            RobotTypes.USER_KEYWORD_STATEMENT_ID,
-            RobotTypes.TEST_CASE_ID,
-            RobotTypes.TASK_ID,
             RobotTypes.LOCAL_ARGUMENTS_SETTING_ID,
             RobotTypes.PARAMETER_ID,
             RobotTypes.TEMPLATE_PARAMETER_ID,
@@ -72,8 +71,8 @@ class RobotBlock(node: ASTNode, private val context: RobotBlockContext, wrap: Wr
         val parentWrap = createWrapIfNecessary()
         if (myNode.elementType === RobotTypes.KEYWORD_VARIABLE_STATEMENT) {
             myNode.putUserData(KEYWORD_VARIABLE_STATEMENT_VARIABLE_ALIGNMENT_KEY, Alignment.createAlignment())
-        } else if (myNode.elementType === RobotTypes.LOCAL_ARGUMENTS_SETTING && context.commonCodeStyleSettings.ALIGN_MULTILINE_PARAMETERS) {
-            myNode.putUserData(USER_KEYWORD_PARAMETER_ALIGNMENT_KEY, Alignment.createAlignment(true))
+        } else if (myNode.elementType === RobotTypes.KEYWORD_CALL) {
+            myNode.putUserData(KEYWORD_CALL_ALIGNMENT_KEY, Alignment.createAlignment())
         }
 
         fun addNewRobotBlock(alignmentIndex: Int, child: ASTNode) {
@@ -208,10 +207,8 @@ class RobotBlock(node: ASTNode, private val context: RobotBlockContext, wrap: Wr
     private fun getAlignment(node: ASTNode, index: Int): Alignment? = when {
         RobotTokenSets.TEMPLATE_VALUES_HOLDER_SET.contains(node.elementType) -> myNode.getUserData(TEMPLATE_VALUES_ALIGNMENT_KEY)?.let { if (index < it.size) it[index] else null }
         node.elementType === RobotTypes.VARIABLE_DEFINITION -> myNode.getUserData(KEYWORD_VARIABLE_STATEMENT_VARIABLE_ALIGNMENT_KEY)
-        node.elementType === RobotTypes.LOCAL_ARGUMENTS_SETTING_PARAMETER_MANDATORY || node.elementType === RobotTypes.LOCAL_ARGUMENTS_SETTING_PARAMETER_OPTIONAL -> myNode.getUserData(
-            USER_KEYWORD_PARAMETER_ALIGNMENT_KEY)
-
         node.elementType === CONTINUATION_TOKEN -> myNode.treeParent?.getUserData(KEYWORD_VARIABLE_STATEMENT_VARIABLE_ALIGNMENT_KEY)
+        node.elementType === RobotTypes.PARAMETER || node.elementType === RobotTypes.POSITIONAL_ARGUMENT -> myNode.getUserData(KEYWORD_CALL_ALIGNMENT_KEY)
         else -> null
     }
 

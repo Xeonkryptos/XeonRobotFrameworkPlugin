@@ -57,7 +57,7 @@ public class RobotKeywordCallImpl extends RobotKeywordCallExtension implements R
   }
 
   @Override
-  public RobotKeywordCallName getNameIdentifier() {
+  public @NotNull RobotKeywordCallName getNameIdentifier() {
     return RobotPsiUtil.getNameIdentifier(this);
   }
 

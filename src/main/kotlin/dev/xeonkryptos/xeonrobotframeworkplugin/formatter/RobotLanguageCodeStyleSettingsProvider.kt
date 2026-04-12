@@ -15,7 +15,6 @@ class RobotLanguageCodeStyleSettingsProvider : LanguageCodeStyleSettingsProvider
     override fun getIndentOptionsEditor(): IndentOptionsEditor = RobotIndentOptionsEditor()
 
     override fun customizeDefaults(commonSettings: CommonCodeStyleSettings, indentOptions: CommonCodeStyleSettings.IndentOptions) {
-        commonSettings.ALIGN_MULTILINE_PARAMETERS = false
         commonSettings.KEEP_FIRST_COLUMN_COMMENT = false
         commonSettings.KEEP_LINE_BREAKS = true
     }
@@ -43,7 +42,6 @@ class RobotLanguageCodeStyleSettingsProvider : LanguageCodeStyleSettingsProvider
                     "WRAP_LONG_LINES",
                     "CALL_PARAMETERS_WRAP",
                     "METHOD_PARAMETERS_WRAP",
-                    "ALIGN_MULTILINE_PARAMETERS",
                     "FOR_STATEMENT_WRAP")
                 consumer.renameStandardOption("METHOD_PARAMETERS_WRAP", RobotBundle.message("formatter.wrap.keyword.definition.arguments"))
                 consumer.renameStandardOption("CALL_PARAMETERS_WRAP", RobotBundle.message("formatter.wrap.keyword.call.arguments"))
@@ -114,8 +112,12 @@ class RobotLanguageCodeStyleSettingsProvider : LanguageCodeStyleSettingsProvider
             }
 
             SettingsType.BLANK_LINES_SETTINGS -> {
-                consumer.showStandardOptions("KEEP_BLANK_LINES_IN_CODE", "BLANK_LINES_BEFORE_IMPORTS", "BLANK_LINES_AFTER_IMPORTS", "KEEP_BLANK_LINES_IN_DECLARATIONS")
+                consumer.showStandardOptions("KEEP_BLANK_LINES_IN_CODE",
+                    "BLANK_LINES_BEFORE_IMPORTS",
+                    "BLANK_LINES_AFTER_IMPORTS",
+                    "BLANK_LINES_AFTER_CLASS_HEADER")
 
+                consumer.renameStandardOption("BLANK_LINES_AFTER_CLASS_HEADER", RobotBundle.message("formatter.blank.lines.after.testcase.task.name"))
                 consumer.showCustomOption(RobotCodeStyleSettings::class.java,
                     "BLANK_LINES_BEFORE_GLOBAL_SETUP_TEARDOWN",
                     RobotBundle.message("formatter.blank.lines.before.global.setup.teardown"),

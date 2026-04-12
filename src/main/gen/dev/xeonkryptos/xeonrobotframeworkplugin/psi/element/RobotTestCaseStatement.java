@@ -20,7 +20,7 @@ public interface RobotTestCaseStatement extends RobotQualifiedNameOwner, PsiName
 
   @NotNull String getName();
 
-  RobotTestCaseId getNameIdentifier();
+  @NotNull RobotTestCaseId getNameIdentifier();
 
   @NotNull Icon getIcon(int flags);
 

@@ -17,6 +17,7 @@ public class RobotFinallyStructureImpl extends RobotFinallyStructureExtension im
     super(node);
   }
 
+  @Override
   public void accept(@NotNull RobotVisitor visitor) {
     visitor.visitFinallyStructure(this);
   }

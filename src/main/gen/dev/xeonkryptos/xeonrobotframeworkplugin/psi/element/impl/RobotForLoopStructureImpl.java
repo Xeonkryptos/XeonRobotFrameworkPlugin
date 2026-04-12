@@ -17,6 +17,7 @@ public class RobotForLoopStructureImpl extends RobotForLoopStructureExtension im
     super(node);
   }
 
+  @Override
   public void accept(@NotNull RobotVisitor visitor) {
     visitor.visitForLoopStructure(this);
   }

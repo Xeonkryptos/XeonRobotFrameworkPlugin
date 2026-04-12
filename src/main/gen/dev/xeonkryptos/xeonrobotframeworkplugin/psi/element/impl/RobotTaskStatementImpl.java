@@ -52,7 +52,7 @@ public class RobotTaskStatementImpl extends RobotTaskExtension implements RobotT
   }
 
   @Override
-  public RobotTaskId getNameIdentifier() {
+  public @NotNull RobotTaskId getNameIdentifier() {
     return RobotPsiUtil.getNameIdentifier(this);
   }
 

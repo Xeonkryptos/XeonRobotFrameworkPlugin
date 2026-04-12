@@ -17,6 +17,7 @@ public class RobotGroupStructureImpl extends RobotGroupStructureExtension implem
     super(node);
   }
 
+  @Override
   public void accept(@NotNull RobotVisitor visitor) {
     visitor.visitGroupStructure(this);
   }

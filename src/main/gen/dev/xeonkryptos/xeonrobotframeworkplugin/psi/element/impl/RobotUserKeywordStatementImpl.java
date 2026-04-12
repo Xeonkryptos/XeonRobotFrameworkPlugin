@@ -58,7 +58,7 @@ public class RobotUserKeywordStatementImpl extends RobotUserKeywordExtension imp
   }
 
   @Override
-  public RobotUserKeywordStatementId getNameIdentifier() {
+  public @NotNull RobotUserKeywordStatementId getNameIdentifier() {
     return RobotPsiUtil.getNameIdentifier(this);
   }
 

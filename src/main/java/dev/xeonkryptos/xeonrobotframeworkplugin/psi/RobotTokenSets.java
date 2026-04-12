@@ -47,10 +47,6 @@ public class RobotTokenSets {
                                                                        RobotTypes.USER_KEYWORDS_HEADER,
                                                                        RobotTypes.COMMENTS_HEADER);
 
-    public static final TokenSet IMPORT_GLOBAL_SETTING_STATEMENTS = TokenSet.create(RobotTypes.RESOURCE_IMPORT_GLOBAL_SETTING,
-                                                                                    RobotTypes.LIBRARY_IMPORT_GLOBAL_SETTING,
-                                                                                    RobotTypes.VARIABLES_IMPORT_GLOBAL_SETTING);
-
     public static final TokenSet TEMPLATE_VALUES_HOLDER_SET = TokenSet.create(RobotTypes.TEMPLATE_PARAMETER, RobotTypes.TEMPLATE_ARGUMENT);
 
     public static final TokenSet FOR_LOOP_IN_TYPES = TokenSet.create(RobotTypes.FOR_IN, RobotTypes.FOR_IN_RANGE, RobotTypes.FOR_IN_ENUMERATE, RobotTypes.FOR_IN_ZIP);

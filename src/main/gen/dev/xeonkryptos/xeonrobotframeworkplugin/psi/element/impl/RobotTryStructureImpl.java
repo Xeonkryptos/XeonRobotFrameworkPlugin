@@ -17,6 +17,7 @@ public class RobotTryStructureImpl extends RobotTryStructureExtension implements
     super(node);
   }
 
+  @Override
   public void accept(@NotNull RobotVisitor visitor) {
     visitor.visitTryStructure(this);
   }

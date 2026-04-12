@@ -17,6 +17,7 @@ public class RobotConditionalStructureImpl extends RobotConditionalStructureExte
     super(node);
   }
 
+  @Override
   public void accept(@NotNull RobotVisitor visitor) {
     visitor.visitConditionalStructure(this);
   }

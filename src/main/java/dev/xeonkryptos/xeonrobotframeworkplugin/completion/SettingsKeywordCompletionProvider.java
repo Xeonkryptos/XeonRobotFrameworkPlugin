@@ -5,7 +5,6 @@ import com.intellij.codeInsight.completion.CompletionProvider;
 import com.intellij.codeInsight.completion.CompletionResultSet;
 import com.intellij.util.ProcessingContext;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotKeywordProvider;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes;
 import org.jetbrains.annotations.NotNull;
 
 class SettingsKeywordCompletionProvider extends CompletionProvider<CompletionParameters> {
