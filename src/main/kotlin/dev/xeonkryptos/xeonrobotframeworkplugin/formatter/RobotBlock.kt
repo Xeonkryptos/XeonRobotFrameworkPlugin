@@ -29,10 +29,8 @@ class RobotBlock(node: ASTNode, private val context: RobotBlockContext, wrap: Wr
         private val SECTION_TYPES = TokenSet.orSet(RobotTokenSets.SECTIONS_HEADER_SET,
             TokenSet.create(RobotTypes.TEST_CASES_SECTION, RobotTypes.TASKS_SECTION, RobotTypes.KEYWORDS_SECTION, RobotTypes.VARIABLES_SECTION, RobotTypes.COMMENTS_SECTION))
         private val LEAF_TYPES = TokenSet.create(RobotTypes.IMPORT_ARGUMENT,
-            RobotTypes.LOCAL_ARGUMENTS_SETTING_ID,
             RobotTypes.PARAMETER_ID,
             RobotTypes.TEMPLATE_PARAMETER_ID,
-            RobotTypes.LOCAL_SETTING_ID,
             RobotTypes.KEYWORD_CALL_NAME)
         private val BLOCK_OPENING_TYPES = TokenSet.create(RobotTypes.TEST_CASE_STATEMENT,
             RobotTypes.USER_KEYWORD_STATEMENT,

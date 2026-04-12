@@ -217,6 +217,10 @@ class RobotPostFormatProcessor : PostFormatProcessor {
 
             // --- Empty line: breaks any ongoing statement ---
             if (trimmed.isEmpty()) {
+                if (currentMetadata != null && currentMetadata.wrappableArgumentCount > identifiedArgumentsCount) {
+                    if (inFormattingRange) lineProcessors.add(EmptyLineRemover(lineStart, lineEnd))
+                    continue
+                }
                 insideWrappableStatement = false
                 currentMetadata = null
                 identifiedArgumentsCount = 0
@@ -347,7 +351,7 @@ class RobotPostFormatProcessor : PostFormatProcessor {
             if (workableLineContent.startsWith(normalizedArgument)) {
                 argumentCount++
                 workableLineContent = workableLineContent.substring(normalizedArgument.length)
-            } else break
+            }
         }
         return argumentCount
     }
@@ -445,6 +449,23 @@ class RobotPostFormatProcessor : PostFormatProcessor {
             if (this === other) return true
             if (javaClass != other?.javaClass) return false
             val that = other as ContinuationIndentFixer
+            return offset == that.offset
+        }
+
+        override fun hashCode(): Int = offset
+    }
+
+    class EmptyLineRemover(override val offset: Int, private val lineEndOffset: Int) : LineProcessor {
+
+        override fun processLine(document: Document, commonSettings: CommonCodeStyleSettings, customSettings: RobotCodeStyleSettings): Int {
+            document.deleteString(offset, lineEndOffset + 1)
+            return lineEndOffset + 1 - offset
+        }
+
+        override fun equals(other: Any?): Boolean {
+            if (this === other) return true
+            if (javaClass != other?.javaClass) return false
+            val that = other as EmptyLineRemover
             return offset == that.offset
         }
 
