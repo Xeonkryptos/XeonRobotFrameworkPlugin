@@ -12,6 +12,7 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.ReservedVariable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 public class RobotParserUtil extends GeneratedParserUtilBase {
 
@@ -19,7 +20,7 @@ public class RobotParserUtil extends GeneratedParserUtilBase {
     private static final Key<Boolean> LOCAL_TEMPLATE_SETTING_KEY = Key.create("LOCAL_TEMPLATE_SETTING_KEY");
     private static final Key<Boolean> LOCAL_TEMPLATE_SETTING_RESET_OVERRIDE_KEY = Key.create("LOCAL_TEMPLATE_SETTING_RESET_OVERRIDE_KEY");
 
-    private static final String TEMPLATE_LOCAL_SETTING_NAME = "[Template]";
+    private static final Pattern TEMPLATE_LOCAL_SETTING_NAME_PATTERN = Pattern.compile("\\[\\s*Template\\s*].*");
 
     public static final Hook<Void> CLEAR_TEMPLATE_STATE_HOOK = (builder, marker, param) -> {
         builder.putUserData(LOCAL_TEMPLATE_SETTING_KEY, false);
@@ -30,14 +31,12 @@ public class RobotParserUtil extends GeneratedParserUtilBase {
         assert latestDoneMarker != null; // should never be null here as we just finished a successful parse of local setting
 
         CharSequence originalText = builder.getOriginalText();
-        int originalTextLength = originalText.length();
 
         int settingStartOffset = latestDoneMarker.getStartOffset();
         int settingEndOffset = latestDoneMarker.getEndOffset();
-        int settingNameEndOffset = Math.min(originalTextLength, settingStartOffset + TEMPLATE_LOCAL_SETTING_NAME.length());
+        CharSequence text = originalText.subSequence(settingStartOffset, settingEndOffset);
 
-        String localSettingName = originalText.subSequence(settingStartOffset, settingNameEndOffset).toString().replaceAll("\\s+", "");
-        if (TEMPLATE_LOCAL_SETTING_NAME.equalsIgnoreCase(localSettingName)) {
+        if (TEMPLATE_LOCAL_SETTING_NAME_PATTERN.matcher(text).find()) {
             updateLocalTemplateState(builder, settingStartOffset, settingEndOffset, originalText);
         }
         return marker;
