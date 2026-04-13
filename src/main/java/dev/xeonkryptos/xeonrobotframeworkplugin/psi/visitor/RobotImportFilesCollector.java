@@ -9,6 +9,7 @@ import com.jetbrains.python.psi.PyFile;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.dto.ImportType;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.KeywordFile;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotImportArgument;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotImportSettings;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLibraryImportGlobalSetting;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLiteralConstantValue;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotNewLibraryName;
@@ -40,6 +41,11 @@ public final class RobotImportFilesCollector extends RobotVisitor {
 
     @Override
     public void visitSettingsSection(@NotNull RobotSettingsSection o) {
+        o.acceptChildren(this);
+    }
+
+    @Override
+    public void visitImportSettings(@NotNull RobotImportSettings o) {
         o.acceptChildren(this);
     }
 

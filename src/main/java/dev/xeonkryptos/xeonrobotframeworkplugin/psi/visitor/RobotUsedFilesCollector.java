@@ -8,6 +8,7 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotExecutableState
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotGlobalSettingStatement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotImportArgument;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotImportGlobalSettingExpression;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotImportSettings;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCall;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCallName;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLibraryImportGlobalSetting;
@@ -50,6 +51,11 @@ public final class RobotUsedFilesCollector extends RobotVisitor {
 
     @Override
     public void visitSection(@NotNull RobotSection o) {
+        o.acceptChildren(this);
+    }
+
+    @Override
+    public void visitImportSettings(@NotNull RobotImportSettings o) {
         o.acceptChildren(this);
     }
 
