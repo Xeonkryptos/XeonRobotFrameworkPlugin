@@ -10,6 +10,7 @@ import com.intellij.psi.tree.TokenSet
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotLanguage
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTokenSets
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes
+import kotlin.math.max
 
 class RobotFormattingModelBuilder : CustomFormattingModelBuilder {
 
@@ -30,6 +31,7 @@ class RobotFormattingModelBuilder : CustomFormattingModelBuilder {
         val customSettings = codeStyleSettings.getCustomSettings(RobotCodeStyleSettings::class.java)
         val maximumSpacesAfterTemplateValues = if (customSettings.KEEP_ADDITIONAL_SPACES_BETWEEN_TEMPLATE_VALUES) Integer.MAX_VALUE else RobotCodeStyleSettings.SUPER_SPACE_SIZE
         val maximumSpacesAfterVariableAssignment = if (customSettings.KEEP_ADDITIONAL_SPACES_AFTER_VARIABLE_ASSIGNMENTS) Integer.MAX_VALUE else RobotCodeStyleSettings.SUPER_SPACE_SIZE
+        val afterContinuationSpaceSize = max(customSettings.AFTER_CONTINUATION_INDENT_SIZE, RobotCodeStyleSettings.SUPER_SPACE_SIZE)
 
         return SpacingBuilder(codeStyleSettings, RobotLanguage.INSTANCE).before(RobotTokenSets.SECTIONS_HEADER_SET)
             .spacing(0, 0, 0, commonSettings.KEEP_LINE_BREAKS, commonSettings.KEEP_BLANK_LINES_IN_CODE)
@@ -55,6 +57,10 @@ class RobotFormattingModelBuilder : CustomFormattingModelBuilder {
             .spacing(0, 0, customSettings.BLANK_LINES_BEFORE_VARIABLE_STATEMENTS, commonSettings.KEEP_LINE_BREAKS, commonSettings.KEEP_BLANK_LINES_IN_CODE)
             .after(RobotTypes.VARIABLE_STATEMENTS)
             .blankLines(customSettings.BLANK_LINES_AFTER_VARIABLE_STATEMENTS)
+            .before(RobotTypes.CONTINUATION)
+            .lineBreakInCode()
+            .after(RobotTypes.CONTINUATION)
+            .spacing(afterContinuationSpaceSize, afterContinuationSpaceSize, 0, commonSettings.KEEP_LINE_BREAKS, commonSettings.KEEP_BLANK_LINES_IN_CODE)
             .after(SUPER_SPACE_SETS)
             .spaces(RobotCodeStyleSettings.SUPER_SPACE_SIZE)
             .after(TokenSet.create(RobotTypes.TEST_CASE_ID, RobotTypes.TASK_ID, RobotTypes.USER_KEYWORD_STATEMENT_ID))
@@ -86,8 +92,7 @@ class RobotFormattingModelBuilder : CustomFormattingModelBuilder {
             .after(TokenSet.create(RobotTypes.LOCAL_SETTING_START, RobotTypes.VARIABLE_ACCESS_START))
             .spaceIf(commonSettings.SPACE_WITHIN_BRACKETS)
             .before(TokenSet.create(RobotTypes.LOCAL_SETTING_END, RobotTypes.VARIABLE_ACCESS_END))
-            .spaceIf(commonSettings.SPACE_WITHIN_BRACKETS) //.after(TokenType.WHITE_SPACE)
-            //.spacing(customSettings.AFTER_CONTINUATION_INDENT_SIZE, customSettings.AFTER_CONTINUATION_INDENT_SIZE, 0, commonSettings.KEEP_LINE_BREAKS, commonSettings.KEEP_BLANK_LINES_IN_CODE)
+            .spaceIf(commonSettings.SPACE_WITHIN_BRACKETS)
             .between(TokenSet.create(RobotTypes.KEYWORD_CALL_NAME), RobotTokenSets.ARGUMENTS_TYPE_SET)
             .spaces(RobotCodeStyleSettings.SUPER_SPACE_SIZE)
     }

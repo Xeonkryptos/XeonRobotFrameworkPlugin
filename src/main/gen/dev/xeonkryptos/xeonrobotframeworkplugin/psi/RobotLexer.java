@@ -8172,7 +8172,7 @@ public class RobotLexer extends AbstractRobotLexer {
           } else {
               yybegin(AFTER_CONTINUATION);
           }
-          return WHITE_SPACE;
+          return CONTINUATION;
             }
           // fall through
           case 264: break;

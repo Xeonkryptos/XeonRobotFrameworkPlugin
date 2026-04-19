@@ -300,7 +300,7 @@ LineComment = {LineCommentSign} {NON_EOL}*
           } else {
               yybegin(AFTER_CONTINUATION);
           }
-          return WHITE_SPACE;
+          return CONTINUATION;
     }
 }
 <AFTER_CONTINUATION> {

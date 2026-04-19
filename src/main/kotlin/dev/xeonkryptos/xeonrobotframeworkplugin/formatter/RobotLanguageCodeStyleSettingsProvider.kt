@@ -173,13 +173,13 @@ Metadata           owner    qa-team-platform
 Metadata           long_meta_key    This metadata value is intentionally very long to trigger wrapping behavior based on RIGHT_MARGIN
 Default Tags       smoke    ui    regression    formatter    very_long_tag_to_force_wrap
 Force Tags         release_candidate    nightly_build    pipeline_stage_validation
-
+    
 *** Variables ***
 ${'$'}{BASE_URL}            https://example.test.local/application/root/path
 ${'$'}{LONG_TEXT}           This is a very long text value that can exceed the configured right margin and trigger wrapping when used in calls
 @{LIST}                     one    two    three    four    five    six    seven
 &{USER}                     name=robot    role=admin    active=${'$'}{TRUE}
-
+    
 *** Test Cases ***
 Formatter Options Showcase
     [Documentation]    This local setting is intentionally very long so local setting wrapping and first argument on new line can be inspected in the preview
