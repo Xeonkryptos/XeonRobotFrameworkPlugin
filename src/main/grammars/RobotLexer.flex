@@ -312,7 +312,10 @@ LineComment = {LineCommentSign} {NON_EOL}*
 <TASKS_SECTION_NAME_DEFINITION>       {
     {EOL}                             { yybegin(TASK_NAME_DEFINITION); return EOL; }
 }
-<TEST_CASES_SECTION_NAME_DEFINITION, TASKS_SECTION_NAME_DEFINITION>  {LiteralValue}   { pushBackTrailingWhitespace(); return DATA_DRIVEN_COLUMN_NAME; }
+<TEST_CASES_SECTION_NAME_DEFINITION, TASKS_SECTION_NAME_DEFINITION>  {
+    {EOL} {EOL}+                      { yypushback(1); return WHITE_SPACE; }
+    {LiteralValue}                    { pushBackTrailingWhitespace(); return DATA_DRIVEN_COLUMN_NAME; }
+}
 
 <IN_CONTINUATION>  {
     {LineComment}                                     { return COMMENT; }
