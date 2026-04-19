@@ -126,6 +126,30 @@ class RobotLanguageCodeStyleSettingsProvider : LanguageCodeStyleSettingsProvider
                     "BLANK_LINES_AFTER_GLOBAL_SETUP_TEARDOWN",
                     RobotBundle.message("formatter.blank.lines.after.global.setup.teardown"),
                     CodeStyleSettingsCustomizableOptions.getInstance().BLANK_LINES)
+                consumer.showCustomOption(RobotCodeStyleSettings::class.java,
+                    "BLANK_LINES_BEFORE_GLOBAL_METADATA",
+                    RobotBundle.message("formatter.blank.lines.before.global.metadata"),
+                    CodeStyleSettingsCustomizableOptions.getInstance().BLANK_LINES)
+                consumer.showCustomOption(RobotCodeStyleSettings::class.java,
+                    "BLANK_LINES_AFTER_GLOBAL_METADATA",
+                    RobotBundle.message("formatter.blank.lines.after.global.metadata"),
+                    CodeStyleSettingsCustomizableOptions.getInstance().BLANK_LINES)
+                consumer.showCustomOption(RobotCodeStyleSettings::class.java,
+                    "BLANK_LINES_BEFORE_GLOBAL_SETTING",
+                    RobotBundle.message("formatter.blank.lines.before.global.setting"),
+                    CodeStyleSettingsCustomizableOptions.getInstance().BLANK_LINES)
+                consumer.showCustomOption(RobotCodeStyleSettings::class.java,
+                    "BLANK_LINES_AFTER_GLOBAL_SETTING",
+                    RobotBundle.message("formatter.blank.lines.after.global.setting"),
+                    CodeStyleSettingsCustomizableOptions.getInstance().BLANK_LINES)
+                consumer.showCustomOption(RobotCodeStyleSettings::class.java,
+                    "BLANK_LINES_BEFORE_VARIABLE_STATEMENTS",
+                    RobotBundle.message("formatter.blank.lines.before.variable.statements"),
+                    CodeStyleSettingsCustomizableOptions.getInstance().BLANK_LINES)
+                consumer.showCustomOption(RobotCodeStyleSettings::class.java,
+                    "BLANK_LINES_AFTER_VARIABLE_STATEMENTS",
+                    RobotBundle.message("formatter.blank.lines.after.variable.statements"),
+                    CodeStyleSettingsCustomizableOptions.getInstance().BLANK_LINES)
             }
 
             else -> { // Ignore

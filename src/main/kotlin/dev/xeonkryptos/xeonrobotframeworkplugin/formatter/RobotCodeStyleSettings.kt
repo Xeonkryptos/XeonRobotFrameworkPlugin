@@ -70,4 +70,22 @@ class RobotCodeStyleSettings(container: CodeStyleSettings) : CustomCodeStyleSett
 
     @JvmField
     var BLANK_LINES_AFTER_GLOBAL_SETUP_TEARDOWN: Int = 1
+
+    @JvmField
+    var BLANK_LINES_BEFORE_GLOBAL_METADATA: Int = 1
+
+    @JvmField
+    var BLANK_LINES_AFTER_GLOBAL_METADATA: Int = 1
+
+    @JvmField
+    var BLANK_LINES_BEFORE_GLOBAL_SETTING: Int = 1
+
+    @JvmField
+    var BLANK_LINES_AFTER_GLOBAL_SETTING: Int = 1
+
+    @JvmField
+    var BLANK_LINES_BEFORE_VARIABLE_STATEMENTS: Int = 0
+
+    @JvmField
+    var BLANK_LINES_AFTER_VARIABLE_STATEMENTS: Int = 1
 }

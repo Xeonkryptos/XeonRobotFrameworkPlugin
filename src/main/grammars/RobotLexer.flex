@@ -178,7 +178,7 @@ AllowedEverythingButVariableSeq = {AllowedEverythingButVariableChar}+
 AllowedExtendedVariableAccessChar = [^\s\[\]$@%&] | {EscapeChar}{1} "[" | {EscapeChar}{1} "]" | {ExceptionForAllowedVariableChar}
 AllowedExtendedVariableAccessSeq = {AllowedExtendedVariableAccessChar}+
 
-VariableLiteralValue =   ([^}$@&%\s] | {ExceptionForAllowedVariableChar} | {OpeningVariable})+
+VariableLiteralValue =   ([^}$@&%\r\n] | {ExceptionForAllowedVariableChar} | {OpeningVariable})+
 LiteralValue =           [^\s]+([ ][^\s]+)*[ ]?
 EverythingButVariableValue = {AllowedEverythingButVariableSeq} ({Space} {AllowedEverythingButVariableSeq})*
 KeywordLibraryNameLiteralValue = [/*]? {EverythingButVariableValue} "."
@@ -338,14 +338,15 @@ LineComment = {LineCommentSign} {NON_EOL}*
 }
 
 <VARIABLE_USAGE> {
-    {ClosingVariable} "["                         { leaveState(); enterNewState(EXTENDED_VARIABLE_ACCESS); yypushback(1); return VARIABLE_RBRACE; }
-    {ClosingVariable} "]"                         { leaveState(); yypushback(1); return VARIABLE_RBRACE; }
-    {ClosingVariable}                             { leaveState(); return VARIABLE_RBRACE; }
-    {OpeningVariable} (!{ClosingVariable}{2})+    { enterNewState(PYTHON_EXPRESSION); yypushback(yylength() - 1); return PYTHON_EXPRESSION_START; }
+    {ClosingVariable} "["                           { leaveState(); enterNewState(EXTENDED_VARIABLE_ACCESS); yypushback(1); return VARIABLE_RBRACE; }
+    {ClosingVariable} "]"                           { leaveState(); yypushback(1); return VARIABLE_RBRACE; }
+    {ClosingVariable}                               { leaveState(); return VARIABLE_RBRACE; }
+    {OpeningVariable} (!{ClosingVariable}{2})+      { enterNewState(PYTHON_EXPRESSION); yypushback(yylength() - 1); return PYTHON_EXPRESSION_START; }
 }
 
 <VARIABLE_DEFINITION, VARIABLE_USAGE> {
-    {VariableLiteralValue}                 { return VARIABLE_BODY; }
+    {VariableLiteralValue}                          { return VARIABLE_BODY; }
+    {EOL}                                           { leaveState(); return EOL; }
 }
 
 <EXTENDED_VARIABLE_ACCESS> {
@@ -357,6 +358,7 @@ LineComment = {LineCommentSign} {NON_EOL}*
           return VARIABLE_ACCESS_END;
       }
     {ExtendedVariableAccessValue}                   { return EXTENDED_VARIABLE_ACCESS_BODY; }
+    {EOL}                                           { leaveState(); return EOL; }
 }
 
 <PYTHON_EXPRESSION> {

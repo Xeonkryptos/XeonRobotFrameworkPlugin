@@ -1,6 +1,13 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.formatter
 
-import com.intellij.formatting.*
+import com.intellij.formatting.ASTBlock
+import com.intellij.formatting.Alignment
+import com.intellij.formatting.Block
+import com.intellij.formatting.ChildAttributes
+import com.intellij.formatting.Indent
+import com.intellij.formatting.Spacing
+import com.intellij.formatting.Wrap
+import com.intellij.formatting.WrapType
 import com.intellij.lang.ASTNode
 import com.intellij.lang.tree.util.children
 import com.intellij.openapi.util.Key
@@ -28,10 +35,6 @@ class RobotBlock(node: ASTNode, private val context: RobotBlockContext, wrap: Wr
         private val WHITESPACE_TYPES = TokenSet.create(CONTINUATION_TOKEN, RobotTypes.EOL, RobotTypes.EOS)
         private val SECTION_TYPES = TokenSet.orSet(RobotTokenSets.SECTIONS_HEADER_SET,
             TokenSet.create(RobotTypes.TEST_CASES_SECTION, RobotTypes.TASKS_SECTION, RobotTypes.KEYWORDS_SECTION, RobotTypes.VARIABLES_SECTION, RobotTypes.COMMENTS_SECTION))
-        private val LEAF_TYPES = TokenSet.create(RobotTypes.IMPORT_ARGUMENT,
-            RobotTypes.PARAMETER_ID,
-            RobotTypes.TEMPLATE_PARAMETER_ID,
-            RobotTypes.KEYWORD_CALL_NAME)
         private val BLOCK_OPENING_TYPES = TokenSet.create(RobotTypes.TEST_CASE_STATEMENT,
             RobotTypes.USER_KEYWORD_STATEMENT,
             RobotTypes.TASK_STATEMENT,
@@ -56,7 +59,6 @@ class RobotBlock(node: ASTNode, private val context: RobotBlockContext, wrap: Wr
             RobotTypes.USER_KEYWORD_STATEMENT_ID,
             RobotTypes.TEST_CASE_ID,
             RobotTypes.TASK_ID)
-        private val FLATTENABLE_TYPES = TokenSet.create(RobotTypes.EXECUTABLE_STATEMENT, RobotTypes.LOCAL_ARGUMENTS_SETTING_PARAMETER, RobotTypes.LITERAL_CONSTANT_VALUE)
     }
 
     private val parent: RobotBlock?
@@ -73,58 +75,38 @@ class RobotBlock(node: ASTNode, private val context: RobotBlockContext, wrap: Wr
             myNode.putUserData(KEYWORD_CALL_ALIGNMENT_KEY, Alignment.createAlignment())
         }
 
-        fun addNewRobotBlock(alignmentIndex: Int, child: ASTNode) {
-            if (shouldCreateBlockForNode(child)) {
-                val indent = getIndentation(child)
-                val childWrap = if (shouldAssignWrapToNode(child)) parentWrap else null
-                val alignment = getAlignment(child, alignmentIndex)
-                val childIndent = getChildIndent(child)
-                RobotBlock(child, context, indent = indent, wrap = childWrap, alignment = alignment, childIndent = childIndent).apply {
-                    blocks.add(this)
-                    myNode.putUserData(CURRENT_BLOCK_KEY, this)
-                    myNode.putUserData(PARENT_BLOCK_KEY, this@RobotBlock)
-                }
+        val myParent = parent
+        if (myNode.elementType === RobotTypes.TEMPLATE_ARGUMENTS && myParent != null && myParent.node.getUserData(TEMPLATE_VALUES_ALIGNMENT_KEY) === null) {
+            val templateValueHolderElements = myNode.getChildren(RobotTokenSets.TEMPLATE_VALUES_HOLDER_SET)
+            val alignments = Array<Alignment>(templateValueHolderElements.size) { Alignment.createAlignment(true) }
+            myParent.node.putUserData(TEMPLATE_VALUES_ALIGNMENT_KEY, alignments)
+        }
 
-                if (myNode.elementType === RobotTypes.SETUP_TEARDOWN_STATEMENTS_GLOBAL_SETTING) {
-                    child.putUserData(PARENT_WRAP_KEY, parentWrap)
-                }
+        fun addNewRobotBlock(alignmentIndex: Int, child: ASTNode) {
+            val indent = getIndentation(child)
+            val childWrap = if (shouldAssignWrapToNode(child)) parentWrap else null
+            val alignment = getAlignment(child, alignmentIndex)
+            val childIndent = getChildIndent(child)
+            RobotBlock(child, context, indent = indent, wrap = childWrap, alignment = alignment, childIndent = childIndent).apply {
+                blocks.add(this)
+                myNode.putUserData(CURRENT_BLOCK_KEY, this)
+                myNode.putUserData(PARENT_BLOCK_KEY, this@RobotBlock)
+            }
+
+            if (myNode.elementType === RobotTypes.SETUP_TEARDOWN_STATEMENTS_GLOBAL_SETTING) {
+                child.putUserData(PARENT_WRAP_KEY, parentWrap)
             }
         }
 
+        var alignmentIndex = 0
         for (child in myNode.children()) {
-            if (child.elementType === RobotTypes.TEMPLATE_ARGUMENTS) {
-                if (myNode.getUserData(TEMPLATE_VALUES_ALIGNMENT_KEY) === null) {
-                    val templateValueHolderElements = child.getChildren(RobotTokenSets.TEMPLATE_VALUES_HOLDER_SET)
-                    val alignments = Array<Alignment>(templateValueHolderElements.size) { Alignment.createAlignment(true) }
-                    myNode.putUserData(TEMPLATE_VALUES_ALIGNMENT_KEY, alignments)
-                }
-                var alignmentIndex = 0
-                for (subNode in child.children()) {
-                    if (RobotTokenSets.TEMPLATE_VALUES_HOLDER_SET.contains(subNode.elementType)) {
-                        addNewRobotBlock(alignmentIndex, subNode)
-                        alignmentIndex++
-                    } else {
-                        addNewRobotBlock(-1, subNode)
-                    }
-                }
-            } else if (FLATTENABLE_TYPES.contains(child.elementType)) addFlattenedNodes(child) { subNode -> addNewRobotBlock(-1, subNode) }
-            else addNewRobotBlock(-1, child)
+            if (shouldCreateBlockForNode(child)) addNewRobotBlock(alignmentIndex++, child)
         }
         return blocks
     }
 
     private fun shouldCreateBlockForNode(node: ASTNode): Boolean =
         !WHITESPACE_TYPES.contains(node.elementType) || (node.elementType === CONTINUATION_TOKEN && node.text == GlobalConstants.CONTINUATION)
-
-    private fun addFlattenedNodes(node: ASTNode, addNewBlock: (subNode: ASTNode) -> Unit) {
-        for (child in node.children()) {
-            if (FLATTENABLE_TYPES.contains(child.elementType)) {
-                addFlattenedNodes(child, addNewBlock)
-            } else {
-                addNewBlock(child)
-            }
-        }
-    }
 
     private fun createWrapIfNecessary(): Wrap? = when (myNode.elementType) {
         RobotTypes.KEYWORD_CALL -> {
@@ -187,23 +169,15 @@ class RobotBlock(node: ASTNode, private val context: RobotBlockContext, wrap: Wr
         else -> false
     }
 
-    private fun findFirstNestedArgument(node: ASTNode, argumentTypes: TokenSet): ASTNode? {
-        for (child in node.children()) {
-            if (argumentTypes.contains(child.elementType)) return child
-            if (FLATTENABLE_TYPES.contains(child.elementType)) {
-                val nested = findFirstNestedArgument(child, argumentTypes)
-                if (nested != null) return nested
-            }
-        }
-        return null
+    private fun getIndentation(node: ASTNode): Indent? = when {
+        BLOCK_OPENING_TYPES.contains(myNode.elementType) && !BLOCK_OPENING_PART_TYPES.contains(node.elementType) -> Indent.getNormalIndent()
+        node.elementType === RobotTypes.TEMPLATE_ARGUMENTS -> Indent.getNormalIndent()
+        node.elementType === CONTINUATION_TOKEN -> Indent.getContinuationIndent()
+        else -> Indent.getNoneIndent()
     }
 
-    private fun getIndentation(node: ASTNode): Indent? = if (BLOCK_OPENING_TYPES.contains(myNode.elementType) && !BLOCK_OPENING_PART_TYPES.contains(node.elementType)) Indent.getNormalIndent()
-    else if (node.elementType === CONTINUATION_TOKEN) Indent.getContinuationIndent()
-    else Indent.getNoneIndent()
-
     private fun getAlignment(node: ASTNode, index: Int): Alignment? = when {
-        RobotTokenSets.TEMPLATE_VALUES_HOLDER_SET.contains(node.elementType) -> myNode.getUserData(TEMPLATE_VALUES_ALIGNMENT_KEY)?.let { if (index < it.size) it[index] else null }
+        RobotTokenSets.TEMPLATE_VALUES_HOLDER_SET.contains(node.elementType) -> parent?.node?.getUserData(TEMPLATE_VALUES_ALIGNMENT_KEY)?.let { if (index < it.size) it[index] else null }
         node.elementType === RobotTypes.VARIABLE_DEFINITION -> myNode.getUserData(KEYWORD_VARIABLE_STATEMENT_VARIABLE_ALIGNMENT_KEY)
         node.elementType === CONTINUATION_TOKEN -> myNode.treeParent?.getUserData(KEYWORD_VARIABLE_STATEMENT_VARIABLE_ALIGNMENT_KEY)
         node.elementType === RobotTypes.PARAMETER || node.elementType === RobotTypes.POSITIONAL_ARGUMENT -> myNode.getUserData(KEYWORD_CALL_ALIGNMENT_KEY)
@@ -244,5 +218,5 @@ class RobotBlock(node: ASTNode, private val context: RobotBlockContext, wrap: Wr
 
     override fun getSpacing(child1: Block?, child2: Block): Spacing? = context.spacingBuilder.getSpacing(this, child1, child2)
 
-    override fun isLeaf(): Boolean = LEAF_TYPES.contains(myNode.elementType) || myNode.firstChildNode === null
+    override fun isLeaf(): Boolean = myNode.firstChildNode === null
 }

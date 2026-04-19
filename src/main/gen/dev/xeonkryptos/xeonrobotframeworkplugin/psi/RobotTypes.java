@@ -65,6 +65,7 @@ public interface RobotTypes {
   IElementType LOCAL_SETTING = new RobotElementType("LOCAL_SETTING");
   IElementType LOCAL_SETTING_ID = new RobotElementType("LOCAL_SETTING_ID");
   IElementType LOOP_CONTROL_STRUCTURE = new RobotElementType("LOOP_CONTROL_STRUCTURE");
+  IElementType METADATA_SETTINGS = new RobotElementType("METADATA_SETTINGS");
   IElementType METADATA_STATEMENT_GLOBAL_SETTING = new RobotElementType("METADATA_STATEMENT_GLOBAL_SETTING");
   IElementType NEW_LIBRARY_NAME = new RobotElementType("NEW_LIBRARY_NAME");
   IElementType PARAMETER = new RobotElementType("PARAMETER");
@@ -106,6 +107,7 @@ public interface RobotTypes {
   IElementType VARIABLE_INDEX_ACCESS_CONTENT = new RobotElementType("VARIABLE_INDEX_ACCESS_CONTENT");
   IElementType VARIABLE_NESTED_ACCESS_CONTENT = new RobotElementType("VARIABLE_NESTED_ACCESS_CONTENT");
   IElementType VARIABLE_SLICE_ACCESS_CONTENT = new RobotElementType("VARIABLE_SLICE_ACCESS_CONTENT");
+  IElementType VARIABLE_STATEMENTS = new RobotElementType("VARIABLE_STATEMENTS");
   IElementType VARIABLE_VALUE = new RobotElementType("VARIABLE_VALUE");
   IElementType WHILE_LOOP_HEADER = new RobotElementType("WHILE_LOOP_HEADER");
   IElementType WHILE_LOOP_STRUCTURE = new RobotElementType("WHILE_LOOP_STRUCTURE");
@@ -332,6 +334,9 @@ public interface RobotTypes {
       else if (type == LOOP_CONTROL_STRUCTURE) {
         return new RobotLoopControlStructureImpl(node);
       }
+      else if (type == METADATA_SETTINGS) {
+        return new RobotMetadataSettingsImpl(node);
+      }
       else if (type == METADATA_STATEMENT_GLOBAL_SETTING) {
         return new RobotMetadataStatementGlobalSettingImpl(node);
       }
@@ -448,6 +453,9 @@ public interface RobotTypes {
       }
       else if (type == VARIABLE_SLICE_ACCESS_CONTENT) {
         return new RobotVariableSliceAccessContentImpl(node);
+      }
+      else if (type == VARIABLE_STATEMENTS) {
+        return new RobotVariableStatementsImpl(node);
       }
       else if (type == VARIABLE_VALUE) {
         return new RobotVariableValueImpl(node);

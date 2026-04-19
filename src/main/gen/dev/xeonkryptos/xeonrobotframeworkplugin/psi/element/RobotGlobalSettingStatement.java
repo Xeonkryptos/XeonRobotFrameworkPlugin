@@ -14,6 +14,9 @@ public interface RobotGlobalSettingStatement extends RobotFoldable, RobotElement
   RobotImportSettings getImportSettings();
 
   @Nullable
+  RobotMetadataSettings getMetadataSettings();
+
+  @Nullable
   RobotSetupTeardownSettings getSetupTeardownSettings();
 
 }

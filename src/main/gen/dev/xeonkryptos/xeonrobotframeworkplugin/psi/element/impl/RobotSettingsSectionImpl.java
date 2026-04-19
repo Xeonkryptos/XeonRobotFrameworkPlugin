@@ -42,6 +42,12 @@ public class RobotSettingsSectionImpl extends RobotSectionImpl implements RobotS
 
   @Override
   @NotNull
+  public List<RobotMetadataSettings> getMetadataSettingsList() {
+    return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotMetadataSettings.class);
+  }
+
+  @Override
+  @NotNull
   public List<RobotSetupTeardownSettings> getSetupTeardownSettingsList() {
     return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotSetupTeardownSettings.class);
   }

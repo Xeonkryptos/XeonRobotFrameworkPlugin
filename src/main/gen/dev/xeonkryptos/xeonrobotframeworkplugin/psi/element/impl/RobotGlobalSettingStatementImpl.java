@@ -41,6 +41,12 @@ public class RobotGlobalSettingStatementImpl extends RobotGlobalSettingExtension
 
   @Override
   @Nullable
+  public RobotMetadataSettings getMetadataSettings() {
+    return PsiTreeUtil.getChildOfType(this, RobotMetadataSettings.class);
+  }
+
+  @Override
+  @Nullable
   public RobotSetupTeardownSettings getSetupTeardownSettings() {
     return PsiTreeUtil.getChildOfType(this, RobotSetupTeardownSettings.class);
   }

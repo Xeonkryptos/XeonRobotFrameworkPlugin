@@ -239,6 +239,11 @@ public class RobotVisitor extends PsiElementVisitor {
     visitExecutableStatement(o);
   }
 
+  public void visitMetadataSettings(@NotNull RobotMetadataSettings o) {
+    visitFoldable(o);
+    // visitElement(o);
+  }
+
   public void visitMetadataStatementGlobalSetting(@NotNull RobotMetadataStatementGlobalSetting o) {
     visitGlobalSettingStatement(o);
     // visitGlobalSettingStatementExpression(o);
@@ -444,6 +449,10 @@ public class RobotVisitor extends PsiElementVisitor {
   }
 
   public void visitVariableStatement(@NotNull RobotVariableStatement o) {
+    visitElement(o);
+  }
+
+  public void visitVariableStatements(@NotNull RobotVariableStatements o) {
     visitElement(o);
   }
 

@@ -57,15 +57,17 @@ section ::= settings_section
 }
 
 settings_section ::= SETTINGS_HEADER eol_marker? setting_statement* {methods=[nameIdentifier="SETTINGS_HEADER" getSectionName]}
-variables_section ::= VARIABLES_HEADER eol_marker? single_variable_statement* {methods=[nameIdentifier="VARIABLES_HEADER" getSectionName]}
+variables_section ::= VARIABLES_HEADER eol_marker? variable_statements? {methods=[nameIdentifier="VARIABLES_HEADER" getSectionName]}
 test_cases_section ::= TEST_CASES_HEADER eol_marker? test_case_statement* {methods=[nameIdentifier="TEST_CASES_HEADER" getSectionName] implements="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotScopeOwner"}
 tasks_section ::= TASKS_HEADER eol_marker? task_statement* {methods=[nameIdentifier="TASKS_HEADER" getSectionName] implements="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotScopeOwner"}
 keywords_section ::= USER_KEYWORDS_HEADER eol_marker? user_keyword_statement* {methods=[nameIdentifier="USER_KEYWORDS_HEADER" getSectionName] implements="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotScopeOwner"}
 comments_section ::= COMMENTS_HEADER eol_marker? COMMENT* {methods=[nameIdentifier="COMMENTS_HEADER" getSectionName]}
 private section_recover ::= !(SETTINGS_HEADER | VARIABLES_HEADER | TEST_CASES_HEADER | TASKS_HEADER | USER_KEYWORDS_HEADER | COMMENTS_HEADER)
 
+variable_statements ::= single_variable_statement+
+
 fake global_setting_statement ::= import_settings
-    | metadata_statement_global_setting
+    | metadata_settings
     | documentation_statement_global_setting
     | suite_name_statement_global_setting
     | setup_teardown_settings
@@ -79,7 +81,7 @@ fake global_setting_statement ::= import_settings
 }
 
 private setting_statement ::= import_settings
-    | metadata_statement_global_setting
+    | metadata_settings
     | documentation_statement_global_setting
     | suite_name_statement_global_setting
     | setup_teardown_settings
@@ -87,6 +89,11 @@ private setting_statement ::= import_settings
     | template_statements_global_setting_wrapper
     | timeout_statements_global_setting
     | unknown_setting_statements_global_setting
+
+metadata_settings ::= metadata_statement_global_setting+ {
+    implements="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotFoldable"
+    mixin="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotMetadataSettingsExtension"
+}
 
 import_settings ::= (library_import_global_setting
     | resource_import_global_setting
@@ -494,7 +501,9 @@ private dict_variable_definition ::= DICT_VARIABLE_START VARIABLE_LBRACE (variab
 
 variable_content ::= (variable | VARIABLE_BODY)+ {
     methods = [getReference]
+    recoverWhile=variable_content_recover
 }
+private variable_content_recover ::= !(VARIABLE_RBRACE | eol_marker)
 python_expression ::= PYTHON_EXPRESSION_START PYTHON_EXPRESSION_CONTENT PYTHON_EXPRESSION_END { methods = [expressionContent="PYTHON_EXPRESSION_CONTENT"] }
 
 private extended_variable_slice_access ::= VARIABLE_ACCESS_START variable_slice_access_content VARIABLE_ACCESS_END {pin=2}

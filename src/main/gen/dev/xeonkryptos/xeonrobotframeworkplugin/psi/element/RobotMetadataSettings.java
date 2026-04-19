@@ -5,14 +5,9 @@ import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 
-public interface RobotVariablesSection extends RobotSection, NameIdentifierHolder {
-
-  @Nullable
-  RobotVariableStatements getVariableStatements();
+public interface RobotMetadataSettings extends RobotFoldable, RobotElement {
 
   @NotNull
-  PsiElement getNameIdentifier();
-
-  @NotNull String getSectionName();
+  List<RobotMetadataStatementGlobalSetting> getMetadataStatementGlobalSettingList();
 
 }

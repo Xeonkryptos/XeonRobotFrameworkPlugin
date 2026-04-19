@@ -399,8 +399,10 @@ public class RobotParser implements PsiParser, LightPsiParser {
   private static boolean dict_variable_definition_2(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "dict_variable_definition_2")) return false;
     boolean r;
+    Marker m = enter_section_(b);
     r = variable_content(b, l + 1);
     if (!r) r = python_expression(b, l + 1);
+    exit_section_(b, m, null, r);
     return r;
   }
 
@@ -1670,8 +1672,10 @@ public class RobotParser implements PsiParser, LightPsiParser {
   private static boolean list_variable_definition_2(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "list_variable_definition_2")) return false;
     boolean r;
+    Marker m = enter_section_(b);
     r = variable_content(b, l + 1);
     if (!r) r = python_expression(b, l + 1);
+    exit_section_(b, m, null, r);
     return r;
   }
 
@@ -1870,6 +1874,23 @@ public class RobotParser implements PsiParser, LightPsiParser {
     boolean r;
     r = for_loop_structure(b, l + 1);
     if (!r) r = while_loop_structure(b, l + 1);
+    return r;
+  }
+
+  /* ********************************************************** */
+  // metadata_statement_global_setting+
+  public static boolean metadata_settings(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "metadata_settings")) return false;
+    if (!nextTokenIs(b, METADATA_KEYWORD)) return false;
+    boolean r;
+    Marker m = enter_section_(b);
+    r = metadata_statement_global_setting(b, l + 1);
+    while (r) {
+      int c = current_position_(b);
+      if (!metadata_statement_global_setting(b, l + 1)) break;
+      if (!empty_element_parsed_guard_(b, "metadata_settings", c)) break;
+    }
+    exit_section_(b, m, METADATA_SETTINGS, r);
     return r;
   }
 
@@ -2108,8 +2129,10 @@ public class RobotParser implements PsiParser, LightPsiParser {
   private static boolean scalar_variable_definition_2_0(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "scalar_variable_definition_2_0")) return false;
     boolean r;
+    Marker m = enter_section_(b);
     r = variable_content(b, l + 1);
     if (!r) r = python_expression(b, l + 1);
+    exit_section_(b, m, null, r);
     return r;
   }
 
@@ -2181,7 +2204,7 @@ public class RobotParser implements PsiParser, LightPsiParser {
 
   /* ********************************************************** */
   // import_settings
-  //     | metadata_statement_global_setting
+  //     | metadata_settings
   //     | documentation_statement_global_setting
   //     | suite_name_statement_global_setting
   //     | setup_teardown_settings
@@ -2194,7 +2217,7 @@ public class RobotParser implements PsiParser, LightPsiParser {
     boolean r;
     Marker m = enter_section_(b);
     r = import_settings(b, l + 1);
-    if (!r) r = metadata_statement_global_setting(b, l + 1);
+    if (!r) r = metadata_settings(b, l + 1);
     if (!r) r = documentation_statement_global_setting(b, l + 1);
     if (!r) r = suite_name_statement_global_setting(b, l + 1);
     if (!r) r = setup_teardown_settings(b, l + 1);
@@ -3017,7 +3040,7 @@ public class RobotParser implements PsiParser, LightPsiParser {
       if (!variable_content_0(b, l + 1)) break;
       if (!empty_element_parsed_guard_(b, "variable_content", c)) break;
     }
-    exit_section_(b, l, m, r, false, null);
+    exit_section_(b, l, m, r, false, RobotParser::variable_content_recover);
     return r;
   }
 
@@ -3027,6 +3050,26 @@ public class RobotParser implements PsiParser, LightPsiParser {
     boolean r;
     r = variable(b, l + 1);
     if (!r) r = consumeToken(b, VARIABLE_BODY);
+    return r;
+  }
+
+  /* ********************************************************** */
+  // !(VARIABLE_RBRACE | eol_marker)
+  static boolean variable_content_recover(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "variable_content_recover")) return false;
+    boolean r;
+    Marker m = enter_section_(b, l, _NOT_);
+    r = !variable_content_recover_0(b, l + 1);
+    exit_section_(b, l, m, r, false, null);
+    return r;
+  }
+
+  // VARIABLE_RBRACE | eol_marker
+  private static boolean variable_content_recover_0(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "variable_content_recover_0")) return false;
+    boolean r;
+    r = consumeToken(b, VARIABLE_RBRACE);
+    if (!r) r = eol_marker(b, l + 1);
     return r;
   }
 
@@ -3093,6 +3136,22 @@ public class RobotParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
+  // single_variable_statement+
+  public static boolean variable_statements(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "variable_statements")) return false;
+    boolean r;
+    Marker m = enter_section_(b, l, _NONE_, VARIABLE_STATEMENTS, "<variable statements>");
+    r = single_variable_statement(b, l + 1);
+    while (r) {
+      int c = current_position_(b);
+      if (!single_variable_statement(b, l + 1)) break;
+      if (!empty_element_parsed_guard_(b, "variable_statements", c)) break;
+    }
+    exit_section_(b, l, m, r, false, null);
+    return r;
+  }
+
+  /* ********************************************************** */
   // variable | positional_argument
   public static boolean variable_value(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "variable_value")) return false;
@@ -3141,7 +3200,7 @@ public class RobotParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // VARIABLES_HEADER eol_marker? single_variable_statement*
+  // VARIABLES_HEADER eol_marker? variable_statements?
   public static boolean variables_section(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "variables_section")) return false;
     boolean r, p;
@@ -3161,14 +3220,10 @@ public class RobotParser implements PsiParser, LightPsiParser {
     return true;
   }
 
-  // single_variable_statement*
+  // variable_statements?
   private static boolean variables_section_2(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "variables_section_2")) return false;
-    while (true) {
-      int c = current_position_(b);
-      if (!single_variable_statement(b, l + 1)) break;
-      if (!empty_element_parsed_guard_(b, "variables_section_2", c)) break;
-    }
+    variable_statements(b, l + 1);
     return true;
   }
 

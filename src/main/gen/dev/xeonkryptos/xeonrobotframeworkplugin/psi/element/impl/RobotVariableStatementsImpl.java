@@ -11,15 +11,14 @@ import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.*;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.*;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotPsiUtil;
 
-public class RobotVariablesSectionImpl extends RobotSectionImpl implements RobotVariablesSection {
+public class RobotVariableStatementsImpl extends RobotPsiElementBase implements RobotVariableStatements {
 
-  public RobotVariablesSectionImpl(@NotNull ASTNode node) {
+  public RobotVariableStatementsImpl(@NotNull ASTNode node) {
     super(node);
   }
 
-  @Override
   public void accept(@NotNull RobotVisitor visitor) {
-    visitor.visitVariablesSection(this);
+    visitor.visitVariableStatements(this);
   }
 
   @Override
@@ -29,20 +28,9 @@ public class RobotVariablesSectionImpl extends RobotSectionImpl implements Robot
   }
 
   @Override
-  @Nullable
-  public RobotVariableStatements getVariableStatements() {
-    return PsiTreeUtil.getChildOfType(this, RobotVariableStatements.class);
-  }
-
-  @Override
   @NotNull
-  public PsiElement getNameIdentifier() {
-    return notNullChild(findChildByType(VARIABLES_HEADER));
-  }
-
-  @Override
-  public @NotNull String getSectionName() {
-    return RobotPsiUtil.getSectionName(this);
+  public List<RobotSingleVariableStatement> getSingleVariableStatementList() {
+    return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotSingleVariableStatement.class);
   }
 
 }

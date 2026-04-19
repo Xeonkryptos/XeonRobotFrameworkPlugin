@@ -14,6 +14,9 @@ public interface RobotSettingsSection extends RobotSection, NameIdentifierHolder
   List<RobotImportSettings> getImportSettingsList();
 
   @NotNull
+  List<RobotMetadataSettings> getMetadataSettingsList();
+
+  @NotNull
   List<RobotSetupTeardownSettings> getSetupTeardownSettingsList();
 
   @NotNull
