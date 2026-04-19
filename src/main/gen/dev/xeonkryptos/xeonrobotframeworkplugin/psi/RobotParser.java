@@ -2179,7 +2179,7 @@ public class RobotParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // !(SETTINGS_HEADER | VARIABLES_HEADER | TEST_CASES_HEADER | TASKS_HEADER | USER_KEYWORDS_HEADER | COMMENTS_HEADER)
+  // !(SETTINGS_HEADER | VARIABLES_HEADER | test_cases_header | tasks_header | USER_KEYWORDS_HEADER | COMMENTS_HEADER)
   static boolean section_recover(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "section_recover")) return false;
     boolean r;
@@ -2189,14 +2189,14 @@ public class RobotParser implements PsiParser, LightPsiParser {
     return r;
   }
 
-  // SETTINGS_HEADER | VARIABLES_HEADER | TEST_CASES_HEADER | TASKS_HEADER | USER_KEYWORDS_HEADER | COMMENTS_HEADER
+  // SETTINGS_HEADER | VARIABLES_HEADER | test_cases_header | tasks_header | USER_KEYWORDS_HEADER | COMMENTS_HEADER
   private static boolean section_recover_0(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "section_recover_0")) return false;
     boolean r;
     r = consumeToken(b, SETTINGS_HEADER);
     if (!r) r = consumeToken(b, VARIABLES_HEADER);
-    if (!r) r = consumeToken(b, TEST_CASES_HEADER);
-    if (!r) r = consumeToken(b, TASKS_HEADER);
+    if (!r) r = test_cases_header(b, l + 1);
+    if (!r) r = tasks_header(b, l + 1);
     if (!r) r = consumeToken(b, USER_KEYWORDS_HEADER);
     if (!r) r = consumeToken(b, COMMENTS_HEADER);
     return r;
@@ -2543,12 +2543,36 @@ public class RobotParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // TASKS_HEADER eol_marker? task_statement*
+  // TASKS_HEADER_NAME DATA_DRIVEN_COLUMN_NAME*
+  public static boolean tasks_header(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "tasks_header")) return false;
+    if (!nextTokenIs(b, TASKS_HEADER_NAME)) return false;
+    boolean r;
+    Marker m = enter_section_(b);
+    r = consumeToken(b, TASKS_HEADER_NAME);
+    r = r && tasks_header_1(b, l + 1);
+    exit_section_(b, m, TASKS_HEADER, r);
+    return r;
+  }
+
+  // DATA_DRIVEN_COLUMN_NAME*
+  private static boolean tasks_header_1(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "tasks_header_1")) return false;
+    while (true) {
+      int c = current_position_(b);
+      if (!consumeToken(b, DATA_DRIVEN_COLUMN_NAME)) break;
+      if (!empty_element_parsed_guard_(b, "tasks_header_1", c)) break;
+    }
+    return true;
+  }
+
+  /* ********************************************************** */
+  // tasks_header eol_marker? task_statement*
   public static boolean tasks_section(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "tasks_section")) return false;
     boolean r, p;
     Marker m = enter_section_(b, l, _NONE_, TASKS_SECTION, "<Section>");
-    r = consumeToken(b, TASKS_HEADER);
+    r = tasks_header(b, l + 1);
     p = r; // pin = 1
     r = r && report_error_(b, tasks_section_1(b, l + 1));
     r = p && tasks_section_2(b, l + 1) && r;
@@ -2755,12 +2779,36 @@ public class RobotParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // TEST_CASES_HEADER eol_marker? test_case_statement*
+  // TEST_CASES_HEADER_NAME DATA_DRIVEN_COLUMN_NAME*
+  public static boolean test_cases_header(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "test_cases_header")) return false;
+    if (!nextTokenIs(b, TEST_CASES_HEADER_NAME)) return false;
+    boolean r;
+    Marker m = enter_section_(b);
+    r = consumeToken(b, TEST_CASES_HEADER_NAME);
+    r = r && test_cases_header_1(b, l + 1);
+    exit_section_(b, m, TEST_CASES_HEADER, r);
+    return r;
+  }
+
+  // DATA_DRIVEN_COLUMN_NAME*
+  private static boolean test_cases_header_1(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "test_cases_header_1")) return false;
+    while (true) {
+      int c = current_position_(b);
+      if (!consumeToken(b, DATA_DRIVEN_COLUMN_NAME)) break;
+      if (!empty_element_parsed_guard_(b, "test_cases_header_1", c)) break;
+    }
+    return true;
+  }
+
+  /* ********************************************************** */
+  // test_cases_header eol_marker? test_case_statement*
   public static boolean test_cases_section(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "test_cases_section")) return false;
     boolean r, p;
     Marker m = enter_section_(b, l, _NONE_, TEST_CASES_SECTION, "<Section>");
-    r = consumeToken(b, TEST_CASES_HEADER);
+    r = test_cases_header(b, l + 1);
     p = r; // pin = 1
     r = r && report_error_(b, test_cases_section_1(b, l + 1));
     r = p && test_cases_section_2(b, l + 1) && r;

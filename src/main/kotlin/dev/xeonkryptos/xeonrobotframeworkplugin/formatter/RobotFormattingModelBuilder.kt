@@ -26,7 +26,13 @@ private val SUPER_SPACE_SETS: TokenSet = TokenSet.orSet(RobotTokenSets.GHERKIN_S
     RobotTokenSets.LOCAL_SETTING_NAMES_SET,
     RobotTokenSets.GLOBAL_SETTING_NAMES_SET,
     RobotTokenSets.ARGUMENTS_TYPE_SET,
-    TokenSet.create(RobotTypes.VAR, RobotTypes.KEYWORD_NAME))
+    TokenSet.create(RobotTypes.VAR,
+        RobotTypes.KEYWORD_NAME,
+        RobotTypes.TEST_CASES_HEADER_NAME,
+        RobotTypes.TASKS_HEADER_NAME,
+        RobotTypes.DATA_DRIVEN_COLUMN_NAME,
+        RobotTypes.TEST_CASE_NAME_PART,
+        RobotTypes.TASK_NAME_PART))
 
 private val VARIABLE_DEFINITION_WITH_OPTIONAL_ASSIGNMENT_SET = TokenSet.create(RobotTypes.VARIABLE_DEFINITION, RobotTypes.ASSIGNMENT)
 

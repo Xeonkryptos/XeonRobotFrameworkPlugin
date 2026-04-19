@@ -67,6 +67,12 @@ class RobotCodeStyleSettings(container: CodeStyleSettings) : CustomCodeStyleSett
     @JvmField
     var VARIABLE_DEFINITIONS_ALIGN_FIRST_ARGUMENT: Boolean = true
 
+    @JvmField
+    var ALIGN_TEMPLATE_ARGUMENTS_WITH_DATA_DRIVEN_NAMES: Boolean = true
+
+    @JvmField
+    var ALIGN_TEMPLATE_ARGUMENTS_WITH_EACH_OTHER: Boolean = true
+
     // ################## Blank lines ##################
     @JvmField
     var BLANK_LINES_BEFORE_GLOBAL_SETUP_TEARDOWN: Int = 1

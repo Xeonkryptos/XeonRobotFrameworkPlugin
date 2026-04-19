@@ -58,8 +58,11 @@ public class RobotHighlighter extends SyntaxHighlighterBase {
         keys.put(RobotTypes.VARIABLES_HEADER, SECTION_TITLE);
         keys.put(RobotTypes.USER_KEYWORDS_HEADER, SECTION_TITLE);
         keys.put(RobotTypes.COMMENTS_HEADER, SECTION_TITLE);
-        keys.put(RobotTypes.TEST_CASES_HEADER, SECTION_TITLE);
+        keys.put(RobotTypes.TEST_CASES_HEADER_NAME, SECTION_TITLE);
+        keys.put(RobotTypes.TASKS_HEADER_NAME, SECTION_TITLE);
         keys.put(RobotTypes.TASKS_HEADER, SECTION_TITLE);
+
+        keys.put(RobotTypes.DATA_DRIVEN_COLUMN_NAME, SECTION_TITLE);
 
         keys.put(RobotTypes.USER_KEYWORD_NAME_PART, USER_KEYWORD_NAME);
         keys.put(RobotTypes.TEST_CASE_NAME_PART, TEST_CASE_NAME);

@@ -18,8 +18,11 @@ import com.intellij.psi.util.PsiUtilCore;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotResourceFileType;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotQualifiedNameOwner;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotSection;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTaskStatement;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTasksSection;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTestCaseStatement;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTestCasesSection;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -28,7 +31,7 @@ import java.util.Collection;
 
 public class RobotRunLineMarkerProvider extends RunLineMarkerContributor implements DumbAware {
 
-    private static final TokenSet EXECUTABLE_SECTION_TYPES = TokenSet.create(RobotTypes.TEST_CASES_HEADER, RobotTypes.TASKS_HEADER);
+    private static final TokenSet EXECUTABLE_SECTION_TYPES = TokenSet.create(RobotTypes.TEST_CASES_HEADER_NAME, RobotTypes.TASKS_HEADER_NAME);
     private static final TokenSet EXECUTABLE_ELEMENT_TYPES = TokenSet.create(RobotTypes.TEST_CASE_NAME_PART, RobotTypes.TASK_NAME_PART);
 
     @Nullable
@@ -42,9 +45,12 @@ public class RobotRunLineMarkerProvider extends RunLineMarkerContributor impleme
             if (EXECUTABLE_ELEMENT_TYPES.contains(type)) {
                 return constructExecutableInfoIcon(element, project, containingFile, false);
             } else if (EXECUTABLE_SECTION_TYPES.contains(type)) {
-                Collection<? extends RobotQualifiedNameOwner> children = PsiTreeUtil.findChildrenOfAnyType(element.getParent(), true, RobotTestCaseStatement.class, RobotTaskStatement.class);
-                if (!children.isEmpty()) {
-                    return constructExecutableInfoIcon(element, project, containingFile, true);
+                RobotSection section = PsiTreeUtil.getParentOfType(element, RobotTestCasesSection.class, RobotTasksSection.class);
+                if (section != null) {
+                    Collection<? extends RobotQualifiedNameOwner> children = PsiTreeUtil.findChildrenOfAnyType(section, true, RobotTestCaseStatement.class, RobotTaskStatement.class);
+                    if (!children.isEmpty()) {
+                        return constructExecutableInfoIcon(element, project, containingFile, true);
+                    }
                 }
             }
         }

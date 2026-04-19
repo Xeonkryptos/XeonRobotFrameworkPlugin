@@ -11,7 +11,7 @@ public interface RobotTestCasesSection extends RobotSection, RobotScopeOwner, Na
   List<RobotTestCaseStatement> getTestCaseStatementList();
 
   @NotNull
-  PsiElement getNameIdentifier();
+  RobotTestCasesHeader getNameIdentifier();
 
   @NotNull String getSectionName();
 

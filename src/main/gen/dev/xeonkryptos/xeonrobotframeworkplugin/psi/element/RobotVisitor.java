@@ -337,6 +337,10 @@ public class RobotVisitor extends PsiElementVisitor {
     // visitElement(o);
   }
 
+  public void visitTasksHeader(@NotNull RobotTasksHeader o) {
+    visitElement(o);
+  }
+
   public void visitTasksSection(@NotNull RobotTasksSection o) {
     visitSection(o);
     // visitScopeOwner(o);
@@ -379,6 +383,10 @@ public class RobotVisitor extends PsiElementVisitor {
     // visitFoldable(o);
     // visitScopeOwner(o);
     // visitElement(o);
+  }
+
+  public void visitTestCasesHeader(@NotNull RobotTestCasesHeader o) {
+    visitElement(o);
   }
 
   public void visitTestCasesSection(@NotNull RobotTestCasesSection o) {

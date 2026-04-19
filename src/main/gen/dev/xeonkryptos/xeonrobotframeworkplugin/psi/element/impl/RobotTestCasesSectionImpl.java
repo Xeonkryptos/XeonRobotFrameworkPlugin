@@ -36,8 +36,8 @@ public class RobotTestCasesSectionImpl extends RobotSectionImpl implements Robot
 
   @Override
   @NotNull
-  public PsiElement getNameIdentifier() {
-    return notNullChild(findChildByType(TEST_CASES_HEADER));
+  public RobotTestCasesHeader getNameIdentifier() {
+    return notNullChild(PsiTreeUtil.getChildOfType(this, RobotTestCasesHeader.class));
   }
 
   @Override

@@ -58,11 +58,14 @@ section ::= settings_section
 
 settings_section ::= SETTINGS_HEADER eol_marker? setting_statement* {methods=[nameIdentifier="SETTINGS_HEADER" getSectionName]}
 variables_section ::= VARIABLES_HEADER eol_marker? variable_statements? {methods=[nameIdentifier="VARIABLES_HEADER" getSectionName]}
-test_cases_section ::= TEST_CASES_HEADER eol_marker? test_case_statement* {methods=[nameIdentifier="TEST_CASES_HEADER" getSectionName] implements="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotScopeOwner"}
-tasks_section ::= TASKS_HEADER eol_marker? task_statement* {methods=[nameIdentifier="TASKS_HEADER" getSectionName] implements="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotScopeOwner"}
+test_cases_section ::= test_cases_header eol_marker? test_case_statement* {methods=[nameIdentifier="test_cases_header" getSectionName] implements="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotScopeOwner"}
+tasks_section ::= tasks_header eol_marker? task_statement* {methods=[nameIdentifier="tasks_header" getSectionName] implements="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotScopeOwner"}
 keywords_section ::= USER_KEYWORDS_HEADER eol_marker? user_keyword_statement* {methods=[nameIdentifier="USER_KEYWORDS_HEADER" getSectionName] implements="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotScopeOwner"}
 comments_section ::= COMMENTS_HEADER eol_marker? COMMENT* {methods=[nameIdentifier="COMMENTS_HEADER" getSectionName]}
-private section_recover ::= !(SETTINGS_HEADER | VARIABLES_HEADER | TEST_CASES_HEADER | TASKS_HEADER | USER_KEYWORDS_HEADER | COMMENTS_HEADER)
+private section_recover ::= !(SETTINGS_HEADER | VARIABLES_HEADER | test_cases_header | tasks_header | USER_KEYWORDS_HEADER | COMMENTS_HEADER)
+
+test_cases_header ::= TEST_CASES_HEADER_NAME DATA_DRIVEN_COLUMN_NAME*
+tasks_header ::= TASKS_HEADER_NAME DATA_DRIVEN_COLUMN_NAME*
 
 variable_statements ::= single_variable_statement+
 

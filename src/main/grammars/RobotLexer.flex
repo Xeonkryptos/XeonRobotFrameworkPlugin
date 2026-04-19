@@ -94,6 +94,29 @@ import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.ExtendedRobotTypes.*;
             || currentState == TEMPLATE_PARAMETER_VALUE
             || currentState == PYTHON_EXECUTED_CONDITION;
   }
+
+  protected void pushbackEverythingUpToKeywordFinishedMarker() {
+      int lengthToKeep = 0;
+      boolean firstPossibleSpaceExitMarkerFound = false;
+      int totalLength = yylength();
+      for (int i = 0; i < totalLength; i++) {
+          char currentChar = yycharat(i);
+          if (currentChar == '\n' || currentChar == '\r' || currentChar == '\t') {
+              break;
+          }
+          if (Character.isWhitespace(currentChar)) {
+              if (firstPossibleSpaceExitMarkerFound) {
+                  lengthToKeep--;
+                  break;
+              }
+              firstPossibleSpaceExitMarkerFound = true;
+          } else if (firstPossibleSpaceExitMarkerFound) {
+              firstPossibleSpaceExitMarkerFound = false;
+          }
+          lengthToKeep++;
+      }
+      yypushback(totalLength - lengthToKeep);
+  }
 %}
 
 %public
@@ -142,13 +165,13 @@ SectionTasksWords = "Tasks" | "Task"
 SectionKeywordsWords = "Keywords" | "Keyword"
 SectionCommentsWords = "Comments" | "Comment"
 
-SectionIdentifierParts = ({Star} | {Space})*
-CommentSectionIdentifier = {Star} {SectionIdentifierParts} {SectionCommentsWords} {NON_EOL}*
-SettingsSectionIdentifier = {Star} {SectionIdentifierParts} {SectionSettingsWords} {NON_EOL}*
-TestcaseSectionIdentifier = {Star} {SectionIdentifierParts} {SectionTestcasesWords} {NON_EOL}*
-TasksSectionIdentifier = {Star} {SectionIdentifierParts} {SectionTasksWords} {NON_EOL}*
-KeywordsSectionIdentifier = {Star} {SectionIdentifierParts} {SectionKeywordsWords} {NON_EOL}*
-VariablesSectionIdentifier = {Star} {SectionIdentifierParts} {SectionVariablesWords} {NON_EOL}*
+SectionIdentifierParts = ({Space}? {Star})* {Space}?
+CommentSectionIdentifier = {Star} {SectionIdentifierParts} {SectionCommentsWords} {SectionIdentifierParts} {SpaceBasedEndMarker}? {NON_EOL}* {EOL}?
+SettingsSectionIdentifier = {Star} {SectionIdentifierParts} {SectionSettingsWords} {SectionIdentifierParts} {SpaceBasedEndMarker}? {NON_EOL}* {EOL}?
+TestcaseSectionIdentifier = {Star} {SectionIdentifierParts} {SectionTestcasesWords} {SectionIdentifierParts} {SpaceBasedEndMarker}? {NON_EOL}* {EOL}?
+TasksSectionIdentifier = {Star} {SectionIdentifierParts} {SectionTasksWords} {SectionIdentifierParts} {SpaceBasedEndMarker}? {NON_EOL}* {EOL}?
+KeywordsSectionIdentifier = {Star} {SectionIdentifierParts} {SectionKeywordsWords} {SectionIdentifierParts} {SpaceBasedEndMarker}? {NON_EOL}* {EOL}?
+VariablesSectionIdentifier = {Star} {SectionIdentifierParts} {SectionVariablesWords} {SectionIdentifierParts} {SpaceBasedEndMarker}? {NON_EOL}* {EOL}?
 
 OpeningVariable = "{"
 ClosingVariable = "}"
@@ -233,7 +256,7 @@ RepeatKeywordCall = "Repeat" {IntraKeywordSeparator}? "Keyword"
 
 LineComment = {LineCommentSign} {NON_EOL}*
 
-%state SETTINGS_SECTION, VARIABLES_SECTION
+%state SETTINGS_SECTION, VARIABLES_SECTION, TEST_CASES_SECTION_NAME_DEFINITION, TASKS_SECTION_NAME_DEFINITION
 %state TESTCASE_NAME_DEFINITION, TESTCASE_DEFINITION, TASK_NAME_DEFINITION, TASK_DEFINITION
 %state USER_KEYWORD_NAME_DEFINITION, USER_KEYWORD_DEFINITION, USER_KEYWORD_RETURN_STATEMENT
 %state SETTING, SETTING_TEMPLATE_START, LOCAL_TEMPLATE_DEFINITION_START, INTERMEDIATE_TEMPLATE_CONFIGURATION, TEMPLATE_DEFINITION, TEMPLATE_ARGUMENTS
@@ -279,9 +302,17 @@ LineComment = {LineCommentSign} {NON_EOL}*
 ^ {SettingsSectionIdentifier}   { resetInternalState(); yybegin(SETTINGS_SECTION); return SETTINGS_HEADER; }
 ^ {VariablesSectionIdentifier}  { resetInternalState(); yybegin(VARIABLES_SECTION); return VARIABLES_HEADER; }
 ^ {KeywordsSectionIdentifier}   { resetInternalState(); yybegin(USER_KEYWORD_NAME_DEFINITION); return USER_KEYWORDS_HEADER; }
-^ {TestcaseSectionIdentifier}   { resetInternalState(); yybegin(TESTCASE_NAME_DEFINITION); return TEST_CASES_HEADER; }
-^ {TasksSectionIdentifier}      { resetInternalState(); yybegin(TASK_NAME_DEFINITION); return TASKS_HEADER; }
+^ {TestcaseSectionIdentifier}   { resetInternalState(); yybegin(TEST_CASES_SECTION_NAME_DEFINITION); pushbackEverythingUpToKeywordFinishedMarker(); return TEST_CASES_HEADER_NAME; }
+^ {TasksSectionIdentifier}      { resetInternalState(); yybegin(TASKS_SECTION_NAME_DEFINITION); pushbackEverythingUpToKeywordFinishedMarker(); return TASKS_HEADER_NAME; }
 ^ {CommentSectionIdentifier}    { resetInternalState(); yybegin(COMMENTS_SECTION); return COMMENTS_HEADER; }
+
+<TEST_CASES_SECTION_NAME_DEFINITION>  {
+    {EOL}                             { yybegin(TESTCASE_NAME_DEFINITION); return EOL; }
+}
+<TASKS_SECTION_NAME_DEFINITION>       {
+    {EOL}                             { yybegin(TASK_NAME_DEFINITION); return EOL; }
+}
+<TEST_CASES_SECTION_NAME_DEFINITION, TASKS_SECTION_NAME_DEFINITION>  {LiteralValue}   { pushBackTrailingWhitespace(); return DATA_DRIVEN_COLUMN_NAME; }
 
 <IN_CONTINUATION>  {
     {LineComment}                                     { return COMMENT; }
@@ -388,21 +419,27 @@ LineComment = {LineCommentSign} {NON_EOL}*
 }
 
 <SETTING> {
-    {WithNameKeyword} {ExtendedSpaceBasedEndMarker}    { pushBackTrailingWhitespace(); return WITH_NAME; }
-    {EOL}                                              { leaveState(); return EOL; }
+    {WithNameKeyword} {ExtendedSpaceBasedEndMarker}          { pushBackTrailingWhitespace(); return WITH_NAME; }
+    {EOL}                                                    { leaveState(); return EOL; }
 }
 
 <TESTCASE_NAME_DEFINITION>     {
-    {EverythingButVariableValue}    { pushBackTrailingWhitespace(); return TEST_CASE_NAME_PART; }
-    {EOL}                           { yybegin(TESTCASE_DEFINITION); return EOL; }
+    {EverythingButVariableValue}                             { pushBackTrailingWhitespace(); return TEST_CASE_NAME_PART; }
+    {SpaceBasedEndMarker} {NonNewlineWhitespace}*            { yybegin(TESTCASE_DEFINITION); return WHITE_SPACE; }
+    {EOL}                                                    { yybegin(TESTCASE_DEFINITION); return EOL; }
 }
 <TASK_NAME_DEFINITION>         {
-    {EverythingButVariableValue}    { pushBackTrailingWhitespace(); return TASK_NAME_PART; }
-    {EOL}                           { yybegin(TASK_DEFINITION); return EOL; }
+    {EverythingButVariableValue}                             { pushBackTrailingWhitespace(); return TASK_NAME_PART; }
+    {SpaceBasedEndMarker} {NonNewlineWhitespace}*            { yybegin(TASK_DEFINITION); return WHITE_SPACE; }
+    {EOL}                                                    { yybegin(TASK_DEFINITION); return EOL; }
 }
 <USER_KEYWORD_NAME_DEFINITION> {
-    {EverythingButVariableValue}    { pushBackTrailingWhitespace(); return USER_KEYWORD_NAME_PART; }
-    {EOL}                           { yybegin(USER_KEYWORD_DEFINITION); return EOL; }
+    {EverythingButVariableValue}                             { pushBackTrailingWhitespace(); return USER_KEYWORD_NAME_PART; }
+    {SpaceBasedEndMarker} {NonNewlineWhitespace}*            { yybegin(USER_KEYWORD_DEFINITION); return WHITE_SPACE; }
+    {EOL}                                                    { yybegin(USER_KEYWORD_DEFINITION); return EOL; }
+}
+<TESTCASE_NAME_DEFINITION, TASK_NAME_DEFINITION, USER_KEYWORD_NAME_DEFINITION> {
+    {SpaceBasedEndMarker} {NonNewlineWhitespace}* {EOL}      { yypushback(1); return WHITE_SPACE; }
 }
 
 <TESTCASE_DEFINITION>          ^ [^\s#] {NON_EOL}+ {EOL}*    { localTemplateEnabled = globalTemplateEnabled; yypushback(yylength()); yybegin(TESTCASE_NAME_DEFINITION); break; }
@@ -767,15 +804,15 @@ LineComment = {LineCommentSign} {NON_EOL}*
 }
 
 <COMMENTS_SECTION> {
-    ^ {SettingsSectionIdentifier}            { resetInternalState(); yybegin(SETTINGS_SECTION); pushBackTrailingWhitespace(); return SETTINGS_HEADER; }
-    ^ {TestcaseSectionIdentifier}            { resetInternalState(); yybegin(TESTCASE_NAME_DEFINITION); pushBackTrailingWhitespace(); return TEST_CASES_HEADER; }
-    ^ {TasksSectionIdentifier}               { resetInternalState(); yybegin(TASK_NAME_DEFINITION); pushBackTrailingWhitespace(); return TASKS_HEADER; }
-    ^ {KeywordsSectionIdentifier}            { resetInternalState(); yybegin(USER_KEYWORD_NAME_DEFINITION); pushBackTrailingWhitespace(); return USER_KEYWORDS_HEADER; }
-    ^ {VariablesSectionIdentifier}           { resetInternalState(); yybegin(VARIABLES_SECTION); pushBackTrailingWhitespace(); return VARIABLES_HEADER; }
+    ^ {SettingsSectionIdentifier}               { resetInternalState(); yybegin(SETTINGS_SECTION); pushBackTrailingWhitespace(); return SETTINGS_HEADER; }
+    ^ {TestcaseSectionIdentifier}               { resetInternalState(); yybegin(TESTCASE_NAME_DEFINITION); pushBackTrailingWhitespace(); return TEST_CASES_HEADER_NAME; }
+    ^ {TasksSectionIdentifier}                  { resetInternalState(); yybegin(TASK_NAME_DEFINITION); pushBackTrailingWhitespace(); return TASKS_HEADER_NAME; }
+    ^ {KeywordsSectionIdentifier}               { resetInternalState(); yybegin(USER_KEYWORD_NAME_DEFINITION); pushBackTrailingWhitespace(); return USER_KEYWORDS_HEADER; }
+    ^ {VariablesSectionIdentifier}              { resetInternalState(); yybegin(VARIABLES_SECTION); pushBackTrailingWhitespace(); return VARIABLES_HEADER; }
 
     <YYINITIAL> {
-        {WhitespaceIncludingNewline}+        { return WHITE_SPACE; }
-        {NON_EOL}+                           { return COMMENT; }
+        {WhitespaceIncludingNewline}+           { return WHITE_SPACE; }
+        {NON_EOL}+                              { return COMMENT; }
     }
 }
 
