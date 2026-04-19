@@ -21,15 +21,13 @@ import org.jetbrains.annotations.NotNull;
 
 public class RobotStubFileElementType extends IStubFileElementType<PsiFileStub<?>> {
 
-    public static final int STUB_FILE_VERSION = 21;
-
     public RobotStubFileElementType() {
         super("ROBOT_FILE", RobotLanguage.INSTANCE);
     }
 
     @Override
     public int getStubVersion() {
-        return super.getStubVersion() + STUB_FILE_VERSION;
+        return super.getStubVersion() + 22;
     }
 
     @Override
