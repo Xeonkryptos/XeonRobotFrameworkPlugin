@@ -109,6 +109,10 @@ class RobotLanguageCodeStyleSettingsProvider : LanguageCodeStyleSettingsProvider
                     "VARIABLE_DEFINITIONS_FIRST_ARGUMENT_ON_NEW_LINE",
                     RobotBundle.message("formatter.variable.definitions.first.argument.on.newline"),
                     RobotBundle.message("formatter.variable.definitions.wrap"))
+                consumer.showCustomOption(RobotCodeStyleSettings::class.java,
+                    "VARIABLE_DEFINITIONS_ALIGN_FIRST_ARGUMENT",
+                    RobotBundle.message("formatter.variable.definitions.align.first.arguments"),
+                    RobotBundle.message("formatter.variable.definitions.wrap"))
             }
 
             SettingsType.BLANK_LINES_SETTINGS -> {
@@ -160,10 +164,6 @@ class RobotLanguageCodeStyleSettingsProvider : LanguageCodeStyleSettingsProvider
     override fun getCodeSample(settingsType: SettingsType): String {
         return """*** Settings ***
 Documentation      Formatter showcase with global settings, long arguments and keyword calls
-Suite Setup        Initialize Suite Context    env=dev    browser=chromium    region=eu-central-1    retries=3    timeout=120s
-Suite Teardown     Cleanup Suite Context       keepLogs=${'$'}{TRUE}    uploadResults=${'$'}{FALSE}    reason=normal-shutdown
-Test Setup         Prepare Shared Fixture      user=robot_admin    password=${'$'}{SECRET}    locale=de_DE    timezone=Europe/Berlin
-Test Teardown      Release Shared Fixture      force=${'$'}{TRUE}    retry=2
 Library            Collections
 Library            OperatingSystem             WITH NAME    OS
 Library            SomeReallyLongLibraryName   alias=LongLib    endpoint=https://very.long.endpoint.example.local/api/v1/robot/formatter
@@ -171,6 +171,10 @@ Resource           resources/common.resource
 Variables          resources/variables.py
 Metadata           owner    qa-team-platform
 Metadata           long_meta_key    This metadata value is intentionally very long to trigger wrapping behavior based on RIGHT_MARGIN
+Suite Setup        Initialize Suite Context    env=dev    browser=chromium    region=eu-central-1    retries=3    timeout=120s
+Suite Teardown     Cleanup Suite Context       keepLogs=${'$'}{TRUE}    uploadResults=${'$'}{FALSE}    reason=normal-shutdown
+Test Setup         Prepare Shared Fixture      user=robot_admin    password=${'$'}{SECRET}    locale=de_DE    timezone=Europe/Berlin
+Test Teardown      Release Shared Fixture      force=${'$'}{TRUE}    retry=2
 Default Tags       smoke    ui    regression    formatter    very_long_tag_to_force_wrap
 Force Tags         release_candidate    nightly_build    pipeline_stage_validation
     

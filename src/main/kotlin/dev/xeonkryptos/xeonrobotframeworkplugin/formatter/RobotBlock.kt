@@ -12,6 +12,7 @@ import com.intellij.lang.ASTNode
 import com.intellij.lang.tree.util.children
 import com.intellij.openapi.util.Key
 import com.intellij.psi.TokenType
+import com.intellij.psi.codeStyle.CommonCodeStyleSettings
 import com.intellij.psi.formatter.common.AbstractBlock
 import com.intellij.psi.tree.TokenSet
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTokenSets
@@ -26,6 +27,7 @@ class RobotBlock(node: ASTNode, private val context: RobotBlockContext, wrap: Wr
         private val TEMPLATE_VALUES_ALIGNMENT_KEY = Key.create<Array<Alignment>>("TEMPLATE_VALUE_ALIGNMENT")
         private val KEYWORD_VARIABLE_STATEMENT_VARIABLE_ALIGNMENT_KEY = Key.create<Alignment>("KEYWORD_VARIABLE_STATEMENT_VARIABLE_ALIGNMENT")
         private val KEYWORD_CALL_ALIGNMENT_KEY = Key.create<Alignment>("KEYWORD_CALL_ALIGNMENT")
+        private val SINGLE_VARIABLE_STATEMENT_FIRST_ARGUMENT_ALIGNMENT_KEY = Key.create<Alignment>("SINGLE_VARIABLE_STATEMENT_FIRST_ARGUMENT_ALIGNMENT")
 
         private val PARENT_WRAP_KEY = Key.create<Wrap>("PARENT_WRAP")
 
@@ -57,6 +59,20 @@ class RobotBlock(node: ASTNode, private val context: RobotBlockContext, wrap: Wr
             RobotTypes.USER_KEYWORD_STATEMENT_ID,
             RobotTypes.TEST_CASE_ID,
             RobotTypes.TASK_ID)
+        private val PARENT_NODES_FOR_PARAMETER_AND_POSITIONAL_ARGUMENT_TO_RETRIEVE_WRAPS = TokenSet.create(RobotTypes.KEYWORD_CALL,
+            RobotTypes.FOR_LOOP_HEADER,
+            RobotTypes.WHILE_LOOP_HEADER,
+            RobotTypes.LOCAL_SETTING,
+            RobotTypes.LIBRARY_IMPORT_GLOBAL_SETTING,
+            RobotTypes.RESOURCE_IMPORT_GLOBAL_SETTING,
+            RobotTypes.VARIABLES_IMPORT_GLOBAL_SETTING,
+            RobotTypes.TAGS_STATEMENT_GLOBAL_SETTING,
+            RobotTypes.SUITE_NAME_STATEMENT_GLOBAL_SETTING,
+            RobotTypes.TIMEOUT_STATEMENTS_GLOBAL_SETTING,
+            RobotTypes.METADATA_STATEMENT_GLOBAL_SETTING,
+            RobotTypes.DOCUMENTATION_STATEMENT_GLOBAL_SETTING,
+            RobotTypes.TEMPLATE_STATEMENTS_GLOBAL_SETTING,
+            RobotTypes.UNKNOWN_SETTING_STATEMENTS_GLOBAL_SETTING)
     }
 
     private val parent: RobotBlock?
@@ -66,18 +82,18 @@ class RobotBlock(node: ASTNode, private val context: RobotBlockContext, wrap: Wr
         val blocks = mutableListOf<Block>()
         if (isLeaf) return blocks
 
+        val myParent = parent
         val parentWrap = createWrapIfNecessary()
         if (myNode.elementType === RobotTypes.KEYWORD_VARIABLE_STATEMENT) {
             myNode.putUserData(KEYWORD_VARIABLE_STATEMENT_VARIABLE_ALIGNMENT_KEY, Alignment.createAlignment())
         } else if (myNode.elementType === RobotTypes.KEYWORD_CALL) {
             myNode.putUserData(KEYWORD_CALL_ALIGNMENT_KEY, Alignment.createAlignment())
-        }
-
-        val myParent = parent
-        if (myNode.elementType === RobotTypes.TEMPLATE_ARGUMENTS && myParent != null && myParent.node.getUserData(TEMPLATE_VALUES_ALIGNMENT_KEY) === null) {
+        } else if (myNode.elementType === RobotTypes.TEMPLATE_ARGUMENTS && myParent != null && myParent.node.getUserData(TEMPLATE_VALUES_ALIGNMENT_KEY) === null) {
             val templateValueHolderElements = myNode.getChildren(RobotTokenSets.TEMPLATE_VALUES_HOLDER_SET)
             val alignments = Array<Alignment>(templateValueHolderElements.size) { Alignment.createAlignment(true) }
             myParent.node.putUserData(TEMPLATE_VALUES_ALIGNMENT_KEY, alignments)
+        } else if (myNode.elementType === RobotTypes.VARIABLE_STATEMENTS) {
+            myNode.putUserData(SINGLE_VARIABLE_STATEMENT_FIRST_ARGUMENT_ALIGNMENT_KEY, Alignment.createAlignment(true))
         }
 
         fun addNewRobotBlock(alignmentIndex: Int, child: ASTNode) {
@@ -97,13 +113,9 @@ class RobotBlock(node: ASTNode, private val context: RobotBlockContext, wrap: Wr
         }
 
         var alignmentIndex = 0
-        for (child in myNode.children()) {
-            if (shouldCreateBlockForNode(child)) addNewRobotBlock(alignmentIndex++, child)
-        }
+        myNode.children().filter { !WHITESPACE_TYPES.contains(it.elementType) }.forEach { addNewRobotBlock(alignmentIndex++, it) }
         return blocks
     }
-
-    private fun shouldCreateBlockForNode(node: ASTNode): Boolean = !WHITESPACE_TYPES.contains(node.elementType)
 
     private fun createWrapIfNecessary(): Wrap? = when (myNode.elementType) {
         RobotTypes.KEYWORD_CALL -> {
@@ -138,7 +150,19 @@ class RobotBlock(node: ASTNode, private val context: RobotBlockContext, wrap: Wr
             Wrap.createWrap(wrapType, context.robotCodeStyleSettings.VARIABLE_DEFINITIONS_FIRST_ARGUMENT_ON_NEW_LINE)
         }
 
-        RobotTypes.LIBRARY_IMPORT_GLOBAL_SETTING, RobotTypes.RESOURCE_IMPORT_GLOBAL_SETTING, RobotTypes.VARIABLES_IMPORT_GLOBAL_SETTING, RobotTypes.TAGS_STATEMENT_GLOBAL_SETTING, RobotTypes.SUITE_NAME_STATEMENT_GLOBAL_SETTING, RobotTypes.TIMEOUT_STATEMENTS_GLOBAL_SETTING, RobotTypes.METADATA_STATEMENT_GLOBAL_SETTING, RobotTypes.DOCUMENTATION_STATEMENT_GLOBAL_SETTING, RobotTypes.TEMPLATE_STATEMENTS_GLOBAL_SETTING, RobotTypes.UNKNOWN_SETTING_STATEMENTS_GLOBAL_SETTING, RobotTypes.SETUP_TEARDOWN_STATEMENTS_GLOBAL_SETTING -> {
+        // @formatter:off
+        RobotTypes.LIBRARY_IMPORT_GLOBAL_SETTING,
+        RobotTypes.RESOURCE_IMPORT_GLOBAL_SETTING,
+        RobotTypes.VARIABLES_IMPORT_GLOBAL_SETTING,
+        RobotTypes.TAGS_STATEMENT_GLOBAL_SETTING,
+        RobotTypes.SUITE_NAME_STATEMENT_GLOBAL_SETTING,
+        RobotTypes.TIMEOUT_STATEMENTS_GLOBAL_SETTING,
+        RobotTypes.METADATA_STATEMENT_GLOBAL_SETTING,
+        RobotTypes.DOCUMENTATION_STATEMENT_GLOBAL_SETTING,
+        RobotTypes.TEMPLATE_STATEMENTS_GLOBAL_SETTING,
+        RobotTypes.UNKNOWN_SETTING_STATEMENTS_GLOBAL_SETTING,
+        RobotTypes.SETUP_TEARDOWN_STATEMENTS_GLOBAL_SETTING -> {
+        // @formatter:on
             val wrapType = context.robotCodeStyleSettings.GLOBAL_SETTINGS_WRAP
             Wrap.createWrap(wrapType, context.robotCodeStyleSettings.GLOBAL_SETTINGS_FIRST_ARGUMENT_ON_NEW_LINE)
         }
@@ -157,9 +181,9 @@ class RobotBlock(node: ASTNode, private val context: RobotBlockContext, wrap: Wr
     }
 
     private fun shouldAssignWrapToNode(node: ASTNode): Boolean = when (node.elementType) {
-        RobotTypes.PARAMETER, RobotTypes.POSITIONAL_ARGUMENT -> myNode.elementType === RobotTypes.KEYWORD_CALL || myNode.elementType === RobotTypes.FOR_LOOP_HEADER || myNode.elementType === RobotTypes.WHILE_LOOP_HEADER || myNode.elementType === RobotTypes.LOCAL_SETTING || myNode.elementType === RobotTypes.LIBRARY_IMPORT_GLOBAL_SETTING || myNode.elementType === RobotTypes.RESOURCE_IMPORT_GLOBAL_SETTING || myNode.elementType === RobotTypes.VARIABLES_IMPORT_GLOBAL_SETTING || myNode.elementType === RobotTypes.TAGS_STATEMENT_GLOBAL_SETTING || myNode.elementType === RobotTypes.SUITE_NAME_STATEMENT_GLOBAL_SETTING || myNode.elementType === RobotTypes.TIMEOUT_STATEMENTS_GLOBAL_SETTING || myNode.elementType === RobotTypes.METADATA_STATEMENT_GLOBAL_SETTING || myNode.elementType === RobotTypes.DOCUMENTATION_STATEMENT_GLOBAL_SETTING || myNode.elementType === RobotTypes.TEMPLATE_STATEMENTS_GLOBAL_SETTING || myNode.elementType === RobotTypes.UNKNOWN_SETTING_STATEMENTS_GLOBAL_SETTING
+        RobotTypes.PARAMETER, RobotTypes.POSITIONAL_ARGUMENT -> PARENT_NODES_FOR_PARAMETER_AND_POSITIONAL_ARGUMENT_TO_RETRIEVE_WRAPS.contains(myNode.elementType)
 
-        RobotTypes.LOCAL_ARGUMENTS_SETTING_PARAMETER_MANDATORY, RobotTypes.LOCAL_ARGUMENTS_SETTING_PARAMETER_OPTIONAL -> true
+        RobotTypes.LOCAL_ARGUMENTS_SETTING_PARAMETER -> true
 
         RobotTypes.LITERAL_CONSTANT, RobotTypes.IMPORT_ARGUMENT, RobotTypes.KEYWORD_CALL -> RobotTokenSets.GLOBAL_SETTING_SET.contains(myNode.elementType)
 
@@ -175,13 +199,25 @@ class RobotBlock(node: ASTNode, private val context: RobotBlockContext, wrap: Wr
         else -> Indent.getNoneIndent()
     }
 
-    private fun getAlignment(node: ASTNode, index: Int): Alignment? = when {
-        RobotTokenSets.TEMPLATE_VALUES_HOLDER_SET.contains(node.elementType) -> parent?.node?.getUserData(TEMPLATE_VALUES_ALIGNMENT_KEY)?.let { if (index < it.size) it[index] else null }
+    private fun getAlignment(node: ASTNode, alignmentIndex: Int): Alignment? = when {
+        RobotTokenSets.TEMPLATE_VALUES_HOLDER_SET.contains(node.elementType) -> parent?.node?.getUserData(TEMPLATE_VALUES_ALIGNMENT_KEY)
+            ?.let { if (alignmentIndex < it.size) it[alignmentIndex] else null }
+
         node.elementType === RobotTypes.VARIABLE_DEFINITION -> myNode.getUserData(KEYWORD_VARIABLE_STATEMENT_VARIABLE_ALIGNMENT_KEY)
         node.elementType === RobotTypes.CONTINUATION -> myNode.treeParent?.getUserData(KEYWORD_VARIABLE_STATEMENT_VARIABLE_ALIGNMENT_KEY)
         node.elementType === RobotTypes.PARAMETER || node.elementType === RobotTypes.POSITIONAL_ARGUMENT -> myNode.getUserData(KEYWORD_CALL_ALIGNMENT_KEY)
+        // @formatter:off
+        node.elementType === RobotTypes.VARIABLE_VALUE
+                && myNode.elementType === RobotTypes.SINGLE_VARIABLE_STATEMENT
+                && isAlignmentForVariableValueInSingleVariableStatementAvailable(node) -> parent?.node?.getUserData(SINGLE_VARIABLE_STATEMENT_FIRST_ARGUMENT_ALIGNMENT_KEY)
+        // @formatter:on
         else -> null
     }
+
+    private fun isAlignmentForVariableValueInSingleVariableStatementAvailable(node: ASTNode) =
+        context.robotCodeStyleSettings.VARIABLE_DEFINITIONS_WRAP == CommonCodeStyleSettings.DO_NOT_WRAP && context.robotCodeStyleSettings.VARIABLE_DEFINITIONS_ALIGN_FIRST_ARGUMENT && myNode.children()
+            .filter { !WHITESPACE_TYPES.contains(it.elementType) }
+            .firstOrNull { it.elementType === RobotTypes.VARIABLE_VALUE } == node
 
     override fun getIndent(): Indent? = indent
 

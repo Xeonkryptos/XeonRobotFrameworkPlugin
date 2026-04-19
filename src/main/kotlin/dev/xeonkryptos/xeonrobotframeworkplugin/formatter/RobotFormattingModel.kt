@@ -19,21 +19,20 @@ class RobotFormattingModel(file: PsiFile, rootBlock: RobotBlock) : PsiBasedForma
 
     private val project = file.project
 
-    override fun replaceWhiteSpace(textRange: TextRange, nodeAfter: ASTNode?, whiteSpace: String): TextRange {
-        return super.replaceWhiteSpace(textRange, nodeAfter, whiteSpace)
-    }
-
     override fun replaceWithPsiInLeaf(textRange: TextRange, whiteSpace: String, leafElement: ASTNode): String? {
         if (!myCanModifyAllWhiteSpaces && (WHITE_SPACES.contains(leafElement.elementType))) return null
 
         var whiteSpaceToUse = whiteSpace
+        var deletableEolNode: ASTNode? = null
         val whiteSpaceTokenType = if (isPreviousWhiteSpaceEndOfStatement(leafElement)) RobotTypes.EOS else TokenType.WHITE_SPACE
-        if (whiteSpaceTokenType === TokenType.WHITE_SPACE && whiteSpace.startsWith('\n')) {
-            findPotentiallyAffectedEolNode(textRange)?.let { eolNode ->
-                whiteSpaceToUse = whiteSpace.substring(eolNode.textLength)
-            }
+        if (whiteSpaceTokenType === TokenType.WHITE_SPACE) {
+            val eolNode = findPotentiallyAffectedEolNode(textRange)
+            if (eolNode != null && whiteSpace.startsWith('\n')) whiteSpaceToUse = whiteSpace.substring(eolNode.textLength)
+            else deletableEolNode = eolNode
         }
+
         CodeStyleManager.getInstance(project).performActionWithFormatterDisabled { FormatterUtil.replaceWhiteSpace(whiteSpaceToUse, leafElement, whiteSpaceTokenType, textRange) }
+        deletableEolNode?.let { CodeStyleManager.getInstance(project).performActionWithFormatterDisabled { it.treeParent?.removeChild(it) } }
 
         return whiteSpace
     }
@@ -55,8 +54,6 @@ class RobotFormattingModel(file: PsiFile, rootBlock: RobotBlock) : PsiBasedForma
         val found = psiElement.containingFile.findElementAt(offset) ?: return false
 
         val treeElement = found.node
-        if (treeElement != null && treeElement.elementType === RobotTypes.EOS) return true
-
-        return false
+        return treeElement != null && treeElement.elementType === RobotTypes.EOS
     }
 }

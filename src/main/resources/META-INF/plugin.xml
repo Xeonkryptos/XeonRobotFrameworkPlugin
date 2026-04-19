@@ -57,9 +57,7 @@
         <codeStyleSettingsProvider implementation="dev.xeonkryptos.xeonrobotframeworkplugin.formatter.RobotCodeStyleSettingsProvider"/>
         <langCodeStyleSettingsProvider implementation="dev.xeonkryptos.xeonrobotframeworkplugin.formatter.RobotLanguageCodeStyleSettingsProvider"/>
         <lang.whiteSpaceFormattingStrategy language="Robot" implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.formatter.RobotWhitespaceFormattingStrategy"/>
-        <!--<preFormatProcessor implementation="dev.xeonkryptos.xeonrobotframeworkplugin.formatter.RobotPreFormatProcessor" id="pre-format-cleaner"/>
-        <preFormatProcessor implementation="dev.xeonkryptos.xeonrobotframeworkplugin.formatter.RobotMetadataCollectorPreFormatProcessor" order="after pre-format-cleaner"/>
-        <postFormatProcessor implementation="dev.xeonkryptos.xeonrobotframeworkplugin.formatter.RobotPostFormatProcessor"/>-->
+        <preFormatProcessor implementation="dev.xeonkryptos.xeonrobotframeworkplugin.formatter.RobotPreFormatProcessor"/>
 
         <lang.parserDefinition language="Robot" implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotParserDefinition"/>
         <lang.braceMatcher language="Robot" implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.misc.RobotPairedBraceMatcher"/>
