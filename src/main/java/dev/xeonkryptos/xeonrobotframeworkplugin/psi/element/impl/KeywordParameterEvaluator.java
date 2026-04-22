@@ -1,5 +1,6 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl;
 
+import com.intellij.codeInsight.completion.CompletionInitializationContext;
 import com.intellij.openapi.project.Project;
 import dev.xeonkryptos.xeonrobotframeworkplugin.config.RobotOptionsProvider;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.DefinedParameter;
@@ -43,6 +44,7 @@ class KeywordParameterEvaluator {
         long positionalArgumentsCount = keywordCall.getAllCallArguments()
                                                    .stream()
                                                    .filter(argument -> argument instanceof RobotPositionalArgument || ((RobotParameter) argument).isFakeParameter())
+                                                   .filter(argument -> !argument.textMatches(CompletionInitializationContext.DUMMY_IDENTIFIER_TRIMMED))
                                                    .count();
         // Removing the first parameters based on defined positional arguments. With positional arguments given, the first parameters can't be available anymore
         // As an addition, RobotParameter's isFakeParameter() does handle any keyword container logic for us
