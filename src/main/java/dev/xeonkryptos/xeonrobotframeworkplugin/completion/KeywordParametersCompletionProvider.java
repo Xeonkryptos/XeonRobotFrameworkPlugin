@@ -8,6 +8,7 @@ import com.intellij.icons.AllIcons.Nodes;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.util.ProcessingContext;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotArgument;
 import dev.xeonkryptos.xeonrobotframeworkplugin.util.RobotTailTypes;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.DefinedParameter;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotCallArgumentsContainer;
@@ -25,12 +26,13 @@ class KeywordParametersCompletionProvider extends CompletionProvider<CompletionP
         PsiElement position = parameters.getPosition();
         RobotCallArgumentsContainer container = PsiTreeUtil.getParentOfType(position, RobotKeywordCall.class, RobotTemplateArguments.class);
         if (container != null) {
-            addKeywordParameters(container, result);
+            addKeywordParameters(container, result, position);
         }
     }
 
-    private void addKeywordParameters(@NotNull RobotCallArgumentsContainer callArgumentsContainer, @NotNull CompletionResultSet resultSet) {
-        Collection<DefinedParameter> missingParameters = callArgumentsContainer.computeMissingParameters();
+    private void addKeywordParameters(@NotNull RobotCallArgumentsContainer callArgumentsContainer, @NotNull CompletionResultSet resultSet, PsiElement position) {
+        RobotArgument ignorableArgument = PsiTreeUtil.getParentOfType(position, RobotArgument.class, false, RobotKeywordCall.class);
+        Collection<DefinedParameter> missingParameters = callArgumentsContainer.computeMissingParameters(ignorableArgument);
         Collection<LookupElement> lookupElements = new LinkedList<>();
         for (DefinedParameter parameter : missingParameters) {
             boolean requiredParameter = !parameter.hasDefaultValue();

@@ -1,7 +1,7 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl;
 
-import com.intellij.codeInsight.completion.CompletionInitializationContext;
 import com.intellij.openapi.project.Project;
+import com.intellij.psi.PsiElement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.config.RobotOptionsProvider;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.DefinedParameter;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotCallArgumentsContainer;
@@ -37,14 +37,14 @@ class KeywordParameterEvaluator {
         return requiredParameterNames.stream().map(DefinedParameter::getLookup).collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
-    public static Collection<DefinedParameter> computeMissingParameters(RobotKeywordCall keywordCall, RobotCallArgumentsContainer container) {
+    public static Collection<DefinedParameter> computeMissingParameters(RobotKeywordCall keywordCall, RobotCallArgumentsContainer container, PsiElement ignorableElement) {
         Project project = keywordCall.getProject();
         Collection<String> definedParameters = container.getDefinedParameterNames();
         LinkedHashSet<DefinedParameter> availableParameters = new LinkedHashSet<>(keywordCall.getAvailableParameters());
         long positionalArgumentsCount = keywordCall.getAllCallArguments()
                                                    .stream()
                                                    .filter(argument -> argument instanceof RobotPositionalArgument || ((RobotParameter) argument).isFakeParameter())
-                                                   .filter(argument -> !argument.textMatches(CompletionInitializationContext.DUMMY_IDENTIFIER_TRIMMED))
+                                                   .filter(argument -> ignorableElement == null || ignorableElement != argument)
                                                    .count();
         // Removing the first parameters based on defined positional arguments. With positional arguments given, the first parameters can't be available anymore
         // As an addition, RobotParameter's isFakeParameter() does handle any keyword container logic for us

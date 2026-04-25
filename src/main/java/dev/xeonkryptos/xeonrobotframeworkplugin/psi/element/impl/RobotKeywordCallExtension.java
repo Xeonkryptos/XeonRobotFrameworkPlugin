@@ -98,8 +98,8 @@ public abstract class RobotKeywordCallExtension extends RobotStubPsiElementBase<
     }
 
     @Override
-    public Collection<DefinedParameter> computeMissingParameters() {
-        return KeywordParameterEvaluator.computeMissingParameters(this, this);
+    public Collection<DefinedParameter> computeMissingParameters(PsiElement ignorableElement) {
+        return KeywordParameterEvaluator.computeMissingParameters(this, this, ignorableElement);
     }
 
     @Override
