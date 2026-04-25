@@ -25,7 +25,7 @@ class OptionalKeywordParametersInserterIntentionAction : PsiElementBaseIntention
 
         val elementGenerator = RobotElementGenerator.getInstance(project)
         val parserFacade = PsiParserFacade.getInstance(project)
-        for (parameter in missingParameters) {
+        missingParameters.filter { !it.isPositionalOnly && !it.isPositionalContainer && !it.isKeywordContainer }.forEach { parameter ->
             val parameterValue = parameter.defaultValue ?: GlobalConstants.SUPER_SPACE
             val newParameter = elementGenerator.createNewParameter(parameter.lookup, parameterValue)
             val eolNode = keywordCall.lastChild ?: return
@@ -41,11 +41,10 @@ class OptionalKeywordParametersInserterIntentionAction : PsiElementBaseIntention
             val keywordCall = element.parentOfType<RobotKeywordCall>(false) ?: return false
             if (keywordCall.lastChild?.node?.elementType !== RobotTypes.EOL) return false
 
-            val missingParameters = keywordCall.computeMissingParameters()
-            return missingParameters.isNotEmpty()
+            return keywordCall.computeMissingParameters().any { !it.isPositionalOnly && !it.isPositionalContainer && !it.isKeywordContainer }
         }
         return false
     }
 
-    override fun getFamilyName(): @IntentionFamilyName String = RobotBundle.message("intention.family.keyword.insert.optional.parameters.name")
+    override fun getFamilyName(): @IntentionFamilyName String = RobotBundle.message("intention.family.keyword.insert.all.missing.parameters.name")
 }
