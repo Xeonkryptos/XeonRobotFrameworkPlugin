@@ -55,8 +55,6 @@ class RobotFormattingModelBuilder : CustomFormattingModelBuilder {
     private fun createSpaceBuilder(codeStyleSettings: CodeStyleSettings): SpacingBuilder {
         val commonSettings = codeStyleSettings.getCommonSettings(RobotLanguage.INSTANCE)
         val customSettings = codeStyleSettings.getCustomSettings(RobotCodeStyleSettings::class.java)
-        val maximumSpacesAfterTemplateValues = if (customSettings.KEEP_ADDITIONAL_SPACES_BETWEEN_TEMPLATE_VALUES) Integer.MAX_VALUE else RobotCodeStyleSettings.SUPER_SPACE_SIZE
-        val maximumSpacesAfterVariableAssignment = if (customSettings.KEEP_ADDITIONAL_SPACES_AFTER_VARIABLE_ASSIGNMENTS) Integer.MAX_VALUE else RobotCodeStyleSettings.SUPER_SPACE_SIZE
         val afterContinuationSpaceSize = max(customSettings.AFTER_CONTINUATION_INDENT_SIZE, RobotCodeStyleSettings.SUPER_SPACE_SIZE)
 
         // @formatter:off
@@ -95,19 +93,19 @@ class RobotFormattingModelBuilder : CustomFormattingModelBuilder {
             .after(TokenSet.create(RobotTypes.TEMPLATE_ARGUMENTS, RobotTypes.LOCAL_SETTING))
             .lineBreakInCode()
             .after(RobotTokenSets.TEMPLATE_VALUES_HOLDER_SET)
-            .spacing(RobotCodeStyleSettings.SUPER_SPACE_SIZE, maximumSpacesAfterTemplateValues, 0, commonSettings.KEEP_LINE_BREAKS, commonSettings.KEEP_BLANK_LINES_IN_CODE)
+            .spaces(RobotCodeStyleSettings.SUPER_SPACE_SIZE)
             .between(RobotTypes.VARIABLE_DEFINITION, RobotTypes.ASSIGNMENT)
             .spaceIf(commonSettings.SPACE_AROUND_ASSIGNMENT_OPERATORS)
             .betweenInside(VARIABLE_DEFINITION_WITH_OPTIONAL_ASSIGNMENT_SET, VARIABLE_VALUE_SINGLE_SET, RobotTypes.SINGLE_VARIABLE_STATEMENT)
-            .spacing(RobotCodeStyleSettings.SUPER_SPACE_SIZE, maximumSpacesAfterVariableAssignment, 0, commonSettings.KEEP_LINE_BREAKS, commonSettings.KEEP_BLANK_LINES_IN_CODE)
+            .spaces(RobotCodeStyleSettings.SUPER_SPACE_SIZE)
             .betweenInside(VARIABLE_DEFINITION_WITH_OPTIONAL_ASSIGNMENT_SET, VARIABLE_VALUE_SINGLE_SET, RobotTypes.INLINE_VARIABLE_STATEMENT)
-            .spacing(RobotCodeStyleSettings.SUPER_SPACE_SIZE, maximumSpacesAfterVariableAssignment, 0, commonSettings.KEEP_LINE_BREAKS, commonSettings.KEEP_BLANK_LINES_IN_CODE)
+            .spaces(RobotCodeStyleSettings.SUPER_SPACE_SIZE)
             .betweenInside(VARIABLE_DEFINITION_WITH_OPTIONAL_ASSIGNMENT_SET, TokenSet.ANY, RobotTypes.EMPTY_VARIABLE_STATEMENT)
-            .spacing(RobotCodeStyleSettings.SUPER_SPACE_SIZE, maximumSpacesAfterVariableAssignment, 0, commonSettings.KEEP_LINE_BREAKS, commonSettings.KEEP_BLANK_LINES_IN_CODE)
+            .spaces(RobotCodeStyleSettings.SUPER_SPACE_SIZE)
             .betweenInside(VARIABLE_DEFINITION_WITH_OPTIONAL_ASSIGNMENT_SET, TokenSet.create(RobotTypes.KEYWORD_CALL), RobotTypes.KEYWORD_VARIABLE_STATEMENT)
-            .spacing(RobotCodeStyleSettings.SUPER_SPACE_SIZE, maximumSpacesAfterVariableAssignment, 0, commonSettings.KEEP_LINE_BREAKS, commonSettings.KEEP_BLANK_LINES_IN_CODE)
+            .spaces(RobotCodeStyleSettings.SUPER_SPACE_SIZE)
             .betweenInside(VARIABLE_DEFINITION_WITH_OPTIONAL_ASSIGNMENT_SET, TokenSet.create(RobotTypes.INLINE_IF_STRUCTURE), RobotTypes.IF_VARIABLE_STATEMENT)
-            .spacing(RobotCodeStyleSettings.SUPER_SPACE_SIZE, maximumSpacesAfterVariableAssignment, 0, commonSettings.KEEP_LINE_BREAKS, commonSettings.KEEP_BLANK_LINES_IN_CODE)
+            .spaces(RobotCodeStyleSettings.SUPER_SPACE_SIZE)
             .afterInside(RobotTypes.KEYWORD_CALL, TokenSet.create(RobotTypes.TEST_CASE_STATEMENT, RobotTypes.TASK_STATEMENT, RobotTypes.USER_KEYWORD_STATEMENT))
             .lineBreakInCode()
             .betweenInside(TokenSet.create(RobotTypes.ASSIGNMENT), TokenSet.ANY, RobotTypes.LOCAL_ARGUMENTS_SETTING_PARAMETER_OPTIONAL)

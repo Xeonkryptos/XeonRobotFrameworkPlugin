@@ -26,14 +26,6 @@ class RobotLanguageCodeStyleSettingsProvider : LanguageCodeStyleSettingsProvider
                 consumer.showStandardOptions("SPACE_AROUND_ASSIGNMENT_OPERATORS", "SPACE_WITHIN_BRACES", "SPACE_WITHIN_BRACKETS")
                 consumer.renameStandardOption("SPACE_AROUND_ASSIGNMENT_OPERATORS", RobotBundle.message("formatter.space.around.assignment.operators"))
                 consumer.renameStandardOption("SPACE_WITHIN_BRACKETS", RobotBundle.message("formatter.space.within.variables.array"))
-                consumer.showCustomOption(RobotCodeStyleSettings::class.java,
-                    "KEEP_ADDITIONAL_SPACES_AFTER_VARIABLE_ASSIGNMENTS",
-                    RobotBundle.message("formatter.keep.additional.spaces.after.variable.assignments"),
-                    customizableOptions.SPACES_OTHER)
-                consumer.showCustomOption(RobotCodeStyleSettings::class.java,
-                    "KEEP_ADDITIONAL_SPACES_BETWEEN_TEMPLATE_VALUES",
-                    RobotBundle.message("formatter.keep.additional.spaces.between.template.values"),
-                    customizableOptions.SPACES_OTHER)
             }
 
             SettingsType.WRAPPING_AND_BRACES_SETTINGS -> {
