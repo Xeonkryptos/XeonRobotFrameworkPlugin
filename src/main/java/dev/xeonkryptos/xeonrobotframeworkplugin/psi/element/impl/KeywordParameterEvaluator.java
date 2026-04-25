@@ -1,18 +1,14 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl;
 
-import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiElement;
-import dev.xeonkryptos.xeonrobotframeworkplugin.config.RobotOptionsProvider;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.DefinedParameter;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotArgument;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotCallArgumentsContainer;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCall;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotParameter;
 
-import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.OptionalInt;
@@ -47,7 +43,6 @@ class KeywordParameterEvaluator {
     }
 
     private static MissingParametersResult computeMissingParametersInternal(RobotKeywordCall keywordCall, RobotCallArgumentsContainer container, PsiElement ignorableElement, boolean countOnly) {
-        Project project = keywordCall.getProject();
         Collection<String> definedParameterNames = new LinkedHashSet<>(container.getDefinedParameterNames());
         List<DefinedParameter> availableParameters = keywordCall.getAvailableParameters()
                                                                 .stream()
@@ -60,14 +55,23 @@ class KeywordParameterEvaluator {
         int positionalContainerEndIndex = positionalContainerEndOpt.orElse(-1);
         int keywordsOnlyStartIndex = keywordsOnlyStartOpt.orElse(availableParameters.size());
 
-        List<DefinedParameter> positionalOnlyRequired = availableParameters.stream()
-                                                                           .filter(param -> param.isPositionalOnly() && !param.hasDefaultValue())
-                                                                           .collect(Collectors.toCollection(ArrayList::new));
+        List<DefinedParameter> positionalOnlyRequired = new ArrayList<>();
+        List<DefinedParameter> normalRequired = new ArrayList<>();
+        List<DefinedParameter> keywordOnlyRequired = new ArrayList<>();
 
-        List<DefinedParameter> keywordRequired = availableParameters.stream()
-                                                                    .filter(param -> !param.isPositionalOnly() && !param.hasDefaultValue()
-                                                                                     && availableParameters.indexOf(param) >= positionalContainerEndIndex)
-                                                                    .collect(Collectors.toCollection(ArrayList::new));
+        for (int i = 0; i < availableParameters.size(); i++) {
+            DefinedParameter param = availableParameters.get(i);
+            if (param.hasDefaultValue()) {
+                continue;
+            }
+            if (param.isPositionalOnly()) {
+                positionalOnlyRequired.add(param);
+            } else if (i >= keywordsOnlyStartIndex) {
+                keywordOnlyRequired.add(param);
+            } else {
+                normalRequired.add(param);
+            }
+        }
 
         int positionalArgumentsCount = countPositionalArguments(container, keywordsOnlyStartIndex, ignorableElement);
 
@@ -76,17 +80,37 @@ class KeywordParameterEvaluator {
             positionalArgumentsCount = positionalContainerEndIndex;
         }
 
+        List<DefinedParameter> allNonKeywordOnlyRequired = new ArrayList<>(positionalOnlyRequired);
+        allNonKeywordOnlyRequired.addAll(normalRequired);
+
+        int positionalSatisfied = Math.min(positionalArgumentsCount, allNonKeywordOnlyRequired.size());
+
         List<DefinedParameter> missingPositional;
         if (countOnly) {
             int positionalOnlyNeeded = Math.max(0, positionalOnlyRequired.size() - positionalArgumentsCount);
             missingPositional = positionalOnlyRequired.stream().limit(positionalOnlyNeeded).collect(Collectors.toList());
         } else {
-            int positionalSatisfied = Math.min(positionalArgumentsCount, positionalOnlyRequired.size());
-            missingPositional = positionalOnlyRequired.subList(positionalSatisfied, positionalOnlyRequired.size());
+            List<DefinedParameter> missingFromPositional = new ArrayList<>();
+            for (int i = positionalSatisfied; i < allNonKeywordOnlyRequired.size(); i++) {
+                missingFromPositional.add(allNonKeywordOnlyRequired.get(i));
+            }
+            missingPositional = missingFromPositional;
         }
 
-        removeMatchingParameters(definedParameterNames, keywordRequired, project);
-        List<DefinedParameter> missingKeywords = keywordRequired.stream().filter(param -> !definedParameterNames.contains(param.getLookup())).toList();
+        int normalSatisfiedByPositional = Math.max(0, positionalSatisfied - positionalOnlyRequired.size());
+
+        List<DefinedParameter> missingKeywords = new ArrayList<>();
+        for (int i = normalSatisfiedByPositional; i < normalRequired.size(); i++) {
+            DefinedParameter param = normalRequired.get(i);
+            if (!definedParameterNames.contains(param.getLookup())) {
+                missingKeywords.add(param);
+            }
+        }
+        for (DefinedParameter param : keywordOnlyRequired) {
+            if (!definedParameterNames.contains(param.getLookup())) {
+                missingKeywords.add(param);
+            }
+        }
 
         return new MissingParametersResult(missingPositional, missingKeywords);
     }
@@ -108,26 +132,6 @@ class KeywordParameterEvaluator {
             index++;
         }
         return count;
-    }
-
-    private static void removeMatchingParameters(Collection<String> definedParameters, Collection<? extends DefinedParameter> availableParameters, Project project) {
-        RobotOptionsProvider robotOptionsProvider = RobotOptionsProvider.getInstance(project);
-        Collator parameterNameCollator = robotOptionsProvider.getParameterNameCollator();
-
-        Iterator<String> definedParamsIterator = definedParameters.iterator();
-        while (definedParamsIterator.hasNext()) {
-            String definedParamName = definedParamsIterator.next();
-            Iterator<? extends DefinedParameter> availableParamsIterator = availableParameters.iterator();
-            while (availableParamsIterator.hasNext()) {
-                DefinedParameter availableParameter = availableParamsIterator.next();
-                String availableParameterName = availableParameter.getLookup();
-                if (parameterNameCollator.equals(definedParamName, availableParameterName)) {
-                    definedParamsIterator.remove();
-                    availableParamsIterator.remove();
-                    break;
-                }
-            }
-        }
     }
 
     private record MissingParametersResult(List<DefinedParameter> missingPositional, List<DefinedParameter> missingKeywords) {}
