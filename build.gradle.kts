@@ -44,6 +44,9 @@ repositories {
 }
 
 dependencies {
+    compileOnly("org.projectlombok:lombok:1.18.46")
+    annotationProcessor("org.projectlombok:lombok:1.18.46")
+
     implementation("org.eclipse.lsp4j:org.eclipse.lsp4j.debug:0.24.0")
     implementation("org.apache.commons:commons-text:1.15.0")
 

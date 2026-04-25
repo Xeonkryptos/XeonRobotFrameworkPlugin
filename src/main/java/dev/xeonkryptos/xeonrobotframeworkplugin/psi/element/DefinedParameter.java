@@ -16,6 +16,12 @@ public interface DefinedParameter extends LookupElementMarker {
    @Nullable
    String getDefaultValue();
 
+   boolean isPositionalOnly();
+
+   void markAsPositionalOnly();
+
+   boolean isPositionalContainer();
+
    boolean isKeywordContainer();
 
    boolean matches(@NotNull String parameterName);

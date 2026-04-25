@@ -12,32 +12,24 @@ import com.intellij.psi.util.CachedValuesManager;
 import com.intellij.psi.util.PsiModificationTracker;
 import com.intellij.util.IncorrectOperationException;
 import com.jetbrains.python.psi.PyFunction;
-import com.jetbrains.python.psi.PyNamedParameter;
-import com.jetbrains.python.psi.PyParameter;
 import com.jetbrains.python.psi.PyParameterList;
-import com.jetbrains.python.psi.PySingleStarParameter;
 import dev.xeonkryptos.xeonrobotframeworkplugin.config.RobotOptionsProvider;
-import dev.xeonkryptos.xeonrobotframeworkplugin.icons.RobotIcons;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.dto.ParameterDto;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.DefinedParameter;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotArgument;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCall;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCallName;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLocalArgumentsSetting;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotParameter;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotUserKeywordStatement;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableDefinition;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.folding.RobotFoldingComputationUtil;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotKeywordCallStub;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotStubPsiElementBase;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.QualifiedNameBuilder;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.RobotElementGenerator;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.visitor.RecursiveRobotVisitor;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.visitor.PyFunctionParametersVisitor;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.visitor.RobotCallArgumentsCollector;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import javax.swing.Icon;
 import java.text.Collator;
 import java.util.Collection;
 import java.util.Comparator;
@@ -50,6 +42,7 @@ import java.util.stream.Collectors;
 public abstract class RobotKeywordCallExtension extends RobotStubPsiElementBase<RobotKeywordCallStub, RobotKeywordCall> implements RobotKeywordCall {
 
     private static final Key<CachedValue<OptionalInt>> START_OF_KEYWORDS_ONLY_INDEX_KEY = Key.create("START_OF_KEYWORDS_ONLY_INDEX_KEY");
+    private static final Key<CachedValue<OptionalInt>> POSITIONAL_ARGUMENT_CONTAINER_INDEX_KEY = Key.create("POSITIONAL_ARGUMENT_CONTAINER_INDEX_KEY");
 
     private Collection<RobotArgument> allCallArguments;
     private Set<String> definedParameterNames;
@@ -63,33 +56,25 @@ public abstract class RobotKeywordCallExtension extends RobotStubPsiElementBase<
     }
 
     @Override
+    public void subtreeChanged() {
+        super.subtreeChanged();
+
+        allCallArguments = null;
+        definedParameterNames = null;
+    }
+
+    @Override
     public Collection<DefinedParameter> getAvailableParameters() {
         PsiElement psiElement = getKeywordCallName().getReference().resolve();
-        if (psiElement != null) {
-            if (psiElement instanceof PyFunction pyFunction) {
-                Set<DefinedParameter> results = new LinkedHashSet<>();
-                PyParameter[] pyParameters = pyFunction.getParameterList().getParameters();
-                inspectPythonFunctionStatically(pyParameters, results);
-                return results;
-            }
+        if (psiElement instanceof PyFunction pyFunction) {
+            PyFunctionParametersVisitor visitor = new PyFunctionParametersVisitor();
+            pyFunction.getParameterList().acceptChildren(visitor);
+            return visitor.getDefinedParameters();
+        } else if (psiElement != null) {
             RobotUserKeywordStatement keywordDefinition = (RobotUserKeywordStatement) psiElement;
             return keywordDefinition.getInputParameters();
         }
         return List.of();
-    }
-
-    @SuppressWarnings("UnstableApiUsage")
-    private static void inspectPythonFunctionStatically(PyParameter[] pyParameters, Set<DefinedParameter> results) {
-        for (PyParameter parameter : pyParameters) {
-            PyNamedParameter parameterName = parameter.getAsNamed();
-            if (parameterName != null && !parameterName.isSelf() && !parameterName.isPositionalContainer() && !parameterName.isKeywordContainer()) {
-                String defaultValueText = parameter.getDefaultValueText();
-                results.add(new ParameterDto(parameter, parameterName.getRepr(false), defaultValueText));
-            }
-            if (parameterName != null && parameterName.isKeywordContainer()) {
-                results.add(new ParameterDto(parameter, parameterName.getRepr(false), null, true));
-            }
-        }
     }
 
     @Override
@@ -145,11 +130,23 @@ public abstract class RobotKeywordCallExtension extends RobotStubPsiElementBase<
     }
 
     @Override
+    public boolean hasPositionalArgumentsContainer() {
+        PsiElement reference = getKeywordCallName().getReference().resolve();
+        if (reference instanceof PyFunction pyFunction) {
+            PyFunctionParametersVisitor pyFunctionParameterVisitor = new PyFunctionParametersVisitor();
+            PyParameterList parameterList = pyFunction.getParameterList();
+            parameterList.acceptChildren(pyFunctionParameterVisitor);
+            return pyFunctionParameterVisitor.isPositionalArgumentsContainerFound();
+        }
+        return false;
+    }
+
+    @Override
     public OptionalInt getStartOfKeywordsOnlyIndex() {
         PsiElement reference = getKeywordCallName().getReference().resolve();
         if (reference instanceof RobotUserKeywordStatement userKeywordStatement) {
             return CachedValuesManager.getCachedValue(userKeywordStatement, START_OF_KEYWORDS_ONLY_INDEX_KEY, () -> {
-                OptionalInt startOfKeywordsOnlyIndexOpt = computeKeywordsOnlyStartIndexFor(userKeywordStatement);
+                OptionalInt startOfKeywordsOnlyIndexOpt = userKeywordStatement.computeKeywordsOnlyStartIndexFor();
                 return Result.createSingleDependency(startOfKeywordsOnlyIndexOpt, PsiModificationTracker.MODIFICATION_COUNT);
             });
         } else if (reference instanceof PyFunction pyFunction) {
@@ -161,42 +158,38 @@ public abstract class RobotKeywordCallExtension extends RobotStubPsiElementBase<
         return OptionalInt.empty();
     }
 
-    @NotNull
-    private static OptionalInt computeKeywordsOnlyStartIndexFor(RobotUserKeywordStatement userKeywordStatement) {
-        Integer startOfKeywordsOnlyIndex = null;
-        List<RobotLocalArgumentsSetting> argumentsSettings = userKeywordStatement.getLocalArgumentsSettingList();
-        if (!argumentsSettings.isEmpty()) {
-            RobotLocalArgumentsSetting argumentsSetting = argumentsSettings.getFirst();
-            RobotUserKeywordStatementKeywordsOnlyStartIndexFinder visitor = new RobotUserKeywordStatementKeywordsOnlyStartIndexFinder();
-            argumentsSetting.acceptChildren(visitor);
-            if (visitor.keywordsOnlyIndex != -1) {
-                startOfKeywordsOnlyIndex = visitor.keywordsOnlyIndex;
-            }
+    @Override
+    public OptionalInt getPositionalArgumentsOnlyEndIndex() {
+        PsiElement reference = getKeywordCallName().getReference().resolve();
+        if (reference instanceof PyFunction pyFunction) {
+            return CachedValuesManager.getCachedValue(reference, POSITIONAL_ARGUMENT_CONTAINER_INDEX_KEY, () -> {
+                OptionalInt startOfPositionalArgumentsContainerIndexOpt = computePositionalArgumentContainerIndexFor(pyFunction);
+                return Result.createSingleDependency(startOfPositionalArgumentsContainerIndexOpt, PsiModificationTracker.MODIFICATION_COUNT);
+            });
         }
-        return startOfKeywordsOnlyIndex != null ? OptionalInt.of(startOfKeywordsOnlyIndex) : OptionalInt.empty();
+        return OptionalInt.empty();
     }
 
     @NotNull
-    @SuppressWarnings("UnstableApiUsage")
+    private static OptionalInt computePositionalArgumentContainerIndexFor(PyFunction pyFunction) {
+        PyParameterList parameterList = pyFunction.getParameterList();
+        PyFunctionParametersVisitor pyFunctionParameterVisitor = new PyFunctionParametersVisitor();
+        parameterList.acceptChildren(pyFunctionParameterVisitor);
+        if (pyFunctionParameterVisitor.getPositionalArgumentsOnlyEndIndex() != -1) {
+            return OptionalInt.of(pyFunctionParameterVisitor.getPositionalArgumentsOnlyEndIndex());
+        }
+        return OptionalInt.empty();
+    }
+
+    @NotNull
     private static OptionalInt computeKeywordsOnlyStartIndexFor(PyFunction pyFunction) {
         PyParameterList parameterList = pyFunction.getParameterList();
-
-        Integer startOfKeywordsOnlyIndex = null;
-        int parameterIndexCorrection = 0;
-        PyParameter[] parameters = parameterList.getParameters();
-        for (int i = 0; i < parameters.length; i++) {
-            PyParameter parameter = parameters[i];
-            if (parameter.isSelf()) {
-                parameterIndexCorrection++;
-            } else {
-                String parameterText = parameter.getText();
-                if (PySingleStarParameter.TEXT.equals(parameterText)) {
-                    startOfKeywordsOnlyIndex = i - parameterIndexCorrection;
-                    break;
-                }
-            }
+        PyFunctionParametersVisitor pyFunctionParameterVisitor = new PyFunctionParametersVisitor();
+        parameterList.acceptChildren(pyFunctionParameterVisitor);
+        if (pyFunctionParameterVisitor.getParametersOnlyStartIndex() != -1) {
+            return OptionalInt.of(pyFunctionParameterVisitor.getParametersOnlyStartIndex());
         }
-        return startOfKeywordsOnlyIndex != null ? OptionalInt.of(startOfKeywordsOnlyIndex) : OptionalInt.empty();
+        return OptionalInt.empty();
     }
 
     @Override
@@ -225,36 +218,5 @@ public abstract class RobotKeywordCallExtension extends RobotStubPsiElementBase<
     @Override
     public String getQualifiedName() {
         return QualifiedNameBuilder.computeQualifiedName(this);
-    }
-
-    @Override
-    public void subtreeChanged() {
-        super.subtreeChanged();
-
-        allCallArguments = null;
-        definedParameterNames = null;
-    }
-
-    @NotNull
-    @Override
-    public Icon getIcon(int flags) {
-        return RobotIcons.FUNCTION;
-    }
-
-    private static class RobotUserKeywordStatementKeywordsOnlyStartIndexFinder extends RecursiveRobotVisitor {
-
-        private int currentIndex = -1;
-        private int keywordsOnlyIndex = -1;
-
-        @Override
-        public void visitVariableDefinition(@NotNull RobotVariableDefinition o) {
-            super.visitVariableDefinition(o);
-            ++currentIndex;
-
-            String parameterName = o.getName();
-            if (parameterName == null || parameterName.isBlank()) {
-                keywordsOnlyIndex = currentIndex;
-            }
-        }
     }
 }

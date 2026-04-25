@@ -21,6 +21,7 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.index.PyRobotKeywordDefinitionIn
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.dto.ImportType;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.DefinedKeyword;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.KeywordFile;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotArgument;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotFile;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCall;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotUserKeywordStatement;
@@ -45,7 +46,7 @@ class KeywordCompletionProvider extends CompletionProvider<CompletionParameters>
     protected void addCompletions(@NotNull CompletionParameters parameters, @NotNull ProcessingContext context, @NotNull CompletionResultSet result) {
         PsiElement position = parameters.getPosition();
         PsiElement positionContext = position.getContext();
-        RobotKeywordCall keywordCall = PsiTreeUtil.getParentOfType(positionContext, RobotKeywordCall.class);
+        RobotKeywordCall keywordCall = PsiTreeUtil.getParentOfType(positionContext, RobotKeywordCall.class, false, RobotArgument.class);
         if (keywordCall == null) {
             return;
         }

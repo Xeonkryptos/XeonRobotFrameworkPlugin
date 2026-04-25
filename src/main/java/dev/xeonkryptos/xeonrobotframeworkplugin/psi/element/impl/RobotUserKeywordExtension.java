@@ -14,6 +14,7 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLocalArgumentsS
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotUserKeywordStatement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotUserKeywordStatementExpression;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotUserKeywordStatementId;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableDefinition;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.folding.RobotFoldingComputationUtil;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotStubPsiElementBase;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotUserKeywordStub;
@@ -21,6 +22,7 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.index.KeywordCallNameIn
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.index.VariableDefinitionNameIndex;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.RobotElementGenerator;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.VariableScope;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.visitor.RecursiveRobotVisitor;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.visitor.RobotUserKeywordInputArgumentCollector;
 import org.jetbrains.annotations.NotNull;
 
@@ -28,6 +30,7 @@ import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.OptionalInt;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -97,6 +100,21 @@ public abstract class RobotUserKeywordExtension extends RobotStubPsiElementBase<
         return globalVariables;
     }
 
+    @NotNull
+    public OptionalInt computeKeywordsOnlyStartIndexFor() {
+        Integer startOfKeywordsOnlyIndex = null;
+        List<RobotLocalArgumentsSetting> argumentsSettings = getLocalArgumentsSettingList();
+        if (!argumentsSettings.isEmpty()) {
+            RobotLocalArgumentsSetting argumentsSetting = argumentsSettings.getFirst();
+            RobotUserKeywordStatementKeywordsOnlyStartIndexFinder visitor = new RobotUserKeywordStatementKeywordsOnlyStartIndexFinder();
+            argumentsSetting.acceptChildren(visitor);
+            if (visitor.keywordsOnlyIndex != -1) {
+                startOfKeywordsOnlyIndex = visitor.keywordsOnlyIndex;
+            }
+        }
+        return startOfKeywordsOnlyIndex != null ? OptionalInt.of(startOfKeywordsOnlyIndex) : OptionalInt.empty();
+    }
+
     @Override
     public @NotNull FoldingDescriptor @NotNull [] fold(@NotNull Document document, boolean quick) {
         if (!RobotFoldingComputationUtil.isFoldingUseful(this, document)) {
@@ -117,5 +135,22 @@ public abstract class RobotUserKeywordExtension extends RobotStubPsiElementBase<
             getNameIdentifier().replace(newUserKeywordStatementId);
         }
         return this;
+    }
+
+    private static class RobotUserKeywordStatementKeywordsOnlyStartIndexFinder extends RecursiveRobotVisitor {
+
+        private int currentIndex = -1;
+        private int keywordsOnlyIndex = -1;
+
+        @Override
+        public void visitVariableDefinition(@NotNull RobotVariableDefinition o) {
+            super.visitVariableDefinition(o);
+            ++currentIndex;
+
+            String parameterName = o.getName();
+            if (parameterName == null || parameterName.isBlank()) {
+                keywordsOnlyIndex = currentIndex;
+            }
+        }
     }
 }

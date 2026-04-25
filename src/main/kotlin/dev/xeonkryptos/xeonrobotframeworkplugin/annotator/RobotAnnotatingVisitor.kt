@@ -9,7 +9,7 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.annotator.highlight.RobotVariabl
 
 open class RobotAnnotatingVisitor : Annotator {
 
-    private val annotators = arrayOf(RobotArgumentAnnotator(),
+    private val annotators = arrayOf(RobotMisplacedArgumentsAnnotator(),
         RobotTemplateParameterAnnotator(),
         ReassignedRobotVariableAnnotator(),
         RobotVariableDefinitionNotFoundAnnotator(),

@@ -16,6 +16,7 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotUserKeywordStat
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableDefinition;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVisitor;
 import dev.xeonkryptos.xeonrobotframeworkplugin.util.RobotTag;
+import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
@@ -24,6 +25,7 @@ import java.util.Set;
 
 public final class RobotUserKeywordsCollector extends RobotVisitor {
 
+    @Getter
     private final Set<DefinedKeyword> keywords = new LinkedHashSet<>();
 
     private final Collection<DefinedParameter> keywordArguments = new LinkedHashSet<>();
@@ -81,7 +83,7 @@ public final class RobotUserKeywordsCollector extends RobotVisitor {
 
             String defaultValue = parameterValueElement.getText();
 
-            ParameterDto parameterDto = new ParameterDto(variableDefinition, parameterName, defaultValue);
+            ParameterDto parameterDto = ParameterDto.builder(variableDefinition, parameterName).defaultValue(defaultValue).build();
             keywordArguments.add(parameterDto);
         }
     }
@@ -91,7 +93,7 @@ public final class RobotUserKeywordsCollector extends RobotVisitor {
         super.visitLocalArgumentsSettingParameterMandatory(o);
 
         String parameterName = o.getVariableDefinition().getName();
-        ParameterDto parameterDto = new ParameterDto(o, parameterName, null);
+        ParameterDto parameterDto = ParameterDto.builder(o, parameterName).build();
         keywordArguments.add(parameterDto);
     }
 
@@ -109,9 +111,5 @@ public final class RobotUserKeywordsCollector extends RobotVisitor {
                 markedAsPrivate = true;
             }
         }
-    }
-
-    public Collection<DefinedKeyword> getKeywords() {
-        return keywords;
     }
 }

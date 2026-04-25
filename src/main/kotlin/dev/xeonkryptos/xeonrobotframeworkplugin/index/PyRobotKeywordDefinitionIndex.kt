@@ -19,7 +19,6 @@ import com.intellij.util.io.KeyDescriptor
 import com.jetbrains.python.PythonFileType
 import com.jetbrains.python.psi.PyFile
 import com.jetbrains.python.psi.PyFunction
-import com.jetbrains.python.psi.PyParameter
 import com.jetbrains.python.psi.stubs.PyFunctionNameIndex
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.dto.KeywordDto
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.DefinedKeyword
@@ -97,7 +96,7 @@ class PyRobotKeywordDefinitionIndex : FileBasedIndexExtension<String, PyRobotKey
                         val elementAt = pyFile.findElementAt(offset.coerceAtMost(pyFile.textLength - 1))
                         val pyFunction = PsiTreeUtil.getParentOfType(elementAt, PyFunction::class.java, false) ?: continue
                         RobotPyUtil.getPythonKeywordName(pyFunction).ifPresent(Consumer { keywordName ->
-                            result += KeywordDto(pyFunction, libraryName, keywordName, listOf<PyParameter?>(*pyFunction.parameterList.parameters))
+                            result += KeywordDto(pyFunction, libraryName, keywordName, pyFunction.parameterList)
                         })
                     }
                     return@processValues true

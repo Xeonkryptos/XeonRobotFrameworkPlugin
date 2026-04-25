@@ -1,17 +1,12 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.psi.dto;
 
 import com.intellij.psi.PsiElement;
-import com.jetbrains.python.psi.PyBoolLiteralExpression;
-import com.jetbrains.python.psi.PyElementVisitor;
-import com.jetbrains.python.psi.PyExpression;
-import com.jetbrains.python.psi.PyNoneLiteralExpression;
 import com.jetbrains.python.psi.PyParameter;
-import com.jetbrains.python.psi.PyReferenceExpression;
-import com.jetbrains.python.psi.PyStringLiteralExpression;
+import com.jetbrains.python.psi.PyParameterList;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.DefinedKeyword;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.DefinedParameter;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.DefinedVariable;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.ReservedVariable;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.visitor.PyFunctionParametersVisitor;
 import dev.xeonkryptos.xeonrobotframeworkplugin.util.DeprecationInspector;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -19,10 +14,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
 
 @SuppressWarnings("UnstableApiUsage")
 public class KeywordDto implements DefinedKeyword {
@@ -36,15 +28,11 @@ public class KeywordDto implements DefinedKeyword {
     private final boolean deprecated;
     private final boolean markedAsPrivate;
 
-    public KeywordDto(@NotNull PsiElement reference, @Nullable String libraryName, @NotNull String name, Collection<PyParameter> parameters) {
-        this(reference, libraryName, name, convertPyParameters(parameters), false);
+    public KeywordDto(@NotNull PsiElement reference, @Nullable String libraryName, @NotNull String name, PyParameterList parameterList) {
+        this(reference, libraryName, name, convertPyParameters(parameterList), false);
     }
 
-    public KeywordDto(@NotNull PsiElement reference,
-                      @Nullable String libraryName,
-                      @NotNull String name,
-                      Collection<DefinedParameter> parameters,
-                      boolean markedAsPrivate) {
+    public KeywordDto(@NotNull PsiElement reference, @Nullable String libraryName, @NotNull String name, Collection<DefinedParameter> parameters, boolean markedAsPrivate) {
         this.reference = reference;
         this.libraryName = libraryName;
         this.name = name.trim();
@@ -79,38 +67,10 @@ public class KeywordDto implements DefinedKeyword {
         return Collections.emptyList();
     }
 
-    private static Collection<DefinedParameter> convertPyParameters(Collection<PyParameter> parameters) {
-        if (parameters == null || parameters.isEmpty()) {
-            return Collections.emptyList();
-        }
-        return parameters.stream()
-                         .filter(parameter -> !parameter.isSelf())
-                         .map(PyParameter::getAsNamed)
-                         .filter(Objects::nonNull)
-                         .filter(parameter -> !parameter.isKeywordContainer() && !parameter.isPositionalContainer() && parameter.getName() != null)
-                         .map(parameter -> {
-                             String defaultValue = null;
-                             if (parameter.hasDefaultValue()) {
-                                 defaultValue = extractDefaultValue(parameter);
-                             }
-                             return new ParameterDto(parameter, parameter.getName(), defaultValue);
-                         })
-                         .collect(Collectors.toCollection(LinkedHashSet::new));
-    }
-
-    @Nullable
-    private static String extractDefaultValue(PyParameter parameter) {
-        String defaultValue;
-        PyDefaultValueExtractor pyDefaultValueExtractor = new PyDefaultValueExtractor();
-        PyExpression defaultValueElement = parameter.getDefaultValue();
-        if (defaultValueElement != null) {
-            defaultValueElement.accept(pyDefaultValueExtractor);
-        }
-        defaultValue = pyDefaultValueExtractor.defaultValue;
-        if (defaultValue == null) {
-            defaultValue = parameter.getDefaultValueText();
-        }
-        return defaultValue;
+    private static Collection<DefinedParameter> convertPyParameters(PyParameterList parameterList) {
+        PyFunctionParametersVisitor visitor = new PyFunctionParametersVisitor();
+        parameterList.acceptChildren(visitor);
+        return visitor.getDefinedParameters();
     }
 
     @Override
@@ -180,30 +140,5 @@ public class KeywordDto implements DefinedKeyword {
     @Override
     public String toString() {
         return this.name;
-    }
-
-    private static class PyDefaultValueExtractor extends PyElementVisitor {
-
-        private String defaultValue;
-
-        @Override
-        public void visitPyStringLiteralExpression(@NotNull PyStringLiteralExpression node) {
-            defaultValue = node.getStringValue();
-        }
-
-        @Override
-        public void visitPyBoolLiteralExpression(@NotNull PyBoolLiteralExpression node) {
-            defaultValue = node.getValue() ? ReservedVariable.TRUE.getVariable() : ReservedVariable.FALSE.getVariable();
-        }
-
-        @Override
-        public void visitPyReferenceExpression(@NotNull PyReferenceExpression node) {
-            defaultValue = node.getName();
-        }
-
-        @Override
-        public void visitPyNoneLiteralExpression(@NotNull PyNoneLiteralExpression node) {
-            defaultValue = ReservedVariable.NONE.getVariable();
-        }
     }
 }
