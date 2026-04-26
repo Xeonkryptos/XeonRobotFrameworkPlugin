@@ -207,7 +207,7 @@ public record RobotElementGenerator(Project project) {
     public RobotVariable createNewScalarVariable(String variableBodyId, String extensionText) {
         String fileContent = """
                              *** Variables ***
-                             ${%s}%s=  DUMMY
+                             ${Variable}=  ${%s}%s
                              """.formatted(variableBodyId, extensionText);
 
         PsiFile psiFile = createDummyPsiFile(fileContent);
@@ -222,7 +222,7 @@ public record RobotElementGenerator(Project project) {
     public RobotVariableContent createNewVariableContent(String variableContent) {
         String fileContent = """
                              *** Variables ***
-                             ${%s}=  DUMMY
+                             ${Variable}=  ${%s}
                              """.formatted(variableContent);
 
         PsiFile psiFile = createDummyPsiFile(fileContent);

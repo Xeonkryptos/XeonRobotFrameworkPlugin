@@ -29,6 +29,7 @@
 - Fixed resolving of template parameter names in data driven tests
 - Fixed parsing of global setting metadata
 - Fixed incorrect testcase, task and keyword name detection in some constellations with special characters in their names
+- Fixed highlighting of NONE constant in local settings
 
 ## 0.6.1
 
