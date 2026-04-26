@@ -1,6 +1,5 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.formatter
 
-import com.intellij.formatting.ASTBlock
 import com.intellij.formatting.Alignment
 import com.intellij.formatting.Block
 import com.intellij.formatting.ChildAttributes
@@ -183,8 +182,6 @@ class RobotBlock(node: ASTNode, private val context: RobotBlockContext, wrap: Wr
 
         SECTION_TYPES.contains(child.elementType) -> Indent.getNoneIndent()
 
-        child.elementType === RobotTypes.CONTINUATION -> Indent.getNoneIndent()
-
         else -> Indent.getContinuationIndent()
     }
 
@@ -203,7 +200,6 @@ class RobotBlock(node: ASTNode, private val context: RobotBlockContext, wrap: Wr
     private fun getIndentation(node: ASTNode): Indent? = when {
         BLOCK_OPENING_TYPES.contains(myNode.elementType) && !BLOCK_OPENING_PART_TYPES.contains(node.elementType) -> Indent.getNormalIndent()
         node.elementType === RobotTypes.TEMPLATE_ARGUMENTS -> Indent.getNormalIndent()
-        node.elementType === RobotTypes.CONTINUATION -> Indent.getContinuationIndent()
         else -> Indent.getNoneIndent()
     }
 
@@ -213,7 +209,6 @@ class RobotBlock(node: ASTNode, private val context: RobotBlockContext, wrap: Wr
         RobotTokenSets.TEMPLATE_VALUES_HOLDER_SET.contains(node.elementType) -> extractTemplateArgumentAlignment(alignmentIndex)
 
         node.elementType === RobotTypes.VARIABLE_DEFINITION -> myNode.getUserData(KEYWORD_VARIABLE_STATEMENT_VARIABLE_ALIGNMENT_KEY)
-        node.elementType === RobotTypes.CONTINUATION -> myNode.treeParent?.getUserData(KEYWORD_VARIABLE_STATEMENT_VARIABLE_ALIGNMENT_KEY)
 
         // @formatter:off
         node.elementType === RobotTypes.VARIABLE_VALUE
@@ -241,19 +236,10 @@ class RobotBlock(node: ASTNode, private val context: RobotBlockContext, wrap: Wr
 
     override fun getIndent(): Indent? = indent
 
-    override fun getAlignment(): Alignment? = when {
-        myNode.elementType === RobotTypes.CONTINUATION && !context.robotCodeStyleSettings.ALIGN_CONTINUATION_WITH_VARIABLE_DEFINITION -> null
-        else -> super.alignment
-    }
-
     override fun getChildAttributes(newChildIndex: Int): ChildAttributes {
         val myParent = parent
         when {
             myParent == null && newChildIndex >= subBlocks.size -> {
-                return ChildAttributes.DELEGATE_TO_PREV_CHILD
-            }
-
-            myParent != null && isChildAttributesForContinuationTokenRequested(newChildIndex) -> {
                 return ChildAttributes.DELEGATE_TO_PREV_CHILD
             }
 
@@ -265,9 +251,6 @@ class RobotBlock(node: ASTNode, private val context: RobotBlockContext, wrap: Wr
         }
         return super.getChildAttributes(newChildIndex)
     }
-
-    private fun isChildAttributesForContinuationTokenRequested(newChildIndex: Int): Boolean =
-        newChildIndex > 0 && ((subBlocks[newChildIndex - 1] as ASTBlock).node?.elementType === RobotTypes.CONTINUATION || newChildIndex < subBlocks.size && (subBlocks[newChildIndex] as ASTBlock).node?.elementType === RobotTypes.CONTINUATION)
 
     override fun getChildIndent(): Indent? = childIndent
 

@@ -5,7 +5,7 @@ import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 
-public interface RobotGlobalSettingStatement extends RobotFoldable, RobotElement {
+public interface RobotGlobalSettingStatement extends RobotFoldable, RobotMultiLineContainerElement, RobotElement {
 
   @Nullable
   RobotGlobalSettingStatement getGlobalSettingStatement();

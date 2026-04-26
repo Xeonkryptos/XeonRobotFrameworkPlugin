@@ -81,7 +81,8 @@ public class RobotVisitor extends PsiElementVisitor {
   }
 
   public void visitForLoopHeader(@NotNull RobotForLoopHeader o) {
-    visitElement(o);
+    visitMultiLineContainerElement(o);
+    // visitElement(o);
   }
 
   public void visitForLoopStructure(@NotNull RobotForLoopStructure o) {
@@ -108,6 +109,7 @@ public class RobotVisitor extends PsiElementVisitor {
 
   public void visitGlobalSettingStatement(@NotNull RobotGlobalSettingStatement o) {
     visitFoldable(o);
+    // visitMultiLineContainerElement(o);
     // visitElement(o);
   }
 
@@ -166,6 +168,7 @@ public class RobotVisitor extends PsiElementVisitor {
     // visitNavigationItem(o);
     // visitCallArgumentsContainer(o);
     // visitFoldable(o);
+    // visitMultiLineContainerElement(o);
     // visitElement(o);
   }
 
@@ -207,6 +210,7 @@ public class RobotVisitor extends PsiElementVisitor {
 
   public void visitLocalArgumentsSetting(@NotNull RobotLocalArgumentsSetting o) {
     visitFoldable(o);
+    // visitMultiLineContainerElement(o);
     // visitElement(o);
   }
 
@@ -228,6 +232,7 @@ public class RobotVisitor extends PsiElementVisitor {
 
   public void visitLocalSetting(@NotNull RobotLocalSetting o) {
     visitFoldable(o);
+    // visitMultiLineContainerElement(o);
     // visitElement(o);
   }
 
@@ -280,6 +285,7 @@ public class RobotVisitor extends PsiElementVisitor {
 
   public void visitReturnStructure(@NotNull RobotReturnStructure o) {
     visitExecutableStatement(o);
+    // visitMultiLineContainerElement(o);
   }
 
   public void visitRoot(@NotNull RobotRoot o) {
@@ -457,7 +463,8 @@ public class RobotVisitor extends PsiElementVisitor {
   }
 
   public void visitVariableStatement(@NotNull RobotVariableStatement o) {
-    visitElement(o);
+    visitMultiLineContainerElement(o);
+    // visitElement(o);
   }
 
   public void visitVariableStatements(@NotNull RobotVariableStatements o) {
@@ -480,7 +487,8 @@ public class RobotVisitor extends PsiElementVisitor {
   }
 
   public void visitWhileLoopHeader(@NotNull RobotWhileLoopHeader o) {
-    visitElement(o);
+    visitMultiLineContainerElement(o);
+    // visitElement(o);
   }
 
   public void visitWhileLoopStructure(@NotNull RobotWhileLoopStructure o) {
@@ -502,6 +510,10 @@ public class RobotVisitor extends PsiElementVisitor {
   }
 
   public void visitFoldable(@NotNull RobotFoldable o) {
+    visitPsiElement(o);
+  }
+
+  public void visitMultiLineContainerElement(@NotNull RobotMultiLineContainerElement o) {
     visitPsiElement(o);
   }
 

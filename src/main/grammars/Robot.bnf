@@ -78,7 +78,7 @@ fake global_setting_statement ::= import_settings
     | template_statements_global_setting_wrapper
     | timeout_statements_global_setting
     | unknown_setting_statements_global_setting {
-    implements="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotFoldable"
+    implements=["dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotFoldable" "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotMultiLineContainerElement"]
     mixin="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotGlobalSettingExtension"
     name="Resource, Library, Variables, Metadata, Documentation, Name, Suite (Setup | Teardown), Force Tags, (Test | Task) Template, (Test | Task) Timeout"
 }
@@ -249,7 +249,7 @@ private user_keyword_statement_recover ::= !user_keyword_statement_id & section_
 local_setting ::= local_setting_id (positional_argument | eol_free_keyword_call)* eol_marker {
     pin=1
     methods=[getSettingName]
-    implements="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotFoldable"
+    implements=["dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotFoldable" "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotMultiLineContainerElement"]
     mixin="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotLocalSettingExtension"
     hooks=[localTemplateDefinitionHook]
 }
@@ -258,7 +258,7 @@ local_setting_id ::= LOCAL_SETTING_START LOCAL_SETTING_NAME LOCAL_SETTING_END {m
 local_arguments_setting ::= local_arguments_setting_id local_arguments_setting_parameter* eol_marker {
     pin=1
     methods=[getSettingName]
-    implements="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotFoldable"
+    implements=["dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotFoldable" "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotMultiLineContainerElement"]
     mixin="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotLocalArgumentsSettingExtension"
 }
 local_arguments_setting_id ::= LOCAL_SETTING_START "Arguments" LOCAL_SETTING_END {methods=[getSettingName] pin=2}
@@ -273,7 +273,7 @@ private control_structure ::= conditional_structure | conditional_inline_structu
 private loop_structure ::= for_loop_structure | while_loop_structure
 private call_structure ::= eol_based_keyword_call | inline_variable_statement | keyword_variable_statement | empty_variable_statement | if_variable_statement
 loop_control_structure ::= (BREAK | CONTINUE) eol_marker?
-return_structure ::= RETURN positional_argument* eol_marker? {pin=1}
+return_structure ::= RETURN positional_argument* eol_marker? {pin=1 implements="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotMultiLineContainerElement"}
 
 for_loop_structure ::= for_loop_header_base eol_marker executable_statement* END eol_marker {
     pin=1
@@ -285,7 +285,10 @@ for_loop_structure ::= for_loop_header_base eol_marker executable_statement* END
 }
 
 private for_loop_header_base ::= for_in_loop_header | for_in_range_loop_header | for_in_enumerate_loop_header | for_in_zip_loop_header
-fake for_loop_header ::= FOR variable_definition+ (FOR_IN | FOR_IN_RANGE | FOR_IN_ENUMERATE | FOR_IN_ZIP) positional_argument+ for_loop_structure_parameter* {methods=[getForInElement]}
+fake for_loop_header ::= FOR variable_definition+ (FOR_IN | FOR_IN_RANGE | FOR_IN_ENUMERATE | FOR_IN_ZIP) positional_argument+ for_loop_structure_parameter* {
+    methods=[getForInElement]
+    implements="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotMultiLineContainerElement"
+}
 for_in_loop_header ::= FOR variable_definition+ FOR_IN positional_argument+ for_loop_structure_parameter* {pin=3 elementType=for_loop_header}
 for_in_range_loop_header ::= FOR variable_definition FOR_IN_RANGE positional_argument positional_argument? positional_argument? for_loop_structure_parameter* {
     pin=3
@@ -307,7 +310,7 @@ while_loop_structure ::= while_loop_header eol_marker executable_statement* END 
     ]
     mixin="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotWhileLoopStructureExtension"
 }
-while_loop_header ::= WHILE conditional_content (EOS parameter+)? {pin=1}
+while_loop_header ::= WHILE conditional_content (EOS parameter+)? {pin=1 implements="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotMultiLineContainerElement"}
 conditional_structure ::= if_structure else_if_structure* else_structure? END eol_marker {
     pin=1
     implements="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotFoldable"
@@ -389,6 +392,7 @@ fake keyword_call ::= base_keyword_call {
         "com.intellij.navigation.NavigationItem"
         "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotCallArgumentsContainer"
         "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotFoldable"
+        "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotMultiLineContainerElement"
     ]
     methods = [getName getNameIdentifier]
     mixin = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotKeywordCallExtension"
@@ -411,7 +415,7 @@ parameter ::= parameter_id PARAMETER_ASSIGNMENT positional_argument? {
 }
 parameter_id ::= PARAMETER_NAME {methods = [getReference]}
 
-fake variable_statement ::= DUMMY {methods = [getIcon]}
+fake variable_statement ::= DUMMY {methods = [getIcon] implements="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotMultiLineContainerElement"}
 single_variable_statement ::= variable_definition ASSIGNMENT? variable_value* parameter? eol_marker? {pin=3}
 inline_variable_statement ::= VAR variable_definition ASSIGNMENT? variable_value+ parameter? eol_marker? {pin=1}
 empty_variable_statement ::= variable_definition ASSIGNMENT? "${EMPTY}" eol_marker? {pin=3}

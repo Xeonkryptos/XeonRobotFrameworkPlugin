@@ -5,11 +5,12 @@ import com.intellij.psi.codeStyle.CodeStyleSettings
 import com.intellij.psi.codeStyle.CommonCodeStyleSettings
 import com.intellij.psi.codeStyle.CommonCodeStyleSettings.WrapConstant
 import com.intellij.psi.codeStyle.CustomCodeStyleSettings
+import dev.xeonkryptos.xeonrobotframeworkplugin.util.GlobalConstants
 
 @Suppress("PropertyName")
 class RobotCodeStyleSettings(container: CodeStyleSettings) : CustomCodeStyleSettings("Robot", container) {
     companion object {
-        const val SUPER_SPACE_SIZE = 2
+        const val SUPER_SPACE_SIZE = GlobalConstants.SUPER_SPACE.length
     }
 
     // ################## Indent settings ##################
@@ -17,8 +18,6 @@ class RobotCodeStyleSettings(container: CodeStyleSettings) : CustomCodeStyleSett
     var AFTER_CONTINUATION_INDENT_SIZE: Int = DEFAULT_TAB_SIZE
 
     // ################## Wrapping and braces settings ##################
-    @JvmField
-    var ALIGN_CONTINUATION_WITH_VARIABLE_DEFINITION: Boolean = false
 
     @JvmField
     var FOR_FIRST_ARGUMENT_ON_NEW_LINE: Boolean = false
@@ -90,4 +89,7 @@ class RobotCodeStyleSettings(container: CodeStyleSettings) : CustomCodeStyleSett
 
     @JvmField
     var BLANK_LINES_AFTER_VARIABLE_STATEMENTS: Int = 1
+
+    @JvmField
+    var BLANK_LINES_AFTER_LOCAL_SETTINGS: Int = 0
 }

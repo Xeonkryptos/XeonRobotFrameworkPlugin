@@ -10,6 +10,7 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.RobotBundle
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotLanguage
 
 class RobotLanguageCodeStyleSettingsProvider : LanguageCodeStyleSettingsProvider() {
+
     override fun getLanguage(): Language = RobotLanguage.INSTANCE
 
     override fun getIndentOptionsEditor(): IndentOptionsEditor = RobotIndentOptionsEditor()
@@ -17,6 +18,7 @@ class RobotLanguageCodeStyleSettingsProvider : LanguageCodeStyleSettingsProvider
     override fun customizeDefaults(commonSettings: CommonCodeStyleSettings, indentOptions: CommonCodeStyleSettings.IndentOptions) {
         commonSettings.KEEP_FIRST_COLUMN_COMMENT = false
         commonSettings.KEEP_LINE_BREAKS = true
+        commonSettings.KEEP_BLANK_LINES_IN_CODE = 1
     }
 
     override fun customizeSettings(consumer: CodeStyleSettingsCustomizable, settingsType: SettingsType) {
@@ -34,10 +36,6 @@ class RobotLanguageCodeStyleSettingsProvider : LanguageCodeStyleSettingsProvider
                 consumer.renameStandardOption("CALL_PARAMETERS_WRAP", RobotBundle.message("formatter.wrap.keyword.call.arguments"))
                 consumer.renameStandardOption("FOR_STATEMENT_WRAP", RobotBundle.message("formatter.for.statement.wrapping.expression"))
 
-                consumer.showCustomOption(RobotCodeStyleSettings::class.java,
-                    "ALIGN_CONTINUATION_WITH_VARIABLE_DEFINITION",
-                    RobotBundle.message("formatter.align.continuation.with.variable.definition"),
-                    customizableOptions.WRAPPING_METHOD_ARGUMENTS_WRAPPING)
                 consumer.showCustomOption(RobotCodeStyleSettings::class.java,
                     "CALL_PARAMETERS_FIRST_ARGUMENT_ON_NEW_LINE",
                     RobotBundle.message("formatter.place.call.arguments.first.parameter.on.newline"),
@@ -112,7 +110,10 @@ class RobotLanguageCodeStyleSettingsProvider : LanguageCodeStyleSettingsProvider
             }
 
             SettingsType.BLANK_LINES_SETTINGS -> {
-                consumer.showStandardOptions("KEEP_BLANK_LINES_IN_CODE", "BLANK_LINES_BEFORE_IMPORTS", "BLANK_LINES_AFTER_IMPORTS", "BLANK_LINES_AFTER_CLASS_HEADER")
+                consumer.showStandardOptions("KEEP_BLANK_LINES_IN_CODE",
+                    "BLANK_LINES_BEFORE_IMPORTS",
+                    "BLANK_LINES_AFTER_IMPORTS",
+                    "BLANK_LINES_AFTER_CLASS_HEADER")
 
                 consumer.renameStandardOption("BLANK_LINES_AFTER_CLASS_HEADER", RobotBundle.message("formatter.blank.lines.after.testcase.task.name"))
                 consumer.showCustomOption(RobotCodeStyleSettings::class.java,
@@ -146,6 +147,10 @@ class RobotLanguageCodeStyleSettingsProvider : LanguageCodeStyleSettingsProvider
                 consumer.showCustomOption(RobotCodeStyleSettings::class.java,
                     "BLANK_LINES_AFTER_VARIABLE_STATEMENTS",
                     RobotBundle.message("formatter.blank.lines.after.variable.statements"),
+                    CodeStyleSettingsCustomizableOptions.getInstance().BLANK_LINES)
+                consumer.showCustomOption(RobotCodeStyleSettings::class.java,
+                    "BLANK_LINES_AFTER_LOCAL_SETTINGS",
+                    RobotBundle.message("formatter.blank.lines.after.local.settings"),
                     CodeStyleSettingsCustomizableOptions.getInstance().BLANK_LINES)
             }
 

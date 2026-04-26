@@ -8,19 +8,15 @@ import com.intellij.psi.codeStyle.CodeStyleManager
 import com.intellij.psi.formatter.FormatterUtil
 import com.intellij.psi.formatter.FormattingDocumentModelImpl
 import com.intellij.psi.formatter.PsiBasedFormattingModel
-import com.intellij.psi.tree.TokenSet
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTokenSets
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes
 
 class RobotFormattingModel(file: PsiFile, rootBlock: RobotBlock) : PsiBasedFormattingModel(file, rootBlock, FormattingDocumentModelImpl.createOn(file)) {
 
-    private companion object {
-        private val WHITE_SPACES = TokenSet.create(TokenType.WHITE_SPACE, RobotTypes.EOL, RobotTypes.EOS)
-    }
-
     private val project = file.project
 
     override fun replaceWithPsiInLeaf(textRange: TextRange, whiteSpace: String, leafElement: ASTNode): String? {
-        if (!myCanModifyAllWhiteSpaces && (WHITE_SPACES.contains(leafElement.elementType))) return null
+        if (!myCanModifyAllWhiteSpaces && (RobotTokenSets.EXTENDED_WHITESPACE_SET.contains(leafElement.elementType))) return null
 
         var whiteSpaceToUse = whiteSpace
         var deletableEolNode: ASTNode? = null

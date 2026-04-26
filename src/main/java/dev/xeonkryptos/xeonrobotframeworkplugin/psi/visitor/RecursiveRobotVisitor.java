@@ -8,7 +8,6 @@ public abstract class RecursiveRobotVisitor extends RobotVisitor {
 
     @Override
     public void visitElement(@NotNull PsiElement element) {
-        super.visitElement(element);
         element.acceptChildren(this);
     }
 }

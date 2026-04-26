@@ -5,7 +5,7 @@ import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 
-public interface RobotLocalSetting extends RobotFoldable, RobotElement {
+public interface RobotLocalSetting extends RobotFoldable, RobotMultiLineContainerElement, RobotElement {
 
   @NotNull
   List<RobotKeywordCall> getKeywordCallList();

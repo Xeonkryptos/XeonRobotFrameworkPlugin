@@ -5,7 +5,7 @@ import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 
-public interface RobotReturnStructure extends RobotExecutableStatement {
+public interface RobotReturnStructure extends RobotExecutableStatement, RobotMultiLineContainerElement {
 
   @NotNull
   List<RobotPositionalArgument> getPositionalArgumentList();

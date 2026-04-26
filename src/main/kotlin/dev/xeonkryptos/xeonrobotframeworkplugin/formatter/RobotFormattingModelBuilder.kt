@@ -10,7 +10,6 @@ import com.intellij.psi.tree.TokenSet
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotLanguage
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTokenSets
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes
-import kotlin.math.max
 
 private val SINGLE_GLOBAL_SETTING_STATEMENTS_SET = TokenSet.create(RobotTypes.DOCUMENTATION_STATEMENT_GLOBAL_SETTING,
     RobotTypes.SUITE_NAME_STATEMENT_GLOBAL_SETTING,
@@ -26,6 +25,7 @@ private val SUPER_SPACE_SETS: TokenSet = TokenSet.orSet(RobotTokenSets.GHERKIN_S
     RobotTokenSets.LOCAL_SETTING_NAMES_SET,
     RobotTokenSets.GLOBAL_SETTING_NAMES_SET,
     RobotTokenSets.ARGUMENTS_TYPE_SET,
+    RobotTokenSets.TEMPLATE_VALUES_HOLDER_SET,
     TokenSet.create(RobotTypes.VAR,
         RobotTypes.KEYWORD_NAME,
         RobotTypes.TEST_CASES_HEADER_NAME,
@@ -55,7 +55,6 @@ class RobotFormattingModelBuilder : CustomFormattingModelBuilder {
     private fun createSpaceBuilder(codeStyleSettings: CodeStyleSettings): SpacingBuilder {
         val commonSettings = codeStyleSettings.getCommonSettings(RobotLanguage.INSTANCE)
         val customSettings = codeStyleSettings.getCustomSettings(RobotCodeStyleSettings::class.java)
-        val afterContinuationSpaceSize = max(customSettings.AFTER_CONTINUATION_INDENT_SIZE, RobotCodeStyleSettings.SUPER_SPACE_SIZE)
 
         // @formatter:off
         return SpacingBuilder(codeStyleSettings, RobotLanguage.INSTANCE)
@@ -65,35 +64,31 @@ class RobotFormattingModelBuilder : CustomFormattingModelBuilder {
             .after(RobotTokenSets.SECTIONS_HEADER_SET)
             .lineBreakInCode()
             .before(RobotTypes.IMPORT_SETTINGS)
-            .blankLines(commonSettings.BLANK_LINES_BEFORE_IMPORTS)
+            .spacing(0, 0, commonSettings.BLANK_LINES_BEFORE_IMPORTS + 1, commonSettings.KEEP_LINE_BREAKS, commonSettings.KEEP_BLANK_LINES_IN_CODE)
             .after(RobotTypes.IMPORT_SETTINGS)
-            .blankLines(commonSettings.BLANK_LINES_AFTER_IMPORTS)
+            .spacing(0, 0, commonSettings.BLANK_LINES_AFTER_IMPORTS + 1, commonSettings.KEEP_LINE_BREAKS, commonSettings.KEEP_BLANK_LINES_IN_CODE)
             .before(RobotTypes.SETUP_TEARDOWN_SETTINGS)
-            .blankLines(customSettings.BLANK_LINES_BEFORE_GLOBAL_SETUP_TEARDOWN)
+            .spacing(0, 0, customSettings.BLANK_LINES_BEFORE_GLOBAL_SETUP_TEARDOWN + 1, commonSettings.KEEP_LINE_BREAKS, commonSettings.KEEP_BLANK_LINES_IN_CODE)
             .after(RobotTypes.SETUP_TEARDOWN_SETTINGS)
-            .blankLines(customSettings.BLANK_LINES_AFTER_GLOBAL_SETUP_TEARDOWN)
+            .spacing(0, 0, customSettings.BLANK_LINES_AFTER_GLOBAL_SETUP_TEARDOWN + 1, commonSettings.KEEP_LINE_BREAKS, commonSettings.KEEP_BLANK_LINES_IN_CODE)
             .before(SINGLE_GLOBAL_SETTING_STATEMENTS_SET)
-            .blankLines(customSettings.BLANK_LINES_BEFORE_GLOBAL_SETTING)
+            .spacing(0, 0, customSettings.BLANK_LINES_BEFORE_GLOBAL_SETTING + 1, commonSettings.KEEP_LINE_BREAKS, commonSettings.KEEP_BLANK_LINES_IN_CODE)
             .after(SINGLE_GLOBAL_SETTING_STATEMENTS_SET)
-            .blankLines(customSettings.BLANK_LINES_AFTER_GLOBAL_SETTING)
+            .spacing(0, 0, customSettings.BLANK_LINES_AFTER_GLOBAL_SETTING + 1, commonSettings.KEEP_LINE_BREAKS, commonSettings.KEEP_BLANK_LINES_IN_CODE)
             .before(RobotTypes.METADATA_SETTINGS)
-            .blankLines(customSettings.BLANK_LINES_BEFORE_GLOBAL_METADATA)
+            .spacing(0, 0, customSettings.BLANK_LINES_BEFORE_GLOBAL_METADATA + 1, commonSettings.KEEP_LINE_BREAKS, commonSettings.KEEP_BLANK_LINES_IN_CODE)
             .after(RobotTypes.METADATA_SETTINGS)
-            .blankLines(customSettings.BLANK_LINES_AFTER_GLOBAL_METADATA)
+            .spacing(0, 0, customSettings.BLANK_LINES_AFTER_GLOBAL_METADATA + 1, commonSettings.KEEP_LINE_BREAKS, commonSettings.KEEP_BLANK_LINES_IN_CODE)
             .before(RobotTypes.VARIABLE_STATEMENTS)
-            .blankLines(customSettings.BLANK_LINES_BEFORE_VARIABLE_STATEMENTS)
+            .spacing(0, 0, customSettings.BLANK_LINES_BEFORE_VARIABLE_STATEMENTS + 1, commonSettings.KEEP_LINE_BREAKS, commonSettings.KEEP_BLANK_LINES_IN_CODE)
             .after(RobotTypes.VARIABLE_STATEMENTS)
-            .blankLines(customSettings.BLANK_LINES_AFTER_VARIABLE_STATEMENTS)
-            .before(RobotTypes.CONTINUATION)
-            .lineBreakInCode()
-            .after(RobotTypes.CONTINUATION)
-            .spaces(afterContinuationSpaceSize)
+            .spacing(0, 0, customSettings.BLANK_LINES_AFTER_VARIABLE_STATEMENTS + 1, commonSettings.KEEP_LINE_BREAKS, commonSettings.KEEP_BLANK_LINES_IN_CODE)
             .after(TokenSet.create(RobotTypes.TEST_CASE_ID, RobotTypes.TASK_ID, RobotTypes.USER_KEYWORD_STATEMENT_ID))
-            .blankLines(commonSettings.BLANK_LINES_AFTER_CLASS_HEADER)
-            .after(TokenSet.create(RobotTypes.TEMPLATE_ARGUMENTS, RobotTypes.LOCAL_SETTING))
+            .spacing(0, 0, commonSettings.BLANK_LINES_AFTER_CLASS_HEADER + 1, commonSettings.KEEP_LINE_BREAKS, commonSettings.KEEP_BLANK_LINES_IN_CODE)
+            .after(TokenSet.create(RobotTypes.LOCAL_SETTING, RobotTypes.LOCAL_ARGUMENTS_SETTING))
+            .spacing(0, 0, customSettings.BLANK_LINES_AFTER_LOCAL_SETTINGS + 1, commonSettings.KEEP_LINE_BREAKS, commonSettings.KEEP_BLANK_LINES_IN_CODE)
+            .after(RobotTypes.TEMPLATE_ARGUMENTS)
             .lineBreakInCode()
-            .after(RobotTokenSets.TEMPLATE_VALUES_HOLDER_SET)
-            .spaces(RobotCodeStyleSettings.SUPER_SPACE_SIZE)
             .between(RobotTypes.VARIABLE_DEFINITION, RobotTypes.ASSIGNMENT)
             .spaceIf(commonSettings.SPACE_AROUND_ASSIGNMENT_OPERATORS)
             .betweenInside(VARIABLE_DEFINITION_WITH_OPTIONAL_ASSIGNMENT_SET, VARIABLE_VALUE_SINGLE_SET, RobotTypes.SINGLE_VARIABLE_STATEMENT)
