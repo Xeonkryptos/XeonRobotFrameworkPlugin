@@ -195,11 +195,12 @@ task_statement ::= task_id eol_marker? testcase_task_statement* {
 task_id ::= (TASK_NAME_PART | variable)+
 private task_statement_recover ::= !task_id & section_recover
 
-private testcase_task_statement ::= local_setting | <<parseTestcaseTaskStatement template_arguments bdd_statement executable_statement>> {
+private testcase_task_statement ::= local_setting | <<parseTestcaseTaskStatement template_test_case_body bdd_statement executable_statement>> {
     recoverWhile=testcase_task_statement_recover
 }
 private testcase_task_statement_recover ::= !(local_setting_id | TEMPLATE_ARGUMENT_VALUE | template_parameter_id | GIVEN | WHEN | task_id | test_case_id) & section_recover & executable_statement_recover
 
+private template_test_case_body ::= for_loop_structure | conditional_content | template_arguments
 template_arguments ::= (template_argument | template_parameter)+ eol_marker {
     pin=1
     implements=[
@@ -275,7 +276,7 @@ private call_structure ::= eol_based_keyword_call | inline_variable_statement | 
 loop_control_structure ::= (BREAK | CONTINUE) eol_marker?
 return_structure ::= RETURN positional_argument* eol_marker? {pin=1 implements="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotMultiLineContainerElement"}
 
-for_loop_structure ::= for_loop_header_base eol_marker executable_statement* END eol_marker {
+for_loop_structure ::= for_loop_header_base eol_marker (template_arguments | executable_statement*) END eol_marker {
     pin=1
     implements=[
         "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotBlockOpeningStructure"
@@ -317,23 +318,23 @@ conditional_structure ::= if_structure else_if_structure* else_structure? END eo
     mixin="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotConditionalStructureExtension"
 }
 private conditional_inline_structure ::= inline_if_structure inline_else_if_structure* inline_else_structure? eol_marker? {pin=1}
-if_structure ::= IF conditional_content eol_marker executable_statement* {
+if_structure ::= IF conditional_content eol_marker (template_arguments | executable_statement*) {
     pin=3
     implements="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotBlockOpeningStructure"
 }
-inline_if_structure ::= IF conditional_content EOS call_structure {
+inline_if_structure ::= IF conditional_content EOS (template_arguments | call_structure) {
     pin=3
     implements="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotBlockOpeningStructure"
 }
-else_if_structure ::= ELSE_IF conditional_content eol_marker executable_statement* {
+else_if_structure ::= ELSE_IF conditional_content eol_marker (template_arguments | executable_statement) {
     pin=3
     implements="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotBlockOpeningStructure"
 }
-inline_else_if_structure ::= ELSE_IF conditional_content EOS call_structure {
+inline_else_if_structure ::= ELSE_IF conditional_content EOS (template_arguments | call_structure) {
     pin=3
     implements="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotBlockOpeningStructure"
 }
-inline_else_structure ::= ELSE call_structure {
+inline_else_structure ::= ELSE (template_arguments | call_structure) {
     pin=2
     implements="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotBlockOpeningStructure"
 }

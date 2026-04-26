@@ -487,66 +487,6 @@ LineComment = {LineCommentSign} {NON_EOL}*
           return LITERAL_CONSTANT;
     }
 }
-<TEMPLATE_DEFINITION> {
-    <TESTCASE_DEFINITION, TASK_DEFINITION> {
-        // Disables the template for the current test case / task due to the NONE "keyword"
-        {LocalTemplateKeyword} ({ExtendedSpaceBasedEndMarker} | {MultiLine}) "NONE" {ExtendedKeywordFinishedMarker}   {
-              yypushback(yylength() - 1);
-              enterNewState(INTERMEDIATE_TEMPLATE_CONFIGURATION);
-              enterNewState(LOCAL_SETTING_DEFINITION);
-              localTemplateEnabled = false;
-              return LOCAL_SETTING_START;
-        }
-        // Expects a template name (keyword) following the [Template] setting. Can be on the same line or on a new line after the continuation marker
-        {LocalTemplateKeyword} ({ExtendedSpaceBasedEndMarker} | {MultiLine})   {
-              yypushback(yylength() - 1);
-              enterNewState(TEMPLATE_DEFINITION);
-              enterNewState(TEMPLATE_ARGUMENTS);
-              enterNewState(SETTING_TEMPLATE_START);
-              enterNewState(LOCAL_SETTING_DEFINITION);
-              localTemplateEnabled = true;
-              return LOCAL_SETTING_START;
-        }
-        // Represents the [Template] configuration WITHOUT any template name to "deactivate" the template for the current test case / task.
-        {LocalTemplateKeyword} {NonNewlineWhitespace}* {EOL} {
-              yypushback(yylength() - 1);
-              enterNewState(LITERAL_CONSTANT_ONLY);
-              enterNewState(LOCAL_SETTING_DEFINITION);
-              localTemplateEnabled = false;
-              return LOCAL_SETTING_START;
-        }
-    }
-
-    ^ [^\s#] {NON_EOL}+ {EOL}*    {
-        localTemplateEnabled = globalTemplateEnabled;
-        leaveState();
-        yypushback(yylength());
-        if (yystate() == TESTCASE_DEFINITION) {
-            yybegin(TESTCASE_NAME_DEFINITION);
-        } else {
-            yybegin(TASK_NAME_DEFINITION);
-        }
-        break;
-    }
-}
-
-<TEMPLATE_ARGUMENTS> {
-    {EverythingButVariableValue} {EqualSign}       {
-          yypushback(1);
-          enterNewState(TEMPLATE_PARAMETER_ASSIGNMENT);
-          return TEMPLATE_PARAMETER_NAME;
-    }
-    {EverythingButVariableValue} {EqualSign} {EverythingButVariableValue}      {
-          int assignmentPos = indexOf('=');
-          yypushback(yylength() - assignmentPos);
-          enterNewState(TEMPLATE_PARAMETER_ASSIGNMENT);
-          return TEMPLATE_PARAMETER_NAME;
-    }
-    <TEMPLATE_PARAMETER_ASSIGNMENT>  {EqualSign}         { yybegin(TEMPLATE_PARAMETER_VALUE); return PARAMETER_ASSIGNMENT; }
-    {EverythingButVariableValue}                         { return TEMPLATE_ARGUMENT_VALUE; }
-}
-
-<TEMPLATE_PARAMETER_VALUE>  {EverythingButVariableValue} { return TEMPLATE_ARGUMENT_VALUE; }
 
 <USER_KEYWORD_DEFINITION> {
     "RETURN" {ExtendedKeywordFinishedMarker}     {
@@ -571,51 +511,81 @@ LineComment = {LineCommentSign} {NON_EOL}*
         return LOCAL_SETTING_START;
     }
 }
-<TESTCASE_DEFINITION, TASK_DEFINITION> {
-    <USER_KEYWORD_DEFINITION> {
-        <TEMPLATE_DEFINITION> {
-            {LocalSetupTeardownKeywords} {ExtendedKeywordFinishedMarker}  {
-                yypushback(yylength() - 1);
-                enterNewState(KEYWORD_CALL);
-                enterNewState(LOCAL_SETTING_DEFINITION);
-                return LOCAL_SETTING_START;
-            }
-            {LocalTagsKeyword} {ExtendedKeywordFinishedMarker}            {
-                yypushback(yylength() - 1);
-                enterNewState(LITERAL_CONSTANT_ONLY);
-                enterNewState(LOCAL_SETTING_DEFINITION);
-                return LOCAL_SETTING_START;
-            }
-            {LocalSettingKeyword} {ExtendedKeywordFinishedMarker}          {
-                yypushback(yylength() - 1);
-                enterNewState(LITERAL_CONSTANT_ONLY);
-                enterNewState(LOCAL_SETTING_DEFINITION);
-                return LOCAL_SETTING_START;
-            }
-        }
 
+<TESTCASE_DEFINITION, TASK_DEFINITION, TEMPLATE_DEFINITION> {
+    // Disables the template for the current test case / task due to the NONE "keyword"
+    {LocalTemplateKeyword} ({ExtendedSpaceBasedEndMarker} | {MultiLine}) "NONE" {ExtendedKeywordFinishedMarker}   {
+          yypushback(yylength() - 1);
+          enterNewState(INTERMEDIATE_TEMPLATE_CONFIGURATION);
+          enterNewState(LOCAL_SETTING_DEFINITION);
+          localTemplateEnabled = false;
+          return LOCAL_SETTING_START;
+    }
+    // Expects a template name (keyword) following the [Template] setting. Can be on the same line or on a new line after the continuation marker
+    {LocalTemplateKeyword} ({ExtendedSpaceBasedEndMarker} | {MultiLine})   {
+          yypushback(yylength() - 1);
+          enterNewState(TEMPLATE_DEFINITION);
+          enterNewState(TEMPLATE_ARGUMENTS);
+          enterNewState(SETTING_TEMPLATE_START);
+          enterNewState(LOCAL_SETTING_DEFINITION);
+          localTemplateEnabled = true;
+          return LOCAL_SETTING_START;
+    }
+    // Represents the [Template] configuration WITHOUT any template name to "deactivate" the template for the current test case / task.
+    {LocalTemplateKeyword} {NonNewlineWhitespace}* {EOL} {
+          yypushback(yylength() - 1);
+          enterNewState(LITERAL_CONSTANT_ONLY);
+          enterNewState(LOCAL_SETTING_DEFINITION);
+          localTemplateEnabled = false;
+          return LOCAL_SETTING_START;
+    }
+}
+<TESTCASE_DEFINITION, TASK_DEFINITION, USER_KEYWORD_DEFINITION, TEMPLATE_DEFINITION> {
+    {LocalSetupTeardownKeywords} {ExtendedKeywordFinishedMarker}  {
+        yypushback(yylength() - 1);
+        enterNewState(KEYWORD_CALL);
+        enterNewState(LOCAL_SETTING_DEFINITION);
+        return LOCAL_SETTING_START;
+    }
+    {LocalTagsKeyword} {ExtendedKeywordFinishedMarker}            {
+        yypushback(yylength() - 1);
+        enterNewState(LITERAL_CONSTANT_ONLY);
+        enterNewState(LOCAL_SETTING_DEFINITION);
+        return LOCAL_SETTING_START;
+    }
+    {LocalSettingKeyword} {ExtendedKeywordFinishedMarker}          {
+        yypushback(yylength() - 1);
+        enterNewState(LITERAL_CONSTANT_ONLY);
+        enterNewState(LOCAL_SETTING_DEFINITION);
+        return LOCAL_SETTING_START;
+    }
+
+    <TEMPLATE_ARGUMENTS> {
         "FOR" {ExtendedSpaceBasedEndMarker}?         { yypushback(yylength() - "FOR".length()); enterNewState(FOR_STRUCTURE); return FOR; }
         "WHILE" {ExtendedSpaceBasedEndMarker}?       { yypushback(yylength() - "WHILE".length()); enterNewState(WHILE_CONFIGURATION); enterNewState(PYTHON_EVALUATED_CONTROL_STRUCTURE_START); return WHILE; }
         "IF" {ExtendedSpaceBasedEndMarker}?          { yypushback(yylength() - "IF".length()); enterNewState(EOL_EXPECTED); enterNewState(PYTHON_EVALUATED_CONTROL_STRUCTURE_START); return IF; }
         "ELSE IF" {ExtendedSpaceBasedEndMarker}?     { yypushback(yylength() - "ELSE IF".length()); enterNewState(EOL_EXPECTED); enterNewState(PYTHON_EVALUATED_CONTROL_STRUCTURE_START); return ELSE_IF; }
         "ELSE" {ExtendedKeywordFinishedMarker}?      { yypushback(yylength() - "ELSE".length()); enterNewState(EOL_EXPECTED); return ELSE; }
-        "TRY" {ExtendedKeywordFinishedMarker}?       { yypushback(yylength() - "TRY".length()); enterNewState(EOL_EXPECTED); return TRY; }
-        "EXCEPT" {ExtendedSpaceBasedEndMarker}?      {
-          enterNewState(SIMPLE_CONTROL_STRUCTURE_START);
-          yypushback(yylength() - "EXCEPT".length());
-          return EXCEPT;
-        }
-        "FINALLY" {ExtendedKeywordFinishedMarker}?   { yypushback(yylength() - "FINALLY".length()); enterNewState(EOL_EXPECTED); return FINALLY; }
         "BREAK" {ExtendedKeywordFinishedMarker}?     { yypushback(yylength() - "BREAK".length()); enterNewState(EOL_EXPECTED); return BREAK; }
         "CONTINUE" {ExtendedKeywordFinishedMarker}?  { yypushback(yylength() - "CONTINUE".length()); enterNewState(EOL_EXPECTED); return CONTINUE; }
-        "GROUP" {ExtendedKeywordFinishedMarker}?     {
-          enterNewState(SIMPLE_CONTROL_STRUCTURE_START);
-          yypushback(yylength() - "GROUP".length());
-          return GROUP;
-        }
         "END" {ExtendedKeywordFinishedMarker}?       { yypushback(yylength() - "END".length()); enterNewState(EOL_EXPECTED); return END; }
     }
-
+}
+<TESTCASE_DEFINITION, TASK_DEFINITION, USER_KEYWORD_DEFINITION> {
+    "TRY" {ExtendedKeywordFinishedMarker}?       { yypushback(yylength() - "TRY".length()); enterNewState(EOL_EXPECTED); return TRY; }
+    "EXCEPT" {ExtendedSpaceBasedEndMarker}?      {
+      enterNewState(SIMPLE_CONTROL_STRUCTURE_START);
+      yypushback(yylength() - "EXCEPT".length());
+      return EXCEPT;
+    }
+    "FINALLY" {ExtendedKeywordFinishedMarker}?   { yypushback(yylength() - "FINALLY".length()); enterNewState(EOL_EXPECTED); return FINALLY; }
+    "GROUP" {ExtendedKeywordFinishedMarker}?     {
+      enterNewState(SIMPLE_CONTROL_STRUCTURE_START);
+      yypushback(yylength() - "GROUP".length());
+      return GROUP;
+    }
+}
+<TESTCASE_DEFINITION, TASK_DEFINITION> {
     "GIVEN" {ExtendedSpaceBasedEndMarker}   {
           yypushback(yylength() - "GIVEN".length());
           enterNewState(KEYWORD_CALL);
@@ -653,10 +623,42 @@ LineComment = {LineCommentSign} {NON_EOL}*
           enterNewState(nextState);
           yypushback(yylength());
           break;
-      }
+   }
 }
 
-<TEMPLATE_DEFINITION>  [^\s]  {yypushback(yylength()); enterNewState(TEMPLATE_ARGUMENTS); break; }
+<TEMPLATE_ARGUMENTS> {
+    {EverythingButVariableValue} {EqualSign}       {
+          yypushback(1);
+          enterNewState(TEMPLATE_PARAMETER_ASSIGNMENT);
+          return TEMPLATE_PARAMETER_NAME;
+    }
+    {EverythingButVariableValue} {EqualSign} {EverythingButVariableValue}      {
+          int assignmentPos = indexOf('=');
+          yypushback(yylength() - assignmentPos);
+          enterNewState(TEMPLATE_PARAMETER_ASSIGNMENT);
+          return TEMPLATE_PARAMETER_NAME;
+    }
+    <TEMPLATE_PARAMETER_ASSIGNMENT>  {EqualSign}         { yybegin(TEMPLATE_PARAMETER_VALUE); return PARAMETER_ASSIGNMENT; }
+    {EverythingButVariableValue}                         { return TEMPLATE_ARGUMENT_VALUE; }
+}
+
+<TEMPLATE_PARAMETER_VALUE>  {EverythingButVariableValue} { return TEMPLATE_ARGUMENT_VALUE; }
+
+<TEMPLATE_DEFINITION> {
+    ^ [^\s#] {NON_EOL}+ {EOL}*    {
+        localTemplateEnabled = globalTemplateEnabled;
+        leaveState();
+        yypushback(yylength());
+        if (yystate() == TESTCASE_DEFINITION) {
+            yybegin(TESTCASE_NAME_DEFINITION);
+        } else {
+            yybegin(TASK_NAME_DEFINITION);
+        }
+        break;
+    }
+}
+
+<TEMPLATE_DEFINITION>  [^\s]  { yypushback(yylength()); enterNewState(TEMPLATE_ARGUMENTS); break; }
 
 <FOR_STRUCTURE>  {
     "IN" {ExtendedKeywordFinishedMarker}            { yypushback(yylength() - "IN".length()); yybegin(FOR_STRUCTURE_LOOP_START); return FOR_IN; }

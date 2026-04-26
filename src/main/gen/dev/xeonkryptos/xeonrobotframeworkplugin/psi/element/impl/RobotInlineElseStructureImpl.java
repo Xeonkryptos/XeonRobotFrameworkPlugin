@@ -28,4 +28,10 @@ public class RobotInlineElseStructureImpl extends RobotExecutableStatementImpl i
     else super.accept(visitor);
   }
 
+  @Override
+  @Nullable
+  public RobotTemplateArguments getTemplateArguments() {
+    return PsiTreeUtil.getChildOfType(this, RobotTemplateArguments.class);
+  }
+
 }

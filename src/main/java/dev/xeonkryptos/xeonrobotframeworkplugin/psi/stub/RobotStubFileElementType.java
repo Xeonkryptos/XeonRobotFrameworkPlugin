@@ -12,6 +12,6 @@ public class RobotStubFileElementType extends IStubFileElementType<PsiFileStub<?
 
     @Override
     public int getStubVersion() {
-        return super.getStubVersion() + 23;
+        return super.getStubVersion() + 24;
     }
 }

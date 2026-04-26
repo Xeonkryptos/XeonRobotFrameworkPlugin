@@ -11,6 +11,7 @@
 - Support for variables in test case and task names
 - Highlight for, while, try, group and if with their corresponding end statement
 - Support for folding grouped import and global setup/teardown statements
+- Support for test case templates with for loops and if/else statements
 
 ### Changed
 

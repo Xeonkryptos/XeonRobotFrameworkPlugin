@@ -33,6 +33,6 @@ public class TaskNameIndex extends StringStubIndexExtension<RobotTaskStatement> 
 
     @Override
     public int getVersion() {
-        return super.getVersion() + 5;
+        return super.getVersion() + 6;
     }
 }

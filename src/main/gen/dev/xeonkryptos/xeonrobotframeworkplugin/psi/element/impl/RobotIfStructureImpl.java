@@ -34,4 +34,10 @@ public class RobotIfStructureImpl extends RobotExecutableStatementImpl implement
     return notNullChild(PsiTreeUtil.getChildOfType(this, RobotConditionalContent.class));
   }
 
+  @Override
+  @Nullable
+  public RobotTemplateArguments getTemplateArguments() {
+    return PsiTreeUtil.getChildOfType(this, RobotTemplateArguments.class);
+  }
+
 }
