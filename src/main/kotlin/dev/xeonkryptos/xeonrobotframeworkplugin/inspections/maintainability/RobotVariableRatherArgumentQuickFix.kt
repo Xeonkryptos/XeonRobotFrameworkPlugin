@@ -16,9 +16,7 @@ class RobotVariableRatherArgumentQuickFix(element: RobotLiteralConstantValue) : 
 
     override fun getText(): @IntentionName String = RobotBundle.message("intention.family.variable-rather-argument.name")
 
-    override fun invoke(
-        project: Project, file: PsiFile, startElement: PsiElement, endElement: PsiElement
-    ) {
+    override fun invoke(project: Project, file: PsiFile, startElement: PsiElement, endElement: PsiElement) {
         RobotElementGenerator.getInstance(project).createNewScalarVariable(startElement.text)?.let { robotVariable -> startElement.replace(robotVariable) }
     }
 

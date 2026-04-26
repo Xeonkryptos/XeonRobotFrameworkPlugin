@@ -1,5 +1,6 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.formatter
 
+import com.intellij.formatting.ASTBlock
 import com.intellij.formatting.Alignment
 import com.intellij.formatting.Block
 import com.intellij.formatting.ChildAttributes
@@ -17,7 +18,6 @@ import com.intellij.psi.formatter.common.AbstractBlock
 import com.intellij.psi.tree.TokenSet
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTokenSets
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes
-import fleet.util.letIf
 
 class RobotBlock(node: ASTNode, private val context: RobotBlockContext, wrap: Wrap? = null, alignment: Alignment? = null, private val indent: Indent? = null, private val childIndent: Indent? = null) :
     AbstractBlock(node, wrap, alignment) {
@@ -96,9 +96,11 @@ class RobotBlock(node: ASTNode, private val context: RobotBlockContext, wrap: Wr
             val dataDrivenElements = myNode.getChildren(TokenSet.create(RobotTypes.DATA_DRIVEN_COLUMN_NAME)).map { Alignment.createAlignment(true) }.toMutableList()
             parent?.node?.putUserData(TEMPLATE_VALUES_ALIGNMENT_WITH_DATA_DRIVEN_HEADER_KEY, dataDrivenElements)
         } else if (myNode.elementType === RobotTypes.TEMPLATE_ARGUMENTS && context.robotCodeStyleSettings.ALIGN_TEMPLATE_ARGUMENTS_WITH_EACH_OTHER) {
-            parent?.letIf(parent?.node?.getUserData(TEMPLATE_VALUES_ALIGNMENT_KEY) === null) {
-                val alignments = myNode.getChildren(RobotTokenSets.TEMPLATE_VALUES_HOLDER_SET).map { Alignment.createAlignment(true) }.toMutableList()
-                it.node.putUserData(TEMPLATE_VALUES_ALIGNMENT_KEY, alignments)
+            if (parent?.node?.getUserData(TEMPLATE_VALUES_ALIGNMENT_KEY) === null) {
+                parent?.let {
+                    val alignments = myNode.getChildren(RobotTokenSets.TEMPLATE_VALUES_HOLDER_SET).map { Alignment.createAlignment(true) }.toMutableList()
+                    it.node.putUserData(TEMPLATE_VALUES_ALIGNMENT_KEY, alignments)
+                }
             }
         } else if (myNode.elementType === RobotTypes.VARIABLE_STATEMENTS) {
             myNode.putUserData(SINGLE_VARIABLE_STATEMENT_FIRST_ARGUMENT_ALIGNMENT_KEY, Alignment.createAlignment(true))
@@ -204,7 +206,8 @@ class RobotBlock(node: ASTNode, private val context: RobotBlockContext, wrap: Wr
     }
 
     private fun getAlignment(node: ASTNode, alignmentIndex: Int): Alignment? = when {
-        node.elementType === RobotTypes.DATA_DRIVEN_COLUMN_NAME -> parent?.node?.getUserData(TEMPLATE_VALUES_ALIGNMENT_WITH_DATA_DRIVEN_HEADER_KEY)?.getOrNull(alignmentIndex)
+        // Substraction of the alignment index by 1 for DATA_DRIVEN_COLUMN_NAME is necessary to exclude the test's name but give the last entry of the columns its alignment value
+        node.elementType === RobotTypes.DATA_DRIVEN_COLUMN_NAME -> parent?.node?.getUserData(TEMPLATE_VALUES_ALIGNMENT_WITH_DATA_DRIVEN_HEADER_KEY)?.getOrNull(alignmentIndex - 1)
 
         RobotTokenSets.TEMPLATE_VALUES_HOLDER_SET.contains(node.elementType) -> extractTemplateArgumentAlignment(alignmentIndex)
 
@@ -254,7 +257,16 @@ class RobotBlock(node: ASTNode, private val context: RobotBlockContext, wrap: Wr
 
     override fun getChildIndent(): Indent? = childIndent
 
-    override fun getSpacing(child1: Block?, child2: Block): Spacing? = context.spacingBuilder.getSpacing(this, child1, child2)
+    override fun getSpacing(child1: Block?, child2: Block): Spacing? {
+        val child1ElementType = ASTBlock.getElementType(child1)
+        if (child1ElementType === RobotTypes.TEST_CASE_ID || child1ElementType === RobotTypes.TASK_ID) {
+            val child2ElementType = ASTBlock.getElementType(child2)
+            if (child2ElementType === RobotTypes.TEMPLATE_ARGUMENTS) {
+                return Spacing.createSpacing(RobotCodeStyleSettings.SUPER_SPACE_SIZE, 0, 0, context.commonCodeStyleSettings.KEEP_LINE_BREAKS, context.commonCodeStyleSettings.KEEP_BLANK_LINES_IN_CODE)
+            }
+        }
+        return context.spacingBuilder.getSpacing(this, child1, child2)
+    }
 
     override fun isLeaf(): Boolean = myNode.firstChildNode === null
 }
