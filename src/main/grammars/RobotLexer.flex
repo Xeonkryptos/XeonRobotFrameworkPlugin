@@ -428,17 +428,17 @@ LineComment = {LineCommentSign} {NON_EOL}*
 
 <TESTCASE_NAME_DEFINITION>     {
     {EverythingButVariableValue}                             { pushBackTrailingWhitespace(); return TEST_CASE_NAME_PART; }
-    {SpaceBasedEndMarker} {NonNewlineWhitespace}*            { yybegin(TESTCASE_DEFINITION); return WHITE_SPACE; }
+    {SpaceBasedEndMarker} {NonNewlineWhitespace}*            { yybegin(TESTCASE_DEFINITION); return EOS; }
     {EOL}                                                    { yybegin(TESTCASE_DEFINITION); return EOL; }
 }
 <TASK_NAME_DEFINITION>         {
     {EverythingButVariableValue}                             { pushBackTrailingWhitespace(); return TASK_NAME_PART; }
-    {SpaceBasedEndMarker} {NonNewlineWhitespace}*            { yybegin(TASK_DEFINITION); return WHITE_SPACE; }
+    {SpaceBasedEndMarker} {NonNewlineWhitespace}*            { yybegin(TASK_DEFINITION); return EOS; }
     {EOL}                                                    { yybegin(TASK_DEFINITION); return EOL; }
 }
 <USER_KEYWORD_NAME_DEFINITION> {
     {EverythingButVariableValue}                             { pushBackTrailingWhitespace(); return USER_KEYWORD_NAME_PART; }
-    {SpaceBasedEndMarker} {NonNewlineWhitespace}*            { yybegin(USER_KEYWORD_DEFINITION); return WHITE_SPACE; }
+    {SpaceBasedEndMarker} {NonNewlineWhitespace}*            { yybegin(USER_KEYWORD_DEFINITION); return EOS; }
     {EOL}                                                    { yybegin(USER_KEYWORD_DEFINITION); return EOL; }
 }
 <TESTCASE_NAME_DEFINITION, TASK_NAME_DEFINITION, USER_KEYWORD_NAME_DEFINITION> {

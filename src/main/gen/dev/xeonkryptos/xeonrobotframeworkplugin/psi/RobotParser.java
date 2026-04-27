@@ -2500,28 +2500,46 @@ public class RobotParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // (TASK_NAME_PART | variable)+
+  // (TASK_NAME_PART | variable)+ EOS?
   public static boolean task_id(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "task_id")) return false;
     boolean r;
     Marker m = enter_section_(b, l, _NONE_, TASK_ID, "<task id>");
     r = task_id_0(b, l + 1);
-    while (r) {
-      int c = current_position_(b);
-      if (!task_id_0(b, l + 1)) break;
-      if (!empty_element_parsed_guard_(b, "task_id", c)) break;
-    }
+    r = r && task_id_1(b, l + 1);
     exit_section_(b, l, m, r, false, null);
     return r;
   }
 
-  // TASK_NAME_PART | variable
+  // (TASK_NAME_PART | variable)+
   private static boolean task_id_0(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "task_id_0")) return false;
+    boolean r;
+    Marker m = enter_section_(b);
+    r = task_id_0_0(b, l + 1);
+    while (r) {
+      int c = current_position_(b);
+      if (!task_id_0_0(b, l + 1)) break;
+      if (!empty_element_parsed_guard_(b, "task_id_0", c)) break;
+    }
+    exit_section_(b, m, null, r);
+    return r;
+  }
+
+  // TASK_NAME_PART | variable
+  private static boolean task_id_0_0(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "task_id_0_0")) return false;
     boolean r;
     r = consumeToken(b, TASK_NAME_PART);
     if (!r) r = variable(b, l + 1);
     return r;
+  }
+
+  // EOS?
+  private static boolean task_id_1(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "task_id_1")) return false;
+    consumeToken(b, EOS);
+    return true;
   }
 
   /* ********************************************************** */
@@ -2736,39 +2754,57 @@ public class RobotParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // for_loop_structure | conditional_content | template_arguments
+  // for_loop_structure | conditional_structure | template_arguments
   static boolean template_test_case_body(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "template_test_case_body")) return false;
     boolean r;
     r = for_loop_structure(b, l + 1);
-    if (!r) r = conditional_content(b, l + 1);
+    if (!r) r = conditional_structure(b, l + 1);
     if (!r) r = template_arguments(b, l + 1);
     return r;
   }
 
   /* ********************************************************** */
-  // (TEST_CASE_NAME_PART | variable)+
+  // (TEST_CASE_NAME_PART | variable)+ EOS?
   public static boolean test_case_id(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "test_case_id")) return false;
     boolean r;
     Marker m = enter_section_(b, l, _NONE_, TEST_CASE_ID, "<test case id>");
     r = test_case_id_0(b, l + 1);
-    while (r) {
-      int c = current_position_(b);
-      if (!test_case_id_0(b, l + 1)) break;
-      if (!empty_element_parsed_guard_(b, "test_case_id", c)) break;
-    }
+    r = r && test_case_id_1(b, l + 1);
     exit_section_(b, l, m, r, false, null);
     return r;
   }
 
-  // TEST_CASE_NAME_PART | variable
+  // (TEST_CASE_NAME_PART | variable)+
   private static boolean test_case_id_0(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "test_case_id_0")) return false;
+    boolean r;
+    Marker m = enter_section_(b);
+    r = test_case_id_0_0(b, l + 1);
+    while (r) {
+      int c = current_position_(b);
+      if (!test_case_id_0_0(b, l + 1)) break;
+      if (!empty_element_parsed_guard_(b, "test_case_id_0", c)) break;
+    }
+    exit_section_(b, m, null, r);
+    return r;
+  }
+
+  // TEST_CASE_NAME_PART | variable
+  private static boolean test_case_id_0_0(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "test_case_id_0_0")) return false;
     boolean r;
     r = consumeToken(b, TEST_CASE_NAME_PART);
     if (!r) r = variable(b, l + 1);
     return r;
+  }
+
+  // EOS?
+  private static boolean test_case_id_1(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "test_case_id_1")) return false;
+    consumeToken(b, EOS);
+    return true;
   }
 
   /* ********************************************************** */
@@ -3064,28 +3100,46 @@ public class RobotParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // (USER_KEYWORD_NAME_PART | variable)+
+  // (USER_KEYWORD_NAME_PART | variable)+ EOS?
   public static boolean user_keyword_statement_id(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "user_keyword_statement_id")) return false;
     boolean r;
     Marker m = enter_section_(b, l, _NONE_, USER_KEYWORD_STATEMENT_ID, "<user keyword statement id>");
     r = user_keyword_statement_id_0(b, l + 1);
-    while (r) {
-      int c = current_position_(b);
-      if (!user_keyword_statement_id_0(b, l + 1)) break;
-      if (!empty_element_parsed_guard_(b, "user_keyword_statement_id", c)) break;
-    }
+    r = r && user_keyword_statement_id_1(b, l + 1);
     exit_section_(b, l, m, r, false, null);
     return r;
   }
 
-  // USER_KEYWORD_NAME_PART | variable
+  // (USER_KEYWORD_NAME_PART | variable)+
   private static boolean user_keyword_statement_id_0(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "user_keyword_statement_id_0")) return false;
+    boolean r;
+    Marker m = enter_section_(b);
+    r = user_keyword_statement_id_0_0(b, l + 1);
+    while (r) {
+      int c = current_position_(b);
+      if (!user_keyword_statement_id_0_0(b, l + 1)) break;
+      if (!empty_element_parsed_guard_(b, "user_keyword_statement_id_0", c)) break;
+    }
+    exit_section_(b, m, null, r);
+    return r;
+  }
+
+  // USER_KEYWORD_NAME_PART | variable
+  private static boolean user_keyword_statement_id_0_0(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "user_keyword_statement_id_0_0")) return false;
     boolean r;
     r = consumeToken(b, USER_KEYWORD_NAME_PART);
     if (!r) r = variable(b, l + 1);
     return r;
+  }
+
+  // EOS?
+  private static boolean user_keyword_statement_id_1(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "user_keyword_statement_id_1")) return false;
+    consumeToken(b, EOS);
+    return true;
   }
 
   /* ********************************************************** */

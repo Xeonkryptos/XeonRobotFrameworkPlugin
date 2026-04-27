@@ -174,7 +174,7 @@ test_case_statement ::= test_case_id eol_marker? testcase_task_statement* {
     recoverWhile=test_case_statement_recover
     hooks=[clearTemplateStateHook]
 }
-test_case_id ::= (TEST_CASE_NAME_PART | variable)+
+test_case_id ::= (TEST_CASE_NAME_PART | variable)+ EOS?
 private test_case_statement_recover ::= !test_case_id & section_recover
 task_statement ::= task_id eol_marker? testcase_task_statement* {
     pin=1
@@ -192,7 +192,7 @@ task_statement ::= task_id eol_marker? testcase_task_statement* {
     recoverWhile=task_statement_recover
     hooks=[clearTemplateStateHook]
 }
-task_id ::= (TASK_NAME_PART | variable)+
+task_id ::= (TASK_NAME_PART | variable)+ EOS?
 private task_statement_recover ::= !task_id & section_recover
 
 private testcase_task_statement ::= local_setting | <<parseTestcaseTaskStatement template_test_case_body bdd_statement executable_statement>> {
@@ -200,7 +200,7 @@ private testcase_task_statement ::= local_setting | <<parseTestcaseTaskStatement
 }
 private testcase_task_statement_recover ::= !(local_setting_id | TEMPLATE_ARGUMENT_VALUE | template_parameter_id | GIVEN | WHEN | task_id | test_case_id) & section_recover & executable_statement_recover
 
-private template_test_case_body ::= for_loop_structure | conditional_content | template_arguments
+private template_test_case_body ::= for_loop_structure | conditional_structure | template_arguments
 template_arguments ::= (template_argument | template_parameter)+ eol_marker {
     pin=1
     implements=[
@@ -244,7 +244,7 @@ user_keyword_statement ::= user_keyword_statement_id eol_marker (local_arguments
     methods = [getNameIdentifier getName getQualifiedName]
     recoverWhile=user_keyword_statement_recover
 }
-user_keyword_statement_id ::= (USER_KEYWORD_NAME_PART | variable)+
+user_keyword_statement_id ::= (USER_KEYWORD_NAME_PART | variable)+ EOS?
 private user_keyword_statement_recover ::= !user_keyword_statement_id & section_recover
 
 local_setting ::= local_setting_id (positional_argument | eol_free_keyword_call)* eol_marker {

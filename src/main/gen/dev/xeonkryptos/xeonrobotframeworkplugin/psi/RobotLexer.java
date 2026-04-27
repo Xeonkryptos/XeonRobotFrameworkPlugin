@@ -8096,7 +8096,7 @@ public class RobotLexer extends AbstractRobotLexer {
           // fall through
           case 175: break;
           case 10:
-            { yybegin(TESTCASE_DEFINITION); return WHITE_SPACE;
+            { yybegin(TESTCASE_DEFINITION); return EOS;
             }
           // fall through
           case 176: break;
@@ -8119,7 +8119,7 @@ public class RobotLexer extends AbstractRobotLexer {
           // fall through
           case 179: break;
           case 14:
-            { yybegin(TASK_DEFINITION); return WHITE_SPACE;
+            { yybegin(TASK_DEFINITION); return EOS;
             }
           // fall through
           case 180: break;
@@ -8134,7 +8134,7 @@ public class RobotLexer extends AbstractRobotLexer {
           // fall through
           case 182: break;
           case 17:
-            { yybegin(USER_KEYWORD_DEFINITION); return WHITE_SPACE;
+            { yybegin(USER_KEYWORD_DEFINITION); return EOS;
             }
           // fall through
           case 183: break;
