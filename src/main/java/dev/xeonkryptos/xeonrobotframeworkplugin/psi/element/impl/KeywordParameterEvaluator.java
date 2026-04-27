@@ -1,12 +1,14 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl;
 
 import com.intellij.psi.PsiElement;
+import dev.xeonkryptos.xeonrobotframeworkplugin.config.RobotOptionsProvider;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.DefinedParameter;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotArgument;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotCallArgumentsContainer;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCall;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotParameter;
 
+import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashSet;
@@ -39,6 +41,7 @@ class KeywordParameterEvaluator {
         MissingParametersResult result = computeMissingParametersInternal(keywordCall, container, ignorableElement, false);
         Collection<DefinedParameter> allMissing = new LinkedHashSet<>(result.missingPositional);
         allMissing.addAll(result.missingKeywords);
+        allMissing.addAll(result.missingOptional);
         return allMissing;
     }
 
@@ -58,13 +61,13 @@ class KeywordParameterEvaluator {
         List<DefinedParameter> positionalOnlyRequired = new ArrayList<>();
         List<DefinedParameter> normalRequired = new ArrayList<>();
         List<DefinedParameter> keywordOnlyRequired = new ArrayList<>();
+        List<DefinedParameter> optional = new ArrayList<>();
 
         for (int i = 0; i < availableParameters.size(); i++) {
             DefinedParameter param = availableParameters.get(i);
             if (param.hasDefaultValue()) {
-                continue;
-            }
-            if (param.isPositionalOnly()) {
+                optional.add(param);
+            } else if (param.isPositionalOnly()) {
                 positionalOnlyRequired.add(param);
             } else if (i >= keywordsOnlyStartIndex) {
                 keywordOnlyRequired.add(param);
@@ -100,19 +103,41 @@ class KeywordParameterEvaluator {
         int normalSatisfiedByPositional = Math.max(0, positionalSatisfied - positionalOnlyRequired.size());
 
         List<DefinedParameter> missingKeywords = new ArrayList<>();
+        Collator parameterNameCollator = RobotOptionsProvider.getInstance(keywordCall.getProject()).getParameterNameCollator();
         for (int i = normalSatisfiedByPositional; i < normalRequired.size(); i++) {
             DefinedParameter param = normalRequired.get(i);
-            if (!definedParameterNames.contains(param.getLookup())) {
-                missingKeywords.add(param);
-            }
-        }
-        for (DefinedParameter param : keywordOnlyRequired) {
-            if (!definedParameterNames.contains(param.getLookup())) {
-                missingKeywords.add(param);
-            }
-        }
 
-        return new MissingParametersResult(missingPositional, missingKeywords);
+            boolean found = false;
+            for (String definedParameterName : definedParameterNames) {
+                if (parameterNameCollator.equals(param.getLookup(), definedParameterName)) {
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) {
+                missingKeywords.add(param);
+            }
+        }
+        findMatchingParameterNames(definedParameterNames, keywordOnlyRequired, parameterNameCollator, missingKeywords);
+        List<DefinedParameter> optionalKeywords = new ArrayList<>();
+        findMatchingParameterNames(definedParameterNames, optional, parameterNameCollator, optionalKeywords);
+
+        return new MissingParametersResult(missingPositional, missingKeywords, optionalKeywords);
+    }
+
+    private static void findMatchingParameterNames(Collection<String> definedParameterNames, List<DefinedParameter> optional, Collator parameterNameCollator, List<DefinedParameter> missingKeywords) {
+        for (DefinedParameter param : optional) {
+            boolean found = false;
+            for (String definedParameterName : definedParameterNames) {
+                if (parameterNameCollator.equals(param.getLookup(), definedParameterName)) {
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) {
+                missingKeywords.add(param);
+            }
+        }
     }
 
     private static int countPositionalArguments(RobotCallArgumentsContainer container, int keywordsOnlyStartIndex, PsiElement ignorableElement) {
@@ -134,5 +159,5 @@ class KeywordParameterEvaluator {
         return count;
     }
 
-    private record MissingParametersResult(List<DefinedParameter> missingPositional, List<DefinedParameter> missingKeywords) {}
+    private record MissingParametersResult(List<DefinedParameter> missingPositional, List<DefinedParameter> missingKeywords, List<DefinedParameter> missingOptional) {}
 }
