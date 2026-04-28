@@ -27,12 +27,12 @@ public class RobotParameterAnnotator extends RobotAnnotator {
             if (keywordCall != null) {
                 Collection<DefinedParameter> availableParameters = keywordCall.getAvailableParameters();
                 String parameterName = parameter.getParameterName();
-                if (keywordCall.getStartOfKeywordsOnlyIndex().isPresent()) {
-                    boolean noDirectMatchFound = availableParameters.stream().noneMatch(param -> param.matches(parameterName));
-                    boolean noKeywordContainerFound = availableParameters.stream().noneMatch(DefinedParameter::isKeywordContainer);
-                    if (noDirectMatchFound && noKeywordContainerFound) {
-                        keywordCall.getStartOfKeywordsOnlyIndex().ifPresent(keywordsOnlyIndex -> handleParameterWithinKeywordOnlyKeywordCall(keywordsOnlyIndex, parameter, keywordCall, getHolder()));
-                    }
+                boolean noDirectMatchFound = availableParameters.stream().noneMatch(param -> param.matches(parameterName));
+                boolean noKeywordContainerFound = availableParameters.stream().noneMatch(DefinedParameter::isKeywordContainer);
+                if (noDirectMatchFound && noKeywordContainerFound) {
+                    keywordCall.getStartOfKeywordsOnlyIndex()
+                               .ifPresentOrElse(keywordsOnlyIndex -> handleParameterWithinKeywordOnlyKeywordCall(keywordsOnlyIndex, parameter, keywordCall, getHolder()),
+                                                () -> highlightParameterAsNotFound(parameter, keywordCall.getName(), getHolder()));
                 }
             }
         }
