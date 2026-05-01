@@ -23,7 +23,7 @@ class KeywordParameterEvaluator {
     }
 
     public static Collection<String> computeMissingRequiredParameters(RobotKeywordCall keywordCall, RobotCallArgumentsContainer container) {
-        MissingParametersResult result = computeMissingParametersInternal(keywordCall, container, null, true);
+        MissingParametersResult result = computeMissingParametersInternal(keywordCall, container, null);
         if (result.missingPositional.isEmpty() && result.missingKeywords.isEmpty()) {
             return List.of();
         }
@@ -38,14 +38,14 @@ class KeywordParameterEvaluator {
     }
 
     public static Collection<DefinedParameter> computeMissingParameters(RobotKeywordCall keywordCall, RobotCallArgumentsContainer container, PsiElement ignorableElement) {
-        MissingParametersResult result = computeMissingParametersInternal(keywordCall, container, ignorableElement, false);
+        MissingParametersResult result = computeMissingParametersInternal(keywordCall, container, ignorableElement);
         Collection<DefinedParameter> allMissing = new LinkedHashSet<>(result.missingPositional);
         allMissing.addAll(result.missingKeywords);
         allMissing.addAll(result.missingOptional);
         return allMissing;
     }
 
-    private static MissingParametersResult computeMissingParametersInternal(RobotKeywordCall keywordCall, RobotCallArgumentsContainer container, PsiElement ignorableElement, boolean countOnly) {
+    private static MissingParametersResult computeMissingParametersInternal(RobotKeywordCall keywordCall, RobotCallArgumentsContainer container, PsiElement ignorableElement) {
         Collection<String> definedParameterNames = new LinkedHashSet<>(container.getDefinedParameterNames());
         List<DefinedParameter> availableParameters = keywordCall.getAvailableParameters()
                                                                 .stream()
@@ -89,16 +89,8 @@ class KeywordParameterEvaluator {
         int positionalSatisfied = Math.min(positionalArgumentsCount, allNonKeywordOnlyRequired.size());
 
         List<DefinedParameter> missingPositional;
-        if (countOnly) {
-            int positionalOnlyNeeded = Math.max(0, positionalOnlyRequired.size() - positionalArgumentsCount);
-            missingPositional = positionalOnlyRequired.stream().limit(positionalOnlyNeeded).collect(Collectors.toList());
-        } else {
-            List<DefinedParameter> missingFromPositional = new ArrayList<>();
-            for (int i = positionalSatisfied; i < allNonKeywordOnlyRequired.size(); i++) {
-                missingFromPositional.add(allNonKeywordOnlyRequired.get(i));
-            }
-            missingPositional = missingFromPositional;
-        }
+        int positionalOnlyNeeded = Math.max(0, positionalOnlyRequired.size() - positionalArgumentsCount);
+        missingPositional = positionalOnlyRequired.stream().limit(positionalOnlyNeeded).collect(Collectors.toList());
 
         int normalSatisfiedByPositional = Math.max(0, positionalSatisfied - positionalOnlyRequired.size());
 
