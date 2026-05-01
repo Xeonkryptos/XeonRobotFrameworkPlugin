@@ -1,4 +1,4 @@
-package dev.xeonkryptos.xeonrobotframeworkplugin.psi.reference;
+package dev.xeonkryptos.xeonrobotframeworkplugin.psi.reference.external.file;
 
 import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.util.Key;

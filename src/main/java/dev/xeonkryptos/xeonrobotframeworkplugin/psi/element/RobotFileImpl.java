@@ -20,7 +20,7 @@ import com.jetbrains.python.psi.PyClass;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotLanguage;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.dto.ImportType;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.reference.PythonResolver;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.reference.RobotPythonClass;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.reference.external.file.RobotPythonClass;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.index.VariableDefinitionNameIndex;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.VariableScope;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.visitor.RobotImportFilesCollector;
