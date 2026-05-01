@@ -8,6 +8,8 @@ GitHub [project](https://github.com/xeonkryptos/XeonRobotFrameworkPlugin).
 
 ## Features
 
+### Code Formatting
+
 ### Syntax Highlighting
 
 ![](https://raw.githubusercontent.com/xeonkryptos/XeonRobotFrameworkPlugin/main/docs/imgs/syntax-highlighting.jpg)
@@ -61,7 +63,6 @@ and keywords.
   supported yet. It is planned as an upcoming feature, though. Same applies to Python's decorators which modify the function signature.
 * Code completion for object access in Robot's variables isn't possible yet.
 * Resolving of variables in JSON or YAML files isn't possible yet.
-* Integration of code formatting isn't implemented yet.
 * Python expressions aren't recognized as such yet, so no code completion or inspections are available for them. They are just highlighted as a special type of string for now.
 
 ## Upcoming Features
@@ -70,7 +71,6 @@ For the upcoming releases, the following features are planned to get implemented
 
 * Support dynamic libraries. Load provided variables, keywords, everything of relevance from them and provide them in code navigation, code completion, inspections, etc.
 * Support variable files in JSON and YAML format.
-* Integrate code formatting.
 * Provide language injection for Python expressions to give you the full experience and support, especially code completion, inspections, code navigation, etc.
 * Extended code completion in variables, especially for object access.
 * Support to load documentation provided in user keywords when hovering a used user keyword or when looking for it in code completion.
