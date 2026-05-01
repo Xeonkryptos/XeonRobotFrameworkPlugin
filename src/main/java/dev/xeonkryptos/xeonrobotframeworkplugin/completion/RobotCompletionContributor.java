@@ -10,13 +10,10 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotConditionalStru
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotExceptionHandlingStructure;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotFile;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotForLoopStructure;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotImportGlobalSettingExpression;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordsSection;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLibraryImportGlobalSetting;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLocalSetting;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLocalSettingId;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotParameter;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotResourceImportGlobalSetting;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotSettingsSection;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTaskStatement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTasksSection;
@@ -24,7 +21,6 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTemplateParamet
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTestCaseStatement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTestCasesSection;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotUserKeywordStatement;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariablesImportGlobalSetting;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotWhileLoopStructure;
 import org.jetbrains.annotations.NotNull;
 
@@ -32,7 +28,6 @@ import static com.intellij.patterns.PlatformPatterns.psiComment;
 import static com.intellij.patterns.PlatformPatterns.psiElement;
 import static com.intellij.patterns.StandardPatterns.instanceOf;
 import static com.intellij.patterns.StandardPatterns.or;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.completion.RobotPatterns.atFirstPositionOf;
 import static dev.xeonkryptos.xeonrobotframeworkplugin.completion.RobotPatterns.indented;
 import static dev.xeonkryptos.xeonrobotframeworkplugin.completion.RobotPatterns.previousNonWhitespaceOrCommentSibling;
 
@@ -51,12 +46,6 @@ public class RobotCompletionContributor extends CompletionContributor {
                            .with(indented())
                            .inFile(psiElement(RobotFile.class)),
                new LocalSettingsCompletionProvider());
-        extend(CompletionType.BASIC,
-               psiElement().andNot(psiComment())
-                           .inside(true, or(instanceOf(RobotLibraryImportGlobalSetting.class), instanceOf(RobotResourceImportGlobalSetting.class), instanceOf(RobotVariablesImportGlobalSetting.class)))
-                           .and(psiElement(RobotTypes.LITERAL_CONSTANT).with(atFirstPositionOf(psiElement(RobotImportGlobalSettingExpression.class))))
-                           .inFile(psiElement(RobotFile.class)),
-               new ImportCompletionProvider());
         extend(CompletionType.BASIC,
                psiElement().andNot(insideCommentOrInnerElement()).inside(true, instanceOf(RobotTestCaseStatement.class)).with(indented()).inFile(psiElement(RobotFile.class)),
                new GherkinCompletionProvider());
