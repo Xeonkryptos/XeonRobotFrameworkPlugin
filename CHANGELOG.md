@@ -6,6 +6,7 @@
 
 ### Changed
 
+- Extended code completion suggestions to variable files import in settings section
 - Optimized multiline handling to increase performance and stability
 
 ### Fixed

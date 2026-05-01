@@ -7,6 +7,7 @@ import com.intellij.codeInsight.completion.PrefixMatcher;
 import com.intellij.codeInsight.lookup.LookupElement;
 import com.intellij.codeInsight.lookup.LookupElementBuilder;
 import com.intellij.icons.AllIcons.Nodes;
+import com.intellij.openapi.application.ReadAction;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModuleUtilCore;
 import com.intellij.openapi.project.Project;
@@ -27,6 +28,8 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.icons.RobotIcons;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotImportGlobalSettingExpression;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLibraryImportGlobalSetting;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotResourceImportGlobalSetting;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariablesImportGlobalSetting;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVisitor;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.reference.RobotFileManager;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.RobotPyUtil;
 import org.apache.commons.text.WordUtils;
@@ -45,31 +48,28 @@ class ImportCompletionProvider extends CompletionProvider<CompletionParameters> 
 
     @Override
     protected void addCompletions(@NotNull CompletionParameters parameters, @NotNull ProcessingContext context, @NotNull CompletionResultSet result) {
-        RobotImportGlobalSettingExpression importElement = PsiTreeUtil.getParentOfType(parameters.getPosition(), RobotImportGlobalSettingExpression.class);
-        if (importElement instanceof RobotLibraryImportGlobalSetting) {
-            Project project = importElement.getProject();
-            List<LookupElement> builtInLibraryCompletions = BuiltInImportCompletionService.getInstance(project).getBuiltInLibraryCompletions();
-            result.addAllElements(builtInLibraryCompletions);
+        RobotImportGlobalSettingExpression importElement = PsiTreeUtil.getParentOfType(parameters.getPosition(), RobotImportGlobalSettingExpression.class, RobotVariablesImportGlobalSetting.class);
+        RobotVisitor visitor = new RobotVisitor() {
+            @Override
+            public void visitLibraryImportGlobalSetting(@NotNull RobotLibraryImportGlobalSetting o) {
+                Project project = o.getProject();
+                addLibraryImportPaths(project, result);
+            }
 
-            GlobalSearchScope projectScope = GlobalSearchScope.projectScope(project);
-            GlobalSearchScope projectExcludedScope = GlobalSearchScope.notScope(projectScope);
+            @Override
+            public void visitResourceImportGlobalSetting(@NotNull RobotResourceImportGlobalSetting o) {
+                addFilePaths(Set.of("resource"), parameters.getOriginalFile(), result);
+            }
 
-            Set<String> pyClassNames = new LinkedHashSet<>();
-            PrefixMatcher prefixMatcher = result.getPrefixMatcher();
-            Processor<String> processor = classNameKey -> {
-                if (prefixMatcher.prefixMatches(classNameKey)) {
-                    pyClassNames.add(classNameKey);
-                }
-                return true;
-            };
-            StubIndex.getInstance().processAllKeys(PyClassNameIndex.KEY, processor, projectScope);
-            addPythonClasses(result, pyClassNames, project, projectScope, RobotLookupScope.PROJECT_SCOPE);
-
-            pyClassNames.clear();
-            StubIndex.getInstance().processAllKeys(PyClassNameIndex.KEY, processor, projectExcludedScope);
-            addPythonClasses(result, pyClassNames, project, projectExcludedScope, RobotLookupScope.LIBRARY_SCOPE);
-        } else if (importElement instanceof RobotResourceImportGlobalSetting) {
-            addResourceFilePaths(result, parameters.getOriginalFile());
+            @Override
+            public void visitVariablesImportGlobalSetting(@NotNull RobotVariablesImportGlobalSetting o) {
+                Project project = o.getProject();
+                addFilePaths(Set.of("yaml", "yml", "json"), parameters.getOriginalFile(), result);
+                addLibraryImportPaths(project, result);
+            }
+        };
+        if (importElement != null) {
+            importElement.accept(visitor);
         }
     }
 
@@ -84,25 +84,53 @@ class ImportCompletionProvider extends CompletionProvider<CompletionParameters> 
         result.addAllElements(collectedElements);
     }
 
-    private void addResourceFilePaths(CompletionResultSet resultSet, PsiFile file) {
+    private void addLibraryImportPaths(Project project, CompletionResultSet result) {
+        List<LookupElement> builtInLibraryCompletions = BuiltInImportCompletionService.getInstance(project).getBuiltInLibraryCompletions();
+        result.addAllElements(builtInLibraryCompletions);
+
+        GlobalSearchScope projectScope = GlobalSearchScope.projectScope(project);
+        GlobalSearchScope projectExcludedScope = GlobalSearchScope.notScope(projectScope);
+
+        Set<String> pyClassNames = new LinkedHashSet<>();
+        PrefixMatcher prefixMatcher = result.getPrefixMatcher();
+        Processor<String> processor = classNameKey -> {
+            if (prefixMatcher.prefixMatches(classNameKey)) {
+                pyClassNames.add(classNameKey);
+            }
+            return true;
+        };
+        StubIndex.getInstance().processAllKeys(PyClassNameIndex.KEY, processor, projectScope);
+        addPythonClasses(result, pyClassNames, project, projectScope, RobotLookupScope.PROJECT_SCOPE);
+
+        pyClassNames.clear();
+        StubIndex.getInstance().processAllKeys(PyClassNameIndex.KEY, processor, projectExcludedScope);
+        addPythonClasses(result, pyClassNames, project, projectExcludedScope, RobotLookupScope.LIBRARY_SCOPE);
+    }
+
+    private void addFilePaths(Set<String> fileExtensions, PsiFile file, CompletionResultSet resultSet) {
         Project project = file.getProject();
         Module moduleForFile = ModuleUtilCore.findModuleForFile(file);
         VirtualFile contentRoot = RobotFileManager.findContentRootForFile(file);
         if (moduleForFile != null && contentRoot != null) {
-            Collection<VirtualFile> resourceFiles = FilenameIndex.getAllFilesByExt(project, "resource", moduleForFile.getModuleContentScope());
-            Collection<LookupElement> elements = resourceFiles.stream()
-                                                              .filter(resourceFile -> VfsUtil.isAncestor(contentRoot, resourceFile, true))
-                                                              .map(virtualFile -> VfsUtil.getRelativePath(virtualFile, contentRoot))
-                                                              .filter(Objects::nonNull)
-                                                              .map(relativePath -> {
-                                                                  String[] lookupStrings = { relativePath, WordUtils.capitalize(relativePath), relativePath.toLowerCase() };
-                                                                  return LookupElementBuilder.create(relativePath)
-                                                                                             .withIcon(RobotIcons.RESOURCE)
-                                                                                             .withLookupStrings(Arrays.asList(lookupStrings))
-                                                                                             .withCaseSensitivity(true)
-                                                                                             .withPresentableText(relativePath);
-                                                              })
-                                                              .collect(Collectors.toCollection(LinkedHashSet::new));
+            @SuppressWarnings("UnstableApiUsage")
+            Set<LookupElementBuilder> elements = fileExtensions.stream()
+                                                               .parallel()
+                                                               .flatMap(fileExtension -> ReadAction.computeCancellable(() -> FilenameIndex.getAllFilesByExt(project,
+                                                                                                                                                            fileExtension,
+                                                                                                                                                            moduleForFile.getModuleContentScope()))
+                                                                                                   .stream())
+                                                               .filter(resourceFile -> VfsUtil.isAncestor(contentRoot, resourceFile, true))
+                                                               .map(virtualFile -> VfsUtil.getRelativePath(virtualFile, contentRoot))
+                                                               .filter(Objects::nonNull)
+                                                               .map(relativePath -> {
+                                                                   String[] lookupStrings = { relativePath, WordUtils.capitalize(relativePath), relativePath.toLowerCase() };
+                                                                   return LookupElementBuilder.create(relativePath)
+                                                                                              .withIcon(RobotIcons.RESOURCE)
+                                                                                              .withLookupStrings(Arrays.asList(lookupStrings))
+                                                                                              .withCaseSensitivity(true)
+                                                                                              .withPresentableText(relativePath);
+                                                               })
+                                                               .collect(Collectors.toCollection(LinkedHashSet::new));
             resultSet.addAllElements(elements);
         }
     }

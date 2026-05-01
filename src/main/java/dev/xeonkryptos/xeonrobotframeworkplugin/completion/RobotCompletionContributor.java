@@ -24,6 +24,7 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTemplateParamet
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTestCaseStatement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTestCasesSection;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotUserKeywordStatement;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariablesImportGlobalSetting;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotWhileLoopStructure;
 import org.jetbrains.annotations.NotNull;
 
@@ -52,7 +53,7 @@ public class RobotCompletionContributor extends CompletionContributor {
                new LocalSettingsCompletionProvider());
         extend(CompletionType.BASIC,
                psiElement().andNot(psiComment())
-                           .inside(true, or(instanceOf(RobotLibraryImportGlobalSetting.class), instanceOf(RobotResourceImportGlobalSetting.class)))
+                           .inside(true, or(instanceOf(RobotLibraryImportGlobalSetting.class), instanceOf(RobotResourceImportGlobalSetting.class), instanceOf(RobotVariablesImportGlobalSetting.class)))
                            .and(psiElement(RobotTypes.LITERAL_CONSTANT).with(atFirstPositionOf(psiElement(RobotImportGlobalSettingExpression.class))))
                            .inFile(psiElement(RobotFile.class)),
                new ImportCompletionProvider());
