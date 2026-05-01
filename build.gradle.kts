@@ -1,3 +1,6 @@
+import com.github.javaparser.printer.concretesyntaxmodel.CsmElement.token
+import org.gradle.internal.impldep.com.fasterxml.jackson.databind.deser.std.FromStringDeserializer.types
+import org.gradle.internal.impldep.org.bouncycastle.util.Strings.lineSeparator
 import org.jetbrains.changelog.Changelog
 import org.jetbrains.changelog.markdownToHTML
 import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
@@ -12,7 +15,7 @@ plugins {
     // Java support
     id("java")
     // gradle-intellij-plugin - read more: https://github.com/JetBrains/gradle-intellij-plugin
-    id("org.jetbrains.intellij.platform") version "2.14.0"
+    id("org.jetbrains.intellij.platform") version "2.15.0"
     // gradle-changelog-plugin - read more: https://github.com/JetBrains/gradle-changelog-plugin
     id("org.jetbrains.changelog") version "2.5.0"
 
