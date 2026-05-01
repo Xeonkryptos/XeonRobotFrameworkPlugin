@@ -219,7 +219,7 @@
 
         <intentionAction>
             <language>Robot</language>
-            <className>dev.xeonkryptos.xeonrobotframeworkplugin.actions.OptionalKeywordParametersInserterIntentionAction</className>
+            <className>dev.xeonkryptos.xeonrobotframeworkplugin.actions.MissingKeywordParametersInserterIntentionAction</className>
             <categoryKey>options.entrypoint</categoryKey>
         </intentionAction>
     </extensions>
