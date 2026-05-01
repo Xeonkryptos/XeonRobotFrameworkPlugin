@@ -125,11 +125,6 @@ public abstract class RobotKeywordCallExtension extends RobotStubPsiElementBase<
     }
 
     @Override
-    public Collection<RobotArgument> getPositionalArguments() {
-        return getPositionalArgumentList().stream().map(argument -> (RobotArgument) argument).collect(Collectors.toList());
-    }
-
-    @Override
     public boolean hasPositionalArgumentsContainer() {
         PsiElement reference = getKeywordCallName().getReference().resolve();
         if (reference instanceof PyFunction pyFunction) {

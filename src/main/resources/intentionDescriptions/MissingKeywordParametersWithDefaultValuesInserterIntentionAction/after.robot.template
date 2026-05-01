@@ -1,9 +1,9 @@
 *** Keywords ***
 
 My keyword with arguments
-[Arguments]    ${arg1}  ${arg2}=default value
-Log    Argument 1: ${arg1}
-Log    Argument 2: ${arg2}
+    [Arguments]    ${arg1}  ${arg2}=default value
+    Log    Argument 1: ${arg1}
+    Log    Argument 2: ${arg2}
 
 *** Test Cases ***
 

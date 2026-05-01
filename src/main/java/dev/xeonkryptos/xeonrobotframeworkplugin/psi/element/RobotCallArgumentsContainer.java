@@ -10,8 +10,6 @@ public interface RobotCallArgumentsContainer {
 
     Collection<RobotArgument> getAllCallArguments();
 
-    Collection<RobotArgument> getPositionalArguments();
-
     default boolean allRequiredParametersArePresent() {
         return computeMissingRequiredParameters().isEmpty();
     }

@@ -10,31 +10,17 @@ import com.intellij.psi.TokenType
 import com.intellij.psi.util.parentOfType
 import dev.xeonkryptos.xeonrobotframeworkplugin.RobotBundle
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.DefinedParameter
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCall
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotParameter
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.ReservedVariable
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.RobotElementGenerator
 import dev.xeonkryptos.xeonrobotframeworkplugin.util.GlobalConstants
 
-class MissingKeywordParametersInserterIntentionAction : PsiElementBaseIntentionAction() {
+sealed class MissingKeywordParametersInserterIntentionAction(private val familyName: String) : PsiElementBaseIntentionAction() {
 
     init {
         text = familyName
-    }
-
-    override fun invoke(project: Project, editor: Editor?, element: PsiElement) {
-        val keywordCall = element.parentOfType<RobotKeywordCall>(false) ?: return
-        val missingParameters = keywordCall.computeMissingParameters()
-
-        val elementGenerator = RobotElementGenerator.getInstance(project)
-        val parserFacade = PsiParserFacade.getInstance(project)
-        missingParameters.filter { !it.isPositionalOnly && !it.isPositionalContainer && !it.isKeywordContainer }.forEach { parameter ->
-            val parameterValue = parameter.defaultValue ?: GlobalConstants.SUPER_SPACE
-            val newParameter = elementGenerator.createNewParameter(parameter.lookup, parameterValue)
-            val eolNode = keywordCall.lastChild ?: return
-
-            val addedParameterElement = keywordCall.addBefore(newParameter, eolNode)
-            val superSpaceElement = parserFacade.createWhiteSpaceFromText(GlobalConstants.SUPER_SPACE)
-            keywordCall.addBefore(superSpaceElement, addedParameterElement)
-        }
     }
 
     override fun isAvailable(project: Project, editor: Editor?, element: PsiElement): Boolean {
@@ -47,5 +33,46 @@ class MissingKeywordParametersInserterIntentionAction : PsiElementBaseIntentionA
         return false
     }
 
-    override fun getFamilyName(): @IntentionFamilyName String = RobotBundle.message("intention.family.keyword.insert.all.missing.parameters.name")
+    override fun invoke(project: Project, editor: Editor?, element: PsiElement) {
+        val keywordCall = element.parentOfType<RobotKeywordCall>(false) ?: return
+        val missingParameters = keywordCall.computeMissingParameters()
+
+        val elementGenerator = RobotElementGenerator.getInstance(project)
+        val parserFacade = PsiParserFacade.getInstance(project)
+        missingParameters.filter { !it.isPositionalOnly && !it.isPositionalContainer && !it.isKeywordContainer }.forEach { parameter ->
+            val newParameter = computeNewParameter(parameter, elementGenerator)
+            val eolNode = keywordCall.lastChild ?: return
+
+            val addedParameterElement = keywordCall.addBefore(newParameter, eolNode)
+            val superSpaceElement = parserFacade.createWhiteSpaceFromText(GlobalConstants.SUPER_SPACE)
+            keywordCall.addBefore(superSpaceElement, addedParameterElement)
+        }
+    }
+
+    abstract fun computeNewParameter(parameter: DefinedParameter, elementGenerator: RobotElementGenerator): RobotParameter
+
+    override fun getFamilyName(): @IntentionFamilyName String = familyName
+}
+
+class MissingKeywordParametersDefaultFreeValuesInserterIntentionAction :
+    MissingKeywordParametersInserterIntentionAction(RobotBundle.message("intention.family.keyword.insert.all.missing.parameters.without.default.values.name")) {
+
+    override fun computeNewParameter(parameter: DefinedParameter, elementGenerator: RobotElementGenerator): RobotParameter =
+        elementGenerator.createNewParameter(parameter.lookup, GlobalConstants.SUPER_SPACE)
+}
+
+class MissingKeywordParametersWithDefaultValuesInserterIntentionAction :
+    MissingKeywordParametersInserterIntentionAction(RobotBundle.message("intention.family.keyword.insert.all.missing.parameters.with.default.values.name")) {
+
+    override fun computeNewParameter(parameter: DefinedParameter, elementGenerator: RobotElementGenerator): RobotParameter {
+        val parameterValue = parameter.defaultValue ?: GlobalConstants.SUPER_SPACE
+        val newParameter = elementGenerator.createNewParameter(parameter.lookup, parameterValue)
+
+        val reservedVariableFound = ReservedVariable.entries.any { it.variable.contentEquals(parameterValue, true) }
+        if (reservedVariableFound) {
+            elementGenerator.createNewScalarVariable(parameterValue)?.let { newParameter.positionalArgument?.firstChild?.replace(it) }
+        }
+
+        return newParameter
+    }
 }
