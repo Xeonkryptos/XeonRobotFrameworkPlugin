@@ -5,6 +5,9 @@
 ## Unreleased
 
 
+### Fixed
+
+- Fixed indentation logic when logically at the end of file
 
 ## 0.7.0 - 2026-05-01
 
