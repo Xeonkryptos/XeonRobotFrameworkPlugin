@@ -12,6 +12,7 @@
 - Highlight for, while, try, group and if with their corresponding end statement
 - Support for folding grouped import and global setup/teardown statements
 - Support for test case templates with for loops and if/else statements
+- New intention to insert missing parameters for keywords without any default values pre-defined
 
 ### Changed
 
@@ -19,6 +20,7 @@
 - Don't fold variables with a complex variable content (i.e. nested variables)
 - Removed support for special characters `*` and `/` at the start of a keyword. The insertion of mandatory parameters is handled by the quick fix already available. The insertion of optional
   parameters is now available via a new intention
+- Insert missing parameters for keywords as variable expressions instead of plain text
 
 ### Fixed
 
