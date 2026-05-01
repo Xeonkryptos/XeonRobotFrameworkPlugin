@@ -1,6 +1,3 @@
-import com.github.javaparser.printer.concretesyntaxmodel.CsmElement.token
-import org.gradle.internal.impldep.com.fasterxml.jackson.databind.deser.std.FromStringDeserializer.types
-import org.gradle.internal.impldep.org.bouncycastle.util.Strings.lineSeparator
 import org.jetbrains.changelog.Changelog
 import org.jetbrains.changelog.markdownToHTML
 import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
@@ -82,7 +79,7 @@ changelog {
     path.set(file("CHANGELOG.md").canonicalPath)
     itemPrefix.set("-")
     lineSeparator.set("\n")
-    keepUnreleasedSection.set(false)
+    keepUnreleasedSection.set(true)
 }
 
 intellijPlatform {

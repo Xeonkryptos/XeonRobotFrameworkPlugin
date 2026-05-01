@@ -2,6 +2,10 @@
 
 # XeonRobotFrameworkPlugin Changelog
 
+## Unreleased
+
+
+
 ## 0.7.0 - 2026-05-01
 
 ### Added
