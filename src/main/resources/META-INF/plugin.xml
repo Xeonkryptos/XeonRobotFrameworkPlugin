@@ -175,9 +175,7 @@
 
         <iconProvider implementation="dev.xeonkryptos.xeonrobotframeworkplugin.RobotDirectoryIconProvider"/>
 
-        <enterHandlerDelegate implementation="dev.xeonkryptos.xeonrobotframeworkplugin.actionhandler.RobotLocalSettingEnterActionHandler"/>
-        <enterHandlerDelegate implementation="dev.xeonkryptos.xeonrobotframeworkplugin.actionhandler.RobotLocalArgumentsSettingEnterActionHandler"/>
-        <enterHandlerDelegate implementation="dev.xeonkryptos.xeonrobotframeworkplugin.actionhandler.RobotKeywordCallEnterActionHandler"/>
+        <enterHandlerDelegate implementation="dev.xeonkryptos.xeonrobotframeworkplugin.actionhandler.RobotSmartMultilineEnterActionHandler"/>
         <enterHandlerDelegate implementation="dev.xeonkryptos.xeonrobotframeworkplugin.actionhandler.RobotSmartBlockCloseActionHandler"/>
 
         <lang.quoteHandler implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.misc.RobotQuoteHandler" language="Robot"/>

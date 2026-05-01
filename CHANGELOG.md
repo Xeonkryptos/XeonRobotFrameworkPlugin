@@ -4,6 +4,9 @@
 
 ## Unreleased
 
+### Changed
+
+- Optimized multiline handling to increase performance and stability
 
 ### Fixed
 
