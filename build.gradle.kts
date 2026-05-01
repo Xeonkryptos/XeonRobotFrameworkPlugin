@@ -118,7 +118,6 @@ intellijPlatform {
 
     pluginVerification {
         ides {
-            recommended()
             select {
                 types = listOf(IntelliJPlatformType.IntellijIdea, IntelliJPlatformType.PyCharm)
                 channels = listOf(ProductRelease.Channel.EAP, ProductRelease.Channel.RELEASE)
