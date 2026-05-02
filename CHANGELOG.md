@@ -6,6 +6,14 @@
 
 ### Added
 
+### Changed
+
+### Fixed
+
+## 0.7.1 - 2026-05-02
+
+### Added
+
 - Support for YAML and JSON variable files in settings section
 
 ### Changed
