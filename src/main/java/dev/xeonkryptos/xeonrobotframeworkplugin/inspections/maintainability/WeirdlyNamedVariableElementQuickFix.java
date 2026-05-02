@@ -7,7 +7,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import dev.xeonkryptos.xeonrobotframeworkplugin.RobotBundle;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableBodyId;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableContent;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.RobotElementGenerator;
 import org.jetbrains.annotations.NotNull;
 
@@ -15,7 +15,7 @@ public class WeirdlyNamedVariableElementQuickFix extends LocalQuickFixOnPsiEleme
 
     private final String newName;
 
-    public WeirdlyNamedVariableElementQuickFix(@NotNull RobotVariableBodyId element, String newName) {
+    public WeirdlyNamedVariableElementQuickFix(@NotNull RobotVariableContent element, String newName) {
         super(element);
         
         this.newName = newName;
@@ -30,15 +30,15 @@ public class WeirdlyNamedVariableElementQuickFix extends LocalQuickFixOnPsiEleme
 
     @Override
     public void invoke(@NotNull Project project, @NotNull PsiFile file, @NotNull PsiElement startElement, @NotNull PsiElement endElement) {
-        RobotVariableBodyId newVariableBodyId = RobotElementGenerator.getInstance(project).createNewVariableBodyId(newName);
-        if (newVariableBodyId != null) {
-            startElement.replace(newVariableBodyId);
+        RobotVariableContent newVariableContent = RobotElementGenerator.getInstance(project).createNewVariableContent(newName);
+        if (newVariableContent != null) {
+            startElement.replace(newVariableContent);
         }
     }
 
     @Override
     public boolean isAvailable(@NotNull Project project, @NotNull PsiFile file, @NotNull PsiElement startElement, @NotNull PsiElement endElement) {
-        return startElement instanceof RobotVariableBodyId;
+        return startElement instanceof RobotVariableContent;
     }
 
     @NotNull

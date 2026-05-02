@@ -14,7 +14,6 @@ public final class RobotCallArgumentsCollector extends RobotVisitor {
 
     @Override
     public void visitArgument(@NotNull RobotArgument o) {
-        super.visitArgument(o);
         arguments.add(o);
     }
 

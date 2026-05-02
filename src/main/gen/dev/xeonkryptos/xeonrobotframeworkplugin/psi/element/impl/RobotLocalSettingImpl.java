@@ -9,7 +9,7 @@ import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.*;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.*;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotPsiImplUtil;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotPsiUtil;
 
 public class RobotLocalSettingImpl extends RobotLocalSettingExtension implements RobotLocalSetting {
 
@@ -47,7 +47,7 @@ public class RobotLocalSettingImpl extends RobotLocalSettingExtension implements
 
   @Override
   public @NotNull String getSettingName() {
-    return RobotPsiImplUtil.getSettingName(this);
+    return RobotPsiUtil.getSettingName(this);
   }
 
 }

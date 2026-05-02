@@ -15,6 +15,7 @@ public class RobotKeywordProvider {
     public static final IElementType IMPORT = new RobotElementType("IMPORT");
     public static final IElementType GHERKIN = new RobotElementType("GHERKIN");
     public static final IElementType SYNTAX_MARKER = new RobotElementType("SYNTAX_MARKER");
+    public static final IElementType GLOBAL_SETTING_STATEMENT = new RobotElementType("GLOBAL_SETTING_STATEMENT");
 
     private static final RobotKeywordTable KEYWORD_TABLE = new RobotKeywordTable();
 
@@ -50,22 +51,22 @@ public class RobotKeywordProvider {
         addRecommendation(RobotTypes.SECTION, "*** Variables ***", "Variables", RobotTailTypes.NEW_LINE);
         addRecommendation(RobotTypes.SECTION, "*** Tasks ***", "Variables", RobotTailTypes.NEW_LINE);
 
-        KEYWORD_TABLE.addSyntax(RobotTypes.GLOBAL_SETTING_STATEMENT, "Suite Setup");
-        KEYWORD_TABLE.addSyntax(RobotTypes.GLOBAL_SETTING_STATEMENT, "Suite Teardown");
-        KEYWORD_TABLE.addSyntax(RobotTypes.GLOBAL_SETTING_STATEMENT, "Test Timeout");
-        KEYWORD_TABLE.addSyntax(RobotTypes.GLOBAL_SETTING_STATEMENT, "Test Setup");
-        KEYWORD_TABLE.addSyntax(RobotTypes.GLOBAL_SETTING_STATEMENT, "Test Teardown");
-        KEYWORD_TABLE.addSyntax(RobotTypes.GLOBAL_SETTING_STATEMENT, "Test Template");
-        KEYWORD_TABLE.addSyntax(RobotTypes.GLOBAL_SETTING_STATEMENT, "Documentation");
-        KEYWORD_TABLE.addSyntax(RobotTypes.GLOBAL_SETTING_STATEMENT, "Metadata");
-        KEYWORD_TABLE.addSyntax(RobotTypes.GLOBAL_SETTING_STATEMENT, "Name");
-        KEYWORD_TABLE.addSyntax(RobotTypes.GLOBAL_SETTING_STATEMENT, "Force Tags");
-        KEYWORD_TABLE.addSyntax(RobotTypes.GLOBAL_SETTING_STATEMENT, "Default Tags");
-        KEYWORD_TABLE.addSyntax(RobotTypes.GLOBAL_SETTING_STATEMENT, "Test Tags");
-        KEYWORD_TABLE.addSyntax(RobotTypes.GLOBAL_SETTING_STATEMENT, "Keyword Tags");
+        KEYWORD_TABLE.addSyntax(RobotTypes.SUITE_NAME_STATEMENT_GLOBAL_SETTING, "Suite Setup");
+        KEYWORD_TABLE.addSyntax(GLOBAL_SETTING_STATEMENT, "Suite Teardown");
+        KEYWORD_TABLE.addSyntax(GLOBAL_SETTING_STATEMENT, "Test Timeout");
+        KEYWORD_TABLE.addSyntax(GLOBAL_SETTING_STATEMENT, "Test Setup");
+        KEYWORD_TABLE.addSyntax(GLOBAL_SETTING_STATEMENT, "Test Teardown");
+        KEYWORD_TABLE.addSyntax(GLOBAL_SETTING_STATEMENT, "Test Template");
+        KEYWORD_TABLE.addSyntax(GLOBAL_SETTING_STATEMENT, "Documentation");
+        KEYWORD_TABLE.addSyntax(GLOBAL_SETTING_STATEMENT, "Metadata");
+        KEYWORD_TABLE.addSyntax(GLOBAL_SETTING_STATEMENT, "Name");
+        KEYWORD_TABLE.addSyntax(GLOBAL_SETTING_STATEMENT, "Force Tags");
+        KEYWORD_TABLE.addSyntax(GLOBAL_SETTING_STATEMENT, "Default Tags");
+        KEYWORD_TABLE.addSyntax(GLOBAL_SETTING_STATEMENT, "Test Tags");
+        KEYWORD_TABLE.addSyntax(GLOBAL_SETTING_STATEMENT, "Keyword Tags");
 
-        for (String syntax : KEYWORD_TABLE.getSyntaxOfType(RobotTypes.GLOBAL_SETTING_STATEMENT)) {
-            addRecommendation(RobotTypes.GLOBAL_SETTING_STATEMENT, syntax, syntax, RobotTailTypes.TAB);
+        for (String syntax : KEYWORD_TABLE.getSyntaxOfType(GLOBAL_SETTING_STATEMENT)) {
+            addRecommendation(GLOBAL_SETTING_STATEMENT, syntax, syntax, RobotTailTypes.TAB);
         }
 
         KEYWORD_TABLE.addSyntax(RobotTypes.LOCAL_SETTING, "[Setup]");
@@ -108,8 +109,8 @@ public class RobotKeywordProvider {
 
         KEYWORD_TABLE.addSyntax(SYNTAX_MARKER, "IF");
         KEYWORD_TABLE.addSyntax(SYNTAX_MARKER, "END");
-        KEYWORD_TABLE.addSyntax(SYNTAX_MARKER, "ELSE");
         KEYWORD_TABLE.addSyntax(SYNTAX_MARKER, "ELSE IF");
+        KEYWORD_TABLE.addSyntax(SYNTAX_MARKER, "ELSE");
         KEYWORD_TABLE.addSyntax(SYNTAX_MARKER, "FOR");
         KEYWORD_TABLE.addSyntax(SYNTAX_MARKER, "WHILE");
         KEYWORD_TABLE.addSyntax(SYNTAX_MARKER, "CONTINUE");

@@ -1,23 +1,19 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.completion;
 
 import com.intellij.codeInsight.completion.CompletionContributor;
-import com.intellij.codeInsight.completion.CompletionParameters;
-import com.intellij.codeInsight.completion.CompletionResultSet;
 import com.intellij.codeInsight.completion.CompletionType;
 import com.intellij.patterns.ElementPattern;
+import com.intellij.psi.PsiElement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotKeywordProvider;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotConditionalStructure;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotExceptionHandlingStructure;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotFile;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotForLoopStructure;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotImportGlobalSettingExpression;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordsSection;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLibraryImportGlobalSetting;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLocalSetting;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLocalSettingId;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotParameter;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotResourceImportGlobalSetting;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotSettingsSection;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTaskStatement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTasksSection;
@@ -46,67 +42,53 @@ public class RobotCompletionContributor extends CompletionContributor {
                            .inFile(psiElement(RobotFile.class)),
                new SettingsKeywordCompletionProvider());
         extend(CompletionType.BASIC,
-               psiElement().andNot(or(psiComment(), psiElement(RobotTypes.LITERAL_CONSTANT), psiElement(RobotTypes.VARIABLE_BODY), psiElement(RobotTypes.TEMPLATE_ARGUMENT_VALUE)))
+               psiElement().andNot(insideCommentOrInnerElement())
                            .inside(true, or(instanceOf(RobotTestCaseStatement.class), instanceOf(RobotTaskStatement.class)))
                            .with(indented())
                            .inFile(psiElement(RobotFile.class)),
                new LocalSettingsCompletionProvider());
         extend(CompletionType.BASIC,
-               psiElement().andNot(psiComment())
-                           .inside(true, or(instanceOf(RobotLibraryImportGlobalSetting.class), instanceOf(RobotResourceImportGlobalSetting.class)))
-                           .and(psiElement(RobotTypes.LITERAL_CONSTANT).with(atFirstPositionOf(psiElement(RobotImportGlobalSettingExpression.class))))
-                           .inFile(psiElement(RobotFile.class)),
-               new ImportCompletionProvider());
-        extend(CompletionType.BASIC,
-               psiElement().andNot(or(psiComment(), psiElement(RobotTypes.LITERAL_CONSTANT), psiElement(RobotTypes.VARIABLE_BODY), psiElement(RobotTypes.TEMPLATE_ARGUMENT_VALUE)))
-                           .inside(true, instanceOf(RobotTestCaseStatement.class))
-                           .with(indented())
-                           .inFile(psiElement(RobotFile.class)),
+               psiElement().andNot(insideCommentOrInnerElement()).inside(true, instanceOf(RobotTestCaseStatement.class)).with(indented()).inFile(psiElement(RobotFile.class)),
                new GherkinCompletionProvider());
         extend(CompletionType.BASIC,
-               psiElement().andNot(or(psiComment(), psiElement(RobotTypes.LITERAL_CONSTANT), psiElement(RobotTypes.VARIABLE_BODY), psiElement(RobotTypes.TEMPLATE_ARGUMENT_VALUE)))
+               psiElement().andNot(insideCommentOrInnerElement())
                            .inside(true, or(instanceOf(RobotTestCaseStatement.class), instanceOf(RobotUserKeywordStatement.class), instanceOf(RobotTaskStatement.class)))
                            .without(previousNonWhitespaceOrCommentSibling(psiElement(RobotForLoopStructure.class)))
                            .with(indented())
                            .inFile(psiElement(RobotFile.class)),
                new ControlStructureCompletionProvider(RobotKeywordProvider.SYNTAX_MARKER));
         extend(CompletionType.BASIC,
-               psiElement().andNot(or(psiComment(), psiElement(RobotTypes.LITERAL_CONSTANT), psiElement(RobotTypes.VARIABLE_BODY), psiElement(RobotTypes.TEMPLATE_ARGUMENT_VALUE)))
+               psiElement().andNot(insideCommentOrInnerElement())
                            .inside(true, instanceOf(RobotUserKeywordStatement.class))
                            .without(previousNonWhitespaceOrCommentSibling(psiElement(RobotForLoopStructure.class)))
                            .with(indented())
                            .inFile(psiElement(RobotFile.class)),
                new ControlStructureCompletionProvider(RobotTypes.USER_KEYWORD_STATEMENT));
         extend(CompletionType.BASIC,
-               psiElement().andNot(or(psiComment(), psiElement(RobotTypes.LITERAL_CONSTANT), psiElement(RobotTypes.VARIABLE_BODY), psiElement(RobotTypes.TEMPLATE_ARGUMENT_VALUE)))
+               psiElement().andNot(insideCommentOrInnerElement())
                            .inside(true, or(instanceOf(RobotForLoopStructure.class), instanceOf(RobotWhileLoopStructure.class)))
                            .with(indented())
                            .inFile(psiElement(RobotFile.class)),
                new ControlStructureCompletionProvider(RobotTypes.LOOP_CONTROL_STRUCTURE));
         extend(CompletionType.BASIC,
-               psiElement().andNot(or(psiComment(), psiElement(RobotTypes.LITERAL_CONSTANT), psiElement(RobotTypes.VARIABLE_BODY), psiElement(RobotTypes.TEMPLATE_ARGUMENT_VALUE)))
-                           .inside(true, or(instanceOf(RobotExceptionHandlingStructure.class)))
-                           .with(indented())
-                           .inFile(psiElement(RobotFile.class)),
+               psiElement().andNot(insideCommentOrInnerElement()).inside(true, or(instanceOf(RobotExceptionHandlingStructure.class))).with(indented()).inFile(psiElement(RobotFile.class)),
                new ControlStructureCompletionProvider(RobotTypes.EXCEPTION_HANDLING_STRUCTURE));
         extend(CompletionType.BASIC,
-               psiElement().andNot(or(psiComment(), psiElement(RobotTypes.LITERAL_CONSTANT), psiElement(RobotTypes.VARIABLE_BODY), psiElement(RobotTypes.TEMPLATE_ARGUMENT_VALUE)))
-                           .inside(true, or(instanceOf(RobotConditionalStructure.class)))
-                           .with(indented())
-                           .inFile(psiElement(RobotFile.class)),
+               psiElement().andNot(insideCommentOrInnerElement()).inside(true, or(instanceOf(RobotConditionalStructure.class))).with(indented()).inFile(psiElement(RobotFile.class)),
                new ControlStructureCompletionProvider(RobotTypes.CONDITIONAL_STRUCTURE));
         extend(CompletionType.BASIC,
-               psiElement().andNot(or(psiComment(), psiElement(RobotTypes.LITERAL_CONSTANT), psiElement(RobotTypes.VARIABLE_BODY), psiElement(RobotTypes.TEMPLATE_ARGUMENT_VALUE)))
+               psiElement().andNot(insideCommentOrInnerElement())
                            .inside(true, or(instanceOf(RobotTestCaseStatement.class), instanceOf(RobotUserKeywordStatement.class), instanceOf(RobotTaskStatement.class)))
                            .with(indented())
                            .with(previousNonWhitespaceOrCommentSibling(psiElement(RobotForLoopStructure.class)))
                            .inFile(psiElement(RobotFile.class)),
                new ForLoopControlStructureCompletionProvider());
         extend(CompletionType.BASIC,
-               psiElement().andNot(or(psiComment(), psiElement(RobotTypes.LITERAL_CONSTANT), psiElement(RobotTypes.VARIABLE_BODY), psiElement(RobotTypes.TEMPLATE_ARGUMENT_VALUE)))
+               psiElement().andNot(insideCommentOrInnerElement())
                            .inside(true, or(instanceOf(RobotTestCasesSection.class), instanceOf(RobotTasksSection.class), instanceOf(RobotKeywordsSection.class)))
                            .with(indented())
-                           .inFile(psiElement(RobotFile.class)), new KeywordCompletionProvider());
+                           .inFile(psiElement(RobotFile.class)),
+               new KeywordCompletionProvider());
         // Provide parameter completions in context of keyword statements
         extend(CompletionType.BASIC,
                psiElement().andOr(psiElement(RobotTypes.LITERAL_CONSTANT), psiElement(RobotTypes.TEMPLATE_ARGUMENT_VALUE))
@@ -118,19 +100,15 @@ public class RobotCompletionContributor extends CompletionContributor {
                psiElement().andOr(psiElement(RobotTypes.LITERAL_CONSTANT), psiElement(RobotTypes.VARIABLE_BODY), psiElement(RobotTypes.TEMPLATE_ARGUMENT_VALUE), psiElement(RobotTypes.KEYWORD_NAME))
                            .inFile(psiElement(RobotFile.class)),
                new VariableCompletionProvider());
-        extend(CompletionType.BASIC,
-               psiElement(RobotTypes.LITERAL_CONSTANT).inside(true, withElementInLocalSetting("[Tags]")).inFile(psiElement(RobotFile.class)),
-               new StandardTagCompletionProvider());
-    }
-
-    @Override
-    public void fillCompletionVariants(@NotNull CompletionParameters parameters, @NotNull CompletionResultSet result) {
-        // debugging point
-        super.fillCompletionVariants(parameters, result.withPrefixMatcher(new RobotPrefixMatcher(result.getPrefixMatcher().getPrefix())));
+        extend(CompletionType.BASIC, psiElement(RobotTypes.LITERAL_CONSTANT).inside(true, withElementInLocalSetting("Tags")).inFile(psiElement(RobotFile.class)), new StandardTagCompletionProvider());
     }
 
     @SuppressWarnings("SameParameterValue")
     private ElementPattern<RobotLocalSetting> withElementInLocalSetting(@NotNull String localSettingId) {
         return psiElement(RobotLocalSetting.class).withFirstChild(psiElement(RobotLocalSettingId.class).withText(localSettingId));
+    }
+
+    private ElementPattern<PsiElement> insideCommentOrInnerElement() {
+        return or(psiComment(), psiElement(RobotTypes.LITERAL_CONSTANT), psiElement(RobotTypes.PARAMETER_NAME), psiElement(RobotTypes.VARIABLE_BODY), psiElement(RobotTypes.TEMPLATE_ARGUMENT_VALUE));
     }
 }

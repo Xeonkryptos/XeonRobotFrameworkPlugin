@@ -3,16 +3,15 @@ package dev.xeonkryptos.xeonrobotframeworkplugin.psi.element;
 import com.intellij.extapi.psi.PsiFileBase;
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.fileTypes.FileType;
-import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Key;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.FileViewProvider;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
-import com.intellij.psi.PsiReference;
+import com.intellij.psi.PsiPolyVariantReference;
+import com.intellij.psi.ResolveResult;
 import com.intellij.psi.search.GlobalSearchScope;
-import com.intellij.psi.util.CachedValue;
 import com.intellij.psi.util.CachedValueProvider.Result;
 import com.intellij.psi.util.CachedValuesManager;
 import com.intellij.psi.util.ParameterizedCachedValue;
@@ -21,12 +20,10 @@ import com.jetbrains.python.psi.PyClass;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotLanguage;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.dto.ImportType;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.reference.PythonResolver;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.reference.RobotFileManager;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.reference.RobotPythonClass;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.reference.external.file.RobotPythonClass;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.index.VariableDefinitionNameIndex;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.VariableScope;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.visitor.RobotImportFilesCollector;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.visitor.RobotSectionVariablesCollector;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.visitor.RobotUsedFilesCollector;
 import dev.xeonkryptos.xeonrobotframeworkplugin.util.DisposableSupplier;
 import org.jetbrains.annotations.NotNull;
@@ -48,7 +45,6 @@ import java.util.stream.Stream;
 public class RobotFileImpl extends PsiFileBase implements KeywordFile, RobotFile {
 
     private static final Key<ParameterizedCachedValue<Collection<VirtualFile>, Boolean>> IMPORTED_VIRTUAL_FILES_CACHE_KEY = Key.create("IMPORTED_VIRTUAL_FILES_CACHE");
-    private static final Key<CachedValue<Collection<DefinedVariable>>> TEST_SUITE_VARIABLES_CACHE_KEY = Key.create("TEST_SUITE_VARIABLES_CACHE");
 
     private final FileType fileType;
 
@@ -93,41 +89,16 @@ public class RobotFileImpl extends PsiFileBase implements KeywordFile, RobotFile
         return List.of();
     }
 
-    @NotNull
     @Override
-    public final Collection<DefinedVariable> getDefinedVariables() {
-        return CachedValuesManager.getCachedValue(this,
-                                                  TEST_SUITE_VARIABLES_CACHE_KEY,
-                                                  () -> Result.createSingleDependency(getDefinedVariables(new LinkedHashSet<>()), PsiModificationTracker.MODIFICATION_COUNT));
-    }
-
-    @NotNull
-    @Override
-    public Collection<DefinedVariable> getDefinedVariables(Collection<KeywordFile> visitedFiles) {
-        Collection<DefinedVariable> sectionVariables = getSectionVariables();
-        Collection<DefinedVariable> globalVariables = RobotFileManager.getGlobalVariables(getProject());
-        Collection<KeywordFile> importedFiles = getImportedFiles(false, ImportType.VARIABLES);
-        Set<DefinedVariable> importedVariables = new HashSet<>();
-        for (KeywordFile keywordFile : importedFiles) {
-            ProgressManager.checkCanceled();
-            if (visitedFiles.add(keywordFile)) {
-                Collection<DefinedVariable> subVariables = keywordFile.getDefinedVariables(visitedFiles);
-                importedVariables.addAll(subVariables);
-            }
-        }
-
-        Set<DefinedVariable> variables = new LinkedHashSet<>(sectionVariables.size() + globalVariables.size() + importedVariables.size());
-        variables.addAll(sectionVariables);
-        variables.addAll(globalVariables);
-        variables.addAll(importedVariables);
-        return variables;
-    }
-
-    private Collection<DefinedVariable> getSectionVariables() {
+    public Collection<DefinedVariable> getLocallyDefinedVariables() {
         if (sectionVariables == null) {
-            RobotSectionVariablesCollector visitor = new RobotSectionVariablesCollector();
-            acceptChildren(visitor);
-            sectionVariables = visitor.getVariables();
+            Project project = getProject();
+            GlobalSearchScope fileScope = GlobalSearchScope.fileScope(getContainingFile().getOriginalFile());
+            sectionVariables = VariableDefinitionNameIndex.getInstance()
+                                                          .getVariableDefinitions(project, fileScope)
+                                                          .stream()
+                                                          .map(DefinedVariable.class::cast)
+                                                          .collect(Collectors.toCollection(LinkedHashSet::new));
         }
         return sectionVariables;
     }
@@ -145,12 +116,13 @@ public class RobotFileImpl extends PsiFileBase implements KeywordFile, RobotFile
             RobotUsedFilesCollector robotUsedFilesCollector = new RobotUsedFilesCollector();
             acceptChildren(robotUsedFilesCollector);
 
-            Collection<PsiFile> results = robotUsedFilesCollector.getReferences()
-                                                                 .stream()
-                                                                 .map(PsiReference::resolve)
-                                                                 .filter(Objects::nonNull)
-                                                                 .map(PsiElement::getContainingFile)
-                                                                 .collect(Collectors.toCollection(ArrayList::new));
+            Collection<PsiFile> results = robotUsedFilesCollector.getReferences().stream().flatMap(reference -> {
+                if (reference instanceof PsiPolyVariantReference polyRef) {
+                    ResolveResult[] resolveResults = polyRef.multiResolve(false);
+                    return Arrays.stream(resolveResults).map(ResolveResult::getElement);
+                }
+                return Stream.of(reference.resolve());
+            }).filter(Objects::nonNull).map(PsiElement::getContainingFile).collect(Collectors.toCollection(ArrayList::new));
             Collection<KeywordFile> importedFiles = collectImportedFiles(false);
             Collection<VirtualFile> virtualFiles = getVirtualFiles(false);
 

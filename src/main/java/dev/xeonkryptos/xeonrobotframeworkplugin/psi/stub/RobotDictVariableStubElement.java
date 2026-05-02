@@ -8,9 +8,9 @@ import com.intellij.psi.stubs.StubElement;
 import com.intellij.psi.stubs.StubInputStream;
 import com.intellij.psi.stubs.StubOutputStream;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotLanguage;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotPsiImplUtil;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotPsiUtil;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotDictVariable;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableBodyId;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableContent;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableDefinition;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotDictVariableImpl;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.index.VariableNameIndex;
@@ -38,8 +38,8 @@ public class RobotDictVariableStubElement extends IStubElementType<RobotDictVari
     @NotNull
     @Override
     public RobotDictVariableStub createStub(@NotNull RobotDictVariable psi, StubElement<? extends PsiElement> parentStub) {
-        RobotVariableBodyId variableBodyId = RobotPsiImplUtil.getVariableBodyId(psi);
-        String variableName = variableBodyId != null ? variableBodyId.getText() : null;
+        RobotVariableContent variableContent = RobotPsiUtil.getVariableContent(psi);
+        String variableName = variableContent != null ? variableContent.getText() : null;
         return new RobotDictVariableStubImpl(parentStub, variableName);
     }
 

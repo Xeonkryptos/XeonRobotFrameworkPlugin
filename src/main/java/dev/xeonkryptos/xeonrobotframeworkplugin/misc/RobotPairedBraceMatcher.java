@@ -10,15 +10,15 @@ import org.jetbrains.annotations.Nullable;
 
 public class RobotPairedBraceMatcher implements PairedBraceMatcher {
 
-    private static final BracePair[] BRACE_PAIRS = new BracePair[] { new BracePair(RobotTypes.SCALAR_VARIABLE_START, RobotTypes.VARIABLE_END, false),
-                                                                     new BracePair(RobotTypes.LIST_VARIABLE_START, RobotTypes.VARIABLE_END, false),
-                                                                     new BracePair(RobotTypes.DICT_VARIABLE_START, RobotTypes.VARIABLE_END, false),
-                                                                     new BracePair(RobotTypes.ENV_VARIABLE_START, RobotTypes.VARIABLE_END, false),
-                                                                     new BracePair(RobotTypes.VARIABLE_ACCESS_START, RobotTypes.VARIABLE_ACCESS_END, false),
-                                                                     new BracePair(RobotTypes.LOCAL_SETTING_START, RobotTypes.LOCAL_SETTING_END, false),
-                                                                     new BracePair(RobotTypes.PYTHON_EXPRESSION_START,
-                                                                                   RobotTypes.PYTHON_EXPRESSION_END,
-                                                                                   false) };
+    private static final BracePair[] BRACE_PAIRS = new BracePair[] { new BracePair(RobotTypes.VARIABLE_LBRACE, RobotTypes.VARIABLE_RBRACE, true),
+                                                                     new BracePair(RobotTypes.VARIABLE_ACCESS_START, RobotTypes.VARIABLE_ACCESS_END, true),
+                                                                     new BracePair(RobotTypes.LOCAL_SETTING_START, RobotTypes.LOCAL_SETTING_END, true),
+                                                                     new BracePair(RobotTypes.PYTHON_EXPRESSION_START, RobotTypes.PYTHON_EXPRESSION_END, true),
+                                                                     new BracePair(RobotTypes.FOR, RobotTypes.END, true),
+                                                                     new BracePair(RobotTypes.WHILE, RobotTypes.END, true),
+                                                                     new BracePair(RobotTypes.GROUP, RobotTypes.END, true),
+                                                                     new BracePair(RobotTypes.IF, RobotTypes.END, true),
+                                                                     new BracePair(RobotTypes.TRY, RobotTypes.END, true) };
 
     @Override
     public BracePair @NotNull [] getPairs() {

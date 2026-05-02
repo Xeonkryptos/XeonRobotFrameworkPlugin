@@ -6,7 +6,6 @@ import com.intellij.openapi.editor.Document;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotGlobalSettingStatement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.folding.RobotFoldingComputationUtil;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 public abstract class RobotGlobalSettingExtension extends RobotPsiElementBase implements RobotGlobalSettingStatement {
 
@@ -14,13 +13,12 @@ public abstract class RobotGlobalSettingExtension extends RobotPsiElementBase im
         super(node);
     }
 
-    @Nullable
     @Override
-    public FoldingDescriptor[] fold(@NotNull Document document) {
+    public @NotNull FoldingDescriptor @NotNull [] fold(@NotNull Document document, boolean quick) {
         if (!RobotFoldingComputationUtil.isFoldingUseful(this, document)) {
-            return null;
+            return FoldingDescriptor.EMPTY_ARRAY;
         }
         var foldingDescriptor = RobotFoldingComputationUtil.computeFoldingDescriptorForContainer(this, getFirstChild(), document);
-        return foldingDescriptor != null ? new FoldingDescriptor[] { foldingDescriptor } : null;
+        return foldingDescriptor != null ? new FoldingDescriptor[] { foldingDescriptor } : FoldingDescriptor.EMPTY_ARRAY;
     }
 }

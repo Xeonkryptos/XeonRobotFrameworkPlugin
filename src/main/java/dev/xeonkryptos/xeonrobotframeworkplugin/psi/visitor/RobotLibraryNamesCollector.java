@@ -2,6 +2,7 @@ package dev.xeonkryptos.xeonrobotframeworkplugin.psi.visitor;
 
 import com.intellij.psi.PsiElement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotImportArgument;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotImportSettings;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLibraryImportGlobalSetting;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotNewLibraryName;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotRoot;
@@ -23,6 +24,11 @@ public final class RobotLibraryNamesCollector extends RobotVisitor {
 
     @Override
     public void visitSettingsSection(@NotNull RobotSettingsSection o) {
+        o.acceptChildren(this);
+    }
+
+    @Override
+    public void visitImportSettings(@NotNull RobotImportSettings o) {
         o.acceptChildren(this);
     }
 

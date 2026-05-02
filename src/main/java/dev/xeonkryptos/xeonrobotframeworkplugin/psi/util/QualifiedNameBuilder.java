@@ -4,7 +4,7 @@ import com.intellij.openapi.module.ModuleManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.roots.ModuleRootManager;
 import com.intellij.openapi.util.Key;
-import com.intellij.openapi.vfs.VfsUtil;
+import com.intellij.openapi.vfs.VfsUtilCore;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
@@ -45,7 +45,7 @@ public final class QualifiedNameBuilder {
     public static String computeQualifiedPath(PsiElement element) {
         return CachedValuesManager.getCachedValue(element, QUALIFIED_PATH_KEY, () -> {
             PsiFile containingFile = element.getContainingFile();
-            VirtualFile virtualFile = containingFile.getVirtualFile();
+            VirtualFile virtualFile = containingFile.getOriginalFile().getVirtualFile();
             Project project = containingFile.getProject();
             RobotQualifiedNameOwner qualifiedNameOwner = PsiTreeUtil.getParentOfType(element, RobotQualifiedNameOwner.class);
             String qualifiedName;
@@ -55,10 +55,10 @@ public final class QualifiedNameBuilder {
                 qualifiedName = Arrays.stream(ModuleManager.getInstance(project).getModules())
                                       .filter(module -> ModuleRootManager.getInstance(module).getFileIndex().isInContent(virtualFile))
                                       .flatMap(module -> Arrays.stream(ModuleRootManager.getInstance(module).getContentRoots()))
-                                      .filter(contentRoot -> VfsUtil.isAncestor(contentRoot, virtualFile, false))
+                                      .filter(contentRoot -> VfsUtilCore.isAncestor(contentRoot, virtualFile, false))
                                       .map(contentRoot -> {
                                           String extension = virtualFile.getExtension();
-                                          String relativePath = VfsUtil.getRelativePath(virtualFile, contentRoot, '.');
+                                          String relativePath = VfsUtilCore.getRelativePath(virtualFile, contentRoot, '.');
                                           if (relativePath != null && extension != null) {
                                               return relativePath.substring(0, relativePath.length() - extension.length() - 1);
                                           }

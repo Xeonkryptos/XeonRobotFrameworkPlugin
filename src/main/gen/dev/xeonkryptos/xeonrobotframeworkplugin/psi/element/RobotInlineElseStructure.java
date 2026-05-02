@@ -7,4 +7,7 @@ import com.intellij.psi.PsiElement;
 
 public interface RobotInlineElseStructure extends RobotExecutableStatement, RobotBlockOpeningStructure {
 
+  @Nullable
+  RobotTemplateArguments getTemplateArguments();
+
 }

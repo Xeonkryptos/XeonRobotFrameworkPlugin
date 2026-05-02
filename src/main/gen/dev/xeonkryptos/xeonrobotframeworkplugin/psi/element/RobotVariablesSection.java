@@ -7,8 +7,8 @@ import com.intellij.psi.PsiElement;
 
 public interface RobotVariablesSection extends RobotSection, NameIdentifierHolder {
 
-  @NotNull
-  List<RobotSingleVariableStatement> getSingleVariableStatementList();
+  @Nullable
+  RobotVariableStatements getVariableStatements();
 
   @NotNull
   PsiElement getNameIdentifier();

@@ -18,7 +18,6 @@ public class RobotNestedVariableInspection extends LocalInspectionTool implement
 
             @Override
             public void visitVariable(@NotNull RobotVariable o) {
-                super.visitVariable(o);
                 if (o.getParent() instanceof RobotVariableContent) {
                     holder.registerProblem(o, RobotBundle.message("INSP.variable.nested"));
                 }

@@ -10,7 +10,6 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotGroupHeader;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotGroupStructure;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.folding.RobotFoldingComputationUtil;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
@@ -20,18 +19,18 @@ public abstract class RobotGroupStructureExtension extends RobotExecutableStatem
     }
 
     @Override
-    public @Nullable FoldingDescriptor[] fold(@NotNull Document document) {
+    public @NotNull FoldingDescriptor @NotNull [] fold(@NotNull Document document, boolean quick) {
         RobotGroupHeader groupHeader = getGroupHeader();
         List<RobotExecutableStatement> executableStatements = getExecutableStatementList();
         PsiElement endElement = findChildByType(RobotTypes.END);
         if (endElement == null) {
-            return null;
+            return FoldingDescriptor.EMPTY_ARRAY;
         }
         List<FoldingDescriptor> foldingDescriptors = RobotFoldingComputationUtil.computeFoldingDescriptorsForBlockStructure(this,
                                                                                                                             groupHeader,
                                                                                                                             executableStatements,
                                                                                                                             document,
                                                                                                                             endElement.getTextRange().getStartOffset());
-        return !foldingDescriptors.isEmpty() ? foldingDescriptors.toArray(FoldingDescriptor.EMPTY_ARRAY) : null;
+        return !foldingDescriptors.isEmpty() ? foldingDescriptors.toArray(FoldingDescriptor.EMPTY_ARRAY) : FoldingDescriptor.EMPTY_ARRAY;
     }
 }

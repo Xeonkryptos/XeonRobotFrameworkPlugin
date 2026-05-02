@@ -9,6 +9,7 @@
     <depends>com.intellij.modules.json</depends>
 
     <depends>PythonCore</depends>
+    <depends>org.jetbrains.plugins.yaml</depends>
 
     <resource-bundle>messages.RobotBundle</resource-bundle>
 
@@ -32,8 +33,6 @@
         <!--suppress PluginXmlValidity -->
         <additionalTextAttributes scheme="Light" file="colorSchemes/RobotLightColorScheme.xml"/>
         <!--suppress PluginXmlValidity -->
-        <additionalTextAttributes scheme="Classic Light" file="colorSchemes/RobotLightColorScheme.xml"/>
-        <!--suppress PluginXmlValidity -->
         <additionalTextAttributes scheme="Darcula" file="colorSchemes/RobotColorScheme.xml"/>
 
         <!-- IDE Hooks -->
@@ -54,6 +53,12 @@
 
         <lang.commenter language="Robot" implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.misc.RobotCommenter"/>
         <lang.foldingBuilder language="Robot" implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.misc.RobotFoldingBuilder"/>
+
+        <lang.formatter language="Robot" implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.formatter.RobotFormattingModelBuilder"/>
+        <codeStyleSettingsProvider implementation="dev.xeonkryptos.xeonrobotframeworkplugin.formatter.RobotCodeStyleSettingsProvider"/>
+        <langCodeStyleSettingsProvider implementation="dev.xeonkryptos.xeonrobotframeworkplugin.formatter.RobotLanguageCodeStyleSettingsProvider"/>
+        <lang.whiteSpaceFormattingStrategy language="Robot" implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.formatter.RobotWhitespaceFormattingStrategy"/>
+
         <lang.parserDefinition language="Robot" implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotParserDefinition"/>
         <lang.braceMatcher language="Robot" implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.misc.RobotPairedBraceMatcher"/>
 
@@ -81,8 +86,8 @@
                                  implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.manipulator.RobotKeywordCallNameElementManipulator"/>
         <lang.elementManipulator forClass="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCallLibraryName"
                                  implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.manipulator.RobotKeywordCallLibraryNameElementManipulator"/>
-        <lang.elementManipulator forClass="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableBodyId"
-                                 implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.manipulator.RobotVariableBodyIdManipulator"/>
+        <lang.elementManipulator forClass="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableContent"
+                                 implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.manipulator.RobotVariableContentManipulator"/>
         <lang.elementManipulator forClass="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotParameterId"
                                  implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.manipulator.RobotParameterIdManipulator"/>
         <lang.elementManipulator forClass="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTemplateParameterId"
@@ -143,13 +148,17 @@
         <localInspection language="Robot" shortName="RobotDeprecatedKeywordCall" bundle="messages.RobotBundle" key="INSP.NAME.deprecated.keyword-call"
                          groupKey="INSP.GROUP.robot" enabledByDefault="true" level="WARNING" dumbAware="false"
                          implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.inspections.deprecation.RobotDeprecatedKeywordCallInspection"/>
+        <!-- New feature -->
+        <localInspection language="Robot" shortName="RobotJsonVariableFileSupport" bundle="messages.RobotBundle" key="INSP.NAME.feature.json.variable.file.import"
+                         groupKey="INSP.GROUP.robot" enabledByDefault="true" level="ERROR" dumbAware="true"
+                         implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.annotator.feature.RobotJsonVariableFileSupportInspection"/>
         <!-- Maintainability -->
         <localInspection language="Robot" shortName="RobotVariableRatherArgumentMeant" bundle="messages.RobotBundle"
                          key="INSP.NAME.variable.rather.argument.meant" groupKey="INSP.GROUP.robot" enabledByDefault="true" level="WARNING" dumbAware="true"
                          implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.inspections.maintainability.RobotVariableRatherArgumentMeantInspection"/>
-        <localInspection language="Robot" enabledByDefault="true" level="WARNING" shortName="TestFailedLine" bundle="messages.RobotBundle"
+        <localInspection language="Robot" enabledByDefault="true" level="WARNING" shortName="RobotTestFailedLine" bundle="messages.RobotBundle"
                          groupKey="INSP.GROUP.robot" key="INSP.NAME.execution.test.failed.line"
-                         implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.inspections.TestFailedLineInspection"/>
+                         implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.inspections.RobotTestFailedLineInspection"/>
         <localInspection language="Robot" shortName="ReplaceBuiltInKeywordsWithNativeExpressions" bundle="messages.RobotBundle" key="INSP.NAME.keyword.replace.with.native.expressions"
                          groupKey="INSP.GROUP.robot" enabledByDefault="true" level="WARNING" dumbAware="true"
                          implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.inspections.maintainability.ReplaceBuiltInKeywordsWithNativeExpressionsInspection"/>
@@ -172,10 +181,7 @@
 
         <iconProvider implementation="dev.xeonkryptos.xeonrobotframeworkplugin.RobotDirectoryIconProvider"/>
 
-        <enterHandlerDelegate implementation="dev.xeonkryptos.xeonrobotframeworkplugin.actionhandler.RobotKeywordIndentationActionHandler"/>
-        <enterHandlerDelegate implementation="dev.xeonkryptos.xeonrobotframeworkplugin.actionhandler.RobotLocalSettingEnterActionHandler"/>
-        <enterHandlerDelegate implementation="dev.xeonkryptos.xeonrobotframeworkplugin.actionhandler.RobotLocalArgumentsSettingEnterActionHandler"/>
-        <enterHandlerDelegate implementation="dev.xeonkryptos.xeonrobotframeworkplugin.actionhandler.RobotKeywordCallEnterActionHandler"/>
+        <enterHandlerDelegate implementation="dev.xeonkryptos.xeonrobotframeworkplugin.actionhandler.RobotSmartMultilineEnterActionHandler"/>
         <enterHandlerDelegate implementation="dev.xeonkryptos.xeonrobotframeworkplugin.actionhandler.RobotSmartBlockCloseActionHandler"/>
 
         <lang.quoteHandler implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.misc.RobotQuoteHandler" language="Robot"/>
@@ -214,6 +220,19 @@
         <renameHandler implementation="dev.xeonkryptos.xeonrobotframeworkplugin.rename.RobotMemberInplaceRenameHandler"/>
 
         <languageInjectionContributor language="Robot" implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.injection.RobotLanguageInjectionContributor"/>
+
+        <codeFoldingOptionsProvider instance="dev.xeonkryptos.xeonrobotframeworkplugin.config.RobotCodeFoldingOptionsProvider"/>
+
+        <intentionAction>
+            <language>Robot</language>
+            <className>dev.xeonkryptos.xeonrobotframeworkplugin.actions.MissingKeywordParametersWithDefaultValuesInserterIntentionAction</className>
+            <categoryKey>options.entrypoint</categoryKey>
+        </intentionAction>
+        <intentionAction>
+            <language>Robot</language>
+            <className>dev.xeonkryptos.xeonrobotframeworkplugin.actions.MissingKeywordParametersDefaultFreeValuesInserterIntentionAction</className>
+            <categoryKey>options.entrypoint</categoryKey>
+        </intentionAction>
     </extensions>
     <actions>
         <action id="XeonRobotFrameworkPlugin.CreateNew" class="dev.xeonkryptos.xeonrobotframeworkplugin.actions.RobotCreateAction">

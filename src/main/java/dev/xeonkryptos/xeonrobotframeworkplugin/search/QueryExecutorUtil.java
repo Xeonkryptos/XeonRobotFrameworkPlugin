@@ -19,8 +19,8 @@ final class QueryExecutorUtil {
     }
 
     static GlobalSearchScope convertToGlobalSearchScope(@NotNull SearchScope scope, @NotNull Project project) {
-        if (scope instanceof GlobalSearchScope) {
-            return (GlobalSearchScope) scope;
+        if (scope instanceof GlobalSearchScope globalSearchScope) {
+            return globalSearchScope;
         } else if (scope instanceof LocalSearchScope localScope) {
             // If the local scope is empty, return empty global scope
             if (localScope == LocalSearchScope.EMPTY) {

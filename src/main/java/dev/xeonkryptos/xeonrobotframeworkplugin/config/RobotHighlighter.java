@@ -58,12 +58,15 @@ public class RobotHighlighter extends SyntaxHighlighterBase {
         keys.put(RobotTypes.VARIABLES_HEADER, SECTION_TITLE);
         keys.put(RobotTypes.USER_KEYWORDS_HEADER, SECTION_TITLE);
         keys.put(RobotTypes.COMMENTS_HEADER, SECTION_TITLE);
-        keys.put(RobotTypes.TEST_CASES_HEADER, SECTION_TITLE);
+        keys.put(RobotTypes.TEST_CASES_HEADER_NAME, SECTION_TITLE);
+        keys.put(RobotTypes.TASKS_HEADER_NAME, SECTION_TITLE);
         keys.put(RobotTypes.TASKS_HEADER, SECTION_TITLE);
 
-        keys.put(RobotTypes.USER_KEYWORD_NAME, USER_KEYWORD_NAME);
-        keys.put(RobotTypes.TEST_CASE_NAME, TEST_CASE_NAME);
-        keys.put(RobotTypes.TASK_NAME, TASK_NAME);
+        keys.put(RobotTypes.DATA_DRIVEN_COLUMN_NAME, SECTION_TITLE);
+
+        keys.put(RobotTypes.USER_KEYWORD_NAME_PART, USER_KEYWORD_NAME);
+        keys.put(RobotTypes.TEST_CASE_NAME_PART, TEST_CASE_NAME);
+        keys.put(RobotTypes.TASK_NAME_PART, TASK_NAME);
 
         keys.put(RobotTypes.COMMENT, COMMENT);
         keys.put(RobotTypes.PARAMETER_NAME, PARAMETER);
@@ -80,6 +83,9 @@ public class RobotHighlighter extends SyntaxHighlighterBase {
         keys.put(RobotTypes.VAR, STRUCTURAL_KEYWORDS);
         keys.put(RobotTypes.FOR, STRUCTURAL_KEYWORDS);
         keys.put(RobotTypes.FOR_IN, STRUCTURAL_KEYWORDS);
+        keys.put(RobotTypes.FOR_IN_ENUMERATE, STRUCTURAL_KEYWORDS);
+        keys.put(RobotTypes.FOR_IN_RANGE, STRUCTURAL_KEYWORDS);
+        keys.put(RobotTypes.FOR_IN_ZIP, STRUCTURAL_KEYWORDS);
         keys.put(RobotTypes.WHILE, STRUCTURAL_KEYWORDS);
         keys.put(RobotTypes.TRY, STRUCTURAL_KEYWORDS);
         keys.put(RobotTypes.EXCEPT, STRUCTURAL_KEYWORDS);
@@ -101,7 +107,8 @@ public class RobotHighlighter extends SyntaxHighlighterBase {
         keys.put(RobotTypes.DICT_VARIABLE_START, VARIABLE);
         keys.put(RobotTypes.ENV_VARIABLE_START, VARIABLE);
         keys.put(RobotTypes.VARIABLE_BODY, VARIABLE);
-        keys.put(RobotTypes.VARIABLE_END, VARIABLE);
+        keys.put(RobotTypes.VARIABLE_LBRACE, VARIABLE);
+        keys.put(RobotTypes.VARIABLE_RBRACE, VARIABLE);
         keys.put(ExtendedRobotTypes.EXTENDED_VARIABLE_ACCESS_BODY, VARIABLE);
         keys.put(RobotTypes.VARIABLE_ACCESS_START, EXTENDED_VARIABLE_ACCESS_BRACKETS);
         keys.put(RobotTypes.VARIABLE_ACCESS_END, EXTENDED_VARIABLE_ACCESS_BRACKETS);

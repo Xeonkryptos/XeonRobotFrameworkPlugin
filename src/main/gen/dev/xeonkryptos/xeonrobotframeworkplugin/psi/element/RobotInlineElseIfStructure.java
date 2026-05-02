@@ -10,4 +10,7 @@ public interface RobotInlineElseIfStructure extends RobotExecutableStatement, Ro
   @NotNull
   RobotConditionalContent getConditionalContent();
 
+  @Nullable
+  RobotTemplateArguments getTemplateArguments();
+
 }

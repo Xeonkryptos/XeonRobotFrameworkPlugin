@@ -8,9 +8,9 @@ import com.intellij.psi.PsiPolyVariantReference;
 import com.intellij.psi.ResolveResult;
 import dev.xeonkryptos.xeonrobotframeworkplugin.RobotBundle;
 import dev.xeonkryptos.xeonrobotframeworkplugin.config.RobotHighlighter;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotPsiImplUtil;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotPsiUtil;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariable;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableBodyId;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableContent;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableDefinition;
 import org.jetbrains.annotations.NotNull;
 
@@ -20,9 +20,9 @@ public class ReassignedRobotVariableAnnotator extends AbstractRobotVariableAnnot
 
     @Override
     protected void evaluateAnnotation(@NotNull RobotVariable variable) {
-        RobotVariableBodyId variableBodyId = RobotPsiImplUtil.getVariableBodyId(variable);
-        if (variableBodyId != null && ((PsiPolyVariantReference) variableBodyId.getReference()).multiResolve(false).length > 0) {
-            ResolveResult[] resolveResults = ((PsiPolyVariantReference) variableBodyId.getReference()).multiResolve(false);
+        RobotVariableContent variableContent = RobotPsiUtil.getVariableContent(variable);
+        if (variableContent != null && ((PsiPolyVariantReference) variableContent.getReference()).multiResolve(false).length > 0) {
+            ResolveResult[] resolveResults = ((PsiPolyVariantReference) variableContent.getReference()).multiResolve(false);
             if (Arrays.stream(resolveResults)
                       .filter(ResolveResult::isValidResult)
                       .map(ResolveResult::getElement)

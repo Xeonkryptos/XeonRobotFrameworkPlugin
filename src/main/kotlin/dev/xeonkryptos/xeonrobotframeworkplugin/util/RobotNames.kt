@@ -16,6 +16,9 @@ object RobotNames {
     const val SETTING_SECTION_NAME = "Setting"
     const val COMMENT_SECTION_NAME = "Comment"
 
+    const val SETTINGS_SECTION_NAME = "Settings"
+    const val VARIABLES_SECTION_NAME = "Variables"
+
     const val TAGS_LOCAL_SETTING_NAME = "Tags"
     const val DOCUMENTATION_LOCAL_SETTING_NAME = "Documentation"
     const val TEARDOWN_LOCAL_SETTING_NAME = "Teardown"
@@ -24,7 +27,9 @@ object RobotNames {
     const val DEFAULT_TAGS_LOCAL_SETTING_NAME = "Default Tags"
     const val FORCE_TAGS_LOCAL_SETTING_NAME = "Force Tags"
 
+    const val SUITE_SETUP_GLOBAL_SETTING_NAME = "Suite Setup"
     const val SUITE_TEARDOWN_GLOBAL_SETTING_NAME = "Suite Teardown"
+    const val TEST_SETUP_GLOBAL_SETTING_NAME = "Test Setup"
     const val TEST_TEARDOWN_GLOBAL_SETTING_NAME = "Test Teardown"
 
     const val RETURN_RESERVED_NAME = "RETURN"
@@ -50,6 +55,9 @@ object RobotNames {
     const val RETURN_FROM_KEYWORD_IF_NORMALIZED_KEYWORD_NAME = "returnfromkeywordif"
     const val RUN_KEYWORD_AND_RETURN_NORMALIZED_KEYWORD_NAME = "runkeywordandreturn"
     const val RUN_KEYWORD_AND_RETURN_IF_NORMALIZED_KEYWORD_NAME = "runkeywordandreturnif"
+
+    const val CREATE_LIST_KEYWORD_NAME = "createlist"
+    const val CREATE_DICTIONARY_KEYWORD_NAME = "createdictionary"
 
     const val DEPRECATED_PREFIX = "*DEPRECATED"
 }

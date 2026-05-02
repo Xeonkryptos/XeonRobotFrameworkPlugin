@@ -11,7 +11,6 @@ import com.intellij.spellchecker.tokenizer.Tokenizer
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLiteralConstantValue
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotPythonExpression
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariable
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableBodyId
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableContent
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableNestedAccessContent
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVisitor
@@ -52,7 +51,7 @@ class RobotSpellcheckingStrategy : SpellcheckingStrategy(), DumbAware {
 
     private class RobotVariableTokenizerVisitor(private val consumer: TokenConsumer) : RecursiveRobotVisitor() {
 
-        override fun visitVariableBodyId(o: RobotVariableBodyId) {
+        override fun visitVariableContent(o: RobotVariableContent) {
             consumer.consumeToken(o, true, PlainTextSplitter.getInstance())
         }
 

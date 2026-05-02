@@ -7,4 +7,7 @@ import com.intellij.psi.PsiElement;
 
 public interface RobotTaskId extends RobotElement {
 
+  @NotNull
+  List<RobotVariable> getVariableList();
+
 }

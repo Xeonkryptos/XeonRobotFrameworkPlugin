@@ -74,6 +74,7 @@ public class RobotKeywordCallStubElement extends IStubElementType<RobotKeywordCa
         sink.occurrence(KeywordCallNameIndex.KEY, keywordName);
 
         if (libraryName != null) {
+            libraryName = KeywordUtil.normalizeKeywordName(libraryName);
             keywordName = keywordName.substring(libraryName.length() + 1);
             sink.occurrence(KeywordCallNameIndex.KEY, keywordName);
         }

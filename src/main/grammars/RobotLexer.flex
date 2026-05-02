@@ -2,8 +2,6 @@ package dev.xeonkryptos.xeonrobotframeworkplugin.psi;
 
 import com.intellij.psi.tree.IElementType;
 
-import java.util.Stack;
-
 import static com.intellij.psi.TokenType.*;
 import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.*;
 import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.ExtendedRobotTypes.*;
@@ -66,11 +64,58 @@ import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.ExtendedRobotTypes.*;
       }
   }
 
+  protected void handleStateChangeOnFakeMultilineDetection() {
+      leaveState();
+      int currentState = yystate();
+      switch (currentState) {
+          case SETTING,
+               SETTING_VALUES,
+               KEYWORD_CALL,
+               KEYWORD_ARGUMENTS,
+               VARIABLE_DEFINITION,
+               USER_KEYWORD_RETURN_STATEMENT,
+               FOR_STRUCTURE_LOOP_START,
+               FOR_STRUCTURE_LOOP,
+               WHILE_CONFIGURATION,
+               LITERAL_CONSTANT_ONLY,
+               VARIABLE_DEFINITION_ARGUMENTS,
+               SETTING_TEMPLATE_START,
+               FOR_STRUCTURE,
+               PARAMETER_VALUE,
+               TEMPLATE_PARAMETER_VALUE,
+               SINGLE_LITERAL_CONSTANT,
+               PYTHON_EXECUTED_CONDITION -> handleStateChangeOnFakeMultilineDetection();
+      }
+  }
+
   protected boolean shouldLeaveStateOnMultilineDetection(int currentState) {
       return currentState == SINGLE_LITERAL_CONSTANT
             || currentState == PARAMETER_VALUE
             || currentState == TEMPLATE_PARAMETER_VALUE
             || currentState == PYTHON_EXECUTED_CONDITION;
+  }
+
+  protected void pushbackEverythingUpToKeywordFinishedMarker() {
+      int lengthToKeep = 0;
+      boolean firstPossibleSpaceExitMarkerFound = false;
+      int totalLength = yylength();
+      for (int i = 0; i < totalLength; i++) {
+          char currentChar = yycharat(i);
+          if (currentChar == '\n' || currentChar == '\r' || currentChar == '\t') {
+              break;
+          }
+          if (Character.isWhitespace(currentChar)) {
+              if (firstPossibleSpaceExitMarkerFound) {
+                  lengthToKeep--;
+                  break;
+              }
+              firstPossibleSpaceExitMarkerFound = true;
+          } else if (firstPossibleSpaceExitMarkerFound) {
+              firstPossibleSpaceExitMarkerFound = false;
+          }
+          lengthToKeep++;
+      }
+      yypushback(totalLength - lengthToKeep);
   }
 %}
 
@@ -108,6 +153,9 @@ ExtendedKeywordFinishedMarker = {KeywordFinishedMarker} {WhitespaceIncludingNewl
 
 MultiLineContinuation = {Continuation} ({SpaceBasedEndMarker} | {EOL})
 
+MultiLineStart = ({EOL} {NonNewlineWhitespace}*)+
+MultiLine = {MultiLineStart} ({MultiLineContinuation} {NonNewlineWhitespace}*)+
+
 WithNameKeyword = "WITH NAME" | "AS"
 
 SectionSettingsWords = "Settings" | "Setting"
@@ -117,13 +165,13 @@ SectionTasksWords = "Tasks" | "Task"
 SectionKeywordsWords = "Keywords" | "Keyword"
 SectionCommentsWords = "Comments" | "Comment"
 
-SectionIdentifierParts = ({Star} | {Space})*
-CommentSectionIdentifier = {Star} {SectionIdentifierParts} {SectionCommentsWords} {NON_EOL}*
-SettingsSectionIdentifier = {Star} {SectionIdentifierParts} {SectionSettingsWords} {NON_EOL}*
-TestcaseSectionIdentifier = {Star} {SectionIdentifierParts} {SectionTestcasesWords} {NON_EOL}*
-TasksSectionIdentifier = {Star} {SectionIdentifierParts} {SectionTasksWords} {NON_EOL}*
-KeywordsSectionIdentifier = {Star} {SectionIdentifierParts} {SectionKeywordsWords} {NON_EOL}*
-VariablesSectionIdentifier = {Star} {SectionIdentifierParts} {SectionVariablesWords} {NON_EOL}*
+SectionIdentifierParts = ({Space}? {Star})* {Space}?
+CommentSectionIdentifier = {Star} {SectionIdentifierParts} {SectionCommentsWords} {SectionIdentifierParts} {SpaceBasedEndMarker}? {NON_EOL}* {EOL}?
+SettingsSectionIdentifier = {Star} {SectionIdentifierParts} {SectionSettingsWords} {SectionIdentifierParts} {SpaceBasedEndMarker}? {NON_EOL}* {EOL}?
+TestcaseSectionIdentifier = {Star} {SectionIdentifierParts} {SectionTestcasesWords} {SectionIdentifierParts} {SpaceBasedEndMarker}? {NON_EOL}* {EOL}?
+TasksSectionIdentifier = {Star} {SectionIdentifierParts} {SectionTasksWords} {SectionIdentifierParts} {SpaceBasedEndMarker}? {NON_EOL}* {EOL}?
+KeywordsSectionIdentifier = {Star} {SectionIdentifierParts} {SectionKeywordsWords} {SectionIdentifierParts} {SpaceBasedEndMarker}? {NON_EOL}* {EOL}?
+VariablesSectionIdentifier = {Star} {SectionIdentifierParts} {SectionVariablesWords} {SectionIdentifierParts} {SpaceBasedEndMarker}? {NON_EOL}* {EOL}?
 
 OpeningVariable = "{"
 ClosingVariable = "}"
@@ -132,8 +180,6 @@ ScalarVariableStart = "$" {OpeningVariable}
 ListVariableStart = "@" {OpeningVariable}
 DictVariableStart = "&" {OpeningVariable}
 EnvVariableStart = "%" {OpeningVariable}
-
-VariableStart = ("$" | "@" | "&" | "%") {OpeningVariable}
 
 LibraryImportKeyword = "Library"
 ResourceImportKeyword = "Resource"
@@ -155,11 +201,10 @@ AllowedEverythingButVariableSeq = {AllowedEverythingButVariableChar}+
 AllowedExtendedVariableAccessChar = [^\s\[\]$@%&] | {EscapeChar}{1} "[" | {EscapeChar}{1} "]" | {ExceptionForAllowedVariableChar}
 AllowedExtendedVariableAccessSeq = {AllowedExtendedVariableAccessChar}+
 
-VariableLiteralValue =   ([^}$@&%] | {ExceptionForAllowedVariableChar} | {OpeningVariable})+
+VariableLiteralValue =   ([^}$@&%\r\n] | {ExceptionForAllowedVariableChar} | {OpeningVariable})+
 LiteralValue =           [^\s]+([ ][^\s]+)*[ ]?
-VariableFreeLiteralValue = {AllowedEverythingButVariableSeq} ({Space} {AllowedEverythingButVariableSeq})*
-KeywordLibraryNameLiteralValue = [/*]? {VariableFreeLiteralValue} "."
 EverythingButVariableValue = {AllowedEverythingButVariableSeq} ({Space} {AllowedEverythingButVariableSeq})*
+KeywordLibraryNameLiteralValue = [/*]? {EverythingButVariableValue} "."
 ExtendedVariableAccessValue = {AllowedExtendedVariableAccessSeq}
 
 LocalSettingKeywordStartWhitespaceFree = "["
@@ -209,81 +254,133 @@ SimpleConditionalKeywordCall = {SetVariableIf} | {ForLoopIf} | {PassExecutionIf}
 
 RepeatKeywordCall = "Repeat" {IntraKeywordSeparator}? "Keyword"
 
-MultiLine = {EOL}+ {NonNewlineWhitespace}* ({MultiLineContinuation} {NonNewlineWhitespace}*)+
-
 LineComment = {LineCommentSign} {NON_EOL}*
 
-%state SETTINGS_SECTION, VARIABLES_SECTION
+%state SETTINGS_SECTION, VARIABLES_SECTION, TEST_CASES_SECTION_NAME_DEFINITION, TASKS_SECTION_NAME_DEFINITION
 %state TESTCASE_NAME_DEFINITION, TESTCASE_DEFINITION, TASK_NAME_DEFINITION, TASK_DEFINITION
 %state USER_KEYWORD_NAME_DEFINITION, USER_KEYWORD_DEFINITION, USER_KEYWORD_RETURN_STATEMENT
-%state SETTING, SETTING_TEMPLATE_START, LOCAL_TEMPLATE_DEFINITION_START, INTERMEDIATE_TEMPLATE_CONFIGURATION, TEMPLATE_DEFINITION
+%state SETTING, SETTING_TEMPLATE_START, LOCAL_TEMPLATE_DEFINITION_START, INTERMEDIATE_TEMPLATE_CONFIGURATION, TEMPLATE_DEFINITION, TEMPLATE_ARGUMENTS
 %state KEYWORD_CALL, KEYWORD_ARGUMENTS, SINGLE_LITERAL_CONSTANT_START, SINGLE_LITERAL_CONSTANT
 %state INLINE_VARIABLE_DEFINITION, VARIABLE_DEFINITION, VARIABLE_DEFINITION_ARGUMENTS, VARIABLE_USAGE, EXTENDED_VARIABLE_ACCESS, PYTHON_EXPRESSION
 %state PARAMETER_VALUE, TEMPLATE_PARAMETER_VALUE
-%state FOR_STRUCTURE, SIMPLE_CONTROL_STRUCTURE_START, FOR_STRUCTURE_LOOP_START, SIMPLE_CONTROL_STRUCTURE, FOR_STRUCTURE_LOOP
+%state FOR_STRUCTURE, SIMPLE_CONTROL_STRUCTURE_START, FOR_STRUCTURE_LOOP_START, SIMPLE_CONTROL_STRUCTURE, FOR_STRUCTURE_LOOP, WHILE_CONFIGURATION
 %state PYTHON_EXECUTED_CONDITION, PYTHON_EVALUATED_CONTROL_STRUCTURE_START
 
-%xstate COMMENTS_SECTION, LITERAL_CONSTANT_ONLY, LITERAL_CONSTANT_ONLY_LIST, LOCAL_SETTING_DEFINITION
-%xstate PARAMETER_ASSIGNMENT, TEMPLATE_PARAMETER_ASSIGNMENT
+%xstate COMMENTS_SECTION, LITERAL_CONSTANT_ONLY, SETTING_VALUES, LOCAL_SETTING_DEFINITION
+%xstate NORMAL_PARAMETER_ASSIGNMENT, TEMPLATE_PARAMETER_ASSIGNMENT
 %xstate KEYWORD_LIBRARY_NAME_SEPARATOR, KEYWORD_CALL_NAME, KEYWORD_LIBRARY_NAME_SEPARATOR_FOR_SPECIAL_KEYWORD
+%xstate IN_CONTINUATION, AFTER_CONTINUATION, FAKE_MULTILINE, SAME_LINE_FAKE_MULTILINE, AFTER_COMMENT
+%xstate VARIABLE_OPENING_BRACE, EOL_EXPECTED
 
 %%
 
-// Define a comment when it is the only thing on the line
-^ {LineComment}                                    { pushBackTrailingWhitespace(); return COMMENT; }
-{LineComment}                                      { pushBackTrailingWhitespace(); return COMMENT; }
+^ {NonNewlineWhitespace}+ {LineComment} {WhitespaceIncludingNewline}*      { enterNewState(AFTER_COMMENT); pushBackEverythingExceptLeadingWhitespace(); return WHITE_SPACE; }
+^ {LineComment}                                                            { enterNewState(AFTER_COMMENT); return COMMENT; }
+{LineComment}                                                              { return COMMENT; }
 
-{EOL} {WhitespaceIncludingNewline}* {LineCommentSign}    { handleStateChangeOnMultiLineDetection(); yypushback(1); return WHITE_SPACE; }
-{MultiLine} {WhitespaceIncludingNewline}*                { handleStateChangeOnMultiLineDetection(); return WHITE_SPACE; }
+<SETTING, SETTING_VALUES, VARIABLE_DEFINITION_ARGUMENTS, KEYWORD_ARGUMENTS, KEYWORD_CALL, USER_KEYWORD_RETURN_STATEMENT, FOR_STRUCTURE_LOOP_START, FOR_STRUCTURE_LOOP, WHILE_CONFIGURATION, SIMPLE_CONTROL_STRUCTURE, LITERAL_CONSTANT_ONLY, VARIABLE_DEFINITION, INLINE_VARIABLE_DEFINITION, SETTING_TEMPLATE_START> {
+    {EOL} {NonNewlineWhitespace}* ({LineComment} ({EOL} {NonNewlineWhitespace}*)+)+ {MultiLineContinuation}                 { enterNewState(IN_CONTINUATION); pushBackEverythingExceptLeadingWhitespace(); return WHITE_SPACE; }
+    {EOL} {NonNewlineWhitespace}* {LineComment} ({EOL} {NonNewlineWhitespace}*)+ .?                                         { enterNewState(FAKE_MULTILINE); yypushback(yylength()); break; }
 
-{ExtendedKeywordFinishedMarker} {LineCommentSign}  { yypushback(1); return WHITE_SPACE; }
+    {SpaceBasedEndMarker} {NonNewlineWhitespace}* ({LineComment} ({EOL} {NonNewlineWhitespace}*)+)+ {MultiLineContinuation} { enterNewState(IN_CONTINUATION); pushBackEverythingExceptLeadingWhitespace(); return WHITE_SPACE; }
+    {SpaceBasedEndMarker} {NonNewlineWhitespace}* {LineComment} ({EOL} {NonNewlineWhitespace}*)+ .?                         { pushBackEverythingExceptLeadingWhitespace(); enterNewState(SAME_LINE_FAKE_MULTILINE); return WHITE_SPACE; }
+
+    {MultiLine} {WhitespaceIncludingNewline}*                                                                               { yypushback(yylength()); enterNewState(IN_CONTINUATION); break; }
+}
+
+<FAKE_MULTILINE, SAME_LINE_FAKE_MULTILINE>  {
+    {EOL}                { handleStateChangeOnFakeMultilineDetection(); return EOL; }
+    {LineComment}        { return COMMENT; }
+}
+<AFTER_COMMENT>   {
+    {WhitespaceIncludingNewline}+                           { leaveState(); return WHITE_SPACE; }
+    {WhitespaceIncludingNewline}+ {MultiLineContinuation}   { yypushback(yylength()); leaveState(); break; }
+    {LineComment}                                           { return COMMENT; }
+    [^]                                                     { yypushback(yylength()); leaveState(); break; }
+}
 
 ^ {SettingsSectionIdentifier}   { resetInternalState(); yybegin(SETTINGS_SECTION); return SETTINGS_HEADER; }
 ^ {VariablesSectionIdentifier}  { resetInternalState(); yybegin(VARIABLES_SECTION); return VARIABLES_HEADER; }
 ^ {KeywordsSectionIdentifier}   { resetInternalState(); yybegin(USER_KEYWORD_NAME_DEFINITION); return USER_KEYWORDS_HEADER; }
-^ {TestcaseSectionIdentifier}   { resetInternalState(); yybegin(TESTCASE_NAME_DEFINITION); return TEST_CASES_HEADER; }
-^ {TasksSectionIdentifier}      { resetInternalState(); yybegin(TASK_NAME_DEFINITION); return TASKS_HEADER; }
+^ {TestcaseSectionIdentifier}   { resetInternalState(); yybegin(TEST_CASES_SECTION_NAME_DEFINITION); pushbackEverythingUpToKeywordFinishedMarker(); return TEST_CASES_HEADER_NAME; }
+^ {TasksSectionIdentifier}      { resetInternalState(); yybegin(TASKS_SECTION_NAME_DEFINITION); pushbackEverythingUpToKeywordFinishedMarker(); return TASKS_HEADER_NAME; }
 ^ {CommentSectionIdentifier}    { resetInternalState(); yybegin(COMMENTS_SECTION); return COMMENTS_HEADER; }
 
+<TEST_CASES_SECTION_NAME_DEFINITION>  {
+    {EOL}                             { yybegin(TESTCASE_NAME_DEFINITION); return EOL; }
+}
+<TASKS_SECTION_NAME_DEFINITION>       {
+    {EOL}                             { yybegin(TASK_NAME_DEFINITION); return EOL; }
+}
+<TEST_CASES_SECTION_NAME_DEFINITION, TASKS_SECTION_NAME_DEFINITION>  {
+    {EOL} {EOL}+                      { yypushback(1); return WHITE_SPACE; }
+    {LiteralValue}                    { pushBackTrailingWhitespace(); return DATA_DRIVEN_COLUMN_NAME; }
+}
+
+<IN_CONTINUATION>  {
+    {LineComment}                                     { return COMMENT; }
+    {MultiLineStart} | {NonNewlineWhitespace}+        { return WHITE_SPACE; }
+    {Continuation} {NonNewlineWhitespace}* ({EOL} {NonNewlineWhitespace}*)+ {MultiLineContinuation}    {
+          yypushback(yylength() - 3);
+          return CONTINUATION;
+    }
+    {MultiLineContinuation}     {
+          int initialLength = yylength();
+          pushBackTrailingWhitespace();
+          int lengthAfterPushback = yylength();
+          if (initialLength == lengthAfterPushback) {
+              leaveState();
+              handleStateChangeOnMultiLineDetection();
+          } else {
+              yybegin(AFTER_CONTINUATION);
+          }
+          return CONTINUATION;
+    }
+}
+<AFTER_CONTINUATION> {
+    {WhitespaceIncludingNewline}+  { leaveState(); handleStateChangeOnMultiLineDetection(); return WHITE_SPACE; }
+}
+
 <VARIABLES_SECTION> {
-    {ScalarVariableStart}       { enterNewState(VARIABLE_DEFINITION); return SCALAR_VARIABLE_START; }
-    {ListVariableStart}         { enterNewState(VARIABLE_DEFINITION); return LIST_VARIABLE_START; }
-    {DictVariableStart}         { enterNewState(VARIABLE_DEFINITION); return DICT_VARIABLE_START; }
-    {EnvVariableStart}          { enterNewState(VARIABLE_DEFINITION); return ENV_VARIABLE_START; }
+    {ScalarVariableStart}       { enterNewState(VARIABLE_DEFINITION); enterNewState(VARIABLE_OPENING_BRACE); yypushback(yylength() - 1); return SCALAR_VARIABLE_START; }
+    {ListVariableStart}         { enterNewState(VARIABLE_DEFINITION); enterNewState(VARIABLE_OPENING_BRACE); yypushback(yylength() - 1); return LIST_VARIABLE_START; }
+    {DictVariableStart}         { enterNewState(VARIABLE_DEFINITION); enterNewState(VARIABLE_OPENING_BRACE); yypushback(yylength() - 1); return DICT_VARIABLE_START; }
+    {EnvVariableStart}          { enterNewState(VARIABLE_DEFINITION); enterNewState(VARIABLE_OPENING_BRACE); yypushback(yylength() - 1); return ENV_VARIABLE_START; }
 }
 
 <INLINE_VARIABLE_DEFINITION> {
-    {ScalarVariableStart}       { yybegin(VARIABLE_DEFINITION); return SCALAR_VARIABLE_START; }
-    {ListVariableStart}         { yybegin(VARIABLE_DEFINITION); return LIST_VARIABLE_START; }
-    {DictVariableStart}         { yybegin(VARIABLE_DEFINITION); return DICT_VARIABLE_START; }
-    {EnvVariableStart}          { yybegin(VARIABLE_DEFINITION); return ENV_VARIABLE_START; }
+    {ScalarVariableStart}       { yybegin(VARIABLE_DEFINITION); enterNewState(VARIABLE_OPENING_BRACE); yypushback(yylength() - 1); return SCALAR_VARIABLE_START; }
+    {ListVariableStart}         { yybegin(VARIABLE_DEFINITION); enterNewState(VARIABLE_OPENING_BRACE); yypushback(yylength() - 1); return LIST_VARIABLE_START; }
+    {DictVariableStart}         { yybegin(VARIABLE_DEFINITION); enterNewState(VARIABLE_OPENING_BRACE); yypushback(yylength() - 1); return DICT_VARIABLE_START; }
+    {EnvVariableStart}          { yybegin(VARIABLE_DEFINITION); enterNewState(VARIABLE_OPENING_BRACE); yypushback(yylength() - 1); return ENV_VARIABLE_START; }
 }
 
 <VARIABLE_DEFINITION> {
-    {ClosingVariable}                                        { yybegin(VARIABLE_DEFINITION_ARGUMENTS); return VARIABLE_END; }
-    {ClosingVariable} {NonNewlineWhitespace}* {EqualSign}    { yybegin(VARIABLE_DEFINITION_ARGUMENTS); yypushback(yylength() - 1); return VARIABLE_END; }
-    {ClosingVariable} "["                                    { enterNewState(EXTENDED_VARIABLE_ACCESS); yypushback(1); return VARIABLE_END; }
-    {ClosingVariable} "]"                                    { yybegin(VARIABLE_DEFINITION_ARGUMENTS); yypushback(1); return VARIABLE_END; }
+    {ClosingVariable}                                        { yybegin(VARIABLE_DEFINITION_ARGUMENTS); return VARIABLE_RBRACE; }
+    {ClosingVariable} {NonNewlineWhitespace}? {EqualSign}    { yybegin(VARIABLE_DEFINITION_ARGUMENTS); yypushback(yylength() - 1); return VARIABLE_RBRACE; }
+    {ClosingVariable} "["                                    { enterNewState(EXTENDED_VARIABLE_ACCESS); yypushback(1); return VARIABLE_RBRACE; }
+    {ClosingVariable} "]"                                    { yybegin(VARIABLE_DEFINITION_ARGUMENTS); yypushback(1); return VARIABLE_RBRACE; }
     {EqualSign}                                              { yybegin(VARIABLE_DEFINITION_ARGUMENTS); return ASSIGNMENT; }
+    {EOL}                                                    { leaveState(); return EOL; }
 }
 
 <VARIABLE_DEFINITION_ARGUMENTS> {
-    {EqualSign} !{SpaceBasedEndMarker}              { yypushback(yylength() - 1); return ASSIGNMENT; }
-    "scope" {EqualSign} !{KeywordFinishedMarker}    { yypushback(yylength() - "scope".length()); enterNewState(PARAMETER_ASSIGNMENT); return PARAMETER_NAME; }
-    {VariableFreeLiteralValue}                        { return LITERAL_CONSTANT; }
+    {EqualSign} {NonNewlineWhitespace}* {EverythingButVariableValue}?       { yypushback(yylength() - 1); return ASSIGNMENT; }
+    "scope" {EqualSign} !{KeywordFinishedMarker}                            { yypushback(yylength() - "scope".length()); enterNewState(NORMAL_PARAMETER_ASSIGNMENT); return PARAMETER_NAME; }
+    {EverythingButVariableValue}                                            { return LITERAL_CONSTANT; }
+    {EOL}                                                                   { leaveState(); return EOL; }
 }
 
 <VARIABLE_USAGE> {
-    {ClosingVariable} "["                         { leaveState(); enterNewState(EXTENDED_VARIABLE_ACCESS); yypushback(1); return VARIABLE_END; }
-    {ClosingVariable} "]"                         { leaveState(); yypushback(1); return VARIABLE_END; }
-    {ClosingVariable}                             { leaveState(); return VARIABLE_END; }
-    {OpeningVariable} (!{ClosingVariable}{2})+    { enterNewState(PYTHON_EXPRESSION); yypushback(yylength() - 1); return PYTHON_EXPRESSION_START; }
+    {ClosingVariable} "["                           { leaveState(); enterNewState(EXTENDED_VARIABLE_ACCESS); yypushback(1); return VARIABLE_RBRACE; }
+    {ClosingVariable} "]"                           { leaveState(); yypushback(1); return VARIABLE_RBRACE; }
+    {ClosingVariable}                               { leaveState(); return VARIABLE_RBRACE; }
+    {OpeningVariable} (!{ClosingVariable}{2})+      { enterNewState(PYTHON_EXPRESSION); yypushback(yylength() - 1); return PYTHON_EXPRESSION_START; }
 }
 
 <VARIABLE_DEFINITION, VARIABLE_USAGE> {
-    {VariableLiteralValue} {ClosingVariable}                 { yypushback(1); return VARIABLE_BODY; }
-    {VariableLiteralValue} {ClosingVariable} {EqualSign}     { yypushback(2); return VARIABLE_BODY; }
-    {VariableLiteralValue} {VariableStart}                   { yypushback(2); return VARIABLE_BODY; }
+    {VariableLiteralValue}                          { return VARIABLE_BODY; }
+    {EOL}                                           { leaveState(); return EOL; }
 }
 
 <EXTENDED_VARIABLE_ACCESS> {
@@ -295,6 +392,7 @@ LineComment = {LineCommentSign} {NON_EOL}*
           return VARIABLE_ACCESS_END;
       }
     {ExtendedVariableAccessValue}                   { return EXTENDED_VARIABLE_ACCESS_BODY; }
+    {EOL}                                           { leaveState(); return EOL; }
 }
 
 <PYTHON_EXPRESSION> {
@@ -304,13 +402,13 @@ LineComment = {LineCommentSign} {NON_EOL}*
 
 <SETTINGS_SECTION> {
     ^ {LibraryImportKeyword} {ExtendedKeywordFinishedMarker}             { enterNewState(SETTING); pushBackTrailingWhitespace(); return LIBRARY_IMPORT_KEYWORD; }
-    ^ {ResourceImportKeyword} {ExtendedKeywordFinishedMarker}            { enterNewState(LITERAL_CONSTANT_ONLY); pushBackTrailingWhitespace(); return RESOURCE_IMPORT_KEYWORD; }
+    ^ {ResourceImportKeyword} {ExtendedKeywordFinishedMarker}            { enterNewState(SETTING_VALUES); pushBackTrailingWhitespace(); return RESOURCE_IMPORT_KEYWORD; }
     ^ {VariablesImportKeyword} {ExtendedKeywordFinishedMarker}           { enterNewState(SETTING); pushBackTrailingWhitespace(); return VARIABLES_IMPORT_KEYWORD; }
-    ^ {NameKeyword} {ExtendedKeywordFinishedMarker}                      { enterNewState(LITERAL_CONSTANT_ONLY); pushBackTrailingWhitespace(); return SUITE_NAME_KEYWORD; }
-    ^ {DocumentationKeyword} {ExtendedKeywordFinishedMarker}             { enterNewState(LITERAL_CONSTANT_ONLY); pushBackTrailingWhitespace(); return DOCUMENTATION_KEYWORD; }
+    ^ {NameKeyword} {ExtendedKeywordFinishedMarker}                      { enterNewState(SETTING_VALUES); pushBackTrailingWhitespace(); return SUITE_NAME_KEYWORD; }
+    ^ {DocumentationKeyword} {ExtendedKeywordFinishedMarker}             { enterNewState(SETTING_VALUES); pushBackTrailingWhitespace(); return DOCUMENTATION_KEYWORD; }
     ^ {MetadataKeyword} {ExtendedKeywordFinishedMarker}                  { enterNewState(SETTING); pushBackTrailingWhitespace(); return METADATA_KEYWORD; }
     ^ {SetupTeardownKeywords} {ExtendedKeywordFinishedMarker}            { enterNewState(KEYWORD_CALL); pushBackTrailingWhitespace(); return SETUP_TEARDOWN_STATEMENT_KEYWORDS; }
-    ^ {TagsKeywords} {ExtendedKeywordFinishedMarker}                     { enterNewState(LITERAL_CONSTANT_ONLY); pushBackTrailingWhitespace(); return TAGS_KEYWORDS; }
+    ^ {TagsKeywords} {ExtendedKeywordFinishedMarker}                     { enterNewState(SETTING_VALUES); pushBackTrailingWhitespace(); return TAGS_KEYWORDS; }
     ^ {TemplateKeywords} {ExtendedKeywordFinishedMarker}                 {
           enterNewState(KEYWORD_CALL);
           pushBackTrailingWhitespace();
@@ -319,92 +417,76 @@ LineComment = {LineCommentSign} {NON_EOL}*
           templateKeywordFound = true;
           return TEMPLATE_KEYWORDS;
       }
-    ^ {TimeoutKeywords} {ExtendedKeywordFinishedMarker}                  { enterNewState(LITERAL_CONSTANT_ONLY); pushBackTrailingWhitespace(); return TIMEOUT_KEYWORDS; }
-    ^ {GenericSettingsKeyword} {ExtendedKeywordFinishedMarker}           { enterNewState(LITERAL_CONSTANT_ONLY); pushBackTrailingWhitespace(); return UNKNOWN_SETTING_KEYWORD; }
+    ^ {TimeoutKeywords} {ExtendedKeywordFinishedMarker}                  { enterNewState(SETTING_VALUES); pushBackTrailingWhitespace(); return TIMEOUT_KEYWORDS; }
+    ^ {GenericSettingsKeyword} {ExtendedKeywordFinishedMarker}           { enterNewState(SETTING_VALUES); pushBackTrailingWhitespace(); return UNKNOWN_SETTING_KEYWORD; }
 }
 
-<TESTCASE_NAME_DEFINITION>     ^ {LiteralValue}    { enterNewState(TESTCASE_DEFINITION); pushBackTrailingWhitespace(); return TEST_CASE_NAME; }
-<TASK_NAME_DEFINITION>         ^ {LiteralValue}    { enterNewState(TASK_DEFINITION); pushBackTrailingWhitespace(); return TASK_NAME; }
-<USER_KEYWORD_NAME_DEFINITION> ^ {LiteralValue}    { enterNewState(USER_KEYWORD_DEFINITION); pushBackTrailingWhitespace(); return USER_KEYWORD_NAME; }
+<SETTING> {
+    {WithNameKeyword} {ExtendedSpaceBasedEndMarker}          { pushBackTrailingWhitespace(); return WITH_NAME; }
+    {EOL}                                                    { leaveState(); return EOL; }
+}
 
-<TESTCASE_DEFINITION>          ^ {LiteralValue}    { localTemplateEnabled = globalTemplateEnabled; pushBackTrailingWhitespace(); return TEST_CASE_NAME; }
-<TASK_DEFINITION>              ^ {LiteralValue}    { localTemplateEnabled = globalTemplateEnabled; pushBackTrailingWhitespace(); return TASK_NAME; }
-<USER_KEYWORD_DEFINITION>      ^ {LiteralValue}    { pushBackTrailingWhitespace(); return USER_KEYWORD_NAME; }
+<TESTCASE_NAME_DEFINITION>     {
+    {EverythingButVariableValue}                             { pushBackTrailingWhitespace(); return TEST_CASE_NAME_PART; }
+    {SpaceBasedEndMarker} {NonNewlineWhitespace}*            { yybegin(TESTCASE_DEFINITION); return EOS; }
+    {EOL}                                                    { yybegin(TESTCASE_DEFINITION); return EOL; }
+}
+<TASK_NAME_DEFINITION>         {
+    {EverythingButVariableValue}                             { pushBackTrailingWhitespace(); return TASK_NAME_PART; }
+    {SpaceBasedEndMarker} {NonNewlineWhitespace}*            { yybegin(TASK_DEFINITION); return EOS; }
+    {EOL}                                                    { yybegin(TASK_DEFINITION); return EOL; }
+}
+<USER_KEYWORD_NAME_DEFINITION> {
+    {EverythingButVariableValue}                             { pushBackTrailingWhitespace(); return USER_KEYWORD_NAME_PART; }
+    {SpaceBasedEndMarker} {NonNewlineWhitespace}*            { yybegin(USER_KEYWORD_DEFINITION); return EOS; }
+    {EOL}                                                    { yybegin(USER_KEYWORD_DEFINITION); return EOL; }
+}
+<TESTCASE_NAME_DEFINITION, TASK_NAME_DEFINITION, USER_KEYWORD_NAME_DEFINITION> {
+    {SpaceBasedEndMarker} {NonNewlineWhitespace}* {EOL}      { yypushback(1); return WHITE_SPACE; }
+}
 
-<KEYWORD_ARGUMENTS, TESTCASE_DEFINITION, TASK_DEFINITION, USER_KEYWORD_DEFINITION, VARIABLE_DEFINITION, SETTINGS_SECTION> {
-    <SETTING, FOR_STRUCTURE_LOOP> {
-        {VariableFreeLiteralValue} {EqualSign} {
+<TESTCASE_DEFINITION>          ^ [^\s#] {NON_EOL}+ {EOL}*    { localTemplateEnabled = globalTemplateEnabled; yypushback(yylength()); yybegin(TESTCASE_NAME_DEFINITION); break; }
+<TASK_DEFINITION>              ^ [^\s#] {NON_EOL}+ {EOL}*    { localTemplateEnabled = globalTemplateEnabled; yypushback(yylength()); yybegin(TASK_NAME_DEFINITION); break; }
+<USER_KEYWORD_DEFINITION>      ^ [^\s#] {NON_EOL}+ {EOL}*    { yypushback(yylength()); yybegin(USER_KEYWORD_NAME_DEFINITION); break; }
+
+<KEYWORD_ARGUMENTS, SETTINGS_SECTION> {
+    <SETTING, FOR_STRUCTURE_LOOP, WHILE_CONFIGURATION> {
+        {EverythingButVariableValue} {EqualSign} {
               yypushback(1);
-              enterNewState(PARAMETER_ASSIGNMENT);
+              enterNewState(NORMAL_PARAMETER_ASSIGNMENT);
               return PARAMETER_NAME;
         }
-        {VariableFreeLiteralValue} {EqualSign} {VariableFreeLiteralValue} {
+        {EverythingButVariableValue} {EqualSign} {EverythingButVariableValue} {
               int assignmentPos = indexOf('=');
               yypushback(yylength() - assignmentPos);
-              enterNewState(PARAMETER_ASSIGNMENT);
+              enterNewState(NORMAL_PARAMETER_ASSIGNMENT);
               return PARAMETER_NAME;
         }
     }
-    {EqualSign} {KeywordFinishedMarker}           { pushBackTrailingWhitespace(); return ASSIGNMENT; }
+    <TESTCASE_DEFINITION, TASK_DEFINITION, USER_KEYWORD_DEFINITION> {
+        {EqualSign} {KeywordFinishedMarker}           { pushBackTrailingWhitespace(); return ASSIGNMENT; }
+    }
 }
 <INTERMEDIATE_TEMPLATE_CONFIGURATION> {
-    ({ExtendedSpaceBasedEndMarker} | ({NonNewlineWhitespace}* {MultiLine})) "NONE" {ExtendedKeywordFinishedMarker}  {
+    {ExtendedSpaceBasedEndMarker} "NONE" {ExtendedKeywordFinishedMarker}  {
           pushBackTrailingWhitespace();
           yypushback("NONE".length());
           return WHITE_SPACE;
     }
+    {NonNewlineWhitespace}* {MultiLine} "NONE" {ExtendedKeywordFinishedMarker}  {
+          pushBackTrailingWhitespace();
+          yypushback("NONE".length());
+          pushBackTrailingWhitespace();
+          yypushback("...".length());
+          enterNewState(IN_CONTINUATION);
+          return WHITE_SPACE;
+    }
     "NONE" {ExtendedKeywordFinishedMarker}  {
           yypushback(yylength() - "NONE".length());
-          yybegin(LITERAL_CONSTANT_ONLY);
+          yybegin(EOL_EXPECTED);
           return LITERAL_CONSTANT;
     }
 }
-<TEMPLATE_DEFINITION> {
-    <TESTCASE_DEFINITION, TASK_DEFINITION> {
-        {LocalTemplateKeyword} ({ExtendedSpaceBasedEndMarker} | ({NonNewlineWhitespace}* {MultiLine})) "NONE" {ExtendedKeywordFinishedMarker}   {
-              yypushback(yylength() - 1);
-              enterNewState(INTERMEDIATE_TEMPLATE_CONFIGURATION);
-              enterNewState(LOCAL_SETTING_DEFINITION);
-              localTemplateEnabled = false;
-              return LOCAL_SETTING_START;
-        }
-        {LocalTemplateKeyword} {NonNewlineWhitespace}* {EOL} {WhitespaceIncludingNewline}* !{MultiLineContinuation}  {
-              yypushback(yylength() - 1);
-              enterNewState(LITERAL_CONSTANT_ONLY);
-              enterNewState(LOCAL_SETTING_DEFINITION);
-              localTemplateEnabled = false;
-              return LOCAL_SETTING_START;
-        }
-        {LocalTemplateKeyword} ({ExtendedSpaceBasedEndMarker} | {MultiLine})   {
-              yypushback(yylength() - 1);
-              enterNewState(TEMPLATE_DEFINITION);
-              enterNewState(SETTING_TEMPLATE_START);
-              enterNewState(LOCAL_SETTING_DEFINITION);
-              localTemplateEnabled = true;
-              return LOCAL_SETTING_START;
-        }
-    }
-    ^ {LiteralValue}    {
-        localTemplateEnabled = globalTemplateEnabled;
-        leaveState();
-        pushBackTrailingWhitespace();
-        return yystate() == TESTCASE_DEFINITION ? TEST_CASE_NAME : TASK_NAME;
-    }
-    {VariableFreeLiteralValue} {EqualSign}       {
-          yypushback(1);
-          enterNewState(TEMPLATE_PARAMETER_ASSIGNMENT);
-          return TEMPLATE_PARAMETER_NAME;
-    }
-    {VariableFreeLiteralValue} {EqualSign} {VariableFreeLiteralValue}      {
-          int assignmentPos = indexOf('=');
-          yypushback(yylength() - assignmentPos);
-          enterNewState(TEMPLATE_PARAMETER_ASSIGNMENT);
-          return TEMPLATE_PARAMETER_NAME;
-    }
-    <TEMPLATE_PARAMETER_ASSIGNMENT>  {EqualSign}       { yybegin(TEMPLATE_PARAMETER_VALUE); return ASSIGNMENT; }
-    {VariableFreeLiteralValue}                         { return TEMPLATE_ARGUMENT_VALUE; }
-}
-<TEMPLATE_PARAMETER_VALUE>  {VariableFreeLiteralValue} { return TEMPLATE_ARGUMENT_VALUE; }
 
 <USER_KEYWORD_DEFINITION> {
     "RETURN" {ExtendedKeywordFinishedMarker}     {
@@ -412,7 +494,7 @@ LineComment = {LineCommentSign} {NON_EOL}*
           enterNewState(USER_KEYWORD_RETURN_STATEMENT);
           return RETURN;
     }
-    {VariableFreeLiteralValue}   { enterNewState(KEYWORD_CALL); yypushback(yylength()); break; }
+    {EverythingButVariableValue}   { enterNewState(KEYWORD_CALL); yypushback(yylength()); break; }
 }
 <LOCAL_SETTING_DEFINITION> {
     {LocalSettingKeywordStart}                                      { pushBackTrailingWhitespace(); return LOCAL_SETTING_START; }
@@ -422,160 +504,248 @@ LineComment = {LineCommentSign} {NON_EOL}*
     {LocalSettingKeywordEndWhitespaceFree}                          { leaveState(); return LOCAL_SETTING_END; }
 }
 <USER_KEYWORD_DEFINITION> {
-    {LocalArgumentsKeyword} {ExtendedKeywordFinishedMarker}       {
+    {LocalArgumentsKeyword} {ExtendedKeywordFinishedMarker}         {
         yypushback(yylength() - 1);
         enterNewState(INLINE_VARIABLE_DEFINITION);
         enterNewState(LOCAL_SETTING_DEFINITION);
         return LOCAL_SETTING_START;
     }
 }
-<TESTCASE_DEFINITION, TASK_DEFINITION> {
-    <USER_KEYWORD_DEFINITION> {
-        <TEMPLATE_DEFINITION> {
-            {LocalSetupTeardownKeywords} {ExtendedKeywordFinishedMarker}  {
-                yypushback(yylength() - 1);
-                enterNewState(KEYWORD_CALL);
-                enterNewState(LOCAL_SETTING_DEFINITION);
-                return LOCAL_SETTING_START;
-            }
-            {LocalTagsKeyword} {ExtendedKeywordFinishedMarker}         {
-                yypushback(yylength() - 1);
-                enterNewState(LITERAL_CONSTANT_ONLY_LIST);
-                enterNewState(LOCAL_SETTING_DEFINITION);
-                return LOCAL_SETTING_START;
-            }
-            {LocalSettingKeyword} {ExtendedKeywordFinishedMarker}         {
-                yypushback(yylength() - 1);
-                enterNewState(LITERAL_CONSTANT_ONLY);
-                enterNewState(LOCAL_SETTING_DEFINITION);
-                return LOCAL_SETTING_START;
-            }
-        }
 
-        "FOR" {ExtendedSpaceBasedEndMarker}?         { yypushback(yylength() - "FOR".length()); enterNewState(FOR_STRUCTURE); return FOR; }
-        "WHILE" {ExtendedSpaceBasedEndMarker}?       { yypushback(yylength() - "WHILE".length()); enterNewState(PYTHON_EVALUATED_CONTROL_STRUCTURE_START); return WHILE; }
-        "IF" {ExtendedSpaceBasedEndMarker}?          { yypushback(yylength() - "IF".length()); enterNewState(PYTHON_EVALUATED_CONTROL_STRUCTURE_START); return IF; }
-        "ELSE IF" {ExtendedSpaceBasedEndMarker}?     { yypushback(yylength() - "ELSE IF".length()); enterNewState(PYTHON_EVALUATED_CONTROL_STRUCTURE_START); return ELSE_IF; }
-        "ELSE" {ExtendedKeywordFinishedMarker}?      { yypushback(yylength() - "ELSE".length()); return ELSE; }
-        "TRY" {EOL}?                                 { yypushback(yylength() - "TRY".length()); return TRY; }
-        "EXCEPT" {ExtendedSpaceBasedEndMarker}?      {
-          if (yylength() > "EXCEPT".length()) {
-              enterNewState(SIMPLE_CONTROL_STRUCTURE_START);
-          }
-          yypushback(yylength() - "EXCEPT".length());
-          return EXCEPT;
-        }
-        "FINALLY" {EOL}?                             { yypushback(yylength() - "FINALLY".length()); return FINALLY; }
-        "BREAK" {ExtendedKeywordFinishedMarker}?     { yypushback(yylength() - "BREAK".length()); return BREAK; }
-        "CONTINUE" {ExtendedKeywordFinishedMarker}?  { yypushback(yylength() - "CONTINUE".length()); return CONTINUE; }
-        "GROUP" {ExtendedSpaceBasedEndMarker}?       {
-          if (yylength() > "GROUP".length()) {
-              enterNewState(SIMPLE_CONTROL_STRUCTURE_START);
-          }
-          yypushback(yylength() - "GROUP".length());
-          return GROUP;
-        }
-        "END" {EOL}?                                 { yypushback(yylength() - "END".length()); return END; }
+<TESTCASE_DEFINITION, TASK_DEFINITION, TEMPLATE_DEFINITION> {
+    // Disables the template for the current test case / task due to the NONE "keyword"
+    {LocalTemplateKeyword} ({ExtendedSpaceBasedEndMarker} | {MultiLine}) "NONE" {ExtendedKeywordFinishedMarker}   {
+          yypushback(yylength() - 1);
+          enterNewState(INTERMEDIATE_TEMPLATE_CONFIGURATION);
+          enterNewState(LOCAL_SETTING_DEFINITION);
+          localTemplateEnabled = false;
+          return LOCAL_SETTING_START;
+    }
+    // Expects a template name (keyword) following the [Template] setting. Can be on the same line or on a new line after the continuation marker
+    {LocalTemplateKeyword} ({ExtendedSpaceBasedEndMarker} | {MultiLine})   {
+          yypushback(yylength() - 1);
+          enterNewState(TEMPLATE_DEFINITION);
+          enterNewState(TEMPLATE_ARGUMENTS);
+          enterNewState(SETTING_TEMPLATE_START);
+          enterNewState(LOCAL_SETTING_DEFINITION);
+          localTemplateEnabled = true;
+          return LOCAL_SETTING_START;
+    }
+    // Represents the [Template] configuration WITHOUT any template name to "deactivate" the template for the current test case / task.
+    {LocalTemplateKeyword} {NonNewlineWhitespace}* {EOL} {
+          yypushback(yylength() - 1);
+          enterNewState(LITERAL_CONSTANT_ONLY);
+          enterNewState(LOCAL_SETTING_DEFINITION);
+          localTemplateEnabled = false;
+          return LOCAL_SETTING_START;
+    }
+}
+<TESTCASE_DEFINITION, TASK_DEFINITION, USER_KEYWORD_DEFINITION, TEMPLATE_DEFINITION> {
+    {LocalSetupTeardownKeywords} {ExtendedKeywordFinishedMarker}  {
+        yypushback(yylength() - 1);
+        enterNewState(KEYWORD_CALL);
+        enterNewState(LOCAL_SETTING_DEFINITION);
+        return LOCAL_SETTING_START;
+    }
+    {LocalTagsKeyword} {ExtendedKeywordFinishedMarker}            {
+        yypushback(yylength() - 1);
+        enterNewState(LITERAL_CONSTANT_ONLY);
+        enterNewState(LOCAL_SETTING_DEFINITION);
+        return LOCAL_SETTING_START;
+    }
+    {LocalSettingKeyword} {ExtendedKeywordFinishedMarker}          {
+        yypushback(yylength() - 1);
+        enterNewState(LITERAL_CONSTANT_ONLY);
+        enterNewState(LOCAL_SETTING_DEFINITION);
+        return LOCAL_SETTING_START;
     }
 
+    <TEMPLATE_ARGUMENTS> {
+        "FOR" {ExtendedSpaceBasedEndMarker}?         { yypushback(yylength() - "FOR".length()); enterNewState(FOR_STRUCTURE); return FOR; }
+        "WHILE" {ExtendedSpaceBasedEndMarker}?       { yypushback(yylength() - "WHILE".length()); enterNewState(WHILE_CONFIGURATION); enterNewState(PYTHON_EVALUATED_CONTROL_STRUCTURE_START); return WHILE; }
+        "IF" {ExtendedSpaceBasedEndMarker}?          { yypushback(yylength() - "IF".length()); enterNewState(EOL_EXPECTED); enterNewState(PYTHON_EVALUATED_CONTROL_STRUCTURE_START); return IF; }
+        "ELSE IF" {ExtendedSpaceBasedEndMarker}?     { yypushback(yylength() - "ELSE IF".length()); enterNewState(EOL_EXPECTED); enterNewState(PYTHON_EVALUATED_CONTROL_STRUCTURE_START); return ELSE_IF; }
+        "ELSE" {ExtendedKeywordFinishedMarker}?      { yypushback(yylength() - "ELSE".length()); enterNewState(EOL_EXPECTED); return ELSE; }
+        "BREAK" {ExtendedKeywordFinishedMarker}?     { yypushback(yylength() - "BREAK".length()); enterNewState(EOL_EXPECTED); return BREAK; }
+        "CONTINUE" {ExtendedKeywordFinishedMarker}?  { yypushback(yylength() - "CONTINUE".length()); enterNewState(EOL_EXPECTED); return CONTINUE; }
+        "END" {ExtendedKeywordFinishedMarker}?       { yypushback(yylength() - "END".length()); enterNewState(EOL_EXPECTED); return END; }
+    }
+}
+<TESTCASE_DEFINITION, TASK_DEFINITION, USER_KEYWORD_DEFINITION> {
+    "TRY" {ExtendedKeywordFinishedMarker}?       { yypushback(yylength() - "TRY".length()); enterNewState(EOL_EXPECTED); return TRY; }
+    "EXCEPT" {ExtendedSpaceBasedEndMarker}?      {
+      enterNewState(SIMPLE_CONTROL_STRUCTURE_START);
+      yypushback(yylength() - "EXCEPT".length());
+      return EXCEPT;
+    }
+    "FINALLY" {ExtendedKeywordFinishedMarker}?   { yypushback(yylength() - "FINALLY".length()); enterNewState(EOL_EXPECTED); return FINALLY; }
+    "GROUP" {ExtendedKeywordFinishedMarker}?     {
+      enterNewState(SIMPLE_CONTROL_STRUCTURE_START);
+      yypushback(yylength() - "GROUP".length());
+      return GROUP;
+    }
+}
+<TESTCASE_DEFINITION, TASK_DEFINITION> {
     "GIVEN" {ExtendedSpaceBasedEndMarker}   {
           yypushback(yylength() - "GIVEN".length());
           enterNewState(KEYWORD_CALL);
           return GIVEN;
-      }
+    }
     "WHEN" {ExtendedSpaceBasedEndMarker}    {
          yypushback(yylength() - "WHEN".length());
          enterNewState(KEYWORD_CALL);
          return WHEN;
-     }
+    }
     "THEN" {ExtendedSpaceBasedEndMarker}    {
          yypushback(yylength() - "THEN".length());
          enterNewState(KEYWORD_CALL);
          return THEN;
-     }
+    }
     "AND" {ExtendedSpaceBasedEndMarker}     {
          yypushback(yylength() - "AND".length());
          enterNewState(KEYWORD_CALL);
          return AND;
-     }
+    }
     "BUT" {ExtendedSpaceBasedEndMarker}     {
          yypushback(yylength() - "BUT".length());
          enterNewState(KEYWORD_CALL);
          return BUT;
-     }
+    }
 
     "VAR" {ExtendedSpaceBasedEndMarker}     {
           yypushback(yylength() - "VAR".length());
           enterNewState(INLINE_VARIABLE_DEFINITION);
           return VAR;
-      }
+    }
 
-    {VariableFreeLiteralValue}                {
+    {EverythingButVariableValue}            {
           int nextState = localTemplateEnabled && templateKeywordFound ? TEMPLATE_DEFINITION : KEYWORD_CALL;
           enterNewState(nextState);
           yypushback(yylength());
           break;
-      }
+   }
 }
+
+<TEMPLATE_ARGUMENTS> {
+    {EverythingButVariableValue} {EqualSign}       {
+          yypushback(1);
+          enterNewState(TEMPLATE_PARAMETER_ASSIGNMENT);
+          return TEMPLATE_PARAMETER_NAME;
+    }
+    {EverythingButVariableValue} {EqualSign} {EverythingButVariableValue}      {
+          int assignmentPos = indexOf('=');
+          yypushback(yylength() - assignmentPos);
+          enterNewState(TEMPLATE_PARAMETER_ASSIGNMENT);
+          return TEMPLATE_PARAMETER_NAME;
+    }
+    <TEMPLATE_PARAMETER_ASSIGNMENT>  {EqualSign}         { yybegin(TEMPLATE_PARAMETER_VALUE); return PARAMETER_ASSIGNMENT; }
+    {EverythingButVariableValue}                         { return TEMPLATE_ARGUMENT_VALUE; }
+}
+
+<TEMPLATE_PARAMETER_VALUE>  {EverythingButVariableValue} { return TEMPLATE_ARGUMENT_VALUE; }
+
+<TEMPLATE_DEFINITION> {
+    ^ [^\s#] {NON_EOL}+ {EOL}*    {
+        localTemplateEnabled = globalTemplateEnabled;
+        leaveState();
+        yypushback(yylength());
+        if (yystate() == TESTCASE_DEFINITION) {
+            yybegin(TESTCASE_NAME_DEFINITION);
+        } else {
+            yybegin(TASK_NAME_DEFINITION);
+        }
+        break;
+    }
+}
+
+<TEMPLATE_DEFINITION>  [^\s]  { yypushback(yylength()); enterNewState(TEMPLATE_ARGUMENTS); break; }
 
 <FOR_STRUCTURE>  {
-    "IN" {ExtendedSpaceBasedEndMarker}            { yypushback(yylength() - "IN".length()); yybegin(FOR_STRUCTURE_LOOP_START); return FOR_IN; }
-    "IN ENUMERATE" {ExtendedSpaceBasedEndMarker}  { yypushback(yylength() - "IN ENUMERATE".length()); yybegin(FOR_STRUCTURE_LOOP_START); return FOR_IN; }
-    "IN RANGE" {ExtendedSpaceBasedEndMarker}      { yypushback(yylength() - "IN RANGE".length()); yybegin(FOR_STRUCTURE_LOOP_START); return FOR_IN; }
-    "IN ZIP" {ExtendedSpaceBasedEndMarker}        { yypushback(yylength() - "IN ZIP".length()); yybegin(FOR_STRUCTURE_LOOP_START); return FOR_IN; }
-    "END" {EOL}                                   { yypushback(1); leaveState(); return END; }
+    "IN" {ExtendedKeywordFinishedMarker}            { yypushback(yylength() - "IN".length()); yybegin(FOR_STRUCTURE_LOOP_START); return FOR_IN; }
+    "IN ENUMERATE" {ExtendedKeywordFinishedMarker}  { yypushback(yylength() - "IN ENUMERATE".length()); yybegin(FOR_STRUCTURE_LOOP_START); return FOR_IN_ENUMERATE; }
+    "IN RANGE" {ExtendedKeywordFinishedMarker}      { yypushback(yylength() - "IN RANGE".length()); yybegin(FOR_STRUCTURE_LOOP_START); return FOR_IN_RANGE; }
+    "IN ZIP" {ExtendedKeywordFinishedMarker}        { yypushback(yylength() - "IN ZIP".length()); yybegin(FOR_STRUCTURE_LOOP_START); return FOR_IN_ZIP; }
+    "END" {EOL}                                     { yypushback(1); return END; }
+    {EOL}                                           { leaveState(); return EOL; }
 }
 
-<SIMPLE_CONTROL_STRUCTURE_START>            {ExtendedSpaceBasedEndMarker}      { yybegin(SIMPLE_CONTROL_STRUCTURE); return WHITE_SPACE; }
-<FOR_STRUCTURE_LOOP_START>                  {ExtendedSpaceBasedEndMarker}      { yybegin(FOR_STRUCTURE_LOOP); return WHITE_SPACE; }
+<SIMPLE_CONTROL_STRUCTURE_START>            {
+    {ExtendedSpaceBasedEndMarker}           { yybegin(SIMPLE_CONTROL_STRUCTURE); return WHITE_SPACE; }
+    {EOL}                                   { leaveState(); return EOL; }
+}
+<FOR_STRUCTURE_LOOP_START> {
+    {ExtendedSpaceBasedEndMarker}           { yybegin(FOR_STRUCTURE_LOOP); return WHITE_SPACE; }
+    [^]                                     { yypushback(yylength()); yybegin(FOR_STRUCTURE_LOOP); break; }
+}
 <PYTHON_EVALUATED_CONTROL_STRUCTURE_START>  {
-    {ExtendedSpaceBasedEndMarker}      { yybegin(PYTHON_EXECUTED_CONDITION); return WHITE_SPACE; }
+    {ExtendedSpaceBasedEndMarker}           { yybegin(PYTHON_EXECUTED_CONDITION); return WHITE_SPACE; }
+    {MultiLine}                             { enterNewState(IN_CONTINUATION); yypushback(yylength()); break; }
+    [^]                                     { yypushback(yylength()); yybegin(PYTHON_EXECUTED_CONDITION); break; }
 }
 <PYTHON_EXECUTED_CONDITION>  {
     {EverythingButVariableValue}            { return PYTHON_EXPRESSION_CONTENT; }
     {ExtendedSpaceBasedEndMarker}           { leaveState(); return EOS; }
+    {EOL}                                   { leaveState(); yypushback(yylength()); break; }
+    {MultiLine}                             {
+      if (previousStates[currentIndex] == WHILE_CONFIGURATION) {
+          pushBackTrailingWhitespace();
+          yypushback(3);
+          leaveState();
+          return EOS;
+      } else {
+          yypushback(yylength());
+          leaveState();
+          break;
+      }
+    }
+}
+
+<WHILE_CONFIGURATION> {
+    {Continuation}                          { return CONTINUATION; }
+    {NonNewlineWhitespace}+                 { return WHITE_SPACE; }
+    {EOL}                                   { leaveState(); return EOL; }
+    [^]                                     { yypushback(yylength()); leaveState(); break; }
 }
 
 <SIMPLE_CONTROL_STRUCTURE> {
-    <FOR_STRUCTURE_LOOP> {VariableFreeLiteralValue}          { return LITERAL_CONSTANT; }
+    <FOR_STRUCTURE_LOOP> {EverythingButVariableValue}        { return LITERAL_CONSTANT; }
     {ExtendedSpaceBasedEndMarker}                            { leaveState(); return EOL; }
 }
-<SETTING> {WithNameKeyword} {ExtendedSpaceBasedEndMarker}    { pushBackTrailingWhitespace(); return WITH_NAME; }
 
-<SETTING, KEYWORD_CALL, KEYWORD_ARGUMENTS, VARIABLE_DEFINITION, USER_KEYWORD_RETURN_STATEMENT, FOR_STRUCTURE_LOOP, PYTHON_EXECUTED_CONDITION, LITERAL_CONSTANT_ONLY, LITERAL_CONSTANT_ONLY_LIST, VARIABLE_DEFINITION_ARGUMENTS, SETTING_TEMPLATE_START, FOR_STRUCTURE> {EOL}+   { leaveState(); return EOL; }
-<TESTCASE_DEFINITION, TASK_DEFINITION, USER_KEYWORD_DEFINITION, VARIABLE_DEFINITION, TEMPLATE_DEFINITION> {EOL}+   { return EOL; }
+<USER_KEYWORD_RETURN_STATEMENT, FOR_STRUCTURE_LOOP, TEMPLATE_ARGUMENTS> {EOL}    { leaveState(); return EOL; }
 
-<PARAMETER_ASSIGNMENT>  {EqualSign}       { yybegin(PARAMETER_VALUE); return ASSIGNMENT; }
+<NORMAL_PARAMETER_ASSIGNMENT> {EqualSign} { yybegin(PARAMETER_VALUE); return PARAMETER_ASSIGNMENT; }
 <PARAMETER_VALUE>       {
-    {VariableFreeLiteralValue}            { return LITERAL_CONSTANT; }
+    {EverythingButVariableValue}          { return LITERAL_CONSTANT; }
     <TEMPLATE_PARAMETER_VALUE> {
         {ExtendedKeywordFinishedMarker}   { leaveState(); yypushback(yylength()); break; }
     }
 }
 
 <SETTING_TEMPLATE_START>  {
-    {KeywordLibraryNameLiteralValue} {VariableFreeLiteralValue}    {
+    {KeywordLibraryNameLiteralValue} {EverythingButVariableValue}        {
           templateKeywordFound = true;
           int libraryNameSeparatorStart = indexOf('.');
           yypushback(yylength() - libraryNameSeparatorStart);
           yybegin(KEYWORD_LIBRARY_NAME_SEPARATOR);
           return KEYWORD_LIBRARY_NAME;
     }
-    {VariableFreeLiteralValue}                                     { templateKeywordFound = true; yybegin(KEYWORD_ARGUMENTS); return KEYWORD_NAME; }
+    {EverythingButVariableValue}                                         { templateKeywordFound = true; return KEYWORD_NAME; }
+    {EOL}                                                                { leaveState(); return EOL; }
 }
 
 <KEYWORD_CALL>  {
-    [/*]? {RunKeywordCall}                                               { return KEYWORD_NAME; }
-    [/*]? {ConditionalRunKeywordCall}                                    { yybegin(PYTHON_EVALUATED_CONTROL_STRUCTURE_START); return KEYWORD_NAME; }
-    [/*]? ({AssertRunKeywordCall} | {RepeatKeywordCall})                 { enterNewState(SINGLE_LITERAL_CONSTANT_START); return KEYWORD_NAME; }
-    [/*]? {SimpleConditionalKeywordCall}                                 {
+    {RunKeywordCall}                                               { return KEYWORD_NAME; }
+    {ConditionalRunKeywordCall}                                    { enterNewState(PYTHON_EVALUATED_CONTROL_STRUCTURE_START); return KEYWORD_NAME; }
+    ({AssertRunKeywordCall} | {RepeatKeywordCall})                 { enterNewState(SINGLE_LITERAL_CONSTANT_START); return KEYWORD_NAME; }
+    {SimpleConditionalKeywordCall}                                 {
           yybegin(KEYWORD_ARGUMENTS);
           enterNewState(PYTHON_EVALUATED_CONTROL_STRUCTURE_START);
           return KEYWORD_NAME;
     }
-    [/*]? {RepeatKeywordCall}                                            { return KEYWORD_NAME; }
+    {RepeatKeywordCall}                                            { return KEYWORD_NAME; }
 
-    [/*]? {BuiltInNamespace} ({RunKeywordCall} | {ConditionalRunKeywordCall} | {AssertRunKeywordCall} | {SimpleConditionalKeywordCall} | {RepeatKeywordCall}) {
+    {BuiltInNamespace} ({RunKeywordCall} | {ConditionalRunKeywordCall} | {AssertRunKeywordCall} | {SimpleConditionalKeywordCall} | {RepeatKeywordCall}) {
           int additionalPushbackLength = 0;
           if (yycharat(0) != 'B' && yycharat(0) != 'b') {
               additionalPushbackLength = 1;
@@ -585,71 +755,81 @@ LineComment = {LineCommentSign} {NON_EOL}*
           return KEYWORD_LIBRARY_NAME;
     }
 
-    {KeywordLibraryNameLiteralValue} {VariableFreeLiteralValue}    {
+    {KeywordLibraryNameLiteralValue} {EverythingButVariableValue} {
           int libraryNameSeparatorStart = indexOf('.');
           yypushback(yylength() - libraryNameSeparatorStart);
           yybegin(KEYWORD_LIBRARY_NAME_SEPARATOR);
           return KEYWORD_LIBRARY_NAME;
     }
-    {VariableFreeLiteralValue}                                     { yybegin(KEYWORD_ARGUMENTS); return KEYWORD_NAME; }
+    {EverythingButVariableValue}                                   { yybegin(KEYWORD_ARGUMENTS); return KEYWORD_NAME; }
+    {EOL}                                                          { leaveState(); return EOL; }
 }
 <KEYWORD_LIBRARY_NAME_SEPARATOR> "."                               { yybegin(KEYWORD_CALL_NAME); return KEYWORD_LIBRARY_SEPARATOR; }
 <KEYWORD_LIBRARY_NAME_SEPARATOR_FOR_SPECIAL_KEYWORD> "."           { leaveState(); return KEYWORD_LIBRARY_SEPARATOR; }
-<KEYWORD_CALL_NAME> {VariableFreeLiteralValue}                     { leaveState(); return KEYWORD_NAME; }
+<KEYWORD_CALL_NAME> {EverythingButVariableValue}                   { leaveState(); return KEYWORD_NAME; }
 
 <KEYWORD_ARGUMENTS> {
     "ELSE IF" {ExtendedSpaceBasedEndMarker}     { yypushback(yylength() - "ELSE IF".length()); yybegin(PYTHON_EVALUATED_CONTROL_STRUCTURE_START); return ELSE_IF; }
     "ELSE" {ExtendedKeywordFinishedMarker}      { yypushback(yylength() - "ELSE".length()); yybegin(KEYWORD_CALL); return ELSE; }
+    {EverythingButVariableValue}                { return LITERAL_CONSTANT; }
+    {EOL}                                       { leaveState(); return EOL; }
 }
 
-<LITERAL_CONSTANT_ONLY> {
-    {ScalarVariableStart}                       { enterNewState(VARIABLE_USAGE); return SCALAR_VARIABLE_START; }
-    {ListVariableStart}                         { enterNewState(VARIABLE_USAGE); return LIST_VARIABLE_START; }
-    {DictVariableStart}                         { enterNewState(VARIABLE_USAGE); return DICT_VARIABLE_START; }
-    {EnvVariableStart}                          { enterNewState(VARIABLE_USAGE); return ENV_VARIABLE_START; }
+<LITERAL_CONSTANT_ONLY, SETTING_VALUES> {
+    {ScalarVariableStart}                                    { yypushback(yylength() - 1); enterNewState(VARIABLE_USAGE); enterNewState(VARIABLE_OPENING_BRACE); return SCALAR_VARIABLE_START; }
+    {ListVariableStart}                                      { yypushback(yylength() - 1); enterNewState(VARIABLE_USAGE); enterNewState(VARIABLE_OPENING_BRACE); return LIST_VARIABLE_START; }
+    {DictVariableStart}                                      { yypushback(yylength() - 1); enterNewState(VARIABLE_USAGE); enterNewState(VARIABLE_OPENING_BRACE); return DICT_VARIABLE_START; }
+    {EnvVariableStart}                                       { yypushback(yylength() - 1); enterNewState(VARIABLE_USAGE); enterNewState(VARIABLE_OPENING_BRACE); return ENV_VARIABLE_START; }
 
-    <LITERAL_CONSTANT_ONLY_LIST> {
-        ^ {LineComment}                                          { pushBackTrailingWhitespace(); return COMMENT; }
-        {LineComment}                                            { pushBackTrailingWhitespace(); return COMMENT; }
+    ^ {LineComment}                                          { return COMMENT; }
+    {LineComment}                                            { return COMMENT; }
 
-        {EOL} {WhitespaceIncludingNewline}* {LineCommentSign}    { yypushback(1); return WHITE_SPACE; }
-        {MultiLine} {WhitespaceIncludingNewline}*                { return WHITE_SPACE; }
-    }
+    {EOL} {WhitespaceIncludingNewline}* {LineCommentSign}    { yypushback(1); return WHITE_SPACE; }
 
-    {NonNewlineWhitespace}+                                      { return WHITE_SPACE; }
-    {ExtendedSpaceBasedEndMarker} {LineCommentSign}              { yypushback(1); return WHITE_SPACE; }
-    {NonNewlineWhitespace}+ {NON_EOL}+                           { pushBackEverythingExceptLeadingWhitespace(); return WHITE_SPACE; }
-    {NON_EOL}+                                                   { pushBackTrailingWhitespace(); return LITERAL_CONSTANT; }
+    {NonNewlineWhitespace}+                                  { return WHITE_SPACE; }
+    {ExtendedSpaceBasedEndMarker} {LineCommentSign}          { yypushback(1); return WHITE_SPACE; }
+    {EverythingButVariableValue}                             { pushBackTrailingWhitespace(); return LITERAL_CONSTANT; }
+    {EOL}                                                    { leaveState(); return EOL; }
 }
-<LITERAL_CONSTANT_ONLY_LIST> {SpaceBasedEndMarker}               { return WHITE_SPACE; }
 
-<SETTINGS_SECTION, SETTING, KEYWORD_ARGUMENTS, USER_KEYWORD_RETURN_STATEMENT, SINGLE_LITERAL_CONSTANT, LITERAL_CONSTANT_ONLY_LIST>  {VariableFreeLiteralValue}  { return LITERAL_CONSTANT; }
+<SETTINGS_SECTION, SETTING, USER_KEYWORD_RETURN_STATEMENT, SINGLE_LITERAL_CONSTANT>  {EverythingButVariableValue}  { return LITERAL_CONSTANT; }
 
 <SINGLE_LITERAL_CONSTANT_START>  {SpaceBasedEndMarker}       { yybegin(SINGLE_LITERAL_CONSTANT); return WHITE_SPACE; }
 <SINGLE_LITERAL_CONSTANT>        {SpaceBasedEndMarker}       { leaveState(); return WHITE_SPACE; }
 
+<VARIABLE_OPENING_BRACE> {
+    {OpeningVariable}        { leaveState(); return VARIABLE_LBRACE; }
+    [^]                      { leaveState(); yypushback(yylength()); break; }
+}
+
+<EOL_EXPECTED> {
+    {NonNewlineWhitespace}+  { return WHITE_SPACE; }
+    {EOL}                    { leaveState(); return EOL; }
+    [^]                      { yypushback(yylength()); leaveState(); break; }
+}
+
 <COMMENTS_SECTION> {
-    ^ {SettingsSectionIdentifier}            { resetInternalState(); yybegin(SETTINGS_SECTION); pushBackTrailingWhitespace(); return SETTINGS_HEADER; }
-    ^ {TestcaseSectionIdentifier}            { resetInternalState(); yybegin(TESTCASE_NAME_DEFINITION); pushBackTrailingWhitespace(); return TEST_CASES_HEADER; }
-    ^ {TasksSectionIdentifier}               { resetInternalState(); yybegin(TASK_NAME_DEFINITION); pushBackTrailingWhitespace(); return TASKS_HEADER; }
-    ^ {KeywordsSectionIdentifier}            { resetInternalState(); yybegin(USER_KEYWORD_NAME_DEFINITION); pushBackTrailingWhitespace(); return USER_KEYWORDS_HEADER; }
-    ^ {VariablesSectionIdentifier}           { resetInternalState(); yybegin(VARIABLES_SECTION); pushBackTrailingWhitespace(); return VARIABLES_HEADER; }
+    ^ {SettingsSectionIdentifier}               { resetInternalState(); yybegin(SETTINGS_SECTION); pushBackTrailingWhitespace(); return SETTINGS_HEADER; }
+    ^ {TestcaseSectionIdentifier}               { resetInternalState(); yybegin(TESTCASE_NAME_DEFINITION); pushBackTrailingWhitespace(); return TEST_CASES_HEADER_NAME; }
+    ^ {TasksSectionIdentifier}                  { resetInternalState(); yybegin(TASK_NAME_DEFINITION); pushBackTrailingWhitespace(); return TASKS_HEADER_NAME; }
+    ^ {KeywordsSectionIdentifier}               { resetInternalState(); yybegin(USER_KEYWORD_NAME_DEFINITION); pushBackTrailingWhitespace(); return USER_KEYWORDS_HEADER; }
+    ^ {VariablesSectionIdentifier}              { resetInternalState(); yybegin(VARIABLES_SECTION); pushBackTrailingWhitespace(); return VARIABLES_HEADER; }
 
     <YYINITIAL> {
-        {WhitespaceIncludingNewline}+        { return WHITE_SPACE; }
-        {NON_EOL}+                           { return COMMENT; }
+        {WhitespaceIncludingNewline}+           { return WHITE_SPACE; }
+        {NON_EOL}+                              { return COMMENT; }
     }
 }
 
-{ScalarVariableStart}                        { enterNewState(VARIABLE_USAGE); return SCALAR_VARIABLE_START; }
-{ListVariableStart}                          { enterNewState(VARIABLE_USAGE); return LIST_VARIABLE_START; }
-{DictVariableStart}                          { enterNewState(VARIABLE_USAGE); return DICT_VARIABLE_START; }
-{EnvVariableStart}                           { enterNewState(VARIABLE_USAGE); return ENV_VARIABLE_START; }
+{ScalarVariableStart}                           { enterNewState(VARIABLE_USAGE); enterNewState(VARIABLE_OPENING_BRACE); yypushback(1); return SCALAR_VARIABLE_START; }
+{ListVariableStart}                             { enterNewState(VARIABLE_USAGE); enterNewState(VARIABLE_OPENING_BRACE); yypushback(1); return LIST_VARIABLE_START; }
+{DictVariableStart}                             { enterNewState(VARIABLE_USAGE); enterNewState(VARIABLE_OPENING_BRACE); yypushback(1); return DICT_VARIABLE_START; }
+{EnvVariableStart}                              { enterNewState(VARIABLE_USAGE); enterNewState(VARIABLE_OPENING_BRACE); yypushback(1); return ENV_VARIABLE_START; }
 
-{EmptyValue} {WhitespaceIncludingNewline}*   { yypushback(yylength() - 2); return LITERAL_CONSTANT; }
+{EmptyValue} {WhitespaceIncludingNewline}*      { yypushback(yylength() - 2); return LITERAL_CONSTANT; }
 
 // Can't be combined to {WhitespaceIncludingNewline}+ because then it would override the EOL handling in various states if there is a newline followed by
 // whitespace. It is just a fallback for any whitespace that is not handled in other states.
-{NonNewlineWhitespace}+ | {EOL}+             { return WHITE_SPACE; }
+{NonNewlineWhitespace}+ | {EOL}                 { return WHITE_SPACE; }
 
 [^] { return BAD_CHARACTER; }

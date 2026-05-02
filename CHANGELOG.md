@@ -6,6 +6,64 @@
 
 ### Added
 
+- Support for YAML and JSON variable files in settings section
+
+### Changed
+
+- Extended code completion suggestions to variable files import in settings section
+- Optimized multiline handling to increase performance and stability
+- Plugin depends now on bundled YAML plugin
+
+### Fixed
+
+- Fixed indentation logic when logically at the end of file
+
+## 0.7.0 - 2026-05-01
+
+### Added
+
+- Support for code formatting
+- Support to configure new code folding under `Settings -> Editor -> General -> Code Folding -> Robot`
+- Support for variables in test case and task names
+- Highlight for, while, try, group and if with their corresponding end statement
+- Support for folding grouped import and global setup/teardown statements
+- Support for test case templates with for loops and if/else statements
+- New intention to insert missing parameters for keywords without any default values pre-defined
+
+### Changed
+
+- Changed matching logic for code completion suggestions. They are based now on Camel Humps matching
+- Don't fold variables with a complex variable content (i.e. nested variables)
+- Removed support for special characters `*` and `/` at the start of a keyword. The insertion of mandatory parameters is handled by the quick fix already available. The insertion of optional
+  parameters is now available via a new intention
+- Insert missing parameters for keywords as variable expressions instead of plain text
+
+### Fixed
+
+- Not correctly detected variables in some cases like local settings
+- QuickFix to insert missing mandatory parameters for keyword calls
+- Fixed rename-refactor when triggered on keyword calls in Robot files referencing a python function
+- Fixed missing execute icon on test case headers when the test case is a data-driven one
+- Fixed inconsistent code completion suggestions for keywords (some keywords weren't shown in the results list even though they matched the input)
+- Fixed resolving of template parameter names in data driven tests
+- Fixed parsing of global setting metadata
+- Fixed incorrect testcase, task and keyword name detection in some constellations with special characters in their names
+- Fixed highlighting of NONE constant in local settings
+
+## 0.6.1
+
+### Changed
+
+- Modifications to stay compatible with the upcoming PyCharm version 2026.1
+
+### Fixed
+
+- Fixed collision of TestFailedLine inspection with IntelliJ IDEA's own inspection
+
+## 0.6.0
+
+### Added
+
 - Update gutter icon based on robot execution results
 - Mark failed keyword calls in editor like for other failed tests in any test framework
 - Added a new inspection to detect arguments that looks like they should be variables instead (currently only global standard variable) and provide a quickfix
@@ -31,6 +89,13 @@
 - Changed the deprecation check into an inspection to be able to suppress it with comment suppression
 - Changed folding logic to keep important editor elements visible when folding multi-line statements
 - Optimized code completion for reserved keywords to provide a more context-sensitive list of suggestions
+- Optimized code completion to show results faster by defining small groups of sources to load and add as completion results step by step rather collecting all first and then add as results
+- Reworked code completion for variables:
+    - Variables are represented now by their robot variable type prefix ($, @, & or %) followed by the variable name
+    - The variables with their braces (something like ${variable}) are added only when the cursor isn't placed in a variable itself, otherwise just the name of the variable without the braces and
+      variable type are added. This change explicitly provides a predictable behavior for code completions, especially with TAB insertion (replacing the element the cursor is placed at)
+    - When typing the variable type prefix ($, @, & or %) the code completion shows only variables of this type
+- Optimized performance for find usages, especially when looking for keyword usages in large projects
 
 ### Fixed
 

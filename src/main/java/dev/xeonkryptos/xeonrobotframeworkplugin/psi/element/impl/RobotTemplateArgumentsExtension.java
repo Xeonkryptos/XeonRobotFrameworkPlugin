@@ -1,6 +1,7 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl;
 
 import com.intellij.lang.ASTNode;
+import com.intellij.psi.PsiElement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.DefinedParameter;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotArgument;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCall;
@@ -41,17 +42,12 @@ public abstract class RobotTemplateArgumentsExtension extends RobotPsiElementBas
     }
 
     @Override
-    public Collection<RobotArgument> getPositionalArguments() {
-        return getTemplateArgumentList().stream().map(argument -> (RobotArgument) argument).collect(Collectors.toList());
-    }
-
-    @Override
-    public Collection<DefinedParameter> computeMissingParameters() {
+    public Collection<DefinedParameter> computeMissingParameters(PsiElement ignorableElement) {
         RobotKeywordCall templateKeywordCall = KeywordUtil.findTemplateKeywordCall(this);
         if (templateKeywordCall == null) {
             return List.of();
         }
-        return KeywordParameterEvaluator.computeMissingParameters(templateKeywordCall, this);
+        return KeywordParameterEvaluator.computeMissingParameters(templateKeywordCall, this, ignorableElement);
     }
 
     @Override

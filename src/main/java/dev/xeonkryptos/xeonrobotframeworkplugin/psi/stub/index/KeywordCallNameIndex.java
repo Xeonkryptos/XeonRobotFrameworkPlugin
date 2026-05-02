@@ -6,11 +6,12 @@ import com.intellij.psi.stubs.StringStubIndexExtension;
 import com.intellij.psi.stubs.StubIndex;
 import com.intellij.psi.stubs.StubIndexKey;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCall;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotStubFileElementType;
 import dev.xeonkryptos.xeonrobotframeworkplugin.util.KeywordUtil;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 public class KeywordCallNameIndex extends StringStubIndexExtension<RobotKeywordCall> {
 
@@ -34,8 +35,22 @@ public class KeywordCallNameIndex extends StringStubIndexExtension<RobotKeywordC
         return StubIndex.getElements(stubIndexKey, normalizedKeywordName, project, scope, RobotKeywordCall.class);
     }
 
+    public Collection<RobotKeywordCall> getKeywordCalls(@NotNull Project project, @NotNull GlobalSearchScope scope) {
+        Set<String> potentialKeywordCallNames = new LinkedHashSet<>();
+        StubIndex.getInstance().processAllKeys(KEY, key -> {
+            potentialKeywordCallNames.add(key);
+            return true;
+        }, scope);
+        Set<RobotKeywordCall> locatedKeywordCalls = new LinkedHashSet<>();
+        for (String potentialKeywordCallName : potentialKeywordCallNames) {
+            Collection<RobotKeywordCall> keywordCalls = StubIndex.getElements(KEY, potentialKeywordCallName, project, scope, RobotKeywordCall.class);
+            locatedKeywordCalls.addAll(keywordCalls);
+        }
+        return locatedKeywordCalls;
+    }
+
     @Override
     public int getVersion() {
-        return RobotStubFileElementType.STUB_FILE_VERSION + super.getVersion() + 3;
+        return super.getVersion() + 7;
     }
 }

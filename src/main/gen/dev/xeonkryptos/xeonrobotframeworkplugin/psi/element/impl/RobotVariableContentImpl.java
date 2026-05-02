@@ -9,7 +9,8 @@ import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.*;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.*;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotPsiImplUtil;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotPsiUtil;
+import com.intellij.psi.PsiReference;
 
 public class RobotVariableContentImpl extends RobotPsiElementBase implements RobotVariableContent {
 
@@ -34,16 +35,8 @@ public class RobotVariableContentImpl extends RobotPsiElementBase implements Rob
   }
 
   @Override
-  @NotNull
-  public List<RobotVariableBodyId> getVariableBodyIdList() {
-    return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotVariableBodyId.class);
-  }
-
-  @Override
-  @Nullable
-  public RobotVariableBodyId getContent() {
-    List<RobotVariableBodyId> p1 = getVariableBodyIdList();
-    return p1.size() < 1 ? null : p1.get(0);
+  public @NotNull PsiReference getReference() {
+    return RobotPsiUtil.getReference(this);
   }
 
 }

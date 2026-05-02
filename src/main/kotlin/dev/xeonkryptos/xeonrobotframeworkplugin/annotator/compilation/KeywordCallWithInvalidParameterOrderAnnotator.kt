@@ -7,7 +7,6 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.annotator.RobotAnnotator
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCall
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotParameter
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.visitor.RobotCallArgumentsCollector
-import dev.xeonkryptos.xeonrobotframeworkplugin.util.KeyUtils
 
 class KeywordCallWithInvalidParameterOrderAnnotator : RobotAnnotator() {
 
@@ -18,7 +17,7 @@ class KeywordCallWithInvalidParameterOrderAnnotator : RobotAnnotator() {
         var parameterFound = false
         for (argument in robotCallArgumentsCollector.arguments) {
             if (argument is RobotParameter) {
-                parameterFound = argument.getUserData(KeyUtils.HANDLED_AS_SIMPLE_ARGUMENT_KEY)?.not() ?: false
+                parameterFound = argument.isFakeParameter
             } else if (parameterFound) {
                 holder.newAnnotation(HighlightSeverity.ERROR, RobotBundle.message("annotation.keyword.arguments.mixed"))
                     .highlightType(ProblemHighlightType.GENERIC_ERROR)

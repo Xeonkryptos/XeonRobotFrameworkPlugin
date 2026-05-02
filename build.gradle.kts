@@ -1,6 +1,8 @@
 import org.jetbrains.changelog.Changelog
 import org.jetbrains.changelog.markdownToHTML
+import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.TestFrameworkType
+import org.jetbrains.intellij.platform.gradle.extensions.intellijPlatform
 import org.jetbrains.intellij.platform.gradle.models.ProductRelease
 import org.jetbrains.intellij.platform.gradle.tasks.PrepareSandboxTask
 
@@ -10,7 +12,7 @@ plugins {
     // Java support
     id("java")
     // gradle-intellij-plugin - read more: https://github.com/JetBrains/gradle-intellij-plugin
-    id("org.jetbrains.intellij.platform") version "2.10.5"
+    id("org.jetbrains.intellij.platform") version "2.15.0"
     // gradle-changelog-plugin - read more: https://github.com/JetBrains/gradle-changelog-plugin
     id("org.jetbrains.changelog") version "2.5.0"
 
@@ -38,11 +40,13 @@ repositories {
 
     intellijPlatform {
         defaultRepositories()
-        jetbrainsRuntime()
     }
 }
 
 dependencies {
+    compileOnly("org.projectlombok:lombok:1.18.46")
+    annotationProcessor("org.projectlombok:lombok:1.18.46")
+
     implementation("org.eclipse.lsp4j:org.eclipse.lsp4j.debug:0.24.0")
     implementation("org.apache.commons:commons-text:1.15.0")
 
@@ -75,7 +79,7 @@ changelog {
     path.set(file("CHANGELOG.md").canonicalPath)
     itemPrefix.set("-")
     lineSeparator.set("\n")
-    keepUnreleasedSection.set(false)
+    keepUnreleasedSection.set(true)
 }
 
 intellijPlatform {
@@ -84,7 +88,7 @@ intellijPlatform {
         id = properties("pluginGroup")
         name = properties("pluginName")
         version = properties("pluginVersion")
-        description = File("./README.md").readText().lines().run {
+        description = file("README.md").readText().lines().run {
             val start = "<!-- Plugin description -->"
             val end = "<!-- Plugin description end -->"
 
@@ -114,8 +118,8 @@ intellijPlatform {
 
     pluginVerification {
         ides {
-            recommended()
             select {
+                types = listOf(IntelliJPlatformType.IntellijIdea, IntelliJPlatformType.PyCharm)
                 channels = listOf(ProductRelease.Channel.EAP, ProductRelease.Channel.RELEASE)
                 sinceBuild = properties("pluginSinceBuild")
                 untilBuild = properties("pluginUntilBuild")
@@ -146,7 +150,7 @@ tasks {
     patchPluginXml {
         changeNotes.set(provider {
             changelog.renderItem(
-                changelog.getLatest().withHeader(false).withEmptySections(false), Changelog.OutputType.HTML
+                changelog.getUnreleased().withHeader(false).withEmptySections(false), Changelog.OutputType.HTML
             )
         })
     }

@@ -11,7 +11,7 @@ public interface RobotTasksSection extends RobotSection, RobotScopeOwner, NameId
   List<RobotTaskStatement> getTaskStatementList();
 
   @NotNull
-  PsiElement getNameIdentifier();
+  RobotTasksHeader getNameIdentifier();
 
   @NotNull String getSectionName();
 

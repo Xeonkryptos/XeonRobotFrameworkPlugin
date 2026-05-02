@@ -5,7 +5,7 @@ import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 
-public interface RobotWhileLoopHeader extends RobotElement {
+public interface RobotWhileLoopHeader extends RobotMultiLineContainerElement, RobotElement {
 
   @Nullable
   RobotConditionalContent getConditionalContent();

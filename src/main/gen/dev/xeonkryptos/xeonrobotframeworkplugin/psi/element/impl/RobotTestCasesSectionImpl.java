@@ -9,7 +9,7 @@ import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.*;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.*;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotPsiImplUtil;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotPsiUtil;
 
 public class RobotTestCasesSectionImpl extends RobotSectionImpl implements RobotTestCasesSection {
 
@@ -36,13 +36,13 @@ public class RobotTestCasesSectionImpl extends RobotSectionImpl implements Robot
 
   @Override
   @NotNull
-  public PsiElement getNameIdentifier() {
-    return notNullChild(findChildByType(TEST_CASES_HEADER));
+  public RobotTestCasesHeader getNameIdentifier() {
+    return notNullChild(PsiTreeUtil.getChildOfType(this, RobotTestCasesHeader.class));
   }
 
   @Override
   public @NotNull String getSectionName() {
-    return RobotPsiImplUtil.getSectionName(this);
+    return RobotPsiUtil.getSectionName(this);
   }
 
 }

@@ -18,8 +18,8 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.DefinedVariable;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.ReservedVariable;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
 import java.util.Collection;
+import java.util.LinkedHashSet;
 import java.util.Map;
 
 public class RobotFileManager {
@@ -53,9 +53,7 @@ public class RobotFileManager {
                 return cachedFiles;
             }
 
-            Collection<PyFile> pyFiles = PyModuleNameIndex.findByQualifiedName(QualifiedName.fromDottedString("robot.libraries"),
-                                                                               project,
-                                                                               PySearchUtilBase.excludeSdkTestsScope(project));
+            Collection<PyFile> pyFiles = PyModuleNameIndex.findByQualifiedName(QualifiedName.fromDottedString("robot.libraries"), project, PySearchUtilBase.excludeSdkTestsScope(project));
             for (PyFile pyFile : pyFiles) {
                 PsiFile[] files = pyFile.getContainingDirectory().getFiles();
                 for (PsiFile file : files) {
@@ -79,14 +77,12 @@ public class RobotFileManager {
                 for (ReservedVariable reservedVariable : reservedVariables) {
                     PsiElement element = reservedVariable.getReferencedPsiElement(project);
                     if (element != null) {
-                        globalVariables.add(new VariableDto(element,
-                                                            reservedVariable.getVariable(),
-                                                            reservedVariable.getUnwrappedVariable(),
-                                                            reservedVariable.getScope()));
+                        globalVariables.add(new VariableDto(element, reservedVariable.getVariable(), reservedVariable.getVariableType(), reservedVariable.getScope()));
                     }
                 }
             }
-            return new ArrayList<>(globalVariables);
+            // Return a new collection to prevent external modification and concurrent modification issues
+            return new LinkedHashSet<>(globalVariables);
         }
     }
 }

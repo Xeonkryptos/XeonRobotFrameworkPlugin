@@ -9,7 +9,11 @@ public interface RobotKeywordCallExpression {
 
     Collection<DefinedParameter> getAvailableParameters();
 
+    boolean hasPositionalArgumentsContainer();
+
     OptionalInt getStartOfKeywordsOnlyIndex();
+
+    OptionalInt getPositionalArgumentsOnlyEndIndex();
 
     PsiElement findParameterReference(String parameterName);
 }

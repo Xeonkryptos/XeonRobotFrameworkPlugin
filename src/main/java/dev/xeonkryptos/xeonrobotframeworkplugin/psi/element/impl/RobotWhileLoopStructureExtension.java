@@ -10,7 +10,6 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotWhileLoopHeader
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotWhileLoopStructure;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.folding.RobotFoldingComputationUtil;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
@@ -20,20 +19,19 @@ public abstract class RobotWhileLoopStructureExtension extends RobotExecutableSt
         super(node);
     }
 
-    @Nullable
     @Override
-    public FoldingDescriptor[] fold(@NotNull Document document) {
+    public @NotNull FoldingDescriptor @NotNull [] fold(@NotNull Document document, boolean quick) {
         RobotWhileLoopHeader whileLoopHeader = getWhileLoopHeader();
         List<RobotExecutableStatement> executableStatements = getExecutableStatementList();
         PsiElement endElement = findChildByType(RobotTypes.END);
         if (endElement == null) {
-            return null;
+            return FoldingDescriptor.EMPTY_ARRAY;
         }
         List<FoldingDescriptor> foldingDescriptors = RobotFoldingComputationUtil.computeFoldingDescriptorsForBlockStructure(this,
                                                                                                                             whileLoopHeader,
                                                                                                                             executableStatements,
                                                                                                                             document,
                                                                                                                             endElement.getTextRange().getStartOffset());
-        return !foldingDescriptors.isEmpty() ? foldingDescriptors.toArray(FoldingDescriptor.EMPTY_ARRAY) : null;
+        return !foldingDescriptors.isEmpty() ? foldingDescriptors.toArray(FoldingDescriptor.EMPTY_ARRAY) : FoldingDescriptor.EMPTY_ARRAY;
     }
 }

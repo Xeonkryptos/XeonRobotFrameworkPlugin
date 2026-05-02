@@ -6,6 +6,8 @@ import com.intellij.codeInspection.ProblemHighlightType;
 import com.intellij.codeInspection.ProblemsHolder;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiElementVisitor;
+import com.intellij.psi.PsiPolyVariantReference;
+import com.intellij.psi.ResolveResult;
 import com.intellij.psi.util.PsiTreeUtil;
 import com.jetbrains.python.psi.PyFunction;
 import com.jetbrains.python.psi.PyStringLiteralExpression;
@@ -14,7 +16,7 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCallLibr
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCallName;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotUserKeywordStatement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariable;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableBodyId;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableContent;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableDefinition;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVisitor;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.RobotPyUtil;
@@ -70,11 +72,11 @@ public class WeirdlyNamedElementsInspection extends LocalInspectionTool {
             }
 
             @Override
-            public void visitVariableBodyId(@NotNull RobotVariableBodyId o) {
+            public void visitVariableContent(@NotNull RobotVariableContent o) {
                 RobotVariable variable = PsiTreeUtil.getParentOfType(o, RobotVariable.class);
                 if (variable != null && !(variable.getParent() instanceof RobotVariableDefinition)) {
-                    PsiElement element = o.getReference().resolve();
-                    if (element instanceof RobotVariableDefinition definition) {
+                    ResolveResult [] elements = ((PsiPolyVariantReference) o.getReference()).multiResolve(false);
+                    if (elements.length > 0 && elements[0] instanceof RobotVariableDefinition definition) {
                         String definedName = definition.getName();
                         int variableBodyTextOffset = o.getTextOffset();
                         int variableTextOffset = variable.getTextOffset() + 2; // account for variable start

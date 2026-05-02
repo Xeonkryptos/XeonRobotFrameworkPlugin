@@ -6,8 +6,10 @@ import com.intellij.codeInspection.ProblemHighlightType
 import com.intellij.codeInspection.ProblemsHolder
 import com.intellij.openapi.project.DumbAware
 import com.intellij.psi.PsiElementVisitor
+import com.intellij.psi.util.parentOfType
 import dev.xeonkryptos.xeonrobotframeworkplugin.RobotBundle
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLiteralConstantValue
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLocalSetting
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotPositionalArgument
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVisitor
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.ReservedVariable
@@ -21,7 +23,10 @@ class RobotVariableRatherArgumentMeantInspection : LocalInspectionTool(), DumbAw
             override fun visitLiteralConstantValue(o: RobotLiteralConstantValue) {
                 if (o.parent is RobotPositionalArgument) {
                     val argumentText = o.text
-                    val reservedVariableFound = ReservedVariable.entries.any { it.unwrappedVariable.contentEquals(argumentText, true) }
+                    var reservedVariableFound = ReservedVariable.entries.any { it.variable.contentEquals(argumentText, true) }
+                    if (ReservedVariable.NONE.variable.contentEquals(argumentText, true)) {
+                        reservedVariableFound = o.parentOfType<RobotLocalSetting>(false) == null
+                    }
                     if (reservedVariableFound) {
                         holder.registerProblem(
                             o,

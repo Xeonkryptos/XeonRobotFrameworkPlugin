@@ -6,12 +6,13 @@ import com.intellij.psi.stubs.StringStubIndexExtension;
 import com.intellij.psi.stubs.StubIndex;
 import com.intellij.psi.stubs.StubIndexKey;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableDefinition;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotStubFileElementType;
 import dev.xeonkryptos.xeonrobotframeworkplugin.util.VariableNameUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 public class VariableDefinitionNameIndex extends StringStubIndexExtension<RobotVariableDefinition> {
 
@@ -29,20 +30,31 @@ public class VariableDefinitionNameIndex extends StringStubIndexExtension<RobotV
         return KEY;
     }
 
-    public Collection<RobotVariableDefinition> getVariableDefinitions(@NotNull String variableName,
-                                                                      @NotNull Project project,
-                                                                      @Nullable GlobalSearchScope scope) {
+    public Collection<RobotVariableDefinition> getVariableDefinitions(@NotNull String variableName, @NotNull Project project, @Nullable GlobalSearchScope scope) {
         StubIndexKey<String, RobotVariableDefinition> stubIndexKey = getKey();
         return VariableNameUtil.INSTANCE.computeVariableNameVariants(variableName)
                                         .stream()
-                                        .flatMap(variant -> StubIndex.getElements(stubIndexKey, variant, project, scope, RobotVariableDefinition.class)
-                                                                     .stream())
+                                        .flatMap(variant -> StubIndex.getElements(stubIndexKey, variant, project, scope, RobotVariableDefinition.class).stream())
                                         .distinct()
                                         .toList();
     }
 
+    public Collection<RobotVariableDefinition> getVariableDefinitions(@NotNull Project project, @NotNull GlobalSearchScope scope) {
+        Set<String> potentialVariableDefinitionNames = new LinkedHashSet<>();
+        StubIndex.getInstance().processAllKeys(KEY, key -> {
+            potentialVariableDefinitionNames.add(key);
+            return true;
+        }, scope);
+        Set<RobotVariableDefinition> locatedVariableDefinitions = new LinkedHashSet<>();
+        for (String potentialVariableDefinitionName : potentialVariableDefinitionNames) {
+            Collection<RobotVariableDefinition> variableDefinitions = StubIndex.getElements(KEY, potentialVariableDefinitionName, project, scope, RobotVariableDefinition.class);
+            locatedVariableDefinitions.addAll(variableDefinitions);
+        }
+        return locatedVariableDefinitions;
+    }
+
     @Override
     public int getVersion() {
-        return RobotStubFileElementType.STUB_FILE_VERSION + super.getVersion() + 2;
+        return super.getVersion() + 7;
     }
 }

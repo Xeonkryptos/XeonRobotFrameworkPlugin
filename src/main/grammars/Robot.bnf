@@ -11,7 +11,7 @@
   psiImplClassSuffix="Impl"
   psiPackage="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element"
   psiImplPackage="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl"
-  psiImplUtilClass="dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotPsiImplUtil"
+  psiImplUtilClass="dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotPsiUtil"
 
   elementTypeHolderClass="dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes"
   elementTypeClass="dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotElementType"
@@ -56,28 +56,58 @@ section ::= settings_section
     mixin="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotSectionExtension"
 }
 
-settings_section ::= SETTINGS_HEADER global_setting_statement* {methods=[nameIdentifier="SETTINGS_HEADER" getSectionName]}
-variables_section ::= VARIABLES_HEADER single_variable_statement* {methods=[nameIdentifier="VARIABLES_HEADER" getSectionName]}
-test_cases_section ::= TEST_CASES_HEADER test_case_statement* {methods=[nameIdentifier="TEST_CASES_HEADER" getSectionName] implements="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotScopeOwner"}
-tasks_section ::= TASKS_HEADER task_statement* {methods=[nameIdentifier="TASKS_HEADER" getSectionName] implements="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotScopeOwner"}
-keywords_section ::= USER_KEYWORDS_HEADER user_keyword_statement* {methods=[nameIdentifier="USER_KEYWORDS_HEADER" getSectionName] implements="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotScopeOwner"}
-comments_section ::= COMMENTS_HEADER COMMENT* {methods=[nameIdentifier="COMMENTS_HEADER" getSectionName]}
-private section_recover ::= !(SETTINGS_HEADER | VARIABLES_HEADER | TEST_CASES_HEADER | TASKS_HEADER | USER_KEYWORDS_HEADER | COMMENTS_HEADER)
+settings_section ::= SETTINGS_HEADER eol_marker? setting_statement* {methods=[nameIdentifier="SETTINGS_HEADER" getSectionName]}
+variables_section ::= VARIABLES_HEADER eol_marker? variable_statements? {methods=[nameIdentifier="VARIABLES_HEADER" getSectionName]}
+test_cases_section ::= test_cases_header eol_marker? test_case_statement* {methods=[nameIdentifier="test_cases_header" getSectionName] implements="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotScopeOwner"}
+tasks_section ::= tasks_header eol_marker? task_statement* {methods=[nameIdentifier="tasks_header" getSectionName] implements="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotScopeOwner"}
+keywords_section ::= USER_KEYWORDS_HEADER eol_marker? user_keyword_statement* {methods=[nameIdentifier="USER_KEYWORDS_HEADER" getSectionName] implements="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotScopeOwner"}
+comments_section ::= COMMENTS_HEADER eol_marker? COMMENT* {methods=[nameIdentifier="COMMENTS_HEADER" getSectionName]}
+private section_recover ::= !(SETTINGS_HEADER | VARIABLES_HEADER | test_cases_header | tasks_header | USER_KEYWORDS_HEADER | COMMENTS_HEADER)
 
-global_setting_statement ::= library_import_global_setting
-    | resource_import_global_setting
-    | variables_import_global_setting
-    | metadata_statement_global_setting
+test_cases_header ::= TEST_CASES_HEADER_NAME DATA_DRIVEN_COLUMN_NAME*
+tasks_header ::= TASKS_HEADER_NAME DATA_DRIVEN_COLUMN_NAME*
+
+variable_statements ::= single_variable_statement+
+
+fake global_setting_statement ::= import_settings
+    | metadata_settings
     | documentation_statement_global_setting
     | suite_name_statement_global_setting
-    | setup_teardown_statements_global_setting
+    | setup_teardown_settings
     | tags_statement_global_setting
     | template_statements_global_setting_wrapper
     | timeout_statements_global_setting
     | unknown_setting_statements_global_setting {
-    implements="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotFoldable"
+    implements=["dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotFoldable" "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotMultiLineContainerElement"]
     mixin="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotGlobalSettingExtension"
     name="Resource, Library, Variables, Metadata, Documentation, Name, Suite (Setup | Teardown), Force Tags, (Test | Task) Template, (Test | Task) Timeout"
+}
+
+private setting_statement ::= import_settings
+    | metadata_settings
+    | documentation_statement_global_setting
+    | suite_name_statement_global_setting
+    | setup_teardown_settings
+    | tags_statement_global_setting
+    | template_statements_global_setting_wrapper
+    | timeout_statements_global_setting
+    | unknown_setting_statements_global_setting
+
+metadata_settings ::= metadata_statement_global_setting+ {
+    implements="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotFoldable"
+    mixin="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotMetadataSettingsExtension"
+}
+
+import_settings ::= (library_import_global_setting
+    | resource_import_global_setting
+    | variables_import_global_setting)+ {
+    implements="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotFoldable"
+    mixin="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotImportSettingsExtension"
+}
+
+setup_teardown_settings ::= setup_teardown_statements_global_setting+ {
+    implements="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotFoldable"
+    mixin="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotSetupTeardownSettingsExtension"
 }
 
 library_import_global_setting ::= LIBRARY_IMPORT_KEYWORD import_argument (parameter | positional_argument)* (WITH_NAME new_library_name)? eol_marker {
@@ -102,9 +132,9 @@ documentation_statement_global_setting ::= DOCUMENTATION_KEYWORD LITERAL_CONSTAN
     pin=1
     methods = [nameElement="DOCUMENTATION_KEYWORD"]
 }
-metadata_statement_global_setting ::= METADATA_KEYWORD parameter* eol_marker {
+metadata_statement_global_setting ::= METADATA_KEYWORD positional_argument positional_argument eol_marker {
     pin=1
-    methods = [nameElement="METADATA_KEYWORD"]
+    methods = [nameElement="METADATA_KEYWORD" metadataName="literal_constant_value" metadataValue="positional_argument"]
 }
 setup_teardown_statements_global_setting ::= SETUP_TEARDOWN_STATEMENT_KEYWORDS (eol_based_keyword_call | variable) {
     pin=1
@@ -144,7 +174,7 @@ test_case_statement ::= test_case_id eol_marker? testcase_task_statement* {
     recoverWhile=test_case_statement_recover
     hooks=[clearTemplateStateHook]
 }
-test_case_id ::= TEST_CASE_NAME
+test_case_id ::= (TEST_CASE_NAME_PART | variable)+ EOS?
 private test_case_statement_recover ::= !test_case_id & section_recover
 task_statement ::= task_id eol_marker? testcase_task_statement* {
     pin=1
@@ -162,14 +192,15 @@ task_statement ::= task_id eol_marker? testcase_task_statement* {
     recoverWhile=task_statement_recover
     hooks=[clearTemplateStateHook]
 }
-task_id ::= TASK_NAME
+task_id ::= (TASK_NAME_PART | variable)+ EOS?
 private task_statement_recover ::= !task_id & section_recover
 
-private testcase_task_statement ::= local_setting | <<parseTestcaseTaskStatement template_arguments bdd_statement executable_statement>> {
+private testcase_task_statement ::= local_setting | <<parseTestcaseTaskStatement template_test_case_body bdd_statement executable_statement>> {
     recoverWhile=testcase_task_statement_recover
 }
 private testcase_task_statement_recover ::= !(local_setting_id | TEMPLATE_ARGUMENT_VALUE | template_parameter_id | GIVEN | WHEN | task_id | test_case_id) & section_recover & executable_statement_recover
 
+private template_test_case_body ::= for_loop_structure | conditional_structure | template_arguments
 template_arguments ::= (template_argument | template_parameter)+ eol_marker {
     pin=1
     implements=[
@@ -179,7 +210,7 @@ template_arguments ::= (template_argument | template_parameter)+ eol_marker {
     mixin="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotTemplateArgumentsExtension"
 }
 
-template_parameter ::= template_parameter_id ASSIGNMENT template_argument {
+template_parameter ::= template_parameter_id PARAMETER_ASSIGNMENT template_argument {
     pin=2
     methods=[getParameterName]
     implements="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotArgument"
@@ -213,13 +244,13 @@ user_keyword_statement ::= user_keyword_statement_id eol_marker (local_arguments
     methods = [getNameIdentifier getName getQualifiedName]
     recoverWhile=user_keyword_statement_recover
 }
-user_keyword_statement_id ::= USER_KEYWORD_NAME
+user_keyword_statement_id ::= (USER_KEYWORD_NAME_PART | variable)+ EOS?
 private user_keyword_statement_recover ::= !user_keyword_statement_id & section_recover
 
 local_setting ::= local_setting_id (positional_argument | eol_free_keyword_call)* eol_marker {
     pin=1
     methods=[getSettingName]
-    implements="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotFoldable"
+    implements=["dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotFoldable" "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotMultiLineContainerElement"]
     mixin="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotLocalSettingExtension"
     hooks=[localTemplateDefinitionHook]
 }
@@ -228,7 +259,7 @@ local_setting_id ::= LOCAL_SETTING_START LOCAL_SETTING_NAME LOCAL_SETTING_END {m
 local_arguments_setting ::= local_arguments_setting_id local_arguments_setting_parameter* eol_marker {
     pin=1
     methods=[getSettingName]
-    implements="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotFoldable"
+    implements=["dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotFoldable" "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotMultiLineContainerElement"]
     mixin="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotLocalArgumentsSettingExtension"
 }
 local_arguments_setting_id ::= LOCAL_SETTING_START "Arguments" LOCAL_SETTING_END {methods=[getSettingName] pin=2}
@@ -241,11 +272,11 @@ private executable_statement_recover ::= !(FOR | WHILE | IF | ELSE_IF | ELSE | T
 
 private control_structure ::= conditional_structure | conditional_inline_structure | exception_handling_structure | group_structure
 private loop_structure ::= for_loop_structure | while_loop_structure
-private call_structure ::= eol_based_keyword_call | inline_variable_statement | keyword_variable_statement | if_variable_statement | empty_variable_statement
+private call_structure ::= eol_based_keyword_call | inline_variable_statement | keyword_variable_statement | empty_variable_statement | if_variable_statement
 loop_control_structure ::= (BREAK | CONTINUE) eol_marker?
-return_structure ::= RETURN positional_argument* eol_marker? {pin=1}
+return_structure ::= RETURN positional_argument* eol_marker? {pin=1 implements="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotMultiLineContainerElement"}
 
-for_loop_structure ::= for_loop_header eol_marker executable_statement* END eol_marker {
+for_loop_structure ::= for_loop_header_base eol_marker (template_arguments | executable_statement*) END eol_marker {
     pin=1
     implements=[
         "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotBlockOpeningStructure"
@@ -253,11 +284,25 @@ for_loop_structure ::= for_loop_header eol_marker executable_statement* END eol_
     ]
     mixin="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotForLoopStructureExtension"
 }
-for_loop_header ::= FOR variable_definition+ FOR_IN positional_argument+ for_loop_structure_parameter* {pin=1 methods=[forInElement="FOR_IN"]}
+
+private for_loop_header_base ::= for_in_loop_header | for_in_range_loop_header | for_in_enumerate_loop_header | for_in_zip_loop_header
+fake for_loop_header ::= FOR variable_definition+ (FOR_IN | FOR_IN_RANGE | FOR_IN_ENUMERATE | FOR_IN_ZIP) positional_argument+ for_loop_structure_parameter* {
+    methods=[getForInElement]
+    implements="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotMultiLineContainerElement"
+}
+for_in_loop_header ::= FOR variable_definition+ FOR_IN positional_argument+ for_loop_structure_parameter* {pin=3 elementType=for_loop_header}
+for_in_range_loop_header ::= FOR variable_definition FOR_IN_RANGE positional_argument positional_argument? positional_argument? for_loop_structure_parameter* {
+    pin=3
+    elementType=for_loop_header
+}
+for_in_enumerate_loop_header ::= FOR variable_definition+ FOR_IN_ENUMERATE positional_argument+ for_loop_structure_parameter* {pin=3 elementType=for_loop_header}
+for_in_zip_loop_header ::= FOR variable_definition+ FOR_IN_ZIP positional_argument positional_argument+ for_loop_structure_parameter* {pin=3 elementType=for_loop_header}
+
 for_loop_structure_parameter ::= for_loop_structure_fill_parameter | for_loop_structure_mode_parameter | for_loop_structure_start_parameter
 for_loop_structure_mode_parameter ::= "mode" ASSIGNMENT ("STRICT" | "SHORTEST" | "LONGEST") {pin=2}
 for_loop_structure_fill_parameter ::= "fill" ASSIGNMENT positional_argument {pin=2}
 for_loop_structure_start_parameter ::= "start" ASSIGNMENT positional_argument {pin=2}
+
 while_loop_structure ::= while_loop_header eol_marker executable_statement* END eol_marker {
     pin=1
     implements=[
@@ -266,30 +311,30 @@ while_loop_structure ::= while_loop_header eol_marker executable_statement* END 
     ]
     mixin="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotWhileLoopStructureExtension"
 }
-while_loop_header ::= WHILE conditional_content (EOS parameter+)? {pin=1}
+while_loop_header ::= WHILE conditional_content (EOS parameter+)? {pin=1 implements="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotMultiLineContainerElement"}
 conditional_structure ::= if_structure else_if_structure* else_structure? END eol_marker {
     pin=1
     implements="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotFoldable"
     mixin="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotConditionalStructureExtension"
 }
 private conditional_inline_structure ::= inline_if_structure inline_else_if_structure* inline_else_structure? eol_marker? {pin=1}
-if_structure ::= IF conditional_content eol_marker executable_statement* {
+if_structure ::= IF conditional_content eol_marker (template_arguments | executable_statement*) {
     pin=3
     implements="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotBlockOpeningStructure"
 }
-inline_if_structure ::= IF conditional_content EOS call_structure {
+inline_if_structure ::= IF conditional_content EOS (template_arguments | call_structure) {
     pin=3
     implements="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotBlockOpeningStructure"
 }
-else_if_structure ::= ELSE_IF conditional_content eol_marker executable_statement* {
+else_if_structure ::= ELSE_IF conditional_content eol_marker (template_arguments | executable_statement) {
     pin=3
     implements="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotBlockOpeningStructure"
 }
-inline_else_if_structure ::= ELSE_IF conditional_content EOS call_structure {
+inline_else_if_structure ::= ELSE_IF conditional_content EOS (template_arguments | call_structure) {
     pin=3
     implements="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotBlockOpeningStructure"
 }
-inline_else_structure ::= ELSE call_structure {
+inline_else_structure ::= ELSE (template_arguments | call_structure) {
     pin=2
     implements="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotBlockOpeningStructure"
 }
@@ -348,6 +393,7 @@ fake keyword_call ::= base_keyword_call {
         "com.intellij.navigation.NavigationItem"
         "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotCallArgumentsContainer"
         "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotFoldable"
+        "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotMultiLineContainerElement"
     ]
     methods = [getName getNameIdentifier]
     mixin = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotKeywordCallExtension"
@@ -363,20 +409,19 @@ keyword_call_name ::= keyword_call_library? KEYWORD_NAME { methods = [getReferen
 keyword_call_library ::= keyword_call_library_name KEYWORD_LIBRARY_SEPARATOR
 keyword_call_library_name ::= KEYWORD_LIBRARY_NAME {methods = [getReference]}
 
-parameter ::= parameter_id ASSIGNMENT positional_argument? {
+parameter ::= parameter_id PARAMETER_ASSIGNMENT positional_argument? {
     methods=[getParameterName]
-    implements="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotArgument"
+    implements=["dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotArgument" "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.FakeParameterIdentifier"]
+    mixin="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotParameterExtension"
 }
 parameter_id ::= PARAMETER_NAME {methods = [getReference]}
 
-fake variable_statement ::= DUMMY {methods = [getIcon]}
+fake variable_statement ::= DUMMY {methods = [getIcon] implements="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotMultiLineContainerElement"}
 single_variable_statement ::= variable_definition ASSIGNMENT? variable_value* parameter? eol_marker? {pin=3}
-// TODO: Extra token for ${EMPTY}? Spaces and underscores in-between, before and after the word are ignored by default. Nothing that can be handled by string matching in the parser.
-//  Or define a custom parser rule to detect the empty variable itself
-empty_variable_statement ::= variable_definition ASSIGNMENT? "${EMPTY}" eol_marker? {pin=3}
 inline_variable_statement ::= VAR variable_definition ASSIGNMENT? variable_value+ parameter? eol_marker? {pin=1}
-keyword_variable_statement ::= variable_definition+ ASSIGNMENT? eol_based_keyword_call {pin=3} // Without EOL as it is handled at a lower level
-if_variable_statement ::= variable_definition+ ASSIGNMENT? conditional_inline_structure {pin=3}
+empty_variable_statement ::= variable_definition ASSIGNMENT? "${EMPTY}" eol_marker? {pin=3}
+keyword_variable_statement ::= variable_definition+ ASSIGNMENT? eol_based_keyword_call // Without EOL as it is handled at a lower level
+if_variable_statement ::= variable_definition+ ASSIGNMENT? conditional_inline_structure
 variable_value ::= variable | positional_argument
 
 import_argument ::= external_positional_argument EOS? {
@@ -417,45 +462,56 @@ reduced_positional_argument ::= <<parsePositionalArgument reduced_positional_arg
 }
 private reduced_positional_argument_content ::= literal_constant_value | variable | conditional_content
 
-variable_definition ::= variable {
+variable_definition ::= scalar_variable_definition | list_variable_definition | dict_variable_definition {
     implements = [
-        "com.intellij.psi.PsiNameIdentifierOwner"
+        "com.intellij.psi.PsiNamedElement"
         "com.intellij.navigation.NavigationItem"
         "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.DefinedVariable"
         "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotQualifiedNameOwner"
+        "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotAssignedVariable"
     ]
     mixin = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotVariableDefinitionExtension"
     stubClass = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotVariableDefinitionStub"
     elementTypeFactory = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotVariableDefinitionStubElement.create"
-    methods = [getNameIdentifier getName getIcon getQualifiedName]
+    methods = [getName getIcon getQualifiedName]
 }
 
 variable ::= scalar_variable | list_variable | dict_variable | environment_variable {
-    methods = [getVariableName]
+    implements = [
+        "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotFoldable"
+        "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotAssignedVariable"
+    ]
+    methods = [getVariableName fold getAssignedValues]
 }
-scalar_variable ::= SCALAR_VARIABLE_START (variable_content | python_expression)? VARIABLE_END (extended_variable_slice_access | extended_variable_index_access | extended_variable_nested_access)* {
+scalar_variable ::= scalar_variable_definition {
     mixin = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotScalarVariableExtension"
     stubClass = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotScalarVariableStub"
     elementTypeFactory = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotScalarVariableStubElement.create"
+    methods = [getVariableName fold getAssignedValues]
 }
-list_variable ::= LIST_VARIABLE_START (variable_content | python_expression) VARIABLE_END (extended_variable_slice_access | extended_variable_index_access | extended_variable_nested_access)* {
+list_variable ::= list_variable_definition {
     mixin = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotListVariableExtension"
     stubClass = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotListVariableStub"
     elementTypeFactory = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotListVariableStubElement.create"
+    methods = [getVariableName fold getAssignedValues]
 }
-dict_variable ::= DICT_VARIABLE_START (variable_content | python_expression) VARIABLE_END extended_variable_nested_access* {
+dict_variable ::= dict_variable_definition {
     mixin = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotDictVariableExtension"
     stubClass = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotDictVariableStub"
     elementTypeFactory = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotDictVariableStubElement.create"
+    methods = [getVariableName fold getAssignedValues]
 }
-environment_variable ::= ENV_VARIABLE_START variable_content VARIABLE_END
+environment_variable ::= ENV_VARIABLE_START VARIABLE_LBRACE variable_content VARIABLE_RBRACE
 
-variable_content ::= (variable | variable_body_id)+ {
-    methods=[content="/variable_body_id[0]"]
-}
-variable_body_id ::= VARIABLE_BODY {
+private scalar_variable_definition ::= SCALAR_VARIABLE_START VARIABLE_LBRACE (variable_content | python_expression)? VARIABLE_RBRACE (extended_variable_slice_access | extended_variable_index_access | extended_variable_nested_access)* {pin=1}
+private list_variable_definition ::= LIST_VARIABLE_START VARIABLE_LBRACE (variable_content | python_expression) VARIABLE_RBRACE (extended_variable_slice_access | extended_variable_index_access | extended_variable_nested_access)* {pin=1}
+private dict_variable_definition ::= DICT_VARIABLE_START VARIABLE_LBRACE (variable_content | python_expression) VARIABLE_RBRACE extended_variable_nested_access* {pin=1}
+
+variable_content ::= (variable | VARIABLE_BODY)+ {
     methods = [getReference]
+    recoverWhile=variable_content_recover
 }
+private variable_content_recover ::= !(VARIABLE_RBRACE | eol_marker)
 python_expression ::= PYTHON_EXPRESSION_START python_expression_body PYTHON_EXPRESSION_END
 python_expression_body ::= PYTHON_EXPRESSION_CONTENT { implements="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotPythonExpressionBodyExtension"}
 
@@ -469,4 +525,6 @@ variable_nested_access_content ::= (variable | literal_constant_value)+
 
 literal_constant_value ::= LITERAL_CONSTANT
 
-private eol_marker ::= EOL+ | <<eof>>
+private eol_marker ::= EOL | <<eof>>
+//noinspection BnfUnusedRule - Simply need the token to be generated, nothing else. It will be handled as a WHITESPACE token
+private CONTINUATION_MARKER ::= CONTINUATION

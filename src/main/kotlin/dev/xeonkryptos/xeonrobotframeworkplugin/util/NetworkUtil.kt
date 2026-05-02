@@ -8,20 +8,21 @@ import java.net.ServerSocket
 object NetworkUtil {
 
     @JvmStatic
-    fun findAvailableSocketPort(port: Int): Int {
+    @JvmOverloads
+    fun findAvailableSocketPort(port: Int = 0): Int {
         try {
             ServerSocket(port).use { serverSocket ->
                 // workaround for linux : calling close() immediately after opening socket
                 // may result that socket is not closed
                 synchronized(serverSocket) {
                     try {
-                        (serverSocket as Object).wait(1)
-                    } catch (ignored: InterruptedException) {
+                        @Suppress("PLATFORM_CLASS_MAPPED_TO_KOTLIN") (serverSocket as Object).wait(1)
+                    } catch (_: InterruptedException) {
                     }
                 }
                 return serverSocket.getLocalPort()
             }
-        } catch (ignored: Exception) {
+        } catch (_: Exception) {
         }
         try {
             return NetUtils.findAvailableSocketPort()

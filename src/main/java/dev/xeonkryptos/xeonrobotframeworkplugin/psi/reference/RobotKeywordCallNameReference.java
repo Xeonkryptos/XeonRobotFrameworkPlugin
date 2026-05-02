@@ -11,7 +11,6 @@ import com.intellij.psi.impl.source.resolve.ResolveCache;
 import com.intellij.psi.search.GlobalSearchScope;
 import com.jetbrains.python.psi.PyClass;
 import com.jetbrains.python.psi.PyFunction;
-import dev.xeonkryptos.xeonrobotframeworkplugin.completion.KeywordCompletionModification;
 import dev.xeonkryptos.xeonrobotframeworkplugin.index.PyRobotKeywordDefinitionIndex.PyRobotKeywordDefinitionIndexUtil;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.dto.ImportType;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.KeywordFile;
@@ -51,11 +50,6 @@ public class RobotKeywordCallNameReference extends PsiPolyVariantReferenceBase<R
         RobotKeywordCallLibrary keywordCallLibrary = keywordCallName.getKeywordCallLibrary();
         String libraryName = keywordCallLibrary != null ? keywordCallLibrary.getKeywordCallLibraryName().getText() : null;
         String keywordName = keywordCallName.getText();
-        if (KeywordCompletionModification.isKeywordStartsWithModifier(libraryName)) {
-            libraryName = libraryName.substring(1);
-        } else if (libraryName == null && KeywordCompletionModification.isKeywordStartsWithModifier(keywordName)) {
-            keywordName = keywordName.substring(1);
-        }
         if (libraryName != null) {
             int libraryNameLength = libraryName.length();
             keywordName = keywordName.substring(libraryNameLength + 1);

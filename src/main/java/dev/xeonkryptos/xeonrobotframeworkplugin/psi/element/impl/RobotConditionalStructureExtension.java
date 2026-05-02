@@ -11,7 +11,6 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotConditionalStru
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotExecutableStatement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.folding.RobotFoldingComputationUtil;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,9 +21,8 @@ public abstract class RobotConditionalStructureExtension extends RobotExecutable
         super(node);
     }
 
-    @Nullable
     @Override
-    public FoldingDescriptor[] fold(@NotNull Document document) {
+    public @NotNull FoldingDescriptor @NotNull [] fold(@NotNull Document document, boolean quick) {
         List<FoldingDescriptor> foldingDescriptors = new ArrayList<>();
         List<RobotExecutableStatement> executableStatements = getExecutableStatementList();
         if (executableStatements.size() == 1) {
@@ -33,7 +31,7 @@ public abstract class RobotConditionalStructureExtension extends RobotExecutable
         } else {
             foldMultipleClauses(document, executableStatements, foldingDescriptors);
         }
-        return !foldingDescriptors.isEmpty() ? foldingDescriptors.toArray(FoldingDescriptor.EMPTY_ARRAY) : null;
+        return !foldingDescriptors.isEmpty() ? foldingDescriptors.toArray(FoldingDescriptor.EMPTY_ARRAY) : FoldingDescriptor.EMPTY_ARRAY;
     }
 
     private void foldSingleIfClause(@NotNull Document document, List<RobotExecutableStatement> executableStatements, List<FoldingDescriptor> foldingDescriptors) {

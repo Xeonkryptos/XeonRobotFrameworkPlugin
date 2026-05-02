@@ -7,7 +7,6 @@ import com.intellij.psi.PsiPolyVariantReferenceBase;
 import com.intellij.psi.ResolveResult;
 import com.intellij.psi.impl.source.resolve.ResolveCache;
 import com.jetbrains.python.psi.PyClass;
-import dev.xeonkryptos.xeonrobotframeworkplugin.completion.KeywordCompletionModification;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.dto.ImportType;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotFile;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCallLibraryName;
@@ -31,9 +30,6 @@ public class RobotKeywordCallLibraryReference extends PsiPolyVariantReferenceBas
         ResolveCache resolveCache = ResolveCache.getInstance(keywordCallLibraryId.getProject());
         return resolveCache.resolveWithCaching(this, (robotKeywordReference, incompCode) -> {
             String libraryName = keywordCallLibraryId.getText();
-            if (KeywordCompletionModification.isKeywordStartsWithModifier(libraryName)) {
-                libraryName = libraryName.substring(1);
-            }
             PsiFile containingFile = keywordCallLibraryId.getContainingFile();
             PsiElement[] keywordLibraryReference = findKeywordLibraryReference(libraryName, containingFile);
             return Arrays.stream(keywordLibraryReference).map(PsiElementResolveResult::new).toArray(ResolveResult[]::new);

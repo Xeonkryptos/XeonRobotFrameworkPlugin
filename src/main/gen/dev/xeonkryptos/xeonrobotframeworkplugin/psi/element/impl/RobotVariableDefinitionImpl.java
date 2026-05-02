@@ -9,7 +9,7 @@ import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.*;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.*;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotPsiImplUtil;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotPsiUtil;
 import javax.swing.Icon;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotVariableDefinitionStub;
 import com.intellij.psi.stubs.IStubElementType;
@@ -35,29 +35,48 @@ public class RobotVariableDefinitionImpl extends RobotVariableDefinitionExtensio
   }
 
   @Override
-  @NotNull
-  public RobotVariable getVariable() {
-    return notNullChild(PsiTreeUtil.getChildOfType(this, RobotVariable.class));
+  @Nullable
+  public RobotPythonExpression getPythonExpression() {
+    return PsiTreeUtil.getChildOfType(this, RobotPythonExpression.class);
   }
 
   @Override
-  public @NotNull RobotVariable getNameIdentifier() {
-    return RobotPsiImplUtil.getNameIdentifier(this);
+  @Nullable
+  public RobotVariableContent getVariableContent() {
+    return PsiTreeUtil.getChildOfType(this, RobotVariableContent.class);
+  }
+
+  @Override
+  @NotNull
+  public List<RobotVariableIndexAccessContent> getVariableIndexAccessContentList() {
+    return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotVariableIndexAccessContent.class);
+  }
+
+  @Override
+  @NotNull
+  public List<RobotVariableNestedAccessContent> getVariableNestedAccessContentList() {
+    return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotVariableNestedAccessContent.class);
+  }
+
+  @Override
+  @NotNull
+  public List<RobotVariableSliceAccessContent> getVariableSliceAccessContentList() {
+    return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotVariableSliceAccessContent.class);
   }
 
   @Override
   public @Nullable String getName() {
-    return RobotPsiImplUtil.getName(this);
+    return RobotPsiUtil.getName(this);
   }
 
   @Override
   public @NotNull Icon getIcon(int flags) {
-    return RobotPsiImplUtil.getIcon(this, flags);
+    return RobotPsiUtil.getIcon(this, flags);
   }
 
   @Override
   public @NotNull String getQualifiedName() {
-    return RobotPsiImplUtil.getQualifiedName(this);
+    return RobotPsiUtil.getQualifiedName(this);
   }
 
 }

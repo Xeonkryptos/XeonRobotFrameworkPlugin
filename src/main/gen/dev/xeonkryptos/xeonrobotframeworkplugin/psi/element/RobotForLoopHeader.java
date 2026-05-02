@@ -5,7 +5,7 @@ import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 
-public interface RobotForLoopHeader extends RobotElement {
+public interface RobotForLoopHeader extends RobotMultiLineContainerElement, RobotElement {
 
   @NotNull
   List<RobotForLoopStructureParameter> getForLoopStructureParameterList();
@@ -16,7 +16,6 @@ public interface RobotForLoopHeader extends RobotElement {
   @NotNull
   List<RobotVariableDefinition> getVariableDefinitionList();
 
-  @Nullable
   PsiElement getForInElement();
 
 }

@@ -6,6 +6,8 @@ import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.StubBasedPsiElement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotListVariableStub;
+import com.intellij.lang.folding.FoldingDescriptor;
+import com.intellij.openapi.editor.Document;
 
 public interface RobotListVariable extends RobotVariable, StubBasedPsiElement<RobotListVariableStub> {
 
@@ -23,5 +25,11 @@ public interface RobotListVariable extends RobotVariable, StubBasedPsiElement<Ro
 
   @NotNull
   List<RobotVariableSliceAccessContent> getVariableSliceAccessContentList();
+
+  @Nullable String getVariableName();
+
+  FoldingDescriptor[] fold(@NotNull Document ignoredDocument, boolean quick);
+
+  FoldingText getAssignedValues();
 
 }

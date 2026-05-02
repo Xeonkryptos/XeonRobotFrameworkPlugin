@@ -9,7 +9,7 @@ import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.*;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.*;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotPsiImplUtil;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotPsiUtil;
 
 public class RobotInlineElseIfStructureImpl extends RobotExecutableStatementImpl implements RobotInlineElseIfStructure {
 
@@ -32,6 +32,12 @@ public class RobotInlineElseIfStructureImpl extends RobotExecutableStatementImpl
   @NotNull
   public RobotConditionalContent getConditionalContent() {
     return notNullChild(PsiTreeUtil.getChildOfType(this, RobotConditionalContent.class));
+  }
+
+  @Override
+  @Nullable
+  public RobotTemplateArguments getTemplateArguments() {
+    return PsiTreeUtil.getChildOfType(this, RobotTemplateArguments.class);
   }
 
 }

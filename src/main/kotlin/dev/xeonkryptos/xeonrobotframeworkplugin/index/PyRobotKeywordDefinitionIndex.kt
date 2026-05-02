@@ -1,5 +1,6 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.index
 
+import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.psi.PsiManager
@@ -18,7 +19,6 @@ import com.intellij.util.io.KeyDescriptor
 import com.jetbrains.python.PythonFileType
 import com.jetbrains.python.psi.PyFile
 import com.jetbrains.python.psi.PyFunction
-import com.jetbrains.python.psi.PyParameter
 import com.jetbrains.python.psi.stubs.PyFunctionNameIndex
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.dto.KeywordDto
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.DefinedKeyword
@@ -74,33 +74,33 @@ class PyRobotKeywordDefinitionIndex : FileBasedIndexExtension<String, PyRobotKey
 
         @JvmStatic
         fun getKeywordNames(
-            project: Project,
-            scope: GlobalSearchScope = GlobalSearchScope.projectScope(project),
-            libraryName: String? = null
+            project: Project, scope: GlobalSearchScope = GlobalSearchScope.projectScope(project), libraryName: String? = null
         ): Collection<DefinedKeyword> {
             val fileBasedIndex = FileBasedIndex.getInstance()
-            val virtualFiles = mutableSetOf<VirtualFile>()
+            val fileKeys = mutableSetOf<String>()
+
             fileBasedIndex.processAllKeys(INDEX_ID, { key ->
-                val containingFiles = fileBasedIndex.getContainingFiles(INDEX_ID, key, scope)
-                virtualFiles.addAll(containingFiles)
+                ProgressManager.checkCanceled()
+                fileKeys.add(key)
                 return@processAllKeys true
             }, scope, null)
-            if (virtualFiles.isEmpty()) return emptyList()
 
             val psiManager = PsiManager.getInstance(project)
             val result = mutableSetOf<DefinedKeyword>()
-            for (virtualFile in virtualFiles) {
-                val pyFile = psiManager.findFile(virtualFile) as? PyFile ?: continue
-                val fileData = fileBasedIndex.getFileData(INDEX_ID, virtualFile, project)
-                fileData.forEach { (_, offsets) ->
-                    for (offset in offsets.array) {
+            for (key in fileKeys) {
+                fileBasedIndex.processValues(INDEX_ID, key, null, { virtualFile, fileData ->
+                    ProgressManager.checkCanceled()
+                    val pyFile = psiManager.findFile(virtualFile) as? PyFile ?: return@processValues true
+                    for (offset in fileData.array) {
+                        ProgressManager.checkCanceled()
                         val elementAt = pyFile.findElementAt(offset.coerceAtMost(pyFile.textLength - 1))
                         val pyFunction = PsiTreeUtil.getParentOfType(elementAt, PyFunction::class.java, false) ?: continue
                         RobotPyUtil.getPythonKeywordName(pyFunction).ifPresent(Consumer { keywordName ->
-                            result += KeywordDto(pyFunction, libraryName, keywordName, listOf<PyParameter?>(*pyFunction.parameterList.parameters))
+                            result += KeywordDto(pyFunction, libraryName, keywordName, pyFunction.parameterList)
                         })
                     }
-                }
+                    return@processValues true
+                }, scope)
             }
             return result
         }
@@ -139,6 +139,8 @@ class PyRobotKeywordDefinitionIndex : FileBasedIndexExtension<String, PyRobotKey
     override fun getValueExternalizer(): DataExternalizer<IntArrayWrapper> = IntArrayExternalizer
 
     override fun getInputFilter(): FileBasedIndex.InputFilter = DefaultFileTypeSpecificInputFilter(PythonFileType.INSTANCE)
+
+    override fun traceKeyHashToVirtualFileMapping(): Boolean = true
 
     private object IntArrayExternalizer : DataExternalizer<IntArrayWrapper> {
         @Throws(IOException::class)

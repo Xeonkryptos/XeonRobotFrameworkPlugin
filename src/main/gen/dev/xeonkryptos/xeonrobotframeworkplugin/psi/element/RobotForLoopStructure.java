@@ -10,4 +10,7 @@ public interface RobotForLoopStructure extends RobotExecutableStatement, RobotBl
   @NotNull
   RobotForLoopHeader getForLoopHeader();
 
+  @Nullable
+  RobotTemplateArguments getTemplateArguments();
+
 }

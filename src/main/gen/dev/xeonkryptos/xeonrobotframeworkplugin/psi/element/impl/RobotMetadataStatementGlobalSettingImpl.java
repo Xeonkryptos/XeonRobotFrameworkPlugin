@@ -9,7 +9,7 @@ import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.*;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.*;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotPsiImplUtil;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotPsiUtil;
 
 public class RobotMetadataStatementGlobalSettingImpl extends RobotGlobalSettingStatementImpl implements RobotMetadataStatementGlobalSetting {
 
@@ -30,14 +30,14 @@ public class RobotMetadataStatementGlobalSettingImpl extends RobotGlobalSettingS
 
   @Override
   @NotNull
-  public List<RobotParameter> getParameterList() {
-    return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotParameter.class);
+  public PsiElement getNameElement() {
+    return notNullChild(findChildByType(METADATA_KEYWORD));
   }
 
   @Override
   @NotNull
-  public PsiElement getNameElement() {
-    return notNullChild(findChildByType(METADATA_KEYWORD));
+  public List<RobotPositionalArgument> getMetadataValue() {
+    return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotPositionalArgument.class);
   }
 
 }

@@ -5,7 +5,51 @@ import com.intellij.psi.tree.TokenSet;
 
 public class RobotTokenSets {
 
-    public static final TokenSet WHITESPACE_SET = TokenSet.create(TokenType.WHITE_SPACE);
+    public static final TokenSet WHITESPACE_SET = TokenSet.create(TokenType.WHITE_SPACE, RobotTypes.CONTINUATION);
     public static final TokenSet COMMENTS_SET = TokenSet.create(RobotTypes.COMMENT);
-    public static final TokenSet STRING_SET = TokenSet.create(RobotTypes.LITERAL_CONSTANT_VALUE);
+    public static final TokenSet STRING_SET = TokenSet.create(RobotTypes.LITERAL_CONSTANT);
+
+    public static final TokenSet EXTENDED_WHITESPACE_SET = TokenSet.orSet(WHITESPACE_SET, TokenSet.create(RobotTypes.EOS, RobotTypes.EOL));
+
+    public static final TokenSet GHERKIN_SET = TokenSet.create(RobotTypes.GIVEN, RobotTypes.WHEN, RobotTypes.THEN, RobotTypes.AND, RobotTypes.BUT);
+    public static final TokenSet LOOP_KEYWORDS_SET = TokenSet.create(RobotTypes.FOR, RobotTypes.FOR_IN, RobotTypes.WHILE, RobotTypes.END);
+    public static final TokenSet CONTROL_KEYWORDS_SET = TokenSet.create(RobotTypes.IF, RobotTypes.ELSE_IF, RobotTypes.ELSE, RobotTypes.END);
+    public static final TokenSet EXCEPTION_KEYWORDS_SET = TokenSet.create(RobotTypes.TRY, RobotTypes.EXCEPT, RobotTypes.ELSE, RobotTypes.FINALLY, RobotTypes.END);
+
+    public static final TokenSet ARGUMENTS_TYPE_SET = TokenSet.create(RobotTypes.PARAMETER, RobotTypes.POSITIONAL_ARGUMENT);
+
+    public static final TokenSet LOCAL_SETTING_NAMES_SET = TokenSet.create(RobotTypes.LOCAL_ARGUMENTS_SETTING_ID, RobotTypes.LOCAL_SETTING_ID);
+    public static final TokenSet GLOBAL_SETTING_NAMES_SET = TokenSet.create(RobotTypes.RESOURCE_IMPORT_KEYWORD,
+                                                                            RobotTypes.LIBRARY_IMPORT_KEYWORD,
+                                                                            RobotTypes.DOCUMENTATION_KEYWORD,
+                                                                            RobotTypes.TAGS_KEYWORDS,
+                                                                            RobotTypes.METADATA_KEYWORD,
+                                                                            RobotTypes.TEMPLATE_KEYWORDS,
+                                                                            RobotTypes.TIMEOUT_KEYWORDS,
+                                                                            RobotTypes.VARIABLES_IMPORT_KEYWORD,
+                                                                            RobotTypes.SETUP_TEARDOWN_STATEMENT_KEYWORDS,
+                                                                            RobotTypes.SUITE_NAME_KEYWORD,
+                                                                            RobotTypes.UNKNOWN_SETTING_KEYWORD);
+    public static final TokenSet GLOBAL_SETTING_SET = TokenSet.create(RobotTypes.RESOURCE_IMPORT_GLOBAL_SETTING,
+                                                                      RobotTypes.LIBRARY_IMPORT_GLOBAL_SETTING,
+                                                                      RobotTypes.DOCUMENTATION_STATEMENT_GLOBAL_SETTING,
+                                                                      RobotTypes.TAGS_STATEMENT_GLOBAL_SETTING,
+                                                                      RobotTypes.METADATA_STATEMENT_GLOBAL_SETTING,
+                                                                      RobotTypes.TEMPLATE_STATEMENTS_GLOBAL_SETTING,
+                                                                      RobotTypes.TIMEOUT_STATEMENTS_GLOBAL_SETTING,
+                                                                      RobotTypes.VARIABLES_IMPORT_GLOBAL_SETTING,
+                                                                      RobotTypes.SETUP_TEARDOWN_STATEMENTS_GLOBAL_SETTING,
+                                                                      RobotTypes.SUITE_NAME_STATEMENT_GLOBAL_SETTING,
+                                                                      RobotTypes.UNKNOWN_SETTING_STATEMENTS_GLOBAL_SETTING);
+
+    public static final TokenSet SECTIONS_HEADER_SET = TokenSet.create(RobotTypes.SETTINGS_HEADER,
+                                                                       RobotTypes.VARIABLES_HEADER,
+                                                                       RobotTypes.TEST_CASES_HEADER,
+                                                                       RobotTypes.TASKS_HEADER,
+                                                                       RobotTypes.USER_KEYWORDS_HEADER,
+                                                                       RobotTypes.COMMENTS_HEADER);
+
+    public static final TokenSet TEMPLATE_VALUES_HOLDER_SET = TokenSet.create(RobotTypes.TEMPLATE_PARAMETER, RobotTypes.TEMPLATE_ARGUMENT);
+
+    public static final TokenSet FOR_LOOP_IN_TYPES = TokenSet.create(RobotTypes.FOR_IN, RobotTypes.FOR_IN_RANGE, RobotTypes.FOR_IN_ENUMERATE, RobotTypes.FOR_IN_ZIP);
 }

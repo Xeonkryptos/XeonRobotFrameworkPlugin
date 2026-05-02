@@ -14,25 +14,16 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.RobotElementGenerator
 
 class RobotVariableRatherArgumentQuickFix(element: RobotLiteralConstantValue) : LocalQuickFixOnPsiElement(element) {
 
-    private val wrappedName = "\${${element.text}}"
+    override fun getText(): @IntentionName String = RobotBundle.message("intention.family.variable-rather-argument.name")
 
-    override fun getText(): @IntentionName String = RobotBundle.message("intention.family.variable-rather-argument.name", wrappedName)
-
-    override fun invoke(
-        project: Project, file: PsiFile, startElement: PsiElement, endElement: PsiElement
-    ) {
+    override fun invoke(project: Project, file: PsiFile, startElement: PsiElement, endElement: PsiElement) {
         RobotElementGenerator.getInstance(project).createNewScalarVariable(startElement.text)?.let { robotVariable -> startElement.replace(robotVariable) }
     }
 
-    override fun isAvailable(
-        project: Project, file: PsiFile, startElement: PsiElement, endElement: PsiElement
-    ): Boolean {
-        return startElement is RobotLiteralConstantValue && startElement.parent is RobotPositionalArgument && ReservedVariable.entries.any {
-            it.unwrappedVariable.contentEquals(
-                startElement.text, true
-            )
+    override fun isAvailable(project: Project, file: PsiFile, startElement: PsiElement, endElement: PsiElement): Boolean =
+        startElement is RobotLiteralConstantValue && startElement.parent is RobotPositionalArgument && ReservedVariable.entries.any {
+            it.variable.contentEquals(startElement.text, true)
         }
-    }
 
     override fun getFamilyName(): @IntentionFamilyName String = RobotBundle.message("intention.family.variable-rather-argument.text")
 }

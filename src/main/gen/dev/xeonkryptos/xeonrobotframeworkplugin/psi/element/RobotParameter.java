@@ -5,7 +5,7 @@ import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 
-public interface RobotParameter extends RobotArgument, RobotElement {
+public interface RobotParameter extends RobotArgument, FakeParameterIdentifier, RobotElement {
 
   @NotNull
   RobotParameterId getParameterId();

@@ -9,7 +9,7 @@ import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.*;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.*;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotPsiImplUtil;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotPsiUtil;
 
 public class RobotGlobalSettingStatementImpl extends RobotGlobalSettingExtension implements RobotGlobalSettingStatement {
 
@@ -25,6 +25,30 @@ public class RobotGlobalSettingStatementImpl extends RobotGlobalSettingExtension
   public void accept(@NotNull PsiElementVisitor visitor) {
     if (visitor instanceof RobotVisitor) accept((RobotVisitor)visitor);
     else super.accept(visitor);
+  }
+
+  @Override
+  @Nullable
+  public RobotGlobalSettingStatement getGlobalSettingStatement() {
+    return PsiTreeUtil.getChildOfType(this, RobotGlobalSettingStatement.class);
+  }
+
+  @Override
+  @Nullable
+  public RobotImportSettings getImportSettings() {
+    return PsiTreeUtil.getChildOfType(this, RobotImportSettings.class);
+  }
+
+  @Override
+  @Nullable
+  public RobotMetadataSettings getMetadataSettings() {
+    return PsiTreeUtil.getChildOfType(this, RobotMetadataSettings.class);
+  }
+
+  @Override
+  @Nullable
+  public RobotSetupTeardownSettings getSetupTeardownSettings() {
+    return PsiTreeUtil.getChildOfType(this, RobotSetupTeardownSettings.class);
   }
 
 }

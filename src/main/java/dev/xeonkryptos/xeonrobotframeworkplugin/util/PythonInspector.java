@@ -48,10 +48,8 @@ public class PythonInspector {
     private static final Path ROBOTCODE_DIR = TOOL_DIR.resolve("robotcode");
     private static final Path PYTHON_ARGUMENT_INSPECTOR_PY = ROBOTCODE_DIR.resolve("python_argument_inspector.py");
 
-    private static final Pattern INSPECTOR_PARAMETER_PATTERN = Pattern.compile(
-            "index:(?<index>\\d+);name:(?<name>.+?);default:(?<defaultValue>.+?)?;kind:(?<type>\\w+)");
-    private static final Pattern INSPECTOR_PARAMETER_WITH_FUNCTION_ASSIGNMENT_PATTERN = Pattern.compile(
-            "(?<functionName>\\w+)=(" + INSPECTOR_PARAMETER_PATTERN.pattern() + ")+");
+    private static final Pattern INSPECTOR_PARAMETER_PATTERN = Pattern.compile("index:(?<index>\\d+);name:(?<name>.+?);default:(?<defaultValue>.+?)?;kind:(?<type>\\w+)");
+    private static final Pattern INSPECTOR_PARAMETER_WITH_FUNCTION_ASSIGNMENT_PATTERN = Pattern.compile("(?<functionName>\\w+)=(" + INSPECTOR_PARAMETER_PATTERN.pattern() + ")+");
 
     private static final AtomicInteger PYTHON_INSPECTOR_THREAD_COUNTER = new AtomicInteger();
     private static final Executor PYTHON_INSPECTOR_EXECUTOR = Executors.newCachedThreadPool(r -> {
@@ -89,10 +87,7 @@ public class PythonInspector {
         return result.getOrDefault(functionName, PythonInspectorParameter.EMPTY);
     }
 
-    public static Map<String, PythonInspectorParameter[]> inspectPythonFunctions(PsiElement sourceElement,
-                                                                                 String namespace,
-                                                                                 String className,
-                                                                                 Map<String, PyFunction> elements) {
+    public static Map<String, PythonInspectorParameter[]> inspectPythonFunctions(PsiElement sourceElement, String namespace, String className, Map<String, PyFunction> elements) {
         if (elements == null || elements.isEmpty()) {
             return Map.of();
         }
@@ -159,8 +154,7 @@ public class PythonInspector {
     }
 
     @NotNull
-    private static Map<String, PythonInspectorParameter[]> extractFunctionParameters(Map<String, PyFunction> elements, BufferedReader reader) throws
-                                                                                                                                              IOException {
+    private static Map<String, PythonInspectorParameter[]> extractFunctionParameters(Map<String, PyFunction> elements, BufferedReader reader) throws IOException {
         String input;
         Map<String, PythonInspectorParameter[]> functions = new LinkedHashMap<>(elements.size());
         Matcher functionMatcher = null;
@@ -199,9 +193,7 @@ public class PythonInspector {
         return parameters;
     }
 
-    public static Collection<DefinedParameter> convertPyParameters(PythonInspector.PythonInspectorParameter[] parameters,
-                                                                   PyParameter[] pyParameters,
-                                                                   boolean instanceFunction) {
+    public static Collection<DefinedParameter> convertPyParameters(PythonInspector.PythonInspectorParameter[] parameters, PyParameter[] pyParameters, boolean instanceFunction) {
         if (parameters == null || parameters.length == 0) {
             return Collections.emptyList();
         }
@@ -212,9 +204,8 @@ public class PythonInspector {
         PythonInspector.ParameterType lastSeenType = null;
         List<Tuple> matchedParameters = new ArrayList<>();
         for (PythonInspector.PythonInspectorParameter parameter : parameters) {
-            if (lastSeenType != null && lastSeenType != parameter.type() && (
-                    lastSeenType == ParameterType.POSITIONAL_ONLY && parameter.type() != ParameterType.VAR_POSITIONAL
-                    || lastSeenType == ParameterType.POSITIONAL_OR_KEYWORD && parameter.type() == ParameterType.KEYWORD_ONLY)) {
+            if (lastSeenType != null && lastSeenType != parameter.type() && (lastSeenType == ParameterType.POSITIONAL_ONLY && parameter.type() != ParameterType.VAR_POSITIONAL
+                                                                             || lastSeenType == ParameterType.POSITIONAL_OR_KEYWORD && parameter.type() == ParameterType.KEYWORD_ONLY)) {
                 indexCorrection++;
             }
             lastSeenType = parameter.type();
@@ -225,17 +216,14 @@ public class PythonInspector {
             Tuple tuple = new Tuple(parameter, pyParameters[index]);
             matchedParameters.add(tuple);
         }
-        return matchedParameters.stream()
-                                .filter(parameter -> !instanceFunction || !"self".equals(parameter.parameter.name()))
-                                .filter(parameter -> parameter.parameter.type() != PythonInspector.ParameterType.VAR_POSITIONAL)
-                                .map(parameter -> {
-                                    String defaultValue = parameter.parameter.defaultValue();
-                                    return new ParameterDto(parameter.pyParameter,
-                                                            parameter.parameter.name(),
-                                                            defaultValue,
-                                                            parameter.parameter.type() == ParameterType.VAR_KEYWORD);
-                                })
-                                .collect(Collectors.toCollection(LinkedHashSet::new));
+        return matchedParameters.stream().filter(parameter -> !instanceFunction || !"self".equals(parameter.parameter.name())).map(parameter -> {
+            String defaultValue = parameter.parameter.defaultValue();
+            return ParameterDto.builder(parameter.pyParameter, parameter.parameter.name())
+                               .defaultValue(defaultValue)
+                               .positionalContainer(parameter.parameter.type() == ParameterType.VAR_POSITIONAL)
+                               .keywordContainer(parameter.parameter.type() == ParameterType.VAR_KEYWORD)
+                               .build();
+        }).collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
     public record PythonInspectorParameter(int index, String name, String defaultValue, ParameterType type) {

@@ -33,7 +33,7 @@ public class RobotFoldingBuilder extends CustomFoldingBuilder {
 
     @Override
     protected void buildLanguageFoldRegions(@NotNull List<FoldingDescriptor> descriptors, @NotNull PsiElement root, @NotNull Document document, boolean quick) {
-        PsiElementVisitor visitor = new RobotFoldingElementsVisitor(document, descriptors);
+        PsiElementVisitor visitor = new RobotFoldingElementsVisitor(document, descriptors, quick);
         root.accept(visitor);
     }
 
@@ -52,10 +52,12 @@ public class RobotFoldingBuilder extends CustomFoldingBuilder {
 
         private final Document document;
         private final List<FoldingDescriptor> descriptors;
+        private final boolean quick;
 
-        private RobotFoldingElementsVisitor(Document document, List<FoldingDescriptor> descriptors) {
+        private RobotFoldingElementsVisitor(Document document, List<FoldingDescriptor> descriptors, boolean quick) {
             this.document = document;
             this.descriptors = descriptors;
+            this.quick = quick;
         }
 
         @Override
@@ -120,11 +122,8 @@ public class RobotFoldingBuilder extends CustomFoldingBuilder {
 
         @Override
         public void visitFoldable(@NotNull RobotFoldable foldable) {
-            FoldingDescriptor[] foldingRegions = foldable.fold(document);
-            if (foldingRegions != null && foldingRegions.length > 0) {
-                ContainerUtil.addAll(descriptors, foldingRegions);
-            }
-
+            FoldingDescriptor[] foldingRegions = foldable.fold(document, quick);
+            ContainerUtil.addAll(descriptors, foldingRegions);
             super.visitFoldable(foldable);
         }
     }

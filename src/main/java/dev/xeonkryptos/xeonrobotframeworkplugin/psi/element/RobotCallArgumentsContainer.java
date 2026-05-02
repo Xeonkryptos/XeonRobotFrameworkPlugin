@@ -1,5 +1,7 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.psi.element;
 
+import com.intellij.psi.PsiElement;
+
 import java.util.Collection;
 
 public interface RobotCallArgumentsContainer {
@@ -8,13 +10,15 @@ public interface RobotCallArgumentsContainer {
 
     Collection<RobotArgument> getAllCallArguments();
 
-    Collection<RobotArgument> getPositionalArguments();
-
     default boolean allRequiredParametersArePresent() {
         return computeMissingRequiredParameters().isEmpty();
     }
 
     Collection<String> computeMissingRequiredParameters();
 
-    Collection<DefinedParameter> computeMissingParameters();
+    default Collection<DefinedParameter> computeMissingParameters() {
+        return computeMissingParameters(null);
+    }
+
+    Collection<DefinedParameter> computeMissingParameters(PsiElement ignorableElement);
 }

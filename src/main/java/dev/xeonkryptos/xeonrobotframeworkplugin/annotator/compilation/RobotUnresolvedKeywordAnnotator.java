@@ -2,8 +2,8 @@ package dev.xeonkryptos.xeonrobotframeworkplugin.annotator.compilation;
 
 import com.intellij.codeInspection.ProblemHighlightType;
 import com.intellij.lang.annotation.HighlightSeverity;
-import com.intellij.psi.PsiElement;
-import com.intellij.psi.PsiReference;
+import com.intellij.psi.PsiPolyVariantReference;
+import com.intellij.psi.ResolveResult;
 import dev.xeonkryptos.xeonrobotframeworkplugin.RobotBundle;
 import dev.xeonkryptos.xeonrobotframeworkplugin.annotator.RobotAnnotator;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCallName;
@@ -13,10 +13,9 @@ public class RobotUnresolvedKeywordAnnotator extends RobotAnnotator {
 
     @Override
     public void visitKeywordCallName(@NotNull RobotKeywordCallName keywordCallName) {
-        PsiReference reference = keywordCallName.getReference();
-        PsiElement resolvedElement = reference.resolve();
-        boolean isResolved = resolvedElement != null;
-        if (!isResolved) {
+        PsiPolyVariantReference reference = (PsiPolyVariantReference) keywordCallName.getReference();
+        ResolveResult[] resolveResults = reference.multiResolve(false);
+        if (resolveResults.length == 0) {
             getHolder().newAnnotation(HighlightSeverity.ERROR, RobotBundle.message("annotation.keyword.not-found"))
                        .highlightType(ProblemHighlightType.ERROR)
                        .range(keywordCallName)

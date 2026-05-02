@@ -10,57 +10,35 @@ on:
 
 jobs:
 
-  gradleValidation:
-    name: Gradle Validation
-    uses: ./.github/workflows/reusable-gradleValidation.yml
-
   unitTests:
     name: Unit Tests
-    needs: gradleValidation
     uses: ./.github/workflows/reusable-unitTests.yml
     secrets: inherit
     permissions:
       checks: write
 
-#  integrationTests:
-#    name: Integration Tests
-#    needs: [ gradleValidation, unitTests ]
-#    uses: ./.github/workflows/reusable-integrationTests.yml
-#    secrets: inherit
+  #  integrationTests:
+  #    name: Integration Tests
+  #    needs: unitTests
+  #    uses: ./.github/workflows/reusable-integrationTests.yml
+  #    secrets: inherit
 
   #  integrationTestsEAP:
   #    name: Integration Tests EAP
-  #    needs: gradleValidation
   #    uses: ./.github/workflows/reusable-integrationTests.yml
   #    secrets: inherit
   #    with:
   #      platformVersion: 222-EAP-SNAPSHOT
 
-  codeInspection:
-    name: Code Inspection
-#    needs: integrationTests
-    uses: ./.github/workflows/reusable-codeInspection.yml
-
-  build:
-    name: Build
-    needs:
-      - unitTests
-#      - integrationTests
-    # - integrationTestsEAP
-      - codeInspection
+  pluginVerification:
+    name: Plugin Verification
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-    outputs:
-      version: ${{ steps.properties.outputs.version }}
-      changelog: ${{ steps.properties.outputs.changelog }}
     steps:
-
       - name: Fetch Sources
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6.0.2
 
       - name: Setup Java
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5.2.0
         with:
           distribution: jetbrains
           java-version: 21
@@ -70,7 +48,44 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v4
+        uses: gradle/actions/setup-gradle@v6.1.0
+
+      - name: Make gradlew executable
+        run: chmod +x ./gradlew
+
+      - name: Verify plugin
+        run: ./gradlew verifyPlugin
+
+  build:
+    name: Build
+    needs:
+      - unitTests
+      #      - integrationTests
+      # - integrationTestsEAP
+      - pluginVerification
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      version: ${{ steps.properties.outputs.version }}
+      changelog: ${{ steps.properties.outputs.changelog }}
+    steps:
+
+      - name: Fetch Sources
+        uses: actions/checkout@v6.0.2
+
+      - name: Setup Java
+        uses: actions/setup-java@v5.2.0
+        with:
+          distribution: jetbrains
+          java-version: 21
+          cache: gradle
+          token: ${{ secrets.GITHUB_TOKEN }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v6.1.0
 
       - name: Make gradlew executable
         run: chmod +x ./gradlew
@@ -94,19 +109,12 @@ jobs:
           echo "$CHANGELOG" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
 
-      - name: Download RobotCode Debugger
-        shell: bash
-        run: |
-          mkdir -p bundled/libs
-          pip install --upgrade -t bundled/libs robotcode[debugger]
-          rm -rf bundled/libs/robot && rm -rf bundled/libs/robotframework*
-
       - name: Build Plugin
         run: ./gradlew buildPlugin -x test
 
       # Store an already-built plugin as an artifact for downloading
       - name: Upload artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7.0.0
         with:
           name: ${{ steps.properties.outputs.artifact }}
           path: ./build/distributions/${{ steps.properties.outputs.artifact }}
@@ -122,7 +130,7 @@ jobs:
 
       # Check out the current repository
       - name: Fetch Sources
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6.0.2
 
       # Remove old release drafts by using the curl request for the available releases with a draft flag
       - name: Remove Old Release Drafts

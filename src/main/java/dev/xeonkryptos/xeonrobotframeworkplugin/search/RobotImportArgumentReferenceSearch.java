@@ -8,6 +8,7 @@ import com.intellij.openapi.vfs.VfsUtilCore;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiReference;
+import com.intellij.psi.PsiReferenceBase;
 import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.psi.search.searches.ReferencesSearch.SearchParameters;
 import com.intellij.util.Processor;
@@ -53,7 +54,7 @@ public class RobotImportArgumentReferenceSearch extends QueryExecutorBase<PsiRef
                     ImportArgumentIndex importArgumentIndex = ImportArgumentIndex.getInstance();
                     Collection<RobotImportArgument> matchingArguments = importArgumentIndex.getImportArgument(relativePath, project, globalSearchScope);
                     for (RobotImportArgument argument : matchingArguments) {
-                        if (argument != null && !consumer.process(argument.getReference())) {
+                        if (!consumer.process(new PsiReferenceBase.Immediate<>(argument, element))) {
                             return;
                         }
                     }
