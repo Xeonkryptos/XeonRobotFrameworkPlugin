@@ -1,10 +1,10 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.psi.reference.external.file
 
 import com.intellij.json.psi.JsonArray
+import com.intellij.json.psi.JsonElementVisitor
 import com.intellij.json.psi.JsonFile
 import com.intellij.json.psi.JsonObject
 import com.intellij.json.psi.JsonProperty
-import com.intellij.json.psi.impl.JsonRecursiveElementVisitor
 import com.intellij.openapi.util.Key
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.psi.PsiFile
@@ -25,8 +25,10 @@ class RobotJsonFile(private val file: JsonFile) : KeywordFile {
 
         private fun resolveVariables(file: JsonFile): Collection<DefinedVariable> = CachedValuesManager.getCachedValue(file, LOCAL_VARIABLE_DEFINITIONS_CACHE_KEY) {
             val variables = mutableSetOf<DefinedVariable>()
-            val visitor = object : JsonRecursiveElementVisitor() {
-                private var parentElements = mutableListOf<String>()
+            val visitor = object : JsonElementVisitor() {
+                override fun visitObject(o: JsonObject) {
+                    o.acceptChildren(this)
+                }
 
                 override fun visitProperty(o: JsonProperty) {
                     val name = o.name
@@ -38,24 +40,7 @@ class RobotJsonFile(private val file: JsonFile) : KeywordFile {
                         else -> VariableType.SCALAR
                     }
 
-                    val layeredNameBuilder = StringBuilder()
-                    parentElements.forEach {
-                        if (it.startsWith('[')) layeredNameBuilder.deleteAt(layeredNameBuilder.length - 1)
-                        layeredNameBuilder.append(it).append('.')
-                    }
-                    variables.add(VariableDto(o, "$layeredNameBuilder$name", variableType, VariableScope.Global))
-
-                    parentElements.add(name)
-                    super.visitProperty(o)
-                    parentElements.removeLast()
-                }
-
-                override fun visitArray(o: JsonArray) {
-                    for ((index, value) in o.valueList.withIndex()) {
-                        parentElements.add("[${index}]")
-                        value.accept(this)
-                        parentElements.removeLast()
-                    }
+                    variables.add(VariableDto(o, name, variableType, VariableScope.Global))
                 }
             }
             file.acceptChildren(visitor)

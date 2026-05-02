@@ -12,11 +12,12 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.dto.VariableType
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.DefinedVariable
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.KeywordFile
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.VariableScope
+import org.jetbrains.yaml.psi.YAMLDocument
 import org.jetbrains.yaml.psi.YAMLFile
 import org.jetbrains.yaml.psi.YAMLKeyValue
 import org.jetbrains.yaml.psi.YAMLMapping
 import org.jetbrains.yaml.psi.YAMLSequence
-import org.jetbrains.yaml.psi.YamlRecursivePsiElementVisitor
+import org.jetbrains.yaml.psi.YamlPsiElementVisitor
 
 class RobotYamlFile(private val file: YAMLFile) : KeywordFile {
 
@@ -25,8 +26,14 @@ class RobotYamlFile(private val file: YAMLFile) : KeywordFile {
 
         private fun resolveVariables(file: YAMLFile): Collection<DefinedVariable> = CachedValuesManager.getCachedValue(file, LOCAL_VARIABLE_DEFINITIONS_CACHE_KEY) {
             val variables = mutableSetOf<DefinedVariable>()
-            val visitor = object : YamlRecursivePsiElementVisitor() {
-                private var parentElements = mutableListOf<String>()
+            val visitor = object : YamlPsiElementVisitor() {
+                override fun visitDocument(document: YAMLDocument) {
+                    document.acceptChildren(this)
+                }
+
+                override fun visitMapping(mapping: YAMLMapping) {
+                    mapping.acceptChildren(this)
+                }
 
                 override fun visitKeyValue(keyValue: YAMLKeyValue) {
                     val name = keyValue.keyText
@@ -38,24 +45,7 @@ class RobotYamlFile(private val file: YAMLFile) : KeywordFile {
                         else -> VariableType.SCALAR
                     }
 
-                    val layeredNameBuilder = StringBuilder()
-                    parentElements.forEach {
-                        if (it.startsWith('[')) layeredNameBuilder.deleteAt(layeredNameBuilder.length - 1)
-                        layeredNameBuilder.append(it).append('.')
-                    }
-                    variables.add(VariableDto(keyValue, "$layeredNameBuilder$name", variableType, VariableScope.Global))
-
-                    parentElements.add(name)
-                    super.visitKeyValue(keyValue)
-                    parentElements.removeLast()
-                }
-
-                override fun visitSequence(sequence: YAMLSequence) {
-                    for ((index, value) in sequence.items.withIndex()) {
-                        parentElements.add("[${index}]")
-                        value.accept(this)
-                        parentElements.removeLast()
-                    }
+                    variables.add(VariableDto(keyValue, name, variableType, VariableScope.Global))
                 }
             }
             file.acceptChildren(visitor)
