@@ -8,9 +8,11 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotExecutableStatement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotForLoopHeader;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotForLoopStructure;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVisitor;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.folding.RobotFoldingComputationUtil;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public abstract class RobotForLoopStructureExtension extends RobotExecutableStatementImpl implements RobotForLoopStructure {
@@ -22,7 +24,14 @@ public abstract class RobotForLoopStructureExtension extends RobotExecutableStat
     @Override
     public @NotNull FoldingDescriptor @NotNull [] fold(@NotNull Document document, boolean quick) {
         RobotForLoopHeader forLoopHeader = getForLoopHeader();
-        List<RobotExecutableStatement> executableStatements = getExecutableStatementList();
+        List<RobotExecutableStatement> executableStatements = new ArrayList<>();
+        RobotVisitor visitor = new RobotVisitor() {
+            @Override
+            public void visitExecutableStatement(@NotNull RobotExecutableStatement o) {
+                executableStatements.add(o);
+            }
+        };
+        acceptChildren(visitor);
         PsiElement endElement = findChildByType(RobotTypes.END);
         if (endElement == null) {
             return FoldingDescriptor.EMPTY_ARRAY;

@@ -6,9 +6,11 @@ import com.intellij.openapi.editor.Document;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotBlockOpeningStructure;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotExecutableStatement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotFoldable;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVisitor;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.folding.RobotFoldingComputationUtil;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public abstract class RobotElseStructureExtension extends RobotExecutableStatementImpl implements RobotExecutableStatement, RobotBlockOpeningStructure, RobotFoldable {
@@ -19,7 +21,14 @@ public abstract class RobotElseStructureExtension extends RobotExecutableStateme
 
     @Override
     public @NotNull FoldingDescriptor @NotNull [] fold(@NotNull Document document, boolean quick) {
-        List<RobotExecutableStatement> executableStatements = getExecutableStatementList();
+        List<RobotExecutableStatement> executableStatements = new ArrayList<>();
+        RobotVisitor visitor = new RobotVisitor() {
+            @Override
+            public void visitExecutableStatement(@NotNull RobotExecutableStatement o) {
+                executableStatements.add(o);
+            }
+        };
+        acceptChildren(visitor);
         List<FoldingDescriptor> foldingDescriptors = RobotFoldingComputationUtil.computeFoldingDescriptorsForBlockStructure(this, getFirstChild(), executableStatements, document);
         return !foldingDescriptors.isEmpty() ? foldingDescriptors.toArray(FoldingDescriptor.EMPTY_ARRAY) : FoldingDescriptor.EMPTY_ARRAY;
     }

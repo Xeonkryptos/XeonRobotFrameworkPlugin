@@ -28,12 +28,6 @@ public class RobotExecutableStatementImpl extends RobotPsiElementBase implements
   }
 
   @Override
-  @NotNull
-  public List<RobotExecutableStatement> getExecutableStatementList() {
-    return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotExecutableStatement.class);
-  }
-
-  @Override
   @Nullable
   public RobotKeywordCall getKeywordCall() {
     return PsiTreeUtil.getChildOfType(this, RobotKeywordCall.class);

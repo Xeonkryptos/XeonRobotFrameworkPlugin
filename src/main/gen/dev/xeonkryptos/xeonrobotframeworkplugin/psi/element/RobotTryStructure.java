@@ -7,4 +7,7 @@ import com.intellij.psi.PsiElement;
 
 public interface RobotTryStructure extends RobotExecutableStatement, RobotBlockOpeningStructure, RobotFoldable {
 
+  @NotNull
+  List<RobotExecutableStatement> getExecutableStatementList();
+
 }

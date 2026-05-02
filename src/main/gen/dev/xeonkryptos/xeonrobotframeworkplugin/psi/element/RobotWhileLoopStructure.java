@@ -8,6 +8,9 @@ import com.intellij.psi.PsiElement;
 public interface RobotWhileLoopStructure extends RobotExecutableStatement, RobotBlockOpeningStructure, RobotFoldable {
 
   @NotNull
+  List<RobotExecutableStatement> getExecutableStatementList();
+
+  @NotNull
   RobotWhileLoopHeader getWhileLoopHeader();
 
 }

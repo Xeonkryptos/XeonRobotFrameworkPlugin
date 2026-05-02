@@ -9,6 +9,7 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotConditionalContent;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotConditionalStructure;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotExecutableStatement;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVisitor;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.folding.RobotFoldingComputationUtil;
 import org.jetbrains.annotations.NotNull;
 
@@ -42,7 +43,14 @@ public abstract class RobotConditionalStructureExtension extends RobotExecutable
         if (endElement == null || conditionalContent == null) {
             return;
         }
-        List<RobotExecutableStatement> ifBlockExecutableStatements = ifBlock.getExecutableStatementList();
+        List<RobotExecutableStatement> ifBlockExecutableStatements = new ArrayList<>();
+        RobotVisitor visitor = new RobotVisitor() {
+            @Override
+            public void visitExecutableStatement(@NotNull RobotExecutableStatement o) {
+                ifBlockExecutableStatements.add(o);
+            }
+        };
+        ifBlock.acceptChildren(visitor);
         int endElementStartOffset = endElement.getTextRange().getStartOffset();
         List<FoldingDescriptor> conditionalFoldingDescriptors = RobotFoldingComputationUtil.computeFoldingDescriptorsForBlockStructure(getNode(),
                                                                                                                                        conditionalContent,
@@ -54,7 +62,14 @@ public abstract class RobotConditionalStructureExtension extends RobotExecutable
 
     private static void foldMultipleClauses(@NotNull Document document, List<RobotExecutableStatement> executableStatements, List<FoldingDescriptor> foldingDescriptors) {
         for (RobotExecutableStatement conditionalBlock : executableStatements) {
-            List<RobotExecutableStatement> conditionalBlockExecutableStatements = conditionalBlock.getExecutableStatementList();
+            List<RobotExecutableStatement> conditionalBlockExecutableStatements = new ArrayList<>();
+            RobotVisitor visitor = new RobotVisitor() {
+                @Override
+                public void visitExecutableStatement(@NotNull RobotExecutableStatement o) {
+                    conditionalBlockExecutableStatements.add(o);
+                }
+            };
+            conditionalBlock.acceptChildren(visitor);
             PsiElement lastHeaderElement = PsiTreeUtil.findChildOfType(conditionalBlock, RobotConditionalContent.class, true, RobotExecutableStatement.class);
             if (lastHeaderElement == null) {
                 // Can be only ELSE here

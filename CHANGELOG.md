@@ -17,6 +17,7 @@
 ### Fixed
 
 - Fixed indentation logic when logically at the end of file
+- Fixed incorrect parsing detecting valid structures as part of template definitions
 
 ## 0.7.0 - 2026-05-01
 

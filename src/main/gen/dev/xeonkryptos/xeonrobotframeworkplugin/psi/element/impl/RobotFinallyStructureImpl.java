@@ -28,4 +28,10 @@ public class RobotFinallyStructureImpl extends RobotFinallyStructureExtension im
     else super.accept(visitor);
   }
 
+  @Override
+  @NotNull
+  public List<RobotExecutableStatement> getExecutableStatementList() {
+    return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotExecutableStatement.class);
+  }
+
 }

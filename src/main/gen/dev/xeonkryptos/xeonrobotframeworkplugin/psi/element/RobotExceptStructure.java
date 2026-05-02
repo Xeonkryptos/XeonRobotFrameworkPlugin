@@ -10,4 +10,7 @@ public interface RobotExceptStructure extends RobotExecutableStatement, RobotBlo
   @NotNull
   RobotExceptHeader getExceptHeader();
 
+  @NotNull
+  List<RobotExecutableStatement> getExecutableStatementList();
+
 }

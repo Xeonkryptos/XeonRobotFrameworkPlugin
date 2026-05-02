@@ -10,10 +10,4 @@ public interface RobotElseIfStructure extends RobotExecutableStatement, RobotBlo
   @NotNull
   RobotConditionalContent getConditionalContent();
 
-  @Nullable
-  RobotExecutableStatement getExecutableStatement();
-
-  @Nullable
-  RobotTemplateArguments getTemplateArguments();
-
 }

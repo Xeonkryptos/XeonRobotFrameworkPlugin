@@ -44,9 +44,6 @@ public interface RobotTypes {
   IElementType IF_VARIABLE_STATEMENT = new RobotElementType("IF_VARIABLE_STATEMENT");
   IElementType IMPORT_ARGUMENT = RobotImportArgumentStubElement.create("IMPORT_ARGUMENT");
   IElementType IMPORT_SETTINGS = new RobotElementType("IMPORT_SETTINGS");
-  IElementType INLINE_ELSE_IF_STRUCTURE = new RobotElementType("INLINE_ELSE_IF_STRUCTURE");
-  IElementType INLINE_ELSE_STRUCTURE = new RobotElementType("INLINE_ELSE_STRUCTURE");
-  IElementType INLINE_IF_STRUCTURE = new RobotElementType("INLINE_IF_STRUCTURE");
   IElementType INLINE_VARIABLE_STATEMENT = new RobotElementType("INLINE_VARIABLE_STATEMENT");
   IElementType KEYWORDS_SECTION = new RobotElementType("KEYWORDS_SECTION");
   IElementType KEYWORD_CALL = RobotKeywordCallStubElement.create("KEYWORD_CALL");
@@ -273,15 +270,6 @@ public interface RobotTypes {
       }
       else if (type == IMPORT_SETTINGS) {
         return new RobotImportSettingsImpl(node);
-      }
-      else if (type == INLINE_ELSE_IF_STRUCTURE) {
-        return new RobotInlineElseIfStructureImpl(node);
-      }
-      else if (type == INLINE_ELSE_STRUCTURE) {
-        return new RobotInlineElseStructureImpl(node);
-      }
-      else if (type == INLINE_IF_STRUCTURE) {
-        return new RobotInlineIfStructureImpl(node);
       }
       else if (type == INLINE_VARIABLE_STATEMENT) {
         return new RobotInlineVariableStatementImpl(node);

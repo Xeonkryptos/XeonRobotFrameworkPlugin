@@ -30,8 +30,8 @@ public class RobotIfVariableStatementImpl extends RobotVariableStatementImpl imp
 
   @Override
   @NotNull
-  public List<RobotExecutableStatement> getExecutableStatementList() {
-    return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotExecutableStatement.class);
+  public RobotExecutableStatement getExecutableStatement() {
+    return notNullChild(PsiTreeUtil.getChildOfType(this, RobotExecutableStatement.class));
   }
 
   @Override

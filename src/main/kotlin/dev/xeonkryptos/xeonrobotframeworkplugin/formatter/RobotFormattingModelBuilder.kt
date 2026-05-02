@@ -99,7 +99,7 @@ class RobotFormattingModelBuilder : CustomFormattingModelBuilder {
             .spaces(RobotCodeStyleSettings.SUPER_SPACE_SIZE)
             .betweenInside(VARIABLE_DEFINITION_WITH_OPTIONAL_ASSIGNMENT_SET, TokenSet.create(RobotTypes.KEYWORD_CALL), RobotTypes.KEYWORD_VARIABLE_STATEMENT)
             .spaces(RobotCodeStyleSettings.SUPER_SPACE_SIZE)
-            .betweenInside(VARIABLE_DEFINITION_WITH_OPTIONAL_ASSIGNMENT_SET, TokenSet.create(RobotTypes.INLINE_IF_STRUCTURE), RobotTypes.IF_VARIABLE_STATEMENT)
+            .betweenInside(VARIABLE_DEFINITION_WITH_OPTIONAL_ASSIGNMENT_SET, TokenSet.create(RobotTypes.IF_STRUCTURE), RobotTypes.IF_VARIABLE_STATEMENT)
             .spaces(RobotCodeStyleSettings.SUPER_SPACE_SIZE)
             .afterInside(RobotTypes.KEYWORD_CALL, TokenSet.create(RobotTypes.TEST_CASE_STATEMENT, RobotTypes.TASK_STATEMENT, RobotTypes.USER_KEYWORD_STATEMENT))
             .lineBreakInCode()

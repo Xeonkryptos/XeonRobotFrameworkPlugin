@@ -6,8 +6,8 @@ import com.intellij.psi.util.childrenOfType
 import com.intellij.psi.util.parentOfType
 import dev.xeonkryptos.xeonrobotframeworkplugin.RobotBundle
 import dev.xeonkryptos.xeonrobotframeworkplugin.annotator.RobotAnnotator
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotInlineElseIfStructure
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotInlineElseStructure
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotElseIfStructure
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotElseStructure
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCall
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotPositionalArgument
 import dev.xeonkryptos.xeonrobotframeworkplugin.util.RobotNames
@@ -17,7 +17,7 @@ class InvalidlyPlacedConditionalKeywordsAnnotator : RobotAnnotator() {
 
     override fun visitKeywordCall(keywordCall: RobotKeywordCall) {
         if (keywordCall.matchesNormalizedName(RobotNames.RUN_KEYWORD_IF_NORMALIZED_KEYWORD_NAME)) {
-            val inlineElseStructureArguments = keywordCall.positionalArgumentList.filter { arg -> arg.childrenOfType<RobotInlineElseStructure>().isNotEmpty() }
+            val inlineElseStructureArguments = keywordCall.positionalArgumentList.filter { arg -> arg.childrenOfType<RobotElseStructure>().isNotEmpty() }
             if (inlineElseStructureArguments.size > 1) {
                 inlineElseStructureArguments.asSequence()
                     .drop(1)
@@ -26,9 +26,9 @@ class InvalidlyPlacedConditionalKeywordsAnnotator : RobotAnnotator() {
         }
     }
 
-    override fun visitInlineElseIfStructure(o: RobotInlineElseIfStructure) = evaluatePositionOfConditionalInlineStatement(o)
+    override fun visitElseIfStructure(o: RobotElseIfStructure) = evaluatePositionOfConditionalInlineStatement(o)
 
-    override fun visitInlineElseStructure(o: RobotInlineElseStructure) = evaluatePositionOfConditionalInlineStatement(o)
+    override fun visitElseStructure(o: RobotElseStructure) = evaluatePositionOfConditionalInlineStatement(o)
 
     private fun evaluatePositionOfConditionalInlineStatement(element: PsiElement) {
         element.parentOfType<RobotPositionalArgument>()?.let {

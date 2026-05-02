@@ -8,7 +8,7 @@ import com.intellij.psi.PsiElement;
 public interface RobotIfVariableStatement extends RobotVariableStatement {
 
   @NotNull
-  List<RobotExecutableStatement> getExecutableStatementList();
+  RobotExecutableStatement getExecutableStatement();
 
   @NotNull
   List<RobotVariableDefinition> getVariableDefinitionList();
