@@ -1,5 +1,6 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.annotator.highlight;
 
+import com.intellij.json.psi.JsonElement;
 import com.intellij.lang.annotation.HighlightSeverity;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiPolyVariantReference;
@@ -13,6 +14,7 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableContent
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableDefinition;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVisitor;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.yaml.psi.YAMLPsiElement;
 
 import java.util.Arrays;
 import java.util.regex.Pattern;
@@ -27,7 +29,8 @@ public class RobotVariableDefinitionNotFoundAnnotator extends AbstractRobotVaria
         if (variableContent != null && Arrays.stream(((PsiPolyVariantReference) variableContent.getReference()).multiResolve(false))
                                              .filter(ResolveResult::isValidResult)
                                              .map(ResolveResult::getElement)
-                                             .noneMatch(result -> result instanceof RobotVariableDefinition || result instanceof PyElement)) {
+                                             .noneMatch(result -> result instanceof RobotVariableDefinition || result instanceof PyElement || result instanceof JsonElement
+                                                                  || result instanceof YAMLPsiElement)) {
             RobotVariableAnalyser robotVariableAnalyser = new RobotVariableAnalyser();
             variable.accept(robotVariableAnalyser);
 

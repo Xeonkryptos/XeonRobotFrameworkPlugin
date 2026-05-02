@@ -1,0 +1,20 @@
+<html lang="en">
+    <body>
+        <p>
+            Reports imports of JSON variable files when the configured Robot Framework version does not support this format.
+        </p>
+        <p>
+            JSON variable files were introduced in Robot Framework 6.1. This inspection highlights import statements that reference <code>.json</code> variable files when the project’s Robot Framework version is set to an earlier version, helping you avoid runtime errors due to unsupported file formats.
+        </p>
+        <p>
+            Example of a problematic import:
+        </p>
+        <pre><code>
+*** Settings ***
+Variable    variables.json
+        </code></pre>
+        <p>
+            To resolve this issue, either upgrade your Robot Framework version to 6.1 or higher, or convert the JSON variable file to a supported format such as <code>.robot</code> or <code>.py</code>.
+        </p>
+    </body>
+</html>

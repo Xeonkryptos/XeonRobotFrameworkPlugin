@@ -9,6 +9,7 @@
     <depends>com.intellij.modules.json</depends>
 
     <depends>PythonCore</depends>
+    <depends>org.jetbrains.plugins.yaml</depends>
 
     <resource-bundle>messages.RobotBundle</resource-bundle>
 
@@ -146,6 +147,10 @@
         <localInspection language="Robot" shortName="RobotDeprecatedKeywordCall" bundle="messages.RobotBundle" key="INSP.NAME.deprecated.keyword-call"
                          groupKey="INSP.GROUP.robot" enabledByDefault="true" level="WARNING" dumbAware="false"
                          implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.inspections.deprecation.RobotDeprecatedKeywordCallInspection"/>
+        <!-- New feature -->
+        <localInspection language="Robot" shortName="RobotJsonVariableFileSupport" bundle="messages.RobotBundle" key="INSP.NAME.feature.json.variable.file.import"
+                         groupKey="INSP.GROUP.robot" enabledByDefault="true" level="ERROR" dumbAware="true"
+                         implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.annotator.feature.RobotJsonVariableFileSupportInspection"/>
         <!-- Maintainability -->
         <localInspection language="Robot" shortName="RobotVariableRatherArgumentMeant" bundle="messages.RobotBundle"
                          key="INSP.NAME.variable.rather.argument.meant" groupKey="INSP.GROUP.robot" enabledByDefault="true" level="WARNING" dumbAware="true"
@@ -175,9 +180,7 @@
 
         <iconProvider implementation="dev.xeonkryptos.xeonrobotframeworkplugin.RobotDirectoryIconProvider"/>
 
-        <enterHandlerDelegate implementation="dev.xeonkryptos.xeonrobotframeworkplugin.actionhandler.RobotLocalSettingEnterActionHandler"/>
-        <enterHandlerDelegate implementation="dev.xeonkryptos.xeonrobotframeworkplugin.actionhandler.RobotLocalArgumentsSettingEnterActionHandler"/>
-        <enterHandlerDelegate implementation="dev.xeonkryptos.xeonrobotframeworkplugin.actionhandler.RobotKeywordCallEnterActionHandler"/>
+        <enterHandlerDelegate implementation="dev.xeonkryptos.xeonrobotframeworkplugin.actionhandler.RobotSmartMultilineEnterActionHandler"/>
         <enterHandlerDelegate implementation="dev.xeonkryptos.xeonrobotframeworkplugin.actionhandler.RobotSmartBlockCloseActionHandler"/>
 
         <lang.quoteHandler implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.misc.RobotQuoteHandler" language="Robot"/>

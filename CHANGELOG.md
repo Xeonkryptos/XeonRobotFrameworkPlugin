@@ -4,7 +4,19 @@
 
 ## Unreleased
 
+### Added
 
+- Support for YAML and JSON variable files in settings section
+
+### Changed
+
+- Extended code completion suggestions to variable files import in settings section
+- Optimized multiline handling to increase performance and stability
+- Plugin depends now on bundled YAML plugin
+
+### Fixed
+
+- Fixed indentation logic when logically at the end of file
 
 ## 0.7.0 - 2026-05-01
 

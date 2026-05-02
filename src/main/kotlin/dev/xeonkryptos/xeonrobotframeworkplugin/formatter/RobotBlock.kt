@@ -12,6 +12,7 @@ import com.intellij.lang.ASTNode
 import com.intellij.lang.tree.util.children
 import com.intellij.lang.tree.util.parents
 import com.intellij.openapi.util.Key
+import com.intellij.psi.PsiFile
 import com.intellij.psi.TokenType
 import com.intellij.psi.codeStyle.CommonCodeStyleSettings
 import com.intellij.psi.formatter.common.AbstractBlock
@@ -36,7 +37,7 @@ class RobotBlock(node: ASTNode, private val context: RobotBlockContext, wrap: Wr
         private val PARENT_WRAP_KEY = Key.create<Wrap>("PARENT_WRAP")
 
         // Differs from whitespace set of RobotTokenSets because it also includes EOL and EOS, which are treated as whitespace for formatting purposes, but not for parsing.
-        private val WHITESPACE_TYPES = TokenSet.create(TokenType.WHITE_SPACE, RobotTypes.EOL, RobotTypes.EOS)
+        private val WHITESPACE_TYPES = TokenSet.create(TokenType.WHITE_SPACE, RobotTypes.EOS)
         private val SECTION_TYPES = TokenSet.orSet(RobotTokenSets.SECTIONS_HEADER_SET,
             TokenSet.create(RobotTypes.TEST_CASES_SECTION,
                 RobotTypes.TASKS_SECTION,
@@ -86,6 +87,8 @@ class RobotBlock(node: ASTNode, private val context: RobotBlockContext, wrap: Wr
             RobotTypes.UNKNOWN_SETTING_STATEMENTS_GLOBAL_SETTING)
 
         private val TEMPLATE_ALIGNMENT_INDEX_INCREASER_SET = TokenSet.orSet(RobotTokenSets.TEMPLATE_VALUES_HOLDER_SET, TokenSet.create(RobotTypes.DATA_DRIVEN_COLUMN_NAME))
+
+        private val DELEGATE_TO_PREV_CHILD_SET = TokenSet.create(RobotTypes.ROOT, RobotTypes.TEST_CASES_SECTION, RobotTypes.TASKS_SECTION, RobotTypes.KEYWORDS_SECTION)
     }
 
     private val parent: RobotBlock?
@@ -103,9 +106,9 @@ class RobotBlock(node: ASTNode, private val context: RobotBlockContext, wrap: Wr
             parent?.node?.putUserData(TEMPLATE_VALUES_ALIGNMENT_WITH_DATA_DRIVEN_HEADER_KEY, dataDrivenElements)
         } else if (myNode.elementType === RobotTypes.TEMPLATE_ARGUMENTS && context.robotCodeStyleSettings.ALIGN_TEMPLATE_ARGUMENTS_WITH_EACH_OTHER) {
             myNode.parents(false).firstOrNull { it.elementType === RobotTypes.TEST_CASE_STATEMENT || it.elementType === RobotTypes.TASK_STATEMENT }?.let {
-                    val alignments = myNode.getChildren(RobotTokenSets.TEMPLATE_VALUES_HOLDER_SET).map { Alignment.createAlignment(true) }.toMutableList()
-                    it.putUserData(TEMPLATE_VALUES_ALIGNMENT_KEY, alignments)
-                }
+                val alignments = myNode.getChildren(RobotTokenSets.TEMPLATE_VALUES_HOLDER_SET).map { Alignment.createAlignment(true) }.toMutableList()
+                it.putUserData(TEMPLATE_VALUES_ALIGNMENT_KEY, alignments)
+            }
         } else if (myNode.elementType === RobotTypes.VARIABLE_STATEMENTS) {
             myNode.putUserData(SINGLE_VARIABLE_STATEMENT_FIRST_ARGUMENT_ALIGNMENT_KEY, Alignment.createAlignment(true))
         }
@@ -262,15 +265,11 @@ class RobotBlock(node: ASTNode, private val context: RobotBlockContext, wrap: Wr
     override fun getChildAttributes(newChildIndex: Int): ChildAttributes {
         val myParent = parent
         when {
-            myParent == null && newChildIndex >= subBlocks.size -> {
-                return ChildAttributes.DELEGATE_TO_PREV_CHILD
-            }
+            myParent == null && newChildIndex >= subBlocks.size -> return ChildAttributes.DELEGATE_TO_PREV_CHILD
 
-            myNode.elementType === RobotTypes.ROOT -> {
-                val lastSubBlock = subBlocks.lastOrNull()
-                val childAttributes = lastSubBlock?.getChildAttributes(lastSubBlock.subBlocks.size)
-                if (childAttributes != null) return childAttributes
-            }
+            myNode.psi is PsiFile -> return ChildAttributes.DELEGATE_TO_PREV_CHILD
+
+            DELEGATE_TO_PREV_CHILD_SET.contains(myNode.elementType) -> return ChildAttributes.DELEGATE_TO_PREV_CHILD
         }
         return super.getChildAttributes(newChildIndex)
     }

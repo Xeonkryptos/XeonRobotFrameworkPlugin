@@ -15,25 +15,31 @@ import com.intellij.psi.PsiDocumentManager;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiWhiteSpace;
+import com.intellij.psi.codeStyle.CommonCodeStyleSettings;
+import com.intellij.psi.codeStyle.CommonCodeStyleSettings.IndentOptions;
+import com.intellij.psi.tree.TokenSet;
 import com.intellij.psi.util.PsiTreeUtil;
 import dev.xeonkryptos.xeonrobotframeworkplugin.config.RobotOptionsProvider;
 import dev.xeonkryptos.xeonrobotframeworkplugin.formatter.RobotCodeStyleSettings;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotFeatureFileType;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotLanguage;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotResourceFileType;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCall;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLocalArgumentsSetting;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLocalSetting;
 import dev.xeonkryptos.xeonrobotframeworkplugin.util.GlobalConstants;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public abstract class AbstractRobotSmartMultilineEnterActionHandler<T extends PsiElement> extends EnterHandlerDelegateAdapter {
+public class RobotSmartMultilineEnterActionHandler extends EnterHandlerDelegateAdapter {
 
-    private final Class<T> expectedElementClass;
+    private static final TokenSet EXPECTED_ELEMENT_TYPES = TokenSet.create(RobotTypes.KEYWORD_CALL, RobotTypes.LOCAL_ARGUMENTS_SETTING, RobotTypes.LOCAL_SETTING);
+    @SuppressWarnings("unchecked")
+    private static final Class<? extends PsiElement>[] EXPECTED_ELEMENT_CLASSES = new Class[] { RobotKeywordCall.class, RobotLocalArgumentsSetting.class, RobotLocalSetting.class };
 
     @Nullable
-    private T foundElement;
-
-    protected AbstractRobotSmartMultilineEnterActionHandler(Class<T> expectedElementClass) {
-        this.expectedElementClass = expectedElementClass;
-    }
+    private PsiElement foundElement;
 
     @Override
     public Result preprocessEnter(@NotNull PsiFile file,
@@ -63,8 +69,8 @@ public abstract class AbstractRobotSmartMultilineEnterActionHandler<T extends Ps
                 return Result.Continue;
             }
 
-            if (expectedElementClass.isInstance(element)) {
-                foundElement = expectedElementClass.cast(element);
+            if (EXPECTED_ELEMENT_TYPES.contains(element.getNode().getElementType())) {
+                foundElement = element;
                 return Result.Continue;
             }
 
@@ -77,18 +83,14 @@ public abstract class AbstractRobotSmartMultilineEnterActionHandler<T extends Ps
 
             boolean lookAtPreviousLine = false;
             while (element instanceof PsiWhiteSpace || element instanceof PsiComment) {
-                if (element instanceof PsiWhiteSpace whiteSpace && whiteSpace.textMatches(GlobalConstants.CONTINUATION)) {
+                if (element instanceof PsiWhiteSpace whiteSpace && whiteSpace.getText().contains(GlobalConstants.CONTINUATION)) {
                     lookAtPreviousLine = true;
                 }
                 int textOffset = element.getTextOffset();
                 if (textOffset <= lineStartOffset && (!lookAtPreviousLine || textOffset <= previousLineStartOffset) || textOffset == 0) {
                     return Result.Continue;
                 }
-                PsiElement currentElement = element;
-                element = element.getPrevSibling();
-                if (element == null) {
-                    element = currentElement.getParent();
-                }
+                element = file.findElementAt(element.getTextRange().getStartOffset() - 1);
             }
 
             foundElement = getExpectedElement(element, lineNumber, document);
@@ -107,11 +109,11 @@ public abstract class AbstractRobotSmartMultilineEnterActionHandler<T extends Ps
     }
 
     @Nullable
-    protected T getExpectedElement(@Nullable PsiElement element, int previousLine, Document document) {
-        if (expectedElementClass.isInstance(element)) {
-            return expectedElementClass.cast(element);
+    private PsiElement getExpectedElement(@Nullable PsiElement element, int previousLine, Document document) {
+        if (element != null && EXPECTED_ELEMENT_TYPES.contains(element.getNode().getElementType())) {
+            return element;
         }
-        T foundElement = PsiTreeUtil.getParentOfType(element, expectedElementClass, false);
+        PsiElement foundElement = PsiTreeUtil.getParentOfType(element, false, EXPECTED_ELEMENT_CLASSES);
         if (foundElement != null) {
             int textOffset = foundElement.getTextOffset();
             int keywordCallLineNumber = document.getLineNumber(textOffset);
@@ -153,7 +155,13 @@ public abstract class AbstractRobotSmartMultilineEnterActionHandler<T extends Ps
             // unnecessary ellipsis to allow for a better writing flow
             if (originalText.length() != text.length()) { // Using a length check to improve performance minimally -> a contains would work, too
                 int newLineStartOffset = document.getLineStartOffset(lineNumber + 1);
-                document.deleteString(lineStartOffset, newLineStartOffset);
+                CommonCodeStyleSettings commonSettings = CodeStyle.getSettings(file).getCommonSettings(RobotLanguage.INSTANCE);
+                int diff = GlobalConstants.CONTINUATION.length();
+                IndentOptions indentOptions = commonSettings.getIndentOptions();
+                if (indentOptions != null) {
+                    diff = Math.max(0, originalText.length() - indentOptions.CONTINUATION_INDENT_SIZE - GlobalConstants.CONTINUATION.length());
+                }
+                document.deleteString(newLineStartOffset - diff, newLineStartOffset);
             }
         } else {
             addEllipsisAndIndentationIntoNewLine(file, editor);

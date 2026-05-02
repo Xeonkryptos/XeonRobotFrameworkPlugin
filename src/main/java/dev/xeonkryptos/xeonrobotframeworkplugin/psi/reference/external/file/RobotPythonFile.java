@@ -1,8 +1,8 @@
-package dev.xeonkryptos.xeonrobotframeworkplugin.psi.reference;
+package dev.xeonkryptos.xeonrobotframeworkplugin.psi.reference.external.file;
 
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiFile;
-import com.jetbrains.python.psi.PyClass;
+import com.jetbrains.python.psi.PyFile;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.dto.ImportType;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.DefinedVariable;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.KeywordFile;
@@ -14,22 +14,22 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
-public class RobotPythonClass implements KeywordFile {
+public class RobotPythonFile implements KeywordFile {
 
     private final String library;
-    private final PyClass pythonClass;
+    private final PyFile pythonFile;
     private final ImportType importType;
 
-    public RobotPythonClass(@Nullable String library, @NotNull PyClass pythonClass, @NotNull ImportType importType) {
+    public RobotPythonFile(@Nullable String library, @NotNull PyFile pythonFile, @NotNull ImportType importType) {
         this.library = library;
-        this.pythonClass = pythonClass;
+        this.pythonFile = pythonFile;
         this.importType = importType;
     }
 
     @Override
     public Collection<DefinedVariable> findDefinedVariable(@NotNull String variableName) {
         if (importType == ImportType.VARIABLES) {
-            return RobotKeywordFileResolver.findVariable(pythonClass, variableName);
+            return RobotKeywordFileResolver.findVariable(pythonFile, variableName);
         }
         return List.of();
     }
@@ -37,7 +37,7 @@ public class RobotPythonClass implements KeywordFile {
     @Override
     public Collection<DefinedVariable> getLocallyDefinedVariables() {
         if (importType == ImportType.VARIABLES) {
-            return RobotKeywordFileResolver.resolveVariables(pythonClass);
+            return RobotKeywordFileResolver.resolveVariables(pythonFile);
         }
         return List.of();
     }
@@ -61,42 +61,39 @@ public class RobotPythonClass implements KeywordFile {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) {
+    public boolean equals(Object obj) {
+        if (this == obj) {
             return true;
         }
-        if (o == null || getClass() != o.getClass()) {
+        if (obj == null || getClass() != obj.getClass()) {
             return false;
         }
-
-        RobotPythonClass that = (RobotPythonClass) o;
-        return Objects.equals(this.library, that.library) && this.pythonClass.equals(that.pythonClass);
+        RobotPythonFile that = (RobotPythonFile) obj;
+        return Objects.equals(library, that.library) && pythonFile.equals(that.pythonFile);
     }
 
     @Override
     public int hashCode() {
         if (library != null) {
-            int result = library.hashCode();
-            return 31 * result + pythonClass.hashCode();
+            return 31 * library.hashCode() + pythonFile.hashCode();
         }
-        return pythonClass.hashCode();
+        return pythonFile.hashCode();
     }
 
     @Override
     public String toString() {
-        return pythonClass.toString();
+        return pythonFile.toString();
     }
 
     @Override
     public VirtualFile getVirtualFile() {
-        PsiFile psiFile = getPsiFile();
-        VirtualFile virtualFile = psiFile.getVirtualFile();
-        return virtualFile != null ? virtualFile : psiFile.getOriginalFile().getVirtualFile();
+        VirtualFile virtualFile = pythonFile.getVirtualFile();
+        return virtualFile != null ? virtualFile : pythonFile.getOriginalFile().getVirtualFile();
     }
 
     @Override
     public final PsiFile getPsiFile() {
-        return pythonClass.getContainingFile();
+        return pythonFile;
     }
 
     @Nullable
