@@ -163,6 +163,9 @@
         <localInspection language="Robot" shortName="DuplicatedParameterInKeywordCall" bundle="messages.RobotBundle" key="INSP.NAME.keyword.duplicated.parameters.defined"
                          groupKey="INSP.GROUP.robot" enabledByDefault="true" level="WEAK WARNING" dumbAware="true"
                          implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.inspections.maintainability.DuplicatedParameterInKeywordCallInspection"/>
+        <localInspection language="Robot" shortName="RobotEvaluateKeywordUnknownModules" bundle="messages.RobotBundle" key="INSP.NAME.keyword.evaluate.parameters.module.unknown"
+                         groupKey="INSP.GROUP.robot" enabledByDefault="true" level="ERROR"
+                         implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.inspections.RobotEvaluateKeywordUnknownModulesInspection"/>
         <lang.inspectionSuppressor language="Robot" implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.inspections.RobotInspectionSuppressor"/>
 
         <runConfigurationProducer implementation="dev.xeonkryptos.xeonrobotframeworkplugin.execution.config.RobotRunConfigurationProducer"/>

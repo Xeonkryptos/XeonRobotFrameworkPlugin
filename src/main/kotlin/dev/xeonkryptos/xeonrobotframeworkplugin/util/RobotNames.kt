@@ -55,11 +55,12 @@ object RobotNames {
     const val RETURN_FROM_KEYWORD_IF_NORMALIZED_KEYWORD_NAME = "returnfromkeywordif"
     const val RUN_KEYWORD_AND_RETURN_NORMALIZED_KEYWORD_NAME = "runkeywordandreturn"
     const val RUN_KEYWORD_AND_RETURN_IF_NORMALIZED_KEYWORD_NAME = "runkeywordandreturnif"
+    const val EVALUATE_NORMALIZED_KEYWORD_NAME = "evaluate"
 
     const val CREATE_LIST_KEYWORD_NAME = "createlist"
     const val CREATE_DICTIONARY_KEYWORD_NAME = "createdictionary"
 
-    const val PARAMETER_MODULES = "modules"
+    const val EVALUATE_MODULES_NORMALIZED_PARAMETER_NAME = "modules"
 
     const val DEPRECATED_PREFIX = "*DEPRECATED"
 }

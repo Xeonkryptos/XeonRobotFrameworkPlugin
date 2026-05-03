@@ -43,44 +43,50 @@ class RobotLanguageInjectionContributor : LanguageInjectionContributor {
 
         override fun visitConditionalContent(o: RobotConditionalContent) {
             pythonExpression = true
-            prefix = "${computeImportsForPythonExpressionBodies(o.pythonExpressionBodyList)}if "
-            suffix = ":\n  pass"
+
+            val inlineModules = computeImportsForPythonExpressionBodies(o.pythonExpressionBodyList)
+            val keywordCall = PsiTreeUtil.getParentOfType(o, RobotKeywordCall::class.java, true, RobotScalarVariable::class.java, RobotListVariable::class.java, RobotDictVariable::class.java)
+            if (keywordCall?.name.equals(RobotNames.EVALUATE_NORMALIZED_KEYWORD_NAME,
+                    ignoreCase = true) || keywordCall?.name.equals("${RobotNames.BUILTIN_NAMESPACE}.${RobotNames.EVALUATE_NORMALIZED_KEYWORD_NAME}", ignoreCase = true)) {
+                val additionalModuleImports = keywordCall?.let {
+                    val modules = mutableListOf<String>()
+                    val visitor = object : RobotVisitor() {
+                        private var parameterUsed = false
+                        private var argumentIndex = 0
+
+                        override fun visitParameter(o: RobotParameter) {
+                            if (o.parameterName.equals(RobotNames.EVALUATE_MODULES_NORMALIZED_PARAMETER_NAME, ignoreCase = true)) {
+                                o.positionalArgument?.let { argument -> extractModules(argument) }
+                            }
+                            parameterUsed = true
+                        }
+
+                        override fun visitPositionalArgument(o: RobotPositionalArgument) {
+                            if (!parameterUsed) {
+                                argumentIndex++
+                                if (argumentIndex == 1) extractModules(o)
+                            }
+                        }
+
+                        private fun extractModules(argument: RobotPositionalArgument) = argument.text.split(Regex("\\s?,\\s?")).let { module -> modules.addAll(module) }
+                    }
+                    it.accept(visitor)
+                    modules
+                } ?: emptyList()
+
+                val moduleImports = mutableSetOf<String>()
+                moduleImports.addAll(additionalModuleImports)
+                moduleImports.addAll(inlineModules)
+                prefix = "${moduleImports.joinToString(separator = "\n", postfix = "\n") { module -> "import $module" }}\nresult = "
+            } else {
+                prefix = "${inlineModules.joinToString(separator = "\n", postfix = "\n") { module -> "import $module" }}if "
+                suffix = ":\n  pass"
+            }
         }
 
         override fun visitPythonExpression(o: RobotPythonExpression) {
             pythonExpression = true
-
-            val keywordCall = PsiTreeUtil.getParentOfType(o, RobotKeywordCall::class.java, true, RobotScalarVariable::class.java, RobotListVariable::class.java, RobotDictVariable::class.java)
-            val additionalModuleImports = keywordCall?.let {
-                val modules = mutableListOf<String>()
-                val visitor = object : RobotVisitor() {
-                    private var parameterUsed = false
-                    private var argumentIndex = 0
-
-                    override fun visitParameter(o: RobotParameter) {
-                        if (o.parameterName == RobotNames.PARAMETER_MODULES) {
-                            o.positionalArgument?.let { argument -> extractModules(argument) }
-                        }
-                        parameterUsed = true
-                    }
-
-                    override fun visitPositionalArgument(o: RobotPositionalArgument) {
-                        if (!parameterUsed) {
-                            argumentIndex++
-                            if (argumentIndex == 1) extractModules(o)
-                        }
-                    }
-
-                    private fun extractModules(argument: RobotPositionalArgument) = argument.text.split(Regex("\\s?,\\s?")).let { module -> modules.addAll(module) }
-                }
-                it.accept(visitor)
-                modules
-            } ?: emptyList()
-
-            val moduleImports = mutableSetOf<String>()
-            moduleImports.addAll(additionalModuleImports)
-            moduleImports.addAll(computeImportsForPythonExpressionBodies(o.pythonExpressionBodyList))
-            prefix = "${moduleImports.joinToString(separator = "\n", postfix = "\n") { module -> "import $module" }}\nresult = "
+            prefix = "${computeImportsForPythonExpressionBodies(o.pythonExpressionBodyList).joinToString(separator = "\n", postfix = "\n") { module -> "import $module" }}\nresult = "
         }
 
         private fun computeImportsForPythonExpressionBodies(pythonExpressionBodies: Collection<RobotPythonExpressionBody>): Collection<String> {
