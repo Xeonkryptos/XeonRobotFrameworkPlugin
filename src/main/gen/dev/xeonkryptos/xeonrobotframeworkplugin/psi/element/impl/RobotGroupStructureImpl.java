@@ -30,6 +30,12 @@ public class RobotGroupStructureImpl extends RobotGroupStructureExtension implem
 
   @Override
   @NotNull
+  public List<RobotExecutableStatement> getExecutableStatementList() {
+    return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotExecutableStatement.class);
+  }
+
+  @Override
+  @NotNull
   public RobotGroupHeader getGroupHeader() {
     return notNullChild(PsiTreeUtil.getChildOfType(this, RobotGroupHeader.class));
   }

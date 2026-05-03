@@ -34,4 +34,10 @@ public class RobotExceptStructureImpl extends RobotExceptStructureExtension impl
     return notNullChild(PsiTreeUtil.getChildOfType(this, RobotExceptHeader.class));
   }
 
+  @Override
+  @NotNull
+  public List<RobotExecutableStatement> getExecutableStatementList() {
+    return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotExecutableStatement.class);
+  }
+
 }

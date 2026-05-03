@@ -34,10 +34,4 @@ public class RobotForLoopStructureImpl extends RobotForLoopStructureExtension im
     return notNullChild(PsiTreeUtil.getChildOfType(this, RobotForLoopHeader.class));
   }
 
-  @Override
-  @Nullable
-  public RobotTemplateArguments getTemplateArguments() {
-    return PsiTreeUtil.getChildOfType(this, RobotTemplateArguments.class);
-  }
-
 }

@@ -4,8 +4,8 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Pair
 import com.intellij.psi.PsiFile
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotConditionalContent
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotInlineElseIfStructure
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotInlineElseStructure
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotElseIfStructure
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotElseStructure
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCall
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotPositionalArgument
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVisitor
@@ -41,8 +41,8 @@ class ReplaceRunKeywordIfQuickFix(keywordCall: RobotKeywordCall) : AbstractRepla
 
         var conditionalContent: RobotConditionalContent? = null
         var ifKeywordCall: RobotKeywordCall? = null
-        val inlineElseIfStructures = mutableListOf<RobotInlineElseIfStructure>()
-        var inlineElseStructure: RobotInlineElseStructure? = null
+        val inlineElseIfStructures = mutableListOf<RobotElseIfStructure>()
+        var inlineElseStructure: RobotElseStructure? = null
 
         override fun visitPositionalArgument(o: RobotPositionalArgument) {
             o.acceptChildren(this)
@@ -56,11 +56,11 @@ class ReplaceRunKeywordIfQuickFix(keywordCall: RobotKeywordCall) : AbstractRepla
             ifKeywordCall = o
         }
 
-        override fun visitInlineElseIfStructure(o: RobotInlineElseIfStructure) {
+        override fun visitElseIfStructure(o: RobotElseIfStructure) {
             inlineElseIfStructures.add(o)
         }
 
-        override fun visitInlineElseStructure(o: RobotInlineElseStructure) {
+        override fun visitElseStructure(o: RobotElseStructure) {
             inlineElseStructure = o
         }
     }

@@ -6,6 +6,14 @@
 
 ### Added
 
+### Changed
+
+### Fixed
+
+## 0.7.1 - 2026-05-02
+
+### Added
+
 - Support for YAML and JSON variable files in settings section
 
 ### Changed
@@ -17,6 +25,7 @@
 ### Fixed
 
 - Fixed indentation logic when logically at the end of file
+- Fixed incorrect parsing detecting valid structures as part of template definitions
 
 ## 0.7.0 - 2026-05-01
 

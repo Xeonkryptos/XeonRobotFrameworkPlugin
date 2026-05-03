@@ -7,9 +7,6 @@ import com.intellij.psi.PsiElement;
 
 public interface RobotExecutableStatement extends RobotElement {
 
-  @NotNull
-  List<RobotExecutableStatement> getExecutableStatementList();
-
   @Nullable
   RobotKeywordCall getKeywordCall();
 
