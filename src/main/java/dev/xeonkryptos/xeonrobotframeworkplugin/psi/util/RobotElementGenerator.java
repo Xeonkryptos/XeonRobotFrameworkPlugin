@@ -379,7 +379,7 @@ public record RobotElementGenerator(Project project) {
     public RobotPythonExpression createNewPythonExpression(String pythonStatement) {
         String fileContent = """
                              *** Variables ***
-                             ${Variable}=  ${{%s}}
+                             ${Variable}=  ${%s}
                              """.formatted(pythonStatement);
 
         PsiFile psiFile = createDummyPsiFile(fileContent);

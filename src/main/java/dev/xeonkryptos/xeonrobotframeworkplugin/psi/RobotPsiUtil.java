@@ -375,8 +375,8 @@ public class RobotPsiUtil {
     @NotNull
     public static TextRange getInjectionRelevantTextRange(@NotNull RobotPythonExpression expression) {
         String text = expression.getText();
-        int offset = text.length() - text.stripLeading().length() - 1;
-        int length = text.trim().length() - 1;
+        int offset = text.length() - text.stripLeading().length() + 1;
+        int length = text.trim().length() - 1 - offset;
         return TextRange.from(offset, length);
     }
 

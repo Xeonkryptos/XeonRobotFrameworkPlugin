@@ -485,9 +485,9 @@ dict_variable ::= dict_variable_definition {
 }
 environment_variable ::= ENV_VARIABLE_START VARIABLE_LBRACE variable_content VARIABLE_RBRACE
 
-private scalar_variable_definition ::= SCALAR_VARIABLE_START VARIABLE_LBRACE (variable_content | python_expression)? VARIABLE_RBRACE (extended_variable_slice_access | extended_variable_index_access | extended_variable_nested_access)* {pin=1}
-private list_variable_definition ::= LIST_VARIABLE_START VARIABLE_LBRACE (variable_content | python_expression) VARIABLE_RBRACE (extended_variable_slice_access | extended_variable_index_access | extended_variable_nested_access)* {pin=1}
-private dict_variable_definition ::= DICT_VARIABLE_START VARIABLE_LBRACE (variable_content | python_expression) VARIABLE_RBRACE extended_variable_nested_access* {pin=1}
+private scalar_variable_definition ::= SCALAR_VARIABLE_START VARIABLE_LBRACE (python_expression | variable_content)? VARIABLE_RBRACE (extended_variable_slice_access | extended_variable_index_access | extended_variable_nested_access)* {pin=1}
+private list_variable_definition ::= LIST_VARIABLE_START VARIABLE_LBRACE (python_expression | variable_content) VARIABLE_RBRACE (extended_variable_slice_access | extended_variable_index_access | extended_variable_nested_access)* {pin=1}
+private dict_variable_definition ::= DICT_VARIABLE_START VARIABLE_LBRACE (python_expression | variable_content) VARIABLE_RBRACE extended_variable_nested_access* {pin=1}
 
 variable_content ::= (variable | VARIABLE_BODY)+ {
     methods = [getReference]
