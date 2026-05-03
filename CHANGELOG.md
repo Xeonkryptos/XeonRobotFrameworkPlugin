@@ -6,9 +6,15 @@
 
 ### Added
 
-- Language injection support for python expressions in Robot files
-
 ### Changed
+
+### Fixed
+
+## 0.7.2 - 2026-05-03
+
+### Added
+
+- Language injection support for python expressions in Robot files
 
 ### Fixed
 
