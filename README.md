@@ -52,6 +52,10 @@ and keywords.
 
 ![](https://raw.githubusercontent.com/xeonkryptos/XeonRobotFrameworkPlugin/main/docs/imgs/rename-refactor.jpg)
 
+### Python Language Injections
+
+![](https://raw.githubusercontent.com/xeonkryptos/XeonRobotFrameworkPlugin/main/docs/imgs/language-injections.jpg)
+
 ## Prerequisites
 
 * Python 3.10 or newer
