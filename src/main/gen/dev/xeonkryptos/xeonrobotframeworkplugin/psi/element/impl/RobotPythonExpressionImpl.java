@@ -10,6 +10,7 @@ import com.intellij.psi.util.PsiTreeUtil;
 import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.*;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.*;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotPsiUtil;
+import com.intellij.openapi.util.TextRange;
 
 public class RobotPythonExpressionImpl extends RobotPsiElementBase implements RobotPythonExpression {
 
@@ -29,8 +30,19 @@ public class RobotPythonExpressionImpl extends RobotPsiElementBase implements Ro
 
   @Override
   @NotNull
-  public RobotPythonExpressionBody getPythonExpressionBody() {
-    return notNullChild(PsiTreeUtil.getChildOfType(this, RobotPythonExpressionBody.class));
+  public List<RobotPythonExpressionBody> getPythonExpressionBodyList() {
+    return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotPythonExpressionBody.class);
+  }
+
+  @Override
+  @NotNull
+  public List<RobotVariable> getVariableList() {
+    return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotVariable.class);
+  }
+
+  @Override
+  public @NotNull TextRange getInjectionRelevantTextRange() {
+    return RobotPsiUtil.getInjectionRelevantTextRange(this);
   }
 
 }

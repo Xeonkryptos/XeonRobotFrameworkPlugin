@@ -106,4 +106,4 @@ jobs:
         uses: actions-js/push@v1.5
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          message: Commit patched changelog
+          message: Patched changelog

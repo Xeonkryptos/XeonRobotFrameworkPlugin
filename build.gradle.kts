@@ -1,3 +1,4 @@
+import org.gradle.api.file.DuplicatesStrategy
 import org.jetbrains.changelog.Changelog
 import org.jetbrains.changelog.markdownToHTML
 import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
@@ -130,11 +131,16 @@ intellijPlatform {
 
 tasks {
     // Set the compatibility versions to 21
-    withType<JavaCompile> {
+    withType<JavaCompile>().configureEach {
         sourceCompatibility = "21"
         targetCompatibility = "21"
         options.compilerArgs = listOf("-Xlint:unchecked")
         options.isDeprecation = true
+    }
+
+    withType<Jar>().configureEach {
+        duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+        exclude("META-INF/*.kotlin_module")
     }
 
     withType<PrepareSandboxTask> {

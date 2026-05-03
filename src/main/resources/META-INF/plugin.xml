@@ -9,6 +9,7 @@
     <depends>com.intellij.modules.json</depends>
 
     <depends>PythonCore</depends>
+    <depends>org.intellij.intelliLang</depends>
     <depends>org.jetbrains.plugins.yaml</depends>
 
     <resource-bundle>messages.RobotBundle</resource-bundle>
@@ -92,16 +93,18 @@
                                  implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.manipulator.RobotParameterIdManipulator"/>
         <lang.elementManipulator forClass="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTemplateParameterId"
                                  implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.manipulator.RobotTemplateParameterIdManipulator"/>
-        <lang.elementManipulator forClass="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotPythonExpressionBody"
-                                 implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.manipulator.RobotPythonExpressionBodyManipulator"/>
+
+        <!-- Manipulators required for language injection -->
+        <lang.elementManipulator forClass="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotConditionalContent"
+                                 implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.manipulator.RobotConditionalContentManipulator"/>
+        <lang.elementManipulator forClass="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotPythonExpression"
+                                 implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.manipulator.RobotPythonExpressionManipulator"/>
 
         <!-- Annotations -->
         <annotator language="Robot" implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.annotator.RobotAnnotatingVisitor"/>
         <annotator language="Robot" implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.annotator.RobotDumbAwareAnnotatingVisitor"/>
 
         <!-- Inspections -->
-        <!-- TODO: inspection: error?: resource import is not a robot file -->
-        <!-- TODO: inspection: warn: import python file vs class -->
         <!-- Inspections: Cleanup -->
         <localInspection language="Robot" shortName="RobotImportNotUsed" bundle="messages.RobotBundle" key="INSP.NAME.import.unused"
                          groupKey="INSP.GROUP.robot" enabledByDefault="true" level="WARNING" dumbAware="true"
@@ -122,12 +125,7 @@
         <localInspection language="Robot" shortName="WeirdlyNamedElements" bundle="messages.RobotBundle"
                          key="INSP.NAME.weird.naming" groupPath="Robot" groupKey="INSP.GROUP.robot" enabledByDefault="true" level="WARNING"
                          implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.inspections.maintainability.WeirdlyNamedElementsInspection"/>
-        <!-- TODO: inspection: warn: use of I in keyword; decreased readability -->
-        <!-- TODO: inspection: warn: scenario step does not start with gherkin; decreased readability -->
-        <!-- TODO: inspection: warn: scenario step is not a keyword (ie variable); decreased readability -->
-        <!-- TODO: inspection: warn: scenario step contains arguments; decreased readability -->
         <!-- Inspections: Complexity -->
-        <!-- TODO: inspection: warn: keyword definitions that contain gherkin; trying to do too much -->
         <localInspection language="Robot" shortName="RobotNestedVariable" bundle="messages.RobotBundle" key="INSP.NAME.variable.nested"
                          groupKey="INSP.GROUP.robot" enabledByDefault="true" level="WARNING" dumbAware="true"
                          implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.inspections.complexity.RobotNestedVariableInspection"/>
@@ -220,6 +218,7 @@
         <renameHandler implementation="dev.xeonkryptos.xeonrobotframeworkplugin.rename.RobotMemberInplaceRenameHandler"/>
 
         <languageInjectionContributor language="Robot" implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.injection.RobotLanguageInjectionContributor"/>
+        <languageInjectionPerformer language="Robot" implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.injection.RobotLanguageInjectionPerformer"/>
 
         <codeFoldingOptionsProvider instance="dev.xeonkryptos.xeonrobotframeworkplugin.config.RobotCodeFoldingOptionsProvider"/>
 

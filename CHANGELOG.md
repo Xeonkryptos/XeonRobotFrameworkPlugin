@@ -6,6 +6,8 @@
 
 ### Added
 
+- Language injection support for python expressions in Robot files
+
 ### Changed
 
 ### Fixed

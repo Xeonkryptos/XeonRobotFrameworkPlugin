@@ -20,7 +20,8 @@ public class RobotVisitor extends PsiElementVisitor {
   }
 
   public void visitConditionalContent(@NotNull RobotConditionalContent o) {
-    visitElement(o);
+    visitPythonInjectionExtension(o);
+    // visitElement(o);
   }
 
   public void visitConditionalStructure(@NotNull RobotConditionalStructure o) {
@@ -259,12 +260,12 @@ public class RobotVisitor extends PsiElementVisitor {
   }
 
   public void visitPythonExpression(@NotNull RobotPythonExpression o) {
-    visitElement(o);
+    visitPythonInjectionExtension(o);
+    // visitElement(o);
   }
 
   public void visitPythonExpressionBody(@NotNull RobotPythonExpressionBody o) {
-    visitPythonExpressionBodyExtension(o);
-    // visitElement(o);
+    visitElement(o);
   }
 
   public void visitResourceImportGlobalSetting(@NotNull RobotResourceImportGlobalSetting o) {
@@ -507,7 +508,7 @@ public class RobotVisitor extends PsiElementVisitor {
     visitPsiElement(o);
   }
 
-  public void visitPythonExpressionBodyExtension(@NotNull RobotPythonExpressionBodyExtension o) {
+  public void visitPythonInjectionExtension(@NotNull RobotPythonInjectionExtension o) {
     visitPsiElement(o);
   }
 

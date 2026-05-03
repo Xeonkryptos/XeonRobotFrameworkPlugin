@@ -5,7 +5,6 @@ import com.intellij.lang.injection.general.LanguageInjectionContributor
 import com.intellij.psi.PsiElement
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotConditionalContent
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotPythonExpression
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotPythonExpressionBody
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVisitor
 import org.intellij.plugins.intelliLang.inject.config.BaseInjection
 
@@ -28,17 +27,14 @@ class RobotLanguageInjectionContributor : LanguageInjectionContributor {
             private set
 
         override fun visitConditionalContent(o: RobotConditionalContent) {
+            pythonExpression = true
             prefix = "if "
             suffix = ":"
         }
 
         override fun visitPythonExpression(o: RobotPythonExpression) {
-            prefix = "result = "
-        }
-
-        override fun visitPythonExpressionBody(o: RobotPythonExpressionBody) {
-            o.parent.accept(this)
             pythonExpression = true
+            prefix = "result = "
         }
     }
 }

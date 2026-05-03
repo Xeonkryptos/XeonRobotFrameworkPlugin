@@ -10,6 +10,7 @@ import com.intellij.psi.util.PsiTreeUtil;
 import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.*;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.*;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotPsiUtil;
+import com.intellij.openapi.util.TextRange;
 
 public class RobotConditionalContentImpl extends RobotPsiElementBase implements RobotConditionalContent {
 
@@ -37,6 +38,11 @@ public class RobotConditionalContentImpl extends RobotPsiElementBase implements 
   @NotNull
   public List<RobotVariable> getVariableList() {
     return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotVariable.class);
+  }
+
+  @Override
+  public @NotNull TextRange getInjectionRelevantTextRange() {
+    return RobotPsiUtil.getInjectionRelevantTextRange(this);
   }
 
 }

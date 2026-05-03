@@ -6,7 +6,7 @@ import com.intellij.psi.LiteralTextEscaper;
 import com.intellij.psi.PsiLanguageInjectionHost;
 import org.jetbrains.annotations.NotNull;
 
-public interface RobotPythonExpressionBodyExtension extends PsiLanguageInjectionHost {
+public interface RobotPythonInjectionExtension extends PsiLanguageInjectionHost {
 
     @Override
     default boolean isValidHost() {
@@ -17,6 +17,8 @@ public interface RobotPythonExpressionBodyExtension extends PsiLanguageInjection
     default PsiLanguageInjectionHost updateText(@NotNull String text) {
         return ElementManipulators.handleContentChange(this, text);
     }
+
+    TextRange getInjectionRelevantTextRange();
 
     @Override
     @NotNull
@@ -37,10 +39,7 @@ public interface RobotPythonExpressionBodyExtension extends PsiLanguageInjection
             @NotNull
             @Override
             public TextRange getRelevantTextRange() {
-                String text = myHost.getText();
-                int offset = text.length() - text.stripLeading().length();
-                int length = text.trim().length();
-                return TextRange.from(offset, length);
+                return myHost.getInjectionRelevantTextRange();
             }
 
             @Override

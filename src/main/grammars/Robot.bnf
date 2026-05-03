@@ -327,8 +327,11 @@ meta else_if_structure ::= ELSE_IF conditional_content <<separator>> <<statement
     pin=3
     implements="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotBlockOpeningStructure"
 }
-conditional_content ::= conditional_content_body+ {name="Condition"}
-private conditional_content_body ::= python_expression_body | variable
+conditional_content ::= (python_expression_body | variable)+ {
+    name="Condition"
+    implements="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotPythonInjectionExtension"
+    methods=[getInjectionRelevantTextRange]
+}
 exception_handling_structure ::= try_structure
     except_structure*
     <<else_structure eol_marker executable_statement*>>?
@@ -491,8 +494,11 @@ variable_content ::= (variable | VARIABLE_BODY)+ {
     recoverWhile=variable_content_recover
 }
 private variable_content_recover ::= !(VARIABLE_RBRACE | eol_marker)
-python_expression ::= PYTHON_EXPRESSION_START python_expression_body PYTHON_EXPRESSION_END
-python_expression_body ::= PYTHON_EXPRESSION_CONTENT { implements="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotPythonExpressionBodyExtension"}
+python_expression ::= PYTHON_EXPRESSION_START (python_expression_body | variable)* PYTHON_EXPRESSION_END {
+    implements="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotPythonInjectionExtension"
+    methods=[getInjectionRelevantTextRange]
+}
+python_expression_body ::= PYTHON_EXPRESSION_CONTENT
 
 private extended_variable_slice_access ::= VARIABLE_ACCESS_START variable_slice_access_content VARIABLE_ACCESS_END {pin=2}
 private extended_variable_index_access ::= VARIABLE_ACCESS_START variable_index_access_content VARIABLE_ACCESS_END {pin=2}

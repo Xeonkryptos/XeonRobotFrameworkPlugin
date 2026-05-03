@@ -253,25 +253,24 @@ public class RobotParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // conditional_content_body+
+  // (python_expression_body | variable)+
   public static boolean conditional_content(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "conditional_content")) return false;
     boolean r;
     Marker m = enter_section_(b, l, _NONE_, CONDITIONAL_CONTENT, "<Condition>");
-    r = conditional_content_body(b, l + 1);
+    r = conditional_content_0(b, l + 1);
     while (r) {
       int c = current_position_(b);
-      if (!conditional_content_body(b, l + 1)) break;
+      if (!conditional_content_0(b, l + 1)) break;
       if (!empty_element_parsed_guard_(b, "conditional_content", c)) break;
     }
     exit_section_(b, l, m, r, false, null);
     return r;
   }
 
-  /* ********************************************************** */
   // python_expression_body | variable
-  static boolean conditional_content_body(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "conditional_content_body")) return false;
+  private static boolean conditional_content_0(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "conditional_content_0")) return false;
     boolean r;
     r = python_expression_body(b, l + 1);
     if (!r) r = variable(b, l + 1);
@@ -1944,16 +1943,36 @@ public class RobotParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // PYTHON_EXPRESSION_START python_expression_body PYTHON_EXPRESSION_END
+  // PYTHON_EXPRESSION_START (python_expression_body | variable)* PYTHON_EXPRESSION_END
   public static boolean python_expression(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "python_expression")) return false;
     if (!nextTokenIs(b, PYTHON_EXPRESSION_START)) return false;
     boolean r;
     Marker m = enter_section_(b);
     r = consumeToken(b, PYTHON_EXPRESSION_START);
-    r = r && python_expression_body(b, l + 1);
+    r = r && python_expression_1(b, l + 1);
     r = r && consumeToken(b, PYTHON_EXPRESSION_END);
     exit_section_(b, m, PYTHON_EXPRESSION, r);
+    return r;
+  }
+
+  // (python_expression_body | variable)*
+  private static boolean python_expression_1(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "python_expression_1")) return false;
+    while (true) {
+      int c = current_position_(b);
+      if (!python_expression_1_0(b, l + 1)) break;
+      if (!empty_element_parsed_guard_(b, "python_expression_1", c)) break;
+    }
+    return true;
+  }
+
+  // python_expression_body | variable
+  private static boolean python_expression_1_0(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "python_expression_1_0")) return false;
+    boolean r;
+    r = python_expression_body(b, l + 1);
+    if (!r) r = variable(b, l + 1);
     return r;
   }
 
