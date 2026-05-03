@@ -195,7 +195,7 @@ task_statement ::= task_id eol_marker? testcase_task_statement* {
 task_id ::= (TASK_NAME_PART | variable)+ EOS?
 private task_statement_recover ::= !task_id & section_recover
 
-private testcase_task_statement ::= local_setting | <<parseTestcaseTaskStatement template_test_case_body bdd_statement executable_statement>> {
+private testcase_task_statement ::= (local_setting | <<parseTestcaseTaskStatement template_test_case_body bdd_statement executable_statement>>) EOL? {
     recoverWhile=testcase_task_statement_recover
 }
 private testcase_task_statement_recover ::= !(local_setting_id | TEMPLATE_ARGUMENT_VALUE | template_parameter_id | GIVEN | WHEN | task_id | test_case_id) & section_recover & executable_statement_recover
@@ -228,7 +228,7 @@ bdd_statement ::= (
         name="Behavior Driven Statement (GIVEN, WHEN, THEN, AND or BUT)"
 }
 
-user_keyword_statement ::= user_keyword_statement_id eol_marker (local_arguments_setting | local_setting | executable_statement)* {
+user_keyword_statement ::= user_keyword_statement_id eol_marker ((local_arguments_setting | local_setting | executable_statement) EOL?)* {
     pin=1
     implements = [
         "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotQualifiedNameOwner"
@@ -511,6 +511,6 @@ variable_nested_access_content ::= (variable | literal_constant_value)+
 
 literal_constant_value ::= LITERAL_CONSTANT
 
-private eol_marker ::= EOL+ | <<eof>>
+private eol_marker ::= EOL | <<eof>>
 //noinspection BnfUnusedRule - Simply need the token to be generated, nothing else. It will be handled as a WHITESPACE token
 private CONTINUATION_MARKER ::= CONTINUATION
