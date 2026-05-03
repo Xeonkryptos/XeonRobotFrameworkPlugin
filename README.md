@@ -54,7 +54,7 @@ and keywords.
 
 ### Python Language Injections
 
-![](https://raw.githubusercontent.com/xeonkryptos/XeonRobotFrameworkPlugin/main/docs/imgs/language-injections.jpg)
+![](https://raw.githubusercontent.com/xeonkryptos/XeonRobotFrameworkPlugin/main/docs/imgs/language-injection.jpg)
 
 ## Prerequisites
 
