@@ -87,9 +87,9 @@ Keyword With Long Arguments
     Log    ${'$'}{arg1}
     
 Validate Pair With Optional Context
-    [Arguments]    ${'$'}{'$'}{left}    ${'$'}{'$'}{right}    ${'$'}{'$'}{optional}=${'$'}{'$'}{FALSE}
-    Should Not Be Empty    ${'$'}{'$'}{left}
-    Should Not Be Empty    ${'$'}{'$'}{right}
+    [Arguments]    ${'$'}{left}    ${'$'}{right}    ${'$'}{optional}=${'$'}{FALSE}
+    Should Not Be Empty    ${'$'}{left}
+    Should Not Be Empty    ${'$'}{right}
 """
 
     const val BLANK_LINES = """*** Settings ***

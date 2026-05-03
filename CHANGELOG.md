@@ -13,6 +13,7 @@
 ### Fixed
 
 - Don't mark variables containing decimal numbers with a dot as variables missing a variable definition
+- Formatting rules
 
 ## 0.7.1 - 2026-05-02
 

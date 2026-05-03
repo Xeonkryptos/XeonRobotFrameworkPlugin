@@ -37,7 +37,7 @@ class RobotBlock(node: ASTNode, private val context: RobotBlockContext, wrap: Wr
         private val PARENT_WRAP_KEY = Key.create<Wrap>("PARENT_WRAP")
 
         // Differs from whitespace set of RobotTokenSets because it also includes EOL and EOS, which are treated as whitespace for formatting purposes, but not for parsing.
-        private val WHITESPACE_TYPES = TokenSet.create(TokenType.WHITE_SPACE, RobotTypes.EOS)
+        private val WHITESPACE_TYPES = TokenSet.create(TokenType.WHITE_SPACE, RobotTypes.EOL, RobotTypes.EOS)
         private val SECTION_TYPES = TokenSet.orSet(RobotTokenSets.SECTIONS_HEADER_SET,
             TokenSet.create(RobotTypes.TEST_CASES_SECTION,
                 RobotTypes.TASKS_SECTION,
@@ -61,6 +61,7 @@ class RobotBlock(node: ASTNode, private val context: RobotBlockContext, wrap: Wr
             RobotTypes.GROUP_STRUCTURE)
         private val BLOCK_OPENING_PART_TYPES = TokenSet.create(RobotTypes.FOR_LOOP_HEADER,
             RobotTypes.WHILE_LOOP_HEADER,
+            RobotTypes.EXCEPT_HEADER,
             RobotTypes.IF,
             RobotTypes.ELSE_IF,
             RobotTypes.ELSE,
