@@ -61,6 +61,8 @@ import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.ExtendedRobotTypes.*;
           yybegin(SINGLE_LITERAL_CONSTANT);
       } else if (currentState == PYTHON_EVALUATED_CONTROL_STRUCTURE_START) {
           yybegin(PYTHON_EXECUTED_CONDITION);
+      } else if (currentState == PYTHON_EVALUATED_EXPRESSION_START) {
+          yybegin(KEYWORD_PYTHON_EXPRESSION);
       }
   }
 
@@ -84,6 +86,7 @@ import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.ExtendedRobotTypes.*;
                PARAMETER_VALUE,
                TEMPLATE_PARAMETER_VALUE,
                SINGLE_LITERAL_CONSTANT,
+               KEYWORD_PYTHON_EXPRESSION,
                PYTHON_EXECUTED_CONDITION -> handleStateChangeOnFakeMultilineDetection();
       }
   }
@@ -92,6 +95,7 @@ import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.ExtendedRobotTypes.*;
       return currentState == SINGLE_LITERAL_CONSTANT
             || currentState == PARAMETER_VALUE
             || currentState == TEMPLATE_PARAMETER_VALUE
+            || currentState == KEYWORD_PYTHON_EXPRESSION
             || currentState == PYTHON_EXECUTED_CONDITION;
   }
 
@@ -254,6 +258,8 @@ SimpleConditionalKeywordCall = {SetVariableIf} | {ForLoopIf} | {PassExecutionIf}
 
 RepeatKeywordCall = "Repeat" {IntraKeywordSeparator}? "Keyword"
 
+EvaluateKeywordCall = "Evaluate"
+
 LineComment = {LineCommentSign} {NON_EOL}*
 
 %state SETTINGS_SECTION, VARIABLES_SECTION, TEST_CASES_SECTION_NAME_DEFINITION, TASKS_SECTION_NAME_DEFINITION
@@ -261,10 +267,10 @@ LineComment = {LineCommentSign} {NON_EOL}*
 %state USER_KEYWORD_NAME_DEFINITION, USER_KEYWORD_DEFINITION, USER_KEYWORD_RETURN_STATEMENT
 %state SETTING, SETTING_TEMPLATE_START, LOCAL_TEMPLATE_DEFINITION_START, INTERMEDIATE_TEMPLATE_CONFIGURATION, TEMPLATE_DEFINITION, TEMPLATE_ARGUMENTS
 %state KEYWORD_CALL, KEYWORD_ARGUMENTS, SINGLE_LITERAL_CONSTANT_START, SINGLE_LITERAL_CONSTANT
-%state INLINE_VARIABLE_DEFINITION, VARIABLE_DEFINITION, VARIABLE_DEFINITION_ARGUMENTS, VARIABLE_USAGE, EXTENDED_VARIABLE_ACCESS, PYTHON_EXPRESSION
+%state INLINE_VARIABLE_DEFINITION, VARIABLE_DEFINITION, VARIABLE_DEFINITION_ARGUMENTS, VARIABLE_USAGE, EXTENDED_VARIABLE_ACCESS
 %state PARAMETER_VALUE, TEMPLATE_PARAMETER_VALUE
 %state FOR_STRUCTURE, SIMPLE_CONTROL_STRUCTURE_START, FOR_STRUCTURE_LOOP_START, SIMPLE_CONTROL_STRUCTURE, FOR_STRUCTURE_LOOP, WHILE_CONFIGURATION
-%state PYTHON_EXECUTED_CONDITION, PYTHON_EVALUATED_CONTROL_STRUCTURE_START
+%state PYTHON_EVALUATED_EXPRESSION_START, KEYWORD_PYTHON_EXPRESSION, PYTHON_EXPRESSION, PYTHON_EXECUTED_CONDITION, PYTHON_EVALUATED_CONTROL_STRUCTURE_START
 
 %xstate COMMENTS_SECTION, LITERAL_CONSTANT_ONLY, SETTING_VALUES, LOCAL_SETTING_DEFINITION
 %xstate NORMAL_PARAMETER_ASSIGNMENT, TEMPLATE_PARAMETER_ASSIGNMENT
@@ -398,6 +404,11 @@ LineComment = {LineCommentSign} {NON_EOL}*
 <PYTHON_EXPRESSION> {
     {ClosingVariable}{2}         { leaveState(); yypushback(1); return PYTHON_EXPRESSION_END; }
     ( [^}] | }[^}] )+            { return PYTHON_EXPRESSION_CONTENT; }
+}
+<KEYWORD_PYTHON_EXPRESSION> {
+    {EverythingButVariableValue} { return PYTHON_EXPRESSION_CONTENT; }
+    {SpaceBasedEndMarker}        { leaveState(); return WHITE_SPACE; }
+    {EOL} | {MultiLine}          { leaveState(); yypushback(yylength()); break; }
 }
 
 <SETTINGS_SECTION> {
@@ -677,6 +688,11 @@ LineComment = {LineCommentSign} {NON_EOL}*
     {ExtendedSpaceBasedEndMarker}           { yybegin(FOR_STRUCTURE_LOOP); return WHITE_SPACE; }
     [^]                                     { yypushback(yylength()); yybegin(FOR_STRUCTURE_LOOP); break; }
 }
+<PYTHON_EVALUATED_EXPRESSION_START>  {
+    {ExtendedSpaceBasedEndMarker}           { yybegin(KEYWORD_PYTHON_EXPRESSION); return WHITE_SPACE; }
+    {MultiLine}                             { enterNewState(IN_CONTINUATION); yypushback(yylength()); break; }
+    [^]                                     { yypushback(yylength()); yybegin(KEYWORD_PYTHON_EXPRESSION); break; }
+}
 <PYTHON_EVALUATED_CONTROL_STRUCTURE_START>  {
     {ExtendedSpaceBasedEndMarker}           { yybegin(PYTHON_EXECUTED_CONDITION); return WHITE_SPACE; }
     {MultiLine}                             { enterNewState(IN_CONTINUATION); yypushback(yylength()); break; }
@@ -737,13 +753,14 @@ LineComment = {LineCommentSign} {NON_EOL}*
 <KEYWORD_CALL>  {
     {RunKeywordCall}                                               { return KEYWORD_NAME; }
     {ConditionalRunKeywordCall}                                    { enterNewState(PYTHON_EVALUATED_CONTROL_STRUCTURE_START); return KEYWORD_NAME; }
-    ({AssertRunKeywordCall} | {RepeatKeywordCall})                 { enterNewState(SINGLE_LITERAL_CONSTANT_START); return KEYWORD_NAME; }
+    {AssertRunKeywordCall} | {RepeatKeywordCall}                   { enterNewState(SINGLE_LITERAL_CONSTANT_START); return KEYWORD_NAME; }
     {SimpleConditionalKeywordCall}                                 {
           yybegin(KEYWORD_ARGUMENTS);
           enterNewState(PYTHON_EVALUATED_CONTROL_STRUCTURE_START);
           return KEYWORD_NAME;
     }
     {RepeatKeywordCall}                                            { return KEYWORD_NAME; }
+    {EvaluateKeywordCall}                                          { yybegin(KEYWORD_ARGUMENTS); enterNewState(PYTHON_EVALUATED_EXPRESSION_START); return KEYWORD_NAME; }
 
     {BuiltInNamespace} ({RunKeywordCall} | {ConditionalRunKeywordCall} | {AssertRunKeywordCall} | {SimpleConditionalKeywordCall} | {RepeatKeywordCall}) {
           int additionalPushbackLength = 0;

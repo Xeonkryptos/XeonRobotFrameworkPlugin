@@ -51,6 +51,6 @@ public class KeywordCallNameIndex extends StringStubIndexExtension<RobotKeywordC
 
     @Override
     public int getVersion() {
-        return super.getVersion() + 8;
+        return super.getVersion() + 9;
     }
 }

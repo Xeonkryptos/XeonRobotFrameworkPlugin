@@ -4,11 +4,19 @@ import com.intellij.lang.injection.general.Injection
 import com.intellij.lang.injection.general.LanguageInjectionContributor
 import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiElement
+import com.intellij.psi.util.PsiTreeUtil
 import com.jetbrains.python.psi.stubs.PyModuleNameIndex
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotConditionalContent
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotDictVariable
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCall
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotListVariable
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotParameter
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotPositionalArgument
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotPythonExpression
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotPythonExpressionBody
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotScalarVariable
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVisitor
+import dev.xeonkryptos.xeonrobotframeworkplugin.util.RobotNames
 import org.intellij.plugins.intelliLang.inject.config.BaseInjection
 
 class RobotLanguageInjectionContributor : LanguageInjectionContributor {
@@ -41,7 +49,35 @@ class RobotLanguageInjectionContributor : LanguageInjectionContributor {
 
         override fun visitPythonExpression(o: RobotPythonExpression) {
             pythonExpression = true
-            prefix = "${computeImportsForPythonExpressionBodies(o.pythonExpressionBodyList)}\nresult = "
+
+            val keywordCall = PsiTreeUtil.getParentOfType(o, RobotKeywordCall::class.java, true, RobotScalarVariable::class.java, RobotListVariable::class.java, RobotDictVariable::class.java)
+            val additionalModuleImports = keywordCall?.let {
+                val modules = mutableListOf<String>()
+                val visitor = object : RobotVisitor() {
+                    private var parameterUsed = false
+                    private var argumentIndex = 0
+
+                    override fun visitParameter(o: RobotParameter) {
+                        if (o.parameterName == RobotNames.PARAMETER_MODULES) {
+                            o.positionalArgument?.let { extractModules(it) }
+                        }
+                        parameterUsed = true
+                    }
+
+                    override fun visitPositionalArgument(o: RobotPositionalArgument) {
+                        if (!parameterUsed) {
+                            argumentIndex++
+                            if (argumentIndex == 1) extractModules(o)
+                        }
+                    }
+
+                    private fun extractModules(argument: RobotPositionalArgument) = argument.text.split(Regex("\\s?,\\s?")).let { modules.addAll(it) }
+                }
+                it.accept(visitor)
+                modules.joinToString(separator = "\n", postfix = "\n") { module -> "import $module" }
+            } ?: ""
+
+            prefix = "${additionalModuleImports}${computeImportsForPythonExpressionBodies(o.pythonExpressionBodyList)}\nresult = "
         }
 
         private fun computeImportsForPythonExpressionBodies(pythonExpressionBodies: Collection<RobotPythonExpressionBody>): String {

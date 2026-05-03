@@ -59,5 +59,7 @@ object RobotNames {
     const val CREATE_LIST_KEYWORD_NAME = "createlist"
     const val CREATE_DICTIONARY_KEYWORD_NAME = "createdictionary"
 
+    const val PARAMETER_MODULES = "modules"
+
     const val DEPRECATED_PREFIX = "*DEPRECATED"
 }
