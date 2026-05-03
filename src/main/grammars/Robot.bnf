@@ -327,8 +327,12 @@ meta else_if_structure ::= ELSE_IF conditional_content <<separator>> <<statement
     pin=3
     implements="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotBlockOpeningStructure"
 }
-conditional_content ::= conditional_content_body+ {name="Condition"}
-private conditional_content_body ::= PYTHON_EXPRESSION_CONTENT | variable
+conditional_content ::= variable* python_expression_body (python_expression_body | variable)* {
+    name="Condition"
+    implements="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotPythonInjectionExtension"
+    methods=[getInjectionRelevantTextRange]
+    pin=2
+}
 exception_handling_structure ::= try_structure
     except_structure*
     <<else_structure eol_marker executable_statement*>>?
@@ -425,21 +429,21 @@ positional_argument ::= external_positional_argument EOS? {
     methods = [getReference]
 }
 external external_positional_argument ::= parsePositionalArgument positional_argument_content
-private positional_argument_content ::= literal_constant_value | variable | sub_keyword_call | conditional_content
+private positional_argument_content ::= literal_constant_value | conditional_content | variable | sub_keyword_call
 
 extended_positional_argument ::= <<parsePositionalArgument extended_positional_argument_content>> EOS? {
     implements="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotArgument"
     methods = [getReference]
     elementType=positional_argument
 }
-private extended_positional_argument_content ::= literal_constant_value | variable | sub_keyword_call | <<else_if_structure EOS sub_keyword_call>> | <<else_structure EOS? sub_keyword_call>> | conditional_content
+private extended_positional_argument_content ::= literal_constant_value | conditional_content | variable | sub_keyword_call | <<else_if_structure EOS sub_keyword_call>> | <<else_structure EOS? sub_keyword_call>>
 
 reduced_positional_argument ::= <<parsePositionalArgument reduced_positional_argument_content>> EOS? {
     implements="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotArgument"
     methods = [getReference]
     elementType=positional_argument
 }
-private reduced_positional_argument_content ::= literal_constant_value | variable | conditional_content
+private reduced_positional_argument_content ::= literal_constant_value | conditional_content | variable
 
 variable_definition ::= scalar_variable_definition | list_variable_definition | dict_variable_definition {
     implements = [
@@ -482,16 +486,20 @@ dict_variable ::= dict_variable_definition {
 }
 environment_variable ::= ENV_VARIABLE_START VARIABLE_LBRACE variable_content VARIABLE_RBRACE
 
-private scalar_variable_definition ::= SCALAR_VARIABLE_START VARIABLE_LBRACE (variable_content | python_expression)? VARIABLE_RBRACE (extended_variable_slice_access | extended_variable_index_access | extended_variable_nested_access)* {pin=1}
-private list_variable_definition ::= LIST_VARIABLE_START VARIABLE_LBRACE (variable_content | python_expression) VARIABLE_RBRACE (extended_variable_slice_access | extended_variable_index_access | extended_variable_nested_access)* {pin=1}
-private dict_variable_definition ::= DICT_VARIABLE_START VARIABLE_LBRACE (variable_content | python_expression) VARIABLE_RBRACE extended_variable_nested_access* {pin=1}
+private scalar_variable_definition ::= SCALAR_VARIABLE_START VARIABLE_LBRACE (python_expression | variable_content)? VARIABLE_RBRACE (extended_variable_slice_access | extended_variable_index_access | extended_variable_nested_access)* {pin=1}
+private list_variable_definition ::= LIST_VARIABLE_START VARIABLE_LBRACE (python_expression | variable_content) VARIABLE_RBRACE (extended_variable_slice_access | extended_variable_index_access | extended_variable_nested_access)* {pin=1}
+private dict_variable_definition ::= DICT_VARIABLE_START VARIABLE_LBRACE (python_expression | variable_content) VARIABLE_RBRACE extended_variable_nested_access* {pin=1}
 
 variable_content ::= (variable | VARIABLE_BODY)+ {
     methods = [getReference]
     recoverWhile=variable_content_recover
 }
 private variable_content_recover ::= !(VARIABLE_RBRACE | eol_marker)
-python_expression ::= PYTHON_EXPRESSION_START PYTHON_EXPRESSION_CONTENT PYTHON_EXPRESSION_END { methods = [expressionContent="PYTHON_EXPRESSION_CONTENT"] }
+python_expression ::= PYTHON_EXPRESSION_START (python_expression_body | variable)* PYTHON_EXPRESSION_END {
+    implements="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotPythonInjectionExtension"
+    methods=[getInjectionRelevantTextRange]
+}
+python_expression_body ::= PYTHON_EXPRESSION_CONTENT
 
 private extended_variable_slice_access ::= VARIABLE_ACCESS_START variable_slice_access_content VARIABLE_ACCESS_END {pin=2}
 private extended_variable_index_access ::= VARIABLE_ACCESS_START variable_index_access_content VARIABLE_ACCESS_END {pin=2}
@@ -503,6 +511,6 @@ variable_nested_access_content ::= (variable | literal_constant_value)+
 
 literal_constant_value ::= LITERAL_CONSTANT
 
-private eol_marker ::= EOL | <<eof>>
+private eol_marker ::= EOL+ | <<eof>>
 //noinspection BnfUnusedRule - Simply need the token to be generated, nothing else. It will be handled as a WHITESPACE token
 private CONTINUATION_MARKER ::= CONTINUATION

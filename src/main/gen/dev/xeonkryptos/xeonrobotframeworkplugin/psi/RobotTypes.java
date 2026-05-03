@@ -69,6 +69,7 @@ public interface RobotTypes {
   IElementType PARAMETER_ID = new RobotElementType("PARAMETER_ID");
   IElementType POSITIONAL_ARGUMENT = new RobotElementType("POSITIONAL_ARGUMENT");
   IElementType PYTHON_EXPRESSION = new RobotElementType("PYTHON_EXPRESSION");
+  IElementType PYTHON_EXPRESSION_BODY = new RobotElementType("PYTHON_EXPRESSION_BODY");
   IElementType RESOURCE_IMPORT_GLOBAL_SETTING = new RobotElementType("RESOURCE_IMPORT_GLOBAL_SETTING");
   IElementType RETURN_STRUCTURE = new RobotElementType("RETURN_STRUCTURE");
   IElementType ROOT = new RobotElementType("ROOT");
@@ -345,6 +346,9 @@ public interface RobotTypes {
       }
       else if (type == PYTHON_EXPRESSION) {
         return new RobotPythonExpressionImpl(node);
+      }
+      else if (type == PYTHON_EXPRESSION_BODY) {
+        return new RobotPythonExpressionBodyImpl(node);
       }
       else if (type == RESOURCE_IMPORT_GLOBAL_SETTING) {
         return new RobotResourceImportGlobalSettingImpl(node);

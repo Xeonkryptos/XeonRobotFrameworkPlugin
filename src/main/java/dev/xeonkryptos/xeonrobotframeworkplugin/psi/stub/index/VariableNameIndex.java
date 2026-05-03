@@ -39,6 +39,6 @@ public class VariableNameIndex extends StringStubIndexExtension<RobotVariable> {
 
     @Override
     public int getVersion() {
-        return super.getVersion() + 11;
+        return super.getVersion() + 12;
     }
 }

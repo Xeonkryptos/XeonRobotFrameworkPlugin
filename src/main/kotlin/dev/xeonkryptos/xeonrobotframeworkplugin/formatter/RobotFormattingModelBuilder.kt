@@ -61,7 +61,7 @@ class RobotFormattingModelBuilder : CustomFormattingModelBuilder {
             .before(RobotTokenSets.SECTIONS_HEADER_SET)
             .none()
             // @formatter:on
-            .after(RobotTokenSets.SECTIONS_HEADER_SET)
+            .after(TokenSet.orSet(RobotTokenSets.SECTIONS_HEADER_SET, TokenSet.create(RobotTypes.TEMPLATE_ARGUMENTS, RobotTypes.TRY)))
             .lineBreakInCode()
             .before(RobotTypes.IMPORT_SETTINGS)
             .spacing(0, 0, commonSettings.BLANK_LINES_BEFORE_IMPORTS + 1, commonSettings.KEEP_LINE_BREAKS, commonSettings.KEEP_BLANK_LINES_IN_CODE)
@@ -87,8 +87,6 @@ class RobotFormattingModelBuilder : CustomFormattingModelBuilder {
             .spacing(0, 0, commonSettings.BLANK_LINES_AFTER_CLASS_HEADER + 1, commonSettings.KEEP_LINE_BREAKS, commonSettings.KEEP_BLANK_LINES_IN_CODE)
             .after(TokenSet.create(RobotTypes.LOCAL_SETTING, RobotTypes.LOCAL_ARGUMENTS_SETTING))
             .spacing(0, 0, customSettings.BLANK_LINES_AFTER_LOCAL_SETTINGS + 1, commonSettings.KEEP_LINE_BREAKS, commonSettings.KEEP_BLANK_LINES_IN_CODE)
-            .after(RobotTypes.TEMPLATE_ARGUMENTS)
-            .lineBreakInCode()
             .between(RobotTypes.VARIABLE_DEFINITION, RobotTypes.ASSIGNMENT)
             .spaceIf(commonSettings.SPACE_AROUND_ASSIGNMENT_OPERATORS)
             .betweenInside(VARIABLE_DEFINITION_WITH_OPTIONAL_ASSIGNMENT_SET, VARIABLE_VALUE_SINGLE_SET, RobotTypes.SINGLE_VARIABLE_STATEMENT)

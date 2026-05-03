@@ -17,11 +17,12 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.yaml.psi.YAMLPsiElement;
 
 import java.util.Arrays;
+import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
 public class RobotVariableDefinitionNotFoundAnnotator extends AbstractRobotVariableAnnotator {
 
-    private static final Pattern NUMBERS_PATTERN = Pattern.compile("\\d+");
+    private static final Predicate<String> MATCH_NUMBER_PREDICATE = Pattern.compile("\\d+(\\.\\d+)?").asMatchPredicate();
 
     @Override
     protected void evaluateAnnotation(@NotNull RobotVariable variable) {
@@ -37,7 +38,7 @@ public class RobotVariableDefinitionNotFoundAnnotator extends AbstractRobotVaria
             String variableName = variable.getVariableName();
             assert variableName != null;
 
-            if (!robotVariableAnalyser.variableDefinitionAsParent && !robotVariableAnalyser.pythonExpressionVariableBodyFound && !NUMBERS_PATTERN.matcher(variableName).matches()) {
+            if (!robotVariableAnalyser.variableDefinitionAsParent && !robotVariableAnalyser.pythonExpressionVariableBodyFound && MATCH_NUMBER_PREDICATE.negate().test(variableName)) {
                 getHolder().newAnnotation(HighlightSeverity.WEAK_WARNING, RobotBundle.message("annotation.variable.not-found")).range(variable).create();
             }
         }

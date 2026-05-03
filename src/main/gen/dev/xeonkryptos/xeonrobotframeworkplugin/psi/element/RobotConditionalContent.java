@@ -4,10 +4,16 @@ package dev.xeonkryptos.xeonrobotframeworkplugin.psi.element;
 import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
+import com.intellij.openapi.util.TextRange;
 
-public interface RobotConditionalContent extends RobotElement {
+public interface RobotConditionalContent extends RobotPythonInjectionExtension, RobotElement {
+
+  @NotNull
+  List<RobotPythonExpressionBody> getPythonExpressionBodyList();
 
   @NotNull
   List<RobotVariable> getVariableList();
+
+  @NotNull TextRange getInjectionRelevantTextRange();
 
 }

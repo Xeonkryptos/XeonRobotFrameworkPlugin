@@ -1,0 +1,27 @@
+<html lang="en">
+    <body>
+        <p>
+            Reports unknown Python modules passed to the Robot Framework <code>Evaluate</code> keyword.
+        </p>
+        <p>
+            This inspection detects unresolved module names in the comma-separated <code>modules</code>
+            argument, including the second positional argument form of <code>Evaluate</code>. It helps
+            catch misspelled module names, missing dependencies, and <code>PYTHONPATH</code> issues
+            before the test is executed.
+        </p>
+        <p>
+            Example:
+        </p>
+        <pre><code>
+*** Test Cases ***
+Example
+    ${value}=    Evaluate    json.loads('{"enabled": true}')    modules=json,jsno
+</code></pre>
+        <!-- tooltip end -->
+        <p>
+            The inspection highlights each unknown module name inside the argument value. Use valid,
+            importable Python module names and make sure they are available in the current project
+            environment.
+        </p>
+    </body>
+</html>

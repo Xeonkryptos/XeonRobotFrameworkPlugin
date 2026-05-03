@@ -27,6 +27,7 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.icons.RobotIcons;
 import dev.xeonkryptos.xeonrobotframeworkplugin.misc.RobotReadWriteAccessDetector;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.FoldingText;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotCommentsSection;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotConditionalContent;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotDictVariable;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotForLoopHeader;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotImportArgument;
@@ -44,6 +45,7 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLocalSettingId;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotParameter;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotParameterId;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotPositionalArgument;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotPythonExpression;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotScalarVariable;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotSection;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotSettingsSection;
@@ -360,6 +362,22 @@ public class RobotPsiUtil {
     @NotNull
     public static String getSectionName(@NotNull RobotKeywordsSection section) {
         return section.getNameIdentifier().getText();
+    }
+
+    @NotNull
+    public static TextRange getInjectionRelevantTextRange(@NotNull RobotConditionalContent content) {
+        String text = content.getText();
+        int offset = text.length() - text.stripLeading().length();
+        int length = text.trim().length();
+        return TextRange.from(offset, length);
+    }
+
+    @NotNull
+    public static TextRange getInjectionRelevantTextRange(@NotNull RobotPythonExpression expression) {
+        String text = expression.getText();
+        int offset = text.length() - text.stripLeading().length() + 1;
+        int length = text.trim().length() - 1 - offset;
+        return TextRange.from(offset, length);
     }
 
     public static PsiElement getForInElement(@NotNull RobotForLoopHeader header) {

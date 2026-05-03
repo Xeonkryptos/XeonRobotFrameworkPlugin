@@ -61,6 +61,8 @@ import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.ExtendedRobotTypes.*;
           yybegin(SINGLE_LITERAL_CONSTANT);
       } else if (currentState == PYTHON_EVALUATED_CONTROL_STRUCTURE_START) {
           yybegin(PYTHON_EXECUTED_CONDITION);
+      } else if (currentState == PYTHON_EVALUATED_EXPRESSION_START) {
+          yybegin(KEYWORD_PYTHON_EXPRESSION);
       }
   }
 
@@ -84,6 +86,7 @@ import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.ExtendedRobotTypes.*;
                PARAMETER_VALUE,
                TEMPLATE_PARAMETER_VALUE,
                SINGLE_LITERAL_CONSTANT,
+               KEYWORD_PYTHON_EXPRESSION,
                PYTHON_EXECUTED_CONDITION -> handleStateChangeOnFakeMultilineDetection();
       }
   }
@@ -92,6 +95,7 @@ import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.ExtendedRobotTypes.*;
       return currentState == SINGLE_LITERAL_CONSTANT
             || currentState == PARAMETER_VALUE
             || currentState == TEMPLATE_PARAMETER_VALUE
+            || currentState == KEYWORD_PYTHON_EXPRESSION
             || currentState == PYTHON_EXECUTED_CONDITION;
   }
 
@@ -158,12 +162,12 @@ MultiLine = {MultiLineStart} ({MultiLineContinuation} {NonNewlineWhitespace}*)+
 
 WithNameKeyword = "WITH NAME" | "AS"
 
-SectionSettingsWords = "Settings" | "Setting"
-SectionVariablesWords = "Variables" | "Variable"
-SectionTestcasesWords = "Test Cases" | "Test Case"
-SectionTasksWords = "Tasks" | "Task"
-SectionKeywordsWords = "Keywords" | "Keyword"
-SectionCommentsWords = "Comments" | "Comment"
+SectionSettingsWords = [Ss][Ee][Tt]{2}[Ii][Nn][Gg][Ss]?
+SectionVariablesWords = [Vv][Aa][Rr][Ii][Aa][Bb][Ll][Ee][Ss]?
+SectionTestcasesWords = [Tt][Ee][Ss][Tt]{Space}[Cc][Aa][Ss][Ee][Ss]?
+SectionTasksWords = [Tt][Aa][Ss][Kk][Ss]?
+SectionKeywordsWords = [Kk][Ee][Yy][Ww][Oo][Rr][Dd][Ss]?
+SectionCommentsWords = [Cc][Oo][Mm]{2}[Ee][Nn][Tt][Ss]?
 
 SectionIdentifierParts = ({Space}? {Star})* {Space}?
 CommentSectionIdentifier = {Star} {SectionIdentifierParts} {SectionCommentsWords} {SectionIdentifierParts} {SpaceBasedEndMarker}? {NON_EOL}* {EOL}?
@@ -181,16 +185,37 @@ ListVariableStart = "@" {OpeningVariable}
 DictVariableStart = "&" {OpeningVariable}
 EnvVariableStart = "%" {OpeningVariable}
 
-LibraryImportKeyword = "Library"
-ResourceImportKeyword = "Resource"
-VariablesImportKeyword = "Variables"
-NameKeyword = "Name"
-DocumentationKeyword = "Documentation"
-MetadataKeyword = "Metadata"
-SetupTeardownKeywords = "Suite Setup" | "Suite Teardown" | "Test Setup" | "Test Teardown" | "Task Setup" | "Task Teardown"
-TagsKeywords = "Test Tags" | "Force Tags" | "Default Tags" | "Keyword Tags"
-TemplateKeywords = "Test Template" | "Task Template"
-TimeoutKeywords = "Test Timeout" | "Task Timeout"
+LibraryImportKeyword = [Ll][Ii][Bb][Rr][Aa][Rr][Yy]
+ResourceImportKeyword = [Rr][Ee][Ss][Oo][Uu][Rr][Cc][Ee]
+VariablesImportKeyword = [Vv][Aa][Rr][Ii][Aa][Bb][Ll][Ee][Ss]
+NameKeyword = [Nn][Aa][Mm][Ee]
+DocumentationKeyword = [Dd][Oo][Cc][Uu][Mm][Ee][Nn][Tt][Aa][Tt][Ii][Oo][Nn]
+MetadataKeyword = [Mm][Ee][Tt][Aa][Dd][Aa][Tt][Aa]
+Suite = [Ss][Uu][Ii][Tt][Ee]
+Test = [Tt][Ee][Ss][Tt]
+Task = [Tt][Aa][Ss][Kk]
+Setup = [Ss][Ee][Tt][Uu][Pp]
+Teardown = [Tt][Ee][Aa][Rr][Dd][Oo][Ww][Nn]
+Tags = [Tt][Aa][Gg][Ss]
+Template = [Tt][Ee][Mm][Pp][Ll][Aa][Tt][Ee]
+Continue = [Cc][Oo][Nn][Tt][Ii][Nn][Uu][Ee]
+On = [Oo][Nn]
+Failure = [Ff][Aa][Ii][Ll][Uu][Rr][Ee]
+Keyword = [Kk][Ee][Yy][Ww][Oo][Rr][Dd]
+Run = [Rr][Uu][Nn]
+If = [Ii][Ff]
+Timeout = [Tt][Ii][Mm][Ee][Oo][Uu][Tt]
+Return = [Rr][Ee][Tt][Uu][Rr][Nn]
+Passed = [Pp][Aa][Ss]{2}[Ee][Dd]
+Failed = [Ff][Aa][Ii][Ll][Ee][Dd]
+And = [Aa][Nn][Dd]
+Error = [Ee][Rr]{2}[Oo][Rr]
+Should = [Ss][Hh][Oo][Uu][Ll][Dd]
+None = [Nn][Oo][Nn][Ee]
+SetupTeardownKeywords = ({Suite} | {Test} | {Task}) {Space} ({Setup} | {Teardown})
+TagsKeywords = ({Test} | [Ff][Oo][Rr][Cc][Ee] | [Dd][Ee][Ff][Aa][Uu][Ll][Tt] | {Keyword}) {Space} {Tags}
+TemplateKeywords = ({Test} | {Task}) {Space} {Template}
+TimeoutKeywords = ({Test} | {Task}) {Space} {Timeout}
 GenericSettingsKeyword = [\w_-]+([ ][\w_-]+)*
 
 VariableCharNotAllowed = [^\s$@%&]
@@ -204,7 +229,7 @@ AllowedExtendedVariableAccessSeq = {AllowedExtendedVariableAccessChar}+
 VariableLiteralValue =   ([^}$@&%\r\n] | {ExceptionForAllowedVariableChar} | {OpeningVariable})+
 LiteralValue =           [^\s]+([ ][^\s]+)*[ ]?
 EverythingButVariableValue = {AllowedEverythingButVariableSeq} ({Space} {AllowedEverythingButVariableSeq})*
-KeywordLibraryNameLiteralValue = [/*]? {EverythingButVariableValue} "."
+KeywordLibraryNameLiteralValue = {EverythingButVariableValue} "."
 ExtendedVariableAccessValue = {AllowedExtendedVariableAccessSeq}
 
 LocalSettingKeywordStartWhitespaceFree = "["
@@ -212,47 +237,49 @@ LocalSettingKeywordEndWhitespaceFree = "]"
 
 LocalSettingKeywordStart = {LocalSettingKeywordStartWhitespaceFree} {NonNewlineWhitespace}*
 LocalSettingKeywordEnd = {NonNewlineWhitespace}* {LocalSettingKeywordEndWhitespaceFree}
-LocalTemplateKeyword = {LocalSettingKeywordStart} "Template" {LocalSettingKeywordEnd}
-LocalSetupTeardownKeywords = {LocalSettingKeywordStart} ("Setup" | "Teardown") {LocalSettingKeywordEnd}
-LocalArgumentsKeyword = {LocalSettingKeywordStart} "Arguments" {LocalSettingKeywordEnd}
-LocalTagsKeyword = {LocalSettingKeywordStart} "Tags" {LocalSettingKeywordEnd}
+LocalTemplateKeyword = {LocalSettingKeywordStart} {Template} {LocalSettingKeywordEnd}
+LocalSetupTeardownKeywords = {LocalSettingKeywordStart} ({Setup} | {Teardown}) {LocalSettingKeywordEnd}
+LocalArgumentsKeyword = {LocalSettingKeywordStart} [Aa][Rr][Gg][Uu][Mm][Ee][Nn][Tt][Ss] {LocalSettingKeywordEnd}
+LocalTagsKeyword = {LocalSettingKeywordStart} {Tags} {LocalSettingKeywordEnd}
 LocalSettingKeyword = {LocalSettingKeywordStart} {GenericSettingsKeyword} {LocalSettingKeywordEnd}
 
-BuiltInNamespace = "BuiltIn."
+BuiltInNamespace = [Bb][Uu][Ii][Ll][Tt][Ii][Nn]"."
 IntraKeywordSeparator = {Space} | "_"+ ({Space} "_"+)*
 
 // Builtin keywords accepting a keyword as an argument and every parameter after that is passed to the called keyword.
-AndContinueOnFailure = "Continue" {IntraKeywordSeparator}? "On" {IntraKeywordSeparator}? "Failure"
-AndIgnoreError = "Ignore" {IntraKeywordSeparator}? "Error"
-AndReturnStatus = "Return" {IntraKeywordSeparator} ?"Status"
-AndWarnOnFailure = "Warn" {IntraKeywordSeparator}? "On" {IntraKeywordSeparator}? "Failure"
-RunKeywordCall = "Run" {IntraKeywordSeparator}? "Keyword" ({IntraKeywordSeparator}? And {IntraKeywordSeparator}? ({AndContinueOnFailure} | {AndIgnoreError} | "Return" | {AndReturnStatus} | {AndWarnOnFailure}))?
+AndContinueOnFailure = {Continue} {IntraKeywordSeparator}? {On} {IntraKeywordSeparator}? {Failure}
+AndIgnoreError = [Ii][Gg][Nn][Oo][Rr][Ee] {IntraKeywordSeparator}? {Error}
+AndReturnStatus = {Return} {IntraKeywordSeparator} ?[Ss][Tt][Aa][Tt][Uu][Ss]
+AndWarnOnFailure = [Ww][Aa][Rr][Nn] {IntraKeywordSeparator}? {On} {IntraKeywordSeparator}? {Failure}
+RunKeywordCall = {Run} {IntraKeywordSeparator}? {Keyword} ({IntraKeywordSeparator}? And {IntraKeywordSeparator}? ({AndContinueOnFailure} | {AndIgnoreError} | {Return} | {AndReturnStatus} | {AndWarnOnFailure}))?
 
 // Builtin keywords accepting a condition to decide whether to run the keyword or not. After that, working like the builtin keywords above, expecting a keyword
 // to execute and its parameters
-AllTestsPassed = "All" {IntraKeywordSeparator}? "Tests" {IntraKeywordSeparator}? "Passed"
-AnyTestsFailed = "Any" {IntraKeywordSeparator}? "Tests" {IntraKeywordSeparator}? "Failed"
-TestFailed = "Test" {IntraKeywordSeparator}? "Failed"
-TestPassed = "Test" {IntraKeywordSeparator}? "Passed"
-TimeoutOccurred = "Timeout" {IntraKeywordSeparator}? "Occurred"
-ConditionalRunKeywordCall = "Run" {IntraKeywordSeparator}? "Keyword" {IntraKeywordSeparator}? "If" ({IntraKeywordSeparator}? ({AllTestsPassed} | {AnyTestsFailed} | {TestFailed} | {TestPassed} | {TimeoutOccurred}))?
-    | "Run" {IntraKeywordSeparator}? "Keyword" {IntraKeywordSeparator}? "Unless"
-    | "Run" {IntraKeywordSeparator}? "Keyword" {IntraKeywordSeparator}? "And" {IntraKeywordSeparator}? "Return" {IntraKeywordSeparator}? "If"
+AllTestsPassed = [Aa][Ll]{2} {IntraKeywordSeparator}? {Test}[Ss] {IntraKeywordSeparator}? {Passed}
+AnyTestsFailed = [Aa][Nn][Yy] {IntraKeywordSeparator}? {Test}[Ss] {IntraKeywordSeparator}? {Failed}
+TestFailed = {Test} {IntraKeywordSeparator}? {Failed}
+TestPassed = {Test} {IntraKeywordSeparator}? {Passed}
+TimeoutOccurred = {Timeout} {IntraKeywordSeparator}? [Oo][Cc]{2}[Uu][Rr]{2}[Ee][Dd]
+ConditionalRunKeywordCall = {Run} {IntraKeywordSeparator}? {Keyword} {IntraKeywordSeparator}? {If} ({IntraKeywordSeparator}? ({AllTestsPassed} | {AnyTestsFailed} | {TestFailed} | {TestPassed} | {TimeoutOccurred}))?
+    | {Run} {IntraKeywordSeparator}? {Keyword} {IntraKeywordSeparator}? [Uu][Nn][Ll][Ee][Ss]{2}
+    | {Run} {IntraKeywordSeparator}? {Keyword} {IntraKeywordSeparator}? {And} {IntraKeywordSeparator}? {Return} {IntraKeywordSeparator}? {If}
 
-AssertRunKeywordCall = "Run" {IntraKeywordSeparator}? "Keyword" {IntraKeywordSeparator}? "And" {IntraKeywordSeparator}? "Expect" {IntraKeywordSeparator}? "Error"
+AssertRunKeywordCall = {Run} {IntraKeywordSeparator}? {Keyword} {IntraKeywordSeparator}? {And} {IntraKeywordSeparator}? [Ee][Xx][Pp][Ee][Cc][Tt] {IntraKeywordSeparator}? {Error}
 
-SetVariableIf = "Set" {IntraKeywordSeparator}? "Variable" {IntraKeywordSeparator}? "If"
-ForLoopIf = ("Continue" | "Exit") {IntraKeywordSeparator}? "For" {IntraKeywordSeparator}? "Loop" {IntraKeywordSeparator}? "If"
-PassExecutionIf = "Pass" {IntraKeywordSeparator}? "Execution" {IntraKeywordSeparator}? {IntraKeywordSeparator}? "If"
-ReturnFromKeywordIf = "Return" {IntraKeywordSeparator}? "From" {IntraKeywordSeparator}? "Keyword" {IntraKeywordSeparator}? "If"
-SkipIf = "Skip" {IntraKeywordSeparator}? "If"
+SetVariableIf = [Ss][Ee][Tt] {IntraKeywordSeparator}? [Vv][Aa][Rr][Ii][Aa][Bb][Ll][Ee] {IntraKeywordSeparator}? {If}
+ForLoopIf = ({Continue} | [Ee][Xx][Ii][Tt]) {IntraKeywordSeparator}? [Ff][Oo][Rr] {IntraKeywordSeparator}? [Ll][Oo]{2}[Pp] {IntraKeywordSeparator}? {If}
+PassExecutionIf = [Pp][Aa][Ss]{2} {IntraKeywordSeparator}? [Ee][Xx][Ee][Cc][Uu][Tt][Ii][Oo][Nn] {IntraKeywordSeparator}? {IntraKeywordSeparator}? {If}
+ReturnFromKeywordIf = {Return} {IntraKeywordSeparator}? [Ff][Rr][Oo][Mm] {IntraKeywordSeparator}? {Keyword} {IntraKeywordSeparator}? {If}
+SkipIf = [Ss][Kk][Ii][Pp] {IntraKeywordSeparator}? {If}
 
-ShouldBeTrue = "Should" {IntraKeywordSeparator}? "Be" {IntraKeywordSeparator}? "True"
-ShouldNotBeTrue = "Should" {IntraKeywordSeparator}? "Not" {IntraKeywordSeparator}? "Be" {IntraKeywordSeparator}? "True"
+ShouldBeTrue = {Should} {IntraKeywordSeparator}? [Bb][Ee] {IntraKeywordSeparator}? [Tt][Rr][Uu][Ee]
+ShouldNotBeTrue = {Should} {IntraKeywordSeparator}? [Nn][Oo][Tt] {IntraKeywordSeparator}? [Bb][Ee] {IntraKeywordSeparator}? [Tt][Rr][Uu][Ee]
 
 SimpleConditionalKeywordCall = {SetVariableIf} | {ForLoopIf} | {PassExecutionIf} | {ReturnFromKeywordIf} | {SkipIf} | {ShouldBeTrue} | {ShouldNotBeTrue}
 
-RepeatKeywordCall = "Repeat" {IntraKeywordSeparator}? "Keyword"
+RepeatKeywordCall = [Rr][Ee][Pp][Ee][Aa][Tt] {IntraKeywordSeparator}? {Keyword}
+
+EvaluateKeywordCall = [Ee][Vv][Aa][Ll][Uu][Aa][Tt][Ee]
 
 LineComment = {LineCommentSign} {NON_EOL}*
 
@@ -261,10 +288,10 @@ LineComment = {LineCommentSign} {NON_EOL}*
 %state USER_KEYWORD_NAME_DEFINITION, USER_KEYWORD_DEFINITION, USER_KEYWORD_RETURN_STATEMENT
 %state SETTING, SETTING_TEMPLATE_START, LOCAL_TEMPLATE_DEFINITION_START, INTERMEDIATE_TEMPLATE_CONFIGURATION, TEMPLATE_DEFINITION, TEMPLATE_ARGUMENTS
 %state KEYWORD_CALL, KEYWORD_ARGUMENTS, SINGLE_LITERAL_CONSTANT_START, SINGLE_LITERAL_CONSTANT
-%state INLINE_VARIABLE_DEFINITION, VARIABLE_DEFINITION, VARIABLE_DEFINITION_ARGUMENTS, VARIABLE_USAGE, EXTENDED_VARIABLE_ACCESS, PYTHON_EXPRESSION
+%state INLINE_VARIABLE_DEFINITION, VARIABLE_DEFINITION, VARIABLE_DEFINITION_ARGUMENTS, VARIABLE_USAGE, EXTENDED_VARIABLE_ACCESS
 %state PARAMETER_VALUE, TEMPLATE_PARAMETER_VALUE
 %state FOR_STRUCTURE, SIMPLE_CONTROL_STRUCTURE_START, FOR_STRUCTURE_LOOP_START, SIMPLE_CONTROL_STRUCTURE, FOR_STRUCTURE_LOOP, WHILE_CONFIGURATION
-%state PYTHON_EXECUTED_CONDITION, PYTHON_EVALUATED_CONTROL_STRUCTURE_START
+%state PYTHON_EVALUATED_EXPRESSION_START, KEYWORD_PYTHON_EXPRESSION, PYTHON_EXPRESSION, PYTHON_EXECUTED_CONDITION, PYTHON_EVALUATED_CONTROL_STRUCTURE_START
 
 %xstate COMMENTS_SECTION, LITERAL_CONSTANT_ONLY, SETTING_VALUES, LOCAL_SETTING_DEFINITION
 %xstate NORMAL_PARAMETER_ASSIGNMENT, TEMPLATE_PARAMETER_ASSIGNMENT
@@ -366,7 +393,7 @@ LineComment = {LineCommentSign} {NON_EOL}*
 
 <VARIABLE_DEFINITION_ARGUMENTS> {
     {EqualSign} {NonNewlineWhitespace}* {EverythingButVariableValue}?       { yypushback(yylength() - 1); return ASSIGNMENT; }
-    "scope" {EqualSign} !{KeywordFinishedMarker}                            { yypushback(yylength() - "scope".length()); enterNewState(NORMAL_PARAMETER_ASSIGNMENT); return PARAMETER_NAME; }
+    [Ss][Cc][Oo][Pp][Ee] {EqualSign} !{KeywordFinishedMarker}                            { yypushback(yylength() - "scope".length()); enterNewState(NORMAL_PARAMETER_ASSIGNMENT); return PARAMETER_NAME; }
     {EverythingButVariableValue}                                            { return LITERAL_CONSTANT; }
     {EOL}                                                                   { leaveState(); return EOL; }
 }
@@ -398,6 +425,11 @@ LineComment = {LineCommentSign} {NON_EOL}*
 <PYTHON_EXPRESSION> {
     {ClosingVariable}{2}         { leaveState(); yypushback(1); return PYTHON_EXPRESSION_END; }
     ( [^}] | }[^}] )+            { return PYTHON_EXPRESSION_CONTENT; }
+}
+<KEYWORD_PYTHON_EXPRESSION> {
+    {EverythingButVariableValue} { return PYTHON_EXPRESSION_CONTENT; }
+    {SpaceBasedEndMarker}        { leaveState(); return WHITE_SPACE; }
+    {EOL} | {MultiLine}          { leaveState(); yypushback(yylength()); break; }
 }
 
 <SETTINGS_SECTION> {
@@ -468,12 +500,12 @@ LineComment = {LineCommentSign} {NON_EOL}*
     }
 }
 <INTERMEDIATE_TEMPLATE_CONFIGURATION> {
-    {ExtendedSpaceBasedEndMarker} "NONE" {ExtendedKeywordFinishedMarker}  {
+    {ExtendedSpaceBasedEndMarker} {None} {ExtendedKeywordFinishedMarker}  {
           pushBackTrailingWhitespace();
           yypushback("NONE".length());
           return WHITE_SPACE;
     }
-    {NonNewlineWhitespace}* {MultiLine} "NONE" {ExtendedKeywordFinishedMarker}  {
+    {NonNewlineWhitespace}* {MultiLine} {None} {ExtendedKeywordFinishedMarker}  {
           pushBackTrailingWhitespace();
           yypushback("NONE".length());
           pushBackTrailingWhitespace();
@@ -481,7 +513,7 @@ LineComment = {LineCommentSign} {NON_EOL}*
           enterNewState(IN_CONTINUATION);
           return WHITE_SPACE;
     }
-    "NONE" {ExtendedKeywordFinishedMarker}  {
+    {None} {ExtendedKeywordFinishedMarker}  {
           yypushback(yylength() - "NONE".length());
           yybegin(EOL_EXPECTED);
           return LITERAL_CONSTANT;
@@ -514,7 +546,7 @@ LineComment = {LineCommentSign} {NON_EOL}*
 
 <TESTCASE_DEFINITION, TASK_DEFINITION, TEMPLATE_DEFINITION> {
     // Disables the template for the current test case / task due to the NONE "keyword"
-    {LocalTemplateKeyword} ({ExtendedSpaceBasedEndMarker} | {MultiLine}) "NONE" {ExtendedKeywordFinishedMarker}   {
+    {LocalTemplateKeyword} ({ExtendedSpaceBasedEndMarker} | {MultiLine}) {None} {ExtendedKeywordFinishedMarker}   {
           yypushback(yylength() - 1);
           enterNewState(INTERMEDIATE_TEMPLATE_CONFIGURATION);
           enterNewState(LOCAL_SETTING_DEFINITION);
@@ -677,6 +709,11 @@ LineComment = {LineCommentSign} {NON_EOL}*
     {ExtendedSpaceBasedEndMarker}           { yybegin(FOR_STRUCTURE_LOOP); return WHITE_SPACE; }
     [^]                                     { yypushback(yylength()); yybegin(FOR_STRUCTURE_LOOP); break; }
 }
+<PYTHON_EVALUATED_EXPRESSION_START>  {
+    {ExtendedSpaceBasedEndMarker}           { yybegin(KEYWORD_PYTHON_EXPRESSION); return WHITE_SPACE; }
+    {MultiLine}                             { enterNewState(IN_CONTINUATION); yypushback(yylength()); break; }
+    [^]                                     { yypushback(yylength()); yybegin(KEYWORD_PYTHON_EXPRESSION); break; }
+}
 <PYTHON_EVALUATED_CONTROL_STRUCTURE_START>  {
     {ExtendedSpaceBasedEndMarker}           { yybegin(PYTHON_EXECUTED_CONDITION); return WHITE_SPACE; }
     {MultiLine}                             { enterNewState(IN_CONTINUATION); yypushback(yylength()); break; }
@@ -737,13 +774,14 @@ LineComment = {LineCommentSign} {NON_EOL}*
 <KEYWORD_CALL>  {
     {RunKeywordCall}                                               { return KEYWORD_NAME; }
     {ConditionalRunKeywordCall}                                    { enterNewState(PYTHON_EVALUATED_CONTROL_STRUCTURE_START); return KEYWORD_NAME; }
-    ({AssertRunKeywordCall} | {RepeatKeywordCall})                 { enterNewState(SINGLE_LITERAL_CONSTANT_START); return KEYWORD_NAME; }
+    {AssertRunKeywordCall} | {RepeatKeywordCall}                   { enterNewState(SINGLE_LITERAL_CONSTANT_START); return KEYWORD_NAME; }
     {SimpleConditionalKeywordCall}                                 {
           yybegin(KEYWORD_ARGUMENTS);
           enterNewState(PYTHON_EVALUATED_CONTROL_STRUCTURE_START);
           return KEYWORD_NAME;
     }
     {RepeatKeywordCall}                                            { return KEYWORD_NAME; }
+    {EvaluateKeywordCall}                                          { yybegin(KEYWORD_ARGUMENTS); enterNewState(PYTHON_EVALUATED_EXPRESSION_START); return KEYWORD_NAME; }
 
     {BuiltInNamespace} ({RunKeywordCall} | {ConditionalRunKeywordCall} | {AssertRunKeywordCall} | {SimpleConditionalKeywordCall} | {RepeatKeywordCall}) {
           int additionalPushbackLength = 0;

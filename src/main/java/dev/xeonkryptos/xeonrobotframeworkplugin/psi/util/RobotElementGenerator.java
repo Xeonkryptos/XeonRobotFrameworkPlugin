@@ -11,6 +11,7 @@ import com.intellij.psi.impl.PsiFileFactoryImpl;
 import com.intellij.testFramework.LightVirtualFile;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotFeatureFileType;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotLanguage;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotConditionalContent;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotConditionalStructure;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotExceptionHandlingStructure;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotImportArgument;
@@ -21,6 +22,7 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLoopControlStru
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotParameter;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotParameterId;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotPositionalArgument;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotPythonExpression;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotReturnStructure;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTaskId;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTemplateParameterId;
@@ -252,12 +254,12 @@ public record RobotElementGenerator(Project project) {
 
     public RobotLoopControlStructure createNewLoopControlStructure(LoopControlStructureType type) {
         String fileContent = """
-        *** Keywords ***
-        Dummy Keyword
-            FOR  ${item}  IN  @{items}
-                %s
-            END
-        """.formatted(type);
+                             *** Keywords ***
+                             Dummy Keyword
+                                 FOR  ${item}  IN  @{items}
+                                     %s
+                                 END
+                             """.formatted(type);
 
         PsiFile psiFile = createDummyPsiFile(fileContent);
         if (psiFile == null) {
@@ -372,6 +374,38 @@ public record RobotElementGenerator(Project project) {
         RobotReturnStructureFinder returnStructureFinder = new RobotReturnStructureFinder();
         psiFile.acceptChildren(returnStructureFinder);
         return returnStructureFinder.returnStructure;
+    }
+
+    public RobotPythonExpression createNewPythonExpression(String pythonStatement) {
+        String fileContent = """
+                             *** Variables ***
+                             ${Variable}=  ${%s}
+                             """.formatted(pythonStatement);
+
+        PsiFile psiFile = createDummyPsiFile(fileContent);
+        if (psiFile == null) {
+            return null;
+        }
+        RobotPythonExpressionFinder pythonExpressionFinder = new RobotPythonExpressionFinder();
+        psiFile.acceptChildren(pythonExpressionFinder);
+        return pythonExpressionFinder.pythonExpression;
+    }
+
+    public RobotConditionalContent createNewConditionalContent(String statement) {
+        String fileContent = """
+                             *** Keywords ***
+                             Dummy
+                                 IF  %s
+                                 END\\n
+                             """.formatted(statement);
+        PsiFile psiFile = createDummyPsiFile(fileContent);
+        if (psiFile == null) {
+            return null;
+        }
+
+        RobotConditionalContentFinder conditionalContentFinder = new RobotConditionalContentFinder();
+        psiFile.acceptChildren(conditionalContentFinder);
+        return conditionalContentFinder.conditionalContent;
     }
 
     public PsiFile createDummyPsiFile(String text) {
@@ -515,6 +549,16 @@ public record RobotElementGenerator(Project project) {
         }
     }
 
+    private static final class RobotConditionalContentFinder extends RecursiveRobotVisitor {
+
+        private RobotConditionalContent conditionalContent;
+
+        @Override
+        public void visitConditionalContent(@NotNull RobotConditionalContent o) {
+            conditionalContent = o;
+        }
+    }
+
     private static final class RobotExceptionHandlingStructureFinder extends RecursiveRobotVisitor {
 
         private RobotExceptionHandlingStructure exceptionHandlingStructure;
@@ -552,6 +596,16 @@ public record RobotElementGenerator(Project project) {
         @Override
         public void visitLoopControlStructure(@NotNull RobotLoopControlStructure o) {
             loopControlStructure = o;
+        }
+    }
+
+    private static final class RobotPythonExpressionFinder extends RecursiveRobotVisitor {
+
+        private RobotPythonExpression pythonExpression;
+
+        @Override
+        public void visitPythonExpression(@NotNull RobotPythonExpression o) {
+            pythonExpression = o;
         }
     }
 }

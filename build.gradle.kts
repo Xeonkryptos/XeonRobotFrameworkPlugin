@@ -1,3 +1,4 @@
+import org.gradle.api.file.DuplicatesStrategy
 import org.jetbrains.changelog.Changelog
 import org.jetbrains.changelog.markdownToHTML
 import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
@@ -12,7 +13,7 @@ plugins {
     // Java support
     id("java")
     // gradle-intellij-plugin - read more: https://github.com/JetBrains/gradle-intellij-plugin
-    id("org.jetbrains.intellij.platform") version "2.15.0"
+    id("org.jetbrains.intellij.platform") version "2.16.0"
     // gradle-changelog-plugin - read more: https://github.com/JetBrains/gradle-changelog-plugin
     id("org.jetbrains.changelog") version "2.5.0"
 
@@ -130,11 +131,16 @@ intellijPlatform {
 
 tasks {
     // Set the compatibility versions to 21
-    withType<JavaCompile> {
+    withType<JavaCompile>().configureEach {
         sourceCompatibility = "21"
         targetCompatibility = "21"
         options.compilerArgs = listOf("-Xlint:unchecked")
         options.isDeprecation = true
+    }
+
+    withType<Jar>().configureEach {
+        duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+        exclude("META-INF/*.kotlin_module")
     }
 
     withType<PrepareSandboxTask> {

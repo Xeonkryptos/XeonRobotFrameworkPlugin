@@ -95,7 +95,6 @@ public class RobotUnusedVariableDefinitionInspection extends LocalInspectionTool
 
         @Override
         public void visitVariableDefinition(@NotNull RobotVariableDefinition o) {
-            super.visitVariableDefinition(o);
             String name = o.getName();
             if (name != null) {
                 foundVariableDefinitions.add(o);
@@ -104,7 +103,6 @@ public class RobotUnusedVariableDefinitionInspection extends LocalInspectionTool
 
         @Override
         public void visitVariable(@NotNull RobotVariable o) {
-            super.visitVariable(o);
             String variableName = o.getVariableName();
             if (variableName != null) {
                 ReadWriteAccessDetector detector = ReadWriteAccessDetector.findDetector(o);

@@ -4,10 +4,16 @@ package dev.xeonkryptos.xeonrobotframeworkplugin.psi.element;
 import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
+import com.intellij.openapi.util.TextRange;
 
-public interface RobotPythonExpression extends RobotElement {
+public interface RobotPythonExpression extends RobotPythonInjectionExtension, RobotElement {
 
   @NotNull
-  PsiElement getExpressionContent();
+  List<RobotPythonExpressionBody> getPythonExpressionBodyList();
+
+  @NotNull
+  List<RobotVariable> getVariableList();
+
+  @NotNull TextRange getInjectionRelevantTextRange();
 
 }

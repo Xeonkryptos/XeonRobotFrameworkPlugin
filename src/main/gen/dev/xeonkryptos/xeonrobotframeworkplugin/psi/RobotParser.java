@@ -253,27 +253,46 @@ public class RobotParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // conditional_content_body+
+  // variable* python_expression_body (python_expression_body | variable)*
   public static boolean conditional_content(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "conditional_content")) return false;
-    boolean r;
+    boolean r, p;
     Marker m = enter_section_(b, l, _NONE_, CONDITIONAL_CONTENT, "<Condition>");
-    r = conditional_content_body(b, l + 1);
-    while (r) {
-      int c = current_position_(b);
-      if (!conditional_content_body(b, l + 1)) break;
-      if (!empty_element_parsed_guard_(b, "conditional_content", c)) break;
-    }
-    exit_section_(b, l, m, r, false, null);
-    return r;
+    r = conditional_content_0(b, l + 1);
+    r = r && python_expression_body(b, l + 1);
+    p = r; // pin = 2
+    r = r && conditional_content_2(b, l + 1);
+    exit_section_(b, l, m, r, p, null);
+    return r || p;
   }
 
-  /* ********************************************************** */
-  // PYTHON_EXPRESSION_CONTENT | variable
-  static boolean conditional_content_body(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "conditional_content_body")) return false;
+  // variable*
+  private static boolean conditional_content_0(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "conditional_content_0")) return false;
+    while (true) {
+      int c = current_position_(b);
+      if (!variable(b, l + 1)) break;
+      if (!empty_element_parsed_guard_(b, "conditional_content_0", c)) break;
+    }
+    return true;
+  }
+
+  // (python_expression_body | variable)*
+  private static boolean conditional_content_2(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "conditional_content_2")) return false;
+    while (true) {
+      int c = current_position_(b);
+      if (!conditional_content_2_0(b, l + 1)) break;
+      if (!empty_element_parsed_guard_(b, "conditional_content_2", c)) break;
+    }
+    return true;
+  }
+
+  // python_expression_body | variable
+  private static boolean conditional_content_2_0(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "conditional_content_2_0")) return false;
     boolean r;
-    r = consumeToken(b, PYTHON_EXPRESSION_CONTENT);
+    r = python_expression_body(b, l + 1);
     if (!r) r = variable(b, l + 1);
     return r;
   }
@@ -391,7 +410,7 @@ public class RobotParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // DICT_VARIABLE_START VARIABLE_LBRACE (variable_content | python_expression) VARIABLE_RBRACE extended_variable_nested_access*
+  // DICT_VARIABLE_START VARIABLE_LBRACE (python_expression | variable_content) VARIABLE_RBRACE extended_variable_nested_access*
   static boolean dict_variable_definition(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "dict_variable_definition")) return false;
     if (!nextTokenIs(b, DICT_VARIABLE_START)) return false;
@@ -406,13 +425,13 @@ public class RobotParser implements PsiParser, LightPsiParser {
     return r || p;
   }
 
-  // variable_content | python_expression
+  // python_expression | variable_content
   private static boolean dict_variable_definition_2(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "dict_variable_definition_2")) return false;
     boolean r;
     Marker m = enter_section_(b);
-    r = variable_content(b, l + 1);
-    if (!r) r = python_expression(b, l + 1);
+    r = python_expression(b, l + 1);
+    if (!r) r = variable_content(b, l + 1);
     exit_section_(b, m, null, r);
     return r;
   }
@@ -562,13 +581,28 @@ public class RobotParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // EOL | <<eof>>
+  // EOL+ | <<eof>>
   static boolean eol_marker(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "eol_marker")) return false;
     boolean r;
     Marker m = enter_section_(b);
-    r = consumeToken(b, EOL);
+    r = eol_marker_0(b, l + 1);
     if (!r) r = eof(b, l + 1);
+    exit_section_(b, m, null, r);
+    return r;
+  }
+
+  // EOL+
+  private static boolean eol_marker_0(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "eol_marker_0")) return false;
+    boolean r;
+    Marker m = enter_section_(b);
+    r = consumeToken(b, EOL);
+    while (r) {
+      int c = current_position_(b);
+      if (!consumeToken(b, EOL)) break;
+      if (!empty_element_parsed_guard_(b, "eol_marker_0", c)) break;
+    }
     exit_section_(b, m, null, r);
     return r;
   }
@@ -787,24 +821,24 @@ public class RobotParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // literal_constant_value | variable | sub_keyword_call | <<else_if_structure EOS sub_keyword_call>> | <<else_structure EOS? sub_keyword_call>> | conditional_content
+  // literal_constant_value | conditional_content | variable | sub_keyword_call | <<else_if_structure EOS sub_keyword_call>> | <<else_structure EOS? sub_keyword_call>>
   static boolean extended_positional_argument_content(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "extended_positional_argument_content")) return false;
     boolean r;
     Marker m = enter_section_(b);
     r = literal_constant_value(b, l + 1);
+    if (!r) r = conditional_content(b, l + 1);
     if (!r) r = variable(b, l + 1);
     if (!r) r = sub_keyword_call(b, l + 1);
     if (!r) r = else_if_structure(b, l + 1, EOS_parser_, RobotParser::sub_keyword_call);
-    if (!r) r = else_structure(b, l + 1, RobotParser::extended_positional_argument_content_4_0, RobotParser::sub_keyword_call);
-    if (!r) r = conditional_content(b, l + 1);
+    if (!r) r = else_structure(b, l + 1, RobotParser::extended_positional_argument_content_5_0, RobotParser::sub_keyword_call);
     exit_section_(b, m, null, r);
     return r;
   }
 
   // EOS?
-  private static boolean extended_positional_argument_content_4_0(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "extended_positional_argument_content_4_0")) return false;
+  private static boolean extended_positional_argument_content_5_0(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "extended_positional_argument_content_5_0")) return false;
     consumeToken(b, EOS);
     return true;
   }
@@ -1597,7 +1631,7 @@ public class RobotParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // LIST_VARIABLE_START VARIABLE_LBRACE (variable_content | python_expression) VARIABLE_RBRACE (extended_variable_slice_access | extended_variable_index_access | extended_variable_nested_access)*
+  // LIST_VARIABLE_START VARIABLE_LBRACE (python_expression | variable_content) VARIABLE_RBRACE (extended_variable_slice_access | extended_variable_index_access | extended_variable_nested_access)*
   static boolean list_variable_definition(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "list_variable_definition")) return false;
     if (!nextTokenIs(b, LIST_VARIABLE_START)) return false;
@@ -1612,13 +1646,13 @@ public class RobotParser implements PsiParser, LightPsiParser {
     return r || p;
   }
 
-  // variable_content | python_expression
+  // python_expression | variable_content
   private static boolean list_variable_definition_2(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "list_variable_definition_2")) return false;
     boolean r;
     Marker m = enter_section_(b);
-    r = variable_content(b, l + 1);
-    if (!r) r = python_expression(b, l + 1);
+    r = python_expression(b, l + 1);
+    if (!r) r = variable_content(b, l + 1);
     exit_section_(b, m, null, r);
     return r;
   }
@@ -1932,26 +1966,60 @@ public class RobotParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // literal_constant_value | variable | sub_keyword_call | conditional_content
+  // literal_constant_value | conditional_content | variable | sub_keyword_call
   static boolean positional_argument_content(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "positional_argument_content")) return false;
     boolean r;
     r = literal_constant_value(b, l + 1);
+    if (!r) r = conditional_content(b, l + 1);
     if (!r) r = variable(b, l + 1);
     if (!r) r = sub_keyword_call(b, l + 1);
-    if (!r) r = conditional_content(b, l + 1);
     return r;
   }
 
   /* ********************************************************** */
-  // PYTHON_EXPRESSION_START PYTHON_EXPRESSION_CONTENT PYTHON_EXPRESSION_END
+  // PYTHON_EXPRESSION_START (python_expression_body | variable)* PYTHON_EXPRESSION_END
   public static boolean python_expression(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "python_expression")) return false;
     if (!nextTokenIs(b, PYTHON_EXPRESSION_START)) return false;
     boolean r;
     Marker m = enter_section_(b);
-    r = consumeTokens(b, 0, PYTHON_EXPRESSION_START, PYTHON_EXPRESSION_CONTENT, PYTHON_EXPRESSION_END);
+    r = consumeToken(b, PYTHON_EXPRESSION_START);
+    r = r && python_expression_1(b, l + 1);
+    r = r && consumeToken(b, PYTHON_EXPRESSION_END);
     exit_section_(b, m, PYTHON_EXPRESSION, r);
+    return r;
+  }
+
+  // (python_expression_body | variable)*
+  private static boolean python_expression_1(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "python_expression_1")) return false;
+    while (true) {
+      int c = current_position_(b);
+      if (!python_expression_1_0(b, l + 1)) break;
+      if (!empty_element_parsed_guard_(b, "python_expression_1", c)) break;
+    }
+    return true;
+  }
+
+  // python_expression_body | variable
+  private static boolean python_expression_1_0(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "python_expression_1_0")) return false;
+    boolean r;
+    r = python_expression_body(b, l + 1);
+    if (!r) r = variable(b, l + 1);
+    return r;
+  }
+
+  /* ********************************************************** */
+  // PYTHON_EXPRESSION_CONTENT
+  public static boolean python_expression_body(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "python_expression_body")) return false;
+    if (!nextTokenIs(b, PYTHON_EXPRESSION_CONTENT)) return false;
+    boolean r;
+    Marker m = enter_section_(b);
+    r = consumeToken(b, PYTHON_EXPRESSION_CONTENT);
+    exit_section_(b, m, PYTHON_EXPRESSION_BODY, r);
     return r;
   }
 
@@ -1975,13 +2043,13 @@ public class RobotParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // literal_constant_value | variable | conditional_content
+  // literal_constant_value | conditional_content | variable
   static boolean reduced_positional_argument_content(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "reduced_positional_argument_content")) return false;
     boolean r;
     r = literal_constant_value(b, l + 1);
-    if (!r) r = variable(b, l + 1);
     if (!r) r = conditional_content(b, l + 1);
+    if (!r) r = variable(b, l + 1);
     return r;
   }
 
@@ -2060,7 +2128,7 @@ public class RobotParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // SCALAR_VARIABLE_START VARIABLE_LBRACE (variable_content | python_expression)? VARIABLE_RBRACE (extended_variable_slice_access | extended_variable_index_access | extended_variable_nested_access)*
+  // SCALAR_VARIABLE_START VARIABLE_LBRACE (python_expression | variable_content)? VARIABLE_RBRACE (extended_variable_slice_access | extended_variable_index_access | extended_variable_nested_access)*
   static boolean scalar_variable_definition(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "scalar_variable_definition")) return false;
     if (!nextTokenIs(b, SCALAR_VARIABLE_START)) return false;
@@ -2075,20 +2143,20 @@ public class RobotParser implements PsiParser, LightPsiParser {
     return r || p;
   }
 
-  // (variable_content | python_expression)?
+  // (python_expression | variable_content)?
   private static boolean scalar_variable_definition_2(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "scalar_variable_definition_2")) return false;
     scalar_variable_definition_2_0(b, l + 1);
     return true;
   }
 
-  // variable_content | python_expression
+  // python_expression | variable_content
   private static boolean scalar_variable_definition_2_0(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "scalar_variable_definition_2_0")) return false;
     boolean r;
     Marker m = enter_section_(b);
-    r = variable_content(b, l + 1);
-    if (!r) r = python_expression(b, l + 1);
+    r = python_expression(b, l + 1);
+    if (!r) r = variable_content(b, l + 1);
     exit_section_(b, m, null, r);
     return r;
   }
