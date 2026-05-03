@@ -40,7 +40,7 @@ class RobotLanguageInjectionPerformer : LanguageInjectionPerformer {
                 val endOffset: Int
                 if (nextVariable != null) {
                     suffix = null
-                    endOffset = nextVariable.textRangeInParent.endOffset
+                    endOffset = nextVariable.textRangeInParent.startOffset
                 } else {
                     suffix = injection.suffix
                     endOffset = rangeInElement.endOffset
