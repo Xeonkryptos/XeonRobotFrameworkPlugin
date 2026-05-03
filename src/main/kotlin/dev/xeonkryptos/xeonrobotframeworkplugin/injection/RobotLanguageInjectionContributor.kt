@@ -30,7 +30,7 @@ class RobotLanguageInjectionContributor : LanguageInjectionContributor {
     private class PythonExpressionInjectionVisitor(private val project: Project) : RobotVisitor() {
 
         companion object {
-            private val pythonModuleDetectionRegex = Regex("(\\p{javaJavaIdentifierStart}+\\.\\p{javaJavaIdentifierStart}+)+")
+            private val pythonModuleDetectionRegex = Regex("(\\p{javaJavaIdentifierStart}+\\.\\p{javaJavaIdentifierStart}*)+")
         }
 
         var pythonExpression: Boolean = false
@@ -59,7 +59,7 @@ class RobotLanguageInjectionContributor : LanguageInjectionContributor {
 
                     override fun visitParameter(o: RobotParameter) {
                         if (o.parameterName == RobotNames.PARAMETER_MODULES) {
-                            o.positionalArgument?.let { extractModules(it) }
+                            o.positionalArgument?.let { argument -> extractModules(argument) }
                         }
                         parameterUsed = true
                     }
@@ -71,20 +71,20 @@ class RobotLanguageInjectionContributor : LanguageInjectionContributor {
                         }
                     }
 
-                    private fun extractModules(argument: RobotPositionalArgument) = argument.text.split(Regex("\\s?,\\s?")).let { modules.addAll(it) }
+                    private fun extractModules(argument: RobotPositionalArgument) = argument.text.split(Regex("\\s?,\\s?")).let { module -> modules.addAll(module) }
                 }
                 it.accept(visitor)
-                modules.joinToString(separator = "\n", postfix = "\n") { module -> "import $module" }
-            } ?: ""
+                modules
+            } ?: emptyList()
 
-            prefix = "${additionalModuleImports}${computeImportsForPythonExpressionBodies(o.pythonExpressionBodyList)}\nresult = "
+            val moduleImports = mutableSetOf<String>()
+            moduleImports.addAll(additionalModuleImports)
+            moduleImports.addAll(computeImportsForPythonExpressionBodies(o.pythonExpressionBodyList))
+            prefix = "${moduleImports.joinToString(separator = "\n", postfix = "\n") { module -> "import $module" }}\nresult = "
         }
 
-        private fun computeImportsForPythonExpressionBodies(pythonExpressionBodies: Collection<RobotPythonExpressionBody>): String {
-            return pythonExpressionBodies.flatMap { pythonModuleDetectionRegex.findAll(it.text) }
-                .map { it.value.split('.')[0] }
-                .filter { PyModuleNameIndex.find(it, project, true).isNotEmpty() }
-                .joinToString(separator = "\n", postfix = "\n") { module -> "import $module" }
+        private fun computeImportsForPythonExpressionBodies(pythonExpressionBodies: Collection<RobotPythonExpressionBody>): Collection<String> {
+            return pythonExpressionBodies.flatMap { pythonModuleDetectionRegex.findAll(it.text) }.map { it.value.split('.')[0] }.filter { PyModuleNameIndex.find(it, project, true).isNotEmpty() }
         }
     }
 }
