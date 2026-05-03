@@ -581,13 +581,28 @@ public class RobotParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // EOL | <<eof>>
+  // EOL+ | <<eof>>
   static boolean eol_marker(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "eol_marker")) return false;
     boolean r;
     Marker m = enter_section_(b);
-    r = consumeToken(b, EOL);
+    r = eol_marker_0(b, l + 1);
     if (!r) r = eof(b, l + 1);
+    exit_section_(b, m, null, r);
+    return r;
+  }
+
+  // EOL+
+  private static boolean eol_marker_0(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "eol_marker_0")) return false;
+    boolean r;
+    Marker m = enter_section_(b);
+    r = consumeToken(b, EOL);
+    while (r) {
+      int c = current_position_(b);
+      if (!consumeToken(b, EOL)) break;
+      if (!empty_element_parsed_guard_(b, "eol_marker_0", c)) break;
+    }
     exit_section_(b, m, null, r);
     return r;
   }

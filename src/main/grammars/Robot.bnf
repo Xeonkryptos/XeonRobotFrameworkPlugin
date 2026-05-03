@@ -511,6 +511,6 @@ variable_nested_access_content ::= (variable | literal_constant_value)+
 
 literal_constant_value ::= LITERAL_CONSTANT
 
-private eol_marker ::= EOL | <<eof>>
+private eol_marker ::= EOL+ | <<eof>>
 //noinspection BnfUnusedRule - Simply need the token to be generated, nothing else. It will be handled as a WHITESPACE token
 private CONTINUATION_MARKER ::= CONTINUATION
