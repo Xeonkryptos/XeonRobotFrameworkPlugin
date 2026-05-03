@@ -327,10 +327,11 @@ meta else_if_structure ::= ELSE_IF conditional_content <<separator>> <<statement
     pin=3
     implements="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotBlockOpeningStructure"
 }
-conditional_content ::= (python_expression_body | variable)+ {
+conditional_content ::= variable* python_expression_body (python_expression_body | variable)* {
     name="Condition"
     implements="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotPythonInjectionExtension"
     methods=[getInjectionRelevantTextRange]
+    pin=2
 }
 exception_handling_structure ::= try_structure
     except_structure*
@@ -428,21 +429,21 @@ positional_argument ::= external_positional_argument EOS? {
     methods = [getReference]
 }
 external external_positional_argument ::= parsePositionalArgument positional_argument_content
-private positional_argument_content ::= literal_constant_value | variable | sub_keyword_call | conditional_content
+private positional_argument_content ::= literal_constant_value | conditional_content | variable | sub_keyword_call
 
 extended_positional_argument ::= <<parsePositionalArgument extended_positional_argument_content>> EOS? {
     implements="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotArgument"
     methods = [getReference]
     elementType=positional_argument
 }
-private extended_positional_argument_content ::= literal_constant_value | variable | sub_keyword_call | <<else_if_structure EOS sub_keyword_call>> | <<else_structure EOS? sub_keyword_call>> | conditional_content
+private extended_positional_argument_content ::= literal_constant_value | conditional_content | variable | sub_keyword_call | <<else_if_structure EOS sub_keyword_call>> | <<else_structure EOS? sub_keyword_call>>
 
 reduced_positional_argument ::= <<parsePositionalArgument reduced_positional_argument_content>> EOS? {
     implements="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotArgument"
     methods = [getReference]
     elementType=positional_argument
 }
-private reduced_positional_argument_content ::= literal_constant_value | variable | conditional_content
+private reduced_positional_argument_content ::= literal_constant_value | conditional_content | variable
 
 variable_definition ::= scalar_variable_definition | list_variable_definition | dict_variable_definition {
     implements = [
