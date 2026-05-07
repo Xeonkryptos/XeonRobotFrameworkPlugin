@@ -20,6 +20,12 @@ class RobotCodeStyleSettings(container: CodeStyleSettings) : CustomCodeStyleSett
     // ################## Wrapping and braces settings ##################
 
     @JvmField
+    var KEEP_SIMPLE_KEYWORD_CALLS_IN_ONE_LINE: Boolean = true
+
+    @JvmField
+    var KEEP_SIMPLE_GLOBAL_SETTINGS_IN_ONE_LINE: Boolean = true
+
+    @JvmField
     var FOR_FIRST_ARGUMENT_ON_NEW_LINE: Boolean = false
 
     @JvmField

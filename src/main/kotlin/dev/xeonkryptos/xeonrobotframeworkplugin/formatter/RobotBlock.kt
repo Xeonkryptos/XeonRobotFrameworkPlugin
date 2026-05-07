@@ -100,19 +100,7 @@ class RobotBlock(node: ASTNode, private val context: RobotBlockContext, wrap: Wr
         if (isLeaf) return blocks
 
         val parentWrap = createWrapIfNecessary()
-        if (myNode.elementType === RobotTypes.KEYWORD_VARIABLE_STATEMENT) {
-            myNode.putUserData(KEYWORD_VARIABLE_STATEMENT_VARIABLE_ALIGNMENT_KEY, Alignment.createAlignment())
-        } else if (myNode.elementType === RobotTypes.TEST_CASES_HEADER && context.robotCodeStyleSettings.ALIGN_TEMPLATE_ARGUMENTS_WITH_DATA_DRIVEN_NAMES) {
-            val dataDrivenElements = myNode.getChildren(TokenSet.create(RobotTypes.DATA_DRIVEN_COLUMN_NAME)).map { Alignment.createAlignment(true) }.toMutableList()
-            parent?.node?.putUserData(TEMPLATE_VALUES_ALIGNMENT_WITH_DATA_DRIVEN_HEADER_KEY, dataDrivenElements)
-        } else if (myNode.elementType === RobotTypes.TEMPLATE_ARGUMENTS && context.robotCodeStyleSettings.ALIGN_TEMPLATE_ARGUMENTS_WITH_EACH_OTHER) {
-            myNode.parents(false).firstOrNull { it.elementType === RobotTypes.TEST_CASE_STATEMENT || it.elementType === RobotTypes.TASK_STATEMENT }?.let {
-                val alignments = myNode.getChildren(RobotTokenSets.TEMPLATE_VALUES_HOLDER_SET).map { Alignment.createAlignment(true) }.toMutableList()
-                it.putUserData(TEMPLATE_VALUES_ALIGNMENT_KEY, alignments)
-            }
-        } else if (myNode.elementType === RobotTypes.VARIABLE_STATEMENTS) {
-            myNode.putUserData(SINGLE_VARIABLE_STATEMENT_FIRST_ARGUMENT_ALIGNMENT_KEY, Alignment.createAlignment(true))
-        }
+        initializeUserData()
 
         var templateAlignmentIndex = 0
         myNode.children().filter { !WHITESPACE_TYPES.contains(it.elementType) }.forEach { child ->
@@ -141,12 +129,38 @@ class RobotBlock(node: ASTNode, private val context: RobotBlockContext, wrap: Wr
         return blocks
     }
 
+    private fun initializeUserData() {
+        when {
+            myNode.elementType === RobotTypes.KEYWORD_VARIABLE_STATEMENT -> {
+                myNode.putUserData(KEYWORD_VARIABLE_STATEMENT_VARIABLE_ALIGNMENT_KEY, Alignment.createAlignment())
+            }
+
+            myNode.elementType === RobotTypes.TEST_CASES_HEADER && context.robotCodeStyleSettings.ALIGN_TEMPLATE_ARGUMENTS_WITH_DATA_DRIVEN_NAMES -> {
+                val dataDrivenElements = myNode.getChildren(TokenSet.create(RobotTypes.DATA_DRIVEN_COLUMN_NAME)).map { Alignment.createAlignment(true) }.toMutableList()
+                parent?.node?.putUserData(TEMPLATE_VALUES_ALIGNMENT_WITH_DATA_DRIVEN_HEADER_KEY, dataDrivenElements)
+            }
+
+            myNode.elementType === RobotTypes.TEMPLATE_ARGUMENTS && context.robotCodeStyleSettings.ALIGN_TEMPLATE_ARGUMENTS_WITH_EACH_OTHER -> {
+                myNode.parents(false).firstOrNull { it.elementType === RobotTypes.TEST_CASE_STATEMENT || it.elementType === RobotTypes.TASK_STATEMENT }?.let {
+                    val alignments = myNode.getChildren(RobotTokenSets.TEMPLATE_VALUES_HOLDER_SET).map { Alignment.createAlignment(true) }.toMutableList()
+                    it.putUserData(TEMPLATE_VALUES_ALIGNMENT_KEY, alignments)
+                }
+            }
+
+            myNode.elementType === RobotTypes.VARIABLE_STATEMENTS -> {
+                myNode.putUserData(SINGLE_VARIABLE_STATEMENT_FIRST_ARGUMENT_ALIGNMENT_KEY, Alignment.createAlignment(true))
+            }
+        }
+    }
+
     private fun createWrapIfNecessary(): Wrap? = when (myNode.elementType) {
         RobotTypes.KEYWORD_CALL -> {
-            val wrapType = context.commonCodeStyleSettings.CALL_PARAMETERS_WRAP
-            val parentWrap = myNode.getUserData(PARENT_WRAP_KEY)
-            if (parentWrap != null) Wrap.createChildWrap(parentWrap, WrapType.byLegacyRepresentation(wrapType), context.robotCodeStyleSettings.CALL_PARAMETERS_FIRST_ARGUMENT_ON_NEW_LINE)
-            else Wrap.createWrap(wrapType, context.robotCodeStyleSettings.CALL_PARAMETERS_FIRST_ARGUMENT_ON_NEW_LINE)
+            if (!context.robotCodeStyleSettings.KEEP_SIMPLE_KEYWORD_CALLS_IN_ONE_LINE || myNode.getChildren(RobotTokenSets.ARGUMENTS_TYPE_SET).size > 1) {
+                val wrapType = context.commonCodeStyleSettings.CALL_PARAMETERS_WRAP
+                val parentWrap = myNode.getUserData(PARENT_WRAP_KEY)
+                if (parentWrap != null) Wrap.createChildWrap(parentWrap, WrapType.byLegacyRepresentation(wrapType), context.robotCodeStyleSettings.CALL_PARAMETERS_FIRST_ARGUMENT_ON_NEW_LINE)
+                else Wrap.createWrap(wrapType, context.robotCodeStyleSettings.CALL_PARAMETERS_FIRST_ARGUMENT_ON_NEW_LINE)
+            } else null
         }
 
         RobotTypes.LOCAL_ARGUMENTS_SETTING -> {
@@ -187,8 +201,11 @@ class RobotBlock(node: ASTNode, private val context: RobotBlockContext, wrap: Wr
         RobotTypes.UNKNOWN_SETTING_STATEMENTS_GLOBAL_SETTING,
         RobotTypes.SETUP_TEARDOWN_STATEMENTS_GLOBAL_SETTING -> {
         // @formatter:on
-            val wrapType = context.robotCodeStyleSettings.GLOBAL_SETTINGS_WRAP
-            Wrap.createWrap(wrapType, context.robotCodeStyleSettings.GLOBAL_SETTINGS_FIRST_ARGUMENT_ON_NEW_LINE)
+            val tokenSet = TokenSet.create(RobotTypes.IMPORT_ARGUMENT, RobotTypes.KEYWORD_CALL, RobotTypes.POSITIONAL_ARGUMENT, RobotTypes.PARAMETER, RobotTypes.LITERAL_CONSTANT, RobotTypes.LITERAL_CONSTANT_VALUE, RobotTypes.VARIABLE)
+            if (!context.robotCodeStyleSettings.KEEP_SIMPLE_GLOBAL_SETTINGS_IN_ONE_LINE || myNode.getChildren(tokenSet).size > 1) {
+                val wrapType = context.robotCodeStyleSettings.GLOBAL_SETTINGS_WRAP
+                Wrap.createWrap(wrapType, context.robotCodeStyleSettings.GLOBAL_SETTINGS_FIRST_ARGUMENT_ON_NEW_LINE)
+            } else null
         }
 
         else -> null
