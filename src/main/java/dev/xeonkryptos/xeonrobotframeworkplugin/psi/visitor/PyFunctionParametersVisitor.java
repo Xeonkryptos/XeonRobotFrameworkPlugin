@@ -1,15 +1,18 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.psi.visitor;
 
 import com.intellij.openapi.util.Ref;
+import com.intellij.psi.PsiElement;
 import com.jetbrains.python.psi.PyElementVisitor;
 import com.jetbrains.python.psi.PyExpression;
 import com.jetbrains.python.psi.PyNamedParameter;
 import com.jetbrains.python.psi.PyRecursiveElementVisitor;
+import com.jetbrains.python.psi.PyReferenceExpression;
 import com.jetbrains.python.psi.PySingleStarParameter;
 import com.jetbrains.python.psi.PySlashParameter;
 import com.jetbrains.python.psi.PyStringLiteralExpression;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.dto.ParameterDto;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.DefinedParameter;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.RobotPyUtil;
 import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 
@@ -56,6 +59,21 @@ public class PyFunctionParametersVisitor extends PyRecursiveElementVisitor {
             public void visitPyStringLiteralExpression(@NotNull PyStringLiteralExpression node) {
                 String stringValue = node.getStringValue();
                 defaultValueTextRef.set(stringValue);
+            }
+
+            @Override
+            public void visitPyReferenceExpression(@NotNull PyReferenceExpression node) {
+                PsiElement firstChild = node.getFirstChild();
+                if (firstChild != null && firstChild.getReference() != null) {
+                    PsiElement target = firstChild.getReference().resolve();
+                    if (RobotPyUtil.isPythonEnumElement(target)) {
+                        PsiElement lastChild = node.getLastChild();
+                        if (lastChild != null) {
+                            String enumValue = lastChild.getText();
+                            defaultValueTextRef.set(enumValue);
+                        }
+                    }
+                }
             }
         };
         PyExpression defaultValueExpression = node.getDefaultValue();
