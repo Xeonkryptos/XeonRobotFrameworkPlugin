@@ -201,7 +201,7 @@ public class ParameterInfoHandlerUtil {
                 if (parameter.getParameter() instanceof PyNamedParameter) {
                     final String annotation = ((PyNamedParameter) parameter.getParameter()).getAnnotationValue();
                     if (annotation != null) {
-                        String annotationText = ParamHelper.getNameInSignature(parameter) + ": " + annotation.replaceAll("\n", "").replaceAll("\\s+", " ");
+                        String annotationText = ParamHelper.getNameInSignature(parameter) + ": " + annotation.replace("\n", "").replaceAll("\\s+", " ");
                         annotations.add(last ? annotationText : (annotationText + ", "));
                         annotationAdded = true;
                     }
@@ -290,7 +290,7 @@ public class ParameterInfoHandlerUtil {
                                                 });
                 }
             } else if (!parameterFound) {
-                int argIndex = Math.max(0, Math.min(i + implicitOffset, positionalContainerIndex));
+                int argIndex = Math.clamp(i + implicitOffset, 0, positionalContainerIndex);
                 PyCallableParameter pyCallableParameter = parameterList.get(argIndex);
                 highlightParameter(pyCallableParameter, parameterHintToIndex, hintFlags, mustHighlight);
             }
