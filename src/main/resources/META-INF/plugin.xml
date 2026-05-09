@@ -1,5 +1,6 @@
 <idea-plugin>
     <id>dev.xeonkryptos.xeonrobotframeworkplugin</id>
+    <!--suppress PluginXmlValidity -->
     <name>Xeon RobotFramework Support</name>
     <vendor email="info@xeonkryptos.dev" url="https://github.com/Xeonkryptos/XeonRobotFrameworkPlugin">Xeonkryptos</vendor>
 
@@ -7,10 +8,14 @@
     <depends>com.intellij.modules.xdebugger</depends>
     <depends>com.intellij.modules.lang</depends>
     <depends>com.intellij.modules.json</depends>
+    <depends>org.jetbrains.plugins.yaml</depends>
 
     <depends>PythonCore</depends>
-    <depends>org.intellij.intelliLang</depends>
-    <depends>org.jetbrains.plugins.yaml</depends>
+    <!--suppress PluginXmlValidity -->
+    <depends optional="true" config-file="dev.xeonkryptos.xeonrobotframeworkplugin-withIntelliLang.xml">org.intellij.intelliLang</depends>
+    <!-- Starting with 2025.3 the intelliLang plugin got changed from a bundled plugin to a bundled module -->
+    <!--suppress PluginXmlValidity -->
+    <depends optional="true" config-file="dev.xeonkryptos.xeonrobotframeworkplugin-withIntelliLang.xml">intellij.platform.langInjection</depends>
 
     <resource-bundle>messages.RobotBundle</resource-bundle>
 
@@ -219,9 +224,6 @@
                                    order="first, before pyvar"/>
         <renamePsiElementProcessor implementation="dev.xeonkryptos.xeonrobotframeworkplugin.rename.RobotVariableDefinitionRenameElementProcessor"/>
         <renameHandler implementation="dev.xeonkryptos.xeonrobotframeworkplugin.rename.RobotMemberInplaceRenameHandler"/>
-
-        <languageInjectionContributor language="Robot" implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.injection.RobotLanguageInjectionContributor"/>
-        <languageInjectionPerformer language="Robot" implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.injection.RobotLanguageInjectionPerformer"/>
 
         <codeFoldingOptionsProvider instance="dev.xeonkryptos.xeonrobotframeworkplugin.config.RobotCodeFoldingOptionsProvider"/>
 

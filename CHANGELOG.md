@@ -6,9 +6,15 @@
 
 ### Added
 
+- Added new formatting options to keep simple keyword calls and global settings in one line even though wrapping is configured
+
 ### Changed
 
+- When inserting default values, the insertion doesn't insert the enum's reference directly rather the enum's value
+
 ### Fixed
+
+- Error notification about unknown plugin when installing this plugin in IDE versions >= 2025.3
 
 ## 0.7.2 - 2026-05-03
 
