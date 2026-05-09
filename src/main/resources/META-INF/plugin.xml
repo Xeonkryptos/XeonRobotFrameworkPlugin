@@ -11,11 +11,9 @@
     <depends>org.jetbrains.plugins.yaml</depends>
 
     <depends>PythonCore</depends>
+    <depends optional="true" config-file="dev.xeonkryptos.xeonrobotframeworkplugin-withIntelliLangBundled.xml">org.intellij.intelliLang</depends>
     <!--suppress PluginXmlValidity -->
-    <depends optional="true" config-file="dev.xeonkryptos.xeonrobotframeworkplugin-withIntelliLang.xml">org.intellij.intelliLang</depends>
-    <!-- Starting with 2025.3 the intelliLang plugin got changed from a bundled plugin to a bundled module -->
-    <!--suppress PluginXmlValidity -->
-    <depends optional="true" config-file="dev.xeonkryptos.xeonrobotframeworkplugin-withIntelliLang.xml">intellij.platform.langInjection</depends>
+    <depends optional="true" config-file="dev.xeonkryptos.xeonrobotframeworkplugin-withIntelliLangModule.xml">intellij.platform.langInjection</depends>
 
     <resource-bundle>messages.RobotBundle</resource-bundle>
 
