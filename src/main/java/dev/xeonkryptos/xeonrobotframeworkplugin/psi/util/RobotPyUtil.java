@@ -7,6 +7,7 @@ import com.intellij.openapi.roots.OrderRootType;
 import com.intellij.openapi.util.Key;
 import com.intellij.openapi.vfs.VfsUtilCore;
 import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.util.CachedValue;
 import com.intellij.psi.util.CachedValueProvider.Result;
@@ -75,5 +76,9 @@ public final class RobotPyUtil {
             }
             return Result.createSingleDependency(false, PsiModificationTracker.MODIFICATION_COUNT);
         });
+    }
+
+    public static boolean isPythonEnumElement(PsiElement element) {
+        return element instanceof PyClass pyClass && pyClass.isSubclass("enum.Enum", null);
     }
 }

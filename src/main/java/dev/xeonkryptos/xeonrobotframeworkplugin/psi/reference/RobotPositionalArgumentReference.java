@@ -27,6 +27,7 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.completion.RobotLookupContext;
 import dev.xeonkryptos.xeonrobotframeworkplugin.completion.RobotLookupElementType;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotParameter;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotPositionalArgument;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.RobotPyUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -70,7 +71,7 @@ public class RobotPositionalArgumentReference extends PsiReferenceBase<RobotPosi
         if (parameter != null) {
             PsiElement resolvedElement = parameter.getParameterId().getReference().resolve();
             Optional<PyExpression> pyExpressionOpt = Optional.ofNullable(resolvedElement)
-                                                             .filter(element -> element instanceof PyParameter)
+                                                             .filter(PyParameter.class::isInstance)
                                                              .map(element -> PsiTreeUtil.findChildOfType(element, PyAnnotation.class))
                                                              .map(PyAnnotation::getValue);
             if (pyExpressionOpt.isPresent()) {
@@ -85,7 +86,7 @@ public class RobotPositionalArgumentReference extends PsiReferenceBase<RobotPosi
     }
 
     private Stream<LookupElement> handleResolvedEnumExpression(PsiElement resolvedExpression) {
-        if (isEnumConstructor(resolvedExpression)) {
+        if (RobotPyUtil.isPythonEnumElement(resolvedExpression)) {
             return ((PyClass) resolvedExpression).getClassAttributes().stream().map(RobotPositionalArgumentReference::createEnumLookupElement);
         }
         PyFunctionalEnumElementVisitor pyElementVisitor = new PyFunctionalEnumElementVisitor();
@@ -106,10 +107,6 @@ public class RobotPositionalArgumentReference extends PsiReferenceBase<RobotPosi
         lookupElementBuilder.putUserData(CompletionKeys.ROBOT_LOOKUP_CONTEXT, RobotLookupContext.WITHIN_KEYWORD_STATEMENT);
         lookupElementBuilder.putUserData(CompletionKeys.ROBOT_LOOKUP_ELEMENT_TYPE, RobotLookupElementType.ARGUMENT);
         return lookupElementBuilder;
-    }
-
-    private static boolean isEnumConstructor(PsiElement element) {
-        return element instanceof PyClass pyClass && pyClass.isSubclass("enum.Enum", null);
     }
 
     private static class PyFunctionalEnumElementVisitor extends PyElementVisitor {
@@ -137,7 +134,7 @@ public class RobotPositionalArgumentReference extends PsiReferenceBase<RobotPosi
         @Override
         public void visitPyReferenceExpression(@NotNull PyReferenceExpression node) {
             PsiElement resolved = node.getReference().resolve();
-            if (isEnumConstructor(resolved)) {
+            if (RobotPyUtil.isPythonEnumElement(resolved)) {
                 extractedEnumValues = extractEnumValues(pyCallExpression);
             }
         }

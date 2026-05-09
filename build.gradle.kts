@@ -1,4 +1,3 @@
-import org.gradle.api.file.DuplicatesStrategy
 import org.jetbrains.changelog.Changelog
 import org.jetbrains.changelog.markdownToHTML
 import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
@@ -67,6 +66,7 @@ dependencies {
 
         plugins(providers.gradleProperty("platformPlugins").map { it.split(',') })
         bundledPlugins(providers.gradleProperty("platformBundledPlugins").map { it.split(',') })
+        bundledModules(providers.gradleProperty("platformBundledPlugins").map { it.split(',') })
 
         pluginVerifier()
     }
@@ -119,7 +119,7 @@ intellijPlatform {
 
     pluginVerification {
         ides {
-            select {
+            latest {
                 types = listOf(IntelliJPlatformType.IntellijIdea, IntelliJPlatformType.PyCharm)
                 channels = listOf(ProductRelease.Channel.EAP, ProductRelease.Channel.RELEASE)
                 sinceBuild = properties("pluginSinceBuild")
