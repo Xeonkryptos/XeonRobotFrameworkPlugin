@@ -194,19 +194,18 @@ object ParameterInfoHandlerUtil {
             // the lambda expression.
             private fun getPresentableText(callableParameter: PyCallableParameter, context: TypeEvalContext, typeFilter: (PyType?) -> Boolean): String {
                 if (callableParameter.parameter is PyNamedParameter || callableParameter.parameter == null) {
-                    val sb = java.lang.StringBuilder()
+                    return buildString {
+                        append(ParamHelper.getNameInSignature(callableParameter))
 
-                    sb.append(ParamHelper.getNameInSignature(callableParameter))
-
-                    var renderedAsTyped = false
-                    val argumentType: PyType? = callableParameter.getArgumentType(context)
-                    if (!typeFilter(argumentType)) {
-                        sb.append(": ")
-                        sb.append(PythonDocumentationProvider.getTypeDescription(argumentType, context))
-                        renderedAsTyped = true
+                        var renderedAsTyped = false
+                        val argumentType: PyType? = callableParameter.getArgumentType(context)
+                        if (!typeFilter(argumentType)) {
+                            append(": ")
+                            append(PythonDocumentationProvider.getTypeName(argumentType, context))
+                            renderedAsTyped = true
+                        }
+                        append(ParamHelper.getDefaultValuePartInSignature(callableParameter.defaultValueText, renderedAsTyped) ?: "")
                     }
-                    sb.append(ParamHelper.getDefaultValuePartInSignature(callableParameter.defaultValueText, renderedAsTyped) ?: "")
-                    return sb.toString()
                 }
 
                 return PyUtil.getReadableRepr(callableParameter.parameter, false)

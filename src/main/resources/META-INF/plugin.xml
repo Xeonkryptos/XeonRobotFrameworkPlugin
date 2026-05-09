@@ -9,8 +9,8 @@
     <depends>com.intellij.modules.lang</depends>
     <depends>com.intellij.modules.json</depends>
     <depends>org.jetbrains.plugins.yaml</depends>
-
     <depends>PythonCore</depends>
+
     <depends optional="true" config-file="dev.xeonkryptos.xeonrobotframeworkplugin-withIntelliLangBundled.xml">org.intellij.intelliLang</depends>
     <!--suppress PluginXmlValidity -->
     <depends optional="true" config-file="dev.xeonkryptos.xeonrobotframeworkplugin-withIntelliLangModule.xml">intellij.platform.langInjection</depends>
