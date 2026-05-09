@@ -192,7 +192,7 @@ object ParameterInfoHandlerUtil {
 
             // Copied from PyCallableParameter#getPresentableText(Boolean, TypeEvalContext, Predicate) as with 261.2 they changed the implementation to Kotlin which makes it byte-incompatible due to
             // the lambda expression.
-            fun getPresentableText(callableParameter: PyCallableParameter, context: TypeEvalContext, typeFilter: (PyType?) -> Boolean): String {
+            private fun getPresentableText(callableParameter: PyCallableParameter, context: TypeEvalContext, typeFilter: (PyType?) -> Boolean): String {
                 if (callableParameter.parameter is PyNamedParameter || callableParameter.parameter == null) {
                     val sb = java.lang.StringBuilder()
 
