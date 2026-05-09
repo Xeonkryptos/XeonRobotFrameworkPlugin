@@ -11,6 +11,7 @@
 ### Changed
 
 - When inserting default values, the insertion doesn't insert the enum's reference directly rather the enum's value
+- Incompatibility issue with upcoming 2026.1.2
 
 ### Fixed
 

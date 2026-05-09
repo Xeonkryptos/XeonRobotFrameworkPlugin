@@ -1,4 +1,3 @@
-import org.gradle.api.file.DuplicatesStrategy
 import org.jetbrains.changelog.Changelog
 import org.jetbrains.changelog.markdownToHTML
 import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
@@ -120,7 +119,7 @@ intellijPlatform {
 
     pluginVerification {
         ides {
-            select {
+            latest {
                 types = listOf(IntelliJPlatformType.IntellijIdea, IntelliJPlatformType.PyCharm)
                 channels = listOf(ProductRelease.Channel.EAP, ProductRelease.Channel.RELEASE)
                 sinceBuild = properties("pluginSinceBuild")
