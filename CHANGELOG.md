@@ -6,6 +6,14 @@
 
 ### Added
 
+### Changed
+
+### Fixed
+
+## 0.7.3 - 2026-05-10
+
+### Added
+
 - Added new formatting options to keep simple keyword calls and global settings in one line even though wrapping is configured
 
 ### Changed
