@@ -1,7 +1,7 @@
 name: Beta Build
 on:
   push:
-    branches: [ 'beta' ]
+    branches: [ 'release/beta' ]
     paths-ignore: [ '**.md' ]
 
 jobs:
