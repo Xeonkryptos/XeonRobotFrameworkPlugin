@@ -4,6 +4,7 @@ import com.intellij.codeInsight.TailTypes;
 import com.intellij.codeInsight.completion.CompletionParameters;
 import com.intellij.codeInsight.completion.CompletionProvider;
 import com.intellij.codeInsight.completion.CompletionResultSet;
+import com.intellij.codeInsight.completion.PrefixMatcher;
 import com.intellij.codeInsight.lookup.LookupElement;
 import com.intellij.icons.AllIcons.Nodes;
 import com.intellij.openapi.project.Project;
@@ -92,6 +93,8 @@ class VariableCompletionProvider extends CompletionProvider<CompletionParameters
         }
 
         int completionOffset = parameters.getOffset();
+        result = computeNewPrefixMatcher(parameters, result);
+
         IElementType elementType = PsiUtilCore.getElementType(psiElement);
         boolean wrapVariableNames = elementType != RobotTypes.VARIABLE_BODY;
 
@@ -100,6 +103,30 @@ class VariableCompletionProvider extends CompletionProvider<CompletionParameters
         addArgumentsFromUserKeyword(result, psiElement, wrapVariableNames);
         addGlobalVariablesFromPreviousUserKeywordCalls(result, psiElement, completionOffset, wrapVariableNames);
         addDefinedVariablesFromImportedFiles(result, parameters.getOriginalFile(), psiElement, wrapVariableNames);
+    }
+
+    private @NotNull CompletionResultSet computeNewPrefixMatcher(@NotNull CompletionParameters parameters, @NotNull CompletionResultSet result) {
+        int completionOffset = parameters.getOffset();
+        int elementStartOffset = parameters.getPosition().getTextRange().getStartOffset();
+        int relativeCompletionTriggerOffset = completionOffset - elementStartOffset;
+
+        PrefixMatcher oldPrefixMatcher = result.getPrefixMatcher();
+        String oldPrefix = oldPrefixMatcher.getPrefix();
+
+        boolean variableMarkerFound = false;
+        StringBuilder newPrefixBuilder = new StringBuilder();
+        for (int i = relativeCompletionTriggerOffset - 1; i >= 0; i--) {
+            char c = oldPrefix.charAt(i);
+            newPrefixBuilder.append(c);
+            if (c == '%' || c == '$' || c == '@') {
+                variableMarkerFound = true;
+                break;
+            }
+        }
+        if (!variableMarkerFound) {
+            newPrefixBuilder.delete(0, newPrefixBuilder.length());
+        }
+        return result.withPrefixMatcher(newPrefixBuilder.reverse().toString());
     }
 
     private void addGlobalVariables(@NotNull CompletionResultSet result, @NotNull PsiElement element, boolean wrapVariableNames) {
