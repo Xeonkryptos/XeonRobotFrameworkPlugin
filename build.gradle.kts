@@ -113,7 +113,7 @@ intellijPlatform {
 
     publishing {
         token = providers.environmentVariable("PUBLISH_TOKEN")
-        channels = properties("pluginVersion").split('-').getOrElse(1) { "default" }.split('.')
+        channels = listOf(properties("pluginVersion").split('-').getOrElse(1) { "default" })
     }
 
     pluginVerification {
