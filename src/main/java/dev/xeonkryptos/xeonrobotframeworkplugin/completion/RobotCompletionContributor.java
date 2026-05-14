@@ -1,6 +1,8 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.completion;
 
 import com.intellij.codeInsight.completion.CompletionContributor;
+import com.intellij.codeInsight.completion.CompletionParameters;
+import com.intellij.codeInsight.completion.CompletionResultSet;
 import com.intellij.codeInsight.completion.CompletionType;
 import com.intellij.patterns.ElementPattern;
 import com.intellij.psi.PsiElement;
@@ -28,7 +30,6 @@ import static com.intellij.patterns.PlatformPatterns.psiComment;
 import static com.intellij.patterns.PlatformPatterns.psiElement;
 import static com.intellij.patterns.StandardPatterns.instanceOf;
 import static com.intellij.patterns.StandardPatterns.or;
-import static dev.xeonkryptos.xeonrobotframeworkplugin.patterns.RobotPatterns.atFirstPositionOf;
 import static dev.xeonkryptos.xeonrobotframeworkplugin.patterns.RobotPatterns.indented;
 import static dev.xeonkryptos.xeonrobotframeworkplugin.patterns.RobotPatterns.previousNonWhitespaceOrCommentSibling;
 
@@ -101,6 +102,11 @@ public class RobotCompletionContributor extends CompletionContributor {
                            .inFile(psiElement(RobotFile.class)),
                new VariableCompletionProvider());
         extend(CompletionType.BASIC, psiElement(RobotTypes.LITERAL_CONSTANT).inside(true, withElementInLocalSetting("Tags")).inFile(psiElement(RobotFile.class)), new StandardTagCompletionProvider());
+    }
+
+    @Override
+    public void fillCompletionVariants(@NotNull CompletionParameters parameters, @NotNull CompletionResultSet result) {
+        super.fillCompletionVariants(parameters, result.withPrefixMatcher(new RobotPrefixMatcher(result.getPrefixMatcher().getPrefix())));
     }
 
     @SuppressWarnings("SameParameterValue")
