@@ -4,11 +4,10 @@
 
 ## Unreleased
 
-### Added
-
-### Changed
-
 ### Fixed
+
+- Reinserted custom prefix matcher for code completion
+- Optimize prefix matching string to provide variables in code completion even in a string
 
 ## 0.7.3 - 2026-05-10
 
