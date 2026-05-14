@@ -116,6 +116,9 @@ jobs:
 
   release:
     name: Publish Plugin
+    needs:
+      - build
+      - pluginVerification
     runs-on: ubuntu-latest
     steps:
 
