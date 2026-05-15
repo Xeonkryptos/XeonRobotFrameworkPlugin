@@ -188,8 +188,11 @@ class RobotBlock(node: ASTNode, private val context: RobotBlockContext, wrap: Wr
         }
 
         RobotTypes.SINGLE_VARIABLE_STATEMENT -> {
-            val wrapType = context.robotCodeStyleSettings.VARIABLE_DEFINITIONS_WRAP
-            Wrap.createWrap(wrapType, context.robotCodeStyleSettings.VARIABLE_DEFINITIONS_FIRST_ARGUMENT_ON_NEW_LINE)
+            if (!context.robotCodeStyleSettings.KEEP_SIMPLE_VARIABLE_STATEMENT_IN_ONE_LINE || myNode.getChildren(TokenSet.orSet(RobotTokenSets.ARGUMENTS_TYPE_SET,
+                    TokenSet.create(RobotTypes.VARIABLE_VALUE))).size > 1) {
+                val wrapType = context.robotCodeStyleSettings.VARIABLE_DEFINITIONS_WRAP
+                Wrap.createWrap(wrapType, context.robotCodeStyleSettings.VARIABLE_DEFINITIONS_FIRST_ARGUMENT_ON_NEW_LINE)
+            } else null
         }
 
         // @formatter:off
