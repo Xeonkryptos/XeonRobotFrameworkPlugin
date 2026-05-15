@@ -1,6 +1,7 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.util
 
 import com.intellij.openapi.module.Module
+import com.intellij.openapi.module.ModuleUtilCore
 import com.intellij.openapi.projectRoots.Sdk
 import com.intellij.openapi.roots.ModuleRootManager
 import com.intellij.openapi.roots.ProjectRootManager
@@ -17,7 +18,7 @@ class RobotLocalProcessExecutor {
 
         @JvmStatic
         fun findPythonSdk(sourceElement: PsiElement): Sdk? {
-            var sdk = PythonSdkUtil.findPythonSdk(sourceElement)
+            var sdk = ModuleUtilCore.findModuleForPsiElement(sourceElement)?.let { module -> PythonSdkUtil.findPythonSdk(module) }
             if (sdk == null) {
                 sdk = ProjectRootManager.getInstance(sourceElement.project).projectSdk
                 if (sdk != null && !PythonSdkUtil.isPythonSdk(sdk)) {
