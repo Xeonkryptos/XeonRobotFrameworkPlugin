@@ -4,10 +4,17 @@
 
 ## Unreleased
 
+### Added
+
+- Added new formatting option to keep simple local settings in one line even though wrapping is configured
+- Added new formatting option to keep simple variable statements in one line even though wrapping is configured
+
 ### Fixed
 
 - Reinserted custom prefix matcher for code completion
 - Optimize prefix matching string to provide variables in code completion even in a string
+- Don't suggest variables at the beginning of a column (usually global settings)
+- Provide global setting keywords in settings section again
 
 ## 0.7.3 - 2026-05-10
 

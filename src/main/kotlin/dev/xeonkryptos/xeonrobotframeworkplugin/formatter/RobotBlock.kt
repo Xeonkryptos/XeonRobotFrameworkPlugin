@@ -164,13 +164,17 @@ class RobotBlock(node: ASTNode, private val context: RobotBlockContext, wrap: Wr
         }
 
         RobotTypes.LOCAL_ARGUMENTS_SETTING -> {
-            val wrapType = context.commonCodeStyleSettings.METHOD_PARAMETERS_WRAP
-            Wrap.createWrap(wrapType, context.robotCodeStyleSettings.METHOD_PARAMETERS_FIRST_ARGUMENT_ON_NEW_LINE)
+            if (!context.robotCodeStyleSettings.KEEP_SIMPLE_LOCAL_SETTINGS_IN_ONE_LINE || myNode.getChildren(TokenSet.create(RobotTypes.LOCAL_ARGUMENTS_SETTING_PARAMETER)).size > 1) {
+                val wrapType = context.commonCodeStyleSettings.METHOD_PARAMETERS_WRAP
+                Wrap.createWrap(wrapType, context.robotCodeStyleSettings.METHOD_PARAMETERS_FIRST_ARGUMENT_ON_NEW_LINE)
+            } else null
         }
 
         RobotTypes.LOCAL_SETTING -> {
-            val wrapType = context.robotCodeStyleSettings.LOCAL_SETTINGS_WRAP
-            Wrap.createWrap(wrapType, context.robotCodeStyleSettings.LOCAL_SETTINGS_FIRST_ARGUMENT_ON_NEW_LINE)
+            if (!context.robotCodeStyleSettings.KEEP_SIMPLE_LOCAL_SETTINGS_IN_ONE_LINE || myNode.getChildren(TokenSet.create(RobotTypes.POSITIONAL_ARGUMENT)).size > 1) {
+                val wrapType = context.robotCodeStyleSettings.LOCAL_SETTINGS_WRAP
+                Wrap.createWrap(wrapType, context.robotCodeStyleSettings.LOCAL_SETTINGS_FIRST_ARGUMENT_ON_NEW_LINE)
+            } else null
         }
 
         RobotTypes.FOR_LOOP_HEADER -> {
@@ -184,8 +188,11 @@ class RobotBlock(node: ASTNode, private val context: RobotBlockContext, wrap: Wr
         }
 
         RobotTypes.SINGLE_VARIABLE_STATEMENT -> {
-            val wrapType = context.robotCodeStyleSettings.VARIABLE_DEFINITIONS_WRAP
-            Wrap.createWrap(wrapType, context.robotCodeStyleSettings.VARIABLE_DEFINITIONS_FIRST_ARGUMENT_ON_NEW_LINE)
+            if (!context.robotCodeStyleSettings.KEEP_SIMPLE_VARIABLE_STATEMENT_IN_ONE_LINE || myNode.getChildren(TokenSet.orSet(RobotTokenSets.ARGUMENTS_TYPE_SET,
+                    TokenSet.create(RobotTypes.VARIABLE_VALUE))).size > 1) {
+                val wrapType = context.robotCodeStyleSettings.VARIABLE_DEFINITIONS_WRAP
+                Wrap.createWrap(wrapType, context.robotCodeStyleSettings.VARIABLE_DEFINITIONS_FIRST_ARGUMENT_ON_NEW_LINE)
+            } else null
         }
 
         // @formatter:off
@@ -201,7 +208,13 @@ class RobotBlock(node: ASTNode, private val context: RobotBlockContext, wrap: Wr
         RobotTypes.UNKNOWN_SETTING_STATEMENTS_GLOBAL_SETTING,
         RobotTypes.SETUP_TEARDOWN_STATEMENTS_GLOBAL_SETTING -> {
         // @formatter:on
-            val tokenSet = TokenSet.create(RobotTypes.IMPORT_ARGUMENT, RobotTypes.KEYWORD_CALL, RobotTypes.POSITIONAL_ARGUMENT, RobotTypes.PARAMETER, RobotTypes.LITERAL_CONSTANT, RobotTypes.LITERAL_CONSTANT_VALUE, RobotTypes.VARIABLE)
+            val tokenSet = TokenSet.create(RobotTypes.IMPORT_ARGUMENT,
+                RobotTypes.KEYWORD_CALL,
+                RobotTypes.POSITIONAL_ARGUMENT,
+                RobotTypes.PARAMETER,
+                RobotTypes.LITERAL_CONSTANT,
+                RobotTypes.LITERAL_CONSTANT_VALUE,
+                RobotTypes.VARIABLE)
             if (!context.robotCodeStyleSettings.KEEP_SIMPLE_GLOBAL_SETTINGS_IN_ONE_LINE || myNode.getChildren(tokenSet).size > 1) {
                 val wrapType = context.robotCodeStyleSettings.GLOBAL_SETTINGS_WRAP
                 Wrap.createWrap(wrapType, context.robotCodeStyleSettings.GLOBAL_SETTINGS_FIRST_ARGUMENT_ON_NEW_LINE)
