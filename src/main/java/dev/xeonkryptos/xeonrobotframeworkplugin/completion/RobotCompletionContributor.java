@@ -38,7 +38,8 @@ public class RobotCompletionContributor extends CompletionContributor {
     public RobotCompletionContributor() {
         extend(CompletionType.BASIC, psiElement().without(indented()).inFile(psiElement(RobotFile.class)), new SectionCompletionProvider());
         extend(CompletionType.BASIC,
-               psiElement().andNot(or(psiComment(), psiElement(RobotTypes.LITERAL_CONSTANT), psiElement(RobotTypes.VARIABLE_BODY), psiElement(RobotTypes.TEMPLATE_ARGUMENT_VALUE)))
+               psiElement().without(indented())
+                           .andNot(or(psiComment(), psiElement(RobotTypes.VARIABLE_BODY), psiElement(RobotTypes.TEMPLATE_ARGUMENT_VALUE)))
                            .inside(true, instanceOf(RobotSettingsSection.class))
                            .inFile(psiElement(RobotFile.class)),
                new SettingsKeywordCompletionProvider());
@@ -98,7 +99,8 @@ public class RobotCompletionContributor extends CompletionContributor {
                new KeywordParametersCompletionProvider());
         // Provide completions in context of variables or arguments
         extend(CompletionType.BASIC,
-               psiElement().andOr(psiElement(RobotTypes.LITERAL_CONSTANT), psiElement(RobotTypes.VARIABLE_BODY), psiElement(RobotTypes.TEMPLATE_ARGUMENT_VALUE), psiElement(RobotTypes.KEYWORD_NAME))
+               psiElement().with(indented())
+                           .andOr(psiElement(RobotTypes.PARAMETER_NAME), psiElement(RobotTypes.LITERAL_CONSTANT), psiElement(RobotTypes.VARIABLE_BODY), psiElement(RobotTypes.TEMPLATE_ARGUMENT_VALUE))
                            .inFile(psiElement(RobotFile.class)),
                new VariableCompletionProvider());
         extend(CompletionType.BASIC, psiElement(RobotTypes.LITERAL_CONSTANT).inside(true, withElementInLocalSetting("Tags")).inFile(psiElement(RobotFile.class)), new StandardTagCompletionProvider());
