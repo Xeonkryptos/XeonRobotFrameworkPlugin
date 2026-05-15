@@ -4,6 +4,10 @@
 
 ## Unreleased
 
+### Added
+
+- Added new formatting option to keep simple local settings in one line even though wrapping is configured
+
 ### Fixed
 
 - Reinserted custom prefix matcher for code completion
