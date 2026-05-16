@@ -1,5 +1,6 @@
 import functools
-from typing import Any, Optional, Tuple, cast
+from pathlib import Path
+from typing import Any, Optional, Sequence, Tuple, cast
 
 from robot.utils.escaping import split_from_equals as robot_split_from_equals
 from robot.variables.search import contains_variable as robot_contains_variable
@@ -8,7 +9,7 @@ from robot.variables.search import is_variable as robot_is_variable
 from robot.variables.search import search_variable as robot_search_variable
 from robotcode.robot.utils.match import normalize
 
-from . import get_robot_version
+from . import RF_VERSION
 
 
 class InvalidVariableError(Exception):
@@ -16,7 +17,7 @@ class InvalidVariableError(Exception):
 
 
 class VariableMatcher:
-    if get_robot_version() >= (7, 3):
+    if RF_VERSION >= (7, 3):
 
         def __init__(
             self, string: str, identifiers: str = "$@&%", parse_type: bool = False, ignore_errors: bool = True
@@ -108,7 +109,7 @@ class VariableMatcher:
     def is_dict_variable(self) -> bool:
         return bool(self.match.is_dict_variable())
 
-    if get_robot_version() >= (6, 1):
+    if RF_VERSION >= (6, 1):
 
         def is_assign(
             self, allow_assign_mark: bool = False, allow_nested: bool = False, allow_items: bool = False
@@ -125,7 +126,7 @@ class VariableMatcher:
         ) -> bool:
             return bool(self.match.is_assign(allow_assign_mark=allow_assign_mark))
 
-    if get_robot_version() >= (6, 1):
+    if RF_VERSION >= (6, 1):
 
         def is_scalar_assign(self, allow_assign_mark: bool = False, allow_nested: bool = False) -> bool:
             return bool(self.match.is_scalar_assign(allow_assign_mark=allow_assign_mark, allow_nested=allow_nested))
@@ -134,7 +135,7 @@ class VariableMatcher:
         def is_scalar_assign(self, allow_assign_mark: bool = False, allow_nested: bool = False) -> bool:
             return bool(self.match.is_scalar_assign(allow_assign_mark=allow_assign_mark))
 
-    if get_robot_version() >= (6, 1):
+    if RF_VERSION >= (6, 1):
 
         def is_list_assign(
             self,
@@ -151,7 +152,7 @@ class VariableMatcher:
         ) -> bool:
             return bool(self.match.is_list_assign(allow_assign_mark=allow_assign_mark))
 
-    if get_robot_version() >= (6, 1):
+    if RF_VERSION >= (6, 1):
 
         def is_dict_assign(self, allow_assign_mark: bool = False, allow_nested: bool = False) -> bool:
             return bool(self.match.is_dict_assign(allow_assign_mark=allow_assign_mark, allow_nested=allow_nested))
@@ -200,28 +201,34 @@ BUILTIN_VARIABLES = [
 ]
 
 
-@functools.lru_cache(maxsize=8192)
+@functools.lru_cache(maxsize=1024)
 def contains_variable(string: str, identifiers: str = "$@&") -> bool:
     return cast(bool, robot_contains_variable(string, identifiers))
 
 
-@functools.lru_cache(maxsize=8192)
+@functools.lru_cache(maxsize=1024)
 def is_scalar_assign(string: str, allow_assign_mark: bool = False) -> bool:
     return cast(bool, robot_is_scalar_assign(string, allow_assign_mark))
 
 
-@functools.lru_cache(maxsize=8192)
+@functools.lru_cache(maxsize=1024)
 def is_variable(string: str, identifiers: str = "$@&") -> bool:
     return cast(bool, robot_is_variable(string, identifiers))
 
 
-@functools.lru_cache(maxsize=8192)
+@functools.lru_cache(maxsize=1024)
 def search_variable(
     string: str, identifiers: str = "$@&%*", parse_type: bool = False, ignore_errors: bool = False
 ) -> VariableMatcher:
     return VariableMatcher(string, identifiers, parse_type, ignore_errors)
 
 
-@functools.lru_cache(maxsize=8192)
+@functools.lru_cache(maxsize=1024)
 def split_from_equals(string: str) -> Tuple[str, Optional[str]]:
     return cast(Tuple[str, Optional[str]], robot_split_from_equals(string))
+
+
+def replace_curdir_in_variable_values(values: Sequence[str], source: str) -> Tuple[str, ...]:
+    """Replace ${CURDIR} in variable values with the escaped parent directory of source."""
+    curdir = str(Path(source).parent).replace("\\", "\\\\")
+    return tuple(s.replace("${CURDIR}", curdir) for s in values)

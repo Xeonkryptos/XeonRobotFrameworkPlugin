@@ -11,6 +11,6 @@ public class RobotSyntaxHighlightingFactory extends SyntaxHighlighterFactory {
 
    @NotNull
    public SyntaxHighlighter getSyntaxHighlighter(@Nullable Project project, @Nullable VirtualFile file) {
-      return new RobotHighlighter();
+      return new RobotHighlighter(project, file);
    }
 }

@@ -16,7 +16,7 @@ plugins {
     // gradle-changelog-plugin - read more: https://github.com/JetBrains/gradle-changelog-plugin
     id("org.jetbrains.changelog") version "2.5.0"
 
-    kotlin("jvm") version "2.0.21"
+    kotlin("jvm") version "2.1.10"
 }
 
 group = properties("pluginGroup")
@@ -47,7 +47,6 @@ dependencies {
     compileOnly("org.projectlombok:lombok:1.18.46")
     annotationProcessor("org.projectlombok:lombok:1.18.46")
 
-    implementation("org.eclipse.lsp4j:org.eclipse.lsp4j.debug:0.24.0")
     implementation("org.apache.commons:commons-text:1.15.0")
 
     testImplementation(platform("org.junit:junit-bom:5.14.1"))
@@ -61,7 +60,7 @@ dependencies {
 
         testFramework(TestFrameworkType.JUnit5)
 
-        pycharmCommunity(platformVersion)
+        pycharm(platformVersion)
         jetbrainsRuntime()
 
         plugins(providers.gradleProperty("platformPlugins").map { it.split(',') })

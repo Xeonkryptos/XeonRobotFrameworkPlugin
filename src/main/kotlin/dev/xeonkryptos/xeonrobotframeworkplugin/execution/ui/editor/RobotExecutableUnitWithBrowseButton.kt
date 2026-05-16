@@ -56,6 +56,7 @@ import kotlinx.coroutines.withContext
 import java.awt.event.ActionListener
 import javax.swing.tree.DefaultMutableTreeNode
 import kotlin.io.path.Path
+import kotlin.time.Duration.Companion.milliseconds
 import javax.swing.event.DocumentEvent as SwingDocumentEvent
 import javax.swing.event.DocumentListener as SwingDocumentListener
 
@@ -101,7 +102,7 @@ class RobotTextFieldWithDirectoryBrowseButton(private val contextAnchor: Context
         addDocumentListener(documentListener)
 
         scope.launch {
-            @Suppress("OPT_IN_USAGE") textChanges.asStateFlow().map { it.trim() }.distinctUntilChanged().debounce(200L).collectLatest { raw ->
+            @Suppress("OPT_IN_USAGE") textChanges.asStateFlow().map { it.trim() }.distinctUntilChanged().debounce(200L.milliseconds).collectLatest { raw ->
                 if (raw.isEmpty()) {
                     withContext(Dispatchers.EDT) { applyValidationResult(null) }
                     return@collectLatest

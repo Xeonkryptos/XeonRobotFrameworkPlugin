@@ -4,16 +4,22 @@ import com.intellij.lexer.Lexer;
 import com.intellij.openapi.editor.DefaultLanguageHighlighterColors;
 import com.intellij.openapi.editor.colors.TextAttributesKey;
 import com.intellij.openapi.fileTypes.SyntaxHighlighterBase;
+import com.intellij.openapi.project.Project;
+import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.TokenType;
 import com.intellij.psi.tree.IElementType;
+import dev.xeonkryptos.xeonrobotframeworkplugin.lsp.RobotLspLexer;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.ExtendedRobotTypes;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotLexerAdapter;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes;
+import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.Map;
 
+@RequiredArgsConstructor
 public class RobotHighlighter extends SyntaxHighlighterBase {
 
     public static final TextAttributesKey SECTION_TITLE = TextAttributesKey.createTextAttributesKey("ROBOT_SECTION_TITLE",
@@ -52,6 +58,11 @@ public class RobotHighlighter extends SyntaxHighlighterBase {
     public static final TextAttributesKey REASSIGNED_VARIABLE = TextAttributesKey.createTextAttributesKey("ROBOT_REASSIGNED_VARIABLE", VARIABLE);
 
     private static final Map<IElementType, TextAttributesKey> keys = new HashMap<>();
+
+    @Nullable
+    private final Project project;
+    @Nullable
+    private final VirtualFile file;
 
     static {
         keys.put(RobotTypes.SETTINGS_HEADER, SECTION_TITLE);
@@ -141,7 +152,10 @@ public class RobotHighlighter extends SyntaxHighlighterBase {
     @NotNull
     @Override
     public Lexer getHighlightingLexer() {
-        return new RobotLexerAdapter();
+        if (project == null) {
+            return new RobotLexerAdapter();
+        }
+        return new RobotLspLexer(project, file);
     }
 
     @NotNull

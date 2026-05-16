@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import ast
 import functools
+import hashlib
 import importlib
 import importlib.util
 import io
@@ -23,6 +24,7 @@ from typing import (
     Iterable,
     Iterator,
     List,
+    Literal,
     NamedTuple,
     Optional,
     Sequence,
@@ -43,8 +45,11 @@ from robot.output.logger import LOGGER
 from robot.output.loggerhelper import AbstractLogger
 from robot.parsing.lexer.tokens import Token
 from robot.parsing.lexer.tokens import Token as RobotToken
-from robot.parsing.model.blocks import Keyword, KeywordSection, Section, SettingSection
-from robot.parsing.model.statements import Arguments, KeywordName
+from robot.parsing.model.blocks import Keyword, KeywordSection, Section, SettingSection, VariableSection
+from robot.parsing.model.statements import Arguments, KeywordName, Statement
+from robot.parsing.model.statements import LibraryImport as RobotLibraryImport
+from robot.parsing.model.statements import ResourceImport as RobotResourceImport
+from robot.parsing.model.statements import VariablesImport as RobotVariablesImport
 from robot.running.arguments.argumentresolver import ArgumentResolver, DictToKwargs, NamedArgumentResolver
 from robot.running.arguments.argumentresolver import VariableReplacer as ArgumentsVariableReplacer
 from robot.running.arguments.argumentspec import ArgInfo
@@ -62,9 +67,9 @@ from robot.variables.filesetter import PythonImporter, YamlImporter
 from robot.variables.finders import VariableFinder
 from robot.variables.replacer import VariableReplacer
 from robotcode.core.lsp.types import Position, Range
-from robotcode.core.utils.path import normalized_path
+from robotcode.core.utils.path import FileId, file_id, normalized_path
 
-from ..utils import get_robot_version
+from ..utils import RF_VERSION
 from ..utils.ast import (
     cached_isinstance,
     get_first_variable_token,
@@ -73,18 +78,22 @@ from ..utils.ast import (
 )
 from ..utils.markdownformatter import MarkDownFormatter
 from ..utils.match import normalize, normalize_namespace
-from ..utils.variables import contains_variable
+from ..utils.robot_patching import patch_variable_not_found
+from ..utils.variables import contains_variable, replace_curdir_in_variable_values, search_variable
 from .entities import (
     ArgumentDefinition,
+    Import,
     ImportedVariableDefinition,
     LibraryArgumentDefinition,
+    LibraryImport,
     NativeValue,
+    ResourceImport,
     SourceEntity,
-    cached_method,
-    single_call,
+    VariableDefinition,
+    VariablesImport,
 )
 
-if get_robot_version() < (7, 0):
+if RF_VERSION < (7, 0):
     from robot.running.handlers import _PythonHandler, _PythonInitHandler  # pyright: ignore[reportMissingImports]
     from robot.running.model import ResourceFile  # pyright: ignore[reportMissingImports]
     from robot.running.usererrorhandler import UserErrorHandler  # pyright: ignore[reportMissingImports]
@@ -92,14 +101,14 @@ if get_robot_version() < (7, 0):
 
     robot_notset = ArgInfo.NOTSET
 
-if get_robot_version() >= (6, 1):
+if RF_VERSION >= (6, 1):
     from robot.libdocpkg.datatypes import (
         TypeDoc as RobotTypeDoc,
     )
     from robot.running.arguments.argumentspec import TypeInfo
     from robot.variables.filesetter import JsonImporter
 
-if get_robot_version() >= (7, 0):
+if RF_VERSION >= (7, 0):
     from robot.running.invalidkeyword import InvalidKeyword
     from robot.running.invalidkeyword import (
         InvalidKeyword as UserErrorHandler,
@@ -107,6 +116,7 @@ if get_robot_version() >= (7, 0):
     from robot.running.resourcemodel import ResourceFile
     from robot.utils import NOT_SET as robot_notset  # type: ignore[no-redef] # noqa: N811
 
+patch_variable_not_found()
 
 RUN_KEYWORD_NAMES = [
     "Run Keyword",
@@ -146,7 +156,7 @@ ALL_RUN_KEYWORDS = [
 BUILTIN_LIBRARY_NAME = "BuiltIn"
 RESERVED_LIBRARY_NAME = "Reserved"
 
-if get_robot_version() < (7, 0):
+if RF_VERSION < (7, 0):
     DEFAULT_LIBRARIES = {BUILTIN_LIBRARY_NAME, RESERVED_LIBRARY_NAME, "Easter"}
 else:
     DEFAULT_LIBRARIES = {BUILTIN_LIBRARY_NAME, "Easter"}
@@ -167,12 +177,12 @@ ALLOWED_RESOURCE_FILE_EXTENSIONS = (
         *REST_EXTENSIONS,
         *JSON_EXTENSIONS,
     }
-    if get_robot_version() >= (6, 1)
+    if RF_VERSION >= (6, 1)
     else {ROBOT_FILE_EXTENSION, RESOURCE_FILE_EXTENSION, *REST_EXTENSIONS}
 )
 
 ALLOWED_VARIABLES_FILE_EXTENSIONS = (
-    {".py", ".yml", ".yaml", ".json"} if get_robot_version() >= (6, 1) else {".py", ".yml", ".yaml"}
+    {".py", ".yml", ".yaml", ".json"} if RF_VERSION >= (6, 1) else {".py", ".yml", ".yaml"}
 )
 ROBOT_DOC_FORMAT = "ROBOT"
 REST_DOC_FORMAT = "REST"
@@ -198,11 +208,11 @@ def convert_from_rest(text: str) -> str:
     return text
 
 
-if get_robot_version() >= (6, 0):
+if RF_VERSION >= (6, 0):
     # monkey patch robot framework for performance reasons
     _old_from_name = EmbeddedArguments.from_name
 
-    @functools.lru_cache(maxsize=8192)
+    @functools.lru_cache(maxsize=1024)
     def _new_from_name(name: str) -> EmbeddedArguments:
         return _old_from_name(name)
 
@@ -214,7 +224,7 @@ if get_robot_version() >= (6, 0):
         except (VariableError, DataError):
             return ()
 
-    if get_robot_version() >= (7, 3):
+    if RF_VERSION >= (7, 3):
 
         def _match_embedded(embedded_arguments: EmbeddedArguments, name: str) -> bool:
             return bool(embedded_arguments.matches(name))
@@ -225,7 +235,7 @@ if get_robot_version() >= (6, 0):
 
 else:
 
-    @functools.lru_cache(maxsize=8192)
+    @functools.lru_cache(maxsize=1024)
     def _get_embedded_arguments(name: str) -> Any:
         try:
             return EmbeddedArguments(name)
@@ -290,7 +300,6 @@ class KeywordMatcher:
 
         return self.normalized_name == (normalize_namespace(o) if self._is_namespace else normalize(o))
 
-    @single_call
     def __hash__(self) -> int:
         return hash(
             (
@@ -329,20 +338,20 @@ class TypeDocType(Enum):
     STANDARD = "Standard"
 
 
-@dataclass
+@dataclass(slots=True)
 class TypedDictItem:
     key: str
     type: str
     required: Optional[bool] = None
 
 
-@dataclass
+@dataclass(slots=True)
 class EnumMember:
     name: str
     value: str
 
 
-@dataclass
+@dataclass(slots=True)
 class TypeDoc:
     type: str
     name: str
@@ -356,7 +365,6 @@ class TypeDoc:
 
     doc_format: str = ROBOT_DOC_FORMAT
 
-    @single_call
     def __hash__(self) -> int:
         return hash(
             (
@@ -369,7 +377,6 @@ class TypeDoc:
             )
         )
 
-    @cached_method
     def to_markdown(self, header_level: int = 2, only_doc: bool = False) -> str:
         result = ""
 
@@ -406,13 +413,13 @@ class TypeDoc:
         return result
 
 
-@dataclass
+@dataclass(slots=True)
 class SourceAndLineInfo:
     source: str
     line_no: int
 
 
-@dataclass
+@dataclass(slots=True)
 class Error:
     message: str
     type_name: str
@@ -453,7 +460,7 @@ def robot_arg_repr(arg: Any) -> Optional[str]:
     return str(robot_arg.default_repr)
 
 
-@dataclass
+@dataclass(slots=True)
 class ArgumentInfo:
     name: str
     str_repr: str
@@ -461,6 +468,25 @@ class ArgumentInfo:
     required: bool
     default_value: Optional[Any] = None
     types: Optional[List[str]] = None
+    literal_values: Optional[List[str]] = None
+
+    @staticmethod
+    def _extract_literal_values(type_info: Any) -> Optional[List[str]]:
+        if RF_VERSION < (7, 0) or type_info is None:
+            return None
+
+        values: List[str] = []
+
+        def _collect(ti: Any) -> None:
+            if ti.type is Literal and ti.nested:
+                for nested in ti.nested:
+                    values.append(nested.name.strip("'"))
+            elif ti.is_union and ti.nested:
+                for nested in ti.nested:
+                    _collect(nested)
+
+        _collect(type_info)
+        return values or None
 
     @staticmethod
     def from_robot(arg: Any) -> ArgumentInfo:
@@ -472,7 +498,7 @@ class ArgumentInfo:
             str_repr=str(arg),
             types=(
                 robot_arg.types_reprs
-                if get_robot_version() < (7, 0)
+                if RF_VERSION < (7, 0)
                 else (
                     ([str(robot_arg.type)] if not robot_arg.type.is_union else [str(t) for t in robot_arg.type.nested])
                     if robot_arg.type
@@ -481,12 +507,12 @@ class ArgumentInfo:
             ),
             kind=KeywordArgumentKind[robot_arg.kind],
             required=robot_arg.required,
+            literal_values=ArgumentInfo._extract_literal_values(robot_arg.type if RF_VERSION >= (7, 0) else None),
         )
 
     def __str__(self) -> str:
         return self.signature()
 
-    @cached_method
     def signature(self, add_types: bool = True) -> str:
         prefix = ""
         if self.kind == KeywordArgumentKind.POSITIONAL_ONLY_MARKER:
@@ -519,7 +545,7 @@ class ArgumentInfo:
 DEPRECATED_PATTERN = re.compile(r"^\*DEPRECATED(?P<message>.*)\*(?P<doc>.*)")
 
 
-@dataclass
+@dataclass(slots=True)
 class ArgumentSpec:
     name: Optional[str]
     type: str
@@ -532,6 +558,21 @@ class ArgumentSpec:
     defaults: Any
     types: Optional[Dict[str, str]] = None
     return_type: Optional[str] = None
+    _robot_arguments: Any = field(init=False, default=None, repr=False, compare=False)
+
+    def __getstate__(self) -> Dict[str, Any]:
+        return {k: getattr(self, k) for k in self.__slots__ if k != "_robot_arguments"}
+
+    def __setstate__(self, state: Any) -> None:
+        if isinstance(state, dict):
+            for k, v in state.items():
+                object.__setattr__(self, k, v)
+        else:
+            # Legacy pickle format: tuple of (dict_or_none, slot_dict)
+            _, slot_state = state
+            for k, v in slot_state.items():
+                object.__setattr__(self, k, v)
+        object.__setattr__(self, "_robot_arguments", None)
 
     @staticmethod
     def from_robot_argument_spec(spec: Any) -> ArgumentSpec:
@@ -543,10 +584,10 @@ class ArgumentSpec:
             var_positional=spec.var_positional,
             named_only=spec.named_only,
             var_named=spec.var_named,
-            embedded=spec.embedded if get_robot_version() >= (7, 0) else None,
+            embedded=spec.embedded if RF_VERSION >= (7, 0) else None,
             defaults={k: str(v) for k, v in spec.defaults.items()} if spec.defaults else {},
-            types={k: str(v) for k, v in spec.types.items()} if get_robot_version() > (7, 0) and spec.types else None,
-            return_type=str(spec.return_type) if get_robot_version() > (7, 0) and spec.return_type else None,
+            types={k: str(v) for k, v in spec.types.items()} if RF_VERSION > (7, 0) and spec.types else None,
+            return_type=str(spec.return_type) if RF_VERSION > (7, 0) and spec.return_type else None,
         )
 
     def resolve(
@@ -558,9 +599,9 @@ class ArgumentSpec:
         dict_to_kwargs: bool = False,
         validate: bool = True,
     ) -> Tuple[List[Any], List[Tuple[str, Any]]]:
-        if not hasattr(self, "__robot_arguments"):
-            if get_robot_version() < (7, 0):
-                self.__robot_arguments = RobotArgumentSpec(
+        if self._robot_arguments is None:
+            if RF_VERSION < (7, 0):
+                self._robot_arguments = RobotArgumentSpec(
                     self.name,
                     self.type,
                     self.positional_only,
@@ -572,7 +613,7 @@ class ArgumentSpec:
                     None,
                 )
             else:
-                self.__robot_arguments = RobotArgumentSpec(
+                self._robot_arguments = RobotArgumentSpec(
                     self.name,
                     self.type,
                     self.positional_only,
@@ -584,18 +625,18 @@ class ArgumentSpec:
                     self.embedded,
                     None,
                 )
-        self.__robot_arguments.name = self.name
+        self._robot_arguments.name = self.name
         if validate:
-            if get_robot_version() < (7, 0):
+            if RF_VERSION < (7, 0):
                 resolver = ArgumentResolver(
-                    self.__robot_arguments,
+                    self._robot_arguments,
                     resolve_named=resolve_named,
                     resolve_variables_until=resolve_variables_until,
                     dict_to_kwargs=dict_to_kwargs,
                 )
             else:
                 resolver = ArgumentResolver(
-                    self.__robot_arguments,
+                    self._robot_arguments,
                     resolve_named=resolve_named,
                     resolve_args_until=resolve_variables_until,
                     dict_to_kwargs=dict_to_kwargs,
@@ -609,26 +650,24 @@ class ArgumentSpec:
             def _raise_positional_after_named(self) -> None:
                 pass
 
-        positional, named = MyNamedArgumentResolver(self.__robot_arguments).resolve(arguments, variables)
-        if get_robot_version() < (7, 0):
+        positional, named = MyNamedArgumentResolver(self._robot_arguments).resolve(arguments, variables)
+        if RF_VERSION < (7, 0):
             positional, named = ArgumentsVariableReplacer(resolve_variables_until).replace(positional, named, variables)
         else:
-            positional, named = ArgumentsVariableReplacer(self.__robot_arguments, resolve_variables_until).replace(
+            positional, named = ArgumentsVariableReplacer(self._robot_arguments, resolve_variables_until).replace(
                 positional, named, variables
             )
-        positional, named = DictToKwargs(self.__robot_arguments, dict_to_kwargs).handle(positional, named)
+        positional, named = DictToKwargs(self._robot_arguments, dict_to_kwargs).handle(positional, named)
         return positional, named
 
 
-@dataclass
+@dataclass(slots=True, eq=False)
 class KeywordDoc(SourceEntity):
     name: str = ""
     name_token: Optional[Token] = field(default=None, compare=False)
     arguments: List[ArgumentInfo] = field(default_factory=list, compare=False)
     arguments_spec: Optional[ArgumentSpec] = field(default=None, compare=False)
-    argument_definitions: Optional[List[ArgumentDefinition]] = field(
-        default=None, compare=False, metadata={"nosave": True}
-    )
+    argument_definitions: Optional[List[ArgumentDefinition]] = field(default=None, compare=False)
     doc: str = field(default="", compare=False)
     tags: List[str] = field(default_factory=list)
     type: str = "keyword"
@@ -645,7 +684,11 @@ class KeywordDoc(SourceEntity):
     deprecated: bool = field(default=False, compare=False)
     return_type: Optional[str] = field(default=None, compare=False)
 
-    parent: Optional[LibraryDoc] = field(default=None, init=False, metadata={"nosave": True})
+    parent: Optional[LibraryDoc] = field(default=None, init=False)
+    _hash_value: int = field(default=0, init=False, compare=False, hash=False, repr=False)
+    _stable_id: str = field(default="", init=False, compare=False, hash=False, repr=False)
+    _parent_stable_id: str = field(default="", init=False, compare=False, hash=False, repr=False)
+    _matcher: Optional[KeywordMatcher] = field(default=None, init=False, compare=False, hash=False, repr=False)
 
     def _get_argument_definitions(self) -> Optional[List[ArgumentDefinition]]:
         return (
@@ -666,22 +709,110 @@ class KeywordDoc(SourceEntity):
             else []
         )
 
+    def _compute_stable_id(self) -> str:
+        h = hashlib.sha256()
+        h.update(
+            "\0".join(
+                (
+                    self.name,
+                    self.longname or "",
+                    self.source or "",
+                    str(self.line_no),
+                    str(self.col_offset),
+                    str(self.end_line_no),
+                    str(self.end_col_offset),
+                    self.type,
+                    self.libname or "",
+                    self.libtype or "",
+                    str(self.is_initializer),
+                    str(self.is_error_handler),
+                    self.doc_format,
+                    "|".join(self.tags),
+                )
+            ).encode()
+        )
+        return h.hexdigest()
+
     def __post_init__(self) -> None:
         if self.argument_definitions is None:
             self.argument_definitions = self._get_argument_definitions()
+        self._hash_value = hash(
+            (
+                self.name,
+                self.longname,
+                self.source,
+                self.line_no,
+                self.col_offset,
+                self.end_line_no,
+                self.end_col_offset,
+                self.type,
+                self.libname,
+                self.libtype,
+                self.is_initializer,
+                self.is_error_handler,
+                self.doc_format,
+                tuple(self.tags),
+            )
+        )
+
+    def _all_slots(self) -> Iterator[str]:
+        for cls in type(self).__mro__:
+            yield from getattr(cls, "__slots__", ())
+
+    _EXCLUDED_FROM_STATE = frozenset({"_matcher", "parent", "_hash_value", "_stable_id"})
+
+    def __getstate__(self) -> Dict[str, Any]:
+        return {slot: getattr(self, slot) for slot in self._all_slots() if slot not in self._EXCLUDED_FROM_STATE}
+
+    def __setstate__(self, state: Dict[str, Any]) -> None:
+        for slot in self._all_slots():
+            setattr(self, slot, state.get(slot, None))
+        self._matcher = None
+        self.parent = None
+        self._stable_id = ""
+        self._hash_value = hash(
+            (
+                self.name,
+                self.longname,
+                self.source,
+                self.line_no,
+                self.col_offset,
+                self.end_line_no,
+                self.end_col_offset,
+                self.type,
+                self.libname,
+                self.libtype,
+                self.is_initializer,
+                self.is_error_handler,
+                self.doc_format,
+                tuple(self.tags) if self.tags else (),
+            )
+        )
+
+    @property
+    def stable_id(self) -> str:
+        if not self._stable_id:
+            self._stable_id = self._compute_stable_id()
+        return self._stable_id
+
+    @property
+    def parent_stable_id(self) -> str:
+        return self._parent_stable_id
 
     def __str__(self) -> str:
         return f"{self.name}({', '.join(str(arg) for arg in self.arguments)})"
 
-    @functools.cached_property
+    @property
     def is_embedded(self) -> bool:
         return self.matcher.embedded_arguments is not None
 
-    @functools.cached_property
+    @property
     def matcher(self) -> KeywordMatcher:
-        return KeywordMatcher(self.name)
+        if self._matcher is None:
+            self._matcher = KeywordMatcher(self.name)
+        return self._matcher
 
-    @functools.cached_property
+    @property
     def is_deprecated(self) -> bool:
         return self.deprecated or DEPRECATED_PATTERN.match(self.doc) is not None
 
@@ -693,31 +824,36 @@ class KeywordDoc(SourceEntity):
     def is_library_keyword(self) -> bool:
         return self.libtype == "LIBRARY"
 
-    @functools.cached_property
+    @property
     def deprecated_message(self) -> str:
         if (m := DEPRECATED_PATTERN.match(self.doc)) is not None:
             return m.group("message").strip()
         return ""
 
-    @functools.cached_property
+    @property
     def name_range(self) -> Range:
         if self.name_token is not None:
             return range_from_token(self.name_token)
 
         return Range.invalid()
 
-    @functools.cached_property
+    @property
     def normalized_tags(self) -> List[str]:
         return [normalize(tag) for tag in self.tags]
 
-    @functools.cached_property
-    def is_private(self) -> bool:
-        if get_robot_version() < (6, 0):
+    if RF_VERSION >= (6, 0):
+
+        @property
+        def is_private(self) -> bool:
+            return "robot:private" in self.normalized_tags
+
+    else:
+
+        @property
+        def is_private(self) -> bool:
             return False
 
-        return "robot:private" in self.normalized_tags
-
-    @functools.cached_property
+    @property
     def range(self) -> Range:
         if self.name_token is not None:
             return range_from_token(self.name_token)
@@ -733,7 +869,6 @@ class KeywordDoc(SourceEntity):
             ),
         )
 
-    @cached_method
     def to_markdown(
         self,
         add_signature: bool = True,
@@ -829,7 +964,7 @@ class KeywordDoc(SourceEntity):
 
         return result
 
-    @functools.cached_property
+    @property
     def signature(self) -> str:
         return (
             f'({self.type}) "{self.name}": ('
@@ -845,7 +980,6 @@ class KeywordDoc(SourceEntity):
             + ")"
         )
 
-    @cached_method
     def parameter_signature(self, full_signatures: Optional[Sequence[int]] = None) -> str:
         return (
             "("
@@ -861,11 +995,15 @@ class KeywordDoc(SourceEntity):
             + ")"
         )
 
-    def is_reserved(self) -> bool:
-        if get_robot_version() < (7, 0):
+    if RF_VERSION < (7, 0):
+
+        def is_reserved(self) -> bool:
             return self.libname == RESERVED_LIBRARY_NAME
 
-        return False
+    else:
+
+        def is_reserved(self) -> bool:
+            return False
 
     def is_any_run_keyword(self) -> bool:
         return self.libname == BUILTIN_LIBRARY_NAME and self.name in ALL_RUN_KEYWORDS
@@ -889,26 +1027,28 @@ class KeywordDoc(SourceEntity):
     def is_run_keywords(self) -> bool:
         return self.libname == BUILTIN_LIBRARY_NAME and self.name == RUN_KEYWORDS_NAME
 
-    @single_call
-    def __hash__(self) -> int:
-        return hash(
-            (
-                self.name,
-                self.longname,
-                self.source,
-                self.line_no,
-                self.col_offset,
-                self.end_line_no,
-                self.end_col_offset,
-                self.type,
-                self.libname,
-                self.libtype,
-                self.is_initializer,
-                self.is_error_handler,
-                self.doc_format,
-                tuple(self.tags),
-            )
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, KeywordDoc):
+            return NotImplemented
+        return (
+            self.name == other.name
+            and self.longname == other.longname
+            and self.source == other.source
+            and self.line_no == other.line_no
+            and self.col_offset == other.col_offset
+            and self.end_line_no == other.end_line_no
+            and self.end_col_offset == other.end_col_offset
+            and self.type == other.type
+            and self.libname == other.libname
+            and self.libtype == other.libtype
+            and self.is_initializer == other.is_initializer
+            and self.is_error_handler == other.is_error_handler
+            and self.doc_format == other.doc_format
+            and self.tags == other.tags
         )
+
+    def __hash__(self) -> int:
+        return self._hash_value
 
 
 class KeywordError(Exception):
@@ -922,14 +1062,49 @@ class KeywordError(Exception):
         self.multiple_keywords = multiple_keywords
 
 
-@dataclass
+@dataclass(slots=True)
 class KeywordStore:
     source: Optional[str] = None
     source_type: Optional[str] = None
     keywords: List[KeywordDoc] = field(default_factory=list)
+    _index: Optional[Dict[str, List[KeywordDoc]]] = field(default=None, init=False, compare=False, repr=False)
+    _embedded: Optional[List[KeywordDoc]] = field(default=None, init=False, compare=False, repr=False)
+
+    def _ensure_index(self) -> Tuple[Dict[str, List[KeywordDoc]], List[KeywordDoc]]:
+        if self._index is not None:
+            return self._index, self._embedded  # type: ignore[return-value]
+        index: Dict[str, List[KeywordDoc]] = {}
+        embedded: List[KeywordDoc] = []
+        for kw in self.keywords:
+            if kw.matcher.embedded_arguments is not None:
+                embedded.append(kw)
+            else:
+                key = kw.matcher.normalized_name
+                bucket = index.get(key)
+                if bucket is None:
+                    index[key] = [kw]
+                else:
+                    bucket.append(kw)
+        self._index = index
+        self._embedded = embedded
+        return index, embedded
+
+    def __getstate__(self) -> Dict[str, Any]:
+        return {
+            "source": self.source,
+            "source_type": self.source_type,
+            "keywords": self.keywords,
+        }
+
+    def __setstate__(self, state: Dict[str, Any]) -> None:
+        self.source = state.get("source")
+        self.source_type = state.get("source_type")
+        self.keywords = state.get("keywords", [])
+        self._index = None
+        self._embedded = None
 
     def __getitem__(self, key: str) -> KeywordDoc:
-        items = [v for v in self.keywords if v.matcher == key]
+        items = list(self.iter_all(key))
 
         if not items:
             raise KeyError
@@ -956,7 +1131,15 @@ class KeywordStore:
         )
 
     def __contains__(self, _x: object) -> bool:
-        return any(v.matcher == _x for v in self.keywords)
+        if type(_x) is KeywordMatcher:
+            _x = _x.name
+        if type(_x) is not str:
+            return False
+        index, embedded = self._ensure_index()
+        normalized = normalize(_x)
+        if index.get(normalized):
+            return True
+        return any(kw.matcher.match_string(_x) for kw in embedded)
 
     def __len__(self) -> int:
         return len(self.keywords)
@@ -986,10 +1169,16 @@ class KeywordStore:
         return list(self.iter_all(key))
 
     def iter_all(self, key: str) -> Iterable[KeywordDoc]:
-        return (v for v in self.keywords if v.matcher.match_string(key))
+        index, embedded = self._ensure_index()
+        normalized = normalize(key)
+        matches = index.get(normalized, [])
+        embedded_matches = [kw for kw in embedded if kw.matcher.match_string(key)]
+        if embedded_matches:
+            return [*embedded_matches, *matches]
+        return matches
 
 
-@dataclass
+@dataclass(slots=True)
 class ModuleSpec:
     name: str
     origin: Optional[str]
@@ -1010,7 +1199,7 @@ RE_INLINE_LINK = re.compile(r"([\`])((?:\1|.)+?)\1", re.VERBOSE)
 RE_HEADERS = re.compile(r"^(#{2,9})\s+(\S.*)$", re.MULTILINE)
 
 
-@dataclass
+@dataclass(slots=True, eq=False)
 class LibraryDoc:
     name: str = ""
     doc: str = field(default="", compare=False)
@@ -1032,13 +1221,21 @@ class LibraryDoc:
     stdout: Optional[str] = field(default=None, compare=False)
     has_listener: Optional[bool] = None
     library_type: Optional[LibraryType] = None
+    _source_id: Optional[FileId] = field(default=None, init=False, compare=False, hash=False, repr=False)
+    _hash_value: int = field(default=0, init=False, compare=False, hash=False, repr=False)
+    _stable_id: str = field(default="", init=False, compare=False, hash=False, repr=False)
+
+    @property
+    def source_id(self) -> Optional[FileId]:
+        if self._source_id is None and self.source is not None:
+            self._source_id = file_id(self.source)
+        return self._source_id
 
     @property
     def inits(self) -> KeywordStore:
         return self._inits
 
-    @inits.setter
-    def inits(self, value: KeywordStore) -> None:
+    def _set_inits(self, value: KeywordStore) -> None:
         self._inits = value
         self._update_keywords(self._inits)
 
@@ -1046,8 +1243,7 @@ class LibraryDoc:
     def keywords(self) -> KeywordStore:
         return self._keywords
 
-    @keywords.setter
-    def keywords(self, value: KeywordStore) -> None:
+    def _set_keywords(self, value: KeywordStore) -> None:
         self._keywords = value
         self._update_keywords(self._keywords)
 
@@ -1057,14 +1253,31 @@ class LibraryDoc:
 
         for k in keywords:
             k.parent = self
+            k._parent_stable_id = self._stable_id
+
+    def _compute_stable_id(self) -> str:
+        h = hashlib.sha256()
+        h.update(
+            "\0".join(
+                (
+                    self.name,
+                    self.source or "",
+                    str(self.line_no),
+                    str(self.end_line_no),
+                    self.version,
+                    self.type,
+                    self.scope,
+                    self.doc_format,
+                    self.member_name or "",
+                )
+            ).encode()
+        )
+        return h.hexdigest()
 
     def __post_init__(self) -> None:
         self._update_keywords(self._inits)
         self._update_keywords(self._keywords)
-
-    @single_call
-    def __hash__(self) -> int:
-        return hash(
+        self._hash_value = hash(
             (
                 self.name,
                 self.source,
@@ -1074,8 +1287,61 @@ class LibraryDoc:
                 self.type,
                 self.scope,
                 self.doc_format,
+                self.member_name,
             )
         )
+
+    @property
+    def stable_id(self) -> str:
+        if not self._stable_id:
+            self._stable_id = self._compute_stable_id()
+        return self._stable_id
+
+    def _all_slots(self) -> Iterator[str]:
+        for cls in type(self).__mro__:
+            yield from getattr(cls, "__slots__", ())
+
+    _EXCLUDED_FROM_STATE = frozenset({"_source_id", "_hash_value", "_stable_id"})
+
+    def __getstate__(self) -> Dict[str, Any]:
+        return {slot: getattr(self, slot) for slot in self._all_slots() if slot not in self._EXCLUDED_FROM_STATE}
+
+    def __setstate__(self, state: Dict[str, Any]) -> None:
+        for slot in self._all_slots():
+            setattr(self, slot, state.get(slot, None))
+        self._hash_value = hash(
+            (
+                self.name,
+                self.source,
+                self.line_no,
+                self.end_line_no,
+                self.version,
+                self.type,
+                self.scope,
+                self.doc_format,
+                self.member_name,
+            )
+        )
+        self._update_keywords(self._inits)
+        self._update_keywords(self._keywords)
+
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, LibraryDoc):
+            return NotImplemented
+        return (
+            self.name == other.name
+            and self.source == other.source
+            and self.line_no == other.line_no
+            and self.end_line_no == other.end_line_no
+            and self.version == other.version
+            and self.type == other.type
+            and self.scope == other.scope
+            and self.doc_format == other.doc_format
+            and self.member_name == other.member_name
+        )
+
+    def __hash__(self) -> int:
+        return self._hash_value
 
     def get_types(self, type_names: Optional[List[str]]) -> List[TypeDoc]:
         def alias(s: str) -> str:
@@ -1108,7 +1374,6 @@ class LibraryDoc:
             ),
         )
 
-    @cached_method
     def to_markdown(
         self,
         add_signature: bool = True,
@@ -1258,21 +1523,20 @@ def var_repr(value: Any) -> str:
     return "${{ " + repr(value) + " }}"
 
 
-@dataclass
+@dataclass(slots=True, eq=False)
 class VariablesDoc(LibraryDoc):
     type: str = "VARIABLES"
     scope: str = "GLOBAL"
 
     variables: List[ImportedVariableDefinition] = field(default_factory=list)
 
-    @cached_method
     def to_markdown(
         self,
         add_signature: bool = True,
         only_doc: bool = True,
         header_level: int = 2,
     ) -> str:
-        result = super().to_markdown(add_signature, only_doc, header_level)
+        result = super(VariablesDoc, self).to_markdown(add_signature, only_doc, header_level)
 
         if self.variables:
             result += "\n---\n\n"
@@ -1291,14 +1555,23 @@ class VariablesDoc(LibraryDoc):
         return result
 
 
-@functools.lru_cache(maxsize=8192)
+@dataclass(slots=True, eq=False)
+class ResourceDoc(LibraryDoc):
+    type: str = "RESOURCE"
+    scope: str = "GLOBAL"
+
+    resource_imports: List[Import] = field(default_factory=list, compare=False)
+    resource_variables: List[VariableDefinition] = field(default_factory=list, compare=False)
+
+
+@functools.lru_cache(maxsize=1024)
 def is_library_by_path(path: str) -> bool:
     return path.lower().endswith((".py", "/", os.sep))
 
 
-@functools.lru_cache(maxsize=8192)
+@functools.lru_cache(maxsize=1024)
 def is_variables_by_path(path: str) -> bool:
-    if get_robot_version() >= (6, 1):
+    if RF_VERSION >= (6, 1):
         return path.lower().endswith((".py", ".yml", ".yaml", ".json", "/", os.sep))
     return path.lower().endswith((".py", ".yml", ".yaml", "/", os.sep))
 
@@ -1406,7 +1679,7 @@ class KeywordWrapper:
         except BaseException:
             return ""
 
-    if get_robot_version() < (7, 0):
+    if RF_VERSION < (7, 0):
 
         @property
         def is_error_handler(self) -> bool:
@@ -1492,7 +1765,7 @@ def error_from_exception(
     )
 
 
-@dataclass
+@dataclass(slots=True)
 class _Variable:
     name: str
     value: Iterable[str]
@@ -1574,7 +1847,7 @@ def resolve_robot_variables(
         vars = [
             _Variable(k, v) for k, v in variables.items() if v is not None and not cached_isinstance(v, NativeValue)
         ]
-        if get_robot_version() < (7, 0):
+        if RF_VERSION < (7, 0):
             result.set_from_variable_table(vars)
         else:
             result.set_from_variable_section(vars)
@@ -1599,7 +1872,7 @@ def resolve_variable(
 
     if contains_variable(name, "$@&%"):
         robot_variables = resolve_robot_variables(working_dir, base_dir, command_line_variables, variables)
-        if get_robot_version() >= (6, 1):
+        if RF_VERSION >= (6, 1):
             return VariableFinder(robot_variables).find(name.replace("\\", "\\\\"))
 
         return VariableFinder(robot_variables.store).find(name.replace("\\", "\\\\"))
@@ -1619,7 +1892,7 @@ def replace_variables_scalar(
 
     if contains_variable(scalar, "$@&%"):
         robot_variables = resolve_robot_variables(working_dir, base_dir, command_line_variables, variables)
-        if get_robot_version() >= (6, 1):
+        if RF_VERSION >= (6, 1):
             return VariableReplacer(robot_variables).replace_scalar(
                 scalar.replace("\\", "\\\\"), ignore_errors=ignore_errors
             )
@@ -1709,7 +1982,7 @@ def get_robot_library_html_doc_str(
     robot_libdoc = LibraryDocumentation(name + ("::" + args if args else ""))
     robot_libdoc.convert_docs_to_html()
     with io.StringIO() as output:
-        if get_robot_version() > (6, 0):
+        if RF_VERSION > (6, 0):
             writer = LibdocHtmlWriter(theme=theme)
         else:
             writer = LibdocHtmlWriter()
@@ -1742,7 +2015,7 @@ def _get_test_library(
     create_handlers: bool = True,
     logger: Any = LOGGER,
 ) -> Any:
-    if get_robot_version() < (7, 0):
+    if RF_VERSION < (7, 0):
         libclass = robot.running.testlibraries._get_lib_class(libcode)
         lib = libclass(libcode, name, args or [], source, logger, variables)
         if create_handlers:
@@ -1854,7 +2127,7 @@ def get_library_doc(
                     else resolve_robot_variables(working_dir, base_dir, command_line_variables, variables)
                 ),
             )
-            if get_robot_version() < (7, 0):
+            if RF_VERSION < (7, 0):
                 _ = lib.get_instance()
             else:
                 _ = lib.instance
@@ -1873,7 +2146,7 @@ def get_library_doc(
             if args:
                 try:
                     lib = _get_test_library(libcode, source, library_name, (), create_handlers=False)
-                    if get_robot_version() < (7, 0):
+                    if RF_VERSION < (7, 0):
                         _ = lib.get_instance()
                     else:
                         _ = lib.instance
@@ -1927,7 +2200,7 @@ def get_library_doc(
 
                 libdoc.doc = _get(lambda: str(lib.doc) if lib is not None else "") or ""
 
-                if get_robot_version() < (7, 0):
+                if RF_VERSION < (7, 0):
                     libdoc.has_listener = lib.has_listener
 
                     if isinstance(lib, robot.running.testlibraries._ModuleLibrary):
@@ -1952,37 +2225,39 @@ def get_library_doc(
 
                 init_wrappers = [KeywordWrapper(lib.init, source)]
                 init_keywords = [(KeywordDocBuilder().build_keyword(k), k) for k in init_wrappers]
-                libdoc.inits = KeywordStore(
-                    keywords=[
-                        KeywordDoc(
-                            name=libdoc.name,
-                            arguments=_get(lambda: [ArgumentInfo.from_robot(a) for a in kw[0].args]) or [],
-                            doc=_get(lambda: kw[0].doc) or "",
-                            tags=_get(lambda: list(kw[0].tags)) or [],
-                            source=_get(lambda: kw[0].source) or "",
-                            line_no=kw[0].lineno if kw[0].lineno is not None else -1,
-                            col_offset=-1,
-                            end_col_offset=-1,
-                            end_line_no=-1,
-                            type="library",
-                            libname=libdoc.name,
-                            libtype=libdoc.type,
-                            longname=f"{libdoc.name}.{kw[0].name}",
-                            doc_format=str(lib.doc_format) or ROBOT_DOC_FORMAT,
-                            is_initializer=True,
-                            arguments_spec=_get(
-                                lambda: ArgumentSpec.from_robot_argument_spec(
-                                    kw[1].arguments if get_robot_version() < (7, 0) else kw[1].args
-                                )
-                            ),
-                        )
-                        for kw in init_keywords
-                    ]
+                libdoc._set_inits(
+                    KeywordStore(
+                        keywords=[
+                            KeywordDoc(
+                                name=libdoc.name,
+                                arguments=_get(lambda: [ArgumentInfo.from_robot(a) for a in kw[0].args]) or [],
+                                doc=_get(lambda: kw[0].doc) or "",
+                                tags=_get(lambda: list(kw[0].tags)) or [],
+                                source=_get(lambda: kw[0].source) or "",
+                                line_no=kw[0].lineno if kw[0].lineno is not None else -1,
+                                col_offset=-1,
+                                end_col_offset=-1,
+                                end_line_no=-1,
+                                type="library",
+                                libname=libdoc.name,
+                                libtype=libdoc.type,
+                                longname=f"{libdoc.name}.{kw[0].name}",
+                                doc_format=str(lib.doc_format) or ROBOT_DOC_FORMAT,
+                                is_initializer=True,
+                                arguments_spec=_get(
+                                    lambda: ArgumentSpec.from_robot_argument_spec(
+                                        kw[1].arguments if RF_VERSION < (7, 0) else kw[1].args
+                                    )
+                                ),
+                            )
+                            for kw in init_keywords
+                        ]
+                    )
                 )
 
                 logger = _Logger()
 
-                if get_robot_version() < (7, 0):
+                if RF_VERSION < (7, 0):
                     lib.logger = logger
                     lib.create_handlers()
                 else:
@@ -2000,7 +2275,7 @@ def get_library_doc(
                             )
                         )
 
-                if get_robot_version() < (7, 0):
+                if RF_VERSION < (7, 0):
                     keyword_wrappers = [KeywordWrapper(k, source) for k in lib.handlers]
                 else:
                     keyword_wrappers = [KeywordWrapper(k, source) for k in lib.keywords]
@@ -2013,61 +2288,63 @@ def get_library_doc(
                     return result
 
                 keyword_docs = [(KeywordDocBuilder().build_keyword(k), k) for k in keyword_wrappers]
-                libdoc.keywords = KeywordStore(
-                    source=libdoc.name,
-                    source_type=libdoc.type,
-                    keywords=[
-                        KeywordDoc(
-                            name=kw[0].name,
-                            arguments=_get(lambda: [ArgumentInfo.from_robot(a) for a in kw[0].args]) or [],
-                            doc=_get(lambda: kw[0].doc) or "",
-                            tags=_get(lambda: list(kw[0].tags)) or [],
-                            source=_get(lambda: kw[0].source) or "",
-                            line_no=kw[0].lineno if kw[0].lineno is not None else -1,
-                            col_offset=-1,
-                            end_col_offset=-1,
-                            end_line_no=-1,
-                            libname=libdoc.name,
-                            libtype=libdoc.type,
-                            longname=f"{libdoc.name}.{kw[0].name}",
-                            doc_format=str(lib.doc_format) or ROBOT_DOC_FORMAT,
-                            is_error_handler=kw[1].is_error_handler,
-                            error_handler_message=kw[1].error_handler_message,
-                            is_registered_run_keyword=RUN_KW_REGISTER.is_run_keyword(libdoc.name, kw[0].name),
-                            args_to_process=get_args_to_process(libdoc.name, kw[0].name),
-                            deprecated=kw[0].deprecated,
-                            arguments_spec=_get(
-                                lambda: (
-                                    ArgumentSpec.from_robot_argument_spec(
-                                        kw[1].arguments if get_robot_version() < (7, 0) else kw[1].args
-                                    )
-                                    if not kw[1].is_error_handler
-                                    else None
-                                )
-                            ),
-                            return_type=_get(
-                                lambda: (
-                                    (
-                                        str(kw[1].args.return_type)
-                                        if kw[1].args.return_type is not None
-                                        and kw[1].args.return_type is not type(None)
+                libdoc._set_keywords(
+                    KeywordStore(
+                        source=libdoc.name,
+                        source_type=libdoc.type,
+                        keywords=[
+                            KeywordDoc(
+                                name=kw[0].name,
+                                arguments=_get(lambda: [ArgumentInfo.from_robot(a) for a in kw[0].args]) or [],
+                                doc=_get(lambda: kw[0].doc) or "",
+                                tags=_get(lambda: list(kw[0].tags)) or [],
+                                source=_get(lambda: kw[0].source) or "",
+                                line_no=kw[0].lineno if kw[0].lineno is not None else -1,
+                                col_offset=-1,
+                                end_col_offset=-1,
+                                end_line_no=-1,
+                                libname=libdoc.name,
+                                libtype=libdoc.type,
+                                longname=f"{libdoc.name}.{kw[0].name}",
+                                doc_format=str(lib.doc_format) or ROBOT_DOC_FORMAT,
+                                is_error_handler=kw[1].is_error_handler,
+                                error_handler_message=kw[1].error_handler_message,
+                                is_registered_run_keyword=RUN_KW_REGISTER.is_run_keyword(libdoc.name, kw[0].name),
+                                args_to_process=get_args_to_process(libdoc.name, kw[0].name),
+                                deprecated=kw[0].deprecated,
+                                arguments_spec=_get(
+                                    lambda: (
+                                        ArgumentSpec.from_robot_argument_spec(
+                                            kw[1].arguments if RF_VERSION < (7, 0) else kw[1].args
+                                        )
+                                        if not kw[1].is_error_handler
                                         else None
                                     )
-                                    if get_robot_version() >= (7, 0)
-                                    else None
-                                )
-                            ),
-                        )
-                        for kw in keyword_docs
-                    ],
+                                ),
+                                return_type=_get(
+                                    lambda: (
+                                        (
+                                            str(kw[1].args.return_type)
+                                            if kw[1].args.return_type is not None
+                                            and kw[1].args.return_type is not type(None)
+                                            else None
+                                        )
+                                        if RF_VERSION >= (7, 0)
+                                        else None
+                                    )
+                                ),
+                            )
+                            for kw in keyword_docs
+                        ],
+                    )
                 )
 
-                if get_robot_version() >= (6, 1):
+                if RF_VERSION >= (6, 1):
 
                     def _yield_type_info(info: TypeInfo) -> Iterable[TypeInfo]:
                         if not info.is_union:
                             yield info
-                        if info.nested:
+                        if info.nested and info.type is not Literal:
                             for nested in info.nested:
                                 yield from _yield_type_info(nested)
 
@@ -2078,7 +2355,7 @@ def get_library_doc(
                                 kw.type_docs[arg.name] = {}
                                 for type_info in _yield_type_info(arg.type):
                                     if type_info.type is not None:
-                                        if get_robot_version() < (7, 0):
+                                        if RF_VERSION < (7, 0):
                                             type_doc = RobotTypeDoc.for_type(
                                                 type_info.type,
                                                 custom_converters,
@@ -2191,17 +2468,7 @@ def find_variables(
     command_line_variables: Optional[Dict[str, Optional[Any]]] = None,
     variables: Optional[Dict[str, Optional[Any]]] = None,
 ) -> str:
-    if get_robot_version() >= (5, 0):
-        return _find_variables_internal(name, working_dir, base_dir, command_line_variables, variables)
-
-    return find_file(
-        name,
-        working_dir,
-        base_dir,
-        command_line_variables,
-        variables,
-        file_type="Variables",
-    )
+    return _find_variables_internal(name, working_dir, base_dir, command_line_variables, variables)
 
 
 def get_variables_doc(
@@ -2227,7 +2494,7 @@ def get_variables_doc(
                 source = import_name
                 importer = YamlImporter()
                 stem = Path(import_name).stem
-            elif get_robot_version() >= (6, 1) and import_name.lower().endswith(".json"):
+            elif RF_VERSION >= (6, 1) and import_name.lower().endswith(".json"):
                 source = import_name
                 importer = JsonImporter()
                 stem = Path(import_name).stem
@@ -2257,15 +2524,11 @@ def get_variables_doc(
 
                 module_importer = Importer("variable file", LOGGER)
 
-                if get_robot_version() >= (5, 0):
-                    libcode, source = module_importer.import_class_or_module(
-                        import_name,
-                        instantiate_with_args=(),
-                        return_source=True,
-                    )
-                else:
-                    source = import_name
-                    libcode = module_importer.import_class_or_module_by_path(import_name, instantiate_with_args=())
+                libcode, source = module_importer.import_class_or_module(
+                    import_name,
+                    instantiate_with_args=(),
+                    return_source=True,
+                )
 
                 importer = MyPythonImporter(libcode)
 
@@ -2282,7 +2545,7 @@ def get_variables_doc(
 
             if python_import:
                 if get_variables is not None:
-                    if get_robot_version() >= (7, 0):
+                    if RF_VERSION >= (7, 0):
                         # TODO: variables initializer for RF7
                         # from robot.running.librarykeyword import StaticKeywordCreator, LibraryInitCreator
 
@@ -2301,37 +2564,39 @@ def get_variables_doc(
 
                         vars_initializer = VarHandler(libdoc, get_variables.__name__, get_variables)
 
-                        libdoc.inits = KeywordStore(
-                            keywords=[
-                                KeywordDoc(
-                                    name=libdoc.name,
-                                    arguments=[ArgumentInfo.from_robot(a) for a in kw[0].args],
-                                    doc=kw[0].doc,
-                                    source=kw[0].source,
-                                    line_no=kw[0].lineno if kw[0].lineno is not None else -1,
-                                    col_offset=-1,
-                                    end_col_offset=-1,
-                                    end_line_no=-1,
-                                    type="variables",
-                                    libname=libdoc.name,
-                                    libtype=libdoc.type,
-                                    longname=f"{libdoc.name}.{kw[0].name}",
-                                    is_initializer=True,
-                                    arguments_spec=ArgumentSpec.from_robot_argument_spec(kw[1].arguments),
-                                )
-                                for kw in [
-                                    (KeywordDocBuilder().build_keyword(k), k)
-                                    for k in [
-                                        KeywordWrapper(
-                                            vars_initializer,
-                                            libdoc.source or "",
-                                        )
+                        libdoc._set_inits(
+                            KeywordStore(
+                                keywords=[
+                                    KeywordDoc(
+                                        name=libdoc.name,
+                                        arguments=[ArgumentInfo.from_robot(a) for a in kw[0].args],
+                                        doc=kw[0].doc,
+                                        source=kw[0].source,
+                                        line_no=kw[0].lineno if kw[0].lineno is not None else -1,
+                                        col_offset=-1,
+                                        end_col_offset=-1,
+                                        end_line_no=-1,
+                                        type="variables",
+                                        libname=libdoc.name,
+                                        libtype=libdoc.type,
+                                        longname=f"{libdoc.name}.{kw[0].name}",
+                                        is_initializer=True,
+                                        arguments_spec=ArgumentSpec.from_robot_argument_spec(kw[1].arguments),
+                                    )
+                                    for kw in [
+                                        (KeywordDocBuilder().build_keyword(k), k)
+                                        for k in [
+                                            KeywordWrapper(
+                                                vars_initializer,
+                                                libdoc.source or "",
+                                            )
+                                        ]
                                     ]
                                 ]
-                            ]
+                            )
                         )
                 else:
-                    if get_robot_version() >= (7, 0):
+                    if RF_VERSION >= (7, 0):
                         # TODO: variables initializer for RF7
 
                         pass
@@ -2353,36 +2618,38 @@ def get_variables_doc(
                                 None,
                             )
 
-                            libdoc.inits = KeywordStore(
-                                keywords=[
-                                    KeywordDoc(
-                                        name=libdoc.name,
-                                        arguments=[],
-                                        doc=kw[0].doc,
-                                        source=kw[0].source,
-                                        line_no=kw[0].lineno if kw[0].lineno is not None else -1,
-                                        col_offset=-1,
-                                        end_col_offset=-1,
-                                        end_line_no=-1,
-                                        type="variables",
-                                        libname=libdoc.name,
-                                        libtype=libdoc.type,
-                                        longname=f"{libdoc.name}.{kw[0].name}",
-                                        is_initializer=True,
-                                    )
-                                    for kw in [
-                                        (
-                                            KeywordDocBuilder().build_keyword(k),
-                                            k,
+                            libdoc._set_inits(
+                                KeywordStore(
+                                    keywords=[
+                                        KeywordDoc(
+                                            name=libdoc.name,
+                                            arguments=[],
+                                            doc=kw[0].doc,
+                                            source=kw[0].source,
+                                            line_no=kw[0].lineno if kw[0].lineno is not None else -1,
+                                            col_offset=-1,
+                                            end_col_offset=-1,
+                                            end_line_no=-1,
+                                            type="variables",
+                                            libname=libdoc.name,
+                                            libtype=libdoc.type,
+                                            longname=f"{libdoc.name}.{kw[0].name}",
+                                            is_initializer=True,
                                         )
-                                        for k in [
-                                            KeywordWrapper(
-                                                vars_initializer,
-                                                libdoc.source or "",
+                                        for kw in [
+                                            (
+                                                KeywordDocBuilder().build_keyword(k),
+                                                k,
                                             )
+                                            for k in [
+                                                KeywordWrapper(
+                                                    vars_initializer,
+                                                    libdoc.source or "",
+                                                )
+                                            ]
                                         ]
                                     ]
-                                ]
+                                )
                             )
             try:
                 # TODO: add type information of the value including dict key names and member names
@@ -2393,7 +2660,7 @@ def get_variables_doc(
                         end_line_no=1,
                         end_col_offset=0,
                         source=source or (module_spec.origin if module_spec is not None else None) or "",
-                        name=name if get_robot_version() < (7, 0) else f"${{{name}}}",
+                        name=name if RF_VERSION < (7, 0) else f"${{{name}}}",
                         name_token=None,
                         value=(
                             NativeValue(value) if value is None or isinstance(value, (int, float, bool, str)) else None
@@ -2679,9 +2946,9 @@ def complete_variables_import(
 
         name = robot_variables.replace_string(name, ignore_errors=True)
 
-    file_like = get_robot_version() < (5, 0) or is_file_like(name)
+    file_like = is_file_like(name)
 
-    if get_robot_version() >= (5, 0) and (name is None or not file_like):
+    if name is None or not file_like:
         result += list(iter_modules_from_python_path(name))
 
     if name is None or file_like:
@@ -2715,7 +2982,7 @@ def complete_variables_import(
     return list(set(result))
 
 
-if get_robot_version() < (7, 0):
+if RF_VERSION < (7, 0):
 
     class _MyUserLibrary(UserLibrary):
         current_kw: Any = None
@@ -2808,13 +3075,16 @@ def _get_argument_definitions_from_line(
 
 
 class _MyResourceBuilder(ResourceBuilder):
-    def __init__(self, resource: Any) -> None:
+    def __init__(self, resource: Any, source: str) -> None:
         super().__init__(resource)
+        self.source = source
         self.keyword_name_nodes: Dict[int, KeywordName] = {}
         self.keywords_nodes: Dict[int, Keyword] = {}
+        self.imports: List[Import] = []
+        self.variables: List[VariableDefinition] = []
 
     def visit_Section(self, node: Section) -> None:  # noqa: N802
-        if isinstance(node, (SettingSection, KeywordSection)):
+        if isinstance(node, (SettingSection, KeywordSection, VariableSection)):
             self.generic_visit(node)
 
     def visit_Keyword(self, node: Keyword) -> None:  # noqa: N802
@@ -2823,10 +3093,136 @@ class _MyResourceBuilder(ResourceBuilder):
         if node.header is not None:
             self.keyword_name_nodes[node.lineno] = node.header
 
+    def visit_LibraryImport(self, node: RobotLibraryImport) -> None:  # noqa: N802
+        name = node.get_token(Token.NAME)
+        separator = node.get_token(Token.WITH_NAME)
+        alias_token = node.get_tokens(Token.NAME)[-1] if separator else None
+        last_data_token = next(v for v in reversed(node.tokens) if v.type not in Token.NON_DATA_TOKENS)
+        if node.name:
+            self.imports.append(
+                LibraryImport(
+                    name=node.name,
+                    name_token=name if name is not None else None,
+                    args=node.args,
+                    alias=node.alias,
+                    alias_token=alias_token,
+                    line_no=node.lineno,
+                    col_offset=node.col_offset,
+                    end_line_no=(
+                        last_data_token.lineno
+                        if last_data_token is not None
+                        else node.end_lineno
+                        if node.end_lineno is not None
+                        else -1
+                    ),
+                    end_col_offset=(
+                        last_data_token.end_col_offset
+                        if last_data_token is not None
+                        else node.end_col_offset
+                        if node.end_col_offset is not None
+                        else -1
+                    ),
+                    source=self.source,
+                )
+            )
+
+    def visit_ResourceImport(self, node: RobotResourceImport) -> None:  # noqa: N802
+        name = node.get_token(Token.NAME)
+        last_data_token = next(v for v in reversed(node.tokens) if v.type not in Token.NON_DATA_TOKENS)
+        if node.name:
+            self.imports.append(
+                ResourceImport(
+                    name=node.name,
+                    name_token=name if name is not None else None,
+                    line_no=node.lineno,
+                    col_offset=node.col_offset,
+                    end_line_no=(
+                        last_data_token.lineno
+                        if last_data_token is not None
+                        else node.end_lineno
+                        if node.end_lineno is not None
+                        else -1
+                    ),
+                    end_col_offset=(
+                        last_data_token.end_col_offset
+                        if last_data_token is not None
+                        else node.end_col_offset
+                        if node.end_col_offset is not None
+                        else -1
+                    ),
+                    source=self.source,
+                )
+            )
+
+    def visit_VariablesImport(self, node: RobotVariablesImport) -> None:  # noqa: N802
+        name = node.get_token(Token.NAME)
+        last_data_token = next(v for v in reversed(node.tokens) if v.type not in Token.NON_DATA_TOKENS)
+        if node.name:
+            self.imports.append(
+                VariablesImport(
+                    name=node.name,
+                    name_token=name if name is not None else None,
+                    args=node.args,
+                    line_no=node.lineno,
+                    col_offset=node.col_offset,
+                    end_line_no=(
+                        last_data_token.lineno
+                        if last_data_token is not None
+                        else node.end_lineno
+                        if node.end_lineno is not None
+                        else -1
+                    ),
+                    end_col_offset=(
+                        last_data_token.end_col_offset
+                        if last_data_token is not None
+                        else node.end_col_offset
+                        if node.end_col_offset is not None
+                        else -1
+                    ),
+                    source=self.source,
+                )
+            )
+
+    def visit_Variable(self, node: Statement) -> None:  # noqa: N802
+        name_token = node.get_token(Token.VARIABLE)
+        if name_token is None:
+            return
+
+        if name_token.value is not None:
+            matcher = search_variable(
+                name_token.value[:-1].rstrip() if name_token.value.endswith("=") else name_token.value,
+                ignore_errors=True,
+                parse_type=True,
+            )
+            if not matcher.is_assign(allow_assign_mark=True) or matcher.name is None:
+                return
+
+            values = node.get_values(Token.ARGUMENT)
+            has_value = bool(values)
+            value = replace_curdir_in_variable_values(values, self.source)
+
+            stripped_name_token = strip_variable_token(name_token, matcher=matcher, parse_type=True)
+
+            self.variables.append(
+                VariableDefinition(
+                    name=matcher.name,
+                    name_token=stripped_name_token,
+                    line_no=stripped_name_token.lineno,
+                    col_offset=stripped_name_token.col_offset,
+                    end_line_no=stripped_name_token.lineno,
+                    end_col_offset=stripped_name_token.end_col_offset,
+                    source=self.source,
+                    has_value=has_value,
+                    resolvable=True,
+                    value=value,
+                    value_type=matcher.type,
+                )
+            )
+
 
 def _get_kw_errors(kw: Any) -> Any:
     r = kw.errors if hasattr(kw, "errors") else None
-    if get_robot_version() >= (7, 0) and kw.error:
+    if RF_VERSION >= (7, 0) and kw.error:
         if not r:
             r = []
         r.append(
@@ -2843,63 +3239,65 @@ def _get_kw_errors(kw: Any) -> Any:
 def get_model_doc(
     model: ast.AST,
     source: str,
-) -> LibraryDoc:
+) -> ResourceDoc:
     res = ResourceFile(source=source)
 
-    res_builder = _MyResourceBuilder(res)
+    res_builder = _MyResourceBuilder(res, source)
     with LOGGER.cache_only:
         res_builder.visit(model)
 
     keyword_name_nodes: Dict[int, KeywordName] = res_builder.keyword_name_nodes
     keywords_nodes: Dict[int, Keyword] = res_builder.keywords_nodes
 
-    if get_robot_version() < (7, 0):
+    if RF_VERSION < (7, 0):
         lib = _MyUserLibrary(res)
     else:
         lib = res
 
-    libdoc = LibraryDoc(
+    libdoc = ResourceDoc(
         name=lib.name or "",
         doc=lib.doc,
-        type="RESOURCE",
-        scope="GLOBAL",
         source=source,
         line_no=1,
+        resource_imports=res_builder.imports,
+        resource_variables=res_builder.variables,
     )
 
-    libdoc.keywords = KeywordStore(
-        source=libdoc.name,
-        source_type=libdoc.type,
-        keywords=[
-            KeywordDoc(
-                name=kw[0].name,
-                arguments=[ArgumentInfo.from_robot(a) for a in kw[0].args],
-                doc=kw[0].doc,
-                tags=list(kw[0].tags),
-                source=str(kw[0].source),
-                name_token=_get_keyword_name_token_from_line(keyword_name_nodes, kw[0].lineno),
-                line_no=kw[0].lineno if kw[0].lineno is not None else -1,
-                col_offset=-1,
-                end_col_offset=-1,
-                end_line_no=-1,
-                libname=libdoc.name,
-                libtype=libdoc.type,
-                longname=f"{libdoc.name}.{kw[0].name}",
-                errors=_get_kw_errors(kw[1]),
-                is_error_handler=isinstance(kw[1], UserErrorHandler),
-                error_handler_message=(
-                    str(cast(UserErrorHandler, kw[1]).error) if isinstance(kw[1], UserErrorHandler) else None
-                ),
-                arguments_spec=ArgumentSpec.from_robot_argument_spec(
-                    kw[1].arguments if get_robot_version() < (7, 0) else kw[1].args
-                ),
-                argument_definitions=_get_argument_definitions_from_line(keywords_nodes, source, kw[0].lineno),
-            )
-            for kw in [
-                (KeywordDocBuilder(resource=True).build_keyword(lw), lw)
-                for lw in (lib.handlers if get_robot_version() < (7, 0) else lib.keywords)
-            ]
-        ],
+    libdoc._set_keywords(
+        KeywordStore(
+            source=libdoc.name,
+            source_type=libdoc.type,
+            keywords=[
+                KeywordDoc(
+                    name=kw[0].name,
+                    arguments=[ArgumentInfo.from_robot(a) for a in kw[0].args],
+                    doc=kw[0].doc,
+                    tags=list(kw[0].tags),
+                    source=str(kw[0].source),
+                    name_token=_get_keyword_name_token_from_line(keyword_name_nodes, kw[0].lineno),
+                    line_no=kw[0].lineno if kw[0].lineno is not None else -1,
+                    col_offset=-1,
+                    end_col_offset=-1,
+                    end_line_no=-1,
+                    libname=libdoc.name,
+                    libtype=libdoc.type,
+                    longname=f"{libdoc.name}.{kw[0].name}",
+                    errors=_get_kw_errors(kw[1]),
+                    is_error_handler=isinstance(kw[1], UserErrorHandler),
+                    error_handler_message=(
+                        str(cast(UserErrorHandler, kw[1]).error) if isinstance(kw[1], UserErrorHandler) else None
+                    ),
+                    arguments_spec=ArgumentSpec.from_robot_argument_spec(
+                        kw[1].arguments if RF_VERSION < (7, 0) else kw[1].args
+                    ),
+                    argument_definitions=_get_argument_definitions_from_line(keywords_nodes, source, kw[0].lineno),
+                )
+                for kw in [
+                    (KeywordDocBuilder(resource=True).build_keyword(lw), lw)
+                    for lw in (lib.handlers if RF_VERSION < (7, 0) else lib.keywords)
+                ]
+            ],
+        )
     )
 
     return libdoc

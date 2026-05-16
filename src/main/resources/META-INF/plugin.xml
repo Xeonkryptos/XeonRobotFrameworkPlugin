@@ -3,6 +3,7 @@
     <!--suppress PluginXmlValidity -->
     <name>Xeon RobotFramework Support</name>
     <vendor email="info@xeonkryptos.dev" url="https://github.com/Xeonkryptos/XeonRobotFrameworkPlugin">Xeonkryptos</vendor>
+    <resource-bundle>messages.RobotBundle</resource-bundle>
 
     <depends>com.intellij.modules.platform</depends>
     <depends>com.intellij.modules.xdebugger</depends>
@@ -10,12 +11,18 @@
     <depends>com.intellij.modules.json</depends>
     <depends>org.jetbrains.plugins.yaml</depends>
     <depends>PythonCore</depends>
+    <depends>com.intellij.modules.ultimate</depends>
 
     <depends optional="true" config-file="dev.xeonkryptos.xeonrobotframeworkplugin-withIntelliLangBundled.xml">org.intellij.intelliLang</depends>
     <!--suppress PluginXmlValidity -->
     <depends optional="true" config-file="dev.xeonkryptos.xeonrobotframeworkplugin-withIntelliLangModule.xml">intellij.platform.langInjection</depends>
 
-    <resource-bundle>messages.RobotBundle</resource-bundle>
+    <incompatible-with>robocorp.lsp.intellij</incompatible-with>
+    <incompatible-with>com.github.jnhyperion.hyperrobotframeworkplugin</incompatible-with>
+    <incompatible-with>com.millennialmedia.intellibot</incompatible-with>
+    <incompatible-with>com.github.nghiatm.robotframeworkplugin</incompatible-with>
+    <incompatible-with>net.modulo3.robot</incompatible-with>
+    <incompatible-with>dev.robotcode.robotcode4ij</incompatible-with>
 
     <extensions defaultExtensionNs="com.intellij">
         <projectConfigurable groupId="language" instance="dev.xeonkryptos.xeonrobotframeworkplugin.config.RobotConfiguration" key="options.entrypoint"
@@ -62,6 +69,8 @@
         <codeStyleSettingsProvider implementation="dev.xeonkryptos.xeonrobotframeworkplugin.formatter.RobotCodeStyleSettingsProvider"/>
         <langCodeStyleSettingsProvider implementation="dev.xeonkryptos.xeonrobotframeworkplugin.formatter.RobotLanguageCodeStyleSettingsProvider"/>
         <lang.whiteSpaceFormattingStrategy language="Robot" implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.formatter.RobotWhitespaceFormattingStrategy"/>
+
+        <platform.lsp.serverSupportProvider implementation="dev.xeonkryptos.xeonrobotframeworkplugin.lsp.RobotLspServerSupportProvider"/>
 
         <lang.parserDefinition language="Robot" implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotParserDefinition"/>
         <lang.braceMatcher language="Robot" implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.misc.RobotPairedBraceMatcher"/>
@@ -224,6 +233,8 @@
         <renameHandler implementation="dev.xeonkryptos.xeonrobotframeworkplugin.rename.RobotMemberInplaceRenameHandler"/>
 
         <codeFoldingOptionsProvider instance="dev.xeonkryptos.xeonrobotframeworkplugin.config.RobotCodeFoldingOptionsProvider"/>
+
+        <notificationGroup id="Robot" displayType="BALLOON" bundle="messages.RobotBundle" key="notification.group.robot"/>
 
         <intentionAction>
             <language>Robot</language>

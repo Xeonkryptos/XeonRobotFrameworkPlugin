@@ -1,0 +1,2 @@
+robotcode==2.5.1
+robotframework>=5.0.0

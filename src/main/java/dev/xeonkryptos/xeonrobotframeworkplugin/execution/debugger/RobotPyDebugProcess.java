@@ -9,7 +9,6 @@ import com.intellij.xdebugger.XSourcePosition;
 import com.intellij.xdebugger.breakpoints.XBreakpointHandler;
 import com.intellij.xdebugger.frame.XSuspendContext;
 import com.jetbrains.python.debugger.PyDebugProcess;
-import dev.xeonkryptos.xeonrobotframeworkplugin.debugger.RobotDebugProcess;
 import dev.xeonkryptos.xeonrobotframeworkplugin.execution.RobotPythonCommandLineState;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;

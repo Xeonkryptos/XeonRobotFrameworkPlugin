@@ -98,7 +98,7 @@ class RobotConfigurationFragmentedEditor(private val runConfiguration: RobotRunC
         val inputFile = TextFieldWithBrowseButton()
         inputFile.addBrowseFolderListener(
             TextBrowseFolderListener(
-                FileChooserDescriptorFactory.createSingleFileDescriptor(), runConfiguration.project
+                FileChooserDescriptorFactory.singleFile(), runConfiguration.project
             )
         )
         val labeledComponent = LabeledComponent.create<TextFieldWithBrowseButton>(inputFile, ExecutionBundle.message("redirect.input.from"))

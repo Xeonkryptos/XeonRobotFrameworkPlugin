@@ -4,7 +4,6 @@ import com.intellij.extapi.psi.ASTWrapperPsiElement;
 import com.intellij.lang.ASTNode;
 import com.intellij.lang.ParserDefinition;
 import com.intellij.lang.PsiParser;
-import com.intellij.lexer.LayeredLexer;
 import com.intellij.lexer.Lexer;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.FileViewProvider;
@@ -12,6 +11,7 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.tree.IFileElementType;
 import com.intellij.psi.tree.TokenSet;
+import dev.xeonkryptos.xeonrobotframeworkplugin.lsp.RobotLspLexer;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotFileImpl;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotStubFileElementType;
 import org.jetbrains.annotations.NotNull;
@@ -23,9 +23,7 @@ public class RobotParserDefinition implements ParserDefinition {
     @NotNull
     @Override
     public Lexer createLexer(Project project) {
-        LayeredLexer layeredLexer = new LayeredLexer(new RobotLexerAdapter());
-        layeredLexer.registerLayer(new RobotExtendedVariableAccessLayerAdapter(), ExtendedRobotTypes.EXTENDED_VARIABLE_ACCESS_BODY);
-        return layeredLexer;
+        return new RobotLspLexer(project, null);
     }
 
     @NotNull

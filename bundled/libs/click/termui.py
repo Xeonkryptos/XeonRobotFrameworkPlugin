@@ -60,7 +60,7 @@ def hidden_prompt_func(prompt: str) -> str:
 def _build_prompt(
     text: str,
     suffix: str,
-    show_default: bool = False,
+    show_default: bool | str = False,
     default: t.Any | None = None,
     show_choices: bool = True,
     type: ParamType | None = None,
@@ -68,6 +68,8 @@ def _build_prompt(
     prompt = text
     if type is not None and show_choices and isinstance(type, Choice):
         prompt += f" ({', '.join(map(str, type.choices))})"
+    if isinstance(show_default, str):
+        default = f"({show_default})"
     if default is not None and show_default:
         prompt = f"{prompt} [{_format_default(default)}]"
     return f"{prompt}{suffix}"
@@ -88,7 +90,7 @@ def prompt(
     type: ParamType | t.Any | None = None,
     value_proc: t.Callable[[str], t.Any] | None = None,
     prompt_suffix: str = ": ",
-    show_default: bool = True,
+    show_default: bool | str = True,
     err: bool = False,
     show_choices: bool = True,
 ) -> t.Any:
@@ -112,12 +114,21 @@ def prompt(
                        convert a value.
     :param prompt_suffix: a suffix that should be added to the prompt.
     :param show_default: shows or hides the default value in the prompt.
+                         If this value is a string, it shows that string
+                         in parentheses instead of the actual value.
     :param err: if set to true the file defaults to ``stderr`` instead of
                 ``stdout``, the same as with echo.
     :param show_choices: Show or hide choices if the passed type is a Choice.
                          For example if type is a Choice of either day or week,
                          show_choices is true and text is "Group by" then the
                          prompt will be "Group by (day, week): ".
+
+    .. versionchanged:: 8.3.3
+        ``show_default`` can be a string to show a custom value instead
+        of the actual default, matching the help text behavior.
+
+    .. versionchanged:: 8.3.1
+        A space is no longer appended to the prompt.
 
     .. versionadded:: 8.0
         ``confirmation_prompt`` can be a custom string.
@@ -138,10 +149,10 @@ def prompt(
         try:
             # Write the prompt separately so that we get nice
             # coloring through colorama on Windows
-            echo(text.rstrip(" "), nl=False, err=err)
-            # Echo a space to stdout to work around an issue where
+            echo(text[:-1], nl=False, err=err)
+            # Echo the last character to stdout to work around an issue where
             # readline causes backspace to clear the whole line.
-            return f(" ")
+            return f(text[-1:])
         except (KeyboardInterrupt, EOFError):
             # getpass doesn't print a newline if the user aborts input with ^C.
             # Allegedly this behavior is inherited from getpass(3).
@@ -214,6 +225,9 @@ def confirm(
     :param err: if set to true the file defaults to ``stderr`` instead of
                 ``stdout``, the same as with echo.
 
+    .. versionchanged:: 8.3.1
+        A space is no longer appended to the prompt.
+
     .. versionchanged:: 8.0
         Repeat until input is given if ``default`` is ``None``.
 
@@ -231,10 +245,10 @@ def confirm(
         try:
             # Write the prompt separately so that we get nice
             # coloring through colorama on Windows
-            echo(prompt.rstrip(" "), nl=False, err=err)
-            # Echo a space to stdout to work around an issue where
+            echo(prompt[:-1], nl=False, err=err)
+            # Echo the last character to stdout to work around an issue where
             # readline causes backspace to clear the whole line.
-            value = visible_prompt_func(" ").lower().strip()
+            value = visible_prompt_func(prompt[-1:]).lower().strip()
         except (KeyboardInterrupt, EOFError):
             raise Abort() from None
         if value in ("y", "yes"):

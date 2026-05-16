@@ -59,7 +59,7 @@ public class RobotColorsPage implements ColorSettingsPage {
     @NotNull
     @Override
     public SyntaxHighlighter getHighlighter() {
-        return new RobotHighlighter();
+        return new RobotHighlighter(null, null);
     }
 
     @NotNull

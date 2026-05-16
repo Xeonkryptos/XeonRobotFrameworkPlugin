@@ -7,9 +7,8 @@ from collections import defaultdict
 from concurrent.futures import CancelledError
 from dataclasses import dataclass
 from io import StringIO
-from pathlib import Path
 from tokenize import TokenError, generate_tokens
-from typing import TYPE_CHECKING, Any, Callable, Dict, Iterator, List, Optional, Set, Tuple, Union, cast
+from typing import Any, Callable, Dict, Iterator, List, Optional, Set, Tuple, Union, cast
 
 from robot.errors import VariableError
 from robot.parsing.lexer.tokens import Token
@@ -45,32 +44,37 @@ from robotcode.core.lsp.types import (
 from robotcode.core.uri import Uri
 from robotcode.core.utils.logging import LoggingDescriptor
 
-from ..utils import get_robot_version
+from ..utils import RF_VERSION
 from ..utils.ast import (
     get_first_variable_token,
     is_not_variable_token,
+    iter_over_keyword_names_and_owners,
     range_from_node,
     range_from_node_or_token,
     range_from_token,
     strip_variable_token,
     tokenize_variables,
 )
+from ..utils.match import normalize
+from ..utils.stubs import Languages
 from ..utils.variables import (
+    BUILTIN_VARIABLES,
     InvalidVariableError,
     VariableMatcher,
     contains_variable,
+    replace_curdir_in_variable_values,
     search_variable,
     split_from_equals,
 )
 from ..utils.visitor import Visitor
 from .entities import (
     ArgumentDefinition,
+    BuiltInVariableDefinition,
     EmbeddedArgumentDefinition,
     EnvironmentVariableDefinition,
     GlobalVariableDefinition,
     LibraryEntry,
     LocalVariableDefinition,
-    TagDefinition,
     TestCaseDefinition,
     TestVariableDefinition,
     VariableDefinition,
@@ -78,14 +82,15 @@ from .entities import (
     VariableNotFoundDefinition,
 )
 from .errors import DIAGNOSTICS_SOURCE_NAME, Error
+from .import_resolver import ImportResolver, ResolvedImports
+from .imports_manager import ImportsManager
 from .keyword_finder import KeywordFinder
-from .library_doc import KeywordDoc, LibraryDoc, is_embedded_keyword
+from .library_doc import KeywordDoc, KeywordMatcher, LibraryDoc, ResourceDoc, is_embedded_keyword
 from .model_helper import ModelHelper
+from .scope_tree import ScopeTree, ScopeTreeBuilder
+from .variable_scope import VariableScope
 
-if TYPE_CHECKING:
-    from .namespace import Namespace
-
-if get_robot_version() < (7, 0):
+if RF_VERSION < (7, 0):
     from robot.variables.search import VariableIterator
 
 else:
@@ -93,7 +98,7 @@ else:
     from robot.variables.search import VariableMatches
 
 
-@dataclass
+@dataclass(slots=True, frozen=True)
 class AnalyzerResult:
     diagnostics: List[Diagnostic]
     keyword_references: Dict[KeywordDoc, Set[Location]]
@@ -101,9 +106,20 @@ class AnalyzerResult:
     local_variable_assignments: Dict[VariableDefinition, Set[Range]]
     namespace_references: Dict[LibraryEntry, Set[Location]]
     test_case_definitions: List[TestCaseDefinition]
-    tag_definitions: List[TagDefinition]
+    keyword_tag_references: Dict[str, Set[Location]]
+    testcase_tag_references: Dict[str, Set[Location]]
+    metadata_references: Dict[str, Set[Location]]
+    scope_tree: ScopeTree = None  # type: ignore[assignment]  # set by run()
 
-    # TODO Tag references
+
+_builtin_variables: Optional[List[VariableDefinition]] = None
+
+
+def _get_builtin_variables() -> List[VariableDefinition]:
+    global _builtin_variables
+    if _builtin_variables is None:
+        _builtin_variables = [BuiltInVariableDefinition(0, 0, 0, 0, "", n, None) for n in BUILTIN_VARIABLES]
+    return _builtin_variables
 
 
 class NamespaceAnalyzer(Visitor):
@@ -112,14 +128,16 @@ class NamespaceAnalyzer(Visitor):
     def __init__(
         self,
         model: ast.AST,
-        namespace: "Namespace",
-        finder: KeywordFinder,
+        source: str,
+        document_uri: str,
+        languages: Optional["Languages"] = None,
     ) -> None:
         super().__init__()
 
         self._model = model
-        self._namespace = namespace
-        self._finder = finder
+        self._source = source
+        self._document_uri = document_uri
+        self._languages = languages
 
         self._current_testcase_or_keyword_name: Optional[str] = None
         self._current_keyword_doc: Optional[KeywordDoc] = None
@@ -132,24 +150,75 @@ class NamespaceAnalyzer(Visitor):
         self._local_variable_assignments: Dict[VariableDefinition, Set[Range]] = defaultdict(set)
         self._namespace_references: Dict[LibraryEntry, Set[Location]] = defaultdict(set)
         self._test_case_definitions: List[TestCaseDefinition] = []
-        self._tag_definitions: List[TagDefinition] = []
+        self._keyword_tag_references: Dict[str, Set[Location]] = defaultdict(set)
+        self._testcase_tag_references: Dict[str, Set[Location]] = defaultdict(set)
+        self._metadata_references: Dict[str, Set[Location]] = defaultdict(set)
 
-        self._variables: Dict[VariableMatcher, VariableDefinition] = {
-            **{v.matcher: v for v in self._namespace.get_builtin_variables()},
-            **{v.matcher: v for v in self._namespace.get_imported_variables()},
-            **{v.matcher: v for v in self._namespace.get_command_line_variables()},
-        }
+        # Phase 1+2 results (set by resolve())
+        self._library_doc: ResourceDoc = None  # type: ignore[assignment]  # set by resolve()
+        self._variable_scope: Optional[VariableScope] = None
+        self._resolved_imports: Optional[ResolvedImports] = None
 
+        # Phase 3 state (set at start of run())
+        self._finder: KeywordFinder = None  # type: ignore[assignment]  # set in run()
+        self._namespaces: Dict[KeywordMatcher, List[LibraryEntry]] = {}
+        self._variables: Dict[VariableMatcher, VariableDefinition] = {}
         self._overridden_variables: Dict[VariableDefinition, VariableDefinition] = {}
-
         self._in_setting = False
         self._in_block_setting = False
-
-        self._suite_variables = self._variables.copy()
+        self._suite_variables: Dict[VariableMatcher, VariableDefinition] = {}
         self._block_variables: Optional[Dict[VariableMatcher, VariableDefinition]] = None
         self._end_block_handlers: Optional[List[Callable[[], None]]] = None
 
-    def run(self) -> AnalyzerResult:
+        # ScopeTree builder — accumulates block-local variable data during Phase 3
+        self._scope_builder = ScopeTreeBuilder()
+
+    def resolve(
+        self, library_doc: ResourceDoc, imports_manager: ImportsManager, sentinel: object = None
+    ) -> ResolvedImports:
+        """Phase 1+2: Build variable scope and resolve imports."""
+        self._library_doc = library_doc
+
+        # Phase 1: Build VariableScope
+        scope = VariableScope(
+            command_line=imports_manager.get_command_line_variables(),
+            own=library_doc.resource_variables,
+            builtin=_get_builtin_variables(),
+        )
+        self._variable_scope = scope
+
+        # Phase 2: Resolve imports
+        resolver = ImportResolver(imports_manager, self._source, scope, sentinel=sentinel)
+        resolved = resolver.resolve(library_doc.resource_imports)
+        self._resolved_imports = resolved
+        return resolved
+
+    @property
+    def variable_scope(self) -> Optional[VariableScope]:
+        return self._variable_scope
+
+    def run(self, finder: KeywordFinder) -> AnalyzerResult:
+        """Phase 3: Full AST analysis using resolved imports and variable scope."""
+
+        assert self._resolved_imports is not None, "resolve() must be called before run()"
+        assert self._variable_scope is not None
+
+        self._finder = finder
+
+        # Build namespaces dict from resolved imports
+        self._namespaces = defaultdict(list)
+        for v in self._resolved_imports.libraries.values():
+            self._namespaces[KeywordMatcher(v.alias or v.name or v.import_name, is_namespace=True)].append(v)
+        for v in self._resolved_imports.resources.values():
+            self._namespaces[KeywordMatcher(v.alias or v.name or v.import_name, is_namespace=True)].append(v)
+
+        # Build variables from scope layers (excluding own — added in _visit_VariableSection with override tracking)
+        self._variables = {
+            **{v.matcher: v for v in self._variable_scope.builtin_variables},
+            **{v.matcher: v for v in self._variable_scope.imported_variables},
+            **{v.matcher: v for v in self._variable_scope.command_line_variables},
+        }
+
         self._diagnostics = []
         self._keyword_references = defaultdict(set)
 
@@ -179,7 +248,10 @@ class NamespaceAnalyzer(Visitor):
             self._local_variable_assignments,
             self._namespace_references,
             self._test_case_definitions,
-            self._tag_definitions,
+            self._keyword_tag_references,
+            self._testcase_tag_references,
+            self._metadata_references,
+            self._scope_builder.build(self._variable_scope),
         )
 
     def _visit_VariableSection(self, node: VariableSection) -> None:  # noqa: N802
@@ -211,13 +283,7 @@ class NamespaceAnalyzer(Visitor):
 
             values = node.get_values(Token.ARGUMENT)
             has_value = bool(values)
-            value = tuple(
-                s.replace(
-                    "${CURDIR}",
-                    str(Path(self._namespace.source).parent).replace("\\", "\\\\"),
-                )
-                for s in values
-            )
+            value = replace_curdir_in_variable_values(values, self._source)
 
             var_def = VariableDefinition(
                 name=name,
@@ -226,7 +292,7 @@ class NamespaceAnalyzer(Visitor):
                 col_offset=stripped_name_token.col_offset,
                 end_line_no=stripped_name_token.lineno,
                 end_col_offset=stripped_name_token.end_col_offset,
-                source=self._namespace.source,
+                source=self._source,
                 has_value=has_value,
                 resolvable=True,
                 value=value,
@@ -257,13 +323,13 @@ class NamespaceAnalyzer(Visitor):
 
             first_overidden_reference: Optional[VariableDefinition] = None
             if existing_var is not None:
-                self._variable_references[existing_var].add(Location(self._namespace.document_uri, r))
+                self._variable_references[existing_var].add(Location(self._document_uri, r))
                 if existing_var not in self._overridden_variables:
                     self._overridden_variables[existing_var] = var_def
                 else:
                     add_to_references = False
                     first_overidden_reference = self._overridden_variables[existing_var]
-                    self._variable_references[first_overidden_reference].add(Location(self._namespace.document_uri, r))
+                    self._variable_references[first_overidden_reference].add(Location(self._document_uri, r))
 
                 if add_to_references and existing_var.type in [
                     VariableDefinitionType.GLOBAL_VARIABLE,
@@ -276,7 +342,7 @@ class NamespaceAnalyzer(Visitor):
                         Error.OVERRIDDEN_BY_COMMANDLINE,
                     )
                 else:
-                    if not add_to_references or existing_var.source == self._namespace.source:
+                    if not add_to_references or existing_var.source == self._source:
                         self._append_diagnostics(
                             r,
                             f"Variable '{name}' already defined.",
@@ -343,7 +409,7 @@ class NamespaceAnalyzer(Visitor):
             if add_to_references:
                 self._variable_references[var_def] = set()
 
-    if get_robot_version() >= (7, 0):
+    if RF_VERSION >= (7, 0):
 
         def visit_Var(self, node: Var) -> None:  # noqa: N802
             self._analyze_statement_variables(node)
@@ -383,17 +449,22 @@ class NamespaceAnalyzer(Visitor):
                     col_offset=stripped_name_token.col_offset,
                     end_line_no=stripped_name_token.lineno,
                     end_col_offset=stripped_name_token.end_col_offset,
-                    source=self._namespace.source,
+                    source=self._source,
                     value_type=matcher.type,
                 )
 
                 if var.matcher not in self._variables:
                     self._variables[var.matcher] = var
                     self._variable_references[var] = set()
+                    if var_type is LocalVariableDefinition:
+                        self._scope_builder.add_variable(
+                            var,
+                            Position(line=var.line_no - 1, character=var.col_offset),
+                        )
                 else:
                     existing_var = self._variables[var.matcher]
 
-                    location = Location(self._namespace.document_uri, range_from_token(stripped_name_token))
+                    location = Location(self._document_uri, range_from_token(stripped_name_token))
                     self._variable_references[existing_var].add(location)
                     if existing_var in self._overridden_variables:
                         self._variable_references[self._overridden_variables[existing_var]].add(location)
@@ -567,9 +638,9 @@ class NamespaceAnalyzer(Visitor):
                 if suite_var is not None and suite_var.type != VariableDefinitionType.VARIABLE:
                     suite_var = None
 
-            self._variable_references[var].add(Location(self._namespace.document_uri, var_range))
+            self._variable_references[var].add(Location(self._document_uri, var_range))
             if suite_var is not None:
-                self._variable_references[suite_var].add(Location(self._namespace.document_uri, var_range))
+                self._variable_references[suite_var].add(Location(self._document_uri, var_range))
 
     def _append_diagnostics(
         self,
@@ -620,6 +691,7 @@ class NamespaceAnalyzer(Visitor):
         allow_variables: bool = False,
         ignore_errors_if_contains_variables: bool = False,
         unescape_keyword: bool = True,
+        is_template: bool = False,
     ) -> Optional[KeywordDoc]:
         result: Optional[KeywordDoc] = None
 
@@ -636,15 +708,31 @@ class NamespaceAnalyzer(Visitor):
             result = self._finder.find_keyword(keyword, raise_keyword_error=False)
 
             if result is not None and self._finder.result_bdd_prefix:
-                keyword_token = ModelHelper.strip_bdd_prefix(self._namespace, keyword_token)
+                bdd_len = len(self._finder.result_bdd_prefix)
+                keyword_token = Token(
+                    keyword_token.type,
+                    keyword_token.value[bdd_len:],
+                    keyword_token.lineno,
+                    keyword_token.col_offset + bdd_len,
+                    keyword_token.error,
+                )
 
             kw_range = range_from_token(keyword_token)
 
             if keyword:
-                (
-                    lib_entry,
-                    kw_namespace,
-                ) = ModelHelper.get_namespace_info_from_keyword_token(self._namespace, keyword_token)
+                for lib, kw_name in iter_over_keyword_names_and_owners(keyword_token.value):
+                    if lib is not None:
+                        lib_entries = next(
+                            (v for k, v in self._namespaces.items() if k == lib),
+                            None,
+                        )
+                        if lib_entries is not None:
+                            kw_namespace = lib
+                            lib_entry = next(
+                                (v for v in lib_entries if kw_name in v.library_doc.keywords),
+                                lib_entries[0] if lib_entries else None,
+                            )
+                            break
 
                 if lib_entry and kw_namespace:
                     r = range_from_token(keyword_token)
@@ -667,11 +755,11 @@ class NamespaceAnalyzer(Visitor):
                 entries = [lib_entry]
                 if self._finder.multiple_keywords_result is not None:
                     entries = next(
-                        (v for k, v in (self._namespace.get_namespaces()).items() if k == kw_namespace),
+                        (v for k, v in self._namespaces.items() if k == kw_namespace),
                         entries,
                     )
                 for entry in entries:
-                    self._namespace_references[entry].add(Location(self._namespace.document_uri, lib_range))
+                    self._namespace_references[entry].add(Location(self._document_uri, lib_range))
 
             if not ignore_errors_if_contains_variables or is_not_variable_token(keyword_token):
                 for e in self._finder.diagnostics:
@@ -685,11 +773,11 @@ class NamespaceAnalyzer(Visitor):
             if result is None:
                 if self._finder.multiple_keywords_result is not None:
                     for d in self._finder.multiple_keywords_result:
-                        self._keyword_references[d].add(Location(self._namespace.document_uri, kw_range))
+                        self._keyword_references[d].add(Location(self._document_uri, kw_range))
             else:
-                self._keyword_references[result].add(Location(self._namespace.document_uri, kw_range))
+                self._keyword_references[result].add(Location(self._document_uri, kw_range))
 
-                if result.is_embedded:
+                if result.is_embedded and not is_template:
                     self._analyze_token_variables(keyword_token)
 
                 if result.errors:
@@ -750,8 +838,8 @@ class NamespaceAnalyzer(Visitor):
                         code=Error.RESERVED_KEYWORD,
                     )
 
-                if get_robot_version() >= (6, 0) and result.is_resource_keyword and result.is_private:
-                    if self._namespace.source != result.source:
+                if result.is_resource_keyword and result.is_private:
+                    if self._source != result.source:
                         self._append_diagnostics(
                             range=kw_range,
                             message=f"Keyword '{result.longname}' is private and should only be called by"
@@ -810,7 +898,7 @@ class NamespaceAnalyzer(Visitor):
                             name_token = Token(Token.ARGUMENT, name, arg.lineno, arg.col_offset)
                             self._variable_references[arg_def].add(
                                 Location(
-                                    self._namespace.document_uri,
+                                    self._document_uri,
                                     range_from_token(name_token),
                                 )
                             )
@@ -1012,6 +1100,7 @@ class NamespaceAnalyzer(Visitor):
                 [],
                 analyze_run_keywords=False,
                 allow_variables=True,
+                is_template=True,
             )
 
         self._test_template = node
@@ -1029,6 +1118,7 @@ class NamespaceAnalyzer(Visitor):
                 [],
                 analyze_run_keywords=False,
                 allow_variables=True,
+                is_template=True,
             )
         self._template = node
 
@@ -1075,6 +1165,7 @@ class NamespaceAnalyzer(Visitor):
         old_variables = self._variables
         self._variables = self._variables.copy()
         self._end_block_handlers = []
+        self._scope_builder.push_scope(node.name or "", range_from_node(node))
         try:
             self.generic_visit(node)
 
@@ -1082,6 +1173,7 @@ class NamespaceAnalyzer(Visitor):
                 handler()
 
         finally:
+            self._scope_builder.pop_scope()
             self._end_block_handlers = None
             self._variables = old_variables
             self._current_testcase_or_keyword_name = None
@@ -1097,14 +1189,14 @@ class NamespaceAnalyzer(Visitor):
                     col_offset=name_token.col_offset,
                     end_line_no=name_token.lineno,
                     end_col_offset=name_token.end_col_offset,
-                    source=self._namespace.source,
+                    source=self._source,
                     name=name_token.value,
                 )
             )
 
     @functools.cached_property
     def _namespace_lib_doc(self) -> LibraryDoc:
-        return self._namespace.get_library_doc()
+        return self._library_doc
 
     def visit_Keyword(self, node: Keyword) -> None:  # noqa: N802
         if node.name:
@@ -1115,7 +1207,7 @@ class NamespaceAnalyzer(Visitor):
                 self._keyword_references[self._current_keyword_doc] = set()
 
             if (
-                get_robot_version() < (6, 1)
+                RF_VERSION < (6, 1)
                 and is_embedded_keyword(node.name)
                 and any(isinstance(v, Arguments) and len(v.values) > 0 for v in node.body)
             ):
@@ -1138,6 +1230,7 @@ class NamespaceAnalyzer(Visitor):
         old_variables = self._variables
         self._variables = self._variables.copy()
         self._end_block_handlers = []
+        self._scope_builder.push_scope(node.name or "", range_from_node(node))
         try:
             arguments = next((v for v in node.body if isinstance(v, Arguments)), None)
             if arguments is not None:
@@ -1150,6 +1243,7 @@ class NamespaceAnalyzer(Visitor):
                 handler()
 
         finally:
+            self._scope_builder.pop_scope()
             self._end_block_handlers = None
             self._block_variables = None
             self._variables = old_variables
@@ -1174,7 +1268,7 @@ class NamespaceAnalyzer(Visitor):
                         name = matcher.base
                         pattern = None
                         type = None
-                    elif get_robot_version() >= (7, 3):
+                    elif RF_VERSION >= (7, 3):
                         re_match = self.EMBEDDED_ARGUMENTS_MATCHER.fullmatch(matcher.base)
                         if re_match:
                             name, type, _, pattern = re_match.groups()
@@ -1195,7 +1289,7 @@ class NamespaceAnalyzer(Visitor):
                         col_offset=variable_token.col_offset,
                         end_line_no=variable_token.lineno,
                         end_col_offset=variable_token.end_col_offset,
-                        source=self._namespace.source,
+                        source=self._source,
                         keyword_doc=self._current_keyword_doc,
                         value_type=type,
                         pattern=pattern,
@@ -1203,6 +1297,10 @@ class NamespaceAnalyzer(Visitor):
 
                     self._variables[arg_def.matcher] = arg_def
                     self._variable_references[arg_def] = set()
+                    self._scope_builder.add_variable(
+                        arg_def,
+                        Position(line=variable_token.lineno - 1, character=variable_token.col_offset),
+                    )
 
     def _visit_Arguments(self, node: Statement) -> None:  # noqa: N802
         args: Dict[VariableMatcher, VariableDefinition] = {}
@@ -1223,7 +1321,7 @@ class NamespaceAnalyzer(Visitor):
                             )
                         )
 
-                    matcher = VariableMatcher(argument.value, parse_type=True, ignore_errors=True)
+                    matcher = search_variable(argument.value, "$@&%", parse_type=True, ignore_errors=True)
                     if not matcher.is_variable() or matcher.name is None:
                         continue
 
@@ -1237,7 +1335,7 @@ class NamespaceAnalyzer(Visitor):
                             col_offset=stripped_argument_token.col_offset,
                             end_line_no=stripped_argument_token.lineno,
                             end_col_offset=stripped_argument_token.end_col_offset,
-                            source=self._namespace.source,
+                            source=self._source,
                             keyword_doc=self._current_keyword_doc,
                             value_type=matcher.type,
                         )
@@ -1247,9 +1345,16 @@ class NamespaceAnalyzer(Visitor):
                         self._variables[arg_def.matcher] = arg_def
                         if arg_def not in self._variable_references:
                             self._variable_references[arg_def] = set()
+                        self._scope_builder.add_variable(
+                            arg_def,
+                            Position(
+                                line=argument_token.lineno - 1,
+                                character=argument_token.end_col_offset,
+                            ),
+                        )
                     else:
                         self._variable_references[args[matcher]].add(
-                            Location(self._namespace.document_uri, range_from_token(stripped_argument_token))
+                            Location(self._document_uri, range_from_token(stripped_argument_token))
                         )
 
             except (VariableError, InvalidVariableError):
@@ -1293,7 +1398,7 @@ class NamespaceAnalyzer(Visitor):
                                 stripped_name_token.col_offset,
                                 stripped_name_token.lineno,
                                 stripped_name_token.end_col_offset,
-                                self._namespace.source,
+                                self._source,
                                 matcher.name,
                                 stripped_name_token,
                             ),
@@ -1318,16 +1423,20 @@ class NamespaceAnalyzer(Visitor):
                         col_offset=stripped_name_token.col_offset,
                         end_line_no=stripped_name_token.lineno,
                         end_col_offset=stripped_name_token.end_col_offset,
-                        source=self._namespace.source,
+                        source=self._source,
                         value_type=matcher.type,
                     )
                     self._variables[matcher] = var_def
                     self._variable_references[var_def] = set()
                     self._local_variable_assignments[var_def].add(var_def.range)
+                    self._scope_builder.add_variable(
+                        var_def,
+                        Position(line=var_def.line_no - 1, character=var_def.col_offset),
+                    )
                 else:
                     self._variable_references[existing_var].add(
                         Location(
-                            self._namespace.document_uri,
+                            self._document_uri,
                             range_from_token(stripped_name_token),
                         )
                     )
@@ -1362,11 +1471,15 @@ class NamespaceAnalyzer(Visitor):
                         col_offset=stripped_variable_token.col_offset,
                         end_line_no=stripped_variable_token.lineno,
                         end_col_offset=stripped_variable_token.end_col_offset,
-                        source=self._namespace.source,
+                        source=self._source,
                         value_type=matcher.type,
                     )
                     self._variables[var_def.matcher] = var_def
                     self._variable_references[var_def] = set()
+                    self._scope_builder.add_variable(
+                        var_def,
+                        Position(line=var_def.line_no - 1, character=var_def.col_offset),
+                    )
                 else:
                     if existing_var.type in [
                         VariableDefinitionType.ARGUMENT,
@@ -1374,7 +1487,7 @@ class NamespaceAnalyzer(Visitor):
                     ]:
                         self._variable_references[existing_var].add(
                             Location(
-                                self._namespace.document_uri,
+                                self._document_uri,
                                 range_from_token(stripped_variable_token),
                             )
                         )
@@ -1403,21 +1516,26 @@ class NamespaceAnalyzer(Visitor):
                     )
                     is None
                 ):
-                    self._variables[matcher] = LocalVariableDefinition(
+                    var_def = LocalVariableDefinition(
                         name=variable_token.value,
                         name_token=strip_variable_token(variable_token),
                         line_no=variable_token.lineno,
                         col_offset=variable_token.col_offset,
                         end_line_no=variable_token.lineno,
                         end_col_offset=variable_token.end_col_offset,
-                        source=self._namespace.source,
+                        source=self._source,
+                    )
+                    self._variables[matcher] = var_def
+                    self._scope_builder.add_variable(
+                        var_def,
+                        Position(line=variable_token.lineno - 1, character=variable_token.col_offset),
                     )
 
             except (VariableError, InvalidVariableError):
                 pass
 
     def _format_template(self, template: str, arguments: Tuple[str, ...]) -> Tuple[str, Tuple[str, ...]]:
-        if get_robot_version() < (7, 0):
+        if RF_VERSION < (7, 0):
             variables = VariableIterator(template, identifiers="$")
             count = len(variables)
             if count == 0 or count != len(arguments):
@@ -1478,13 +1596,20 @@ class NamespaceAnalyzer(Visitor):
 
         self.generic_visit(node)
 
+    def _collect_tag_references(self, node: Statement, refs: Dict[str, Set[Location]]) -> None:
+        for token in node.get_tokens(Token.ARGUMENT):
+            if token.value:
+                refs[normalize(token.value)].add(Location(self._document_uri, range_from_token(token)))
+
     def visit_DefaultTags(self, node: Statement) -> None:  # noqa: N802
         self._analyze_statement_variables(node, DiagnosticSeverity.HINT)
+        self._collect_tag_references(node, self._testcase_tag_references)
 
     def visit_ForceTags(self, node: Statement) -> None:  # noqa: N802
         self._analyze_statement_variables(node, DiagnosticSeverity.HINT)
+        self._collect_tag_references(node, self._testcase_tag_references)
 
-        if get_robot_version() >= (6, 0):
+        if RF_VERSION >= (6, 0):
             tag = node.get_token(Token.FORCE_TAGS)
             if tag is not None and tag.value.upper() == "FORCE TAGS":
                 self._append_diagnostics(
@@ -1497,8 +1622,9 @@ class NamespaceAnalyzer(Visitor):
 
     def visit_TestTags(self, node: Statement) -> None:  # noqa: N802
         self._analyze_statement_variables(node, DiagnosticSeverity.HINT)
+        self._collect_tag_references(node, self._testcase_tag_references)
 
-        if get_robot_version() >= (6, 0):
+        if RF_VERSION >= (6, 0):
             tag = node.get_token(Token.FORCE_TAGS)
             if tag is not None and tag.value.upper() == "FORCE TAGS":
                 self._append_diagnostics(
@@ -1512,8 +1638,17 @@ class NamespaceAnalyzer(Visitor):
     def visit_Arguments(self, node: Statement) -> None:  # noqa: N802
         pass
 
+    def visit_KeywordTags(self, node: Statement) -> None:  # noqa: N802
+        self._visit_settings_statement(node, DiagnosticSeverity.HINT)
+        self._collect_tag_references(node, self._keyword_tag_references)
+
     def visit_DocumentationOrMetadata(self, node: Statement) -> None:  # noqa: N802
         self._visit_settings_statement(node, DiagnosticSeverity.HINT)
+
+        if hasattr(node, "name") and node.name:
+            name_token = node.get_token(Token.NAME)
+            if name_token is not None:
+                self._metadata_references[node.name].add(Location(self._document_uri, range_from_token(name_token)))
 
     def visit_Timeout(self, node: Statement) -> None:  # noqa: N802
         self._visit_block_settings_statement(node)
@@ -1526,8 +1661,12 @@ class NamespaceAnalyzer(Visitor):
 
     def visit_Tags(self, node: Statement) -> None:  # noqa: N802
         self._visit_settings_statement(node, DiagnosticSeverity.HINT)
+        if any(isinstance(n, Keyword) for n in self._node_stack):
+            self._collect_tag_references(node, self._keyword_tag_references)
+        else:
+            self._collect_tag_references(node, self._testcase_tag_references)
 
-        if (6, 0) < get_robot_version() < (7, 0):
+        if (6, 0) < RF_VERSION < (7, 0):
             for tag in node.get_tokens(Token.ARGUMENT):
                 if tag.value and tag.value.startswith("-"):
                     self._append_diagnostics(
@@ -1544,7 +1683,7 @@ class NamespaceAnalyzer(Visitor):
     def visit_SectionHeader(self, node: Statement) -> None:  # noqa: N802
         self._analyze_statement_variables(node)
 
-        if get_robot_version() >= (7, 0):
+        if RF_VERSION >= (7, 0):
             token = node.get_token(*Token.HEADER_TOKENS)
             if not token.error:
                 return
@@ -1564,7 +1703,7 @@ class NamespaceAnalyzer(Visitor):
                     code=Error.DEPRECATED_HEADER,
                 )
 
-    if get_robot_version() >= (7, 0):
+    if RF_VERSION >= (7, 0):
 
         def visit_ReturnSetting(self, node: Statement) -> None:  # noqa: N802
             def _handler() -> None:
@@ -1573,7 +1712,7 @@ class NamespaceAnalyzer(Visitor):
             if self._end_block_handlers is not None:
                 self._end_block_handlers.append(_handler)
 
-            if get_robot_version() >= (7, 0):
+            if RF_VERSION >= (7, 0):
                 token = node.get_token(Token.RETURN_SETTING)
                 if token is not None and token.error:
                     self._append_diagnostics(
@@ -1602,9 +1741,9 @@ class NamespaceAnalyzer(Visitor):
                 code=Error.IMPORT_REQUIRES_VALUE,
             )
 
-    def visit_VariablesImport(self, node: VariablesImport) -> None:  # noqa: N802
-        if get_robot_version() >= (6, 1):
-            self._check_import_name(node.name, node, "Variables")
+    def _visit_import_node(self, node: Statement, import_type: str) -> None:
+        if RF_VERSION >= (6, 1):
+            self._check_import_name(node.name, node, import_type)
 
         name_token = node.get_token(Token.NAME)
         if name_token is None:
@@ -1613,78 +1752,27 @@ class NamespaceAnalyzer(Visitor):
         self._analyze_token_variables(name_token)
         self._analyze_statement_variables(node)
 
-        found = False
-        entries = self._namespace.get_import_entries()
-        if entries and self._namespace.document:
+        entries = self._resolved_imports.import_entries if self._resolved_imports is not None else {}
+        if entries:
             for v in entries.values():
-                if v.import_source == self._namespace.source and v.import_range == range_from_token(name_token):
+                if v.import_source == self._source and v.import_range == range_from_token(name_token):
                     for k in self._namespace_references:
                         if type(k) is type(v) and k.library_doc.source_or_origin == v.library_doc.source_or_origin:
-                            self._namespace_references[k].add(
-                                Location(self._namespace.document.document_uri, v.import_range)
-                            )
-                            found = True
+                            self._namespace_references[k].add(Location(self._document_uri, v.import_range))
                             break
-                    if not found:
+                    else:
                         if v not in self._namespace_references:
                             self._namespace_references[v] = set()
                     break
+
+    def visit_VariablesImport(self, node: VariablesImport) -> None:  # noqa: N802
+        self._visit_import_node(node, "Variables")
 
     def visit_ResourceImport(self, node: ResourceImport) -> None:  # noqa: N802
-        if get_robot_version() >= (6, 1):
-            self._check_import_name(node.name, node, "Resource")
-
-        name_token = node.get_token(Token.NAME)
-        if name_token is None:
-            return
-
-        self._analyze_token_variables(name_token)
-        self._analyze_statement_variables(node)
-
-        found = False
-        entries = self._namespace.get_import_entries()
-        if entries and self._namespace.document:
-            for v in entries.values():
-                if v.import_source == self._namespace.source and v.import_range == range_from_token(name_token):
-                    for k in self._namespace_references:
-                        if type(k) is type(v) and k.library_doc.source_or_origin == v.library_doc.source_or_origin:
-                            self._namespace_references[k].add(
-                                Location(self._namespace.document.document_uri, v.import_range)
-                            )
-                            found = True
-                            break
-                    if not found:
-                        if v not in self._namespace_references:
-                            self._namespace_references[v] = set()
-                    break
+        self._visit_import_node(node, "Resource")
 
     def visit_LibraryImport(self, node: LibraryImport) -> None:  # noqa: N802
-        if get_robot_version() >= (6, 1):
-            self._check_import_name(node.name, node, "Library")
-
-        name_token = node.get_token(Token.NAME)
-        if name_token is None:
-            return
-
-        self._analyze_token_variables(name_token)
-        self._analyze_statement_variables(node)
-
-        found = False
-        entries = self._namespace.get_import_entries()
-        if entries and self._namespace.document:
-            for v in entries.values():
-                if v.import_source == self._namespace.source and v.import_range == range_from_token(name_token):
-                    for k in self._namespace_references:
-                        if type(k) is type(v) and k.library_doc.source_or_origin == v.library_doc.source_or_origin:
-                            self._namespace_references[k].add(
-                                Location(self._namespace.document.document_uri, v.import_range)
-                            )
-                            found = True
-                            break
-                    if not found:
-                        if v not in self._namespace_references:
-                            self._namespace_references[v] = set()
-                    break
+        self._visit_import_node(node, "Library")
 
     def visit_WhileHeader(self, node: Statement) -> None:  # noqa: N802
         self._analyze_statement_expression_variables(node)
@@ -1728,7 +1816,7 @@ class NamespaceAnalyzer(Visitor):
         )
 
         try:
-            matcher = VariableMatcher(name)
+            matcher = search_variable(name, "$@&%", ignore_errors=True)
 
             return vars.get(matcher, None)
         except (VariableError, InvalidVariableError):
@@ -1776,7 +1864,7 @@ class NamespaceAnalyzer(Visitor):
                             sub_token.col_offset,
                             sub_token.lineno,
                             sub_token.end_col_offset,
-                            self._namespace.source,
+                            self._source,
                             sub_token.value,
                             strip_variable_token(sub_token),
                         ),
@@ -1851,7 +1939,7 @@ class NamespaceAnalyzer(Visitor):
                                         sub_sub_token.col_offset,
                                         sub_sub_token.lineno,
                                         sub_sub_token.end_col_offset,
-                                        self._namespace.source,
+                                        self._source,
                                         name,
                                         sub_sub_token,
                                     ),
@@ -1864,7 +1952,7 @@ class NamespaceAnalyzer(Visitor):
                         var_token.col_offset,
                         var_token.lineno,
                         var_token.end_col_offset,
-                        self._namespace.source,
+                        self._source,
                         var_token.value,
                         var_token,
                     ),
@@ -1899,7 +1987,7 @@ class NamespaceAnalyzer(Visitor):
                                     sub_token.col_offset,
                                     sub_token.lineno,
                                     sub_token.end_col_offset,
-                                    self._namespace.source,
+                                    self._source,
                                     f"${{{tokval}}}",
                                     sub_token,
                                 ),

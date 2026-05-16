@@ -17,7 +17,6 @@ public class RobotWordScanner extends DefaultWordsScanner {
 
     public RobotWordScanner() {
         super(new RobotLexerAdapter(), IDENTIFIERS, COMMENTS, LITERALS);
-
         setMayHaveFileRefsInLiterals(true);
     }
 }
