@@ -15,6 +15,7 @@
 - Optimize prefix matching string to provide variables in code completion even in a string
 - Don't suggest variables at the beginning of a column (usually global settings)
 - Provide global setting keywords in settings section again
+- Positioning of folding marker for section headers
 
 ## 0.7.3 - 2026-05-10
 

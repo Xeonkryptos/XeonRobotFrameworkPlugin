@@ -95,7 +95,7 @@ object RobotFoldingComputationUtil {
     @JvmOverloads
     fun computeFoldingDescriptorForContainer(element: PsiElement, startElement: PsiElement, document: Document, collapsedByDefault: Boolean = false): FoldingDescriptor? {
         val identifiedFoldableTextRange = computeFoldableTextRange(element, document)
-        val foldableTextRange = TextRange.create(identifiedFoldableTextRange.startOffset + startElement.textLength, identifiedFoldableTextRange.endOffset)
+        val foldableTextRange = TextRange.create(identifiedFoldableTextRange.startOffset + startElement.textLength - 1, identifiedFoldableTextRange.endOffset)
         if (foldableTextRange.isEmpty) return null
 
         val placeholderText = computeMethodLikeFoldingPlaceholder(startElement)

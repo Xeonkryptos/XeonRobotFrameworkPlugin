@@ -39,7 +39,7 @@ public class RobotCompletionContributor extends CompletionContributor {
         extend(CompletionType.BASIC, psiElement().without(indented()).inFile(psiElement(RobotFile.class)), new SectionCompletionProvider());
         extend(CompletionType.BASIC,
                psiElement().without(indented())
-                           .andNot(or(psiComment(), psiElement(RobotTypes.VARIABLE_BODY), psiElement(RobotTypes.TEMPLATE_ARGUMENT_VALUE)))
+                           .andNot(or(psiComment(), psiElement(RobotTypes.VARIABLE_BODY)))
                            .inside(true, instanceOf(RobotSettingsSection.class))
                            .inFile(psiElement(RobotFile.class)),
                new SettingsKeywordCompletionProvider());
