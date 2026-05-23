@@ -162,4 +162,14 @@ tasks {
     test {
         useJUnitPlatform()
     }
+
+    register("printChannel") {
+        group = "help"
+        description = "Prints the plugin release channel derived from the plugin version."
+        val pluginVersion = properties("pluginVersion")
+        doLast {
+            val channel = pluginVersion.split('-').getOrElse(1) { "default" }
+            println(channel)
+        }
+    }
 }
