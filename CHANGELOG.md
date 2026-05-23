@@ -16,6 +16,7 @@
 - Don't suggest variables at the beginning of a column (usually global settings)
 - Provide global setting keywords in settings section again
 - Positioning of folding marker for section headers
+- Correctly detect end of line in template arguments even when every parameter is a variable
 
 ## 0.7.3 - 2026-05-10
 

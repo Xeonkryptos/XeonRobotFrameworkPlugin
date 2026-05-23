@@ -657,9 +657,13 @@ LineComment = {LineCommentSign} {NON_EOL}*
           return VAR;
     }
 
-    {EverythingButVariableValue}            {
-          int nextState = localTemplateEnabled && templateKeywordFound ? TEMPLATE_DEFINITION : KEYWORD_CALL;
-          enterNewState(nextState);
+    {EverythingButVariableValue} | {ScalarVariableStart} | {ListVariableStart} | {DictVariableStart} | {EnvVariableStart} {
+          if (localTemplateEnabled && templateKeywordFound) {
+              enterNewState(TEMPLATE_DEFINITION);
+              enterNewState(TEMPLATE_ARGUMENTS);
+          } else {
+              enterNewState(KEYWORD_CALL);
+          }
           yypushback(yylength());
           break;
    }
@@ -696,8 +700,6 @@ LineComment = {LineCommentSign} {NON_EOL}*
         break;
     }
 }
-
-<TEMPLATE_DEFINITION>  [^\s]  { yypushback(yylength()); enterNewState(TEMPLATE_ARGUMENTS); break; }
 
 <FOR_STRUCTURE>  {
     "IN" {ExtendedKeywordFinishedMarker}            { yypushback(yylength() - "IN".length()); yybegin(FOR_STRUCTURE_LOOP_START); return FOR_IN; }
