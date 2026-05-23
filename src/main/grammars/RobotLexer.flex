@@ -170,12 +170,12 @@ SectionKeywordsWords = [Kk][Ee][Yy][Ww][Oo][Rr][Dd][Ss]?
 SectionCommentsWords = [Cc][Oo][Mm]{2}[Ee][Nn][Tt][Ss]?
 
 SectionIdentifierParts = ({Space}? {Star})* {Space}?
-CommentSectionIdentifier = {Star} {SectionIdentifierParts} {SectionCommentsWords} {SectionIdentifierParts} {SpaceBasedEndMarker}? {NON_EOL}* {EOL}?
-SettingsSectionIdentifier = {Star} {SectionIdentifierParts} {SectionSettingsWords} {SectionIdentifierParts} {SpaceBasedEndMarker}? {NON_EOL}* {EOL}?
-TestcaseSectionIdentifier = {Star} {SectionIdentifierParts} {SectionTestcasesWords} {SectionIdentifierParts} {SpaceBasedEndMarker}? {NON_EOL}* {EOL}?
-TasksSectionIdentifier = {Star} {SectionIdentifierParts} {SectionTasksWords} {SectionIdentifierParts} {SpaceBasedEndMarker}? {NON_EOL}* {EOL}?
-KeywordsSectionIdentifier = {Star} {SectionIdentifierParts} {SectionKeywordsWords} {SectionIdentifierParts} {SpaceBasedEndMarker}? {NON_EOL}* {EOL}?
-VariablesSectionIdentifier = {Star} {SectionIdentifierParts} {SectionVariablesWords} {SectionIdentifierParts} {SpaceBasedEndMarker}? {NON_EOL}* {EOL}?
+CommentSectionIdentifier = {Star} {SectionIdentifierParts} {SectionCommentsWords} {SectionIdentifierParts} {SpaceBasedEndMarker}? {NON_EOL}*
+SettingsSectionIdentifier = {Star} {SectionIdentifierParts} {SectionSettingsWords} {SectionIdentifierParts} {SpaceBasedEndMarker}? {NON_EOL}*
+TestcaseSectionIdentifier = {Star} {SectionIdentifierParts} {SectionTestcasesWords} {SectionIdentifierParts} {SpaceBasedEndMarker}? {NON_EOL}*
+TasksSectionIdentifier = {Star} {SectionIdentifierParts} {SectionTasksWords} {SectionIdentifierParts} {SpaceBasedEndMarker}? {NON_EOL}*
+KeywordsSectionIdentifier = {Star} {SectionIdentifierParts} {SectionKeywordsWords} {SectionIdentifierParts} {SpaceBasedEndMarker}? {NON_EOL}*
+VariablesSectionIdentifier = {Star} {SectionIdentifierParts} {SectionVariablesWords} {SectionIdentifierParts} {SpaceBasedEndMarker}? {NON_EOL}*
 
 OpeningVariable = "{"
 ClosingVariable = "}"
@@ -325,6 +325,13 @@ LineComment = {LineCommentSign} {NON_EOL}*
     {LineComment}                                           { return COMMENT; }
     [^]                                                     { yypushback(yylength()); leaveState(); break; }
 }
+
+^ {SettingsSectionIdentifier} {EOL}   { resetInternalState(); yybegin(SETTINGS_SECTION); yypushback(1); return SETTINGS_HEADER; }
+^ {VariablesSectionIdentifier} {EOL}  { resetInternalState(); yybegin(VARIABLES_SECTION); yypushback(1); return VARIABLES_HEADER; }
+^ {KeywordsSectionIdentifier} {EOL}   { resetInternalState(); yybegin(USER_KEYWORD_NAME_DEFINITION); yypushback(1); return USER_KEYWORDS_HEADER; }
+^ {TestcaseSectionIdentifier} {EOL}   { resetInternalState(); yybegin(TEST_CASES_SECTION_NAME_DEFINITION); pushbackEverythingUpToKeywordFinishedMarker(); yypushback(1); return TEST_CASES_HEADER_NAME; }
+^ {TasksSectionIdentifier} {EOL}      { resetInternalState(); yybegin(TASKS_SECTION_NAME_DEFINITION); pushbackEverythingUpToKeywordFinishedMarker(); yypushback(1); return TASKS_HEADER_NAME; }
+^ {CommentSectionIdentifier} {EOL}    { resetInternalState(); yybegin(COMMENTS_SECTION); yypushback(1); return COMMENTS_HEADER; }
 
 ^ {SettingsSectionIdentifier}   { resetInternalState(); yybegin(SETTINGS_SECTION); return SETTINGS_HEADER; }
 ^ {VariablesSectionIdentifier}  { resetInternalState(); yybegin(VARIABLES_SECTION); return VARIABLES_HEADER; }
@@ -847,11 +854,19 @@ LineComment = {LineCommentSign} {NON_EOL}*
 }
 
 <COMMENTS_SECTION> {
-    ^ {SettingsSectionIdentifier}               { resetInternalState(); yybegin(SETTINGS_SECTION); pushBackTrailingWhitespace(); return SETTINGS_HEADER; }
-    ^ {TestcaseSectionIdentifier}               { resetInternalState(); yybegin(TESTCASE_NAME_DEFINITION); pushBackTrailingWhitespace(); return TEST_CASES_HEADER_NAME; }
-    ^ {TasksSectionIdentifier}                  { resetInternalState(); yybegin(TASK_NAME_DEFINITION); pushBackTrailingWhitespace(); return TASKS_HEADER_NAME; }
-    ^ {KeywordsSectionIdentifier}               { resetInternalState(); yybegin(USER_KEYWORD_NAME_DEFINITION); pushBackTrailingWhitespace(); return USER_KEYWORDS_HEADER; }
-    ^ {VariablesSectionIdentifier}              { resetInternalState(); yybegin(VARIABLES_SECTION); pushBackTrailingWhitespace(); return VARIABLES_HEADER; }
+    ^ {SettingsSectionIdentifier} {EOL}         { resetInternalState(); yybegin(SETTINGS_SECTION); yypushback(1); return SETTINGS_HEADER; }
+    ^ {VariablesSectionIdentifier} {EOL}        { resetInternalState(); yybegin(VARIABLES_SECTION); yypushback(1); return VARIABLES_HEADER; }
+    ^ {KeywordsSectionIdentifier} {EOL}         { resetInternalState(); yybegin(USER_KEYWORD_NAME_DEFINITION); yypushback(1); return USER_KEYWORDS_HEADER; }
+    ^ {TestcaseSectionIdentifier} {EOL}         { resetInternalState(); yybegin(TEST_CASES_SECTION_NAME_DEFINITION); pushbackEverythingUpToKeywordFinishedMarker(); yypushback(1); return TEST_CASES_HEADER_NAME; }
+    ^ {TasksSectionIdentifier} {EOL}            { resetInternalState(); yybegin(TASKS_SECTION_NAME_DEFINITION); pushbackEverythingUpToKeywordFinishedMarker(); yypushback(1); return TASKS_HEADER_NAME; }
+    ^ {CommentSectionIdentifier} {EOL}          { resetInternalState(); yybegin(COMMENTS_SECTION); yypushback(1); return COMMENTS_HEADER; }
+
+    ^ {SettingsSectionIdentifier}               { resetInternalState(); yybegin(SETTINGS_SECTION); return SETTINGS_HEADER; }
+    ^ {VariablesSectionIdentifier}              { resetInternalState(); yybegin(VARIABLES_SECTION); return VARIABLES_HEADER; }
+    ^ {KeywordsSectionIdentifier}               { resetInternalState(); yybegin(USER_KEYWORD_NAME_DEFINITION); return USER_KEYWORDS_HEADER; }
+    ^ {TestcaseSectionIdentifier}               { resetInternalState(); yybegin(TEST_CASES_SECTION_NAME_DEFINITION); pushbackEverythingUpToKeywordFinishedMarker(); return TEST_CASES_HEADER_NAME; }
+    ^ {TasksSectionIdentifier}                  { resetInternalState(); yybegin(TASKS_SECTION_NAME_DEFINITION); pushbackEverythingUpToKeywordFinishedMarker(); return TASKS_HEADER_NAME; }
+    ^ {CommentSectionIdentifier}                { resetInternalState(); yybegin(COMMENTS_SECTION); return COMMENTS_HEADER; }
 
     <YYINITIAL> {
         {WhitespaceIncludingNewline}+           { return WHITE_SPACE; }
