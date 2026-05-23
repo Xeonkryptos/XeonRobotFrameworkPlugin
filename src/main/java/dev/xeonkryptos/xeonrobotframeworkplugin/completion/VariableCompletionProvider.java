@@ -115,12 +115,14 @@ class VariableCompletionProvider extends CompletionProvider<CompletionParameters
 
         boolean variableMarkerFound = false;
         StringBuilder newPrefixBuilder = new StringBuilder();
-        for (int i = relativeCompletionTriggerOffset - 1; i >= 0; i--) {
-            char c = oldPrefix.charAt(i);
-            newPrefixBuilder.append(c);
-            if (c == '%' || c == '$' || c == '@') {
-                variableMarkerFound = true;
-                break;
+        if (oldPrefix.length() >= relativeCompletionTriggerOffset) {
+            for (int i = relativeCompletionTriggerOffset - 1; i >= 0; i--) {
+                char c = oldPrefix.charAt(i);
+                newPrefixBuilder.append(c);
+                if (c == '%' || c == '$' || c == '@') {
+                    variableMarkerFound = true;
+                    break;
+                }
             }
         }
         if (!variableMarkerFound) {
