@@ -20,10 +20,9 @@ import com.intellij.platform.lsp.api.customization.LspFormattingSupport
 import com.intellij.platform.lsp.api.customization.LspSemanticTokensSupport
 import com.jetbrains.python.sdk.pythonSdk
 import dev.xeonkryptos.xeonrobotframeworkplugin.RobotBundle
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotFeatureFileType
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotResourceFileType
+import dev.xeonkryptos.xeonrobotframeworkplugin.fileTypes.RobotFeatureFileType
+import dev.xeonkryptos.xeonrobotframeworkplugin.fileTypes.RobotResourceFileType
 import dev.xeonkryptos.xeonrobotframeworkplugin.util.BundleUtil
-import org.eclipse.lsp4j.InitializeResult
 
 class RobotLspServerSupportProvider : LspServerSupportProvider {
 
@@ -51,18 +50,7 @@ class RobotLspServerSupportProvider : LspServerSupportProvider {
         override val lspHoverSupport: Boolean = false
         override val lspSemanticTokensSupport: LspSemanticTokensSupport? = null
 
-        override val lspServerListener: LspServerListener = object : LspServerListener {
-            override fun serverInitialized(params: InitializeResult) {
-                val tokenService = RobotLspSemanticTokenService.getInstance(project)
-                val semanticTokensOptions = params.capabilities?.semanticTokensProvider
-                if (semanticTokensOptions != null) {
-                    tokenService.legend = semanticTokensOptions.legend
-                    tokenService.invalidateAllCaches()
-                    LOG.info("LSP semantic tokens legend received: types=${semanticTokensOptions.legend?.tokenTypes}, modifiers=${semanticTokensOptions.legend?.tokenModifiers}")
-                }
-                tokenService.reparseOpenFiles()
-            }
-        }
+        override val lspServerListener: LspServerListener? = null
 
         override fun isSupportedFile(file: VirtualFile) = file.fileType == RobotFeatureFileType.getInstance() || file.fileType == RobotResourceFileType.getInstance()
 

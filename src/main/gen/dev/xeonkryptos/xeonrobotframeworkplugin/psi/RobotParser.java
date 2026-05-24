@@ -41,8 +41,8 @@ public class RobotParser implements PsiParser, LightPsiParser {
       SINGLE_VARIABLE_STATEMENT),
     create_token_set_(DICT_VARIABLE, ENVIRONMENT_VARIABLE, LIST_VARIABLE, SCALAR_VARIABLE,
       VARIABLE),
-    create_token_set_(COMMENTS_SECTION, KEYWORDS_SECTION, SECTION, SETTINGS_SECTION,
-      TASKS_SECTION, TEST_CASES_SECTION, VARIABLES_SECTION),
+    create_token_set_(COMMENTS_SECTION, INVALID_SECTION, KEYWORDS_SECTION, SECTION,
+      SETTINGS_SECTION, TASKS_SECTION, TEST_CASES_SECTION, VARIABLES_SECTION),
     create_token_set_(DOCUMENTATION_STATEMENT_GLOBAL_SETTING, LIBRARY_IMPORT_GLOBAL_SETTING, METADATA_STATEMENT_GLOBAL_SETTING, RESOURCE_IMPORT_GLOBAL_SETTING,
       SETUP_TEARDOWN_STATEMENTS_GLOBAL_SETTING, SUITE_NAME_STATEMENT_GLOBAL_SETTING, TAGS_STATEMENT_GLOBAL_SETTING, TEMPLATE_STATEMENTS_GLOBAL_SETTING,
       TIMEOUT_STATEMENTS_GLOBAL_SETTING, UNKNOWN_SETTING_STATEMENTS_GLOBAL_SETTING, VARIABLES_IMPORT_GLOBAL_SETTING),
@@ -1437,6 +1437,18 @@ public class RobotParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
+  // INVALID_SECTION_HEADER INVALID_SECTION_DATA
+  public static boolean invalid_section(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "invalid_section")) return false;
+    boolean r, p;
+    Marker m = enter_section_(b, l, _NONE_, INVALID_SECTION, "<Section>");
+    r = consumeTokens(b, 1, INVALID_SECTION_HEADER, INVALID_SECTION_DATA);
+    p = r; // pin = 1
+    exit_section_(b, l, m, r, p, RobotParser::section_recover);
+    return r || p;
+  }
+
+  /* ********************************************************** */
   // keyword_call_library_name KEYWORD_LIBRARY_SEPARATOR
   public static boolean keyword_call_library(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "keyword_call_library")) return false;
@@ -2174,6 +2186,7 @@ public class RobotParser implements PsiParser, LightPsiParser {
   //     | tasks_section
   //     | keywords_section
   //     | comments_section
+  //     | invalid_section
   public static boolean section(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "section")) return false;
     boolean r;
@@ -2184,6 +2197,7 @@ public class RobotParser implements PsiParser, LightPsiParser {
     if (!r) r = tasks_section(b, l + 1);
     if (!r) r = keywords_section(b, l + 1);
     if (!r) r = comments_section(b, l + 1);
+    if (!r) r = invalid_section(b, l + 1);
     exit_section_(b, l, m, r, false, null);
     return r;
   }

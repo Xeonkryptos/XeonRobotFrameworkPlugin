@@ -33,7 +33,7 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.completion.RobotLookupContext;
 import dev.xeonkryptos.xeonrobotframeworkplugin.completion.RobotLookupScope;
 import dev.xeonkryptos.xeonrobotframeworkplugin.completion.service.BuiltInImportCompletionService;
 import dev.xeonkryptos.xeonrobotframeworkplugin.icons.RobotIcons;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotResourceFileType;
+import dev.xeonkryptos.xeonrobotframeworkplugin.fileTypes.RobotResourceFileType;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotImportArgument;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotImportGlobalSettingExpression;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLibraryImportGlobalSetting;

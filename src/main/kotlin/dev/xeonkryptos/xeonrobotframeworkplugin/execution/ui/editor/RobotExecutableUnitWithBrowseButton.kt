@@ -35,7 +35,7 @@ import com.jetbrains.python.extensions.ContextAnchor
 import com.sun.java.accessibility.util.SwingEventMonitor.removeDocumentListener
 import dev.xeonkryptos.xeonrobotframeworkplugin.RobotBundle
 import dev.xeonkryptos.xeonrobotframeworkplugin.gotocontributor.RobotGotoClassContributor
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotFeatureFileType
+import dev.xeonkryptos.xeonrobotframeworkplugin.fileTypes.RobotFeatureFileType
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotQualifiedNameOwner
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTaskStatement
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTestCaseStatement

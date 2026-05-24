@@ -4,11 +4,12 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.psi;
 
 import com.intellij.psi.tree.IElementType;
+import dev.xeonkryptos.xeonrobotframeworkplugin.lexer.RobotFlexLexerBase;
 
 import static com.intellij.psi.TokenType.*;
 import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.*;
 
-public class RobotExtendedVariableAccessLayerLexer extends AbstractRobotLexer {
+public class RobotExtendedVariableAccessLayerLexer extends RobotFlexLexerBase {
 
   /** This character denotes the end of file */
   public static final int YYEOF = -1;

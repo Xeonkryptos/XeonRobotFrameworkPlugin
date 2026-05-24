@@ -1,14 +1,16 @@
-package dev.xeonkryptos.xeonrobotframeworkplugin.psi;
+package dev.xeonkryptos.xeonrobotframeworkplugin.fileTypes;
 
 import dev.xeonkryptos.xeonrobotframeworkplugin.icons.RobotIcons;
 import com.intellij.openapi.fileTypes.LanguageFileType;
 import javax.swing.Icon;
+
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotLanguage;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class RobotFeatureFileType extends LanguageFileType {
 
-   private static final RobotFeatureFileType INSTANCE = new RobotFeatureFileType();
+   public static final RobotFeatureFileType INSTANCE = new RobotFeatureFileType();
 
    private RobotFeatureFileType() {
       super(RobotLanguage.INSTANCE);
@@ -40,6 +42,6 @@ public class RobotFeatureFileType extends LanguageFileType {
 
    @NotNull
    public String getDisplayName() {
-       return this.getName();
+       return getName();
    }
 }

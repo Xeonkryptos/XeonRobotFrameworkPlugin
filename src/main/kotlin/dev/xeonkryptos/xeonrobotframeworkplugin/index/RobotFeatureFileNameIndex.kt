@@ -12,7 +12,7 @@ import com.intellij.util.indexing.hints.FileTypeSubstitutionStrategy
 import com.intellij.util.io.EnumeratorStringDescriptor
 import com.intellij.util.io.KeyDescriptor
 import com.jetbrains.python.PyNames
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotFeatureFileType
+import dev.xeonkryptos.xeonrobotframeworkplugin.fileTypes.RobotFeatureFileType
 import java.util.Collections
 
 class RobotFeatureFileNameIndex : ScalarIndexExtension<String>() {

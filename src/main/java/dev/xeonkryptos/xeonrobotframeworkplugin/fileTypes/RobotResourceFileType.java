@@ -1,7 +1,8 @@
-package dev.xeonkryptos.xeonrobotframeworkplugin.psi;
+package dev.xeonkryptos.xeonrobotframeworkplugin.fileTypes;
 
 import dev.xeonkryptos.xeonrobotframeworkplugin.icons.RobotIcons;
 import com.intellij.openapi.fileTypes.LanguageFileType;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotLanguage;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -9,7 +10,7 @@ import javax.swing.Icon;
 
 public class RobotResourceFileType extends LanguageFileType {
 
-    private static final RobotResourceFileType INSTANCE = new RobotResourceFileType();
+    public static final RobotResourceFileType INSTANCE = new RobotResourceFileType();
 
     private RobotResourceFileType() {
         super(RobotLanguage.INSTANCE);

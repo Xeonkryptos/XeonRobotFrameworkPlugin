@@ -147,6 +147,11 @@ public class RobotVisitor extends PsiElementVisitor {
     visitVariableStatement(o);
   }
 
+  public void visitInvalidSection(@NotNull RobotInvalidSection o) {
+    visitSection(o);
+    // visitNameIdentifierHolder(o);
+  }
+
   public void visitKeywordCall(@NotNull RobotKeywordCall o) {
     visitQualifiedNameOwner(o);
     // visitKeywordCallExpression(o);

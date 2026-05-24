@@ -50,7 +50,8 @@ section ::= settings_section
     | test_cases_section
     | tasks_section
     | keywords_section
-    | comments_section {
+    | comments_section
+    | invalid_section {
     methods=[getSectionName]
     implements="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotFoldable"
     mixin="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotSectionExtension"
@@ -62,6 +63,7 @@ test_cases_section ::= test_cases_header eol_marker? test_case_statement* {metho
 tasks_section ::= tasks_header eol_marker? task_statement* {methods=[nameIdentifier="tasks_header" getSectionName] implements="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotScopeOwner"}
 keywords_section ::= USER_KEYWORDS_HEADER eol_marker? user_keyword_statement* {methods=[nameIdentifier="USER_KEYWORDS_HEADER" getSectionName] implements="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotScopeOwner"}
 comments_section ::= COMMENTS_HEADER eol_marker? COMMENT* {methods=[nameIdentifier="COMMENTS_HEADER" getSectionName]}
+invalid_section ::= INVALID_SECTION_HEADER INVALID_SECTION_DATA {methods=[nameIdentifier="INVALID_SECTION_HEADER" getSectionName]}
 private section_recover ::= !(SETTINGS_HEADER | VARIABLES_HEADER | test_cases_header | tasks_header | USER_KEYWORDS_HEADER | COMMENTS_HEADER)
 
 test_cases_header ::= TEST_CASES_HEADER_NAME DATA_DRIVEN_COLUMN_NAME*

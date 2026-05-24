@@ -2,7 +2,7 @@ package dev.xeonkryptos.xeonrobotframeworkplugin.usage;
 
 import com.intellij.lang.cacheBuilder.DefaultWordsScanner;
 import com.intellij.psi.tree.TokenSet;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotLexerAdapter;
+import dev.xeonkryptos.xeonrobotframeworkplugin.lexer.RobotLexerAdapter;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes;
 
 public class RobotWordScanner extends DefaultWordsScanner {

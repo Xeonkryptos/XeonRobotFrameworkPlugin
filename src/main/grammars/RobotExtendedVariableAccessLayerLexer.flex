@@ -19,7 +19,6 @@ import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.*;
 %function advance
 %type IElementType
 %unicode
-%caseless
 
 Space = " "
 Tab = \t

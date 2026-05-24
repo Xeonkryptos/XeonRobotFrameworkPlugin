@@ -45,6 +45,7 @@ public interface RobotTypes {
   IElementType IMPORT_ARGUMENT = RobotImportArgumentStubElement.create("IMPORT_ARGUMENT");
   IElementType IMPORT_SETTINGS = new RobotElementType("IMPORT_SETTINGS");
   IElementType INLINE_VARIABLE_STATEMENT = new RobotElementType("INLINE_VARIABLE_STATEMENT");
+  IElementType INVALID_SECTION = new RobotElementType("INVALID_SECTION");
   IElementType KEYWORDS_SECTION = new RobotElementType("KEYWORDS_SECTION");
   IElementType KEYWORD_CALL = RobotKeywordCallStubElement.create("KEYWORD_CALL");
   IElementType KEYWORD_CALL_LIBRARY = new RobotElementType("KEYWORD_CALL_LIBRARY");
@@ -139,6 +140,8 @@ public interface RobotTypes {
   IElementType GIVEN = new RobotTokenType("GIVEN");
   IElementType GROUP = new RobotTokenType("GROUP");
   IElementType IF = new RobotTokenType("IF");
+  IElementType INVALID_SECTION_DATA = new RobotTokenType("INVALID_SECTION_DATA");
+  IElementType INVALID_SECTION_HEADER = new RobotTokenType("INVALID_SECTION_HEADER");
   IElementType KEYWORD_LIBRARY_NAME = new RobotTokenType("KEYWORD_LIBRARY_NAME");
   IElementType KEYWORD_LIBRARY_SEPARATOR = new RobotTokenType("KEYWORD_LIBRARY_SEPARATOR");
   IElementType KEYWORD_NAME = new RobotTokenType("KEYWORD_NAME");
@@ -274,6 +277,9 @@ public interface RobotTypes {
       }
       else if (type == INLINE_VARIABLE_STATEMENT) {
         return new RobotInlineVariableStatementImpl(node);
+      }
+      else if (type == INVALID_SECTION) {
+        return new RobotInvalidSectionImpl(node);
       }
       else if (type == KEYWORDS_SECTION) {
         return new RobotKeywordsSectionImpl(node);
