@@ -6,69 +6,102 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.lexer.RobotLexingConstants.NON_B
 import dev.xeonkryptos.xeonrobotframeworkplugin.lexer.RobotLexingConstants.SECTION_MARKER
 import dev.xeonkryptos.xeonrobotframeworkplugin.lexer.RobotLexingConstants.SIMPLE_SPACE_CHARACTER
 import dev.xeonkryptos.xeonrobotframeworkplugin.lexer.RobotLexingConstants.TAB_CHARACTER
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotLexer.INTERMEDIATE_TEMPLATE_CONFIGURATION
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotLexer.LITERAL_CONSTANT_ONLY
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotLexer.SETTING_TEMPLATE_START
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotLexer.TEMPLATE_ARGUMENTS
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotLexer.TEMPLATE_DEFINITION
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTemplateKeywordLexer
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.LOCAL_SETTING_START
 
 enum class RobotSectionType {
     SETTINGS, VARIABLES, TEST_CASES, TASKS, KEYWORDS, COMMENTS, INVALID
 }
 
+enum class RobotGlobalSettingType {
+    SIMPLE_VALUE_SETTING, CONFIGURABLE_SETTING, KEYWORD_CALL_SETTING
+}
+
+enum class RobotLocalSettingType {
+    SIMPLE_VALUE_SETTING, KEYWORD_CALL_SETTING, PARAMETER_DEFINITION_SETTING
+}
+
 abstract class RobotMultiLingualFlexLexerBase @JvmOverloads constructor(protected val project: Project? = null) : RobotFlexLexerBase() {
 
     private val invalidSectionHandler = RobotMultiLingualStateHandler(RobotSectionType.INVALID, SimpleSectionStateSwitcher(RobotTypes.INVALID_SECTION_HEADER)::switchState)
-    private val defaultLanguageSectionNames: Map<String, RobotMultiLingualStateHandler<RobotSectionType>> =
-        mapOf("setting" to RobotMultiLingualStateHandler(RobotSectionType.SETTINGS, SimpleSectionStateSwitcher(RobotTypes.SETTINGS_HEADER)::switchState),
-            "settings" to RobotMultiLingualStateHandler(RobotSectionType.SETTINGS, SimpleSectionStateSwitcher(RobotTypes.SETTINGS_HEADER)::switchState),
-            "variable" to RobotMultiLingualStateHandler(RobotSectionType.VARIABLES, SimpleSectionStateSwitcher(RobotTypes.VARIABLES_HEADER)::switchState),
-            "variables" to RobotMultiLingualStateHandler(RobotSectionType.VARIABLES, SimpleSectionStateSwitcher(RobotTypes.VARIABLES_HEADER)::switchState),
-            "test case" to RobotMultiLingualStateHandler(RobotSectionType.TEST_CASES) { targetState ->
-                resetInternalState()
-                yybegin(targetState)
-                pushbackEverythingUpToKeywordFinishedMarker()
-                RobotTypes.TEST_CASES_HEADER_NAME
-            },
-            "test cases" to RobotMultiLingualStateHandler(RobotSectionType.TEST_CASES) { targetState ->
-                resetInternalState()
-                yybegin(targetState)
-                pushbackEverythingUpToKeywordFinishedMarker()
-                RobotTypes.TEST_CASES_HEADER_NAME
-            },
-            "task" to RobotMultiLingualStateHandler(RobotSectionType.TASKS) { targetState ->
-                resetInternalState()
-                yybegin(targetState)
-                pushbackEverythingUpToKeywordFinishedMarker()
-                RobotTypes.TASKS_HEADER_NAME
-            },
-            "tasks" to RobotMultiLingualStateHandler(RobotSectionType.TASKS) { targetState ->
-                resetInternalState()
-                yybegin(targetState)
-                pushbackEverythingUpToKeywordFinishedMarker()
-                RobotTypes.TASKS_HEADER_NAME
-            },
-            "keyword" to RobotMultiLingualStateHandler(RobotSectionType.KEYWORDS, SimpleSectionStateSwitcher(RobotTypes.USER_KEYWORDS_HEADER)::switchState),
-            "keywords" to RobotMultiLingualStateHandler(RobotSectionType.KEYWORDS, SimpleSectionStateSwitcher(RobotTypes.USER_KEYWORDS_HEADER)::switchState),
-            "comment" to RobotMultiLingualStateHandler(RobotSectionType.COMMENTS, SimpleSectionStateSwitcher(RobotTypes.COMMENTS_HEADER)::switchState),
-            "comments" to RobotMultiLingualStateHandler(RobotSectionType.COMMENTS, SimpleSectionStateSwitcher(RobotTypes.COMMENTS_HEADER)::switchState))
+    private val invalidGlobalSettingHandler =
+        RobotMultiLingualStateHandler(RobotGlobalSettingType.SIMPLE_VALUE_SETTING, SimpleGlobalSettingStateSwitcher(RobotTypes.UNKNOWN_SETTING_KEYWORD)::switchState)
+    private val invalidLocalSettingHandler = RobotMultiLingualStateHandler(RobotLocalSettingType.SIMPLE_VALUE_SETTING, SimpleLocalSettingStateSwitcher()::switchState)
+    private val intermediateTemplateLocalSettingHandler = RobotMultiLingualStateHandler(RobotLocalSettingType.SIMPLE_VALUE_SETTING, LocalTemplateSettingStateSwitcher()::switchState)
+
+    private val defaultLanguageSectionNames = mapOf("setting" to RobotMultiLingualStateHandler(RobotSectionType.SETTINGS, SimpleSectionStateSwitcher(RobotTypes.SETTINGS_HEADER)::switchState),
+        "settings" to RobotMultiLingualStateHandler(RobotSectionType.SETTINGS, SimpleSectionStateSwitcher(RobotTypes.SETTINGS_HEADER)::switchState),
+        "variable" to RobotMultiLingualStateHandler(RobotSectionType.VARIABLES, SimpleSectionStateSwitcher(RobotTypes.VARIABLES_HEADER)::switchState),
+        "variables" to RobotMultiLingualStateHandler(RobotSectionType.VARIABLES, SimpleSectionStateSwitcher(RobotTypes.VARIABLES_HEADER)::switchState),
+        "test case" to RobotMultiLingualStateHandler(RobotSectionType.TEST_CASES) { targetState ->
+            resetInternalState()
+            yybegin(targetState)
+            pushbackEverythingUpToKeywordFinishedMarker()
+            RobotTypes.TEST_CASES_HEADER_NAME
+        },
+        "test cases" to RobotMultiLingualStateHandler(RobotSectionType.TEST_CASES) { targetState ->
+            resetInternalState()
+            yybegin(targetState)
+            pushbackEverythingUpToKeywordFinishedMarker()
+            RobotTypes.TEST_CASES_HEADER_NAME
+        },
+        "task" to RobotMultiLingualStateHandler(RobotSectionType.TASKS) { targetState ->
+            resetInternalState()
+            yybegin(targetState)
+            pushbackEverythingUpToKeywordFinishedMarker()
+            RobotTypes.TASKS_HEADER_NAME
+        },
+        "tasks" to RobotMultiLingualStateHandler(RobotSectionType.TASKS) { targetState ->
+            resetInternalState()
+            yybegin(targetState)
+            pushbackEverythingUpToKeywordFinishedMarker()
+            RobotTypes.TASKS_HEADER_NAME
+        },
+        "keyword" to RobotMultiLingualStateHandler(RobotSectionType.KEYWORDS, SimpleSectionStateSwitcher(RobotTypes.USER_KEYWORDS_HEADER)::switchState),
+        "keywords" to RobotMultiLingualStateHandler(RobotSectionType.KEYWORDS, SimpleSectionStateSwitcher(RobotTypes.USER_KEYWORDS_HEADER)::switchState),
+        "comment" to RobotMultiLingualStateHandler(RobotSectionType.COMMENTS, SimpleSectionStateSwitcher(RobotTypes.COMMENTS_HEADER)::switchState),
+        "comments" to RobotMultiLingualStateHandler(RobotSectionType.COMMENTS, SimpleSectionStateSwitcher(RobotTypes.COMMENTS_HEADER)::switchState))
 
     private val defaultLanguageGlobalSettingNames = mapOf(
-        "library" to RobotTypes.LIBRARY_IMPORT_GLOBAL_SETTING,
-        "resource" to RobotTypes.RESOURCE_IMPORT_GLOBAL_SETTING,
-        "variables" to RobotTypes.VARIABLES_IMPORT_GLOBAL_SETTING,
-        "name" to RobotTypes.SUITE_NAME_STATEMENT_GLOBAL_SETTING,
-        "documentation" to RobotTypes.DOCUMENTATION_STATEMENT_GLOBAL_SETTING,
-        "suite setup" to RobotTypes.SETUP_TEARDOWN_STATEMENTS_GLOBAL_SETTING,
-        "suite teardown" to RobotTypes.SETUP_TEARDOWN_STATEMENTS_GLOBAL_SETTING,
-        "metadata" to RobotTypes.METADATA_STATEMENT_GLOBAL_SETTING,
-        "test tags" to RobotTypes.TAGS_STATEMENT_GLOBAL_SETTING,
-        "test setup" to RobotTypes.SETUP_TEARDOWN_STATEMENTS_GLOBAL_SETTING,
-        "test teardown" to RobotTypes.SETUP_TEARDOWN_STATEMENTS_GLOBAL_SETTING,
-        "test timeout" to RobotTypes.TIMEOUT_STATEMENTS_GLOBAL_SETTING,
-        "task setup" to RobotTypes.SETUP_TEARDOWN_STATEMENTS_GLOBAL_SETTING,
-        "task teardown" to RobotTypes.SETUP_TEARDOWN_STATEMENTS_GLOBAL_SETTING,
-        "task tags" to RobotTypes.TAGS_STATEMENT_GLOBAL_SETTING,
-        "task timeout" to RobotTypes.TIMEOUT_STATEMENTS_GLOBAL_SETTING,
-        "test template" to RobotTypes.TEMPLATE_STATEMENTS_GLOBAL_SETTING,
-        "default tags" to RobotTypes.TAGS_STATEMENT_GLOBAL_SETTING,
+        "library" to RobotMultiLingualStateHandler(RobotGlobalSettingType.CONFIGURABLE_SETTING, SimpleGlobalSettingStateSwitcher(RobotTypes.LIBRARY_IMPORT_KEYWORD)::switchState),
+        "resource" to RobotMultiLingualStateHandler(RobotGlobalSettingType.SIMPLE_VALUE_SETTING, SimpleGlobalSettingStateSwitcher(RobotTypes.RESOURCE_IMPORT_KEYWORD)::switchState),
+        "variables" to RobotMultiLingualStateHandler(RobotGlobalSettingType.CONFIGURABLE_SETTING, SimpleGlobalSettingStateSwitcher(RobotTypes.VARIABLES_IMPORT_KEYWORD)::switchState),
+        "name" to RobotMultiLingualStateHandler(RobotGlobalSettingType.SIMPLE_VALUE_SETTING, SimpleGlobalSettingStateSwitcher(RobotTypes.SUITE_NAME_KEYWORD)::switchState),
+        "documentation" to RobotMultiLingualStateHandler(RobotGlobalSettingType.SIMPLE_VALUE_SETTING, SimpleGlobalSettingStateSwitcher(RobotTypes.DOCUMENTATION_KEYWORD)::switchState),
+        "suite setup" to RobotMultiLingualStateHandler(RobotGlobalSettingType.KEYWORD_CALL_SETTING, SimpleGlobalSettingStateSwitcher(RobotTypes.SETUP_TEARDOWN_STATEMENT_KEYWORDS)::switchState),
+        "suite teardown" to RobotMultiLingualStateHandler(RobotGlobalSettingType.KEYWORD_CALL_SETTING, SimpleGlobalSettingStateSwitcher(RobotTypes.SETUP_TEARDOWN_STATEMENT_KEYWORDS)::switchState),
+        "metadata" to RobotMultiLingualStateHandler(RobotGlobalSettingType.CONFIGURABLE_SETTING, SimpleGlobalSettingStateSwitcher(RobotTypes.METADATA_KEYWORD)::switchState),
+        "test tags" to RobotMultiLingualStateHandler(RobotGlobalSettingType.SIMPLE_VALUE_SETTING, SimpleGlobalSettingStateSwitcher(RobotTypes.TAGS_KEYWORDS)::switchState),
+        "test setup" to RobotMultiLingualStateHandler(RobotGlobalSettingType.KEYWORD_CALL_SETTING, SimpleGlobalSettingStateSwitcher(RobotTypes.SETUP_TEARDOWN_STATEMENT_KEYWORDS)::switchState),
+        "test teardown" to RobotMultiLingualStateHandler(RobotGlobalSettingType.KEYWORD_CALL_SETTING, SimpleGlobalSettingStateSwitcher(RobotTypes.SETUP_TEARDOWN_STATEMENT_KEYWORDS)::switchState),
+        "test timeout" to RobotMultiLingualStateHandler(RobotGlobalSettingType.SIMPLE_VALUE_SETTING, SimpleGlobalSettingStateSwitcher(RobotTypes.TIMEOUT_KEYWORDS)::switchState),
+        "test template" to RobotMultiLingualStateHandler(RobotGlobalSettingType.KEYWORD_CALL_SETTING) { targetState ->
+            markTemplateParsingEnabled()
+            SimpleGlobalSettingStateSwitcher(RobotTypes.TEMPLATE_KEYWORDS).switchState(targetState)
+        },
+        "task tags" to RobotMultiLingualStateHandler(RobotGlobalSettingType.SIMPLE_VALUE_SETTING, SimpleGlobalSettingStateSwitcher(RobotTypes.TAGS_KEYWORDS)::switchState),
+        "task setup" to RobotMultiLingualStateHandler(RobotGlobalSettingType.KEYWORD_CALL_SETTING, SimpleGlobalSettingStateSwitcher(RobotTypes.SETUP_TEARDOWN_STATEMENT_KEYWORDS)::switchState),
+        "task teardown" to RobotMultiLingualStateHandler(RobotGlobalSettingType.KEYWORD_CALL_SETTING, SimpleGlobalSettingStateSwitcher(RobotTypes.SETUP_TEARDOWN_STATEMENT_KEYWORDS)::switchState),
+        "task timeout" to RobotMultiLingualStateHandler(RobotGlobalSettingType.SIMPLE_VALUE_SETTING, SimpleGlobalSettingStateSwitcher(RobotTypes.TIMEOUT_KEYWORDS)::switchState),
+        "task template" to RobotMultiLingualStateHandler(RobotGlobalSettingType.KEYWORD_CALL_SETTING) { targetState ->
+            markTemplateParsingEnabled()
+            SimpleGlobalSettingStateSwitcher(RobotTypes.TEMPLATE_KEYWORDS).switchState(targetState)
+        },
+        "keyword tags" to RobotMultiLingualStateHandler(RobotGlobalSettingType.SIMPLE_VALUE_SETTING, SimpleGlobalSettingStateSwitcher(RobotTypes.TAGS_KEYWORDS)::switchState),
+        "default tags" to RobotMultiLingualStateHandler(RobotGlobalSettingType.SIMPLE_VALUE_SETTING, SimpleGlobalSettingStateSwitcher(RobotTypes.TAGS_KEYWORDS)::switchState),
     )
+
+    private val defaultLanguageLocalSettingNames = mapOf("tags" to RobotMultiLingualStateHandler(RobotLocalSettingType.SIMPLE_VALUE_SETTING, SimpleLocalSettingStateSwitcher()::switchState),
+        "setup" to RobotMultiLingualStateHandler(RobotLocalSettingType.KEYWORD_CALL_SETTING, SimpleLocalSettingStateSwitcher()::switchState),
+        "teardown" to RobotMultiLingualStateHandler(RobotLocalSettingType.KEYWORD_CALL_SETTING, SimpleLocalSettingStateSwitcher()::switchState),
+        "timeout" to RobotMultiLingualStateHandler(RobotLocalSettingType.SIMPLE_VALUE_SETTING, SimpleLocalSettingStateSwitcher()::switchState),
+        "arguments" to RobotMultiLingualStateHandler(RobotLocalSettingType.PARAMETER_DEFINITION_SETTING, SimpleLocalSettingStateSwitcher()::switchState))
 
     protected var globalTemplateEnabled = false
     protected var localTemplateEnabled: Boolean = false
@@ -77,6 +110,9 @@ abstract class RobotMultiLingualFlexLexerBase @JvmOverloads constructor(protecte
     protected var currentIndex: Int = -1
 
     protected val previousStates: IntArray = IntArray(20)
+
+    protected var buffer: CharSequence = ""
+    protected var endPosition: Int = 0
 
     protected fun switchSection(): IElementType {
         val sectionName = computeSectionName()
@@ -89,22 +125,61 @@ abstract class RobotMultiLingualFlexLexerBase @JvmOverloads constructor(protecte
         var index = 0
         val length = yylength()
         val sectionHeaderName = StringBuilder()
-        while (index < length && (yycharat(index) == SECTION_MARKER)) index++
+        while (index < length && yycharat(index) == SECTION_MARKER) index++
         while (index < length) {
             val c = yytext()[index]
-            if (c == SECTION_MARKER || c == TAB_CHARACTER || isNewLineCharacter(c)) break
-            if (isSuperSpace(index)) break
+            if (c == SECTION_MARKER || c == TAB_CHARACTER || isNewLineCharacter(c) || isSuperSpace(index)) break
             sectionHeaderName.append(c.lowercase())
             index++
         }
         return sectionHeaderName.trim()
     }
 
+    protected fun switchGlobalSetting(): IElementType {
+        val settingName = computeGlobalSettingName()
+        val globalSetting = defaultLanguageGlobalSettingNames.getOrDefault(settingName, invalidGlobalSettingHandler)
+        val nextStateId = getGlobalSettingStateId(globalSetting.sourceType)
+        return globalSetting.switchState(nextStateId)
+    }
+
+    private fun computeGlobalSettingName(): CharSequence {
+        var index = 0
+        val length = yylength()
+        val globalSettingName = StringBuilder()
+        while (index < length) {
+            val c = yytext()[index]
+            if (isSuperSpace(index) || c == TAB_CHARACTER || isNewLineCharacter(c)) break
+            globalSettingName.append(c.lowercase())
+            index++
+        }
+        return globalSettingName.trim()
+    }
+
+    protected fun switchLocalSetting(): IElementType {
+        val localSettingName = computeLocalSettingName()
+        val localSetting = defaultLanguageLocalSettingNames.getOrDefault(localSettingName, intermediateTemplateLocalSettingHandler)
+        val nextStateId = getLocalSettingStateId(localSetting.sourceType)
+        return localSetting.switchState(nextStateId)
+    }
+
+    private fun computeLocalSettingName(): CharSequence {
+        val sourceText = yytext()
+        return sourceText.substring(1, sourceText.length - 1).trim()
+    }
+
     protected abstract fun getSectionStateId(sectionType: RobotSectionType): Int
 
-    abstract fun yytext(): CharSequence
+    protected abstract fun getGlobalSettingStateId(settingType: RobotGlobalSettingType): Int
 
-    fun isNewLineAt(currentTokenIndex: Int): Boolean = isNewLineCharacter(yycharat(currentTokenIndex))
+    protected abstract fun getLocalSettingDefinitionState(): Int
+
+    protected abstract fun getLocalSettingStateId(settingType: RobotLocalSettingType): Int
+
+    protected abstract fun getNextTemplateStates(parseResult: TemplateParseResult): IntArray
+
+    protected abstract fun isTemplateSupportingState(state: Int): Boolean
+
+    abstract fun yytext(): CharSequence
 
     fun isNewLineCharacter(character: Char): Boolean = character == RobotLexingConstants.NEW_LINE || character == RobotLexingConstants.CARRIAGE_RETURN
 
@@ -203,4 +278,46 @@ abstract class RobotMultiLingualFlexLexerBase @JvmOverloads constructor(protecte
             return elementType
         }
     }
+
+    private inner class SimpleGlobalSettingStateSwitcher(private val elementType: IElementType) {
+
+        fun switchState(targetState: Int): IElementType {
+            enterNewState(targetState)
+            pushBackTrailingWhitespace()
+            return elementType
+        }
+    }
+
+    private inner class SimpleLocalSettingStateSwitcher {
+
+        fun switchState(targetState: Int): IElementType {
+            yypushback(yylength() - 1)
+            enterNewState(targetState)
+            enterNewState(getLocalSettingDefinitionState())
+            return LOCAL_SETTING_START
+        }
+    }
+
+    private inner class LocalTemplateSettingStateSwitcher {
+
+        fun switchState(targetState: Int): IElementType {
+            val localSettingName = computeLocalSettingName()
+            if (localSettingName != "template" || isTemplateSupportingState(yystate())) return invalidLocalSettingHandler.switchState(targetState)
+
+            val lexer = RobotTemplateKeywordLexer()
+            lexer.reset(buffer, tokenEnd, endPosition, 0)
+            val parseResult = lexer.advance() ?: return invalidLocalSettingHandler.switchState(targetState)
+
+            yypushback(yylength() - 1)
+            for (state in getNextTemplateStates(parseResult)) {
+                enterNewState(state)
+            }
+            markLocalTemplateParsingDisabled()
+            return LOCAL_SETTING_START
+        }
+    }
+}
+
+enum class TemplateParseResult {
+    EMPTY_RESET, NONE_RESET, KEYWORD
 }

@@ -25,7 +25,7 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotStubFileElementTyp
 class RobotParserDefinition : ParserDefinition {
 
     override fun createLexer(project: Project): Lexer {
-        val layeredLexer = LayeredLexer(RobotLexerAdapter())
+        val layeredLexer = LayeredLexer(RobotLexerAdapter(project))
         layeredLexer.registerLayer(RobotExtendedVariableAccessLayerAdapter(), ExtendedRobotTypes.EXTENDED_VARIABLE_ACCESS_BODY)
         return MergingRobotLexerAdapter(layeredLexer)
     }

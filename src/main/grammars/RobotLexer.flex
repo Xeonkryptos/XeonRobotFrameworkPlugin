@@ -2,8 +2,7 @@ package dev.xeonkryptos.xeonrobotframeworkplugin.psi;
 
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.tree.IElementType;
-import dev.xeonkryptos.xeonrobotframeworkplugin.lexer.RobotMultiLingualFlexLexerBase;
-import dev.xeonkryptos.xeonrobotframeworkplugin.lexer.RobotSectionType;
+import dev.xeonkryptos.xeonrobotframeworkplugin.lexer.*;
 import java.util.Map;
 import java.util.EnumMap;
 import org.jetbrains.annotations.NotNull;
@@ -15,6 +14,8 @@ import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.ExtendedRobotTypes.*;
 
 %{
   private final Map<RobotSectionType, Integer> sectionTypes = new EnumMap<>(RobotSectionType.class);
+  private final Map<RobotGlobalSettingType, Integer> globalSettingTypes = new EnumMap<>(RobotGlobalSettingType.class);
+  private final Map<RobotLocalSettingType, Integer> localSettingTypes = new EnumMap<>(RobotLocalSettingType.class);
 
   public RobotLexer(Project project) {
     super(project);
@@ -26,11 +27,48 @@ import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.ExtendedRobotTypes.*;
     sectionTypes.put(RobotSectionType.KEYWORDS, USER_KEYWORD_NAME_DEFINITION);
     sectionTypes.put(RobotSectionType.COMMENTS, COMMENTS_SECTION);
     sectionTypes.put(RobotSectionType.INVALID, INVALID_SECTION);
+
+    globalSettingTypes.put(RobotGlobalSettingType.SIMPLE_VALUE_SETTING, SETTING_VALUES);
+    globalSettingTypes.put(RobotGlobalSettingType.CONFIGURABLE_SETTING, SETTING);
+    globalSettingTypes.put(RobotGlobalSettingType.KEYWORD_CALL_SETTING, KEYWORD_CALL);
+
+    localSettingTypes.put(RobotLocalSettingType.SIMPLE_VALUE_SETTING, LITERAL_CONSTANT_ONLY);
+    localSettingTypes.put(RobotLocalSettingType.KEYWORD_CALL_SETTING, KEYWORD_CALL);
+    localSettingTypes.put(RobotLocalSettingType.PARAMETER_DEFINITION_SETTING, INLINE_VARIABLE_DEFINITION);
   }
 
   @Override
   protected int getSectionStateId(@NotNull RobotSectionType sectionType) {
     return sectionTypes.getOrDefault(sectionType, INVALID_SECTION);
+  }
+
+  @Override
+  protected int getGlobalSettingStateId(@NotNull RobotGlobalSettingType settingType) {
+    return globalSettingTypes.getOrDefault(settingType, SETTING_VALUES);
+  }
+
+  @Override
+  protected int getLocalSettingDefinitionState() {
+    return LOCAL_SETTING_DEFINITION;
+  }
+
+  @Override
+  protected int getLocalSettingStateId(@NotNull RobotLocalSettingType settingType) {
+    return localSettingTypes.getOrDefault(settingType, LITERAL_CONSTANT_ONLY);
+  }
+
+  @Override
+  protected boolean isTemplateSupportingState(int state) {
+      return state == TESTCASE_DEFINITION || state == TASK_DEFINITION || state == TEMPLATE_DEFINITION;
+  }
+
+  @Override
+  protected int[] getNextTemplateStates(TemplateParseResult result) {
+      return switch (result) {
+          case TemplateParseResult.EMPTY_RESET -> new int[] {LITERAL_CONSTANT_ONLY, LOCAL_SETTING_DEFINITION};
+          case TemplateParseResult.NONE_RESET -> new int[] {INTERMEDIATE_TEMPLATE_CONFIGURATION, LOCAL_SETTING_DEFINITION};
+          case TemplateParseResult.KEYWORD -> new int[] {TEMPLATE_DEFINITION, TEMPLATE_ARGUMENTS, SETTING_TEMPLATE_START, LOCAL_SETTING_DEFINITION};
+      };
   }
 
   protected void handleStateChangeOnMultiLineDetection() {
@@ -81,7 +119,6 @@ import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.ExtendedRobotTypes.*;
 %}
 
 %public
-%buffer 65536
 %class RobotLexer
 %extends RobotMultiLingualFlexLexerBase
 %function advance
@@ -119,7 +156,7 @@ MultiLine = {MultiLineStart} ({MultiLineContinuation} {NonNewlineWhitespace}*)+
 
 WithNameKeyword = "WITH NAME" | "AS"
 
-LiteralValue =           [^\s]+([ ][^\s]+)*[ ]?
+LiteralValue = [^\s]+([ ][^\s]+)*[ ]?
 
 SectionIdentifierParts = ({Space}? {Star})* {Space}?
 GenericSectionIdentifier = {Star} {SectionIdentifierParts} {LiteralValue} {SpaceBasedEndMarker}? {NON_EOL}*
@@ -132,19 +169,7 @@ ListVariableStart = "@" {OpeningVariable}
 DictVariableStart = "&" {OpeningVariable}
 EnvVariableStart = "%" {OpeningVariable}
 
-LibraryImportKeyword = [Ll][Ii][Bb][Rr][Aa][Rr][Yy]
-ResourceImportKeyword = [Rr][Ee][Ss][Oo][Uu][Rr][Cc][Ee]
-VariablesImportKeyword = [Vv][Aa][Rr][Ii][Aa][Bb][Ll][Ee][Ss]
-NameKeyword = [Nn][Aa][Mm][Ee]
-DocumentationKeyword = [Dd][Oo][Cc][Uu][Mm][Ee][Nn][Tt][Aa][Tt][Ii][Oo][Nn]
-MetadataKeyword = [Mm][Ee][Tt][Aa][Dd][Aa][Tt][Aa]
-Suite = [Ss][Uu][Ii][Tt][Ee]
 Test = [Tt][Ee][Ss][Tt]
-Task = [Tt][Aa][Ss][Kk]
-Setup = [Ss][Ee][Tt][Uu][Pp]
-Teardown = [Tt][Ee][Aa][Rr][Dd][Oo][Ww][Nn]
-Tags = [Tt][Aa][Gg][Ss]
-Template = [Tt][Ee][Mm][Pp][Ll][Aa][Tt][Ee]
 Continue = [Cc][Oo][Nn][Tt][Ii][Nn][Uu][Ee]
 On = [Oo][Nn]
 Failure = [Ff][Aa][Ii][Ll][Uu][Rr][Ee]
@@ -159,10 +184,6 @@ And = [Aa][Nn][Dd]
 Error = [Ee][Rr]{2}[Oo][Rr]
 Should = [Ss][Hh][Oo][Uu][Ll][Dd]
 None = [Nn][Oo][Nn][Ee]
-SetupTeardownKeywords = ({Suite} | {Test} | {Task}) {Space} ({Setup} | {Teardown})
-TagsKeywords = ({Test} | [Ff][Oo][Rr][Cc][Ee] | [Dd][Ee][Ff][Aa][Uu][Ll][Tt] | {Keyword}) {Space} {Tags}
-TemplateKeywords = ({Test} | {Task}) {Space} {Template}
-TimeoutKeywords = ({Test} | {Task}) {Space} {Timeout}
 GenericSettingsKeyword = [\w_-]+([ ][\w_-]+)*
 
 VariableCharNotAllowed = [^\s$@%&]
@@ -183,10 +204,6 @@ LocalSettingKeywordEndWhitespaceFree = "]"
 
 LocalSettingKeywordStart = {LocalSettingKeywordStartWhitespaceFree} {NonNewlineWhitespace}*
 LocalSettingKeywordEnd = {NonNewlineWhitespace}* {LocalSettingKeywordEndWhitespaceFree}
-LocalTemplateKeyword = {LocalSettingKeywordStart} {Template} {LocalSettingKeywordEnd}
-LocalSetupTeardownKeywords = {LocalSettingKeywordStart} ({Setup} | {Teardown}) {LocalSettingKeywordEnd}
-LocalArgumentsKeyword = {LocalSettingKeywordStart} [Aa][Rr][Gg][Uu][Mm][Ee][Nn][Tt][Ss] {LocalSettingKeywordEnd}
-LocalTagsKeyword = {LocalSettingKeywordStart} {Tags} {LocalSettingKeywordEnd}
 LocalSettingKeyword = {LocalSettingKeywordStart} {GenericSettingsKeyword} {LocalSettingKeywordEnd}
 
 BuiltInNamespace = [Bb][Uu][Ii][Ll][Tt][Ii][Nn]"."
@@ -375,22 +392,7 @@ LineComment = {LineCommentSign} {NON_EOL}*
 }
 
 <SETTINGS_SECTION> {
-    ^ {LibraryImportKeyword} {ExtendedKeywordFinishedMarker}             { enterNewState(SETTING); pushBackTrailingWhitespace(); return LIBRARY_IMPORT_KEYWORD; }
-    ^ {ResourceImportKeyword} {ExtendedKeywordFinishedMarker}            { enterNewState(SETTING_VALUES); pushBackTrailingWhitespace(); return RESOURCE_IMPORT_KEYWORD; }
-    ^ {VariablesImportKeyword} {ExtendedKeywordFinishedMarker}           { enterNewState(SETTING); pushBackTrailingWhitespace(); return VARIABLES_IMPORT_KEYWORD; }
-    ^ {NameKeyword} {ExtendedKeywordFinishedMarker}                      { enterNewState(SETTING_VALUES); pushBackTrailingWhitespace(); return SUITE_NAME_KEYWORD; }
-    ^ {DocumentationKeyword} {ExtendedKeywordFinishedMarker}             { enterNewState(SETTING_VALUES); pushBackTrailingWhitespace(); return DOCUMENTATION_KEYWORD; }
-    ^ {MetadataKeyword} {ExtendedKeywordFinishedMarker}                  { enterNewState(SETTING); pushBackTrailingWhitespace(); return METADATA_KEYWORD; }
-    ^ {SetupTeardownKeywords} {ExtendedKeywordFinishedMarker}            { enterNewState(KEYWORD_CALL); pushBackTrailingWhitespace(); return SETUP_TEARDOWN_STATEMENT_KEYWORDS; }
-    ^ {TagsKeywords} {ExtendedKeywordFinishedMarker}                     { enterNewState(SETTING_VALUES); pushBackTrailingWhitespace(); return TAGS_KEYWORDS; }
-    ^ {TemplateKeywords} {ExtendedKeywordFinishedMarker}                 {
-          enterNewState(KEYWORD_CALL);
-          pushBackTrailingWhitespace();
-          markTemplateParsingEnabled();
-          return TEMPLATE_KEYWORDS;
-      }
-    ^ {TimeoutKeywords} {ExtendedKeywordFinishedMarker}                  { enterNewState(SETTING_VALUES); pushBackTrailingWhitespace(); return TIMEOUT_KEYWORDS; }
-    ^ {GenericSettingsKeyword} {ExtendedKeywordFinishedMarker}           { enterNewState(SETTING_VALUES); pushBackTrailingWhitespace(); return UNKNOWN_SETTING_KEYWORD; }
+    ^ {GenericSettingsKeyword} {ExtendedKeywordFinishedMarker}         { return switchGlobalSetting(); }
 }
 
 <SETTING> {
@@ -475,61 +477,9 @@ LineComment = {LineCommentSign} {NON_EOL}*
     {NonNewlineWhitespace}+                                         { return WHITE_SPACE; }
     {LocalSettingKeywordEndWhitespaceFree}                          { leaveState(); return LOCAL_SETTING_END; }
 }
-<USER_KEYWORD_DEFINITION> {
-    {LocalArgumentsKeyword} {ExtendedKeywordFinishedMarker}         {
-        yypushback(yylength() - 1);
-        enterNewState(INLINE_VARIABLE_DEFINITION);
-        enterNewState(LOCAL_SETTING_DEFINITION);
-        return LOCAL_SETTING_START;
-    }
-}
-
-<TESTCASE_DEFINITION, TASK_DEFINITION, TEMPLATE_DEFINITION> {
-    // Disables the template for the current test case / task due to the NONE "keyword"
-    {LocalTemplateKeyword} ({ExtendedSpaceBasedEndMarker} | {MultiLine}) {None} {ExtendedKeywordFinishedMarker}   {
-          yypushback(yylength() - 1);
-          enterNewState(INTERMEDIATE_TEMPLATE_CONFIGURATION);
-          enterNewState(LOCAL_SETTING_DEFINITION);
-          markLocalTemplateParsingDisabled();
-          return LOCAL_SETTING_START;
-    }
-    // Expects a template name (keyword) following the [Template] setting. Can be on the same line or on a new line after the continuation marker
-    {LocalTemplateKeyword} ({ExtendedSpaceBasedEndMarker} | {MultiLine})   {
-          yypushback(yylength() - 1);
-          enterNewState(TEMPLATE_DEFINITION);
-          enterNewState(TEMPLATE_ARGUMENTS);
-          enterNewState(SETTING_TEMPLATE_START);
-          enterNewState(LOCAL_SETTING_DEFINITION);
-          markLocalTemplateParsingEnabled();
-          return LOCAL_SETTING_START;
-    }
-    // Represents the [Template] configuration WITHOUT any template name to "deactivate" the template for the current test case / task.
-    {LocalTemplateKeyword} {NonNewlineWhitespace}* {EOL} {
-          yypushback(yylength() - 1);
-          enterNewState(LITERAL_CONSTANT_ONLY);
-          enterNewState(LOCAL_SETTING_DEFINITION);
-          markLocalTemplateParsingDisabled();
-          return LOCAL_SETTING_START;
-    }
-}
 <TESTCASE_DEFINITION, TASK_DEFINITION, USER_KEYWORD_DEFINITION, TEMPLATE_DEFINITION> {
-    {LocalSetupTeardownKeywords} {ExtendedKeywordFinishedMarker}  {
-        yypushback(yylength() - 1);
-        enterNewState(KEYWORD_CALL);
-        enterNewState(LOCAL_SETTING_DEFINITION);
-        return LOCAL_SETTING_START;
-    }
-    {LocalTagsKeyword} {ExtendedKeywordFinishedMarker}            {
-        yypushback(yylength() - 1);
-        enterNewState(LITERAL_CONSTANT_ONLY);
-        enterNewState(LOCAL_SETTING_DEFINITION);
-        return LOCAL_SETTING_START;
-    }
-    {LocalSettingKeyword} {ExtendedKeywordFinishedMarker}          {
-        yypushback(yylength() - 1);
-        enterNewState(LITERAL_CONSTANT_ONLY);
-        enterNewState(LOCAL_SETTING_DEFINITION);
-        return LOCAL_SETTING_START;
+    <USER_KEYWORD_DEFINITION> {
+        {LocalSettingKeyword} {ExtendedKeywordFinishedMarker}   { return switchLocalSetting(); }
     }
 
     <TEMPLATE_ARGUMENTS> {
