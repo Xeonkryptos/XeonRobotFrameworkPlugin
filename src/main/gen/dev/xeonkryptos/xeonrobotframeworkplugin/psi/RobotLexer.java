@@ -393,190 +393,190 @@ public class RobotLexer extends AbstractRobotLexer {
     "\1\76\2\77\1\0\1\100\1\4\4\3\1\0\5\4"+
     "\1\101\2\0\14\4\1\102\1\103\1\104\1\105\1\106"+
     "\7\0\1\6\1\107\7\6\2\0\1\11\2\107\3\1"+
-    "\1\11\3\3\1\0\5\11\2\0\1\14\3\1\1\14"+
-    "\1\0\13\14\1\110\4\14\2\0\4\14\5\111\3\3"+
-    "\35\111\2\0\1\15\3\1\1\15\3\3\1\0\5\15"+
-    "\42\112\2\0\1\20\3\1\1\20\3\3\1\0\5\20"+
-    "\2\0\1\23\3\1\1\0\14\23\2\0\5\23\5\113"+
-    "\3\3\32\113\2\0\1\4\5\0\3\1\1\4\1\72"+
+    "\1\11\3\3\1\0\5\11\2\0\1\14\3\1\1\110"+
+    "\1\0\13\14\1\111\4\14\2\0\4\14\5\112\3\3"+
+    "\35\112\2\0\1\15\3\1\1\15\3\3\1\0\5\15"+
+    "\42\113\2\0\1\20\3\1\1\20\3\3\1\0\5\20"+
+    "\2\0\1\23\3\1\1\0\14\23\2\0\5\23\5\114"+
+    "\3\3\32\114\2\0\1\4\5\0\3\1\1\4\1\72"+
     "\3\3\1\0\7\4\2\0\2\25\4\1\1\25\4\3"+
-    "\1\0\5\25\12\0\1\110\4\0\15\114\1\110\6\114"+
-    "\2\0\1\115\1\26\4\1\5\26\1\110\2\26\4\3"+
+    "\1\0\5\25\12\0\1\111\4\0\15\115\1\111\6\115"+
+    "\2\0\1\116\1\26\4\1\5\26\1\111\2\26\4\3"+
     "\1\0\5\26\2\0\2\30\4\1\13\30\4\3\1\0"+
-    "\5\30\1\4\1\116\1\117\1\120\1\121\1\0\2\33"+
-    "\2\1\2\33\1\0\1\122\1\123\1\124\2\72\2\3"+
-    "\6\33\1\36\1\0\1\36\1\4\1\125\1\126\1\0"+
-    "\1\41\2\1\1\41\2\127\2\3\5\41\2\0\1\26"+
+    "\5\30\1\4\1\117\1\120\1\121\1\122\1\0\2\33"+
+    "\2\1\2\33\1\0\1\123\1\124\1\125\2\72\2\3"+
+    "\6\33\1\36\1\0\1\36\1\4\1\126\1\127\1\0"+
+    "\1\41\2\1\1\41\2\130\2\3\5\41\2\0\1\26"+
     "\3\1\1\26\3\3\1\0\5\26\2\0\1\47\1\24"+
     "\3\0\1\73\1\0\4\1\1\0\1\106\4\3\11\0"+
     "\1\2\2\0\1\53\2\0\3\1\1\53\3\3\1\0"+
-    "\5\53\1\0\1\1\1\130\1\72\1\3\6\53\5\0"+
-    "\1\107\2\0\1\107\3\1\1\131\1\132\1\133\1\134"+
-    "\3\0\1\72\6\1\1\135\1\0\1\73\1\135\3\1"+
+    "\5\53\1\0\1\1\1\131\1\72\1\3\6\53\5\0"+
+    "\1\107\2\0\1\107\3\1\1\132\1\133\1\134\1\135"+
+    "\3\0\1\72\6\1\1\136\1\0\1\73\1\136\3\1"+
     "\1\106\3\3\22\4\6\0\6\6\1\106\6\11\5\14"+
-    "\1\136\2\14\1\137\2\14\1\110\1\0\1\14\1\140"+
-    "\3\14\2\0\1\14\1\0\2\14\1\106\46\111\1\106"+
-    "\6\15\46\112\1\106\6\20\10\23\1\0\3\23\3\0"+
-    "\1\23\1\0\3\23\1\106\43\113\1\141\1\142\1\0"+
-    "\1\106\1\72\6\4\1\143\1\0\1\4\1\144\1\0"+
-    "\1\144\3\1\1\106\3\3\6\25\6\0\1\136\1\137"+
-    "\6\0\12\114\1\136\1\137\1\110\10\114\1\145\1\0"+
-    "\1\115\1\145\3\1\3\26\1\136\1\137\1\0\1\26"+
-    "\1\106\3\3\6\26\1\146\1\0\1\146\3\1\13\30"+
+    "\1\137\2\14\1\140\2\14\1\111\1\0\1\14\1\141"+
+    "\3\14\2\0\1\14\1\0\2\14\1\106\46\112\1\106"+
+    "\6\15\46\113\1\106\6\20\10\23\1\0\3\23\3\0"+
+    "\1\23\1\0\3\23\1\106\43\114\1\142\1\143\1\0"+
+    "\1\106\1\72\6\4\1\144\1\0\1\4\1\145\1\0"+
+    "\1\145\3\1\1\106\3\3\6\25\6\0\1\137\1\140"+
+    "\6\0\12\115\1\137\1\140\1\111\10\115\1\146\1\0"+
+    "\1\116\1\146\3\1\3\26\1\137\1\140\1\0\1\26"+
+    "\1\106\3\3\6\26\1\147\1\0\1\147\3\1\13\30"+
     "\1\106\3\3\6\30\1\4\1\0\1\33\1\1\4\72"+
     "\1\3\6\33\1\0\1\4\6\41\1\106\6\26\1\0"+
-    "\1\147\2\0\1\150\1\106\10\0\1\106\6\53\2\72"+
+    "\1\150\2\0\1\151\1\106\10\0\1\106\6\53\2\72"+
     "\6\53\3\0\6\1\1\0\1\1\1\3\22\4\6\0"+
-    "\6\6\6\11\1\151\1\0\1\14\1\152\1\0\1\14"+
-    "\1\153\1\136\1\0\2\14\1\137\1\0\3\14\1\140"+
-    "\1\0\1\154\1\0\2\14\1\155\1\0\3\14\51\111"+
-    "\6\15\51\112\6\20\3\23\1\0\2\23\1\0\2\23"+
-    "\1\0\1\23\3\0\3\23\42\113\3\141\3\142\1\0"+
-    "\7\4\1\0\1\1\1\3\6\25\5\0\1\153\7\0"+
-    "\10\114\1\153\1\136\1\114\1\137\2\114\1\155\4\114"+
-    "\1\0\1\1\2\26\1\153\2\0\1\26\1\3\6\26"+
+    "\6\6\6\11\1\152\1\0\1\14\1\153\1\0\1\14"+
+    "\1\154\1\137\1\0\2\14\1\140\1\0\3\14\1\141"+
+    "\1\0\1\155\1\0\2\14\1\156\1\0\3\14\51\112"+
+    "\6\15\51\113\6\20\3\23\1\0\2\23\1\0\2\23"+
+    "\1\0\1\23\3\0\3\23\42\114\3\142\3\143\1\0"+
+    "\7\4\1\0\1\1\1\3\6\25\5\0\1\154\7\0"+
+    "\10\115\1\154\1\137\1\115\1\140\2\115\1\156\4\115"+
+    "\1\0\1\1\2\26\1\154\2\0\1\26\1\3\6\26"+
     "\1\0\1\1\7\30\1\0\2\30\1\0\4\30\1\3"+
-    "\6\30\1\4\1\141\1\33\4\72\6\33\1\4\6\41"+
-    "\6\26\2\156\13\0\14\53\1\0\2\157\1\0\1\157"+
-    "\2\0\3\1\1\160\2\1\3\4\1\160\10\4\1\161"+
-    "\2\0\2\4\4\0\1\4\5\0\5\6\3\11\1\160"+
-    "\2\11\1\162\1\14\1\153\2\0\3\14\1\163\1\164"+
-    "\1\0\1\165\1\0\1\166\3\14\3\111\1\160\34\111"+
-    "\3\15\1\160\2\15\3\112\1\160\34\112\3\20\1\160"+
-    "\2\20\2\23\2\0\5\23\1\0\3\23\3\113\1\160"+
-    "\25\113\3\0\2\167\1\0\3\4\1\160\2\4\1\0"+
-    "\3\25\1\160\2\25\4\0\1\170\1\0\1\162\3\0"+
-    "\1\166\3\0\3\114\1\160\2\114\1\162\1\114\1\153"+
-    "\2\114\1\166\3\114\1\162\1\26\2\0\1\166\3\26"+
-    "\1\160\2\26\3\30\1\0\2\30\1\0\5\30\1\0"+
-    "\1\30\1\0\1\30\1\0\5\30\1\160\2\30\1\171"+
-    "\2\0\5\141\3\33\1\160\2\33\1\4\3\41\1\160"+
-    "\2\41\3\26\1\160\2\26\6\0\1\160\2\0\2\172"+
-    "\1\0\2\44\1\0\3\53\1\160\5\53\1\160\2\53"+
-    "\2\173\3\0\1\50\1\0\3\1\2\174\2\1\3\4"+
-    "\4\160\1\0\3\4\2\0\4\4\2\0\7\4\5\0"+
-    "\5\6\3\11\3\160\1\0\1\11\1\162\1\0\2\14"+
-    "\1\175\1\14\1\176\1\0\1\163\1\0\1\166\1\0"+
-    "\3\14\3\111\1\160\2\174\3\160\30\111\3\15\3\160"+
-    "\1\0\1\15\3\112\1\160\2\174\3\160\30\112\3\20"+
-    "\3\160\1\0\1\20\1\0\4\23\1\0\1\23\2\0"+
-    "\3\23\3\113\1\160\2\174\3\160\25\113\2\0\1\167"+
-    "\3\4\3\160\1\0\2\4\3\25\4\160\1\0\1\25"+
-    "\1\177\11\0\3\114\2\174\2\114\1\162\3\114\1\166"+
-    "\4\114\1\0\2\26\1\0\3\26\4\160\1\0\1\26"+
-    "\4\30\1\0\1\30\1\0\5\30\1\200\1\0\3\30"+
-    "\4\160\1\0\1\30\1\4\1\33\1\0\5\33\2\160"+
-    "\2\33\1\201\3\41\2\160\1\41\3\26\3\160\1\0"+
-    "\1\26\6\0\4\160\2\0\3\53\3\160\1\0\4\53"+
-    "\2\174\1\160\2\53\1\0\5\1\3\4\2\174\3\160"+
-    "\23\4\5\0\5\6\3\11\2\174\2\11\1\14\1\202"+
-    "\1\175\1\0\1\203\2\0\1\14\1\0\2\14\3\111"+
-    "\2\174\22\111\3\15\2\174\2\15\3\112\2\174\22\112"+
-    "\3\20\2\174\2\20\2\23\1\0\1\23\1\204\2\0"+
-    "\1\23\1\0\1\23\1\0\1\23\3\113\2\174\24\113"+
-    "\2\205\1\0\3\4\2\174\3\4\3\25\2\174\3\160"+
-    "\2\25\2\0\1\202\4\0\6\114\1\202\5\114\1\26"+
-    "\1\202\3\26\2\174\3\160\2\26\5\30\1\0\2\30"+
-    "\1\0\4\30\1\0\6\30\2\174\3\160\2\30\1\4"+
-    "\6\33\2\174\1\160\2\33\1\201\2\0\1\201\3\41"+
-    "\2\174\1\41\3\26\2\174\2\26\2\0\1\206\4\0"+
-    "\2\174\2\0\3\53\2\174\7\53\1\0\1\207\1\210"+
-    "\1\211\2\1\1\207\1\210\1\211\1\160\2\174\3\4"+
-    "\1\212\2\0\17\4\2\0\2\6\1\207\1\210\1\211"+
-    "\2\11\1\213\1\202\1\0\1\203\1\0\1\214\1\0"+
-    "\2\14\1\207\1\210\1\211\22\111\1\207\1\210\1\211"+
-    "\2\15\1\207\1\210\1\211\22\112\1\207\1\210\1\211"+
-    "\2\20\1\23\3\0\1\23\1\0\1\23\1\207\1\210"+
-    "\1\211\22\113\1\207\1\210\1\211\3\4\1\207\1\210"+
-    "\1\211\1\160\2\174\2\25\1\0\1\213\4\0\1\207"+
-    "\1\210\1\211\2\114\1\213\1\202\1\114\1\214\3\114"+
-    "\1\213\1\0\1\207\1\210\1\211\1\160\2\174\2\26"+
-    "\1\30\1\215\1\0\4\30\1\0\1\30\1\0\4\30"+
-    "\1\0\1\207\1\210\1\211\1\160\2\174\2\30\1\216"+
-    "\1\0\1\33\1\205\1\33\1\207\1\210\1\211\2\33"+
-    "\1\207\1\210\1\211\1\41\1\207\1\210\1\211\2\26"+
-    "\2\0\1\207\1\210\1\211\2\0\1\207\1\210\1\211"+
-    "\2\53\1\207\1\210\1\211\2\53\2\217\1\0\2\220"+
-    "\2\221\2\222\1\1\1\223\4\207\4\210\4\211\1\4"+
-    "\1\223\1\4\1\224\2\0\1\225\2\0\13\4\1\0"+
-    "\1\6\3\207\3\210\3\211\1\11\1\223\1\213\1\0"+
-    "\1\14\1\207\2\220\3\207\1\210\2\221\3\210\1\211"+
-    "\2\222\3\211\1\111\1\223\10\111\3\207\3\210\3\211"+
-    "\1\15\1\223\1\207\2\220\3\207\1\210\2\221\3\210"+
-    "\1\211\2\222\3\211\1\112\1\223\10\112\3\207\3\210"+
-    "\3\211\1\20\1\223\2\0\1\23\1\207\2\220\3\207"+
-    "\1\210\2\221\3\210\1\211\2\222\3\211\1\113\1\223"+
-    "\10\113\3\207\3\210\3\211\1\4\1\223\4\207\4\210"+
-    "\4\211\1\25\1\223\3\0\2\220\2\221\2\222\1\114"+
-    "\1\223\1\213\2\114\1\0\4\207\4\210\4\211\1\26"+
-    "\1\223\5\146\1\30\1\0\5\30\1\0\3\30\4\207"+
-    "\4\210\4\211\1\30\1\223\2\207\2\210\2\211\1\33"+
-    "\1\223\2\207\2\210\2\211\1\223\3\207\3\210\3\211"+
-    "\1\26\1\223\1\0\1\226\1\0\4\207\4\210\4\211"+
-    "\1\0\1\223\3\207\3\210\3\211\1\53\1\223\2\220"+
-    "\1\207\2\221\1\210\2\222\1\211\1\53\1\223\1\227"+
-    "\2\230\2\220\3\207\2\221\3\210\2\222\3\211\1\227"+
-    "\4\223\11\4\1\231\2\0\1\232\2\0\2\220\2\221"+
-    "\2\222\1\227\3\223\2\0\1\14\1\0\2\220\2\221"+
-    "\2\222\1\227\1\223\2\230\3\223\5\111\2\220\2\221"+
-    "\2\222\1\227\3\223\2\220\2\221\2\222\1\227\1\223"+
-    "\2\230\3\223\5\112\2\220\2\221\2\222\1\227\3\223"+
-    "\1\0\1\23\2\220\2\221\2\222\1\227\1\223\2\230"+
-    "\3\223\2\113\2\220\2\221\2\222\1\227\3\223\2\220"+
-    "\3\207\2\221\3\210\2\222\3\211\1\227\4\223\1\233"+
-    "\3\0\1\227\2\230\3\114\2\220\3\207\2\221\3\210"+
-    "\2\222\3\211\1\227\4\223\10\146\3\30\1\234\2\30"+
-    "\2\0\1\30\2\220\3\207\2\221\3\210\2\222\3\211"+
-    "\1\227\4\223\2\220\1\207\2\221\1\210\2\222\1\211"+
-    "\1\227\2\223\2\220\2\221\2\222\2\223\2\220\2\221"+
-    "\2\222\1\227\3\223\1\0\2\220\2\221\2\222\1\227"+
-    "\4\223\2\220\2\221\2\222\1\227\3\223\1\227\2\230"+
-    "\1\223\2\235\1\207\2\220\1\210\2\221\1\211\2\222"+
-    "\4\227\2\230\3\223\1\4\1\236\2\0\6\4\3\227"+
-    "\2\230\1\237\1\240\1\0\1\240\1\0\1\227\2\235"+
-    "\3\227\2\230\5\111\3\227\2\230\1\227\2\235\3\227"+
-    "\2\230\5\112\3\227\2\230\3\0\1\23\1\0\1\227"+
-    "\2\235\3\227\2\230\5\113\3\227\2\230\1\207\2\220"+
-    "\1\210\2\221\1\211\2\222\4\227\2\230\3\223\1\0"+
-    "\2\235\1\237\2\114\1\207\2\220\1\210\2\221\1\211"+
-    "\2\222\4\227\2\230\3\223\11\146\2\30\1\0\2\30"+
-    "\1\0\6\30\1\0\1\207\2\220\1\210\2\221\1\211"+
-    "\2\222\4\227\2\230\3\223\2\227\2\230\1\223\2\230"+
-    "\3\227\2\230\1\0\4\227\2\230\3\227\2\230\2\235"+
-    "\1\227\2\235\3\227\1\223\2\230\7\4\2\235\1\0"+
-    "\1\155\1\0\2\240\2\235\3\111\4\235\3\112\2\235"+
-    "\2\0\1\241\1\0\2\235\5\113\4\235\3\227\1\223"+
-    "\2\230\1\114\2\240\2\235\3\227\1\223\2\230\5\146"+
-    "\1\0\2\146\1\0\4\146\3\30\1\0\2\30\1\242"+
-    "\1\30\1\0\2\235\3\227\1\223\2\230\2\235\1\227"+
-    "\2\235\1\0\4\235\1\227\2\235\2\4\1\243\2\0"+
-    "\1\4\2\0\1\111\1\112\1\0\1\113\1\227\2\235"+
-    "\1\114\1\227\2\235\1\146\1\0\2\146\1\0\5\146"+
-    "\1\0\1\146\1\0\1\146\1\0\2\146\1\30\1\244"+
-    "\3\30\1\0\4\30\1\227\2\235\1\245\1\0\1\246"+
-    "\2\0\1\247\4\0\1\111\1\112\1\114\2\146\1\0"+
-    "\1\146\1\0\5\146\1\250\2\0\2\30\1\0\3\30"+
-    "\1\0\11\30\1\0\1\30\1\0\2\237\1\0\1\111"+
-    "\1\112\1\114\3\146\1\0\2\146\1\0\4\146\1\0"+
-    "\3\146\2\0\3\30\1\0\4\30\1\0\5\30\1\251"+
-    "\1\0\3\111\3\112\1\251\1\114\1\0\4\146\1\0"+
-    "\1\146\1\0\4\146\2\0\7\30\1\0\2\30\1\0"+
-    "\4\30\1\242\1\146\1\0\5\146\1\0\3\146\1\200"+
-    "\7\30\1\0\1\30\2\0\4\30\3\146\1\250\2\146"+
-    "\2\0\1\146\5\30\1\0\6\30\1\0\1\30\2\146"+
-    "\1\0\2\146\1\0\6\146\1\0\4\30\1\234\1\30"+
-    "\1\0\5\30\3\146\1\0\2\146\1\250\1\146\2\0"+
+    "\6\30\1\4\1\142\1\33\4\72\6\33\1\4\6\41"+
+    "\6\26\2\157\13\0\14\53\1\0\2\160\1\0\1\160"+
+    "\2\0\3\1\1\161\2\1\3\4\1\161\10\4\1\162"+
+    "\2\0\2\4\4\0\1\4\5\0\5\6\3\11\1\161"+
+    "\2\11\1\163\1\14\1\154\2\0\3\14\1\164\1\165"+
+    "\1\0\1\166\1\0\1\167\3\14\3\112\1\161\34\112"+
+    "\3\15\1\161\2\15\3\113\1\161\34\113\3\20\1\161"+
+    "\2\20\2\23\2\0\5\23\1\0\3\23\3\114\1\161"+
+    "\25\114\3\0\2\170\1\0\3\4\1\161\2\4\1\0"+
+    "\3\25\1\161\2\25\4\0\1\171\1\0\1\163\3\0"+
+    "\1\167\3\0\3\115\1\161\2\115\1\163\1\115\1\154"+
+    "\2\115\1\167\3\115\1\163\1\26\2\0\1\167\3\26"+
+    "\1\161\2\26\3\30\1\0\2\30\1\0\5\30\1\0"+
+    "\1\30\1\0\1\30\1\0\5\30\1\161\2\30\1\172"+
+    "\2\0\5\142\3\33\1\161\2\33\1\4\3\41\1\161"+
+    "\2\41\3\26\1\161\2\26\6\0\1\161\2\0\2\173"+
+    "\1\0\2\44\1\0\3\53\1\161\5\53\1\161\2\53"+
+    "\2\174\3\0\1\50\1\0\3\1\2\175\2\1\3\4"+
+    "\4\161\1\0\3\4\2\0\4\4\2\0\7\4\5\0"+
+    "\5\6\3\11\3\161\1\0\1\11\1\163\1\0\2\14"+
+    "\1\176\1\14\1\177\1\0\1\164\1\0\1\167\1\0"+
+    "\3\14\3\112\1\161\2\175\3\161\30\112\3\15\3\161"+
+    "\1\0\1\15\3\113\1\161\2\175\3\161\30\113\3\20"+
+    "\3\161\1\0\1\20\1\0\4\23\1\0\1\23\2\0"+
+    "\3\23\3\114\1\161\2\175\3\161\25\114\2\0\1\170"+
+    "\3\4\3\161\1\0\2\4\3\25\4\161\1\0\1\25"+
+    "\1\200\11\0\3\115\2\175\2\115\1\163\3\115\1\167"+
+    "\4\115\1\0\2\26\1\0\3\26\4\161\1\0\1\26"+
+    "\4\30\1\0\1\30\1\0\5\30\1\201\1\0\3\30"+
+    "\4\161\1\0\1\30\1\4\1\33\1\0\5\33\2\161"+
+    "\2\33\1\202\3\41\2\161\1\41\3\26\3\161\1\0"+
+    "\1\26\6\0\4\161\2\0\3\53\3\161\1\0\4\53"+
+    "\2\175\1\161\2\53\1\0\5\1\3\4\2\175\3\161"+
+    "\23\4\5\0\5\6\3\11\2\175\2\11\1\14\1\203"+
+    "\1\176\1\0\1\204\2\0\1\14\1\0\2\14\3\112"+
+    "\2\175\22\112\3\15\2\175\2\15\3\113\2\175\22\113"+
+    "\3\20\2\175\2\20\2\23\1\0\1\23\1\205\2\0"+
+    "\1\23\1\0\1\23\1\0\1\23\3\114\2\175\24\114"+
+    "\2\206\1\0\3\4\2\175\3\4\3\25\2\175\3\161"+
+    "\2\25\2\0\1\203\4\0\6\115\1\203\5\115\1\26"+
+    "\1\203\3\26\2\175\3\161\2\26\5\30\1\0\2\30"+
+    "\1\0\4\30\1\0\6\30\2\175\3\161\2\30\1\4"+
+    "\6\33\2\175\1\161\2\33\1\202\2\0\1\202\3\41"+
+    "\2\175\1\41\3\26\2\175\2\26\2\0\1\207\4\0"+
+    "\2\175\2\0\3\53\2\175\7\53\1\0\1\210\1\211"+
+    "\1\212\2\1\1\210\1\211\1\212\1\161\2\175\3\4"+
+    "\1\213\2\0\17\4\2\0\2\6\1\210\1\211\1\212"+
+    "\2\11\1\214\1\203\1\0\1\204\1\0\1\215\1\0"+
+    "\2\14\1\210\1\211\1\212\22\112\1\210\1\211\1\212"+
+    "\2\15\1\210\1\211\1\212\22\113\1\210\1\211\1\212"+
+    "\2\20\1\23\3\0\1\23\1\0\1\23\1\210\1\211"+
+    "\1\212\22\114\1\210\1\211\1\212\3\4\1\210\1\211"+
+    "\1\212\1\161\2\175\2\25\1\0\1\214\4\0\1\210"+
+    "\1\211\1\212\2\115\1\214\1\203\1\115\1\215\3\115"+
+    "\1\214\1\0\1\210\1\211\1\212\1\161\2\175\2\26"+
+    "\1\30\1\216\1\0\4\30\1\0\1\30\1\0\4\30"+
+    "\1\0\1\210\1\211\1\212\1\161\2\175\2\30\1\217"+
+    "\1\0\1\33\1\206\1\33\1\210\1\211\1\212\2\33"+
+    "\1\210\1\211\1\212\1\41\1\210\1\211\1\212\2\26"+
+    "\2\0\1\210\1\211\1\212\2\0\1\210\1\211\1\212"+
+    "\2\53\1\210\1\211\1\212\2\53\2\220\1\0\2\221"+
+    "\2\222\2\223\1\1\1\224\4\210\4\211\4\212\1\4"+
+    "\1\224\1\4\1\225\2\0\1\226\2\0\13\4\1\0"+
+    "\1\6\3\210\3\211\3\212\1\11\1\224\1\214\1\0"+
+    "\1\14\1\210\2\221\3\210\1\211\2\222\3\211\1\212"+
+    "\2\223\3\212\1\112\1\224\10\112\3\210\3\211\3\212"+
+    "\1\15\1\224\1\210\2\221\3\210\1\211\2\222\3\211"+
+    "\1\212\2\223\3\212\1\113\1\224\10\113\3\210\3\211"+
+    "\3\212\1\20\1\224\2\0\1\23\1\210\2\221\3\210"+
+    "\1\211\2\222\3\211\1\212\2\223\3\212\1\114\1\224"+
+    "\10\114\3\210\3\211\3\212\1\4\1\224\4\210\4\211"+
+    "\4\212\1\25\1\224\3\0\2\221\2\222\2\223\1\115"+
+    "\1\224\1\214\2\115\1\0\4\210\4\211\4\212\1\26"+
+    "\1\224\5\147\1\30\1\0\5\30\1\0\3\30\4\210"+
+    "\4\211\4\212\1\30\1\224\2\210\2\211\2\212\1\33"+
+    "\1\224\2\210\2\211\2\212\1\224\3\210\3\211\3\212"+
+    "\1\26\1\224\1\0\1\227\1\0\4\210\4\211\4\212"+
+    "\1\0\1\224\3\210\3\211\3\212\1\53\1\224\2\221"+
+    "\1\210\2\222\1\211\2\223\1\212\1\53\1\224\1\230"+
+    "\2\231\2\221\3\210\2\222\3\211\2\223\3\212\1\230"+
+    "\4\224\11\4\1\232\2\0\1\233\2\0\2\221\2\222"+
+    "\2\223\1\230\3\224\2\0\1\14\1\0\2\221\2\222"+
+    "\2\223\1\230\1\224\2\231\3\224\5\112\2\221\2\222"+
+    "\2\223\1\230\3\224\2\221\2\222\2\223\1\230\1\224"+
+    "\2\231\3\224\5\113\2\221\2\222\2\223\1\230\3\224"+
+    "\1\0\1\23\2\221\2\222\2\223\1\230\1\224\2\231"+
+    "\3\224\2\114\2\221\2\222\2\223\1\230\3\224\2\221"+
+    "\3\210\2\222\3\211\2\223\3\212\1\230\4\224\1\234"+
+    "\3\0\1\230\2\231\3\115\2\221\3\210\2\222\3\211"+
+    "\2\223\3\212\1\230\4\224\10\147\3\30\1\235\2\30"+
+    "\2\0\1\30\2\221\3\210\2\222\3\211\2\223\3\212"+
+    "\1\230\4\224\2\221\1\210\2\222\1\211\2\223\1\212"+
+    "\1\230\2\224\2\221\2\222\2\223\2\224\2\221\2\222"+
+    "\2\223\1\230\3\224\1\0\2\221\2\222\2\223\1\230"+
+    "\4\224\2\221\2\222\2\223\1\230\3\224\1\230\2\231"+
+    "\1\224\2\236\1\210\2\221\1\211\2\222\1\212\2\223"+
+    "\4\230\2\231\3\224\1\4\1\237\2\0\6\4\3\230"+
+    "\2\231\1\240\1\241\1\0\1\241\1\0\1\230\2\236"+
+    "\3\230\2\231\5\112\3\230\2\231\1\230\2\236\3\230"+
+    "\2\231\5\113\3\230\2\231\3\0\1\23\1\0\1\230"+
+    "\2\236\3\230\2\231\5\114\3\230\2\231\1\210\2\221"+
+    "\1\211\2\222\1\212\2\223\4\230\2\231\3\224\1\0"+
+    "\2\236\1\240\2\115\1\210\2\221\1\211\2\222\1\212"+
+    "\2\223\4\230\2\231\3\224\11\147\2\30\1\0\2\30"+
+    "\1\0\6\30\1\0\1\210\2\221\1\211\2\222\1\212"+
+    "\2\223\4\230\2\231\3\224\2\230\2\231\1\224\2\231"+
+    "\3\230\2\231\1\0\4\230\2\231\3\230\2\231\2\236"+
+    "\1\230\2\236\3\230\1\224\2\231\7\4\2\236\1\0"+
+    "\1\156\1\0\2\241\2\236\3\112\4\236\3\113\2\236"+
+    "\2\0\1\242\1\0\2\236\5\114\4\236\3\230\1\224"+
+    "\2\231\1\115\2\241\2\236\3\230\1\224\2\231\5\147"+
+    "\1\0\2\147\1\0\4\147\3\30\1\0\2\30\1\243"+
+    "\1\30\1\0\2\236\3\230\1\224\2\231\2\236\1\230"+
+    "\2\236\1\0\4\236\1\230\2\236\2\4\1\244\2\0"+
+    "\1\4\2\0\1\112\1\113\1\0\1\114\1\230\2\236"+
+    "\1\115\1\230\2\236\1\147\1\0\2\147\1\0\5\147"+
+    "\1\0\1\147\1\0\1\147\1\0\2\147\1\30\1\245"+
+    "\3\30\1\0\4\30\1\230\2\236\1\246\1\0\1\247"+
+    "\2\0\1\250\4\0\1\112\1\113\1\115\2\147\1\0"+
+    "\1\147\1\0\5\147\1\251\2\0\2\30\1\0\3\30"+
+    "\1\0\11\30\1\0\1\30\1\0\2\240\1\0\1\112"+
+    "\1\113\1\115\3\147\1\0\2\147\1\0\4\147\1\0"+
+    "\3\147\2\0\3\30\1\0\4\30\1\0\5\30\1\252"+
+    "\1\0\3\112\3\113\1\252\1\115\1\0\4\147\1\0"+
+    "\1\147\1\0\4\147\2\0\7\30\1\0\2\30\1\0"+
+    "\4\30\1\243\1\147\1\0\5\147\1\0\3\147\1\201"+
+    "\7\30\1\0\1\30\2\0\4\30\3\147\1\251\2\147"+
+    "\2\0\1\147\5\30\1\0\6\30\1\0\1\30\2\147"+
+    "\1\0\2\147\1\0\6\147\1\0\4\30\1\235\1\30"+
+    "\1\0\5\30\3\147\1\0\2\147\1\251\1\147\2\0"+
     "\2\30\1\0\3\30\1\0\2\30\1\0\2\30\1\0"+
-    "\5\30\1\0\2\30\4\146\1\0\4\146\1\30\2\0"+
+    "\5\30\1\0\2\30\4\147\1\0\4\147\1\30\2\0"+
     "\1\30\1\0\1\30\1\0\1\30\2\0\1\30\1\0"+
-    "\3\30\2\0\2\146\1\0\3\146\1\0\11\146\1\0"+
-    "\1\146\4\30\2\0\1\30\2\0\3\146\1\0\4\146"+
-    "\1\0\5\146\5\30\1\0\7\146\1\0\2\146\1\0"+
-    "\4\146\1\234\3\30\1\250\7\146\1\0\1\146\2\0"+
-    "\4\146\1\30\5\146\1\0\6\146\1\0\3\146\1\250"+
-    "\1\146\1\0\5\146\1\0\3\146\1\0\2\146\1\0"+
-    "\5\146\1\0\3\146\1\0\1\146\1\0\1\146\2\0"+
-    "\1\146\1\0\2\146\1\0\3\146\2\0\7\146";
+    "\3\30\2\0\2\147\1\0\3\147\1\0\11\147\1\0"+
+    "\1\147\4\30\2\0\1\30\2\0\3\147\1\0\4\147"+
+    "\1\0\5\147\5\30\1\0\7\147\1\0\2\147\1\0"+
+    "\4\147\1\235\3\30\1\251\7\147\1\0\1\147\2\0"+
+    "\4\147\1\30\5\147\1\0\6\147\1\0\3\147\1\251"+
+    "\1\147\1\0\5\147\1\0\3\147\1\0\2\147\1\0"+
+    "\5\147\1\0\3\147\1\0\1\147\1\0\1\147\2\0"+
+    "\1\147\1\0\2\147\1\0\3\147\2\0\7\147";
 
   private static int [] zzUnpackAction() {
     int [] result = new int[4393];
@@ -8656,57 +8656,57 @@ public class RobotLexer extends AbstractRobotLexer {
             { return COMMENT;
             }
           // fall through
-          case 170: break;
+          case 171: break;
           case 2:
             { return WHITE_SPACE;
             }
           // fall through
-          case 171: break;
+          case 172: break;
           case 3:
             { enterNewState(AFTER_COMMENT); return COMMENT;
             }
           // fall through
-          case 172: break;
+          case 173: break;
           case 4:
             { return LITERAL_CONSTANT;
             }
           // fall through
-          case 173: break;
+          case 174: break;
           case 5:
             { return BAD_CHARACTER;
             }
           // fall through
-          case 174: break;
+          case 175: break;
           case 6:
             { pushBackTrailingWhitespace(); return DATA_DRIVEN_COLUMN_NAME;
             }
           // fall through
-          case 175: break;
+          case 176: break;
           case 7:
             { yybegin(TESTCASE_NAME_DEFINITION); return EOL;
             }
           // fall through
-          case 176: break;
+          case 177: break;
           case 8:
             { yybegin(TASK_NAME_DEFINITION); return EOL;
             }
           // fall through
-          case 177: break;
+          case 178: break;
           case 9:
             { pushBackTrailingWhitespace(); return TEST_CASE_NAME_PART;
             }
           // fall through
-          case 178: break;
+          case 179: break;
           case 10:
             { yybegin(TESTCASE_DEFINITION); return EOS;
             }
           // fall through
-          case 179: break;
+          case 180: break;
           case 11:
             { yybegin(TESTCASE_DEFINITION); return EOL;
             }
           // fall through
-          case 180: break;
+          case 181: break;
           case 12:
             { if (localTemplateEnabled && templateKeywordFound) {
               enterNewState(TEMPLATE_DEFINITION);
@@ -8718,325 +8718,346 @@ public class RobotLexer extends AbstractRobotLexer {
           break;
             }
           // fall through
-          case 181: break;
+          case 182: break;
           case 13:
             { pushBackTrailingWhitespace(); return TASK_NAME_PART;
             }
           // fall through
-          case 182: break;
+          case 183: break;
           case 14:
             { yybegin(TASK_DEFINITION); return EOS;
             }
           // fall through
-          case 183: break;
+          case 184: break;
           case 15:
             { yybegin(TASK_DEFINITION); return EOL;
             }
           // fall through
-          case 184: break;
+          case 185: break;
           case 16:
             { pushBackTrailingWhitespace(); return USER_KEYWORD_NAME_PART;
             }
           // fall through
-          case 185: break;
+          case 186: break;
           case 17:
             { yybegin(USER_KEYWORD_DEFINITION); return EOS;
             }
           // fall through
-          case 186: break;
+          case 187: break;
           case 18:
             { yybegin(USER_KEYWORD_DEFINITION); return EOL;
             }
           // fall through
-          case 187: break;
+          case 188: break;
           case 19:
             { enterNewState(KEYWORD_CALL); yypushback(yylength()); break;
             }
           // fall through
-          case 188: break;
+          case 189: break;
           case 20:
             { leaveState(); return EOL;
             }
           // fall through
-          case 189: break;
+          case 190: break;
           case 21:
             { templateKeywordFound = true; return KEYWORD_NAME;
             }
           // fall through
-          case 190: break;
+          case 191: break;
           case 22:
             { return TEMPLATE_ARGUMENT_VALUE;
             }
           // fall through
-          case 191: break;
+          case 192: break;
           case 23:
             { yybegin(TEMPLATE_PARAMETER_VALUE); return PARAMETER_ASSIGNMENT;
             }
           // fall through
-          case 192: break;
+          case 193: break;
           case 24:
             { yybegin(KEYWORD_ARGUMENTS); return KEYWORD_NAME;
             }
           // fall through
-          case 193: break;
+          case 194: break;
           case 25:
             { yybegin(SINGLE_LITERAL_CONSTANT); return WHITE_SPACE;
             }
           // fall through
-          case 194: break;
+          case 195: break;
           case 26:
             { leaveState(); return WHITE_SPACE;
             }
           // fall through
-          case 195: break;
+          case 196: break;
           case 27:
             { return VARIABLE_BODY;
             }
           // fall through
-          case 196: break;
+          case 197: break;
           case 28:
             { yybegin(VARIABLE_DEFINITION_ARGUMENTS); return ASSIGNMENT;
             }
           // fall through
-          case 197: break;
+          case 198: break;
           case 29:
             { yybegin(VARIABLE_DEFINITION_ARGUMENTS); return VARIABLE_RBRACE;
             }
           // fall through
-          case 198: break;
+          case 199: break;
           case 30:
             { yypushback(yylength() - 1); return ASSIGNMENT;
             }
           // fall through
-          case 199: break;
+          case 200: break;
           case 31:
             { enterNewState(PYTHON_EXPRESSION); yypushback(yylength() - 1); return PYTHON_EXPRESSION_START;
             }
           // fall through
-          case 200: break;
+          case 201: break;
           case 32:
             { leaveState(); return VARIABLE_RBRACE;
             }
           // fall through
-          case 201: break;
+          case 202: break;
           case 33:
             { return EXTENDED_VARIABLE_ACCESS_BODY;
             }
           // fall through
-          case 202: break;
+          case 203: break;
           case 34:
             { return VARIABLE_ACCESS_START;
             }
           // fall through
-          case 203: break;
+          case 204: break;
           case 35:
             { return VARIABLE_ACCESS_END;
             }
           // fall through
-          case 204: break;
+          case 205: break;
           case 36:
             { leaveState(); yypushback(yylength()); break;
             }
           // fall through
-          case 205: break;
+          case 206: break;
           case 37:
             { yybegin(SIMPLE_CONTROL_STRUCTURE); return WHITE_SPACE;
             }
           // fall through
-          case 206: break;
+          case 207: break;
           case 38:
             { yypushback(yylength()); yybegin(FOR_STRUCTURE_LOOP); break;
             }
           // fall through
-          case 207: break;
+          case 208: break;
           case 39:
             { yybegin(FOR_STRUCTURE_LOOP); return WHITE_SPACE;
             }
           // fall through
-          case 208: break;
+          case 209: break;
           case 40:
             { yypushback(yylength()); leaveState(); break;
             }
           // fall through
-          case 209: break;
+          case 210: break;
           case 41:
             { yypushback(yylength()); yybegin(KEYWORD_PYTHON_EXPRESSION); break;
             }
           // fall through
-          case 210: break;
+          case 211: break;
           case 42:
             { yybegin(KEYWORD_PYTHON_EXPRESSION); return WHITE_SPACE;
             }
           // fall through
-          case 211: break;
+          case 212: break;
           case 43:
             { return PYTHON_EXPRESSION_CONTENT;
             }
           // fall through
-          case 212: break;
+          case 213: break;
           case 44:
             { leaveState(); return EOS;
             }
           // fall through
-          case 213: break;
+          case 214: break;
           case 45:
             { yypushback(yylength()); yybegin(PYTHON_EXECUTED_CONDITION); break;
             }
           // fall through
-          case 214: break;
+          case 215: break;
           case 46:
             { yybegin(PYTHON_EXECUTED_CONDITION); return WHITE_SPACE;
             }
           // fall through
-          case 215: break;
+          case 216: break;
           case 47:
             { pushBackTrailingWhitespace(); return LITERAL_CONSTANT;
             }
           // fall through
-          case 216: break;
+          case 217: break;
           case 48:
             { return LOCAL_SETTING_NAME;
             }
           // fall through
-          case 217: break;
+          case 218: break;
           case 49:
             { pushBackTrailingWhitespace(); return LOCAL_SETTING_START;
             }
           // fall through
-          case 218: break;
+          case 219: break;
           case 50:
             { leaveState(); return LOCAL_SETTING_END;
             }
           // fall through
-          case 219: break;
+          case 220: break;
           case 51:
             { yybegin(PARAMETER_VALUE); return PARAMETER_ASSIGNMENT;
             }
           // fall through
-          case 220: break;
+          case 221: break;
           case 52:
             { yybegin(KEYWORD_CALL_NAME); return KEYWORD_LIBRARY_SEPARATOR;
             }
           // fall through
-          case 221: break;
+          case 222: break;
           case 53:
             { leaveState(); return KEYWORD_NAME;
             }
           // fall through
-          case 222: break;
+          case 223: break;
           case 54:
             { leaveState(); return KEYWORD_LIBRARY_SEPARATOR;
             }
           // fall through
-          case 223: break;
+          case 224: break;
           case 55:
             { leaveState(); handleStateChangeOnMultiLineDetection(); return WHITE_SPACE;
             }
           // fall through
-          case 224: break;
+          case 225: break;
           case 56:
             { handleStateChangeOnFakeMultilineDetection(); return EOL;
             }
           // fall through
-          case 225: break;
+          case 226: break;
           case 57:
             { leaveState(); return VARIABLE_LBRACE;
             }
           // fall through
-          case 226: break;
+          case 227: break;
           case 58:
             { enterNewState(AFTER_COMMENT); pushBackEverythingExceptLeadingWhitespace(); return WHITE_SPACE;
             }
           // fall through
-          case 227: break;
+          case 228: break;
           case 59:
             { yypushback(1);
               enterNewState(NORMAL_PARAMETER_ASSIGNMENT);
               return PARAMETER_NAME;
             }
           // fall through
-          case 228: break;
+          case 229: break;
           case 60:
             { enterNewState(VARIABLE_USAGE); enterNewState(VARIABLE_OPENING_BRACE); yypushback(1); return SCALAR_VARIABLE_START;
             }
           // fall through
-          case 229: break;
+          case 230: break;
           case 61:
             { enterNewState(VARIABLE_USAGE); enterNewState(VARIABLE_OPENING_BRACE); yypushback(1); return ENV_VARIABLE_START;
             }
           // fall through
-          case 230: break;
+          case 231: break;
           case 62:
             { enterNewState(VARIABLE_USAGE); enterNewState(VARIABLE_OPENING_BRACE); yypushback(1); return DICT_VARIABLE_START;
             }
           // fall through
-          case 231: break;
+          case 232: break;
           case 63:
             { pushBackTrailingWhitespace(); return ASSIGNMENT;
             }
           // fall through
-          case 232: break;
+          case 233: break;
           case 64:
             { enterNewState(VARIABLE_USAGE); enterNewState(VARIABLE_OPENING_BRACE); yypushback(1); return LIST_VARIABLE_START;
             }
           // fall through
-          case 233: break;
+          case 234: break;
           case 65:
             { enterNewState(SETTING_VALUES); pushBackTrailingWhitespace(); return UNKNOWN_SETTING_KEYWORD;
             }
           // fall through
-          case 234: break;
+          case 235: break;
           case 66:
             { enterNewState(VARIABLE_DEFINITION); enterNewState(VARIABLE_OPENING_BRACE); yypushback(yylength() - 1); return SCALAR_VARIABLE_START;
             }
           // fall through
-          case 235: break;
+          case 236: break;
           case 67:
             { enterNewState(VARIABLE_DEFINITION); enterNewState(VARIABLE_OPENING_BRACE); yypushback(yylength() - 1); return ENV_VARIABLE_START;
             }
           // fall through
-          case 236: break;
+          case 237: break;
           case 68:
             { enterNewState(VARIABLE_DEFINITION); enterNewState(VARIABLE_OPENING_BRACE); yypushback(yylength() - 1); return DICT_VARIABLE_START;
             }
           // fall through
-          case 237: break;
+          case 238: break;
           case 69:
             { enterNewState(VARIABLE_DEFINITION); enterNewState(VARIABLE_OPENING_BRACE); yypushback(yylength() - 1); return LIST_VARIABLE_START;
             }
           // fall through
-          case 238: break;
+          case 239: break;
           case 70:
             { yypushback(yylength() - 2); return LITERAL_CONSTANT;
             }
           // fall through
-          case 239: break;
+          case 240: break;
           case 71:
             { yypushback(1); return WHITE_SPACE;
             }
           // fall through
-          case 240: break;
-          case 72:
-            { yypushback(yylength() - "IF".length()); enterNewState(EOL_EXPECTED); enterNewState(PYTHON_EVALUATED_CONTROL_STRUCTURE_START); return IF;
-            }
-          // fall through
           case 241: break;
-          case 73:
-            { localTemplateEnabled = globalTemplateEnabled; yypushback(yylength()); yybegin(TESTCASE_NAME_DEFINITION); break;
+          case 72:
+            { if (getLocalTemplateEnabled() && getTemplateKeywordFound()) {
+             enterNewState(TEMPLATE_DEFINITION);
+             enterNewState(TEMPLATE_ARGUMENTS);
+         } else {
+             enterNewState(VARIABLE_USAGE);
+             enterNewState(VARIABLE_OPENING_BRACE);
+             yypushback(1);
+             return switch(yycharat(0)) {
+                 case '$' -> SCALAR_VARIABLE_START;
+                 case '@' -> LIST_VARIABLE_START;
+                 case '&' -> DICT_VARIABLE_START;
+                 case '%' -> ENV_VARIABLE_START;
+                 default -> null;
+             };
+         }
+         yypushback(yylength());
+         break;
             }
           // fall through
           case 242: break;
-          case 74:
-            { localTemplateEnabled = globalTemplateEnabled; yypushback(yylength()); yybegin(TASK_NAME_DEFINITION); break;
+          case 73:
+            { yypushback(yylength() - "IF".length()); enterNewState(EOL_EXPECTED); enterNewState(PYTHON_EVALUATED_CONTROL_STRUCTURE_START); return IF;
             }
           // fall through
           case 243: break;
-          case 75:
-            { yypushback(yylength()); yybegin(USER_KEYWORD_NAME_DEFINITION); break;
+          case 74:
+            { localTemplateEnabled = globalTemplateEnabled; yypushback(yylength()); yybegin(TESTCASE_NAME_DEFINITION); break;
             }
           // fall through
           case 244: break;
+          case 75:
+            { localTemplateEnabled = globalTemplateEnabled; yypushback(yylength()); yybegin(TASK_NAME_DEFINITION); break;
+            }
+          // fall through
+          case 245: break;
           case 76:
+            { yypushback(yylength()); yybegin(USER_KEYWORD_NAME_DEFINITION); break;
+            }
+          // fall through
+          case 246: break;
+          case 77:
             { localTemplateEnabled = globalTemplateEnabled;
         leaveState();
         yypushback(yylength());
@@ -9048,130 +9069,130 @@ public class RobotLexer extends AbstractRobotLexer {
         break;
             }
           // fall through
-          case 245: break;
-          case 77:
+          case 247: break;
+          case 78:
             { yypushback(1);
           enterNewState(TEMPLATE_PARAMETER_ASSIGNMENT);
           return TEMPLATE_PARAMETER_NAME;
             }
           // fall through
-          case 246: break;
-          case 78:
+          case 248: break;
+          case 79:
             { yybegin(VARIABLE_DEFINITION); enterNewState(VARIABLE_OPENING_BRACE); yypushback(yylength() - 1); return SCALAR_VARIABLE_START;
             }
           // fall through
-          case 247: break;
-          case 79:
+          case 249: break;
+          case 80:
             { yybegin(VARIABLE_DEFINITION); enterNewState(VARIABLE_OPENING_BRACE); yypushback(yylength() - 1); return ENV_VARIABLE_START;
             }
           // fall through
-          case 248: break;
-          case 80:
+          case 250: break;
+          case 81:
             { yybegin(VARIABLE_DEFINITION); enterNewState(VARIABLE_OPENING_BRACE); yypushback(yylength() - 1); return DICT_VARIABLE_START;
             }
           // fall through
-          case 249: break;
-          case 81:
+          case 251: break;
+          case 82:
             { yybegin(VARIABLE_DEFINITION); enterNewState(VARIABLE_OPENING_BRACE); yypushback(yylength() - 1); return LIST_VARIABLE_START;
             }
           // fall through
-          case 250: break;
-          case 82:
+          case 252: break;
+          case 83:
             { yybegin(VARIABLE_DEFINITION_ARGUMENTS); yypushback(yylength() - 1); return VARIABLE_RBRACE;
             }
           // fall through
-          case 251: break;
-          case 83:
+          case 253: break;
+          case 84:
             { enterNewState(EXTENDED_VARIABLE_ACCESS); yypushback(1); return VARIABLE_RBRACE;
             }
           // fall through
-          case 252: break;
-          case 84:
+          case 254: break;
+          case 85:
             { yybegin(VARIABLE_DEFINITION_ARGUMENTS); yypushback(1); return VARIABLE_RBRACE;
             }
           // fall through
-          case 253: break;
-          case 85:
+          case 255: break;
+          case 86:
             { leaveState(); enterNewState(EXTENDED_VARIABLE_ACCESS); yypushback(1); return VARIABLE_RBRACE;
             }
           // fall through
-          case 254: break;
-          case 86:
+          case 256: break;
+          case 87:
             { leaveState(); yypushback(1); return VARIABLE_RBRACE;
             }
           // fall through
-          case 255: break;
-          case 87:
+          case 257: break;
+          case 88:
             { leaveState();
           yypushback(yylength() - 1);
           return VARIABLE_ACCESS_END;
             }
           // fall through
-          case 256: break;
-          case 88:
+          case 258: break;
+          case 89:
             { leaveState(); yypushback(1); return PYTHON_EXPRESSION_END;
             }
           // fall through
-          case 257: break;
-          case 89:
+          case 259: break;
+          case 90:
             { yypushback(yylength() - 1); enterNewState(VARIABLE_USAGE); enterNewState(VARIABLE_OPENING_BRACE); return SCALAR_VARIABLE_START;
             }
           // fall through
-          case 258: break;
-          case 90:
+          case 260: break;
+          case 91:
             { yypushback(yylength() - 1); enterNewState(VARIABLE_USAGE); enterNewState(VARIABLE_OPENING_BRACE); return ENV_VARIABLE_START;
             }
           // fall through
-          case 259: break;
-          case 91:
+          case 261: break;
+          case 92:
             { yypushback(yylength() - 1); enterNewState(VARIABLE_USAGE); enterNewState(VARIABLE_OPENING_BRACE); return DICT_VARIABLE_START;
             }
           // fall through
-          case 260: break;
-          case 92:
+          case 262: break;
+          case 93:
             { yypushback(yylength() - 1); enterNewState(VARIABLE_USAGE); enterNewState(VARIABLE_OPENING_BRACE); return LIST_VARIABLE_START;
             }
           // fall through
-          case 261: break;
-          case 93:
+          case 263: break;
+          case 94:
             { int assignmentPos = indexOf('=');
               yypushback(yylength() - assignmentPos);
               enterNewState(NORMAL_PARAMETER_ASSIGNMENT);
               return PARAMETER_NAME;
             }
           // fall through
-          case 262: break;
-          case 94:
+          case 264: break;
+          case 95:
             { yypushback(yylength() - "END".length()); enterNewState(EOL_EXPECTED); return END;
             }
           // fall through
-          case 263: break;
-          case 95:
+          case 265: break;
+          case 96:
             { yypushback(yylength() - "FOR".length()); enterNewState(FOR_STRUCTURE); return FOR;
             }
           // fall through
-          case 264: break;
-          case 96:
+          case 266: break;
+          case 97:
             { yypushback(yylength() - "TRY".length()); enterNewState(EOL_EXPECTED); return TRY;
             }
           // fall through
-          case 265: break;
-          case 97:
+          case 267: break;
+          case 98:
             { pushBackEverythingExceptLeadingWhitespace(); enterNewState(SAME_LINE_FAKE_MULTILINE); return WHITE_SPACE;
             }
           // fall through
-          case 266: break;
-          case 98:
+          case 268: break;
+          case 99:
             { enterNewState(FAKE_MULTILINE); yypushback(yylength()); break;
             }
           // fall through
-          case 267: break;
-          case 99:
+          case 269: break;
+          case 100:
             { pushBackTrailingWhitespace(); return WITH_NAME;
             }
           // fall through
-          case 268: break;
-          case 100:
+          case 270: break;
+          case 101:
             { templateKeywordFound = true;
           int libraryNameSeparatorStart = indexOf('.');
           yypushback(yylength() - libraryNameSeparatorStart);
@@ -9179,73 +9200,73 @@ public class RobotLexer extends AbstractRobotLexer {
           return KEYWORD_LIBRARY_NAME;
             }
           // fall through
-          case 269: break;
-          case 101:
+          case 271: break;
+          case 102:
             { int assignmentPos = indexOf('=');
           yypushback(yylength() - assignmentPos);
           enterNewState(TEMPLATE_PARAMETER_ASSIGNMENT);
           return TEMPLATE_PARAMETER_NAME;
             }
           // fall through
-          case 270: break;
-          case 102:
+          case 272: break;
+          case 103:
             { int libraryNameSeparatorStart = indexOf('.');
           yypushback(yylength() - libraryNameSeparatorStart);
           yybegin(KEYWORD_LIBRARY_NAME_SEPARATOR);
           return KEYWORD_LIBRARY_NAME;
             }
           // fall through
-          case 271: break;
-          case 103:
+          case 273: break;
+          case 104:
             { yypushback(yylength() - "IN".length()); yybegin(FOR_STRUCTURE_LOOP_START); return FOR_IN;
             }
           // fall through
-          case 272: break;
-          case 104:
+          case 274: break;
+          case 105:
             { return CONTINUATION;
             }
           // fall through
-          case 273: break;
-          case 105:
+          case 275: break;
+          case 106:
             { yypushback(yylength() - "AND".length());
          enterNewState(KEYWORD_CALL);
          return AND;
             }
           // fall through
-          case 274: break;
-          case 106:
+          case 276: break;
+          case 107:
             { yypushback(yylength() - "BUT".length());
          enterNewState(KEYWORD_CALL);
          return BUT;
             }
           // fall through
-          case 275: break;
-          case 107:
+          case 277: break;
+          case 108:
             { yypushback(yylength() - "ELSE".length()); enterNewState(EOL_EXPECTED); return ELSE;
             }
           // fall through
-          case 276: break;
-          case 108:
+          case 278: break;
+          case 109:
             { yypushback(yylength() - "VAR".length());
           enterNewState(INLINE_VARIABLE_DEFINITION);
           return VAR;
             }
           // fall through
-          case 277: break;
-          case 109:
+          case 279: break;
+          case 110:
             { yypushback(yylength() - 1);
         enterNewState(LITERAL_CONSTANT_ONLY);
         enterNewState(LOCAL_SETTING_DEFINITION);
         return LOCAL_SETTING_START;
             }
           // fall through
-          case 278: break;
-          case 110:
+          case 280: break;
+          case 111:
             { yypushback(1); return END;
             }
           // fall through
-          case 279: break;
-          case 111:
+          case 281: break;
+          case 112:
             { int initialLength = yylength();
           pushBackTrailingWhitespace();
           int lengthAfterPushback = yylength();
@@ -9258,71 +9279,71 @@ public class RobotLexer extends AbstractRobotLexer {
           return CONTINUATION;
             }
           // fall through
-          case 280: break;
-          case 112:
+          case 282: break;
+          case 113:
             { resetInternalState(); yybegin(TASKS_SECTION_NAME_DEFINITION); pushbackEverythingUpToKeywordFinishedMarker(); return TASKS_HEADER_NAME;
             }
           // fall through
-          case 281: break;
-          case 113:
+          case 283: break;
+          case 114:
             { enterNewState(SETTING_VALUES); pushBackTrailingWhitespace(); return SUITE_NAME_KEYWORD;
             }
           // fall through
-          case 282: break;
-          case 114:
+          case 284: break;
+          case 115:
             { yypushback(yylength() - "BREAK".length()); enterNewState(EOL_EXPECTED); return BREAK;
             }
           // fall through
-          case 283: break;
-          case 115:
+          case 285: break;
+          case 116:
             { enterNewState(SIMPLE_CONTROL_STRUCTURE_START);
       yypushback(yylength() - "GROUP".length());
       return GROUP;
             }
           // fall through
-          case 284: break;
-          case 116:
+          case 286: break;
+          case 117:
             { yypushback(yylength() - "THEN".length());
          enterNewState(KEYWORD_CALL);
          return THEN;
             }
           // fall through
-          case 285: break;
-          case 117:
+          case 287: break;
+          case 118:
             { yypushback(yylength() - "WHEN".length());
          enterNewState(KEYWORD_CALL);
          return WHEN;
             }
           // fall through
-          case 286: break;
-          case 118:
+          case 288: break;
+          case 119:
             { yypushback(yylength() - "WHILE".length()); enterNewState(WHILE_CONFIGURATION); enterNewState(PYTHON_EVALUATED_CONTROL_STRUCTURE_START); return WHILE;
             }
           // fall through
-          case 287: break;
-          case 119:
+          case 289: break;
+          case 120:
             { yypushback(yylength()); enterNewState(IN_CONTINUATION); break;
             }
           // fall through
-          case 288: break;
-          case 120:
+          case 290: break;
+          case 121:
             { yypushback(yylength() - "NONE".length());
           yybegin(EOL_EXPECTED);
           return LITERAL_CONSTANT;
             }
           // fall through
-          case 289: break;
-          case 121:
+          case 291: break;
+          case 122:
             { yypushback(yylength() - "ELSE".length()); yybegin(KEYWORD_CALL); return ELSE;
             }
           // fall through
-          case 290: break;
-          case 122:
+          case 292: break;
+          case 123:
             { enterNewState(IN_CONTINUATION); yypushback(yylength()); break;
             }
           // fall through
-          case 291: break;
-          case 123:
+          case 293: break;
+          case 124:
             { if (previousStates[currentIndex] == WHILE_CONFIGURATION) {
           pushBackTrailingWhitespace();
           yypushback(3);
@@ -9335,177 +9356,177 @@ public class RobotLexer extends AbstractRobotLexer {
       }
             }
           // fall through
-          case 292: break;
-          case 124:
+          case 294: break;
+          case 125:
             { resetInternalState(); yybegin(TASKS_SECTION_NAME_DEFINITION); pushbackEverythingUpToKeywordFinishedMarker(); yypushback(1); return TASKS_HEADER_NAME;
             }
           // fall through
-          case 293: break;
-          case 125:
+          case 295: break;
+          case 126:
             { enterNewState(SIMPLE_CONTROL_STRUCTURE_START);
       yypushback(yylength() - "EXCEPT".length());
       return EXCEPT;
             }
           // fall through
-          case 294: break;
-          case 126:
+          case 296: break;
+          case 127:
             { yypushback(yylength() - "GIVEN".length());
           enterNewState(KEYWORD_CALL);
           return GIVEN;
             }
           // fall through
-          case 295: break;
-          case 127:
+          case 297: break;
+          case 128:
             { pushBackTrailingWhitespace();
           yypushback("NONE".length());
           return WHITE_SPACE;
             }
           // fall through
-          case 296: break;
-          case 128:
+          case 298: break;
+          case 129:
             { yybegin(KEYWORD_ARGUMENTS);
           enterNewState(PYTHON_EVALUATED_CONTROL_STRUCTURE_START);
           return KEYWORD_NAME;
             }
           // fall through
-          case 297: break;
-          case 129:
+          case 299: break;
+          case 130:
             { yypushback(yylength() - "scope".length()); enterNewState(NORMAL_PARAMETER_ASSIGNMENT); return PARAMETER_NAME;
             }
           // fall through
-          case 298: break;
-          case 130:
+          case 300: break;
+          case 131:
             { yypushback(yylength() - "ELSE IF".length()); enterNewState(EOL_EXPECTED); enterNewState(PYTHON_EVALUATED_CONTROL_STRUCTURE_START); return ELSE_IF;
             }
           // fall through
-          case 299: break;
-          case 131:
+          case 301: break;
+          case 132:
             { yypushback(yylength() - "FINALLY".length()); enterNewState(EOL_EXPECTED); return FINALLY;
             }
           // fall through
-          case 300: break;
-          case 132:
+          case 302: break;
+          case 133:
             { yypushback(yylength() - "RETURN".length());
           enterNewState(USER_KEYWORD_RETURN_STATEMENT);
           return RETURN;
             }
           // fall through
-          case 301: break;
-          case 133:
+          case 303: break;
+          case 134:
             { enterNewState(IN_CONTINUATION); pushBackEverythingExceptLeadingWhitespace(); return WHITE_SPACE;
             }
           // fall through
-          case 302: break;
-          case 134:
+          case 304: break;
+          case 135:
             { yypushback(yylength() - "IN ZIP".length()); yybegin(FOR_STRUCTURE_LOOP_START); return FOR_IN_ZIP;
             }
           // fall through
-          case 303: break;
-          case 135:
+          case 305: break;
+          case 136:
             { resetInternalState(); yybegin(COMMENTS_SECTION); return COMMENTS_HEADER;
             }
           // fall through
-          case 304: break;
-          case 136:
+          case 306: break;
+          case 137:
             { resetInternalState(); yybegin(USER_KEYWORD_NAME_DEFINITION); return USER_KEYWORDS_HEADER;
             }
           // fall through
-          case 305: break;
-          case 137:
+          case 307: break;
+          case 138:
             { resetInternalState(); yybegin(SETTINGS_SECTION); return SETTINGS_HEADER;
             }
           // fall through
-          case 306: break;
-          case 138:
+          case 308: break;
+          case 139:
             { enterNewState(SETTING); pushBackTrailingWhitespace(); return LIBRARY_IMPORT_KEYWORD;
             }
           // fall through
-          case 307: break;
-          case 139:
+          case 309: break;
+          case 140:
             { yypushback(yylength() - "CONTINUE".length()); enterNewState(EOL_EXPECTED); return CONTINUE;
             }
           // fall through
-          case 308: break;
-          case 140:
+          case 310: break;
+          case 141:
             { yypushback(yylength() - 1);
         enterNewState(KEYWORD_CALL);
         enterNewState(LOCAL_SETTING_DEFINITION);
         return LOCAL_SETTING_START;
             }
           // fall through
-          case 309: break;
-          case 141:
+          case 311: break;
+          case 142:
             { yybegin(KEYWORD_ARGUMENTS); enterNewState(PYTHON_EVALUATED_EXPRESSION_START); return KEYWORD_NAME;
             }
           // fall through
-          case 310: break;
-          case 142:
+          case 312: break;
+          case 143:
             { yypushback(yylength() - "ELSE IF".length()); yybegin(PYTHON_EVALUATED_CONTROL_STRUCTURE_START); return ELSE_IF;
             }
           // fall through
-          case 311: break;
-          case 143:
+          case 313: break;
+          case 144:
             { yypushback(yylength() - 3);
           return CONTINUATION;
             }
           // fall through
-          case 312: break;
-          case 144:
+          case 314: break;
+          case 145:
             { resetInternalState(); yybegin(COMMENTS_SECTION); yypushback(1); return COMMENTS_HEADER;
             }
           // fall through
-          case 313: break;
-          case 145:
+          case 315: break;
+          case 146:
             { resetInternalState(); yybegin(USER_KEYWORD_NAME_DEFINITION); yypushback(1); return USER_KEYWORDS_HEADER;
             }
           // fall through
-          case 314: break;
-          case 146:
+          case 316: break;
+          case 147:
             { resetInternalState(); yybegin(SETTINGS_SECTION); yypushback(1); return SETTINGS_HEADER;
             }
           // fall through
-          case 315: break;
-          case 147:
+          case 317: break;
+          case 148:
             { resetInternalState(); yybegin(VARIABLES_SECTION); return VARIABLES_HEADER;
             }
           // fall through
-          case 316: break;
-          case 148:
+          case 318: break;
+          case 149:
             { enterNewState(SETTING); pushBackTrailingWhitespace(); return METADATA_KEYWORD;
             }
           // fall through
-          case 317: break;
-          case 149:
+          case 319: break;
+          case 150:
             { enterNewState(SETTING_VALUES); pushBackTrailingWhitespace(); return RESOURCE_IMPORT_KEYWORD;
             }
           // fall through
-          case 318: break;
-          case 150:
+          case 320: break;
+          case 151:
             { yypushback(yylength() - "IN RANGE".length()); yybegin(FOR_STRUCTURE_LOOP_START); return FOR_IN_RANGE;
             }
           // fall through
-          case 319: break;
-          case 151:
+          case 321: break;
+          case 152:
             { resetInternalState(); yybegin(TEST_CASES_SECTION_NAME_DEFINITION); pushbackEverythingUpToKeywordFinishedMarker(); return TEST_CASES_HEADER_NAME;
             }
           // fall through
-          case 320: break;
-          case 152:
+          case 322: break;
+          case 153:
             { resetInternalState(); yybegin(VARIABLES_SECTION); yypushback(1); return VARIABLES_HEADER;
             }
           // fall through
-          case 321: break;
-          case 153:
+          case 323: break;
+          case 154:
             { enterNewState(SETTING_VALUES); pushBackTrailingWhitespace(); return TAGS_KEYWORDS;
             }
           // fall through
-          case 322: break;
-          case 154:
+          case 324: break;
+          case 155:
             { enterNewState(SETTING); pushBackTrailingWhitespace(); return VARIABLES_IMPORT_KEYWORD;
             }
           // fall through
-          case 323: break;
-          case 155:
+          case 325: break;
+          case 156:
             { pushBackTrailingWhitespace();
           yypushback("NONE".length());
           pushBackTrailingWhitespace();
@@ -9514,23 +9535,23 @@ public class RobotLexer extends AbstractRobotLexer {
           return WHITE_SPACE;
             }
           // fall through
-          case 324: break;
-          case 156:
+          case 326: break;
+          case 157:
             { return KEYWORD_NAME;
             }
           // fall through
-          case 325: break;
-          case 157:
+          case 327: break;
+          case 158:
             { resetInternalState(); yybegin(TEST_CASES_SECTION_NAME_DEFINITION); pushbackEverythingUpToKeywordFinishedMarker(); yypushback(1); return TEST_CASES_HEADER_NAME;
             }
           // fall through
-          case 326: break;
-          case 158:
+          case 328: break;
+          case 159:
             { enterNewState(KEYWORD_CALL); pushBackTrailingWhitespace(); return SETUP_TEARDOWN_STATEMENT_KEYWORDS;
             }
           // fall through
-          case 327: break;
-          case 159:
+          case 329: break;
+          case 160:
             { yypushback(yylength() - 1);
           enterNewState(TEMPLATE_DEFINITION);
           enterNewState(TEMPLATE_ARGUMENTS);
@@ -9540,8 +9561,8 @@ public class RobotLexer extends AbstractRobotLexer {
           return LOCAL_SETTING_START;
             }
           // fall through
-          case 328: break;
-          case 160:
+          case 330: break;
+          case 161:
             { yypushback(yylength() - 1);
           enterNewState(LITERAL_CONSTANT_ONLY);
           enterNewState(LOCAL_SETTING_DEFINITION);
@@ -9549,41 +9570,41 @@ public class RobotLexer extends AbstractRobotLexer {
           return LOCAL_SETTING_START;
             }
           // fall through
-          case 329: break;
-          case 161:
+          case 331: break;
+          case 162:
             { yypushback(yylength() - 1);
         enterNewState(INLINE_VARIABLE_DEFINITION);
         enterNewState(LOCAL_SETTING_DEFINITION);
         return LOCAL_SETTING_START;
             }
           // fall through
-          case 330: break;
-          case 162:
+          case 332: break;
+          case 163:
             { enterNewState(PYTHON_EVALUATED_CONTROL_STRUCTURE_START); return KEYWORD_NAME;
             }
           // fall through
-          case 331: break;
-          case 163:
+          case 333: break;
+          case 164:
             { enterNewState(SETTING_VALUES); pushBackTrailingWhitespace(); return TIMEOUT_KEYWORDS;
             }
           // fall through
-          case 332: break;
-          case 164:
+          case 334: break;
+          case 165:
             { enterNewState(SINGLE_LITERAL_CONSTANT_START); return KEYWORD_NAME;
             }
           // fall through
-          case 333: break;
-          case 165:
+          case 335: break;
+          case 166:
             { yypushback(yylength() - "IN ENUMERATE".length()); yybegin(FOR_STRUCTURE_LOOP_START); return FOR_IN_ENUMERATE;
             }
           // fall through
-          case 334: break;
-          case 166:
+          case 336: break;
+          case 167:
             { enterNewState(SETTING_VALUES); pushBackTrailingWhitespace(); return DOCUMENTATION_KEYWORD;
             }
           // fall through
-          case 335: break;
-          case 167:
+          case 337: break;
+          case 168:
             { enterNewState(KEYWORD_CALL);
           pushBackTrailingWhitespace();
           globalTemplateEnabled = true;
@@ -9592,8 +9613,8 @@ public class RobotLexer extends AbstractRobotLexer {
           return TEMPLATE_KEYWORDS;
             }
           // fall through
-          case 336: break;
-          case 168:
+          case 338: break;
+          case 169:
             { int additionalPushbackLength = 0;
           if (yycharat(0) != 'B' && yycharat(0) != 'b') {
               additionalPushbackLength = 1;
@@ -9603,8 +9624,8 @@ public class RobotLexer extends AbstractRobotLexer {
           return KEYWORD_LIBRARY_NAME;
             }
           // fall through
-          case 337: break;
-          case 169:
+          case 339: break;
+          case 170:
             { yypushback(yylength() - 1);
           enterNewState(INTERMEDIATE_TEMPLATE_CONFIGURATION);
           enterNewState(LOCAL_SETTING_DEFINITION);
@@ -9612,7 +9633,7 @@ public class RobotLexer extends AbstractRobotLexer {
           return LOCAL_SETTING_START;
             }
           // fall through
-          case 338: break;
+          case 340: break;
           default:
             zzScanError(ZZ_NO_MATCH);
           }

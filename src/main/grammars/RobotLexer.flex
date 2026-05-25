@@ -657,7 +657,7 @@ LineComment = {LineCommentSign} {NON_EOL}*
           return VAR;
     }
 
-    {EverythingButVariableValue} | {ScalarVariableStart} | {ListVariableStart} | {DictVariableStart} | {EnvVariableStart} {
+    {EverythingButVariableValue} {
           if (localTemplateEnabled && templateKeywordFound) {
               enterNewState(TEMPLATE_DEFINITION);
               enterNewState(TEMPLATE_ARGUMENTS);
@@ -666,6 +666,26 @@ LineComment = {LineCommentSign} {NON_EOL}*
           }
           yypushback(yylength());
           break;
+   }
+
+   {ScalarVariableStart} | {ListVariableStart} | {DictVariableStart} | {EnvVariableStart}  {
+         if (getLocalTemplateEnabled() && getTemplateKeywordFound()) {
+             enterNewState(TEMPLATE_DEFINITION);
+             enterNewState(TEMPLATE_ARGUMENTS);
+         } else {
+             enterNewState(VARIABLE_USAGE);
+             enterNewState(VARIABLE_OPENING_BRACE);
+             yypushback(1);
+             return switch(yycharat(0)) {
+                 case '$' -> SCALAR_VARIABLE_START;
+                 case '@' -> LIST_VARIABLE_START;
+                 case '&' -> DICT_VARIABLE_START;
+                 case '%' -> ENV_VARIABLE_START;
+                 default -> null;
+             };
+         }
+         yypushback(yylength());
+         break;
    }
 }
 
