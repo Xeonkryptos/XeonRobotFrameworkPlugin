@@ -9017,7 +9017,7 @@ public class RobotLexer extends AbstractRobotLexer {
           // fall through
           case 241: break;
           case 72:
-            { if (getLocalTemplateEnabled() && getTemplateKeywordFound()) {
+            { if (localTemplateEnabled && templateKeywordFound) {
              enterNewState(TEMPLATE_DEFINITION);
              enterNewState(TEMPLATE_ARGUMENTS);
          } else {

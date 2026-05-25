@@ -669,7 +669,7 @@ LineComment = {LineCommentSign} {NON_EOL}*
    }
 
    {ScalarVariableStart} | {ListVariableStart} | {DictVariableStart} | {EnvVariableStart}  {
-         if (getLocalTemplateEnabled() && getTemplateKeywordFound()) {
+         if (localTemplateEnabled && templateKeywordFound) {
              enterNewState(TEMPLATE_DEFINITION);
              enterNewState(TEMPLATE_ARGUMENTS);
          } else {
