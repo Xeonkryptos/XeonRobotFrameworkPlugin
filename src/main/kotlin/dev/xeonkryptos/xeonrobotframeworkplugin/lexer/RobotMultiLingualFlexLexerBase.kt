@@ -6,11 +6,6 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.lexer.RobotLexingConstants.NON_B
 import dev.xeonkryptos.xeonrobotframeworkplugin.lexer.RobotLexingConstants.SECTION_MARKER
 import dev.xeonkryptos.xeonrobotframeworkplugin.lexer.RobotLexingConstants.SIMPLE_SPACE_CHARACTER
 import dev.xeonkryptos.xeonrobotframeworkplugin.lexer.RobotLexingConstants.TAB_CHARACTER
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotLexer.INTERMEDIATE_TEMPLATE_CONFIGURATION
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotLexer.LITERAL_CONSTANT_ONLY
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotLexer.SETTING_TEMPLATE_START
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotLexer.TEMPLATE_ARGUMENTS
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotLexer.TEMPLATE_DEFINITION
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTemplateKeywordLexer
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.LOCAL_SETTING_START
@@ -27,6 +22,10 @@ enum class RobotLocalSettingType {
     SIMPLE_VALUE_SETTING, KEYWORD_CALL_SETTING, PARAMETER_DEFINITION_SETTING
 }
 
+enum class RobotKeywordType {
+    BEHAVIOUR_DRIVEN, NORMAL_KEYWORD
+}
+
 abstract class RobotMultiLingualFlexLexerBase @JvmOverloads constructor(protected val project: Project? = null) : RobotFlexLexerBase() {
 
     private val invalidSectionHandler = RobotMultiLingualStateHandler(RobotSectionType.INVALID, SimpleSectionStateSwitcher(RobotTypes.INVALID_SECTION_HEADER)::switchState)
@@ -34,6 +33,7 @@ abstract class RobotMultiLingualFlexLexerBase @JvmOverloads constructor(protecte
         RobotMultiLingualStateHandler(RobotGlobalSettingType.SIMPLE_VALUE_SETTING, SimpleGlobalSettingStateSwitcher(RobotTypes.UNKNOWN_SETTING_KEYWORD)::switchState)
     private val invalidLocalSettingHandler = RobotMultiLingualStateHandler(RobotLocalSettingType.SIMPLE_VALUE_SETTING, SimpleLocalSettingStateSwitcher()::switchState)
     private val intermediateTemplateLocalSettingHandler = RobotMultiLingualStateHandler(RobotLocalSettingType.SIMPLE_VALUE_SETTING, LocalTemplateSettingStateSwitcher()::switchState)
+    private val normalKeywordHandler = RobotMultiLingualStateHandler(RobotKeywordType.NORMAL_KEYWORD, SimpleKeywordStateSwitcher()::switchState)
 
     private val defaultLanguageSectionNames = mapOf("setting" to RobotMultiLingualStateHandler(RobotSectionType.SETTINGS, SimpleSectionStateSwitcher(RobotTypes.SETTINGS_HEADER)::switchState),
         "settings" to RobotMultiLingualStateHandler(RobotSectionType.SETTINGS, SimpleSectionStateSwitcher(RobotTypes.SETTINGS_HEADER)::switchState),
@@ -103,6 +103,13 @@ abstract class RobotMultiLingualFlexLexerBase @JvmOverloads constructor(protecte
         "timeout" to RobotMultiLingualStateHandler(RobotLocalSettingType.SIMPLE_VALUE_SETTING, SimpleLocalSettingStateSwitcher()::switchState),
         "arguments" to RobotMultiLingualStateHandler(RobotLocalSettingType.PARAMETER_DEFINITION_SETTING, SimpleLocalSettingStateSwitcher()::switchState))
 
+    private val defaultLanguageBehaviourDrivenIdentifierNames =
+        mapOf("given" to RobotMultiLingualStateHandler(RobotKeywordType.BEHAVIOUR_DRIVEN, SimpleBehaviourDrivenIdentifierStateSwitcher(RobotTypes.GIVEN)::switchState),
+            "when" to RobotMultiLingualStateHandler(RobotKeywordType.BEHAVIOUR_DRIVEN, SimpleBehaviourDrivenIdentifierStateSwitcher(RobotTypes.WHEN)::switchState),
+            "then" to RobotMultiLingualStateHandler(RobotKeywordType.BEHAVIOUR_DRIVEN, SimpleBehaviourDrivenIdentifierStateSwitcher(RobotTypes.THEN)::switchState),
+            "and" to RobotMultiLingualStateHandler(RobotKeywordType.BEHAVIOUR_DRIVEN, SimpleBehaviourDrivenIdentifierStateSwitcher(RobotTypes.AND)::switchState),
+            "but" to RobotMultiLingualStateHandler(RobotKeywordType.BEHAVIOUR_DRIVEN, SimpleBehaviourDrivenIdentifierStateSwitcher(RobotTypes.BUT)::switchState))
+
     protected var globalTemplateEnabled = false
     protected var localTemplateEnabled: Boolean = false
     protected var templateKeywordFound: Boolean = false
@@ -114,7 +121,7 @@ abstract class RobotMultiLingualFlexLexerBase @JvmOverloads constructor(protecte
     protected var buffer: CharSequence = ""
     protected var endPosition: Int = 0
 
-    protected fun switchSection(): IElementType {
+    protected fun switchSection(): IElementType? {
         val sectionName = computeSectionName()
         val section = defaultLanguageSectionNames.getOrDefault(sectionName, invalidSectionHandler)
         val nextStateId = getSectionStateId(section.sourceType)
@@ -135,7 +142,7 @@ abstract class RobotMultiLingualFlexLexerBase @JvmOverloads constructor(protecte
         return sectionHeaderName.trim()
     }
 
-    protected fun switchGlobalSetting(): IElementType {
+    protected fun switchGlobalSetting(): IElementType? {
         val settingName = computeGlobalSettingName()
         val globalSetting = defaultLanguageGlobalSettingNames.getOrDefault(settingName, invalidGlobalSettingHandler)
         val nextStateId = getGlobalSettingStateId(globalSetting.sourceType)
@@ -155,7 +162,7 @@ abstract class RobotMultiLingualFlexLexerBase @JvmOverloads constructor(protecte
         return globalSettingName.trim()
     }
 
-    protected fun switchLocalSetting(): IElementType {
+    protected fun switchLocalSetting(): IElementType? {
         val localSettingName = computeLocalSettingName()
         val localSetting = defaultLanguageLocalSettingNames.getOrDefault(localSettingName, intermediateTemplateLocalSettingHandler)
         val nextStateId = getLocalSettingStateId(localSetting.sourceType)
@@ -165,6 +172,13 @@ abstract class RobotMultiLingualFlexLexerBase @JvmOverloads constructor(protecte
     private fun computeLocalSettingName(): CharSequence {
         val sourceText = yytext()
         return sourceText.substring(1, sourceText.length - 1).trim()
+    }
+
+    protected fun switchPotentialKeyword(): IElementType? {
+        val keywordName = yytext()
+        val stateHandler = defaultLanguageBehaviourDrivenIdentifierNames.getOrDefault(keywordName, normalKeywordHandler)
+        val nextStateId = getKeywordStateId(stateHandler.sourceType)
+        return stateHandler.switchState(nextStateId)
     }
 
     protected abstract fun getSectionStateId(sectionType: RobotSectionType): Int
@@ -178,6 +192,8 @@ abstract class RobotMultiLingualFlexLexerBase @JvmOverloads constructor(protecte
     protected abstract fun getNextTemplateStates(parseResult: TemplateParseResult): IntArray
 
     protected abstract fun isTemplateSupportingState(state: Int): Boolean
+
+    protected abstract fun getKeywordStateId(keywordType: RobotKeywordType): Int
 
     abstract fun yytext(): CharSequence
 
@@ -265,9 +281,9 @@ abstract class RobotMultiLingualFlexLexerBase @JvmOverloads constructor(protecte
         yypushback(totalLength - lengthToKeep)
     }
 
-    private class RobotMultiLingualStateHandler<T>(val sourceType: T, private val switchStateCallable: (targetState: Int) -> IElementType) {
+    private class RobotMultiLingualStateHandler<T>(val sourceType: T, private val switchStateCallable: (targetState: Int) -> IElementType?) {
 
-        fun switchState(targetState: Int): IElementType = switchStateCallable(targetState)
+        fun switchState(targetState: Int): IElementType? = switchStateCallable(targetState)
     }
 
     private inner class SimpleSectionStateSwitcher(private val elementType: IElementType) {
@@ -300,7 +316,7 @@ abstract class RobotMultiLingualFlexLexerBase @JvmOverloads constructor(protecte
 
     private inner class LocalTemplateSettingStateSwitcher {
 
-        fun switchState(targetState: Int): IElementType {
+        fun switchState(targetState: Int): IElementType? {
             val localSettingName = computeLocalSettingName()
             if (localSettingName != "template" || isTemplateSupportingState(yystate())) return invalidLocalSettingHandler.switchState(targetState)
 
@@ -314,6 +330,24 @@ abstract class RobotMultiLingualFlexLexerBase @JvmOverloads constructor(protecte
             }
             markLocalTemplateParsingDisabled()
             return LOCAL_SETTING_START
+        }
+    }
+
+    private inner class SimpleBehaviourDrivenIdentifierStateSwitcher(private val elementType: IElementType) {
+
+        fun switchState(targetState: Int): IElementType {
+            pushBackTrailingWhitespace()
+            enterNewState(targetState)
+            return elementType
+        }
+    }
+
+    private inner class SimpleKeywordStateSwitcher {
+
+        fun switchState(targetState: Int): IElementType? {
+            enterNewState(targetState)
+            yypushback(yylength())
+            return null
         }
     }
 }

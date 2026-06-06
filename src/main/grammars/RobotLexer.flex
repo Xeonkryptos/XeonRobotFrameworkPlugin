@@ -63,12 +63,17 @@ import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.ExtendedRobotTypes.*;
   }
 
   @Override
-  protected int[] getNextTemplateStates(TemplateParseResult result) {
+  protected int @NotNull [] getNextTemplateStates(TemplateParseResult result) {
       return switch (result) {
           case TemplateParseResult.EMPTY_RESET -> new int[] {LITERAL_CONSTANT_ONLY, LOCAL_SETTING_DEFINITION};
           case TemplateParseResult.NONE_RESET -> new int[] {INTERMEDIATE_TEMPLATE_CONFIGURATION, LOCAL_SETTING_DEFINITION};
           case TemplateParseResult.KEYWORD -> new int[] {TEMPLATE_DEFINITION, TEMPLATE_ARGUMENTS, SETTING_TEMPLATE_START, LOCAL_SETTING_DEFINITION};
       };
+  }
+
+  @Override
+  protected int getKeywordStateId(@NotNull RobotKeywordType keywordType) {
+      return KEYWORD_CALL;
   }
 
   protected void handleStateChangeOnMultiLineDetection() {
@@ -508,32 +513,6 @@ LineComment = {LineCommentSign} {NON_EOL}*
     }
 }
 <TESTCASE_DEFINITION, TASK_DEFINITION> {
-    "GIVEN" {ExtendedSpaceBasedEndMarker}   {
-          yypushback(yylength() - "GIVEN".length());
-          enterNewState(KEYWORD_CALL);
-          return GIVEN;
-    }
-    "WHEN" {ExtendedSpaceBasedEndMarker}    {
-         yypushback(yylength() - "WHEN".length());
-         enterNewState(KEYWORD_CALL);
-         return WHEN;
-    }
-    "THEN" {ExtendedSpaceBasedEndMarker}    {
-         yypushback(yylength() - "THEN".length());
-         enterNewState(KEYWORD_CALL);
-         return THEN;
-    }
-    "AND" {ExtendedSpaceBasedEndMarker}     {
-         yypushback(yylength() - "AND".length());
-         enterNewState(KEYWORD_CALL);
-         return AND;
-    }
-    "BUT" {ExtendedSpaceBasedEndMarker}     {
-         yypushback(yylength() - "BUT".length());
-         enterNewState(KEYWORD_CALL);
-         return BUT;
-    }
-
     "VAR" {ExtendedSpaceBasedEndMarker}     {
           yypushback(yylength() - "VAR".length());
           enterNewState(INLINE_VARIABLE_DEFINITION);
@@ -544,10 +523,13 @@ LineComment = {LineCommentSign} {NON_EOL}*
           if (getLocalTemplateEnabled() && getTemplateKeywordFound()) {
               enterNewState(TEMPLATE_DEFINITION);
               enterNewState(TEMPLATE_ARGUMENTS);
-          } else {
-              enterNewState(KEYWORD_CALL);
+              yypushback(yylength());
+              break;
           }
-          yypushback(yylength());
+          IElementType elementType = switchPotentialKeyword();
+          if (elementType != null) {
+              return elementType;
+          }
           break;
    }
 
