@@ -541,7 +541,7 @@ LineComment = {LineCommentSign} {NON_EOL}*
     }
 
     {EverythingButVariableValue} {
-          if (getLocalTemplateEnabled() && getTemplateKeywordFound()) {
+          if (localTemplateEnabled && templateKeywordFound) {
               enterNewState(TEMPLATE_DEFINITION);
               enterNewState(TEMPLATE_ARGUMENTS);
           } else {
@@ -549,27 +549,27 @@ LineComment = {LineCommentSign} {NON_EOL}*
           }
           yypushback(yylength());
           break;
-    }
+   }
 
-    {ScalarVariableStart} | {ListVariableStart} | {DictVariableStart} | {EnvVariableStart}  {
-          if (getLocalTemplateEnabled() && getTemplateKeywordFound()) {
-              enterNewState(TEMPLATE_DEFINITION);
-              enterNewState(TEMPLATE_ARGUMENTS);
-          } else {
-              enterNewState(VARIABLE_USAGE);
-              enterNewState(VARIABLE_OPENING_BRACE);
-              yypushback(1);
-              return switch(yycharat(0)) {
-                  case '$' -> SCALAR_VARIABLE_START;
-                  case '@' -> LIST_VARIABLE_START;
-                  case '&' -> DICT_VARIABLE_START;
-                  case '%' -> ENV_VARIABLE_START;
-                  default -> null;
-              };
-          }
-          yypushback(yylength());
-          break;
-    }
+   {ScalarVariableStart} | {ListVariableStart} | {DictVariableStart} | {EnvVariableStart}  {
+         if (localTemplateEnabled && templateKeywordFound) {
+             enterNewState(TEMPLATE_DEFINITION);
+             enterNewState(TEMPLATE_ARGUMENTS);
+         } else {
+             enterNewState(VARIABLE_USAGE);
+             enterNewState(VARIABLE_OPENING_BRACE);
+             yypushback(1);
+             return switch(yycharat(0)) {
+                 case '$' -> SCALAR_VARIABLE_START;
+                 case '@' -> LIST_VARIABLE_START;
+                 case '&' -> DICT_VARIABLE_START;
+                 case '%' -> ENV_VARIABLE_START;
+                 default -> null;
+             };
+         }
+         yypushback(yylength());
+         break;
+   }
 }
 
 <TEMPLATE_ARGUMENTS> {
