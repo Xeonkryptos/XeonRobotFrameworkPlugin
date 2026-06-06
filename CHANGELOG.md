@@ -6,6 +6,14 @@
 
 ### Added
 
+### Changed
+
+### Fixed
+
+## 0.7.4 - 2026-06-06
+
+### Added
+
 - Added new formatting option to keep simple local settings in one line even though wrapping is configured
 - Added new formatting option to keep simple variable statements in one line even though wrapping is configured
 
