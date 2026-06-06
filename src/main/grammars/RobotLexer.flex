@@ -541,7 +541,7 @@ LineComment = {LineCommentSign} {NON_EOL}*
     }
 
     {EverythingButVariableValue} {
-          if (localTemplateEnabled && templateKeywordFound) {
+          if (getLocalTemplateEnabled() && getTemplateKeywordFound()) {
               enterNewState(TEMPLATE_DEFINITION);
               enterNewState(TEMPLATE_ARGUMENTS);
           } else {
@@ -552,7 +552,7 @@ LineComment = {LineCommentSign} {NON_EOL}*
    }
 
    {ScalarVariableStart} | {ListVariableStart} | {DictVariableStart} | {EnvVariableStart}  {
-         if (localTemplateEnabled && templateKeywordFound) {
+         if (getLocalTemplateEnabled() && getTemplateKeywordFound()) {
              enterNewState(TEMPLATE_DEFINITION);
              enterNewState(TEMPLATE_ARGUMENTS);
          } else {

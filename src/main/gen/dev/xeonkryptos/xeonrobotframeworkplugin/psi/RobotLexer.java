@@ -4926,7 +4926,7 @@ public class RobotLexer extends RobotMultiLingualFlexLexerBase {
           // fall through
           case 153: break;
           case 12:
-            { if (localTemplateEnabled && templateKeywordFound) {
+            { if (getLocalTemplateEnabled() && getTemplateKeywordFound()) {
               enterNewState(TEMPLATE_DEFINITION);
               enterNewState(TEMPLATE_ARGUMENTS);
           } else {
@@ -5234,7 +5234,7 @@ public class RobotLexer extends RobotMultiLingualFlexLexerBase {
           // fall through
           case 211: break;
           case 70:
-            { if (localTemplateEnabled && templateKeywordFound) {
+            { if (getLocalTemplateEnabled() && getTemplateKeywordFound()) {
              enterNewState(TEMPLATE_DEFINITION);
              enterNewState(TEMPLATE_ARGUMENTS);
          } else {
