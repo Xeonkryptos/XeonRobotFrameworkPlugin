@@ -4,11 +4,9 @@
 
 ## Unreleased
 
-### Added
-
-### Changed
-
 ### Fixed
+
+- Incorrect detection of section header marker end leading to an incorrect formatting result in data-driven test definitions with column header names
 
 ## 0.7.4 - 2026-06-06
 

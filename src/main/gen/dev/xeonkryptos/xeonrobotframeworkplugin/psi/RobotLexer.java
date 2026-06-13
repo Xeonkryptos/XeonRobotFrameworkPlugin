@@ -8374,7 +8374,8 @@ public class RobotLexer extends AbstractRobotLexer {
           }
           lengthToKeep++;
       }
-      yypushback(totalLength - lengthToKeep);
+      int pushbackLength = Math.max(0, totalLength - lengthToKeep - 1);
+      yypushback(pushbackLength);
   }
 
 
