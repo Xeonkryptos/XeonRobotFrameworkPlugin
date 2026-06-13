@@ -1,4 +1,4 @@
-package dev.xeonkryptos.xeonrobotframeworkplugin.actions
+package dev.xeonkryptos.xeonrobotframeworkplugin.codeinsight.intention
 
 import com.intellij.codeInsight.intention.PsiElementBaseIntentionAction
 import com.intellij.codeInspection.util.IntentionFamilyName
@@ -7,6 +7,7 @@ import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiParserFacade
 import com.intellij.psi.TokenType
+import com.intellij.psi.util.elementType
 import com.intellij.psi.util.parentOfType
 import dev.xeonkryptos.xeonrobotframeworkplugin.RobotBundle
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes
@@ -26,8 +27,6 @@ sealed class MissingKeywordParametersInserterIntentionAction(private val familyN
     override fun isAvailable(project: Project, editor: Editor?, element: PsiElement): Boolean {
         if (element.node.elementType === RobotTypes.EOL || element.node.elementType === TokenType.WHITE_SPACE || element.node.elementType === RobotTypes.KEYWORD_NAME || element.node.elementType === RobotTypes.KEYWORD_LIBRARY_NAME) {
             val keywordCall = element.parentOfType<RobotKeywordCall>(false) ?: return false
-            if (keywordCall.lastChild?.node?.elementType !== RobotTypes.EOL) return false
-
             return keywordCall.computeMissingParameters().any { !it.isPositionalOnly && !it.isPositionalContainer && !it.isKeywordContainer }
         }
         return false
@@ -41,10 +40,13 @@ sealed class MissingKeywordParametersInserterIntentionAction(private val familyN
         val parserFacade = PsiParserFacade.getInstance(project)
         missingParameters.filter { !it.isPositionalOnly && !it.isPositionalContainer && !it.isKeywordContainer }.forEach { parameter ->
             val newParameter = computeNewParameter(parameter, elementGenerator)
-            val eolNode = keywordCall.lastChild ?: return
+            val lastChild = keywordCall.lastChild ?: return
 
-            val addedParameterElement = keywordCall.addBefore(newParameter, eolNode)
             val superSpaceElement = parserFacade.createWhiteSpaceFromText(GlobalConstants.SUPER_SPACE)
+
+            val addedParameterElement = if (lastChild.elementType === RobotTypes.EOL) keywordCall.addBefore(newParameter, lastChild)
+            else keywordCall.addAfter(newParameter, lastChild)
+
             keywordCall.addBefore(superSpaceElement, addedParameterElement)
         }
     }
