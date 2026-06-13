@@ -12,6 +12,7 @@
 
 - Incorrect detection of section header marker end leading to an incorrect formatting result in data-driven test definitions with column header names
 - Do not add unexpected whitespaces in data-driven tests when pressing Enter
+- Execution directory doesn't change at runtime from configured or evaluated working directory with pyproject.toml
 
 ## 0.7.4 - 2026-06-06
 

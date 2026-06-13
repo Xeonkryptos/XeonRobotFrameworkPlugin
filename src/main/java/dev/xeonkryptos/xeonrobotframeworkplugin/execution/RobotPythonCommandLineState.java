@@ -96,7 +96,8 @@ public class RobotPythonCommandLineState extends PythonScriptCommandLineState {
                 ParametersList parametersList = commandLine.getParametersList();
                 ParamsGroup moduleGroup = parametersList.getParamsGroup(PythonCommandLineState.GROUP_MODULE);
                 if (moduleGroup != null) {
-                    modifyCommandLine(moduleGroup, executionMode);
+                    Path workingDirectory = commandLine.getWorkingDirectory();
+                    modifyCommandLine(moduleGroup, executionMode, workingDirectory);
                 }
             }));
             enrichExecutionResult(executionResult);
@@ -141,7 +142,7 @@ public class RobotPythonCommandLineState extends PythonScriptCommandLineState {
         }
     }
 
-    private void modifyCommandLine(ParamsGroup paramsGroup, RobotExecutionMode robotExecutionMode) {
+    private void modifyCommandLine(ParamsGroup paramsGroup, RobotExecutionMode robotExecutionMode, Path workingDirectory) {
         ParametersList parametersList = paramsGroup.getParametersList();
         parametersList.set(1, BundleUtil.ROBOTCODE_DIR.resolve("robotcode").toString());
 
@@ -158,6 +159,10 @@ public class RobotPythonCommandLineState extends PythonScriptCommandLineState {
         parametersList.addAt(2, String.valueOf(robotDebugPort));
         parametersList.addAt(2, "--tcp");
         parametersList.addAt(2, "debug");
+        if (workingDirectory != null) {
+            parametersList.addAt(2, workingDirectory.normalize().toAbsolutePath().toString());
+            parametersList.addAt(2, "--root");
+        }
 
         enrichWithTestArguments(runConfiguration, parametersList::add);
     }
@@ -274,6 +279,10 @@ public class RobotPythonCommandLineState extends PythonScriptCommandLineState {
             int robotDebugPort = NetworkUtil.findAvailableSocketPort();
             dapCommunicator = new RobotDebugAdapterProtocolCommunicator(robotDebugPort);
 
+            @SuppressWarnings("unchecked")
+            Function<TargetEnvironment, String> workingDir = (Function<TargetEnvironment, String>) pythonExecution.getWorkingDir();
+            additionalParameters.add(TargetEnvironmentFunctions.constant("--root"));
+            additionalParameters.add(workingDir);
             additionalParameters.add(TargetEnvironmentFunctions.constant("debug"));
             additionalParameters.add(TargetEnvironmentFunctions.constant("--tcp"));
             additionalParameters.add(TargetEnvironmentFunctions.constant(String.valueOf(robotDebugPort)));
@@ -364,7 +373,7 @@ public class RobotPythonCommandLineState extends PythonScriptCommandLineState {
                                                                   .inSmartMode(project)
                                                                   .executeSynchronously();
         return virtualFileStmtOptional.map(vfile -> VfsUtilCore.getCommonAncestor(expandedWorkingDirVFile, vfile))
-                                      .map(vfile -> VfsUtilCore.getRelativePath(vfile, virtualFileStmtOptional.get(), '/'))
+                                      .map(vfile -> VfsUtilCore.getRelativePath(virtualFileStmtOptional.get(), vfile, '/'))
                                       .orElseGet(() -> execInfo.getLocation().replace('.', '/') + "." + RobotFeatureFileType.getInstance().getDefaultExtension());
     }
 
@@ -386,6 +395,7 @@ public class RobotPythonCommandLineState extends PythonScriptCommandLineState {
         }
     }
 
+    @SuppressWarnings({ "LombokGetterMayBeUsed", "RedundantSuppression" }) // Cannot because Kotlin is accessing this method and Kotlin can't work with lombok yet
     public RobotDebugAdapterProtocolCommunicator getDapCommunicator() {
         return dapCommunicator;
     }
