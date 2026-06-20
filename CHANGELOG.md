@@ -7,6 +7,7 @@
 ### Changed
 
 - A new line for the new intentions to insert obligatory and missing parameters or all other optional ones isn't necessary anymore to get the intentions
+- Robot version detection checks are reduced to an absolute minimum
 
 ### Fixed
 
