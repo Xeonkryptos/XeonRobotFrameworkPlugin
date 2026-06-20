@@ -6,6 +6,7 @@ import com.intellij.psi.stubs.StringStubIndexExtension;
 import com.intellij.psi.stubs.StubIndex;
 import com.intellij.psi.stubs.StubIndexKey;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariable;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotStubFileElementType;
 import dev.xeonkryptos.xeonrobotframeworkplugin.util.VariableNameUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -39,6 +40,6 @@ public class VariableNameIndex extends StringStubIndexExtension<RobotVariable> {
 
     @Override
     public int getVersion() {
-        return super.getVersion() + 13;
+        return super.getVersion() + RobotStubFileElementType.STUB_VERSION + 13;
     }
 }

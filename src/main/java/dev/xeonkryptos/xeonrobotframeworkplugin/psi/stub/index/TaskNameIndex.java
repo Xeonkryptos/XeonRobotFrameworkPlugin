@@ -8,6 +8,7 @@ import com.intellij.psi.stubs.StubIndexKey;
 import com.intellij.util.Processor;
 import com.intellij.util.indexing.IdFilter;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTaskStatement;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotStubFileElementType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -33,6 +34,6 @@ public class TaskNameIndex extends StringStubIndexExtension<RobotTaskStatement> 
 
     @Override
     public int getVersion() {
-        return super.getVersion() + 7;
+        return super.getVersion() + RobotStubFileElementType.STUB_VERSION + 7;
     }
 }
