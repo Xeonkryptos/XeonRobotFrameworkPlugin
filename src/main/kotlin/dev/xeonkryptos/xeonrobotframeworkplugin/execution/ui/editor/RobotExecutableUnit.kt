@@ -1,6 +1,5 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.execution.ui.editor
 
-import ai.grazie.utils.applyIf
 import com.intellij.execution.ui.SettingsEditorFragment
 import com.intellij.execution.ui.SettingsEditorFragmentType
 import com.intellij.icons.AllIcons
@@ -280,8 +279,8 @@ private class DeletableBrowseButtonPanel(
     }
 
     private val newSymbolBrowseButton =
-        RobotExecutableUnitWithBrowseButton(contextAnchor) { executionMode }.applyIf(executionMode.unitExecutionMode && executionUnit != null) {
-            updateUnitLocation(executionUnit!!.location, executionUnit.unitName)
+        RobotExecutableUnitWithBrowseButton(contextAnchor) { executionMode }.apply {
+            if (executionMode.unitExecutionMode && executionUnit != null) updateUnitLocation(executionUnit.location, executionUnit.unitName)
         }.apply {
             childComponent.addDocumentListener(this, object : DocumentListener {
                 override fun documentChanged(event: com.intellij.openapi.editor.event.DocumentEvent) {
@@ -290,8 +289,8 @@ private class DeletableBrowseButtonPanel(
             })
         }
     private val newDirectoryBrowseButton =
-        RobotTextFieldWithDirectoryBrowseButton(contextAnchor).applyIf(!executionMode.unitExecutionMode && executionUnit != null) {
-            updateUnitLocation(executionUnit!!.location)
+        RobotTextFieldWithDirectoryBrowseButton(contextAnchor).apply {
+            if (!executionMode.unitExecutionMode && executionUnit != null) updateUnitLocation(executionUnit.location)
         }.apply {
             addDocumentListener(directoryDocumentListener)
         }

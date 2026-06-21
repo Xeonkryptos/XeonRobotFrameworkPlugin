@@ -7,9 +7,7 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotLanguage
 
 class RobotCharFilter : CharFilter() {
 
-    override fun acceptChar(
-        c: Char, prefixLength: Int, lookup: Lookup?
-    ): Result? {
+    override fun acceptChar(c: Char, prefixLength: Int, lookup: Lookup?): Result? {
         if (lookup?.isCompletion?.not() ?: false || lookup?.psiFile?.language != RobotLanguage.INSTANCE) return null
 
         if (c == '\t' || c == ' ' && endsWithSpace(lookup)) return Result.SELECT_ITEM_AND_FINISH_LOOKUP

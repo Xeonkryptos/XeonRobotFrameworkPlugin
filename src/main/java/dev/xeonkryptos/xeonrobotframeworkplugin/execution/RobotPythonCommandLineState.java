@@ -7,7 +7,6 @@ import com.intellij.execution.Executor;
 import com.intellij.execution.configurations.ParametersList;
 import com.intellij.execution.configurations.ParamsGroup;
 import com.intellij.execution.executors.DefaultDebugExecutor;
-import com.intellij.execution.executors.DefaultRunExecutor;
 import com.intellij.execution.process.ProcessEvent;
 import com.intellij.execution.process.ProcessHandler;
 import com.intellij.execution.runners.ExecutionEnvironment;
@@ -25,15 +24,11 @@ import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.openapi.vfs.VfsUtilCore;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.util.ArrayUtil;
-import com.jetbrains.python.actions.PyExecuteInConsole;
-import com.jetbrains.python.actions.PyRunFileInConsoleAction;
-import com.jetbrains.python.console.PyConsoleOptions;
 import com.jetbrains.python.extensions.ContextAnchor;
 import com.jetbrains.python.extensions.ModuleBasedContextAnchor;
 import com.jetbrains.python.extensions.ProjectSdkContextAnchor;
 import com.jetbrains.python.run.CommandLinePatcher;
 import com.jetbrains.python.run.PythonCommandLineState;
-import com.jetbrains.python.run.PythonConsoleScripts;
 import com.jetbrains.python.run.PythonExecution;
 import com.jetbrains.python.run.PythonImportErrorFilter;
 import com.jetbrains.python.run.PythonRunConfiguration;
@@ -194,41 +189,6 @@ public class RobotPythonCommandLineState extends PythonScriptCommandLineState {
         final RobotExecutionMode executionMode = computeRobotExecutionMode(executor);
         var wrappedConverter = new MyPythonScriptTargetedCommandLineBuilder(converter, runConfiguration, executionMode);
         try {
-            String executorId = executor.getId();
-            if (showCommandLineAfterwards() && (DefaultRunExecutor.EXECUTOR_ID.equals(executorId) || RobotDryRunExecutor.EXECUTOR_ID.equals(executorId))) {
-                Project project = runConfiguration.getProject();
-                PythonRunConfiguration pythonRunConfiguration = (PythonRunConfiguration) runConfiguration.getPythonRunConfiguration().clone();
-                PyRunFileInConsoleAction.configExecuted(pythonRunConfiguration);
-
-                pythonRunConfiguration.setModuleMode(true);
-                pythonRunConfiguration.setScriptName("robot");
-                String workingDirectory = pythonRunConfiguration.getWorkingDirectory();
-                if (workingDirectory == null || workingDirectory.isBlank()) {
-                    pythonRunConfiguration.setWorkingDirectory(pythonRunConfiguration.getWorkingDirectorySafe());
-                }
-
-                StringBuilder additionalTestArguments = new StringBuilder();
-                enrichWithTestArguments(runConfiguration, argument -> {
-                    boolean containsSpaces = argument.contains(" ");
-                    if (containsSpaces) {
-                        additionalTestArguments.append('"');
-                    }
-                    additionalTestArguments.append(argument);
-                    if (containsSpaces) {
-                        additionalTestArguments.append('"');
-                    }
-                    additionalTestArguments.append(" ");
-                });
-
-                String scriptParameters = pythonRunConfiguration.getScriptParameters() + additionalTestArguments.toString().trim();
-                pythonRunConfiguration.setScriptParameters(scriptParameters);
-
-                Function<TargetEnvironment, String> runFileText = PythonConsoleScripts.buildScriptFunctionWithConsoleRun(pythonRunConfiguration);
-                boolean useExistingConsole = PyConsoleOptions.getInstance(project).isUseExistingConsole();
-                PyExecuteInConsole.executeCodeInConsole(project, runFileText, null, useExistingConsole, false, true, pythonRunConfiguration);
-
-                return null;
-            }
             ExecutionResult executionResult = super.execute(executor, wrappedConverter);
             enrichExecutionResult(executionResult);
             return executionResult;
