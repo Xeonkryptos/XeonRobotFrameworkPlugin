@@ -327,7 +327,7 @@ meta else_if_structure ::= ELSE_IF conditional_content <<separator>> <<statement
     pin=3
     implements="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotBlockOpeningStructure"
 }
-conditional_content ::= variable* python_expression_body (python_expression_body | variable)* {
+conditional_content ::= (variable | python_expression_body)+ {
     name="Condition"
     implements="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotPythonInjectionExtension"
     methods=[getInjectionRelevantTextRange]
