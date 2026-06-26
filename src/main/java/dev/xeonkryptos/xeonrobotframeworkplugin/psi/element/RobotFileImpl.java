@@ -46,6 +46,12 @@ public class RobotFileImpl extends PsiFileBase implements KeywordFile, RobotFile
 
     private static final Key<ParameterizedCachedValue<Collection<VirtualFile>, Boolean>> IMPORTED_VIRTUAL_FILES_CACHE_KEY = Key.create("IMPORTED_VIRTUAL_FILES_CACHE");
 
+    private static final Key<ParameterizedCachedValue<Collection<KeywordFile>, ImportFilesCacheParameter>> IMPORTED_RESOURCE_KEYWORD_FILES_CACHE_KEY = Key.create(
+            "IMPORTED_RESOURCE_KEYWORD_FILES_CACHE");
+    private static final Key<ParameterizedCachedValue<Collection<KeywordFile>, ImportFilesCacheParameter>> IMPORTED_LIBRARY_KEYWORD_FILES_CACHE_KEY = Key.create("IMPORTED_LIBRARY_KEYWORD_FILES_CACHE");
+    private static final Key<ParameterizedCachedValue<Collection<KeywordFile>, ImportFilesCacheParameter>> IMPORTED_VARIABLES_KEYWORD_FILES_CACHE_KEY = Key.create(
+            "IMPORTED_VARIABLES_KEYWORD_FILES_CACHE");
+
     private final FileType fileType;
 
     private Collection<DefinedVariable> sectionVariables;
@@ -169,11 +175,12 @@ public class RobotFileImpl extends PsiFileBase implements KeywordFile, RobotFile
         if (importTypes == null || importTypes.length == 0) {
             importTypes = ImportType.values();
         }
+        Collection<KeywordFile> importedKeywordFiles = collectImportFiles(importTypes);
         if (!includeTransitive) {
-            return collectImportFiles(importTypes);
+            return importedKeywordFiles;
         }
         Set<KeywordFile> results = new LinkedHashSet<>();
-        for (KeywordFile keywordFile : collectImportFiles(importTypes)) {
+        for (KeywordFile keywordFile : importedKeywordFiles) {
             collectTransitiveKeywordFiles(keywordFile, results, importTypes);
         }
         return results;
@@ -187,9 +194,24 @@ public class RobotFileImpl extends PsiFileBase implements KeywordFile, RobotFile
             acceptChildren(importFilesCollector);
             importedKeywordFiles = importFilesCollector.getKeywordFileSuppliers();
         }
-        Stream<DisposableSupplier<KeywordFile>> resourceImports = importedKeywordFiles.getOrDefault(ImportType.RESOURCE, Set.of()).stream();
-        Stream<Supplier<KeywordFile>> imports = Arrays.stream(importTypes).flatMap(importType -> importedKeywordFiles.getOrDefault(importType, Set.of()).stream());
-        return Stream.concat(resourceImports, imports).distinct().map(Supplier::get).filter(Objects::nonNull).collect(Collectors.toCollection(LinkedHashSet::new));
+        CachedValuesManager manager = CachedValuesManager.getManager(getProject());
+        return Stream.concat(Stream.of(ImportType.RESOURCE), Arrays.stream(importTypes)).distinct().flatMap(importType -> {
+            var key = switch (importType) {
+                case LIBRARY -> IMPORTED_LIBRARY_KEYWORD_FILES_CACHE_KEY;
+                case VARIABLES -> IMPORTED_VARIABLES_KEYWORD_FILES_CACHE_KEY;
+                case RESOURCE -> IMPORTED_RESOURCE_KEYWORD_FILES_CACHE_KEY;
+            };
+            return manager.getParameterizedCachedValue(this, key, param -> {
+                Collection<KeywordFile> result = param.imports()
+                                                      .getOrDefault(param.importType(), Set.of())
+                                                      .stream()
+                                                      .map(Supplier::get)
+                                                      .filter(Objects::nonNull)
+                                                      .collect(Collectors.toCollection(LinkedHashSet::new));
+                Set<PsiFile> dependencies = Stream.concat(result.stream().map(KeywordFile::getPsiFile), Stream.of(this)).collect(Collectors.toSet());
+                return Result.create(result, dependencies);
+            }, false, new ImportFilesCacheParameter(importType, importedKeywordFiles)).stream();
+        }).collect(Collectors.toSet());
     }
 
     private void collectTransitiveKeywordFiles(KeywordFile keywordFile, Collection<KeywordFile> results, ImportType[] importTypes) {
@@ -227,4 +249,6 @@ public class RobotFileImpl extends PsiFileBase implements KeywordFile, RobotFile
     public String toString() {
         return "Robot: " + getName();
     }
+
+    private record ImportFilesCacheParameter(ImportType importType, Map<ImportType, Set<DisposableSupplier<KeywordFile>>> imports) {}
 }

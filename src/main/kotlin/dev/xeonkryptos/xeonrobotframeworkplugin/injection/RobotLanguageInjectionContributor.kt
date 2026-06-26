@@ -5,7 +5,9 @@ import com.intellij.lang.injection.general.LanguageInjectionContributor
 import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiElement
 import com.intellij.psi.util.PsiTreeUtil
+import com.jetbrains.python.ast.findChildByType
 import com.jetbrains.python.psi.stubs.PyModuleNameIndex
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotConditionalContent
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotDictVariable
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCall
@@ -42,6 +44,9 @@ class RobotLanguageInjectionContributor : LanguageInjectionContributor {
             private set
 
         override fun visitConditionalContent(o: RobotConditionalContent) {
+            @Suppress("UnstableApiUsage")
+            o.findChildByType<RobotPythonExpressionBody>(RobotTypes.PYTHON_EXPRESSION_BODY) ?: return
+
             pythonExpression = true
 
             val inlineModules = computeImportsForPythonExpressionBodies(o.pythonExpressionBodyList)

@@ -253,47 +253,27 @@ public class RobotParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // variable* python_expression_body (python_expression_body | variable)*
+  // (variable | python_expression_body)+
   public static boolean conditional_content(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "conditional_content")) return false;
-    boolean r, p;
+    boolean r;
     Marker m = enter_section_(b, l, _NONE_, CONDITIONAL_CONTENT, "<Condition>");
     r = conditional_content_0(b, l + 1);
-    r = r && python_expression_body(b, l + 1);
-    p = r; // pin = 2
-    r = r && conditional_content_2(b, l + 1);
-    exit_section_(b, l, m, r, p, null);
-    return r || p;
+    while (r) {
+      int c = current_position_(b);
+      if (!conditional_content_0(b, l + 1)) break;
+      if (!empty_element_parsed_guard_(b, "conditional_content", c)) break;
+    }
+    exit_section_(b, l, m, r, false, null);
+    return r;
   }
 
-  // variable*
+  // variable | python_expression_body
   private static boolean conditional_content_0(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "conditional_content_0")) return false;
-    while (true) {
-      int c = current_position_(b);
-      if (!variable(b, l + 1)) break;
-      if (!empty_element_parsed_guard_(b, "conditional_content_0", c)) break;
-    }
-    return true;
-  }
-
-  // (python_expression_body | variable)*
-  private static boolean conditional_content_2(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "conditional_content_2")) return false;
-    while (true) {
-      int c = current_position_(b);
-      if (!conditional_content_2_0(b, l + 1)) break;
-      if (!empty_element_parsed_guard_(b, "conditional_content_2", c)) break;
-    }
-    return true;
-  }
-
-  // python_expression_body | variable
-  private static boolean conditional_content_2_0(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "conditional_content_2_0")) return false;
     boolean r;
-    r = python_expression_body(b, l + 1);
-    if (!r) r = variable(b, l + 1);
+    r = variable(b, l + 1);
+    if (!r) r = python_expression_body(b, l + 1);
     return r;
   }
 

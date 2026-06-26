@@ -41,7 +41,7 @@ abstract class AbstractRobotVariableAnnotator extends RobotAnnotator {
         if (variableName == null) {
             return false;
         }
-        Collection<DefinedVariable> globalVariables = RobotFileManager.getGlobalVariables(variable.getProject());
+        Collection<DefinedVariable> globalVariables = RobotFileManager.getGlobalVariables(variable);
         if (globalVariables.stream().anyMatch(globalVariable -> globalVariable.matches(variableName))) {
             return false;
         }

@@ -1,5 +1,6 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.psi.util;
 
+import com.intellij.openapi.module.Module;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
@@ -212,8 +213,8 @@ public enum VariableScope {
     }
 
     @Nullable
-    public static PsiElement getReferencedPsiElement(@NotNull Project project) {
-        return PythonResolver.findClass("robot.variables.scopes.GlobalVariables", project);
+    public static PsiElement getReferencedPsiElement(@NotNull Project project, @Nullable Module module) {
+        return PythonResolver.findClass("robot.variables.scopes.GlobalVariables", project, module);
     }
 
     public abstract boolean isInScope(@NotNull PsiElement sourceElement, @NotNull PsiElement element);

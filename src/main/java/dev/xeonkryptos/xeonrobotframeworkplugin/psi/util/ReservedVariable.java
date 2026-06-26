@@ -1,10 +1,7 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.psi.util;
 
-import com.intellij.openapi.project.Project;
-import com.intellij.psi.PsiElement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.dto.VariableType;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 public enum ReservedVariable {
 
@@ -83,10 +80,5 @@ public enum ReservedVariable {
     @NotNull
     public VariableType getVariableType() {
         return variableType;
-    }
-
-    @Nullable
-    public final PsiElement getReferencedPsiElement(@NotNull Project project) {
-        return VariableScope.getReferencedPsiElement(project);
     }
 }
