@@ -25,7 +25,7 @@ class BuiltInImportCompletionService(private val project: Project) {
 
     private fun computeBuiltinLibraryCompletions(): List<LookupElementBuilder> =
         RobotFileManager.getCachedRobotSystemFiles(project).keys.asSequence().map { libraryName: String? ->
-            val lookupStrings = arrayOf<String?>(libraryName, WordUtils.capitalize(libraryName), libraryName!!.lowercase(Locale.getDefault()))
+            val lookupStrings = arrayOf(libraryName, WordUtils.capitalize(libraryName), libraryName!!.lowercase(Locale.getDefault()))
             LookupElementBuilder.create(libraryName)
                 .withPresentableText(libraryName)
                 .withLookupStrings(listOf(*lookupStrings))

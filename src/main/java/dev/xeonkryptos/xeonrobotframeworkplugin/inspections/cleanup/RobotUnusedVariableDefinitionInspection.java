@@ -7,21 +7,28 @@ import com.intellij.codeInspection.LocalInspectionToolSession;
 import com.intellij.codeInspection.ProblemHighlightType;
 import com.intellij.codeInspection.ProblemsHolder;
 import com.intellij.openapi.util.Key;
+import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.psi.search.SearchScope;
 import com.intellij.psi.search.searches.ReferencesSearch;
 import com.intellij.psi.util.PsiTreeUtil;
 import dev.xeonkryptos.xeonrobotframeworkplugin.RobotBundle;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.dto.ImportType;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.KeywordFile;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotFile;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariable;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableDefinition;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVisitor;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 public class RobotUnusedVariableDefinitionInspection extends LocalInspectionTool {
 
@@ -43,14 +50,17 @@ public class RobotUnusedVariableDefinitionInspection extends LocalInspectionTool
         }
 
         filterOutUsedVariableDefinitions(variableUsageVisitor);
-        SearchScope scope = GlobalSearchScope.projectScope(problemsHolder.getProject());
+        SearchScope scope = GlobalSearchScope.filesScope(problemsHolder.getProject(), () -> {
+            RobotFile robotFile = (RobotFile) problemsHolder.getFile();
+            List<VirtualFile> importedFiles = robotFile.collectImportedFiles(true, ImportType.VARIABLES).stream().map(KeywordFile::getVirtualFile).collect(Collectors.toCollection(ArrayList::new));
+            importedFiles.add(robotFile.getVirtualFile());
+            return importedFiles;
+        });
         for (RobotVariableDefinition unusedVariableDefinition : variableUsageVisitor.foundVariableDefinitions) {
             @SuppressWarnings("UnstableApiUsage")
             boolean problemDetected = ReferencesSearch.search(unusedVariableDefinition, scope)
                                                       .allowParallelProcessing()
-                                                      .mapping(ref -> PsiTreeUtil.getParentOfType(ref.getElement(),
-                                                                                                  RobotVariable.class,
-                                                                                                  RobotVariableDefinition.class))
+                                                      .mapping(ref -> PsiTreeUtil.getParentOfType(ref.getElement(), RobotVariable.class, RobotVariableDefinition.class))
                                                       .filtering(Objects::nonNull)
                                                       .filtering(element -> {
                                                           ReadWriteAccessDetector detector = ReadWriteAccessDetector.findDetector(element);
