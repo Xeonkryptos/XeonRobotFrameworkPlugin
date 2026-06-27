@@ -16,6 +16,7 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordsSection
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLocalSetting;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLocalSettingId;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotParameter;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotPositionalArgument;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotSettingsSection;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTaskStatement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTasksSection;
@@ -38,10 +39,7 @@ public class RobotCompletionContributor extends CompletionContributor {
     public RobotCompletionContributor() {
         extend(CompletionType.BASIC, psiElement().without(indented()).inFile(psiElement(RobotFile.class)), new SectionCompletionProvider());
         extend(CompletionType.BASIC,
-               psiElement().without(indented())
-                           .andNot(or(psiComment(), psiElement(RobotTypes.VARIABLE_BODY)))
-                           .inside(true, instanceOf(RobotSettingsSection.class))
-                           .inFile(psiElement(RobotFile.class)),
+               psiElement().without(indented()).andNot(or(psiComment(), psiElement(RobotTypes.VARIABLE_BODY))).inside(true, instanceOf(RobotSettingsSection.class)).inFile(psiElement(RobotFile.class)),
                new SettingsKeywordCompletionProvider());
         extend(CompletionType.BASIC,
                psiElement().andNot(insideCommentOrInnerElement())
@@ -97,6 +95,12 @@ public class RobotCompletionContributor extends CompletionContributor {
                            .andNot(psiElement().inside(true, or(instanceOf(RobotParameter.class), instanceOf(RobotTemplateParameter.class))))
                            .inFile(psiElement(RobotFile.class)),
                new KeywordParametersCompletionProvider());
+        extend(CompletionType.BASIC,
+               psiElement().with(indented())
+                           .andOr(psiElement(RobotTypes.LITERAL_CONSTANT), psiElement(RobotTypes.TEMPLATE_ARGUMENT_VALUE))
+                           .inside(true, instanceOf(RobotPositionalArgument.class))
+                           .inside(true, instanceOf(RobotParameter.class)),
+               new PositionalArgumentProvider());
         // Provide completions in context of variables or arguments
         extend(CompletionType.BASIC,
                psiElement().with(indented())
