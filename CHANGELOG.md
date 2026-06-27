@@ -9,6 +9,7 @@
 - A new line for the new intentions to insert obligatory and missing parameters or all other optional ones isn't necessary anymore to get the intentions
 - Robot version detection checks are reduced to an absolute minimum
 - Improved Python class lookup logic to improve overall plugin performance and reduce the CPU usage
+- Add enum values in code completion in an earlier stage to allow higher sorting as right now
 
 ### Fixed
 
