@@ -9,6 +9,7 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.lexer.RobotLexingConstants.TAB_C
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTemplateKeywordLexer
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.LOCAL_SETTING_START
+import kotlin.math.max
 
 enum class RobotSectionType {
     SETTINGS, VARIABLES, TEST_CASES, TASKS, KEYWORDS, COMMENTS, INVALID
@@ -230,10 +231,6 @@ abstract class RobotMultiLingualFlexLexerBase @JvmOverloads constructor(protecte
         localTemplateEnabled = true
     }
 
-    protected fun markLocalTemplateParsingEnabled() {
-        localTemplateEnabled = true
-    }
-
     protected fun markLocalTemplateParsingDisabled() {
         localTemplateEnabled = false
     }
@@ -278,7 +275,8 @@ abstract class RobotMultiLingualFlexLexerBase @JvmOverloads constructor(protecte
             }
             lengthToKeep++
         }
-        yypushback(totalLength - lengthToKeep)
+        val pushbackLength = max(0, totalLength - lengthToKeep - 1)
+        yypushback(pushbackLength)
     }
 
     private class RobotMultiLingualStateHandler<T>(val sourceType: T, private val switchStateCallable: (targetState: Int) -> IElementType?) {
