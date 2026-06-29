@@ -1,5 +1,6 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.completion;
 
+import com.intellij.application.options.CodeStyle;
 import com.intellij.codeInsight.TailTypes;
 import com.intellij.codeInsight.completion.CompletionParameters;
 import com.intellij.codeInsight.completion.CompletionProvider;
@@ -16,7 +17,7 @@ import com.intellij.psi.stubs.StubIndex;
 import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.util.ProcessingContext;
 import com.intellij.util.Processor;
-import dev.xeonkryptos.xeonrobotframeworkplugin.config.RobotOptionsProvider;
+import dev.xeonkryptos.xeonrobotframeworkplugin.formatter.RobotCodeStyleSettings;
 import dev.xeonkryptos.xeonrobotframeworkplugin.index.PyRobotKeywordDefinitionIndex.PyRobotKeywordDefinitionIndexUtil;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.dto.ImportType;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.DefinedKeyword;
@@ -62,8 +63,8 @@ class KeywordCompletionProvider extends CompletionProvider<CompletionParameters>
             virtualFile = robotFile.getOriginalFile().getVirtualFile();
         }
 
-        RobotOptionsProvider robotOptionsProvider = RobotOptionsProvider.getInstance(project);
-        boolean capitalizeKeywords = robotOptionsProvider.capitalizeKeywords();
+        RobotCodeStyleSettings customSettings = CodeStyle.getCustomSettings(robotFile, RobotCodeStyleSettings.class);
+        boolean capitalizeKeywords = customSettings.CAPITALIZE_KEYWORDS;
 
         Stream<VirtualFile> importedFilesStream = robotFile.collectImportedFiles(true, ImportType.LIBRARY).stream().map(KeywordFile::getVirtualFile);
         Set<VirtualFile> virtualFiles = Stream.concat(Stream.of(virtualFile), importedFilesStream).collect(Collectors.toSet());
@@ -73,7 +74,7 @@ class KeywordCompletionProvider extends CompletionProvider<CompletionParameters>
 
         collectUserKeywords(project, searchScope, definedKeywords);
 
-        Collection<DefinedKeyword> constructedPythonKeywords = PyRobotKeywordDefinitionIndexUtil.getKeywordNames(project, searchScope, null);
+        Collection<DefinedKeyword> constructedPythonKeywords = PyRobotKeywordDefinitionIndexUtil.getKeywordNames(project, searchScope, null, robotFile);
         definedKeywords.addAll(constructedPythonKeywords);
 
         Collection<LookupElement> wrappedKeywords = wrapDefinedKeywordsIntoLookupElements(definedKeywords, capitalizeKeywords);

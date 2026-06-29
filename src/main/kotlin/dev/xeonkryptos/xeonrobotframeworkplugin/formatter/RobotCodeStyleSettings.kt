@@ -104,4 +104,12 @@ class RobotCodeStyleSettings(container: CodeStyleSettings) : CustomCodeStyleSett
 
     @JvmField
     var BLANK_LINES_AFTER_LOCAL_SETTINGS: Int = 0
+
+    // ################# Custom Language Settings ###################
+
+    @JvmField
+    var MULTILINE_INDENTATION: Boolean = true
+
+    @JvmField
+    var CAPITALIZE_KEYWORDS: Boolean = true
 }

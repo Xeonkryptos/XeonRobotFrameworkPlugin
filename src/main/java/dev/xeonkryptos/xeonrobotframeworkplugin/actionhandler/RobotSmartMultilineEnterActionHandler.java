@@ -19,11 +19,10 @@ import com.intellij.psi.codeStyle.CommonCodeStyleSettings;
 import com.intellij.psi.codeStyle.CommonCodeStyleSettings.IndentOptions;
 import com.intellij.psi.tree.TokenSet;
 import com.intellij.psi.util.PsiTreeUtil;
-import dev.xeonkryptos.xeonrobotframeworkplugin.config.RobotOptionsProvider;
-import dev.xeonkryptos.xeonrobotframeworkplugin.formatter.RobotCodeStyleSettings;
 import dev.xeonkryptos.xeonrobotframeworkplugin.fileTypes.RobotFeatureFileType;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotLanguage;
 import dev.xeonkryptos.xeonrobotframeworkplugin.fileTypes.RobotResourceFileType;
+import dev.xeonkryptos.xeonrobotframeworkplugin.formatter.RobotCodeStyleSettings;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotLanguage;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCall;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLocalArgumentsSetting;
@@ -50,8 +49,8 @@ public class RobotSmartMultilineEnterActionHandler extends EnterHandlerDelegateA
                                   EditorActionHandler originalHandler) {
         FileType fileType = file.getFileType();
         if (fileType == RobotFeatureFileType.getInstance() || fileType == RobotResourceFileType.getInstance()) {
-            RobotOptionsProvider robotOptionsProvider = RobotOptionsProvider.getInstance(file.getProject());
-            if (!robotOptionsProvider.multilineIndentation()) {
+            RobotCodeStyleSettings customSettings = CodeStyle.getCustomSettings(file, RobotCodeStyleSettings.class);
+            if (!customSettings.MULTILINE_INDENTATION) {
                 return Result.Continue;
             }
 

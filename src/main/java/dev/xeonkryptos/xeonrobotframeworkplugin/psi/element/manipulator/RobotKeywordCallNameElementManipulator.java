@@ -18,7 +18,7 @@ public class RobotKeywordCallNameElementManipulator extends AbstractElementManip
                                                                                                                                                  IncorrectOperationException {
         String original = keywordCallName.getText();
         Project project = keywordCallName.getProject();
-        newText = KeywordUtil.getInstance(project).functionToKeyword(newText);
+        newText = KeywordUtil.getInstance().functionToKeyword(newText, keywordCallName.getContainingFile());
         String newContent = textRange.replace(original, newText);
 
         RobotKeywordCallName newKeywordCallName = RobotElementGenerator.getInstance(project).createNewKeywordCallName(newContent);

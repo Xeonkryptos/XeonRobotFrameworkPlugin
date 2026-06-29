@@ -52,7 +52,7 @@ public class WeirdlyNamedElementsInspection extends LocalInspectionTool {
                         expectedName = decoratorDefinedNameOpt.filter(literal -> !literal.trim().equalsIgnoreCase(finalizedCallName)).orElse(null);
                     } else {
                         expectedName = Optional.ofNullable(pyFunction.getName())
-                                               .map(functionName -> KeywordUtil.getInstance(pyFunction.getProject()).functionToKeyword(functionName))
+                                               .map(functionName -> KeywordUtil.getInstance().functionToKeyword(functionName, o.getContainingFile()))
                                                .filter(name -> !name.trim().equalsIgnoreCase(finalizedCallName))
                                                .orElse(null);
                     }

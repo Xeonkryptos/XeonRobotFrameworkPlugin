@@ -3,6 +3,7 @@ package dev.xeonkryptos.xeonrobotframeworkplugin.index
 import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
+import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiManager
 import com.intellij.psi.search.GlobalSearchScope
 import com.intellij.psi.util.PsiTreeUtil
@@ -73,9 +74,7 @@ class PyRobotKeywordDefinitionIndex : FileBasedIndexExtension<String, PyRobotKey
         }
 
         @JvmStatic
-        fun getKeywordNames(
-            project: Project, scope: GlobalSearchScope = GlobalSearchScope.projectScope(project), libraryName: String? = null
-        ): Collection<DefinedKeyword> {
+        fun getKeywordNames(project: Project, scope: GlobalSearchScope = GlobalSearchScope.projectScope(project), libraryName: String? = null, file: PsiFile): Collection<DefinedKeyword> {
             val fileBasedIndex = FileBasedIndex.getInstance()
             val fileKeys = mutableSetOf<String>()
 
@@ -95,7 +94,7 @@ class PyRobotKeywordDefinitionIndex : FileBasedIndexExtension<String, PyRobotKey
                         ProgressManager.checkCanceled()
                         val elementAt = pyFile.findElementAt(offset.coerceAtMost(pyFile.textLength - 1))
                         val pyFunction = PsiTreeUtil.getParentOfType(elementAt, PyFunction::class.java, false) ?: continue
-                        RobotPyUtil.getPythonKeywordName(pyFunction).ifPresent(Consumer { keywordName ->
+                        RobotPyUtil.getPythonKeywordName(pyFunction, file).ifPresent(Consumer { keywordName ->
                             result += KeywordDto(pyFunction, libraryName, keywordName, pyFunction.parameterList)
                         })
                     }

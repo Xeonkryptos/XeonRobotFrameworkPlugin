@@ -26,7 +26,12 @@ class RobotCodeStyleSettingsProvider : CodeStyleSettingsProvider() {
             override fun getHelpTopic(): @NonNls String = "reference.settingsdialog.codestyle.robot"
         }
 
-    private class RobotCodeStyleMainPanel(currentSettings: CodeStyleSettings, settings: CodeStyleSettings) : TabbedLanguageCodeStylePanel(RobotLanguage.INSTANCE, currentSettings, settings)
+    private class RobotCodeStyleMainPanel(currentSettings: CodeStyleSettings, settings: CodeStyleSettings) : TabbedLanguageCodeStylePanel(RobotLanguage.INSTANCE, currentSettings, settings) {
+        override fun initTabs(settings: CodeStyleSettings) {
+            super.initTabs(settings)
+            addTab(RobotCustomFormattingPanel(settings))
+        }
+    }
 
     override fun getLanguage(): Language = RobotLanguage.INSTANCE
 }
