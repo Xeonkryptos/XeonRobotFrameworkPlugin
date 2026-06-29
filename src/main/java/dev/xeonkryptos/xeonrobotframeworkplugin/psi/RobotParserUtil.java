@@ -20,10 +20,12 @@ public class RobotParserUtil extends GeneratedParserUtilBase {
     private static final Key<Boolean> LOCAL_TEMPLATE_SETTING_KEY = Key.create("LOCAL_TEMPLATE_SETTING_KEY");
     private static final Key<Boolean> LOCAL_TEMPLATE_SETTING_RESET_OVERRIDE_KEY = Key.create("LOCAL_TEMPLATE_SETTING_RESET_OVERRIDE_KEY");
 
-    private static final Pattern TEMPLATE_LOCAL_SETTING_NAME_PATTERN = Pattern.compile("\\[\\s*Template\\s*].*");
+    // TODO: Need to be translatable, too
+    private static final Pattern TEMPLATE_LOCAL_SETTING_NAME_PATTERN = Pattern.compile("\\[\\s*Template\\s*].*", Pattern.CASE_INSENSITIVE);
 
     public static final Hook<Void> CLEAR_TEMPLATE_STATE_HOOK = (builder, marker, param) -> {
         builder.putUserData(LOCAL_TEMPLATE_SETTING_KEY, false);
+        builder.putUserData(LOCAL_TEMPLATE_SETTING_RESET_OVERRIDE_KEY, false);
         return marker;
     };
     public static final Hook<Void> LOCAL_TEMPLATE_DEFINITION_HOOK = (builder, marker, param) -> {

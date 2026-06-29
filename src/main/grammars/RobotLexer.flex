@@ -275,7 +275,7 @@ LineComment = {LineCommentSign} {NON_EOL}*
 
 <SETTING, SETTING_VALUES, VARIABLE_DEFINITION_ARGUMENTS, KEYWORD_ARGUMENTS, KEYWORD_CALL, USER_KEYWORD_RETURN_STATEMENT, FOR_STRUCTURE_LOOP_START, FOR_STRUCTURE_LOOP, WHILE_CONFIGURATION, SIMPLE_CONTROL_STRUCTURE, LITERAL_CONSTANT_ONLY, VARIABLE_DEFINITION, INLINE_VARIABLE_DEFINITION, SETTING_TEMPLATE_START> {
     {EOL} {NonNewlineWhitespace}* ({LineComment} ({EOL} {NonNewlineWhitespace}*)+)+ {MultiLineContinuation}                 { enterNewState(IN_CONTINUATION); pushBackEverythingExceptLeadingWhitespace(); return WHITE_SPACE; }
-    {EOL} {NonNewlineWhitespace}* {LineComment} ({EOL} {NonNewlineWhitespace}*)+ .?                                         { enterNewState(FAKE_MULTILINE); yypushback(yylength()); break; }
+    {EOL} {NonNewlineWhitespace}* {LineComment} ({EOL} {NonNewlineWhitespace}*)+ .?                                         { enterNewState(FAKE_MULTILINE); pushBackEverythingExceptLeadingWhitespace(); return WHITE_SPACE; }
 
     {SpaceBasedEndMarker} {NonNewlineWhitespace}* ({LineComment} ({EOL} {NonNewlineWhitespace}*)+)+ {MultiLineContinuation} { enterNewState(IN_CONTINUATION); pushBackEverythingExceptLeadingWhitespace(); return WHITE_SPACE; }
     {SpaceBasedEndMarker} {NonNewlineWhitespace}* {LineComment} ({EOL} {NonNewlineWhitespace}*)+ .?                         { pushBackEverythingExceptLeadingWhitespace(); enterNewState(SAME_LINE_FAKE_MULTILINE); return WHITE_SPACE; }
@@ -284,8 +284,9 @@ LineComment = {LineCommentSign} {NON_EOL}*
 }
 
 <FAKE_MULTILINE, SAME_LINE_FAKE_MULTILINE>  {
-    {EOL}                { handleStateChangeOnFakeMultilineDetection(); return EOL; }
-    {LineComment}        { return COMMENT; }
+    {EOL}                                                   { handleStateChangeOnFakeMultilineDetection(); return EOL; }
+    {EOL} {NonNewlineWhitespace}* {LineComment}             { pushBackEverythingExceptLeadingWhitespace(); return WHITE_SPACE; }
+    {LineComment}                                           { return COMMENT; }
 }
 <AFTER_COMMENT>   {
     {WhitespaceIncludingNewline}+                           { leaveState(); return WHITE_SPACE; }
@@ -584,6 +585,7 @@ LineComment = {LineCommentSign} {NON_EOL}*
         }
         break;
     }
+    ^ {NonNewlineWhitespace} {NonNewlineWhitespace}+ [^\[#\s]{1}     { enterNewState(TEMPLATE_ARGUMENTS); yypushback(yylength()); break; }
 }
 
 <FOR_STRUCTURE>  {

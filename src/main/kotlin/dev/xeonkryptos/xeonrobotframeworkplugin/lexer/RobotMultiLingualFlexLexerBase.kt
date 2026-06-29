@@ -164,19 +164,19 @@ abstract class RobotMultiLingualFlexLexerBase @JvmOverloads constructor(protecte
     }
 
     protected fun switchLocalSetting(): IElementType? {
-        val localSettingName = computeLocalSettingName()
+        val localSettingName = extractLocalSettingName()
         val localSetting = defaultLanguageLocalSettingNames.getOrDefault(localSettingName, intermediateTemplateLocalSettingHandler)
         val nextStateId = getLocalSettingStateId(localSetting.sourceType)
         return localSetting.switchState(nextStateId)
     }
 
-    private fun computeLocalSettingName(): CharSequence {
-        val sourceText = yytext()
-        return sourceText.substring(1, sourceText.length - 1).trim()
+    private fun extractLocalSettingName(): CharSequence {
+        val sourceText = yytext().trim()
+        return sourceText.substring(1, sourceText.length - 1).lowercase()
     }
 
     protected fun switchPotentialKeyword(): IElementType? {
-        val keywordName = yytext()
+        val keywordName = yytext().toString().trim().lowercase()
         val stateHandler = defaultLanguageBehaviourDrivenIdentifierNames.getOrDefault(keywordName, normalKeywordHandler)
         val nextStateId = getKeywordStateId(stateHandler.sourceType)
         return stateHandler.switchState(nextStateId)
@@ -315,11 +315,15 @@ abstract class RobotMultiLingualFlexLexerBase @JvmOverloads constructor(protecte
     private inner class LocalTemplateSettingStateSwitcher {
 
         fun switchState(targetState: Int): IElementType? {
-            val localSettingName = computeLocalSettingName()
-            if (localSettingName != "template" || isTemplateSupportingState(yystate())) return invalidLocalSettingHandler.switchState(targetState)
+            val localSettingName = extractLocalSettingName()
+            if (localSettingName != "template" || !isTemplateSupportingState(yystate())) return invalidLocalSettingHandler.switchState(targetState)
 
             val lexer = RobotTemplateKeywordLexer()
-            lexer.reset(buffer, tokenEnd, endPosition, 0)
+            var startDiff = 0
+            for (i in (tokenStart.until(tokenEnd)).reversed()) {
+                if (Character.isWhitespace(buffer[i])) startDiff++ else break
+            }
+            lexer.reset(buffer, tokenEnd - startDiff, endPosition, 0)
             val parseResult = lexer.advance() ?: return invalidLocalSettingHandler.switchState(targetState)
 
             yypushback(yylength() - 1)

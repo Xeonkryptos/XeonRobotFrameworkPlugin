@@ -71,15 +71,7 @@ tasks_header ::= TASKS_HEADER_NAME DATA_DRIVEN_COLUMN_NAME*
 
 variable_statements ::= single_variable_statement+
 
-fake global_setting_statement ::= import_settings
-    | metadata_settings
-    | documentation_statement_global_setting
-    | suite_name_statement_global_setting
-    | setup_teardown_settings
-    | tags_statement_global_setting
-    | template_statements_global_setting_wrapper
-    | timeout_statements_global_setting
-    | unknown_setting_statements_global_setting {
+fake global_setting_statement ::= setting_statement {
     implements=["dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotFoldable" "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotMultiLineContainerElement"]
     mixin="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotGlobalSettingExtension"
     name="Resource, Library, Variables, Metadata, Documentation, Name, Suite (Setup | Teardown), Force Tags, (Test | Task) Template, (Test | Task) Timeout"
@@ -136,7 +128,7 @@ documentation_statement_global_setting ::= DOCUMENTATION_KEYWORD LITERAL_CONSTAN
 }
 metadata_statement_global_setting ::= METADATA_KEYWORD positional_argument positional_argument eol_marker {
     pin=1
-    methods = [nameElement="METADATA_KEYWORD" metadataName="literal_constant_value" metadataValue="positional_argument"]
+    methods = [nameElement="METADATA_KEYWORD" metadataName="positional_argument[0]" metadataValue="positional_argument[1]"]
 }
 setup_teardown_statements_global_setting ::= SETUP_TEARDOWN_STATEMENT_KEYWORDS (eol_based_keyword_call | variable) {
     pin=1
