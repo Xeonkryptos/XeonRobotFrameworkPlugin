@@ -96,6 +96,7 @@ public class RobotRunConfiguration extends LocatableConfigurationBase<Element>
         super.readExternal(element);
 
         pythonRunConfiguration.readExternal(element);
+        pythonRunConfiguration.setShowCommandLineAfterwards(false);
 
         testCases = deserializeList(element, TEST_CASE_NAME);
         tasks = deserializeList(element, TASK_NAME);
@@ -106,6 +107,7 @@ public class RobotRunConfiguration extends LocatableConfigurationBase<Element>
     public void writeExternal(@NotNull Element element) throws WriteExternalException {
         super.writeExternal(element);
 
+        pythonRunConfiguration.setShowCommandLineAfterwards(false);
         pythonRunConfiguration.writeExternal(element);
 
         serializeList(element, testCases, TEST_CASE_NAME);

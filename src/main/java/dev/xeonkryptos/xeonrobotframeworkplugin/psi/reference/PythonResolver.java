@@ -5,9 +5,12 @@ import com.intellij.openapi.module.ModuleUtil;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.roots.ProjectRootModificationTracker;
 import com.intellij.openapi.util.Key;
+import com.intellij.openapi.util.Ref;
 import com.intellij.openapi.util.SystemInfo;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
+import com.intellij.psi.search.GlobalSearchScope;
+import com.intellij.psi.stubs.StubIndex;
 import com.intellij.psi.util.CachedValue;
 import com.intellij.psi.util.CachedValueProvider.Result;
 import com.intellij.psi.util.CachedValuesManager;
@@ -22,8 +25,6 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.util.RobotNames;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -39,7 +40,7 @@ public class PythonResolver {
             Project project = psiFile.getProject();
             return CachedValuesManager.getManager(project).getCachedValue(module, BUILT_IN_LIBRARY_CACHE_KEY, () -> {
                 ProjectRootModificationTracker projectRootModificationTracker = ProjectRootModificationTracker.getInstance(project);
-                PyClass builtIn = PythonResolver.findClass(RobotNames.BUILTIN_FULL_PYTHON_NAMESPACE, project);
+                PyClass builtIn = PythonResolver.findClass(RobotNames.BUILTIN_FULL_PYTHON_NAMESPACE, project, module);
                 if (builtIn != null) {
                     return Result.createSingleDependency(builtIn, projectRootModificationTracker);
                 }
@@ -50,7 +51,7 @@ public class PythonResolver {
     }
 
     @Nullable
-    public static PsiElement resolveElement(@NotNull String elementName, @NotNull Project project) {
+    public static PsiElement resolveElement(@NotNull String elementName, @NotNull Project project, @Nullable Module module) {
         Map<String, PsiFile> cachedFiles = RobotFileManager.getCachedRobotSystemFiles(project);
         if (elementName.startsWith("robot.libraries.")) {
             elementName = elementName.replace("robot.libraries.", "");
@@ -59,17 +60,17 @@ public class PythonResolver {
             return cachedFiles.get(elementName);
         }
 
-        PyClass pyClass = findClass(elementName, project);
+        PyClass pyClass = findClass(elementName, project, module);
         if (pyClass != null) {
             return pyClass;
         }
 
-        PyFile pyFile = findModule(elementName, project);
+        PyFile pyFile = findModule(elementName, project, module);
         if (pyFile != null) {
             for (PyImportStatementBase importStatement : pyFile.getImportBlock()) {
                 for (String fullyQualifiedName : importStatement.getFullyQualifiedObjectNames()) {
                     if (elementName.equals(fullyQualifiedName)) {
-                        PyClass importedClass = findClass(elementName + "." + elementName, project);
+                        PyClass importedClass = findClass(elementName + "." + elementName, project, module);
                         if (importedClass != null) {
                             return importedClass;
                         }
@@ -79,71 +80,69 @@ public class PythonResolver {
             return pyFile;
         }
 
-        String shortName = extractShortName(elementName);
-        Collection<PyClass> classes = PyClassNameIndex.find(shortName, project, true);
-        List<PyClass> matchingClasses = new ArrayList<>();
-
-        for (PyClass cls : classes) {
-            String className = cls.getName();
-            if (className != null && className.equals(elementName)) {
-                matchingClasses.add(cls);
-            } else {
-                String qualifiedName = cls.getQualifiedName();
-                if (qualifiedName != null && elementName.contains(".")) {
-                    QualifiedName elementQualifiedName = QualifiedName.fromDottedString(elementName);
-                    QualifiedName classQualifiedName = QualifiedName.fromDottedString(qualifiedName);
-
-                    if (Objects.equals(elementQualifiedName.getFirstComponent(), classQualifiedName.getFirstComponent())
-                        && Objects.equals(elementQualifiedName.getLastComponent(), classQualifiedName.getLastComponent())) {
-                        matchingClasses.add(cls);
-                    }
-                }
-            }
-        }
-        return matchingClasses.isEmpty() ? null : matchingClasses.getFirst();
+        return findClassWithShortName(elementName, project, module);
     }
 
     @Nullable
-    public static PyFile findModule(@NotNull String moduleName, @NotNull Project project) {
-        List<PyFile> modules = PyModuleNameIndex.findByQualifiedName(QualifiedName.fromDottedString(moduleName),
-                                                                     project,
-                                                                     PySearchUtilBase.excludeSdkTestsScope(project));
-        for (PyFile pyFile : modules) {
-            if (pyFile.isValid()) {
-                return pyFile;
-            }
+    public static PyFile findModule(@NotNull String moduleName, @NotNull Project project, @Nullable Module module) {
+        GlobalSearchScope scope = module != null ? createPyElementGlobalSearchScope(project, module) : PySearchUtilBase.excludeSdkTestsScope(project);
+        List<PyFile> modules = PyModuleNameIndex.findByQualifiedName(QualifiedName.fromDottedString(moduleName), project, scope);
+        if (!modules.isEmpty()) {
+            return modules.getFirst();
         }
         return null;
     }
 
     @Nullable
-    public static PyClass findClass(@NotNull String name, @NotNull Project project) {
+    public static PyClass findClass(@NotNull String name, @NotNull Project project, @Nullable Module module) {
         String shortName = extractShortName(name);
-        Collection<PyClass> classes = PyClassNameIndex.find(shortName, project, true);
 
-        List<PyClass> matchedByNames = new ArrayList<>();
-        for (PyClass pyClass : classes) {
+        Ref<PyClass> matchingClassRef = Ref.create();
+        GlobalSearchScope scope = module != null ? createPyElementGlobalSearchScope(project, module) : PySearchUtilBase.excludeSdkTestsScope(project);
+        StubIndex.getInstance().processElements(PyClassNameIndex.KEY, shortName, project, scope, PyClass.class, pyClass -> {
             String qName = pyClass.getQualifiedName();
-            if (qName != null) {
-                if (qName.equals(name) || !SystemInfo.isFileSystemCaseSensitive && qName.equalsIgnoreCase(name)) {
-                    matchedByNames.add(pyClass);
-                } else if (qName.equals(name + "." + shortName) || !SystemInfo.isFileSystemCaseSensitive && qName.equalsIgnoreCase(name + "." + shortName)) {
-                    matchedByNames.add(pyClass);
-                }
+            boolean relevantPyClass = qName != null && (qName.equals(name) || !SystemInfo.isFileSystemCaseSensitive && qName.equalsIgnoreCase(name) || qName.equals(name + "." + shortName)
+                                                        || !SystemInfo.isFileSystemCaseSensitive && qName.equalsIgnoreCase(name + "." + shortName));
+            if (relevantPyClass) {
+                matchingClassRef.set(pyClass);
+                return false;
             }
-        }
+            return true;
+        });
+        return matchingClassRef.get();
+    }
 
-        if (matchedByNames.isEmpty()) {
-            return null;
-        } else {
-            PyClass matchedByName = null;
-            for (PyClass pyClass : matchedByNames) {
-                if (pyClass.getContainingFile().getName().endsWith(".pyi")) {
-                    matchedByName = pyClass;
+    @Nullable
+    public static PyClass findClassWithShortName(@NotNull String elementName, @NotNull Project project, @Nullable Module module) {
+        String shortName = extractShortName(elementName);
+
+        Ref<PyClass> matchingClassRef = Ref.create();
+        GlobalSearchScope scope = module != null ? createPyElementGlobalSearchScope(project, module) : PySearchUtilBase.excludeSdkTestsScope(project);
+        StubIndex.getInstance().processElements(PyClassNameIndex.KEY, shortName, project, scope, PyClass.class, pyClass -> {
+            String className = pyClass.getName();
+            if (className != null && className.equals(elementName)) {
+                matchingClassRef.set(pyClass);
+                return false;
+            } else {
+                String qualifiedName = pyClass.getQualifiedName();
+                if (qualifiedName != null && elementName.contains(".")) {
+                    QualifiedName elementQualifiedName = QualifiedName.fromDottedString(elementName);
+                    QualifiedName classQualifiedName = QualifiedName.fromDottedString(qualifiedName);
+
+                    if (Objects.equals(elementQualifiedName.getFirstComponent(), classQualifiedName.getFirstComponent()) && Objects.equals(elementQualifiedName.getLastComponent(),
+                                                                                                                                           classQualifiedName.getLastComponent())) {
+                        matchingClassRef.set(pyClass);
+                        return false;
+                    }
                 }
             }
-            return matchedByName != null ? matchedByName : matchedByNames.getFirst();
-        }
+            return true;
+        });
+        return matchingClassRef.get();
+    }
+
+    private static GlobalSearchScope createPyElementGlobalSearchScope(Project project, Module module) {
+        return GlobalSearchScope.moduleWithDependenciesAndLibrariesScope(module, false).uniteWith(GlobalSearchScope.projectScope(project));
     }
 
     @NotNull

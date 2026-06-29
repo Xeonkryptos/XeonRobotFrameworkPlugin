@@ -8,7 +8,6 @@ import com.intellij.openapi.project.DumbService.DumbModeListener;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.impl.source.resolve.ResolveCache;
 import com.intellij.util.messages.MessageBusConnection;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.reference.ProjectFileCache;
 
 @Service(Level.PROJECT)
 public final class RobotListenerMgr implements Disposable {
@@ -31,7 +30,6 @@ public final class RobotListenerMgr implements Disposable {
             @Override
             public void exitDumbMode() {
                 // Clearing library references after re-index
-                ProjectFileCache.clearProjectCache(project);
                 ResolveCache resolveCache = project.getService(ResolveCache.class);
                 resolveCache.clearCache(true);
             }

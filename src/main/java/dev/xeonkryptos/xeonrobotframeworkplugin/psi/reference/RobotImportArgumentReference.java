@@ -100,7 +100,8 @@ public class RobotImportArgumentReference extends PsiPolyVariantReferenceBase<Ro
                     results.add(new PsiElementResolveResult(resourceFile));
                 } else {
                     // File not directly found in file system. Try to find it in module search path (e.g. for classes or modules)
-                    PsiElement result = PythonResolver.resolveElement(argumentValue, project);
+                    Module moduleForPsiElement = ModuleUtilCore.findModuleForPsiElement(element);
+                    PsiElement result = PythonResolver.resolveElement(argumentValue, project, moduleForPsiElement);
                     if (result != null) {
                         results.add(new PsiElementResolveResult(result));
                     }

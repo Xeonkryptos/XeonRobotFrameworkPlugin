@@ -132,8 +132,7 @@ class VariableCompletionProvider extends CompletionProvider<CompletionParameters
     }
 
     private void addGlobalVariables(@NotNull CompletionResultSet result, @NotNull PsiElement element, boolean wrapVariableNames) {
-        Project project = element.getProject();
-        Collection<DefinedVariable> globalVariables = RobotFileManager.getGlobalVariables(project);
+        Collection<DefinedVariable> globalVariables = RobotFileManager.getGlobalVariables(element);
         Collection<LookupElement> lookupElements = wrapDefinedVariables(globalVariables, element, wrapVariableNames);
         lookupElements.forEach(lookupElement -> lookupElement.putUserData(CompletionKeys.ROBOT_LOOKUP_ELEMENT_TYPE, RobotLookupElementType.VARIABLE));
         result.addAllElements(lookupElements);

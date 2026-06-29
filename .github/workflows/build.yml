@@ -40,7 +40,6 @@ jobs:
           distribution: jetbrains
           java-version: 21
           cache: gradle
-          token: ${{ secrets.GITHUB_TOKEN }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -78,7 +77,6 @@ jobs:
           distribution: jetbrains
           java-version: 21
           cache: gradle
-          token: ${{ secrets.GITHUB_TOKEN }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -167,12 +165,15 @@ jobs:
         with:
           distribution: jetbrains
           java-version: 21
-          token: ${{ secrets.GITHUB_TOKEN }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v6.1.0
         with:
           cache-read-only: true
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Make gradlew executable
         run: chmod +x ./gradlew

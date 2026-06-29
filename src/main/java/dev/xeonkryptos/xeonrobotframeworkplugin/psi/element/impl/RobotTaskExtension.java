@@ -6,6 +6,8 @@ import com.intellij.openapi.editor.Document;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.stubs.IStubElementType;
 import com.intellij.util.IncorrectOperationException;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.DataDrivenStatement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTaskId;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTaskStatement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.folding.RobotFoldingComputationUtil;
@@ -16,7 +18,7 @@ import org.jetbrains.annotations.NotNull;
 
 import javax.swing.Icon;
 
-public abstract class RobotTaskExtension extends RobotStubPsiElementBase<RobotTaskStatementStub, RobotTaskStatement> implements RobotTaskStatement {
+public abstract class RobotTaskExtension extends RobotStubPsiElementBase<RobotTaskStatementStub, RobotTaskStatement> implements RobotTaskStatement, DataDrivenStatement {
 
     public RobotTaskExtension(@NotNull ASTNode node) {
         super(node);
@@ -33,6 +35,12 @@ public abstract class RobotTaskExtension extends RobotStubPsiElementBase<RobotTa
         }
         var foldingDescriptor = RobotFoldingComputationUtil.computeFoldingDescriptorForContainer(this, getTaskId(), document);
         return foldingDescriptor != null ? new FoldingDescriptor[] { foldingDescriptor } : FoldingDescriptor.EMPTY_ARRAY;
+    }
+
+    @Override
+    public boolean isDataDrivenStatement() {
+        RobotTaskId taskId = getTaskId();
+        return taskId.getLastChild() != null && taskId.getLastChild().getNode().getElementType() == RobotTypes.EOS;
     }
 
     @NotNull

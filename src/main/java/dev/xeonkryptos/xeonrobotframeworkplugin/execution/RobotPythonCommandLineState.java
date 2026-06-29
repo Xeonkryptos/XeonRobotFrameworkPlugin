@@ -7,7 +7,6 @@ import com.intellij.execution.Executor;
 import com.intellij.execution.configurations.ParametersList;
 import com.intellij.execution.configurations.ParamsGroup;
 import com.intellij.execution.executors.DefaultDebugExecutor;
-import com.intellij.execution.executors.DefaultRunExecutor;
 import com.intellij.execution.process.ProcessEvent;
 import com.intellij.execution.process.ProcessHandler;
 import com.intellij.execution.runners.ExecutionEnvironment;
@@ -25,15 +24,11 @@ import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.openapi.vfs.VfsUtilCore;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.util.ArrayUtil;
-import com.jetbrains.python.actions.PyExecuteInConsole;
-import com.jetbrains.python.actions.PyRunFileInConsoleAction;
-import com.jetbrains.python.console.PyConsoleOptions;
 import com.jetbrains.python.extensions.ContextAnchor;
 import com.jetbrains.python.extensions.ModuleBasedContextAnchor;
 import com.jetbrains.python.extensions.ProjectSdkContextAnchor;
 import com.jetbrains.python.run.CommandLinePatcher;
 import com.jetbrains.python.run.PythonCommandLineState;
-import com.jetbrains.python.run.PythonConsoleScripts;
 import com.jetbrains.python.run.PythonExecution;
 import com.jetbrains.python.run.PythonImportErrorFilter;
 import com.jetbrains.python.run.PythonRunConfiguration;
@@ -96,7 +91,8 @@ public class RobotPythonCommandLineState extends PythonScriptCommandLineState {
                 ParametersList parametersList = commandLine.getParametersList();
                 ParamsGroup moduleGroup = parametersList.getParamsGroup(PythonCommandLineState.GROUP_MODULE);
                 if (moduleGroup != null) {
-                    modifyCommandLine(moduleGroup, executionMode);
+                    Path workingDirectory = commandLine.getWorkingDirectory();
+                    modifyCommandLine(moduleGroup, executionMode, workingDirectory);
                 }
             }));
             enrichExecutionResult(executionResult);
@@ -141,7 +137,7 @@ public class RobotPythonCommandLineState extends PythonScriptCommandLineState {
         }
     }
 
-    private void modifyCommandLine(ParamsGroup paramsGroup, RobotExecutionMode robotExecutionMode) {
+    private void modifyCommandLine(ParamsGroup paramsGroup, RobotExecutionMode robotExecutionMode, Path workingDirectory) {
         ParametersList parametersList = paramsGroup.getParametersList();
         parametersList.set(1, BundleUtil.ROBOTCODE_DIR.resolve("robotcode").toString());
 
@@ -158,6 +154,10 @@ public class RobotPythonCommandLineState extends PythonScriptCommandLineState {
         parametersList.addAt(2, String.valueOf(robotDebugPort));
         parametersList.addAt(2, "--tcp");
         parametersList.addAt(2, "debug");
+        if (workingDirectory != null) {
+            parametersList.addAt(2, workingDirectory.normalize().toAbsolutePath().toString());
+            parametersList.addAt(2, "--root");
+        }
 
         enrichWithTestArguments(runConfiguration, parametersList::add);
     }
@@ -189,41 +189,6 @@ public class RobotPythonCommandLineState extends PythonScriptCommandLineState {
         final RobotExecutionMode executionMode = computeRobotExecutionMode(executor);
         var wrappedConverter = new MyPythonScriptTargetedCommandLineBuilder(converter, runConfiguration, executionMode);
         try {
-            String executorId = executor.getId();
-            if (showCommandLineAfterwards() && (DefaultRunExecutor.EXECUTOR_ID.equals(executorId) || RobotDryRunExecutor.EXECUTOR_ID.equals(executorId))) {
-                Project project = runConfiguration.getProject();
-                PythonRunConfiguration pythonRunConfiguration = (PythonRunConfiguration) runConfiguration.getPythonRunConfiguration().clone();
-                PyRunFileInConsoleAction.configExecuted(pythonRunConfiguration);
-
-                pythonRunConfiguration.setModuleMode(true);
-                pythonRunConfiguration.setScriptName("robot");
-                String workingDirectory = pythonRunConfiguration.getWorkingDirectory();
-                if (workingDirectory == null || workingDirectory.isBlank()) {
-                    pythonRunConfiguration.setWorkingDirectory(pythonRunConfiguration.getWorkingDirectorySafe());
-                }
-
-                StringBuilder additionalTestArguments = new StringBuilder();
-                enrichWithTestArguments(runConfiguration, argument -> {
-                    boolean containsSpaces = argument.contains(" ");
-                    if (containsSpaces) {
-                        additionalTestArguments.append('"');
-                    }
-                    additionalTestArguments.append(argument);
-                    if (containsSpaces) {
-                        additionalTestArguments.append('"');
-                    }
-                    additionalTestArguments.append(" ");
-                });
-
-                String scriptParameters = pythonRunConfiguration.getScriptParameters() + additionalTestArguments.toString().trim();
-                pythonRunConfiguration.setScriptParameters(scriptParameters);
-
-                Function<TargetEnvironment, String> runFileText = PythonConsoleScripts.buildScriptFunctionWithConsoleRun(pythonRunConfiguration);
-                boolean useExistingConsole = PyConsoleOptions.getInstance(project).isUseExistingConsole();
-                PyExecuteInConsole.executeCodeInConsole(project, runFileText, null, useExistingConsole, false, true, pythonRunConfiguration);
-
-                return null;
-            }
             ExecutionResult executionResult = super.execute(executor, wrappedConverter);
             enrichExecutionResult(executionResult);
             return executionResult;
@@ -274,6 +239,10 @@ public class RobotPythonCommandLineState extends PythonScriptCommandLineState {
             int robotDebugPort = NetworkUtil.findAvailableSocketPort();
             dapCommunicator = new RobotDebugAdapterProtocolCommunicator(robotDebugPort);
 
+            @SuppressWarnings("unchecked")
+            Function<TargetEnvironment, String> workingDir = (Function<TargetEnvironment, String>) pythonExecution.getWorkingDir();
+            additionalParameters.add(TargetEnvironmentFunctions.constant("--root"));
+            additionalParameters.add(workingDir);
             additionalParameters.add(TargetEnvironmentFunctions.constant("debug"));
             additionalParameters.add(TargetEnvironmentFunctions.constant("--tcp"));
             additionalParameters.add(TargetEnvironmentFunctions.constant(String.valueOf(robotDebugPort)));
@@ -364,7 +333,7 @@ public class RobotPythonCommandLineState extends PythonScriptCommandLineState {
                                                                   .inSmartMode(project)
                                                                   .executeSynchronously();
         return virtualFileStmtOptional.map(vfile -> VfsUtilCore.getCommonAncestor(expandedWorkingDirVFile, vfile))
-                                      .map(vfile -> VfsUtilCore.getRelativePath(vfile, virtualFileStmtOptional.get(), '/'))
+                                      .map(vfile -> VfsUtilCore.getRelativePath(virtualFileStmtOptional.get(), vfile, '/'))
                                       .orElseGet(() -> execInfo.getLocation().replace('.', '/') + "." + RobotFeatureFileType.getInstance().getDefaultExtension());
     }
 
@@ -386,6 +355,7 @@ public class RobotPythonCommandLineState extends PythonScriptCommandLineState {
         }
     }
 
+    @SuppressWarnings({ "LombokGetterMayBeUsed", "RedundantSuppression" }) // Cannot because Kotlin is accessing this method and Kotlin can't work with lombok yet
     public RobotDebugAdapterProtocolCommunicator getDapCommunicator() {
         return dapCommunicator;
     }

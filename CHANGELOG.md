@@ -4,11 +4,19 @@
 
 ## Unreleased
 
-### Added
-
 ### Changed
 
+- A new line for the new intentions to insert obligatory and missing parameters or all other optional ones isn't necessary anymore to get the intentions
+- Robot version detection checks are reduced to an absolute minimum
+- Improved Python class lookup logic to improve overall plugin performance and reduce the CPU usage
+- Add enum values in code completion in an earlier stage to allow higher sorting as right now
+
 ### Fixed
+
+- Incorrect detection of section header marker end leading to an incorrect formatting result in data-driven test definitions with column header names
+- Do not add unexpected whitespaces in data-driven tests when pressing Enter
+- Execution directory doesn't change at runtime from configured or evaluated working directory with pyproject.toml
+- Parsing of conditional statements consisting of a variable only
 
 ## 0.7.4 - 2026-06-06
 

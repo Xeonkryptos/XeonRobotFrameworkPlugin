@@ -313,7 +313,7 @@ while_loop_structure ::= while_loop_header eol_marker executable_statement* END 
     ]
     mixin="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotWhileLoopStructureExtension"
 }
-while_loop_header ::= WHILE conditional_content (EOS parameter+)? {pin=1 implements="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotMultiLineContainerElement"}
+while_loop_header ::= WHILE conditional_content_only (EOS parameter+)? {pin=1 implements="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotMultiLineContainerElement"}
 meta conditional_structure ::= <<if_structure <<separator>> <<statement>>>> <<else_if_structure <<separator>> <<statement>>>>* <<else_structure <<separator>> <<statement>>>>? <<end_marker>> {
     pin=1
     implements="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotFoldable"
@@ -321,11 +321,11 @@ meta conditional_structure ::= <<if_structure <<separator>> <<statement>>>> <<el
 }
 private conditional_template_structure ::= <<conditional_structure eol_marker template_test_case_body (END eol_marker)>>
 private conditional_inline_structure ::= <<conditional_structure EOS call_structure eol_marker?>> {pin=1}
-meta if_structure ::= IF conditional_content <<separator>> <<statement>> {
+meta if_structure ::= IF conditional_content_only <<separator>> <<statement>> {
     pin=3
     implements="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotBlockOpeningStructure"
 }
-meta else_if_structure ::= ELSE_IF conditional_content <<separator>> <<statement>> {
+meta else_if_structure ::= ELSE_IF conditional_content_only <<separator>> <<statement>> {
     pin=3
     implements="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotBlockOpeningStructure"
 }
@@ -334,6 +334,13 @@ conditional_content ::= variable* python_expression_body (python_expression_body
     implements="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotPythonInjectionExtension"
     methods=[getInjectionRelevantTextRange]
     pin=2
+}
+conditional_content_only ::= (python_expression_body | variable)+ {
+    name="Condition"
+    implements="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotPythonInjectionExtension"
+    methods=[getInjectionRelevantTextRange]
+    pin=2
+    elementType=conditional_content
 }
 exception_handling_structure ::= try_structure
     except_structure*

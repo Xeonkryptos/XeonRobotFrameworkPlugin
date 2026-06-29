@@ -19,6 +19,7 @@ import com.intellij.psi.formatter.common.AbstractBlock
 import com.intellij.psi.tree.TokenSet
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTokenSets
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.DataDrivenStatement
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLocalSetting
 import dev.xeonkryptos.xeonrobotframeworkplugin.util.RobotNames
 
@@ -301,6 +302,12 @@ class RobotBlock(node: ASTNode, private val context: RobotBlockContext, wrap: Wr
             myNode.psi is PsiFile -> return ChildAttributes.DELEGATE_TO_PREV_CHILD
 
             DELEGATE_TO_PREV_CHILD_SET.contains(myNode.elementType) -> return ChildAttributes.DELEGATE_TO_PREV_CHILD
+
+            RobotTokenSets.SECTIONS_HEADER_SET.contains(myNode.elementType) -> return ChildAttributes(childIndent, null)
+
+            (myNode.elementType === RobotTypes.TEST_CASE_STATEMENT || myNode.elementType === RobotTypes.TASK_STATEMENT) && (myNode.psi as DataDrivenStatement).isDataDrivenStatement -> return ChildAttributes(
+                Indent.getNoneIndent(),
+                null)
         }
         return super.getChildAttributes(newChildIndex)
     }
