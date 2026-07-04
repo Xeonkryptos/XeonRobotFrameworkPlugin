@@ -18,6 +18,7 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLocalSettingId;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotParameter;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotPositionalArgument;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotSettingsSection;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotSetupTeardownSettings;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTaskStatement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTasksSection;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTemplateParameter;
@@ -85,8 +86,8 @@ public class RobotCompletionContributor extends CompletionContributor {
                new ForLoopControlStructureCompletionProvider());
         extend(CompletionType.BASIC,
                psiElement().andNot(insideCommentOrInnerElement())
-                           .inside(true, or(instanceOf(RobotTestCasesSection.class), instanceOf(RobotTasksSection.class), instanceOf(RobotKeywordsSection.class)))
-                           .with(indented())
+                           .andOr(psiElement().inside(true, or(instanceOf(RobotTestCasesSection.class), instanceOf(RobotTasksSection.class), instanceOf(RobotKeywordsSection.class))).with(indented()),
+                                  psiElement().inside(RobotSettingsSection.class).inside(true, instanceOf(RobotSetupTeardownSettings.class)))
                            .inFile(psiElement(RobotFile.class)),
                new KeywordCompletionProvider());
         // Provide parameter completions in context of keyword statements
