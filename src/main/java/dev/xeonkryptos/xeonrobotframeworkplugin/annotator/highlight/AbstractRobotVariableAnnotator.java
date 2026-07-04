@@ -42,7 +42,7 @@ abstract class AbstractRobotVariableAnnotator extends RobotAnnotator {
             return false;
         }
         Collection<DefinedVariable> globalVariables = RobotFileManager.getGlobalVariables(variable);
-        if (globalVariables.stream().anyMatch(globalVariable -> globalVariable.matches(variableName))) {
+        if (globalVariables != null && globalVariables.stream().anyMatch(globalVariable -> globalVariable.matches(variableName))) {
             return false;
         }
         RobotLocalArgumentsSetting localArgumentsSetting = PsiTreeUtil.getParentOfType(variable, RobotLocalArgumentsSetting.class);

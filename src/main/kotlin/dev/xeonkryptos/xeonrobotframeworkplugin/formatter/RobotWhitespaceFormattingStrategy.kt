@@ -10,7 +10,6 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTokenSets
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotMultiLineContainerElement
 import dev.xeonkryptos.xeonrobotframeworkplugin.util.GlobalConstants
-import org.toml.lang.psi.ext.elementType
 
 class RobotWhitespaceFormattingStrategy : StaticSymbolWhiteSpaceDefinitionStrategy(' ', '\t', '\n', '.') {
 
@@ -29,7 +28,7 @@ class RobotWhitespaceFormattingStrategy : StaticSymbolWhiteSpaceDefinitionStrate
     }
 
     override fun adjustWhiteSpaceIfNecessary(whiteSpaceText: CharSequence, startElement: PsiElement, startOffset: Int, endOffset: Int, codeStyleSettings: CodeStyleSettings): CharSequence {
-        if (whiteSpaceText.isNotEmpty() && whiteSpaceText[0] == '\n' && (startElement.nextSibling != null && startElement.nextSibling.elementType !== RobotTypes.EOL || startElement.elementType === RobotTypes.EOS)) {
+        if (whiteSpaceText.isNotEmpty() && whiteSpaceText[0] == '\n' && (startElement.nextSibling != null && startElement.nextSibling.node.elementType !== RobotTypes.EOL || startElement.node.elementType === RobotTypes.EOS)) {
             return computeAdjustedWhitespaceWithContinuation(whiteSpaceText, startElement, codeStyleSettings)
         }
         return whiteSpaceText
