@@ -17,6 +17,7 @@
 - Do not add unexpected whitespaces in data-driven tests when pressing Enter
 - Execution directory doesn't change at runtime from configured or evaluated working directory with pyproject.toml
 - Parsing of conditional statements consisting of a variable only
+- Code completions for Test Setup, Task Setup, Test Teardown, Task Teardown are now available again
 
 ## 0.7.4 - 2026-06-06
 
