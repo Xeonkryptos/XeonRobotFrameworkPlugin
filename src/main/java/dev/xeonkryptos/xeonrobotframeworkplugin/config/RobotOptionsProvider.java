@@ -32,15 +32,6 @@ public final class RobotOptionsProvider implements PersistentStateComponent<Robo
         return parameterNameCollator;
     }
 
-    public String parameterNameCollationRules() {
-        return state.parameterNameCollationRules;
-    }
-
-    public void setParameterNameCollationRules(String parameterNameCollationRules) {
-        state.parameterNameCollationRules = parameterNameCollationRules;
-        updateParameterNameCollator();
-    }
-
     private void updateParameterNameCollator() {
         RuleBasedCollator baseCollator = (RuleBasedCollator) Collator.getInstance();
         String baseRules = baseCollator.getRules();
@@ -63,19 +54,6 @@ public final class RobotOptionsProvider implements PersistentStateComponent<Robo
         } catch (ParseException ignored2) {
             return baseCollator;
         }
-    }
-
-    public String canParseParameterNameCollationRules(String parameterNameCollationRules) {
-        if (parameterNameCollationRules == null || parameterNameCollationRules.isBlank()) {
-            return null;
-        }
-        try {
-            String baseRules = ((RuleBasedCollator) parameterNameCollator).getRules();
-            new RuleBasedCollator(baseRules + parameterNameCollationRules);
-        } catch (ParseException e) {
-            return e.getMessage();
-        }
-        return null;
     }
 
     @Override
