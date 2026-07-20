@@ -5,7 +5,7 @@ on:
     inputs:
       platformVersion:
         required: false
-        default: 2024.3.1
+        default: 2025.1
         type: string
 
 jobs:
@@ -16,11 +16,11 @@ jobs:
       fail-fast: false
       matrix:
         gradleVersion:
-          - "9.6.0"
+          - "9.6.1"
         os:
           - windows-latest
           - ubuntu-latest
-          #- macos-latest
+          - macos-latest
 
     steps:
 
