@@ -4,6 +4,14 @@
 
 ## Unreleased
 
+### Added
+
+### Changed
+
+### Fixed
+
+## 0.7.5 - 2026-07-08
+
 ### Changed
 
 - A new line for the new intentions to insert obligatory and missing parameters or all other optional ones isn't necessary anymore to get the intentions
