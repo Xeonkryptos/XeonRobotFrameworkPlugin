@@ -14,4 +14,11 @@ public final class RobotTailTypes {
       }
    };
    public static final TailType ASSIGNMENT_TAIL_TYPE = TailType.createSimpleTailType('=');
+   public static final TailType SPACE = TailType.createSimpleTailType(' ');
+   public static final TailType NONE = new TailType() {
+      @Override
+      public int processTail(Editor editor, int tailOffset) {
+         return tailOffset;
+      }
+   };
 }
