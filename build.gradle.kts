@@ -17,6 +17,7 @@ plugins {
     id("org.jetbrains.changelog") version "2.5.0"
 
     kotlin("jvm") version "2.0.21"
+    kotlin("plugin.lombok") version "2.0.21"
 }
 
 group = properties("pluginGroup")
@@ -69,6 +70,7 @@ dependencies {
 
         pluginVerifier()
     }
+    testImplementation(kotlin("test"))
 }
 
 // Configure gradle-changelog-plugin plugin.

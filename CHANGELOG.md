@@ -6,6 +6,8 @@
 
 ### Added
 
+Added support for special variable syntax in Python expressions
+
 ### Changed
 
 ### Fixed

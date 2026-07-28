@@ -224,12 +224,18 @@ ExceptionForAllowedVariableChar = [$@%&] [^{] | {EscapeChar}{1} [\s$@%&]
 AllowedEverythingButVariableChar = {VariableCharNotAllowed} | {ExceptionForAllowedVariableChar}
 AllowedEverythingButVariableSeq = {AllowedEverythingButVariableChar}+
 
+ExceptionForAllowedVariableCharWithSpecialVariable = [@%&] [^{] | {EscapeChar}{1} [\s$@%&]
+AllowedEverythingButSpecialVariableChar = {VariableCharNotAllowed} | {ExceptionForAllowedVariableCharWithSpecialVariable}
+AllowedEverythingButSpecialVariableSeq = {AllowedEverythingButSpecialVariableChar}+
+
 AllowedExtendedVariableAccessChar = [^\s\[\]$@%&] | {EscapeChar}{1} "[" | {EscapeChar}{1} "]" | {ExceptionForAllowedVariableChar}
 AllowedExtendedVariableAccessSeq = {AllowedExtendedVariableAccessChar}+
 
 VariableLiteralValue =   ([^}$@&%\r\n] | {ExceptionForAllowedVariableChar} | {OpeningVariable})+
+WhitespaceFreeVariableLiteralValue =   ([^}$@&%\s] | {ExceptionForAllowedVariableChar} | {OpeningVariable})+
 LiteralValue =           [^\s]+([ ][^\s]+)*[ ]?
 EverythingButVariableValue = {AllowedEverythingButVariableSeq} ({Space} {AllowedEverythingButVariableSeq})*
+EverythingButSpecialVariableValue = {AllowedEverythingButSpecialVariableSeq} ({Space} {AllowedEverythingButSpecialVariableSeq})*
 KeywordLibraryNameLiteralValue = {EverythingButVariableValue} "."
 ExtendedVariableAccessValue = {AllowedExtendedVariableAccessSeq}
 
@@ -298,7 +304,7 @@ LineComment = {LineCommentSign} {NON_EOL}*
 %xstate NORMAL_PARAMETER_ASSIGNMENT, TEMPLATE_PARAMETER_ASSIGNMENT
 %xstate KEYWORD_LIBRARY_NAME_SEPARATOR, KEYWORD_CALL_NAME, KEYWORD_LIBRARY_NAME_SEPARATOR_FOR_SPECIAL_KEYWORD
 %xstate IN_CONTINUATION, AFTER_CONTINUATION, FAKE_MULTILINE, SAME_LINE_FAKE_MULTILINE, AFTER_COMMENT
-%xstate VARIABLE_OPENING_BRACE, EOL_EXPECTED
+%xstate VARIABLE_OPENING_BRACE, EOL_EXPECTED, SPECIAL_VARIABLE_USAGE
 
 %%
 
@@ -416,6 +422,10 @@ LineComment = {LineCommentSign} {NON_EOL}*
 <VARIABLE_DEFINITION, VARIABLE_USAGE> {
     {VariableLiteralValue}                          { return VARIABLE_BODY; }
     {EOL}                                           { leaveState(); return EOL; }
+}
+<SPECIAL_VARIABLE_USAGE> {
+    \w+                                             { return VARIABLE_BODY; }
+    [^]                                             { leaveState(); yypushback(yylength()); break; }
 }
 
 <EXTENDED_VARIABLE_ACCESS> {
@@ -750,7 +760,8 @@ LineComment = {LineCommentSign} {NON_EOL}*
     [^]                                     { yypushback(yylength()); yybegin(PYTHON_EXECUTED_CONDITION); break; }
 }
 <PYTHON_EXECUTED_CONDITION>  {
-    {EverythingButVariableValue}            { return PYTHON_EXPRESSION_CONTENT; }
+    "$" [^{\s]                              { enterNewState(SPECIAL_VARIABLE_USAGE); yypushback(1); return SCALAR_VARIABLE_START; }
+    {EverythingButSpecialVariableValue}     { return PYTHON_EXPRESSION_CONTENT; }
     {ExtendedSpaceBasedEndMarker}           { leaveState(); return EOS; }
     {EOL}                                   { leaveState(); yypushback(yylength()); break; }
     {MultiLine}                             {
