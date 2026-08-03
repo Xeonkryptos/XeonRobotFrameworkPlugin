@@ -43,7 +43,8 @@ public enum VariableScope {
             if (elementContainingFile instanceof RobotFile robotFile) {
                 return robotFile.collectImportedFiles(true, ImportType.VARIABLES, ImportType.RESOURCE)
                                 .stream()
-                                .anyMatch(importedFile -> importedFile.getVirtualFile().getPath().equals(sourceContainingFilePath));
+                                .flatMap(importedFile -> importedFile.getVirtualFiles().stream())
+                                .anyMatch(virtualFile -> virtualFile.getPath().equals(sourceContainingFilePath));
             }
             return false;
         }

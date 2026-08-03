@@ -20,7 +20,7 @@ public interface KeywordFile {
 
     @NotNull Collection<VirtualFile> getVirtualFiles(boolean includeTransitive);
 
-    VirtualFile getVirtualFile();
+    Collection<VirtualFile> getVirtualFiles();
 
     PsiFile getPsiFile();
 

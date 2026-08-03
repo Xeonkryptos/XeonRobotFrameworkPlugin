@@ -6,11 +6,13 @@
 
 ### Added
 
-Added support for special variable syntax in Python expressions
+- Added support for special variable syntax in Python expressions
 
 ### Changed
 
 ### Fixed
+
+- Fixed issue leading to mixin'ed classes not to be considered, thus excluding them at a whole
 
 ## 0.7.5 - 2026-07-08
 

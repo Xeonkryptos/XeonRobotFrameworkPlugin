@@ -3,6 +3,7 @@ package dev.xeonkryptos.xeonrobotframeworkplugin.psi.reference.external.file;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiFile;
 import com.jetbrains.python.psi.PyClass;
+import com.jetbrains.python.psi.types.TypeEvalContext;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.dto.ImportType;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.DefinedVariable;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.KeywordFile;
@@ -11,8 +12,10 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 public class RobotPythonClass implements KeywordFile {
 
@@ -61,6 +64,37 @@ public class RobotPythonClass implements KeywordFile {
     }
 
     @Override
+    public Collection<VirtualFile> getVirtualFiles() {
+        PsiFile psiFile = getPsiFile();
+        VirtualFile virtualFile = psiFile.getVirtualFile();
+        Set<VirtualFile> virtualFiles = new LinkedHashSet<>();
+        if (virtualFile != null) {
+            virtualFiles.add(virtualFile);
+        } else {
+            virtualFiles.add(psiFile.getOriginalFile().getVirtualFile());
+        }
+        TypeEvalContext typeEvalContext = TypeEvalContext.codeAnalysis(psiFile.getProject(), psiFile);
+        pythonClass.getAncestorClasses(typeEvalContext)
+                   .stream()
+                   .map(pyClass -> pyClass.getContainingFile().getOriginalFile().getVirtualFile())
+                   .filter(Objects::nonNull)
+                   .distinct()
+                   .forEach(virtualFiles::add);
+        return virtualFiles;
+    }
+
+    @Override
+    public final PsiFile getPsiFile() {
+        return pythonClass.getContainingFile();
+    }
+
+    @Nullable
+    @Override
+    public String getLibraryName() {
+        return library;
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) {
             return true;
@@ -85,23 +119,5 @@ public class RobotPythonClass implements KeywordFile {
     @Override
     public String toString() {
         return pythonClass.toString();
-    }
-
-    @Override
-    public VirtualFile getVirtualFile() {
-        PsiFile psiFile = getPsiFile();
-        VirtualFile virtualFile = psiFile.getVirtualFile();
-        return virtualFile != null ? virtualFile : psiFile.getOriginalFile().getVirtualFile();
-    }
-
-    @Override
-    public final PsiFile getPsiFile() {
-        return pythonClass.getContainingFile();
-    }
-
-    @Nullable
-    @Override
-    public String getLibraryName() {
-        return library;
     }
 }
