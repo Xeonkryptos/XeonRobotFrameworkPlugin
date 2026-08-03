@@ -7,6 +7,7 @@ import com.intellij.openapi.util.TextRange
 import com.intellij.psi.ElementManipulators
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiLanguageInjectionHost
+import com.intellij.psi.util.endOffset
 import com.jetbrains.python.ast.findChildrenByClass
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariable
 
@@ -45,19 +46,41 @@ class RobotLanguageInjectionPerformer : LanguageInjectionPerformer {
                     suffix = injection.suffix
                     endOffset = rangeInElement.endOffset
                 }
-                registrar.addPlace("${injection.prefix}${ROBOT_VARIABLE_PLACEHOLDER}", suffix, context, TextRange(firstVariableAtStartOfConditionRange.endOffset, endOffset))
+                registrar.addPlace(
+                    "${injection.prefix}${ROBOT_VARIABLE_PLACEHOLDER}",
+                    suffix,
+                    context,
+                    TextRange(firstVariableAtStartOfConditionRange.endOffset, endOffset)
+                )
                 endOffset
             }
 
             for (variable in variables.drop(1)) {
                 val variableTextRange = variable.textRangeInParent
                 val suffix = if (variableTextRange.endOffset == rangeInElement.endOffset) injection.suffix else null
-                registrar.addPlace(ROBOT_VARIABLE_PLACEHOLDER, suffix, context, TextRange(startOffset, variableTextRange.startOffset))
+                registrar.addPlace(
+                    ROBOT_VARIABLE_PLACEHOLDER,
+                    suffix,
+                    context,
+                    TextRange(startOffset, variableTextRange.startOffset)
+                )
                 startOffset = variableTextRange.endOffset
             }
 
             if (startOffset < rangeInElement.endOffset) {
-                registrar.addPlace(ROBOT_VARIABLE_PLACEHOLDER, injection.suffix, context, TextRange(startOffset, rangeInElement.endOffset))
+                registrar.addPlace(
+                    ROBOT_VARIABLE_PLACEHOLDER,
+                    injection.suffix,
+                    context,
+                    TextRange(startOffset, rangeInElement.endOffset)
+                )
+            } else if (variables.lastOrNull()?.textRangeInParent?.endOffset == rangeInElement.endOffset) {
+                registrar.addPlace(
+                    ROBOT_VARIABLE_PLACEHOLDER,
+                    injection.suffix,
+                    context,
+                    TextRange(rangeInElement.endOffset, rangeInElement.endOffset)
+                )
             }
         } else {
             registrar.addPlace(injection.prefix, injection.suffix, context, rangeInElement)

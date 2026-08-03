@@ -327,13 +327,13 @@ meta else_if_structure ::= ELSE_IF conditional_content_only <<separator>> <<stat
     pin=3
     implements="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotBlockOpeningStructure"
 }
-conditional_content ::= variable* python_expression_body (python_expression_body | variable)* {
+conditional_content ::= extended_variable* python_expression_body (python_expression_body | extended_variable)* {
     name="Condition"
     implements="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotPythonInjectionExtension"
     methods=[getInjectionRelevantTextRange]
     pin=2
 }
-conditional_content_only ::= (python_expression_body | variable)+ {
+conditional_content_only ::= (python_expression_body | extended_variable)+ {
     name="Condition"
     implements="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotPythonInjectionExtension"
     methods=[getInjectionRelevantTextRange]
@@ -473,6 +473,7 @@ variable ::= scalar_variable | list_variable | dict_variable | environment_varia
     ]
     methods = [getVariableName fold getAssignedValues]
 }
+private extended_variable ::= variable | special_scalar_variable
 scalar_variable ::= scalar_variable_definition {
     mixin = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotScalarVariableExtension"
     stubClass = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotScalarVariableStub"
@@ -493,16 +494,22 @@ dict_variable ::= dict_variable_definition {
 }
 environment_variable ::= ENV_VARIABLE_START VARIABLE_LBRACE variable_content VARIABLE_RBRACE
 
-private scalar_variable_definition ::= SCALAR_VARIABLE_START VARIABLE_LBRACE (python_expression | variable_content)? VARIABLE_RBRACE (extended_variable_slice_access | extended_variable_index_access | extended_variable_nested_access)* {pin=1}
+special_scalar_variable ::= special_scalar_variable_definition {
+    elementType = scalar_variable
+}
+
+private scalar_variable_definition ::= SCALAR_VARIABLE_START VARIABLE_LBRACE (python_expression | variable_content)? VARIABLE_RBRACE (extended_variable_slice_access | extended_variable_index_access | extended_variable_nested_access)* {pin=2}
 private list_variable_definition ::= LIST_VARIABLE_START VARIABLE_LBRACE (python_expression | variable_content) VARIABLE_RBRACE (extended_variable_slice_access | extended_variable_index_access | extended_variable_nested_access)* {pin=1}
 private dict_variable_definition ::= DICT_VARIABLE_START VARIABLE_LBRACE (python_expression | variable_content) VARIABLE_RBRACE extended_variable_nested_access* {pin=1}
+
+private special_scalar_variable_definition ::= SCALAR_VARIABLE_START variable_content {pin=2}
 
 variable_content ::= (variable | VARIABLE_BODY)+ {
     methods = [getReference]
     recoverWhile=variable_content_recover
 }
 private variable_content_recover ::= !(VARIABLE_RBRACE | eol_marker)
-python_expression ::= PYTHON_EXPRESSION_START (python_expression_body | variable)* PYTHON_EXPRESSION_END {
+python_expression ::= PYTHON_EXPRESSION_START (python_expression_body | variable | special_scalar_variable)* PYTHON_EXPRESSION_END {
     implements="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotPythonInjectionExtension"
     methods=[getInjectionRelevantTextRange]
 }

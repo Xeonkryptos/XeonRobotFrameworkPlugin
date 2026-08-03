@@ -15,7 +15,6 @@ import com.intellij.psi.search.searches.ReferencesSearch;
 import com.intellij.psi.util.PsiTreeUtil;
 import dev.xeonkryptos.xeonrobotframeworkplugin.RobotBundle;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.dto.ImportType;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.KeywordFile;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotFile;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariable;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableDefinition;
@@ -52,7 +51,10 @@ public class RobotUnusedVariableDefinitionInspection extends LocalInspectionTool
         filterOutUsedVariableDefinitions(variableUsageVisitor);
         SearchScope scope = GlobalSearchScope.filesScope(problemsHolder.getProject(), () -> {
             RobotFile robotFile = (RobotFile) problemsHolder.getFile();
-            List<VirtualFile> importedFiles = robotFile.collectImportedFiles(true, ImportType.VARIABLES).stream().map(KeywordFile::getVirtualFile).collect(Collectors.toCollection(ArrayList::new));
+            List<VirtualFile> importedFiles = robotFile.collectImportedFiles(true, ImportType.VARIABLES)
+                                                       .stream()
+                                                       .flatMap(keywordFile -> keywordFile.getVirtualFiles().stream())
+                                                       .collect(Collectors.toCollection(ArrayList::new));
             importedFiles.add(robotFile.getVirtualFile());
             return importedFiles;
         });

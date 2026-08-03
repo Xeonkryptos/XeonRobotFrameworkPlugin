@@ -58,7 +58,7 @@ class RobotJsonFile(private val file: JsonFile) : KeywordFile {
 
     override fun getVirtualFiles(includeTransitive: Boolean): Collection<VirtualFile> = setOf()
 
-    override fun getVirtualFile(): VirtualFile? = file.virtualFile
+    override fun getVirtualFiles(): Collection<VirtualFile?> = if (file.virtualFile != null) listOf(file.virtualFile) else emptyList()
 
     override fun getPsiFile(): PsiFile = file
 
