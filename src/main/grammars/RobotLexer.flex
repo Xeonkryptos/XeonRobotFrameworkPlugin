@@ -267,7 +267,10 @@ AnyTestsFailed = [Aa][Nn][Yy] {IntraKeywordSeparator}? {Test}[Ss] {IntraKeywordS
 TestFailed = {Test} {IntraKeywordSeparator}? {Failed}
 TestPassed = {Test} {IntraKeywordSeparator}? {Passed}
 TimeoutOccurred = {Timeout} {IntraKeywordSeparator}? [Oo][Cc]{2}[Uu][Rr]{2}[Ee][Dd]
-ConditionalRunKeywordCall = {Run} {IntraKeywordSeparator}? {Keyword} {IntraKeywordSeparator}? {If} ({IntraKeywordSeparator}? ({AllTestsPassed} | {AnyTestsFailed} | {TestFailed} | {TestPassed} | {TimeoutOccurred}))?
+// `Run Keyword If Test Failed/Test Passed/All Tests Passed/Any Tests Failed/Timeout Occurred` take a KEYWORD to run
+// (like {RunKeywordCall}), NOT a condition expression. Only bare `Run Keyword If`/`Unless`/`And Return If` take one.
+RunKeywordIfStatus = {Run} {IntraKeywordSeparator}? {Keyword} {IntraKeywordSeparator}? {If} {IntraKeywordSeparator}? ({AllTestsPassed} | {AnyTestsFailed} | {TestFailed} | {TestPassed} | {TimeoutOccurred})
+ConditionalRunKeywordCall = {Run} {IntraKeywordSeparator}? {Keyword} {IntraKeywordSeparator}? {If}
     | {Run} {IntraKeywordSeparator}? {Keyword} {IntraKeywordSeparator}? [Uu][Nn][Ll][Ee][Ss]{2}
     | {Run} {IntraKeywordSeparator}? {Keyword} {IntraKeywordSeparator}? {And} {IntraKeywordSeparator}? {Return} {IntraKeywordSeparator}? {If}
 
@@ -813,7 +816,7 @@ LineComment = {LineCommentSign} {NON_EOL}*
 }
 
 <KEYWORD_CALL>  {
-    {RunKeywordCall}                                               { return KEYWORD_NAME; }
+    {RunKeywordCall} | {RunKeywordIfStatus}                        { return KEYWORD_NAME; }
     {ConditionalRunKeywordCall}                                    { enterNewState(PYTHON_EVALUATED_CONTROL_STRUCTURE_START); return KEYWORD_NAME; }
     {AssertRunKeywordCall} | {RepeatKeywordCall}                   { enterNewState(SINGLE_LITERAL_CONSTANT_START); return KEYWORD_NAME; }
     {SimpleConditionalKeywordCall}                                 {
@@ -824,7 +827,7 @@ LineComment = {LineCommentSign} {NON_EOL}*
     {RepeatKeywordCall}                                            { return KEYWORD_NAME; }
     {EvaluateKeywordCall}                                          { yybegin(KEYWORD_ARGUMENTS); enterNewState(PYTHON_EVALUATED_EXPRESSION_START); return KEYWORD_NAME; }
 
-    {BuiltInNamespace} ({RunKeywordCall} | {ConditionalRunKeywordCall} | {AssertRunKeywordCall} | {SimpleConditionalKeywordCall} | {RepeatKeywordCall}) {
+    {BuiltInNamespace} ({RunKeywordCall} | {RunKeywordIfStatus} | {ConditionalRunKeywordCall} | {AssertRunKeywordCall} | {SimpleConditionalKeywordCall} | {RepeatKeywordCall}) {
           int additionalPushbackLength = 0;
           if (yycharat(0) != 'B' && yycharat(0) != 'b') {
               additionalPushbackLength = 1;

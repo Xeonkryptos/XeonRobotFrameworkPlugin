@@ -15,6 +15,8 @@ plugins {
     id("org.jetbrains.intellij.platform") version "2.17.0"
     // gradle-changelog-plugin - read more: https://github.com/JetBrains/gradle-changelog-plugin
     id("org.jetbrains.changelog") version "2.5.0"
+    // grammar-kit - only used to regenerate the JFlex lexer into src/main/gen (checked in)
+    id("org.jetbrains.grammarkit") version "2022.3.2.2"
 
     kotlin("jvm") version "2.0.21"
     kotlin("plugin.lombok") version "2.0.21"
@@ -54,13 +56,18 @@ dependencies {
     testImplementation(platform("org.junit:junit-bom:5.14.1"))
     testImplementation("org.junit.jupiter:junit-jupiter")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+    // Runs the JUnit3-style BasePlatformTestCase tests under the JUnit Platform.
+    testRuntimeOnly("org.junit.vintage:junit-vintage-engine")
 
-    testRuntimeOnly("junit:junit:4.13.2")
+    // BasePlatformTestCase extends junit.framework.TestCase (JUnit3, shipped in the junit4 jar); needed at compile time.
+    testImplementation("junit:junit:4.13.2")
 
     intellijPlatform {
         val platformVersion = properties("platformVersion")
 
         testFramework(TestFrameworkType.JUnit5)
+        // BasePlatformTestCase (PSI/light-fixture tests) lives in the Platform test framework.
+        testFramework(TestFrameworkType.Platform)
 
         pycharmCommunity(platformVersion)
         jetbrainsRuntime()
@@ -131,6 +138,15 @@ intellijPlatform {
 }
 
 tasks {
+    // Regenerates src/main/gen/.../RobotLexer.java from the JFlex source. Run manually after editing the .flex;
+    // the generated file is checked in, so this is not part of the normal build.
+    register<org.jetbrains.grammarkit.tasks.GenerateLexerTask>("generateRobotLexer") {
+        sourceFile.set(file("src/main/grammars/RobotLexer.flex"))
+        targetOutputDir.set(file("src/main/gen/dev/xeonkryptos/xeonrobotframeworkplugin/psi"))
+        // Must stay false: the target dir also holds the generated parser/PSI, which purge would delete.
+        purgeOldFiles.set(false)
+    }
+
     // Set the compatibility versions to 21
     withType<JavaCompile>().configureEach {
         sourceCompatibility = "21"
