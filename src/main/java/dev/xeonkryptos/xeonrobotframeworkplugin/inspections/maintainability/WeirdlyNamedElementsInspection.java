@@ -46,8 +46,7 @@ public class WeirdlyNamedElementsInspection extends LocalInspectionTool {
                 PsiElement resolvedElement = o.getReference().resolve();
                 String expectedName = null;
                 if (resolvedElement instanceof PyFunction pyFunction) {
-                    Optional<String> decoratorDefinedNameOpt = RobotPyUtil.findCustomKeywordNameDecoratorExpression(pyFunction)
-                                                                          .map(PyStringLiteralExpression::getStringValue);
+                    Optional<String> decoratorDefinedNameOpt = RobotPyUtil.findCustomKeywordNameDecoratorExpression(pyFunction).map(PyStringLiteralExpression::getStringValue);
                     if (decoratorDefinedNameOpt.isPresent()) {
                         expectedName = decoratorDefinedNameOpt.filter(literal -> !literal.trim().equalsIgnoreCase(finalizedCallName)).orElse(null);
                     } else {
@@ -59,15 +58,14 @@ public class WeirdlyNamedElementsInspection extends LocalInspectionTool {
                 } else if (resolvedElement != null) {
                     RobotUserKeywordStatement userKeywordStatement = (RobotUserKeywordStatement) resolvedElement;
                     String userKeywordName = userKeywordStatement.getName().trim();
-                    if (!userKeywordName.equalsIgnoreCase(finalizedCallName) && !userKeywordName.equalsIgnoreCase(fullKeywordCallName)) {
+                    if (!userKeywordName.equalsIgnoreCase(finalizedCallName) && !userKeywordName.equalsIgnoreCase(fullKeywordCallName)
+                        // Only relevant for non-embedding keywords
+                        && userKeywordStatement.getUserKeywordStatementId().getVariableDefinitionList().isEmpty()) {
                         expectedName = userKeywordName;
                     }
                 }
                 if (expectedName != null) {
-                    holder.registerProblem(o,
-                                           RobotBundle.message("INSP.weird.naming", expectedName),
-                                           ProblemHighlightType.WARNING,
-                                           new WeirdlyNamedKeywordCallQuickFix(o, expectedName));
+                    holder.registerProblem(o, RobotBundle.message("INSP.weird.naming", expectedName), ProblemHighlightType.WARNING, new WeirdlyNamedKeywordCallQuickFix(o, expectedName));
                 }
             }
 
@@ -75,7 +73,7 @@ public class WeirdlyNamedElementsInspection extends LocalInspectionTool {
             public void visitVariableContent(@NotNull RobotVariableContent o) {
                 RobotVariable variable = PsiTreeUtil.getParentOfType(o, RobotVariable.class);
                 if (variable != null && !(variable.getParent() instanceof RobotVariableDefinition)) {
-                    ResolveResult [] elements = ((PsiPolyVariantReference) o.getReference()).multiResolve(false);
+                    ResolveResult[] elements = ((PsiPolyVariantReference) o.getReference()).multiResolve(false);
                     if (elements.length > 0 && elements[0] instanceof RobotVariableDefinition definition) {
                         String definedName = definition.getName();
                         int variableBodyTextOffset = o.getTextOffset();

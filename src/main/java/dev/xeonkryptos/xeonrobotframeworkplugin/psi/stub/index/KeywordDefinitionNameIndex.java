@@ -30,6 +30,6 @@ public class KeywordDefinitionNameIndex extends StringStubIndexExtension<RobotUs
 
     @Override
     public int getVersion() {
-        return super.getVersion() + 10;
+        return super.getVersion() + 11;
     }
 }

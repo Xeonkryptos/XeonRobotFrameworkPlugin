@@ -7,12 +7,12 @@
 ### Added
 
 - Added support for special variable syntax in Python expressions
-
-### Changed
+- Added support for embedded user keywords
 
 ### Fixed
 
 - Fixed issue leading to mixin'ed classes not to be considered, thus excluding them at a whole
+- Fixed parsing of Built-In keywords which expect keywords as arguments rather than conditional expressions
 
 ## 0.7.5 - 2026-07-08
 

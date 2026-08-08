@@ -68,6 +68,7 @@
 
         <stubElementTypeHolder class="dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes" externalIdPrefix="robot."/>
         <stubIndex implementation="dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.index.KeywordDefinitionNameIndex"/>
+        <stubIndex implementation="dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.index.EmbeddedKeywordDefinitionNameIndex"/>
         <stubIndex implementation="dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.index.KeywordCallNameIndex"/>
         <stubIndex implementation="dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.index.ImportArgumentIndex"/>
         <stubIndex implementation="dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.index.VariableNameIndex"/>
@@ -152,7 +153,10 @@
         <!-- New feature -->
         <localInspection language="Robot" shortName="RobotJsonVariableFileSupport" bundle="messages.RobotBundle" key="INSP.NAME.feature.json.variable.file.import"
                          groupKey="INSP.GROUP.robot" enabledByDefault="true" level="ERROR" dumbAware="true"
-                         implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.annotator.feature.RobotJsonVariableFileSupportInspection"/>
+                         implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.inspections.versioned.RobotJsonVariableFileSupportInspection"/>
+        <localInspection language="Robot" shortName="RobotCombinedEmbeddedWithConcreteArguments" bundle="messages.RobotBundle" key="INSP.NAME.feature.combined.embedded.with.concrete.arguments"
+                         groupKey="INSP.GROUP.robot" enabledByDefault="true" level="ERROR" dumbAware="true"
+                         implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.inspections.versioned.RobotCombinedEmbeddedWithConcreteArgumentsInspection"/>
         <!-- Maintainability -->
         <localInspection language="Robot" shortName="RobotVariableRatherArgumentMeant" bundle="messages.RobotBundle"
                          key="INSP.NAME.variable.rather.argument.meant" groupKey="INSP.GROUP.robot" enabledByDefault="true" level="WARNING" dumbAware="true"

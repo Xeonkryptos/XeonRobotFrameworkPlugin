@@ -244,7 +244,7 @@ user_keyword_statement ::= user_keyword_statement_id eol_marker ((local_argument
     methods = [getNameIdentifier getName getQualifiedName]
     recoverWhile=user_keyword_statement_recover
 }
-user_keyword_statement_id ::= (USER_KEYWORD_NAME_PART | variable)+ EOS?
+user_keyword_statement_id ::= (USER_KEYWORD_NAME_PART | variable_definition)+ EOS?
 private user_keyword_statement_recover ::= !user_keyword_statement_id & section_recover
 
 local_setting ::= local_setting_id (positional_argument | eol_free_keyword_call)* eol_marker {

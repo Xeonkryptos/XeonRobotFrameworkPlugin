@@ -9,7 +9,9 @@ import com.intellij.psi.stubs.StubOutputStream;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotLanguage;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotUserKeywordStatement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotUserKeywordStatementImpl;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.index.EmbeddedKeywordDefinitionNameIndex;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.index.KeywordDefinitionNameIndex;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.visitor.EmbeddedUserKeywordNamePatternVisitor;
 import dev.xeonkryptos.xeonrobotframeworkplugin.util.KeywordUtil;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
@@ -34,7 +36,13 @@ public class RobotUserKeywordStubElement extends IStubElementType<RobotUserKeywo
     @NotNull
     @Override
     public RobotUserKeywordStub createStub(@NotNull RobotUserKeywordStatement psi, StubElement<? extends PsiElement> parentStub) {
-        return new RobotUserKeywordStubImpl(parentStub, psi.getName());
+        String embeddedKeywordPatternString = null;
+        if (EmbeddedUserKeywordNamePatternVisitor.isEmbeddedUserKeyword(psi)) {
+            EmbeddedUserKeywordNamePatternVisitor visitor = new EmbeddedUserKeywordNamePatternVisitor();
+            psi.acceptChildren(visitor);
+            embeddedKeywordPatternString = visitor.getEmbeddedKeywordNamePattern();
+        }
+        return new RobotUserKeywordStubImpl(parentStub, psi.getName(), embeddedKeywordPatternString);
     }
 
     @NotNull
@@ -46,12 +54,15 @@ public class RobotUserKeywordStubElement extends IStubElementType<RobotUserKeywo
     @Override
     public void serialize(@NotNull RobotUserKeywordStub stub, @NotNull StubOutputStream dataStream) throws IOException {
         dataStream.writeName(stub.getName());
+        dataStream.writeName(stub.getEmbeddedKeywordPatternString());
     }
 
     @NotNull
     @Override
     public RobotUserKeywordStub deserialize(@NotNull StubInputStream dataStream, StubElement parentStub) throws IOException {
-        return new RobotUserKeywordStubImpl(parentStub, dataStream.readNameString());
+        String keywordName = dataStream.readNameString();
+        String embeddedKeywordPatternString = dataStream.readNameString();
+        return new RobotUserKeywordStubImpl(parentStub, keywordName, embeddedKeywordPatternString);
     }
 
     @Override
@@ -59,5 +70,9 @@ public class RobotUserKeywordStubElement extends IStubElementType<RobotUserKeywo
         String name = stub.getName();
         String normalizeKeywordName = KeywordUtil.normalizeKeywordName(name);
         sink.occurrence(KeywordDefinitionNameIndex.KEY, normalizeKeywordName);
+        String embeddedKeywordPatternString = stub.getEmbeddedKeywordPatternString();
+        if (embeddedKeywordPatternString != null) {
+            sink.occurrence(EmbeddedKeywordDefinitionNameIndex.KEY, embeddedKeywordPatternString);
+        }
     }
 }
