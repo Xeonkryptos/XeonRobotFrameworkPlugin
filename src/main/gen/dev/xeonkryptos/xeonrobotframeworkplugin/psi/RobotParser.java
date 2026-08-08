@@ -3133,7 +3133,7 @@ public class RobotParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // (USER_KEYWORD_NAME_PART | variable)+ EOS?
+  // (USER_KEYWORD_NAME_PART | variable_definition)+ EOS?
   public static boolean user_keyword_statement_id(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "user_keyword_statement_id")) return false;
     boolean r;
@@ -3144,7 +3144,7 @@ public class RobotParser implements PsiParser, LightPsiParser {
     return r;
   }
 
-  // (USER_KEYWORD_NAME_PART | variable)+
+  // (USER_KEYWORD_NAME_PART | variable_definition)+
   private static boolean user_keyword_statement_id_0(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "user_keyword_statement_id_0")) return false;
     boolean r;
@@ -3159,12 +3159,12 @@ public class RobotParser implements PsiParser, LightPsiParser {
     return r;
   }
 
-  // USER_KEYWORD_NAME_PART | variable
+  // USER_KEYWORD_NAME_PART | variable_definition
   private static boolean user_keyword_statement_id_0_0(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "user_keyword_statement_id_0_0")) return false;
     boolean r;
     r = consumeToken(b, USER_KEYWORD_NAME_PART);
-    if (!r) r = variable(b, l + 1);
+    if (!r) r = variable_definition(b, l + 1);
     return r;
   }
 
