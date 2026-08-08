@@ -6,6 +6,14 @@
 
 ### Added
 
+### Changed
+
+### Fixed
+
+## 0.7.6 - 2026-08-08
+
+### Added
+
 - Added support for special variable syntax in Python expressions
 - Added support for embedded user keywords
 
