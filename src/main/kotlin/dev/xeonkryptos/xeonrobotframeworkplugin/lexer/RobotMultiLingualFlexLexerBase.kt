@@ -6,6 +6,13 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.lexer.RobotLexingConstants.NON_B
 import dev.xeonkryptos.xeonrobotframeworkplugin.lexer.RobotLexingConstants.SECTION_MARKER
 import dev.xeonkryptos.xeonrobotframeworkplugin.lexer.RobotLexingConstants.SIMPLE_SPACE_CHARACTER
 import dev.xeonkryptos.xeonrobotframeworkplugin.lexer.RobotLexingConstants.TAB_CHARACTER
+import dev.xeonkryptos.xeonrobotframeworkplugin.localization.BehaviourDrivenType
+import dev.xeonkryptos.xeonrobotframeworkplugin.localization.DefaultLocalizationTypeMappingProvider
+import dev.xeonkryptos.xeonrobotframeworkplugin.localization.GlobalSettingType
+import dev.xeonkryptos.xeonrobotframeworkplugin.localization.LocalSettingType
+import dev.xeonkryptos.xeonrobotframeworkplugin.localization.LocalizationLoadingMechanism
+import dev.xeonkryptos.xeonrobotframeworkplugin.localization.LocalizationTypeMappingProvider
+import dev.xeonkryptos.xeonrobotframeworkplugin.localization.SectionType
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTemplateKeywordLexer
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.LOCAL_SETTING_START
@@ -36,80 +43,75 @@ abstract class RobotMultiLingualFlexLexerBase @JvmOverloads constructor(protecte
     private val intermediateTemplateLocalSettingHandler = RobotMultiLingualStateHandler(RobotLocalSettingType.SIMPLE_VALUE_SETTING, LocalTemplateSettingStateSwitcher()::switchState)
     private val normalKeywordHandler = RobotMultiLingualStateHandler(RobotKeywordType.NORMAL_KEYWORD, SimpleKeywordStateSwitcher()::switchState)
 
-    private val defaultLanguageSectionNames = mapOf("setting" to RobotMultiLingualStateHandler(RobotSectionType.SETTINGS, SimpleSectionStateSwitcher(RobotTypes.SETTINGS_HEADER)::switchState),
-        "settings" to RobotMultiLingualStateHandler(RobotSectionType.SETTINGS, SimpleSectionStateSwitcher(RobotTypes.SETTINGS_HEADER)::switchState),
-        "variable" to RobotMultiLingualStateHandler(RobotSectionType.VARIABLES, SimpleSectionStateSwitcher(RobotTypes.VARIABLES_HEADER)::switchState),
-        "variables" to RobotMultiLingualStateHandler(RobotSectionType.VARIABLES, SimpleSectionStateSwitcher(RobotTypes.VARIABLES_HEADER)::switchState),
-        "test case" to RobotMultiLingualStateHandler(RobotSectionType.TEST_CASES) { targetState ->
-            resetInternalState()
-            yybegin(targetState)
-            pushbackEverythingUpToKeywordFinishedMarker()
-            RobotTypes.TEST_CASES_HEADER_NAME
-        },
-        "test cases" to RobotMultiLingualStateHandler(RobotSectionType.TEST_CASES) { targetState ->
-            resetInternalState()
-            yybegin(targetState)
-            pushbackEverythingUpToKeywordFinishedMarker()
-            RobotTypes.TEST_CASES_HEADER_NAME
-        },
-        "task" to RobotMultiLingualStateHandler(RobotSectionType.TASKS) { targetState ->
-            resetInternalState()
-            yybegin(targetState)
-            pushbackEverythingUpToKeywordFinishedMarker()
-            RobotTypes.TASKS_HEADER_NAME
-        },
-        "tasks" to RobotMultiLingualStateHandler(RobotSectionType.TASKS) { targetState ->
-            resetInternalState()
-            yybegin(targetState)
-            pushbackEverythingUpToKeywordFinishedMarker()
-            RobotTypes.TASKS_HEADER_NAME
-        },
-        "keyword" to RobotMultiLingualStateHandler(RobotSectionType.KEYWORDS, SimpleSectionStateSwitcher(RobotTypes.USER_KEYWORDS_HEADER)::switchState),
-        "keywords" to RobotMultiLingualStateHandler(RobotSectionType.KEYWORDS, SimpleSectionStateSwitcher(RobotTypes.USER_KEYWORDS_HEADER)::switchState),
-        "comment" to RobotMultiLingualStateHandler(RobotSectionType.COMMENTS, SimpleSectionStateSwitcher(RobotTypes.COMMENTS_HEADER)::switchState),
-        "comments" to RobotMultiLingualStateHandler(RobotSectionType.COMMENTS, SimpleSectionStateSwitcher(RobotTypes.COMMENTS_HEADER)::switchState))
+    private val languageSectionTypeHandlers =
+        mapOf(SectionType.SETTINGS to RobotMultiLingualStateHandler(RobotSectionType.SETTINGS, SimpleSectionStateSwitcher(RobotTypes.SETTINGS_HEADER)::switchState),
+            SectionType.VARIABLES to RobotMultiLingualStateHandler(RobotSectionType.VARIABLES, SimpleSectionStateSwitcher(RobotTypes.VARIABLES_HEADER)::switchState),
+            SectionType.TEST_CASES to RobotMultiLingualStateHandler(RobotSectionType.TEST_CASES) { targetState ->
+                resetInternalState()
+                yybegin(targetState)
+                pushbackEverythingUpToKeywordFinishedMarker()
+                RobotTypes.TEST_CASES_HEADER_NAME
+            },
+            SectionType.TASKS to RobotMultiLingualStateHandler(RobotSectionType.TASKS) { targetState ->
+                resetInternalState()
+                yybegin(targetState)
+                pushbackEverythingUpToKeywordFinishedMarker()
+                RobotTypes.TASKS_HEADER_NAME
+            },
+            SectionType.KEYWORDS to RobotMultiLingualStateHandler(RobotSectionType.KEYWORDS, SimpleSectionStateSwitcher(RobotTypes.USER_KEYWORDS_HEADER)::switchState),
+            SectionType.COMMENTS to RobotMultiLingualStateHandler(RobotSectionType.COMMENTS, SimpleSectionStateSwitcher(RobotTypes.COMMENTS_HEADER)::switchState))
 
-    private val defaultLanguageGlobalSettingNames = mapOf(
-        "library" to RobotMultiLingualStateHandler(RobotGlobalSettingType.CONFIGURABLE_SETTING, SimpleGlobalSettingStateSwitcher(RobotTypes.LIBRARY_IMPORT_KEYWORD)::switchState),
-        "resource" to RobotMultiLingualStateHandler(RobotGlobalSettingType.SIMPLE_VALUE_SETTING, SimpleGlobalSettingStateSwitcher(RobotTypes.RESOURCE_IMPORT_KEYWORD)::switchState),
-        "variables" to RobotMultiLingualStateHandler(RobotGlobalSettingType.CONFIGURABLE_SETTING, SimpleGlobalSettingStateSwitcher(RobotTypes.VARIABLES_IMPORT_KEYWORD)::switchState),
-        "name" to RobotMultiLingualStateHandler(RobotGlobalSettingType.SIMPLE_VALUE_SETTING, SimpleGlobalSettingStateSwitcher(RobotTypes.SUITE_NAME_KEYWORD)::switchState),
-        "documentation" to RobotMultiLingualStateHandler(RobotGlobalSettingType.SIMPLE_VALUE_SETTING, SimpleGlobalSettingStateSwitcher(RobotTypes.DOCUMENTATION_KEYWORD)::switchState),
-        "suite setup" to RobotMultiLingualStateHandler(RobotGlobalSettingType.KEYWORD_CALL_SETTING, SimpleGlobalSettingStateSwitcher(RobotTypes.SETUP_TEARDOWN_STATEMENT_KEYWORDS)::switchState),
-        "suite teardown" to RobotMultiLingualStateHandler(RobotGlobalSettingType.KEYWORD_CALL_SETTING, SimpleGlobalSettingStateSwitcher(RobotTypes.SETUP_TEARDOWN_STATEMENT_KEYWORDS)::switchState),
-        "metadata" to RobotMultiLingualStateHandler(RobotGlobalSettingType.CONFIGURABLE_SETTING, SimpleGlobalSettingStateSwitcher(RobotTypes.METADATA_KEYWORD)::switchState),
-        "test tags" to RobotMultiLingualStateHandler(RobotGlobalSettingType.SIMPLE_VALUE_SETTING, SimpleGlobalSettingStateSwitcher(RobotTypes.TAGS_KEYWORDS)::switchState),
-        "test setup" to RobotMultiLingualStateHandler(RobotGlobalSettingType.KEYWORD_CALL_SETTING, SimpleGlobalSettingStateSwitcher(RobotTypes.SETUP_TEARDOWN_STATEMENT_KEYWORDS)::switchState),
-        "test teardown" to RobotMultiLingualStateHandler(RobotGlobalSettingType.KEYWORD_CALL_SETTING, SimpleGlobalSettingStateSwitcher(RobotTypes.SETUP_TEARDOWN_STATEMENT_KEYWORDS)::switchState),
-        "test timeout" to RobotMultiLingualStateHandler(RobotGlobalSettingType.SIMPLE_VALUE_SETTING, SimpleGlobalSettingStateSwitcher(RobotTypes.TIMEOUT_KEYWORDS)::switchState),
-        "test template" to RobotMultiLingualStateHandler(RobotGlobalSettingType.KEYWORD_CALL_SETTING) { targetState ->
+    private val languageGlobalSettingTypeHandlers = mapOf(
+        GlobalSettingType.LIBRARY to RobotMultiLingualStateHandler(RobotGlobalSettingType.CONFIGURABLE_SETTING, SimpleGlobalSettingStateSwitcher(RobotTypes.LIBRARY_IMPORT_KEYWORD)::switchState),
+        GlobalSettingType.RESOURCE to RobotMultiLingualStateHandler(RobotGlobalSettingType.SIMPLE_VALUE_SETTING, SimpleGlobalSettingStateSwitcher(RobotTypes.RESOURCE_IMPORT_KEYWORD)::switchState),
+        GlobalSettingType.VARIABLES to RobotMultiLingualStateHandler(RobotGlobalSettingType.CONFIGURABLE_SETTING, SimpleGlobalSettingStateSwitcher(RobotTypes.VARIABLES_IMPORT_KEYWORD)::switchState),
+        GlobalSettingType.NAME to RobotMultiLingualStateHandler(RobotGlobalSettingType.SIMPLE_VALUE_SETTING, SimpleGlobalSettingStateSwitcher(RobotTypes.SUITE_NAME_KEYWORD)::switchState),
+        GlobalSettingType.DOCUMENTATION to RobotMultiLingualStateHandler(RobotGlobalSettingType.SIMPLE_VALUE_SETTING, SimpleGlobalSettingStateSwitcher(RobotTypes.DOCUMENTATION_KEYWORD)::switchState),
+        GlobalSettingType.SUITE_SETUP to RobotMultiLingualStateHandler(RobotGlobalSettingType.KEYWORD_CALL_SETTING,
+            SimpleGlobalSettingStateSwitcher(RobotTypes.SETUP_TEARDOWN_STATEMENT_KEYWORDS)::switchState),
+        GlobalSettingType.SUITE_TEARDOWN to RobotMultiLingualStateHandler(RobotGlobalSettingType.KEYWORD_CALL_SETTING,
+            SimpleGlobalSettingStateSwitcher(RobotTypes.SETUP_TEARDOWN_STATEMENT_KEYWORDS)::switchState),
+        GlobalSettingType.METADATA to RobotMultiLingualStateHandler(RobotGlobalSettingType.CONFIGURABLE_SETTING, SimpleGlobalSettingStateSwitcher(RobotTypes.METADATA_KEYWORD)::switchState),
+        GlobalSettingType.TEST_TAGS to RobotMultiLingualStateHandler(RobotGlobalSettingType.SIMPLE_VALUE_SETTING, SimpleGlobalSettingStateSwitcher(RobotTypes.TAGS_KEYWORDS)::switchState),
+        GlobalSettingType.TEST_SETUP to RobotMultiLingualStateHandler(RobotGlobalSettingType.KEYWORD_CALL_SETTING,
+            SimpleGlobalSettingStateSwitcher(RobotTypes.SETUP_TEARDOWN_STATEMENT_KEYWORDS)::switchState),
+        GlobalSettingType.TEST_TEARDOWN to RobotMultiLingualStateHandler(RobotGlobalSettingType.KEYWORD_CALL_SETTING,
+            SimpleGlobalSettingStateSwitcher(RobotTypes.SETUP_TEARDOWN_STATEMENT_KEYWORDS)::switchState),
+        GlobalSettingType.TEST_TIMEOUT to RobotMultiLingualStateHandler(RobotGlobalSettingType.SIMPLE_VALUE_SETTING, SimpleGlobalSettingStateSwitcher(RobotTypes.TIMEOUT_KEYWORDS)::switchState),
+        GlobalSettingType.TEST_TEMPLATE to RobotMultiLingualStateHandler(RobotGlobalSettingType.KEYWORD_CALL_SETTING) { targetState ->
             markTemplateParsingEnabled()
             SimpleGlobalSettingStateSwitcher(RobotTypes.TEMPLATE_KEYWORDS).switchState(targetState)
         },
-        "task tags" to RobotMultiLingualStateHandler(RobotGlobalSettingType.SIMPLE_VALUE_SETTING, SimpleGlobalSettingStateSwitcher(RobotTypes.TAGS_KEYWORDS)::switchState),
-        "task setup" to RobotMultiLingualStateHandler(RobotGlobalSettingType.KEYWORD_CALL_SETTING, SimpleGlobalSettingStateSwitcher(RobotTypes.SETUP_TEARDOWN_STATEMENT_KEYWORDS)::switchState),
-        "task teardown" to RobotMultiLingualStateHandler(RobotGlobalSettingType.KEYWORD_CALL_SETTING, SimpleGlobalSettingStateSwitcher(RobotTypes.SETUP_TEARDOWN_STATEMENT_KEYWORDS)::switchState),
-        "task timeout" to RobotMultiLingualStateHandler(RobotGlobalSettingType.SIMPLE_VALUE_SETTING, SimpleGlobalSettingStateSwitcher(RobotTypes.TIMEOUT_KEYWORDS)::switchState),
-        "task template" to RobotMultiLingualStateHandler(RobotGlobalSettingType.KEYWORD_CALL_SETTING) { targetState ->
+        GlobalSettingType.TASK_TAGS to RobotMultiLingualStateHandler(RobotGlobalSettingType.SIMPLE_VALUE_SETTING, SimpleGlobalSettingStateSwitcher(RobotTypes.TAGS_KEYWORDS)::switchState),
+        GlobalSettingType.TASK_SETUP to RobotMultiLingualStateHandler(RobotGlobalSettingType.KEYWORD_CALL_SETTING,
+            SimpleGlobalSettingStateSwitcher(RobotTypes.SETUP_TEARDOWN_STATEMENT_KEYWORDS)::switchState),
+        GlobalSettingType.TASK_TEARDOWN to RobotMultiLingualStateHandler(RobotGlobalSettingType.KEYWORD_CALL_SETTING,
+            SimpleGlobalSettingStateSwitcher(RobotTypes.SETUP_TEARDOWN_STATEMENT_KEYWORDS)::switchState),
+        GlobalSettingType.TASK_TIMEOUT to RobotMultiLingualStateHandler(RobotGlobalSettingType.SIMPLE_VALUE_SETTING, SimpleGlobalSettingStateSwitcher(RobotTypes.TIMEOUT_KEYWORDS)::switchState),
+        GlobalSettingType.TASK_TEMPLATE to RobotMultiLingualStateHandler(RobotGlobalSettingType.KEYWORD_CALL_SETTING) { targetState ->
             markTemplateParsingEnabled()
             SimpleGlobalSettingStateSwitcher(RobotTypes.TEMPLATE_KEYWORDS).switchState(targetState)
         },
-        "keyword tags" to RobotMultiLingualStateHandler(RobotGlobalSettingType.SIMPLE_VALUE_SETTING, SimpleGlobalSettingStateSwitcher(RobotTypes.TAGS_KEYWORDS)::switchState),
-        "default tags" to RobotMultiLingualStateHandler(RobotGlobalSettingType.SIMPLE_VALUE_SETTING, SimpleGlobalSettingStateSwitcher(RobotTypes.TAGS_KEYWORDS)::switchState),
+        GlobalSettingType.KEYWORD_TAGS to RobotMultiLingualStateHandler(RobotGlobalSettingType.SIMPLE_VALUE_SETTING, SimpleGlobalSettingStateSwitcher(RobotTypes.TAGS_KEYWORDS)::switchState),
+        GlobalSettingType.DEFAULT_TAGS to RobotMultiLingualStateHandler(RobotGlobalSettingType.SIMPLE_VALUE_SETTING, SimpleGlobalSettingStateSwitcher(RobotTypes.TAGS_KEYWORDS)::switchState),
     )
 
-    private val defaultLanguageLocalSettingNames = mapOf("tags" to RobotMultiLingualStateHandler(RobotLocalSettingType.SIMPLE_VALUE_SETTING, SimpleLocalSettingStateSwitcher()::switchState),
-        "setup" to RobotMultiLingualStateHandler(RobotLocalSettingType.KEYWORD_CALL_SETTING, SimpleLocalSettingStateSwitcher()::switchState),
-        "teardown" to RobotMultiLingualStateHandler(RobotLocalSettingType.KEYWORD_CALL_SETTING, SimpleLocalSettingStateSwitcher()::switchState),
-        "timeout" to RobotMultiLingualStateHandler(RobotLocalSettingType.SIMPLE_VALUE_SETTING, SimpleLocalSettingStateSwitcher()::switchState),
-        "arguments" to RobotMultiLingualStateHandler(RobotLocalSettingType.PARAMETER_DEFINITION_SETTING, SimpleLocalSettingStateSwitcher()::switchState))
+    private val languageLocalSettingTypeHandlers =
+        mapOf(LocalSettingType.TAGS to RobotMultiLingualStateHandler(RobotLocalSettingType.SIMPLE_VALUE_SETTING, SimpleLocalSettingStateSwitcher()::switchState),
+            LocalSettingType.SETUP to RobotMultiLingualStateHandler(RobotLocalSettingType.KEYWORD_CALL_SETTING, SimpleLocalSettingStateSwitcher()::switchState),
+            LocalSettingType.TEARDOWN to RobotMultiLingualStateHandler(RobotLocalSettingType.KEYWORD_CALL_SETTING, SimpleLocalSettingStateSwitcher()::switchState),
+            LocalSettingType.TIMEOUT to RobotMultiLingualStateHandler(RobotLocalSettingType.SIMPLE_VALUE_SETTING, SimpleLocalSettingStateSwitcher()::switchState),
+            LocalSettingType.ARGUMENTS to RobotMultiLingualStateHandler(RobotLocalSettingType.PARAMETER_DEFINITION_SETTING, SimpleLocalSettingStateSwitcher()::switchState))
 
-    private val defaultLanguageBehaviourDrivenIdentifierNames =
-        mapOf("given" to RobotMultiLingualStateHandler(RobotKeywordType.BEHAVIOUR_DRIVEN, SimpleBehaviourDrivenIdentifierStateSwitcher(RobotTypes.GIVEN)::switchState),
-            "when" to RobotMultiLingualStateHandler(RobotKeywordType.BEHAVIOUR_DRIVEN, SimpleBehaviourDrivenIdentifierStateSwitcher(RobotTypes.WHEN)::switchState),
-            "then" to RobotMultiLingualStateHandler(RobotKeywordType.BEHAVIOUR_DRIVEN, SimpleBehaviourDrivenIdentifierStateSwitcher(RobotTypes.THEN)::switchState),
-            "and" to RobotMultiLingualStateHandler(RobotKeywordType.BEHAVIOUR_DRIVEN, SimpleBehaviourDrivenIdentifierStateSwitcher(RobotTypes.AND)::switchState),
-            "but" to RobotMultiLingualStateHandler(RobotKeywordType.BEHAVIOUR_DRIVEN, SimpleBehaviourDrivenIdentifierStateSwitcher(RobotTypes.BUT)::switchState))
+    private val languageBehaviourDrivenIdentifierTypeHandlers =
+        mapOf(BehaviourDrivenType.GIVEN to RobotMultiLingualStateHandler(RobotKeywordType.BEHAVIOUR_DRIVEN, SimpleBehaviourDrivenIdentifierStateSwitcher(RobotTypes.GIVEN)::switchState),
+            BehaviourDrivenType.WHEN to RobotMultiLingualStateHandler(RobotKeywordType.BEHAVIOUR_DRIVEN, SimpleBehaviourDrivenIdentifierStateSwitcher(RobotTypes.WHEN)::switchState),
+            BehaviourDrivenType.THEN to RobotMultiLingualStateHandler(RobotKeywordType.BEHAVIOUR_DRIVEN, SimpleBehaviourDrivenIdentifierStateSwitcher(RobotTypes.THEN)::switchState),
+            BehaviourDrivenType.AND to RobotMultiLingualStateHandler(RobotKeywordType.BEHAVIOUR_DRIVEN, SimpleBehaviourDrivenIdentifierStateSwitcher(RobotTypes.AND)::switchState),
+            BehaviourDrivenType.BUT to RobotMultiLingualStateHandler(RobotKeywordType.BEHAVIOUR_DRIVEN, SimpleBehaviourDrivenIdentifierStateSwitcher(RobotTypes.BUT)::switchState))
+
+    private val localizationTypeMappingProvider: LocalizationTypeMappingProvider
+        get() = if (project != null) LocalizationLoadingMechanism.getInstance(project).loadLocalizationTypeMappingProvider() else DefaultLocalizationTypeMappingProvider
 
     protected var globalTemplateEnabled = false
     protected var localTemplateEnabled: Boolean = false
@@ -124,7 +126,8 @@ abstract class RobotMultiLingualFlexLexerBase @JvmOverloads constructor(protecte
 
     protected fun switchSection(): IElementType? {
         val sectionName = computeSectionName()
-        val section = defaultLanguageSectionNames.getOrDefault(sectionName, invalidSectionHandler)
+        val sectionType = localizationTypeMappingProvider.getSectionTypeMapping(sectionName)
+        val section = if (sectionType == null) invalidSectionHandler else languageSectionTypeHandlers.getOrDefault(sectionType, invalidSectionHandler)
         val nextStateId = getSectionStateId(section.sourceType)
         return section.switchState(nextStateId)
     }
@@ -145,7 +148,8 @@ abstract class RobotMultiLingualFlexLexerBase @JvmOverloads constructor(protecte
 
     protected fun switchGlobalSetting(): IElementType? {
         val settingName = computeGlobalSettingName()
-        val globalSetting = defaultLanguageGlobalSettingNames.getOrDefault(settingName, invalidGlobalSettingHandler)
+        val globalSettingType = localizationTypeMappingProvider.getGlobalSettingTypeMapping(settingName)
+        val globalSetting = if (globalSettingType == null) invalidGlobalSettingHandler else languageGlobalSettingTypeHandlers.getOrDefault(globalSettingType, invalidGlobalSettingHandler)
         val nextStateId = getGlobalSettingStateId(globalSetting.sourceType)
         return globalSetting.switchState(nextStateId)
     }
@@ -165,7 +169,9 @@ abstract class RobotMultiLingualFlexLexerBase @JvmOverloads constructor(protecte
 
     protected fun switchLocalSetting(): IElementType? {
         val localSettingName = extractLocalSettingName()
-        val localSetting = defaultLanguageLocalSettingNames.getOrDefault(localSettingName, intermediateTemplateLocalSettingHandler)
+        val localSettingType = localizationTypeMappingProvider.getLocalSettingTypeMapping(localSettingName)
+        val localSetting =
+            if (localSettingType == null) intermediateTemplateLocalSettingHandler else languageLocalSettingTypeHandlers.getOrDefault(localSettingType, intermediateTemplateLocalSettingHandler)
         val nextStateId = getLocalSettingStateId(localSetting.sourceType)
         return localSetting.switchState(nextStateId)
     }
@@ -177,7 +183,8 @@ abstract class RobotMultiLingualFlexLexerBase @JvmOverloads constructor(protecte
 
     protected fun switchPotentialKeyword(): IElementType? {
         val keywordName = yytext().toString().trim().lowercase()
-        val stateHandler = defaultLanguageBehaviourDrivenIdentifierNames.getOrDefault(keywordName, normalKeywordHandler)
+        val behaviourDrivenType = localizationTypeMappingProvider.getBehaviourDrivenIdentifierTypeMapping(keywordName)
+        val stateHandler = if (behaviourDrivenType == null) normalKeywordHandler else languageBehaviourDrivenIdentifierTypeHandlers.getOrDefault(behaviourDrivenType, normalKeywordHandler)
         val nextStateId = getKeywordStateId(stateHandler.sourceType)
         return stateHandler.switchState(nextStateId)
     }

@@ -39,10 +39,16 @@ class RobotConfiguration(project: Project) : Configurable.NoScroll, SearchableCo
     private val panel = panel {
         group(RobotBundle.message("options.languages.row.label")) {
             row {
-                scrollCell(defaultLanguageConfigurationsTable).resizableColumn().align(Align.FILL)
+                scrollCell(defaultLanguageConfigurationsTable).resizableColumn().align(Align.FILL).onApply {
+                    val enabledDefaultLanguages = defaultLanguageConfigurationsTableModel.languages.asSequence().filter { it.active }.mapNotNull { it.languageClassReference }.toList()
+                    optionsProvider.enabledDefaultLanguageCodes = enabledDefaultLanguages
+                }
             }.resizableRow()
             row {
-                cell(customLanguageConfigurationsTableToolbar.createPanel()).resizableColumn().align(Align.FILL)
+                cell(customLanguageConfigurationsTableToolbar.createPanel()).resizableColumn().align(Align.FILL).onApply {
+                    val enabledCustomLanguageClasses = customLanguageConfigurationsTableModel.languages.asSequence().filter { it.active }.mapNotNull { it.languageClassReference }.toList()
+                    optionsProvider.enabledCustomLanguageClasses = enabledCustomLanguageClasses
+                }
             }.resizableRow()
         }
     }
