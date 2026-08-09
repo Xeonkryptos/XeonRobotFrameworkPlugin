@@ -60,7 +60,7 @@ and keywords.
 
 ## Limitations
 
-* Only static code analysis is available for now. Dynamic features like described [here](https://robotframework.org/robotframework/latest/RobotFrameworkUserGuide.html#dynamic-library-api) isn't
+* Only static code analysis is available for now. Dynamic features like described [here](https://robotframework.org/robotframework/latest/RobotFrameworkUserGuide.html#dynamic-library-api) aren't
   supported yet. It is planned as an upcoming feature, though. Same applies to Python's decorators which modify the function signature.
 * Code completion for object access in Robot's variables isn't possible yet.
 

@@ -1,7 +1,6 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.psi;
 
 import com.intellij.codeInsight.TailType;
-import com.intellij.codeInsight.TailTypes;
 import com.intellij.psi.tree.IElementType;
 import dev.xeonkryptos.xeonrobotframeworkplugin.util.RobotNames;
 import dev.xeonkryptos.xeonrobotframeworkplugin.util.RobotTailTypes;
@@ -101,11 +100,11 @@ public class RobotKeywordProvider {
         KEYWORD_TABLE.addSyntax(GHERKIN, "AND");
         KEYWORD_TABLE.addSyntax(GHERKIN, "BUT");
 
-        addRecommendation(GHERKIN, "GIVEN", "Given", TailTypes.spaceType());
-        addRecommendation(GHERKIN, "WHEN", "WHEN", TailTypes.spaceType());
-        addRecommendation(GHERKIN, "THEN", "THEN", TailTypes.spaceType());
-        addRecommendation(GHERKIN, "AND", "AND", TailTypes.spaceType());
-        addRecommendation(GHERKIN, "BUT", "BUT", TailTypes.spaceType());
+        addRecommendation(GHERKIN, "GIVEN", "Given", RobotTailTypes.SPACE);
+        addRecommendation(GHERKIN, "WHEN", "WHEN", RobotTailTypes.SPACE);
+        addRecommendation(GHERKIN, "THEN", "THEN", RobotTailTypes.SPACE);
+        addRecommendation(GHERKIN, "AND", "AND", RobotTailTypes.SPACE);
+        addRecommendation(GHERKIN, "BUT", "BUT", RobotTailTypes.SPACE);
 
         KEYWORD_TABLE.addSyntax(SYNTAX_MARKER, "IF");
         KEYWORD_TABLE.addSyntax(SYNTAX_MARKER, "END");
@@ -128,16 +127,16 @@ public class RobotKeywordProvider {
 
         addRecommendation(SYNTAX_MARKER, "IF", "IF", RobotTailTypes.TAB);
         addRecommendation(RobotTypes.CONDITIONAL_STRUCTURE, "ELSE IF", "ELSE IF", RobotTailTypes.TAB);
-        addRecommendation(RobotTypes.CONDITIONAL_STRUCTURE, "ELSE", "ELSE", TailTypes.noneType());
+        addRecommendation(RobotTypes.CONDITIONAL_STRUCTURE, "ELSE", "ELSE", RobotTailTypes.NONE);
         addRecommendation(SYNTAX_MARKER, "WHILE", "WHILE", RobotTailTypes.TAB);
         addRecommendation(SYNTAX_MARKER, "FOR", "FOR", RobotTailTypes.TAB);
-        addRecommendation(RobotTypes.LOOP_CONTROL_STRUCTURE, "CONTINUE", "CONTINUE", TailTypes.noneType());
-        addRecommendation(RobotTypes.LOOP_CONTROL_STRUCTURE, "BREAK", "BREAK", TailTypes.noneType());
-        addRecommendation(SYNTAX_MARKER, "TRY", "TRY", TailTypes.noneType());
+        addRecommendation(RobotTypes.LOOP_CONTROL_STRUCTURE, "CONTINUE", "CONTINUE", RobotTailTypes.NONE);
+        addRecommendation(RobotTypes.LOOP_CONTROL_STRUCTURE, "BREAK", "BREAK", RobotTailTypes.NONE);
+        addRecommendation(SYNTAX_MARKER, "TRY", "TRY", RobotTailTypes.NONE);
         addRecommendation(RobotTypes.EXCEPTION_HANDLING_STRUCTURE, "EXCEPT", "EXCEPT", RobotTailTypes.TAB);
-        addRecommendation(RobotTypes.EXCEPTION_HANDLING_STRUCTURE, "ELSE", "ELSE", TailTypes.noneType());
-        addRecommendation(RobotTypes.EXCEPTION_HANDLING_STRUCTURE, "FINALLY", "FINALLY", TailTypes.noneType());
-        addRecommendation(RobotTypes.USER_KEYWORD_STATEMENT, "RETURN", "RETURN", TailTypes.noneType());
+        addRecommendation(RobotTypes.EXCEPTION_HANDLING_STRUCTURE, "ELSE", "ELSE", RobotTailTypes.NONE);
+        addRecommendation(RobotTypes.EXCEPTION_HANDLING_STRUCTURE, "FINALLY", "FINALLY", RobotTailTypes.NONE);
+        addRecommendation(RobotTypes.USER_KEYWORD_STATEMENT, "RETURN", "RETURN", RobotTailTypes.NONE);
         addRecommendation(RobotTypes.FOR_IN, "IN", "IN", RobotTailTypes.TAB);
         addRecommendation(RobotTypes.FOR_IN, "IN RANGE", "IN RANGE", RobotTailTypes.TAB);
         addRecommendation(RobotTypes.FOR_IN, "IN ENUMERATE", "IN ENUMERATE", RobotTailTypes.TAB);

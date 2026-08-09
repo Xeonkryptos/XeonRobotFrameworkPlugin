@@ -1,0 +1,31 @@
+<html lang="en">
+    <body>
+        <p>
+            Reports user-defined keywords that combine embedded arguments in the keyword name with an explicit <code>[Arguments]</code> setting when the configured Robot Framework version does not support this syntax.
+        </p>
+
+        <p>
+            This inspection checks each user keyword declaration and flags it when both argument styles are used together.
+            The combination is only valid starting with Robot Framework 6.1.
+        </p>
+
+        <p><b>Examples:</b></p>
+        <pre><code>*** Keywords ***
+# Reported when Robot Framework version is below 6.1
+Log In As ${user}
+    [Arguments]    ${password}
+    Log    ${user}:${password}
+
+# Valid from Robot Framework 6.1 and later
+Create User ${name} In ${team}
+    [Arguments]    ${role}
+    Log    ${name} / ${team} / ${role}
+</code></pre>
+        <!-- tooltip end -->
+
+        <p>
+            The problem is highlighted on the affected user keyword statement so you can either split argument styles
+            or update the Robot Framework version used by the project.
+        </p>
+    </body>
+</html>

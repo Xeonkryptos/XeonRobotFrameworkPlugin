@@ -1,4 +1,4 @@
-package dev.xeonkryptos.xeonrobotframeworkplugin.annotator.feature
+package dev.xeonkryptos.xeonrobotframeworkplugin.inspections.versioned
 
 import com.intellij.codeInspection.LocalInspectionToolSession
 import com.intellij.codeInspection.ProblemHighlightType

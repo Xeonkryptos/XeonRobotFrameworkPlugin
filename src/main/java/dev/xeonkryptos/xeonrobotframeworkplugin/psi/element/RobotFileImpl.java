@@ -32,6 +32,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -165,7 +166,7 @@ public class RobotFileImpl extends PsiFileBase implements KeywordFile, RobotFile
     public Collection<VirtualFile> findImportedFilesWithLibraryName(@NotNull String libraryName) {
         return getImportedFiles(true, ImportType.LIBRARY).stream()
                                                          .filter(importedFile -> libraryName.equals(importedFile.getLibraryName()))
-                                                         .map(KeywordFile::getVirtualFile)
+                                                         .flatMap(keywordFile -> keywordFile.getVirtualFiles().stream())
                                                          .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
@@ -228,10 +229,19 @@ public class RobotFileImpl extends PsiFileBase implements KeywordFile, RobotFile
         return CachedValuesManager.getManager(getProject()).getParameterizedCachedValue(this, IMPORTED_VIRTUAL_FILES_CACHE_KEY, transitive -> {
             Set<VirtualFile> files = new LinkedHashSet<>();
             for (KeywordFile keywordFile : collectImportedFiles(transitive)) {
-                files.add(keywordFile.getVirtualFile());
+                files.addAll(keywordFile.getVirtualFiles());
             }
             return Result.createSingleDependency(files, PsiModificationTracker.MODIFICATION_COUNT);
         }, false, includeTransitive);
+    }
+
+    @Override
+    public Collection<VirtualFile> getVirtualFiles() {
+        VirtualFile virtualFile = getVirtualFile();
+        if (virtualFile == null) {
+            return Collections.emptyList();
+        }
+        return List.of(virtualFile);
     }
 
     @Override

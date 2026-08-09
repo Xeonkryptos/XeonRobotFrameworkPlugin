@@ -13,11 +13,11 @@ import com.jetbrains.python.psi.PyClass;
 import com.jetbrains.python.psi.PyFunction;
 import dev.xeonkryptos.xeonrobotframeworkplugin.index.PyRobotKeywordDefinitionIndex.PyRobotKeywordDefinitionIndexUtil;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.dto.ImportType;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.KeywordFile;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotFile;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCallLibrary;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCallName;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotUserKeywordStatement;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.index.EmbeddedKeywordDefinitionNameIndex;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.index.KeywordDefinitionNameIndex;
 import dev.xeonkryptos.xeonrobotframeworkplugin.util.RobotNames;
 import org.jetbrains.annotations.NotNull;
@@ -78,10 +78,15 @@ public class RobotKeywordCallNameReference extends PsiPolyVariantReferenceBase<R
         GlobalSearchScope searchScope = GlobalSearchScope.filesWithLibrariesScope(project, importedFiles);
 
         Collection<RobotUserKeywordStatement> userKeywordStatements = KeywordDefinitionNameIndex.getUserKeywordStatements(keyword, project, searchScope);
+        Collection<RobotUserKeywordStatement> embeddedUserKeywordStatements = EmbeddedKeywordDefinitionNameIndex.getEmbeddedUserKeywordStatements(keyword, project, searchScope);
+        userKeywordStatements.addAll(embeddedUserKeywordStatements);
         Collection<PyFunction> pythonKeywordFunctions = PyRobotKeywordDefinitionIndexUtil.findKeywordFunctions(keyword, psiFile.getProject(), searchScope);
         if (libraryName != null && (userKeywordStatements.isEmpty() || pythonKeywordFunctions.isEmpty())) {
             String fullKeywordName = libraryName + "." + keyword;
-            userKeywordStatements = KeywordDefinitionNameIndex.getUserKeywordStatements(fullKeywordName, project, searchScope);
+            Collection<RobotUserKeywordStatement> userKeywordStatementsWithFullReference = KeywordDefinitionNameIndex.getUserKeywordStatements(fullKeywordName, project, searchScope);
+            userKeywordStatements.addAll(userKeywordStatementsWithFullReference);
+            Collection<RobotUserKeywordStatement> embeddedUserKeywordStatementsWithFullReference = EmbeddedKeywordDefinitionNameIndex.getEmbeddedUserKeywordStatements(keyword, project, searchScope);
+            userKeywordStatements.addAll(embeddedUserKeywordStatementsWithFullReference);
             pythonKeywordFunctions = PyRobotKeywordDefinitionIndexUtil.findKeywordFunctions(fullKeywordName, psiFile.getProject(), searchScope);
         }
         Collection<PsiElement> keywordElements = new LinkedHashSet<>(userKeywordStatements.size() + pythonKeywordFunctions.size());
@@ -98,7 +103,7 @@ public class RobotKeywordCallNameReference extends PsiPolyVariantReferenceBase<R
             importedFiles = robotFile.findImportedFilesWithLibraryName(libraryName);
         }
         if (importedFiles == null || importedFiles.isEmpty()) {
-            importedFiles = robotFile.collectImportedFiles(true, ImportType.LIBRARY).stream().map(KeywordFile::getVirtualFile).collect(Collectors.toSet());
+            importedFiles = robotFile.collectImportedFiles(true, ImportType.LIBRARY).stream().flatMap(keywordFile -> keywordFile.getVirtualFiles().stream()).collect(Collectors.toSet());
         }
         VirtualFile virtualFile = robotFile.getVirtualFile();
         if (virtualFile == null) {

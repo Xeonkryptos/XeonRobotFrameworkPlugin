@@ -29,8 +29,8 @@ public class RobotUserKeywordStatementIdImpl extends RobotPsiElementBase impleme
 
   @Override
   @NotNull
-  public List<RobotVariable> getVariableList() {
-    return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotVariable.class);
+  public List<RobotVariableDefinition> getVariableDefinitionList() {
+    return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotVariableDefinition.class);
   }
 
 }

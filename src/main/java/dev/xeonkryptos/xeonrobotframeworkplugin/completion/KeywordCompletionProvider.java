@@ -21,7 +21,6 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.formatter.RobotCodeStyleSettings
 import dev.xeonkryptos.xeonrobotframeworkplugin.index.PyRobotKeywordDefinitionIndex.PyRobotKeywordDefinitionIndexUtil;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.dto.ImportType;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.DefinedKeyword;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.KeywordFile;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotArgument;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotFile;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCall;
@@ -66,7 +65,7 @@ class KeywordCompletionProvider extends CompletionProvider<CompletionParameters>
         RobotCodeStyleSettings customSettings = CodeStyle.getCustomSettings(robotFile, RobotCodeStyleSettings.class);
         boolean capitalizeKeywords = customSettings.CAPITALIZE_KEYWORDS;
 
-        Stream<VirtualFile> importedFilesStream = robotFile.collectImportedFiles(true, ImportType.LIBRARY).stream().map(KeywordFile::getVirtualFile);
+        Stream<VirtualFile> importedFilesStream = robotFile.collectImportedFiles(true, ImportType.LIBRARY).stream().flatMap(keywordFile -> keywordFile.getVirtualFiles().stream());
         Set<VirtualFile> virtualFiles = Stream.concat(Stream.of(virtualFile), importedFilesStream).collect(Collectors.toSet());
 
         Set<DefinedKeyword> definedKeywords = new LinkedHashSet<>();

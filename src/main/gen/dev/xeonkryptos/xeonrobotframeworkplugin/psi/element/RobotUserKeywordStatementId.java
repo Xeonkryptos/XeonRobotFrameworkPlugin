@@ -8,6 +8,6 @@ import com.intellij.psi.PsiElement;
 public interface RobotUserKeywordStatementId extends RobotElement {
 
   @NotNull
-  List<RobotVariable> getVariableList();
+  List<RobotVariableDefinition> getVariableDefinitionList();
 
 }
