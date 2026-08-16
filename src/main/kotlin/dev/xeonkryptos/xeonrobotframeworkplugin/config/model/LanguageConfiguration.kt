@@ -1,3 +1,3 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.config.model
 
-data class LanguageConfiguration(var languageClassReference: String? = null, var active: Boolean = true)
+data class LanguageConfiguration(var languageClassReference: String? = null, var active: Boolean = true, val defaultLanguage: Boolean)

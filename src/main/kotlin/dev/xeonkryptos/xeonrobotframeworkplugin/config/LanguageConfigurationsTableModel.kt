@@ -2,9 +2,10 @@ package dev.xeonkryptos.xeonrobotframeworkplugin.config
 
 import dev.xeonkryptos.xeonrobotframeworkplugin.RobotBundle
 import dev.xeonkryptos.xeonrobotframeworkplugin.config.model.LanguageConfiguration
+import dev.xeonkryptos.xeonrobotframeworkplugin.ui.util.table.Reorderable
 import javax.swing.table.AbstractTableModel
 
-class LanguageConfigurationsTableModel(private val languageColumnNameKey: String) : AbstractTableModel() {
+class LanguageConfigurationsTableModel(private val languageColumnNameKey: String) : AbstractTableModel(), Reorderable {
 
     private val myLanguages = mutableListOf<LanguageConfiguration>()
     val languages: List<LanguageConfiguration>
@@ -42,16 +43,23 @@ class LanguageConfigurationsTableModel(private val languageColumnNameKey: String
         fireTableCellUpdated(rowIndex, columnIndex)
     }
 
+    override fun reorder(fromIndex: Int, toIndex: Int) {
+        val languageToMove = myLanguages.removeAt(fromIndex)
+        fireTableRowsDeleted(fromIndex, fromIndex)
+
+        myLanguages.add(toIndex, languageToMove)
+        fireTableRowsInserted(toIndex, toIndex)
+    }
+
     fun addNewLanguage() {
-        myLanguages.add(LanguageConfiguration())
+        myLanguages.add(LanguageConfiguration(defaultLanguage = false))
         fireTableRowsInserted(myLanguages.size - 1, myLanguages.size - 1)
     }
 
     fun removeLanguage(language: LanguageConfiguration) {
-        myLanguages.remove(language)
-        fireTableRowsDeleted(myLanguages.size, myLanguages.size)
-        if (myLanguages.isEmpty()) {
-            addNewLanguage()
+        if (!language.defaultLanguage) {
+            myLanguages.remove(language)
+            fireTableRowsDeleted(myLanguages.size, myLanguages.size)
         }
     }
 }
