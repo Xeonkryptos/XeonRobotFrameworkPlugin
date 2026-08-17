@@ -45,7 +45,8 @@ public abstract class RobotParameterExtension extends RobotPsiElementBase implem
                     String keywordCallName = kc.getName();
                     String normalizedKeywordCallName = KeywordUtil.normalizeKeywordName(keywordCallName);
                     // Create Dictionary keyword calls have special handling for parameters
-                    result = !RobotNames.CREATE_DICTIONARY_NORMALIZED_KEYWORD_NAME.equalsIgnoreCase(normalizedKeywordCallName);
+                    result = !RobotNames.CREATE_DICTIONARY_NORMALIZED_KEYWORD_NAME.equalsIgnoreCase(normalizedKeywordCallName) &&
+                             !RobotNames.SET_TO_DICTIONARY_NORMALIZED_KEYWORD_NAME.equalsIgnoreCase(normalizedKeywordCallName);
                 }
                 return Result.create(result, this, resolvedReference, kc);
             }, false, keywordCall);

@@ -44,6 +44,7 @@ object RobotNames {
     const val EXIT_FOR_LOOP_NORMALIZED_KEYWORD_NAME = "exitforloop"
     const val EXIT_FOR_LOOP_IF_NORMALIZED_KEYWORD_NAME = "exitforloopif"
     const val CREATE_DICTIONARY_NORMALIZED_KEYWORD_NAME: String = "createdictionary"
+    const val SET_TO_DICTIONARY_NORMALIZED_KEYWORD_NAME: String = "settodictionary"
     const val RUN_KEYWORD_IF_NORMALIZED_KEYWORD_NAME: String = "runkeywordif"
     const val RUN_KEYWORD_IF_ALL_TESTS_PASSED_NORMALIZED_KEYWORD_NAME = "runkeywordifalltestspassed"
     const val RUN_KEYWORD_IF_ANY_TESTS_FAILED_NORMALIZED_KEYWORD_NAME = "runkeywordifanytestsfailed"
