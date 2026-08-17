@@ -10,6 +10,8 @@
 
 ### Fixed
 
+- Fixed Lexing issue with a single `=` used as a keyword argument
+
 ## 0.7.6 - 2026-08-08
 
 ### Added

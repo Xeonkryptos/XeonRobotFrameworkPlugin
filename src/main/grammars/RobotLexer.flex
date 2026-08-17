@@ -502,23 +502,21 @@ LineComment = {LineCommentSign} {NON_EOL}*
 <TASK_DEFINITION>              ^ [^\s#] {NON_EOL}+ {EOL}*    { localTemplateEnabled = globalTemplateEnabled; yypushback(yylength()); yybegin(TASK_NAME_DEFINITION); break; }
 <USER_KEYWORD_DEFINITION>      ^ [^\s#] {NON_EOL}+ {EOL}*    { yypushback(yylength()); yybegin(USER_KEYWORD_NAME_DEFINITION); break; }
 
-<KEYWORD_ARGUMENTS, SETTINGS_SECTION> {
-    <SETTING, FOR_STRUCTURE_LOOP, WHILE_CONFIGURATION> {
-        {EverythingButVariableValue} {EqualSign} {
-              yypushback(1);
-              enterNewState(NORMAL_PARAMETER_ASSIGNMENT);
-              return PARAMETER_NAME;
-        }
-        {EverythingButVariableValue} {EqualSign} {EverythingButVariableValue} {
-              int assignmentPos = indexOf('=');
-              yypushback(yylength() - assignmentPos);
-              enterNewState(NORMAL_PARAMETER_ASSIGNMENT);
-              return PARAMETER_NAME;
-        }
+<SETTINGS_SECTION, SETTING, FOR_STRUCTURE_LOOP, WHILE_CONFIGURATION, KEYWORD_ARGUMENTS> {
+    {EverythingButVariableValue} {EqualSign} {
+          yypushback(1);
+          enterNewState(NORMAL_PARAMETER_ASSIGNMENT);
+          return PARAMETER_NAME;
     }
-    <TESTCASE_DEFINITION, TASK_DEFINITION, USER_KEYWORD_DEFINITION> {
-        {EqualSign} {KeywordFinishedMarker}           { pushBackTrailingWhitespace(); return ASSIGNMENT; }
+    {EverythingButVariableValue} {EqualSign} {EverythingButVariableValue} {
+          int assignmentPos = indexOf('=');
+          yypushback(yylength() - assignmentPos);
+          enterNewState(NORMAL_PARAMETER_ASSIGNMENT);
+          return PARAMETER_NAME;
     }
+}
+<SETTINGS_SECTION, TESTCASE_DEFINITION, TASK_DEFINITION, USER_KEYWORD_DEFINITION> {
+    {EqualSign} {KeywordFinishedMarker}           { pushBackTrailingWhitespace(); return ASSIGNMENT; }
 }
 <INTERMEDIATE_TEMPLATE_CONFIGURATION> {
     {ExtendedSpaceBasedEndMarker} {None} {ExtendedKeywordFinishedMarker}  {
