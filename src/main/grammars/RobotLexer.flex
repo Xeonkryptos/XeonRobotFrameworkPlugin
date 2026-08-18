@@ -764,6 +764,7 @@ LineComment = {LineCommentSign} {NON_EOL}*
     "$" [^{\s]                              { enterNewState(SPECIAL_VARIABLE_USAGE); yypushback(1); return SCALAR_VARIABLE_START; }
     {EverythingButSpecialVariableValue}     { return PYTHON_EXPRESSION_CONTENT; }
     {ExtendedSpaceBasedEndMarker}           { leaveState(); return EOS; }
+    {ExtendedSpaceBasedEndMarker} {LineCommentSign}     { yypushback(1); return WHITE_SPACE; }
     {EOL}                                   { leaveState(); yypushback(yylength()); break; }
     {MultiLine}                             {
       if (previousStates[currentIndex] == WHILE_CONFIGURATION) {
@@ -884,6 +885,7 @@ LineComment = {LineCommentSign} {NON_EOL}*
 
 <EOL_EXPECTED> {
     {NonNewlineWhitespace}+  { return WHITE_SPACE; }
+    {LineComment}            { return COMMENT; }
     {EOL}                    { leaveState(); return EOL; }
     [^]                      { yypushback(yylength()); leaveState(); break; }
 }

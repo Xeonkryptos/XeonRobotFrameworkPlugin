@@ -12,6 +12,7 @@
 
 - Fixed Lexing issue with a single `=` used as a keyword argument
 - Don't complain about unknown parameter names when `Set To Dictionary` keyword call is detected. It's handled the same way as `Create Dictionary`
+- Fixed parsing issues when using line comments in the same line as multi-line IF/ELSE statements
 
 ## 0.7.6 - 2026-08-08
 
