@@ -17,6 +17,17 @@ class RobotCodeStyleSettings(container: CodeStyleSettings) : CustomCodeStyleSett
     @JvmField
     var AFTER_CONTINUATION_INDENT_SIZE: Int = DEFAULT_TAB_SIZE
 
+    // ################## Spaces ##################
+
+    @JvmField
+    var SPACES_AFTER_LOCAL_SETTING_NAME: Int = SUPER_SPACE_SIZE
+
+    @JvmField
+    var SPACES_AFTER_VARIABLE_STATEMENT_ASSIGNMENT: Int = SUPER_SPACE_SIZE
+
+    @JvmField
+    var SPACES_BETWEEN_KEYWORD_CALL_AND_ARGUMENTS: Int = SUPER_SPACE_SIZE
+
     // ################## Wrapping and braces settings ##################
 
     @JvmField

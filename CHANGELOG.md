@@ -6,6 +6,8 @@
 
 ### Added
 
+- Added new formatting options to increase the spaces after local settings, keyword calls and their arguments and after variable statements
+
 ### Changed
 
 ### Fixed
