@@ -14,6 +14,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 
+import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.TEMPLATE_ARGUMENT_VALUE;
+
 public class RobotParserUtil extends GeneratedParserUtilBase {
 
     private static final Key<Boolean> GLOBAL_TEMPLATE_SETTING_KEY = Key.create("GLOBAL_TEMPLATE_SETTING_KEY");
@@ -53,7 +55,6 @@ public class RobotParserUtil extends GeneratedParserUtilBase {
      * @param builder                  current PsiBuilder
      * @param level                    current parser level
      * @param positionalArgumentParser parser for positional arguments, e.g. {@link RobotParser#positional_argument_content(PsiBuilder, int)}
-     *
      * @return true if a positional argument could be parsed (was detected), false otherwise
      */
     public static boolean parsePositionalArgument(PsiBuilder builder, int level, Parser positionalArgumentParser) {
@@ -138,6 +139,30 @@ public class RobotParserUtil extends GeneratedParserUtilBase {
                 }
             }
         }
+    }
+
+    public static boolean parseTemplateArgument(PsiBuilder b, int l, Parser variableParser) {
+        if (!recursion_guard_(b, l, "template_argument")) return false;
+
+        WhitespaceSkippedMemory whitespaceSkippedMemory = new WhitespaceSkippedMemory();
+        b.setWhitespaceSkippedCallback(whitespaceSkippedMemory);
+
+        // Default parser logic to parse a template argument (either a TEMPLATE_ARGUMENT_VALUE or a variable)
+        boolean r = consumeToken(b, TEMPLATE_ARGUMENT_VALUE);
+        if (!r) r = variableParser.parse(b, l + 1);
+
+        // Continue parsing template argument values or variables until we reach the end of the line or a whitespace (tab, super space) that indicates the end of the argument
+        // This is necessary to collect all parts, including variables, into a single template argument. Mostly required to keep the formatting working and not breaking anything.
+        while (r && !nextTokenIs(b, RobotTypes.EOL) && !whitespaceSkippedMemory.containsArgumentEndMarker(b)) {
+            if (nextTokenIs(b, TEMPLATE_ARGUMENT_VALUE)) {
+                r = consumeToken(b, TEMPLATE_ARGUMENT_VALUE);
+            } else {
+                r = variableParser.parse(b, l + 1);
+            }
+        }
+
+        b.setWhitespaceSkippedCallback(null);
+        return r;
     }
 
     private static class WhitespaceSkippedMemory implements WhitespaceSkippedCallback {

@@ -216,7 +216,8 @@ template_parameter ::= template_parameter_id PARAMETER_ASSIGNMENT template_argum
     implements="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotArgument"
 }
 template_parameter_id ::= TEMPLATE_PARAMETER_NAME {methods=[getReference]}
-template_argument ::= TEMPLATE_ARGUMENT_VALUE | variable {implements="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotArgument"}
+template_argument ::= external_template_argument {implements="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotArgument"}
+private external external_template_argument ::= parseTemplateArgument variable
 
 bdd_statement ::= (
         GIVEN eol_based_keyword_call WHEN eol_based_keyword_call

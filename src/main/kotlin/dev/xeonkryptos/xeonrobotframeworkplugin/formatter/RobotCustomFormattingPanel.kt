@@ -5,6 +5,7 @@ import com.intellij.ide.highlighter.HighlighterFactory
 import com.intellij.openapi.editor.colors.EditorColorsScheme
 import com.intellij.openapi.editor.highlighter.EditorHighlighter
 import com.intellij.openapi.fileTypes.FileType
+import com.intellij.openapi.ui.ValidationInfo
 import com.intellij.openapi.util.NlsContexts
 import com.intellij.psi.codeStyle.CodeStyleSettings
 import com.intellij.ui.IdeBorderFactory
@@ -39,40 +40,19 @@ class RobotCustomFormattingPanel(settings: CodeStyleSettings) : CodeStyleAbstrac
                 cell(spacesAfterLocalSettingNameField).onApply { customSettings.SPACES_AFTER_LOCAL_SETTING_NAME = spacesAfterLocalSettingNameField.value }
                     .onReset { spacesAfterLocalSettingNameField.value = customSettings.SPACES_AFTER_LOCAL_SETTING_NAME }
                     .onIsModified { spacesAfterLocalSettingNameField.value != customSettings.SPACES_AFTER_LOCAL_SETTING_NAME }
-                    .validationOnApply {
-                        try {
-                            it.valueEditor.validateContent()
-                            null
-                        } catch (e: Exception) {
-                            ValidationInfoBuilder(it).error(e.localizedMessage)
-                        }
-                    }
+                    .validationOnApply { validateIntegerFieldOnApply(it) }
             }
             row(RobotBundle.message("formatter.spaces.after.variable.statement.assignment")) {
                 cell(spacesAfterVariableStatementField).onApply { customSettings.SPACES_AFTER_VARIABLE_STATEMENT_ASSIGNMENT = spacesAfterVariableStatementField.value }
                     .onReset { spacesAfterVariableStatementField.value = customSettings.SPACES_AFTER_VARIABLE_STATEMENT_ASSIGNMENT }
                     .onIsModified { spacesAfterVariableStatementField.value != customSettings.SPACES_AFTER_VARIABLE_STATEMENT_ASSIGNMENT }
-                    .validationOnApply {
-                        try {
-                            it.valueEditor.validateContent()
-                            null
-                        } catch (e: Exception) {
-                            ValidationInfoBuilder(it).error(e.localizedMessage)
-                        }
-                    }
+                    .validationOnApply { validateIntegerFieldOnApply(it) }
             }
             row(RobotBundle.message("formatter.spaces.between.keyword.call.and.arguments")) {
                 cell(spacesBetweenKeywordCallAndArgumentsField).onApply { customSettings.SPACES_BETWEEN_KEYWORD_CALL_AND_ARGUMENTS = spacesBetweenKeywordCallAndArgumentsField.value }
                     .onReset { spacesBetweenKeywordCallAndArgumentsField.value = customSettings.SPACES_BETWEEN_KEYWORD_CALL_AND_ARGUMENTS }
                     .onIsModified { spacesBetweenKeywordCallAndArgumentsField.value != customSettings.SPACES_BETWEEN_KEYWORD_CALL_AND_ARGUMENTS }
-                    .validationOnApply {
-                        try {
-                            it.valueEditor.validateContent()
-                            null
-                        } catch (e: Exception) {
-                            ValidationInfoBuilder(it).error(e.localizedMessage)
-                        }
-                    }
+                    .validationOnApply { validateIntegerFieldOnApply(it) }
             }
         }
     }
@@ -108,6 +88,15 @@ class RobotCustomFormattingPanel(settings: CodeStyleSettings) : CodeStyleAbstrac
         columns = 4
         if (defaultValue < 0) isCanBeEmpty = true
         minimumSize = preferredSize
+    }
+
+    private fun validateIntegerFieldOnApply(field: IntegerField): ValidationInfo? {
+        return try {
+            field.validateContent()
+            null
+        } catch (e: Exception) {
+            ValidationInfoBuilder(field).error(e.localizedMessage)
+        }
     }
 
     override fun getRightMargin(): Int = 80

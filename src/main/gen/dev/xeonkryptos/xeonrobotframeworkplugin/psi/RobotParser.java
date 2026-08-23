@@ -2659,13 +2659,12 @@ public class RobotParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // TEMPLATE_ARGUMENT_VALUE | variable
+  // external_template_argument
   public static boolean template_argument(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "template_argument")) return false;
     boolean r;
     Marker m = enter_section_(b, l, _NONE_, TEMPLATE_ARGUMENT, "<template argument>");
-    r = consumeToken(b, TEMPLATE_ARGUMENT_VALUE);
-    if (!r) r = variable(b, l + 1);
+    r = parseTemplateArgument(b, l + 1, RobotParser::variable);
     exit_section_(b, l, m, r, false, null);
     return r;
   }
