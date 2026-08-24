@@ -397,6 +397,11 @@ LineComment = {LineCommentSign} {NON_EOL}*
     {ListVariableStart}         { yybegin(VARIABLE_DEFINITION); enterNewState(VARIABLE_OPENING_BRACE); yypushback(yylength() - 1); return LIST_VARIABLE_START; }
     {DictVariableStart}         { yybegin(VARIABLE_DEFINITION); enterNewState(VARIABLE_OPENING_BRACE); yypushback(yylength() - 1); return DICT_VARIABLE_START; }
     {EnvVariableStart}          { yybegin(VARIABLE_DEFINITION); enterNewState(VARIABLE_OPENING_BRACE); yypushback(yylength() - 1); return ENV_VARIABLE_START; }
+    {EOL} {NonNewlineWhitespace}* {Continuation} {SpaceBasedEndMarker}? {
+          yypushback(yylength() - 1);
+          return WHITE_SPACE;
+       }
+    {EOL}                       { leaveState(); return EOL; }
 }
 
 <VARIABLE_DEFINITION> {
