@@ -2325,7 +2325,7 @@ public class RobotParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // SETUP_TEARDOWN_STATEMENT_KEYWORDS (eol_based_keyword_call | variable)
+  // SETUP_TEARDOWN_STATEMENT_KEYWORDS (eol_based_keyword_call | variable | eol_marker)?
   public static boolean setup_teardown_statements_global_setting(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "setup_teardown_statements_global_setting")) return false;
     if (!nextTokenIs(b, SETUP_TEARDOWN_STATEMENT_KEYWORDS)) return false;
@@ -2338,12 +2338,20 @@ public class RobotParser implements PsiParser, LightPsiParser {
     return r || p;
   }
 
-  // eol_based_keyword_call | variable
+  // (eol_based_keyword_call | variable | eol_marker)?
   private static boolean setup_teardown_statements_global_setting_1(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "setup_teardown_statements_global_setting_1")) return false;
+    setup_teardown_statements_global_setting_1_0(b, l + 1);
+    return true;
+  }
+
+  // eol_based_keyword_call | variable | eol_marker
+  private static boolean setup_teardown_statements_global_setting_1_0(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "setup_teardown_statements_global_setting_1_0")) return false;
     boolean r;
     r = eol_based_keyword_call(b, l + 1);
     if (!r) r = variable(b, l + 1);
+    if (!r) r = eol_marker(b, l + 1);
     return r;
   }
 

@@ -136,7 +136,7 @@ metadata_statement_global_setting ::= METADATA_KEYWORD positional_argument posit
     pin=1
     methods = [nameElement="METADATA_KEYWORD" metadataName="literal_constant_value" metadataValue="positional_argument"]
 }
-setup_teardown_statements_global_setting ::= SETUP_TEARDOWN_STATEMENT_KEYWORDS (eol_based_keyword_call | variable) {
+setup_teardown_statements_global_setting ::= SETUP_TEARDOWN_STATEMENT_KEYWORDS (eol_based_keyword_call | variable | eol_marker)? {
     pin=1
     methods = [nameElement="SETUP_TEARDOWN_STATEMENT_KEYWORDS"]
 }

@@ -10,6 +10,8 @@
 
 ### Changed
 
+- Removed requirement for `Test Setup` and `Test Teardown` as well as the tasks counterparts for an argument
+
 ### Fixed
 
 - Fixed Lexing issue with a single `=` used as a keyword argument
