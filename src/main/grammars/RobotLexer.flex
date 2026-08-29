@@ -736,6 +736,7 @@ LineComment = {LineCommentSign} {NON_EOL}*
         }
         break;
     }
+    [^]                           { leaveState(); yypushback(yylength()); break; }
 }
 
 <FOR_STRUCTURE>  {

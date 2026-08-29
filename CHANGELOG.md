@@ -19,6 +19,7 @@
 - Fixed parsing issues when using line comments in the same line as multi-line IF/ELSE statements
 - Fixed formatting issue in data-driven test cases which are using variables within a column's value
 - Fixed lexing of empty Arguments settings in user keywords
+- Fixed parsing of template arguments based on local setting `[Template]`
 
 ## 0.7.6 - 2026-08-08
 
