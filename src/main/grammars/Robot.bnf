@@ -216,8 +216,7 @@ template_parameter ::= template_parameter_id PARAMETER_ASSIGNMENT template_argum
     implements="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotArgument"
 }
 template_parameter_id ::= TEMPLATE_PARAMETER_NAME {methods=[getReference]}
-template_argument ::= external_template_argument {implements="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotArgument"}
-private external external_template_argument ::= parseTemplateArgument variable
+template_argument ::= <<parseTemplateArgument>> {implements="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotArgument"}
 
 bdd_statement ::= (
         GIVEN eol_based_keyword_call WHEN eol_based_keyword_call
@@ -333,6 +332,7 @@ conditional_content ::= extended_variable* python_expression_body (python_expres
     implements="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotPythonInjectionExtension"
     methods=[getInjectionRelevantTextRange]
     pin=2
+    hooks=[clearSkippedWhitespaceMemoryHook]
 }
 conditional_content_only ::= (python_expression_body | extended_variable)+ {
     name="Condition"
@@ -444,7 +444,13 @@ extended_positional_argument ::= <<parsePositionalArgument extended_positional_a
     methods = [getReference]
     elementType=positional_argument
 }
-private extended_positional_argument_content ::= literal_constant_value | conditional_content | variable | sub_keyword_call | <<else_if_structure EOS sub_keyword_call>> | <<else_structure EOS? sub_keyword_call>>
+private extended_positional_argument_content ::= literal_constant_value | conditional_content | variable | sub_keyword_call | else_if_sub_keyword_call | else_sub_keyword_call
+private else_if_sub_keyword_call ::= <<else_if_structure EOS sub_keyword_call>> {
+    hooks=[clearSkippedWhitespaceMemoryHook]
+}
+private else_sub_keyword_call ::= <<else_structure EOS sub_keyword_call>> {
+    hooks=[clearSkippedWhitespaceMemoryHook]
+}
 
 reduced_positional_argument ::= <<parsePositionalArgument reduced_positional_argument_content>> EOS? {
     implements="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotArgument"

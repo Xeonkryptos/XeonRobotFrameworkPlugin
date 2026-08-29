@@ -20,6 +20,7 @@
 - Fixed formatting issue in data-driven test cases which are using variables within a column's value
 - Fixed lexing of empty Arguments settings in user keywords
 - Fixed parsing of template arguments based on local setting `[Template]`
+- Fixed parsing of positional arguments with more than one variable separated by only a single space leading to incorrect wrap format results
 
 ## 0.7.6 - 2026-08-08
 
