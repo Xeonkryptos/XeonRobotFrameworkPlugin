@@ -362,7 +362,7 @@ except_structure ::= except_header eol_marker executable_statement* {
     mixin="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotExceptStructureExtension"
 }
 except_header ::= EXCEPT (positional_argument | parameter*)? {pin=1}
-meta else_structure ::= ELSE <<separator>> <<statement>> {
+meta else_structure ::= ELSE <<separator>>? <<statement>> {
     implements=[
         "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotBlockOpeningStructure"
         "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotFoldable"
@@ -404,7 +404,11 @@ fake keyword_call ::= base_keyword_call {
 }
 eol_based_keyword_call ::= base_keyword_call eol_marker? {elementType=keyword_call}
 eol_free_keyword_call ::= base_keyword_call {elementType=keyword_call}
-private base_keyword_call ::= keyword_call_name (parameter | extended_positional_argument)* {pin=1}
+private base_keyword_call ::= keyword_call_name (parameter | extended_positional_argument)* {
+    pin=1
+    recoverWhile=base_keyword_call_recover
+}
+private base_keyword_call_recover ::= !(EOL)
 sub_keyword_call ::= keyword_call_name (parameter | reduced_positional_argument)* {pin=1 elementType=keyword_call}
 keyword_call_name ::= keyword_call_library? KEYWORD_NAME { methods = [getReference keywordName="KEYWORD_NAME"] }
 keyword_call_library ::= keyword_call_library_name KEYWORD_LIBRARY_SEPARATOR

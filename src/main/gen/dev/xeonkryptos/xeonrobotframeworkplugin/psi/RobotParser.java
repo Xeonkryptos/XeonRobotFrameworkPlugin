@@ -10,6 +10,7 @@ import com.intellij.lang.ASTNode;
 import com.intellij.psi.tree.TokenSet;
 import com.intellij.lang.PsiParser;
 import com.intellij.lang.LightPsiParser;
+import static com.intellij.lang.WhitespacesBinders.*;
 
 @SuppressWarnings({"SimplifiableIfStatement", "UnusedAssignment"})
 public class RobotParser implements PsiParser, LightPsiParser {
@@ -61,13 +62,12 @@ public class RobotParser implements PsiParser, LightPsiParser {
   // keyword_call_name (parameter | extended_positional_argument)*
   static boolean base_keyword_call(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "base_keyword_call")) return false;
-    if (!nextTokenIs(b, "", KEYWORD_LIBRARY_NAME, KEYWORD_NAME)) return false;
     boolean r, p;
     Marker m = enter_section_(b, l, _NONE_);
     r = keyword_call_name(b, l + 1);
     p = r; // pin = 1
     r = r && base_keyword_call_1(b, l + 1);
-    exit_section_(b, l, m, r, p, null);
+    exit_section_(b, l, m, r, p, RobotParser::base_keyword_call_recover);
     return r || p;
   }
 
@@ -88,6 +88,17 @@ public class RobotParser implements PsiParser, LightPsiParser {
     boolean r;
     r = parameter(b, l + 1);
     if (!r) r = extended_positional_argument(b, l + 1);
+    return r;
+  }
+
+  /* ********************************************************** */
+  // !(EOL)
+  static boolean base_keyword_call_recover(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "base_keyword_call_recover")) return false;
+    boolean r;
+    Marker m = enter_section_(b, l, _NOT_);
+    r = !consumeToken(b, EOL);
+    exit_section_(b, l, m, r, false, null);
     return r;
   }
 
@@ -521,17 +532,24 @@ public class RobotParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // ELSE <<separator>> <<statement>>
+  // ELSE <<separator>>? <<statement>>
   public static boolean else_structure(PsiBuilder b, int l, Parser _separator, Parser _statement) {
     if (!recursion_guard_(b, l, "else_structure")) return false;
     if (!nextTokenIs(b, ELSE)) return false;
     boolean r;
     Marker m = enter_section_(b);
     r = consumeToken(b, ELSE);
-    r = r && _separator.parse(b, l);
+    r = r && else_structure_1(b, l + 1, _separator);
     r = r && _statement.parse(b, l);
     exit_section_(b, m, ELSE_STRUCTURE, r);
     return r;
+  }
+
+  // <<separator>>?
+  private static boolean else_structure_1(PsiBuilder b, int l, Parser _separator) {
+    if (!recursion_guard_(b, l, "else_structure_1")) return false;
+    _separator.parse(b, l);
+    return true;
   }
 
   /* ********************************************************** */
@@ -2676,7 +2694,7 @@ public class RobotParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // external_template_argument
+  // <<parseTemplateArgument>>
   public static boolean template_argument(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "template_argument")) return false;
     boolean r;

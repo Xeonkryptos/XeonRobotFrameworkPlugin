@@ -496,6 +496,7 @@ LineComment = {LineCommentSign} {NON_EOL}*
 }
 <USER_KEYWORD_NAME_DEFINITION> {
     {EverythingButVariableValue}                             { pushBackTrailingWhitespace(); return USER_KEYWORD_NAME_PART; }
+    {NonNewlineWhitespace}* {LineCommentSign}                { yypushback(1); return WHITE_SPACE; }
     {SpaceBasedEndMarker} {NonNewlineWhitespace}*            { yybegin(USER_KEYWORD_DEFINITION); return EOS; }
     {EOL}                                                    { yybegin(USER_KEYWORD_DEFINITION); return EOL; }
 }

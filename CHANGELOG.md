@@ -11,6 +11,7 @@
 ### Changed
 
 - Removed requirement for `Test Setup` and `Test Teardown` as well as the tasks counterparts for an argument
+- Incorrectly parsed keywords doesn't lead to corrupt keywords after them if they are correctly identified
 
 ### Fixed
 
@@ -21,6 +22,8 @@
 - Fixed lexing of empty Arguments settings in user keywords
 - Fixed parsing of template arguments based on local setting `[Template]`
 - Fixed parsing of positional arguments with more than one variable separated by only a single space leading to incorrect wrap format results
+- Fixed parsing issue of `Run Keyword If` statements with multiline ELSE
+- Fixed parsing of user keywords with a line comment in the same line as a user keyword's name
 
 ## 0.7.6 - 2026-08-08
 
