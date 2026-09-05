@@ -12,6 +12,7 @@
 
 - Removed requirement for `Test Setup` and `Test Teardown` as well as the tasks counterparts for an argument
 - Incorrectly parsed keywords doesn't lead to corrupt keywords after them if they are correctly identified
+- Evaluate the available Robot version based on the project's SDK and separately from any robot files to improve performance
 
 ### Fixed
 
