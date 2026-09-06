@@ -9,15 +9,15 @@ object RobotNames {
 
     const val BUILTIN_FULL_PYTHON_NAMESPACE: String = "robot.libraries.${BUILTIN_NAMESPACE}"
 
+    const val LANGUAGE_BASE_CLASS_REFERENCE: String = "robot.conf.languages.Language"
+    const val ENGLISH_LANGUAGE_CLASS_REFERENCE: String = "robot.conf.languages.En"
+
     const val TEST_CASE_SECTION_NAME = "Test Case"
     const val TASK_SECTION_NAME = "Task"
     const val KEYWORD_SECTION_NAME = "Keyword"
     const val VARIABLE_SECTION_NAME = "Variable"
     const val SETTING_SECTION_NAME = "Setting"
     const val COMMENT_SECTION_NAME = "Comment"
-
-    const val SETTINGS_SECTION_NAME = "Settings"
-    const val VARIABLES_SECTION_NAME = "Variables"
 
     const val TAGS_LOCAL_SETTING_NAME = "Tags"
     const val DOCUMENTATION_LOCAL_SETTING_NAME = "Documentation"

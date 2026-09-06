@@ -28,7 +28,7 @@ enum class GlobalSettingType {
 }
 
 enum class LocalSettingType {
-    TAGS, SETUP, TEARDOWN, TIMEOUT, ARGUMENTS
+    TAGS, SETUP, TEARDOWN, TEMPLATE, TIMEOUT, ARGUMENTS
 }
 
 enum class BehaviourDrivenType {

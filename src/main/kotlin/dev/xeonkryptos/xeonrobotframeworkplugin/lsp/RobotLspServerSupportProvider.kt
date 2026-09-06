@@ -24,6 +24,8 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.fileTypes.RobotFeatureFileType
 import dev.xeonkryptos.xeonrobotframeworkplugin.fileTypes.RobotResourceFileType
 import dev.xeonkryptos.xeonrobotframeworkplugin.util.BundleUtil
 
+// LSP Server will be required in a future version of the plugin, to evaluate python code dynamically.
+@Suppress("unused")
 class RobotLspServerSupportProvider : LspServerSupportProvider {
 
     override fun fileOpened(project: Project, file: VirtualFile, serverStarter: LspServerSupportProvider.LspServerStarter) {

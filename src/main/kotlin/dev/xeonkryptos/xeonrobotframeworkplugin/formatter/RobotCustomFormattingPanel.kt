@@ -56,7 +56,7 @@ class RobotCustomFormattingPanel(settings: CodeStyleSettings) : CodeStyleAbstrac
                     .validationOnApply { validateIntegerFieldOnApply(it) }
             }
         }
-        group {
+        group(RobotBundle.message("formatter.settings.custom.general")) {
             row {
                 checkBox(RobotBundle.message("formatter.custom.multiline-indentation")).bindSelected(customSettings::MULTILINE_INDENTATION).onChanged { onSomethingChanged() }
             }

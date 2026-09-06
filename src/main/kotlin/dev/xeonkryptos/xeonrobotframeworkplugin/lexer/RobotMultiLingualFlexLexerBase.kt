@@ -323,7 +323,8 @@ abstract class RobotMultiLingualFlexLexerBase @JvmOverloads constructor(protecte
 
         fun switchState(targetState: Int): IElementType? {
             val localSettingName = extractLocalSettingName()
-            if (localSettingName != "template" || !isTemplateSupportingState(yystate())) return invalidLocalSettingHandler.switchState(targetState)
+            val localSettingTypeMapping = localizationTypeMappingProvider.getLocalSettingTypeMapping(localSettingName)
+            if (localSettingTypeMapping != LocalSettingType.TEMPLATE || !isTemplateSupportingState(yystate())) return invalidLocalSettingHandler.switchState(targetState)
 
             val lexer = RobotTemplateKeywordLexer()
             var startDiff = 0

@@ -16,7 +16,7 @@ jobs:
       fail-fast: false
       matrix:
         gradleVersion:
-          - "9.6.1"
+          - "9.7.1"
         os:
           - windows-latest
           - ubuntu-latest
