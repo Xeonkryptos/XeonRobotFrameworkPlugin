@@ -1,6 +1,7 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.psi;
 
 import com.intellij.psi.tree.IElementType;
+import dev.xeonkryptos.xeonrobotframeworkplugin.lexer.RobotFlexLexerBase;
 
 import static com.intellij.psi.TokenType.*;
 import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.*;
@@ -15,7 +16,7 @@ import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.*;
 %public
 %buffer 65536
 %class RobotExtendedVariableAccessLayerLexer
-%extends AbstractRobotLexer
+%extends RobotFlexLexerBase
 %function advance
 %type IElementType
 %unicode
