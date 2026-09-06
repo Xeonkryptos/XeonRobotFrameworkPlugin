@@ -11,19 +11,21 @@ import com.intellij.formatting.WrapType
 import com.intellij.lang.ASTNode
 import com.intellij.lang.tree.util.children
 import com.intellij.lang.tree.util.parents
+import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Key
 import com.intellij.psi.PsiFile
 import com.intellij.psi.TokenType
 import com.intellij.psi.codeStyle.CommonCodeStyleSettings
 import com.intellij.psi.formatter.common.AbstractBlock
 import com.intellij.psi.tree.TokenSet
+import dev.xeonkryptos.xeonrobotframeworkplugin.localization.LocalSettingType
+import dev.xeonkryptos.xeonrobotframeworkplugin.localization.LocalizationLoadingMechanism
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTokenSets
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.DataDrivenStatement
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLocalSetting
-import dev.xeonkryptos.xeonrobotframeworkplugin.util.RobotNames
 
-class RobotBlock(node: ASTNode, private val context: RobotBlockContext, wrap: Wrap? = null, alignment: Alignment? = null, private val indent: Indent? = null, private val childIndent: Indent? = null) :
+class RobotBlock(private val project: Project, node: ASTNode, private val context: RobotBlockContext, wrap: Wrap? = null, alignment: Alignment? = null, private val indent: Indent? = null, private val childIndent: Indent? = null) :
     AbstractBlock(node, wrap, alignment) {
     companion object {
         private val PARENT_BLOCK_KEY = Key.create<RobotBlock>("PARENT_BLOCK")
@@ -113,6 +115,8 @@ class RobotBlock(node: ASTNode, private val context: RobotBlockContext, wrap: Wr
         val parentWrap = createWrapIfNecessary()
         initializeUserData()
 
+        val localizationTypeMappingProvider = LocalizationLoadingMechanism.getInstance(project).localizationTypeMappingProvider
+
         var templateAlignmentIndex = 0
         myNode.children().filter { !WHITESPACE_TYPES.contains(it.elementType) }.forEach { child ->
             val indent = getIndentation(child)
@@ -125,7 +129,7 @@ class RobotBlock(node: ASTNode, private val context: RobotBlockContext, wrap: Wr
             }
 
             val childIndent = getChildIndent(child)
-            RobotBlock(child, context, indent = indent, wrap = childWrap, alignment = alignment, childIndent = childIndent).apply {
+            RobotBlock(project, child, context, indent = indent, wrap = childWrap, alignment = alignment, childIndent = childIndent).apply {
                 blocks.add(this)
                 myNode.putUserData(PARENT_BLOCK_KEY, this@RobotBlock)
             }
@@ -133,8 +137,9 @@ class RobotBlock(node: ASTNode, private val context: RobotBlockContext, wrap: Wr
             if (myNode.elementType === RobotTypes.SETUP_TEARDOWN_STATEMENTS_GLOBAL_SETTING) {
                 child.putUserData(PARENT_WRAP_KEY, parentWrap)
             }
-            if (child.elementType === RobotTypes.LOCAL_SETTING && (child.psi as RobotLocalSetting).settingName == RobotNames.TEMPLATE_LOCAL_SETTING_NAME) {
-                myNode.putUserData(IGNORE_DATA_COLUMN_ALIGNMENT_KEY, true)
+            if (child.elementType === RobotTypes.LOCAL_SETTING) {
+                val localSettingType = localizationTypeMappingProvider.getLocalSettingType((child.psi as RobotLocalSetting).settingName)
+                if (localSettingType == LocalSettingType.TEMPLATE) myNode.putUserData(IGNORE_DATA_COLUMN_ALIGNMENT_KEY, true)
             }
         }
         return blocks

@@ -19,18 +19,9 @@ object RobotNames {
     const val SETTING_SECTION_NAME = "Setting"
     const val COMMENT_SECTION_NAME = "Comment"
 
-    const val TAGS_LOCAL_SETTING_NAME = "Tags"
-    const val DOCUMENTATION_LOCAL_SETTING_NAME = "Documentation"
-    const val TEARDOWN_LOCAL_SETTING_NAME = "Teardown"
-    const val TEMPLATE_LOCAL_SETTING_NAME = "Template"
     const val RETURN_LOCAL_SETTING_NAME = "Return"
     const val DEFAULT_TAGS_LOCAL_SETTING_NAME = "Default Tags"
     const val FORCE_TAGS_LOCAL_SETTING_NAME = "Force Tags"
-
-    const val SUITE_SETUP_GLOBAL_SETTING_NAME = "Suite Setup"
-    const val SUITE_TEARDOWN_GLOBAL_SETTING_NAME = "Suite Teardown"
-    const val TEST_SETUP_GLOBAL_SETTING_NAME = "Test Setup"
-    const val TEST_TEARDOWN_GLOBAL_SETTING_NAME = "Test Teardown"
 
     const val RETURN_RESERVED_NAME = "RETURN"
 

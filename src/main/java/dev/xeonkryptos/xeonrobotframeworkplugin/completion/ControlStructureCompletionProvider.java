@@ -20,7 +20,7 @@ class ControlStructureCompletionProvider extends CompletionProvider<CompletionPa
 
     @Override
     protected void addCompletions(@NotNull CompletionParameters parameters, @NotNull ProcessingContext context, @NotNull CompletionResultSet result) {
-        List<LookupElement> lookupElements = CompletionProviderUtils.computeAdditionalSyntaxLookups(controlStructureType);
+        List<LookupElement> lookupElements = CompletionProviderUtils.computeAdditionalSyntaxLookups(controlStructureType, parameters.getPosition().getProject());
         result.addAllElements(lookupElements);
     }
 }

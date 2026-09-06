@@ -6,6 +6,10 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiManager;
 import com.intellij.psi.util.PsiTreeUtil;
+import dev.xeonkryptos.xeonrobotframeworkplugin.localization.GlobalSettingType;
+import dev.xeonkryptos.xeonrobotframeworkplugin.localization.LocalSettingType;
+import dev.xeonkryptos.xeonrobotframeworkplugin.localization.LocalizationLoadingMechanism;
+import dev.xeonkryptos.xeonrobotframeworkplugin.localization.LocalizationTypeMappingProvider;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.dto.ImportType;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotFile;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCall;
@@ -17,7 +21,6 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotSetupTeardownSt
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTestCaseStatement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTestCasesSection;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.reference.PythonResolver;
-import dev.xeonkryptos.xeonrobotframeworkplugin.util.RobotNames;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -115,7 +118,11 @@ public enum VariableScope {
                 return false;
             }
             RobotSetupTeardownStatementsGlobalSetting globalSetting = PsiTreeUtil.getParentOfType(keyword, RobotSetupTeardownStatementsGlobalSetting.class);
-            return globalSetting != null && RobotNames.SUITE_TEARDOWN_GLOBAL_SETTING_NAME.equalsIgnoreCase(globalSetting.getSettingName());
+            if (globalSetting != null) {
+                LocalizationTypeMappingProvider localizationTypeMappingProvider = LocalizationLoadingMechanism.getInstance(keyword.getProject()).getLocalizationTypeMappingProvider();
+                GlobalSettingType globalSettingType = localizationTypeMappingProvider.getGlobalSettingType(globalSetting.getSettingName());
+                return globalSettingType == GlobalSettingType.SUITE_TEARDOWN;
+            }
         }
         return false;
     }
@@ -136,7 +143,11 @@ public enum VariableScope {
                 return false;
             }
             RobotSetupTeardownStatementsGlobalSetting globalSetting = PsiTreeUtil.getParentOfType(keyword, RobotSetupTeardownStatementsGlobalSetting.class);
-            return globalSetting != null && RobotNames.TEST_TEARDOWN_GLOBAL_SETTING_NAME.equalsIgnoreCase(globalSetting.getSettingName());
+            if (globalSetting != null) {
+                LocalizationTypeMappingProvider localizationTypeMappingProvider = LocalizationLoadingMechanism.getInstance(keyword.getProject()).getLocalizationTypeMappingProvider();
+                GlobalSettingType globalSettingType = localizationTypeMappingProvider.getGlobalSettingType(globalSetting.getSettingName());
+                return globalSettingType == GlobalSettingType.TEST_TEARDOWN;
+            }
         } else if (isInTestCase(position)) {
             // check that we are next to a teardown bracket setting
             RobotKeywordCall keyword = getKeywordCall(position);
@@ -144,7 +155,11 @@ public enum VariableScope {
                 return false;
             }
             RobotLocalSetting localSetting = PsiTreeUtil.getParentOfType(keyword, RobotLocalSetting.class);
-            return localSetting != null && RobotNames.TEARDOWN_LOCAL_SETTING_NAME.equalsIgnoreCase(localSetting.getSettingName());
+            if (localSetting != null) {
+                LocalizationTypeMappingProvider localizationTypeMappingProvider = LocalizationLoadingMechanism.getInstance(keyword.getProject()).getLocalizationTypeMappingProvider();
+                LocalSettingType localSettingType = localizationTypeMappingProvider.getLocalSettingType(localSetting.getSettingName());
+                return localSettingType == LocalSettingType.TEARDOWN;
+            }
         }
         return false;
     }
@@ -195,7 +210,11 @@ public enum VariableScope {
         RobotKeywordsSection keywordsSection = PsiTreeUtil.getParentOfType(keyword, RobotKeywordsSection.class);
         if (keywordsSection != null) {
             RobotLocalSetting localSetting = PsiTreeUtil.getParentOfType(keyword, RobotLocalSetting.class);
-            return localSetting != null && RobotNames.TEARDOWN_LOCAL_SETTING_NAME.equalsIgnoreCase(localSetting.getSettingName());
+            if (localSetting != null) {
+                LocalizationTypeMappingProvider localizationTypeMappingProvider = LocalizationLoadingMechanism.getInstance(keyword.getProject()).getLocalizationTypeMappingProvider();
+                LocalSettingType localSettingType = localizationTypeMappingProvider.getLocalSettingType(localSetting.getSettingName());
+                return localSettingType == LocalSettingType.TEARDOWN;
+            }
         }
         return false;
     }

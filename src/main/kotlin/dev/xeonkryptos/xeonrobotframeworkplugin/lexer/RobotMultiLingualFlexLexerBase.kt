@@ -111,7 +111,7 @@ abstract class RobotMultiLingualFlexLexerBase @JvmOverloads constructor(protecte
             BehaviourDrivenType.BUT to RobotMultiLingualStateHandler(RobotKeywordType.BEHAVIOUR_DRIVEN, SimpleBehaviourDrivenIdentifierStateSwitcher(RobotTypes.BUT)::switchState))
 
     private val localizationTypeMappingProvider: LocalizationTypeMappingProvider
-        get() = if (project != null) LocalizationLoadingMechanism.getInstance(project).loadLocalizationTypeMappingProvider() else DefaultLocalizationTypeMappingProvider
+        get() = if (project != null) LocalizationLoadingMechanism.getInstance(project).localizationTypeMappingProvider else DefaultLocalizationTypeMappingProvider
 
     protected var globalTemplateEnabled = false
     protected var localTemplateEnabled: Boolean = false
@@ -126,7 +126,7 @@ abstract class RobotMultiLingualFlexLexerBase @JvmOverloads constructor(protecte
 
     protected fun switchSection(): IElementType? {
         val sectionName = computeSectionName()
-        val sectionType = localizationTypeMappingProvider.getSectionTypeMapping(sectionName)
+        val sectionType = localizationTypeMappingProvider.getSectionType(sectionName)
         val section = if (sectionType == null) invalidSectionHandler else languageSectionTypeHandlers.getOrDefault(sectionType, invalidSectionHandler)
         val nextStateId = getSectionStateId(section.sourceType)
         return section.switchState(nextStateId)
@@ -148,7 +148,7 @@ abstract class RobotMultiLingualFlexLexerBase @JvmOverloads constructor(protecte
 
     protected fun switchGlobalSetting(): IElementType? {
         val settingName = computeGlobalSettingName()
-        val globalSettingType = localizationTypeMappingProvider.getGlobalSettingTypeMapping(settingName)
+        val globalSettingType = localizationTypeMappingProvider.getGlobalSettingType(settingName)
         val globalSetting = if (globalSettingType == null) invalidGlobalSettingHandler else languageGlobalSettingTypeHandlers.getOrDefault(globalSettingType, invalidGlobalSettingHandler)
         val nextStateId = getGlobalSettingStateId(globalSetting.sourceType)
         return globalSetting.switchState(nextStateId)
@@ -169,7 +169,7 @@ abstract class RobotMultiLingualFlexLexerBase @JvmOverloads constructor(protecte
 
     protected fun switchLocalSetting(): IElementType? {
         val localSettingName = extractLocalSettingName()
-        val localSettingType = localizationTypeMappingProvider.getLocalSettingTypeMapping(localSettingName)
+        val localSettingType = localizationTypeMappingProvider.getLocalSettingType(localSettingName)
         val localSetting =
             if (localSettingType == null) intermediateTemplateLocalSettingHandler else languageLocalSettingTypeHandlers.getOrDefault(localSettingType, intermediateTemplateLocalSettingHandler)
         val nextStateId = getLocalSettingStateId(localSetting.sourceType)
@@ -183,7 +183,7 @@ abstract class RobotMultiLingualFlexLexerBase @JvmOverloads constructor(protecte
 
     protected fun switchPotentialKeyword(): IElementType? {
         val keywordName = yytext().toString().trim().lowercase()
-        val behaviourDrivenType = localizationTypeMappingProvider.getBehaviourDrivenIdentifierTypeMapping(keywordName)
+        val behaviourDrivenType = localizationTypeMappingProvider.getBehaviourDrivenIdentifierType(keywordName)
         val stateHandler = if (behaviourDrivenType == null) normalKeywordHandler else languageBehaviourDrivenIdentifierTypeHandlers.getOrDefault(behaviourDrivenType, normalKeywordHandler)
         val nextStateId = getKeywordStateId(stateHandler.sourceType)
         return stateHandler.switchState(nextStateId)
@@ -323,7 +323,7 @@ abstract class RobotMultiLingualFlexLexerBase @JvmOverloads constructor(protecte
 
         fun switchState(targetState: Int): IElementType? {
             val localSettingName = extractLocalSettingName()
-            val localSettingTypeMapping = localizationTypeMappingProvider.getLocalSettingTypeMapping(localSettingName)
+            val localSettingTypeMapping = localizationTypeMappingProvider.getLocalSettingType(localSettingName)
             if (localSettingTypeMapping != LocalSettingType.TEMPLATE || !isTemplateSupportingState(yystate())) return invalidLocalSettingHandler.switchState(targetState)
 
             val lexer = RobotTemplateKeywordLexer()

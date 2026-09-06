@@ -23,9 +23,13 @@ public class RobotDeprecatedSectionsNamingInspection extends RobotVersionBasedIn
             @Override
             public void visitSection(@NotNull RobotSection o) {
                 String sectionName = o.getText().replace("*", "").trim();
-                if (RobotNames.TEST_CASE_SECTION_NAME.equalsIgnoreCase(sectionName) || RobotNames.KEYWORD_SECTION_NAME.equalsIgnoreCase(sectionName)
-                    || RobotNames.SETTING_SECTION_NAME.equalsIgnoreCase(sectionName) || RobotNames.VARIABLE_SECTION_NAME.equalsIgnoreCase(sectionName)
-                    || RobotNames.COMMENT_SECTION_NAME.equalsIgnoreCase(sectionName) || RobotNames.TASK_SECTION_NAME.equalsIgnoreCase(sectionName)) {
+                // Not modifying the logic here to use localization. The deprecated section names are only for English, and the inspection is meant to catch those specific names regardless of localization.
+                if (RobotNames.TEST_CASE_SECTION_NAME.equalsIgnoreCase(sectionName) ||
+                    RobotNames.KEYWORD_SECTION_NAME.equalsIgnoreCase(sectionName) ||
+                    RobotNames.SETTING_SECTION_NAME.equalsIgnoreCase(sectionName) ||
+                    RobotNames.VARIABLE_SECTION_NAME.equalsIgnoreCase(sectionName) ||
+                    RobotNames.COMMENT_SECTION_NAME.equalsIgnoreCase(sectionName) ||
+                    RobotNames.TASK_SECTION_NAME.equalsIgnoreCase(sectionName)) {
                     holder.registerProblem(o, RobotBundle.message("INSP.section.single-section-name.deprecated"), ProblemHighlightType.LIKE_DEPRECATED);
                 }
             }

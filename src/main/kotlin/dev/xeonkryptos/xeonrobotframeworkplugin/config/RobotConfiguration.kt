@@ -32,6 +32,7 @@ import javax.swing.ListSelectionModel
 import javax.swing.table.DefaultTableCellRenderer
 import javax.swing.table.TableCellRenderer
 
+@Suppress("UnstableApiUsage")
 class RobotConfiguration(project: Project, cs: CoroutineScope) : Configurable.NoScroll, SearchableConfigurable {
 
     private val optionsProvider = RobotOptionsProvider.getInstance(project)
@@ -75,7 +76,6 @@ class RobotConfiguration(project: Project, cs: CoroutineScope) : Configurable.No
                     val inheritors = PyClassInheritorsSearch.search(languageBaseClass, false).findAll()
                     inheritors.map { inheritor ->
                         val qualifiedName = inheritor.qualifiedName!!
-                        @Suppress("UnstableApiUsage")
                         LanguageConfiguration(
                             displayName = inheritor.docStringValue?.split(Regex("[\\r\\n]+"))?.firstOrNull() ?: inheritor.name!!,
                             languageClassReference = qualifiedName,

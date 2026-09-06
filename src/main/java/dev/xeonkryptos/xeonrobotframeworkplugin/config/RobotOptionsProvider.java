@@ -7,22 +7,29 @@ import com.intellij.openapi.components.Service.Level;
 import com.intellij.openapi.components.State;
 import com.intellij.openapi.components.Storage;
 import com.intellij.openapi.project.Project;
+import com.intellij.util.messages.MessageBus;
+import dev.xeonkryptos.xeonrobotframeworkplugin.localization.LocalizationTopics;
 import org.jetbrains.annotations.NotNull;
 
 import java.text.Collator;
 import java.text.ParseException;
 import java.text.RuleBasedCollator;
 import java.util.Collection;
-import java.util.List;
 import java.util.Set;
 
 @Service(Level.PROJECT)
 @State(name = "RobotOptionsProvider", storages = { @Storage(value = "$WORKSPACE_FILE$", roamingType = RoamingType.DISABLED) })
 public final class RobotOptionsProvider implements PersistentStateComponent<RobotOptionsProvider.State> {
 
+    private final MessageBus messageBus;
+
     private final State state = new State();
 
     private Collator parameterNameCollator;
+
+    public RobotOptionsProvider(Project project) {
+        this.messageBus = project.getMessageBus();
+    }
 
     public static RobotOptionsProvider getInstance(Project project) {
         return project.getService(RobotOptionsProvider.class);
@@ -34,6 +41,7 @@ public final class RobotOptionsProvider implements PersistentStateComponent<Robo
 
     public void setEnabledLanguages(Collection<String> enabledLanguages) {
         state.enabledLanguages = Set.copyOf(enabledLanguages);
+        messageBus.syncPublisher(LocalizationTopics.LOCALIZATION_CHANGED_TOPIC).onLocalizationChanged(enabledLanguages);
     }
 
     public Collator getParameterNameCollator() {
@@ -75,7 +83,7 @@ public final class RobotOptionsProvider implements PersistentStateComponent<Robo
     @Override
     public void loadState(@NotNull State state) {
         this.state.parameterNameCollationRules = state.parameterNameCollationRules;
-        this.state.enabledLanguages = state.enabledLanguages;
+        setEnabledLanguages(state.enabledLanguages);
     }
 
     public static class State {
