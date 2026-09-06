@@ -39,16 +39,21 @@ class RobotBlock(node: ASTNode, private val context: RobotBlockContext, wrap: Wr
 
         // Differs from whitespace set of RobotTokenSets because it also includes EOL and EOS, which are treated as whitespace for formatting purposes, but not for parsing.
         private val WHITESPACE_TYPES = TokenSet.create(TokenType.WHITE_SPACE, RobotTypes.EOL, RobotTypes.EOS)
-        private val SECTION_TYPES = TokenSet.orSet(RobotTokenSets.SECTIONS_HEADER_SET,
-            TokenSet.create(RobotTypes.TEST_CASES_SECTION,
+        private val SECTION_TYPES = TokenSet.orSet(
+            RobotTokenSets.SECTIONS_HEADER_SET,
+            TokenSet.create(
+                RobotTypes.TEST_CASES_SECTION,
                 RobotTypes.TASKS_SECTION,
                 RobotTypes.KEYWORDS_SECTION,
                 RobotTypes.VARIABLES_SECTION,
                 RobotTypes.COMMENTS_SECTION,
                 RobotTypes.TEST_CASES_HEADER_NAME,
                 RobotTypes.TASKS_HEADER_NAME,
-                RobotTypes.DATA_DRIVEN_COLUMN_NAME))
-        private val BLOCK_OPENING_TYPES = TokenSet.create(RobotTypes.TEST_CASE_STATEMENT,
+                RobotTypes.DATA_DRIVEN_COLUMN_NAME
+            )
+        )
+        private val BLOCK_OPENING_TYPES = TokenSet.create(
+            RobotTypes.TEST_CASE_STATEMENT,
             RobotTypes.USER_KEYWORD_STATEMENT,
             RobotTypes.TASK_STATEMENT,
             RobotTypes.FOR_LOOP_STRUCTURE,
@@ -59,8 +64,10 @@ class RobotBlock(node: ASTNode, private val context: RobotBlockContext, wrap: Wr
             RobotTypes.TRY_STRUCTURE,
             RobotTypes.EXCEPT_STRUCTURE,
             RobotTypes.FINALLY_STRUCTURE,
-            RobotTypes.GROUP_STRUCTURE)
-        private val BLOCK_OPENING_PART_TYPES = TokenSet.create(RobotTypes.FOR_LOOP_HEADER,
+            RobotTypes.GROUP_STRUCTURE
+        )
+        private val BLOCK_OPENING_PART_TYPES = TokenSet.create(
+            RobotTypes.FOR_LOOP_HEADER,
             RobotTypes.WHILE_LOOP_HEADER,
             RobotTypes.EXCEPT_HEADER,
             RobotTypes.IF,
@@ -72,8 +79,10 @@ class RobotBlock(node: ASTNode, private val context: RobotBlockContext, wrap: Wr
             RobotTypes.END,
             RobotTypes.USER_KEYWORD_STATEMENT_ID,
             RobotTypes.TEST_CASE_ID,
-            RobotTypes.TASK_ID)
-        private val PARENT_NODES_FOR_PARAMETER_AND_POSITIONAL_ARGUMENT_TO_RETRIEVE_WRAPS = TokenSet.create(RobotTypes.KEYWORD_CALL,
+            RobotTypes.TASK_ID
+        )
+        private val PARENT_NODES_FOR_PARAMETER_AND_POSITIONAL_ARGUMENT_TO_RETRIEVE_WRAPS = TokenSet.create(
+            RobotTypes.KEYWORD_CALL,
             RobotTypes.FOR_LOOP_HEADER,
             RobotTypes.WHILE_LOOP_HEADER,
             RobotTypes.LOCAL_SETTING,
@@ -86,7 +95,8 @@ class RobotBlock(node: ASTNode, private val context: RobotBlockContext, wrap: Wr
             RobotTypes.METADATA_STATEMENT_GLOBAL_SETTING,
             RobotTypes.DOCUMENTATION_STATEMENT_GLOBAL_SETTING,
             RobotTypes.TEMPLATE_STATEMENTS_GLOBAL_SETTING,
-            RobotTypes.UNKNOWN_SETTING_STATEMENTS_GLOBAL_SETTING)
+            RobotTypes.UNKNOWN_SETTING_STATEMENTS_GLOBAL_SETTING
+        )
 
         private val TEMPLATE_ALIGNMENT_INDEX_INCREASER_SET = TokenSet.orSet(RobotTokenSets.TEMPLATE_VALUES_HOLDER_SET, TokenSet.create(RobotTypes.DATA_DRIVEN_COLUMN_NAME))
 
@@ -189,8 +199,13 @@ class RobotBlock(node: ASTNode, private val context: RobotBlockContext, wrap: Wr
         }
 
         RobotTypes.SINGLE_VARIABLE_STATEMENT -> {
-            if (!context.robotCodeStyleSettings.KEEP_SIMPLE_VARIABLE_STATEMENT_IN_ONE_LINE || myNode.getChildren(TokenSet.orSet(RobotTokenSets.ARGUMENTS_TYPE_SET,
-                    TokenSet.create(RobotTypes.VARIABLE_VALUE))).size > 1) {
+            if (!context.robotCodeStyleSettings.KEEP_SIMPLE_VARIABLE_STATEMENT_IN_ONE_LINE || myNode.getChildren(
+                    TokenSet.orSet(
+                        RobotTokenSets.ARGUMENTS_TYPE_SET,
+                        TokenSet.create(RobotTypes.VARIABLE_VALUE)
+                    )
+                ).size > 1
+            ) {
                 val wrapType = context.robotCodeStyleSettings.VARIABLE_DEFINITIONS_WRAP
                 Wrap.createWrap(wrapType, context.robotCodeStyleSettings.VARIABLE_DEFINITIONS_FIRST_ARGUMENT_ON_NEW_LINE)
             } else null
@@ -209,13 +224,15 @@ class RobotBlock(node: ASTNode, private val context: RobotBlockContext, wrap: Wr
         RobotTypes.UNKNOWN_SETTING_STATEMENTS_GLOBAL_SETTING,
         RobotTypes.SETUP_TEARDOWN_STATEMENTS_GLOBAL_SETTING -> {
         // @formatter:on
-            val tokenSet = TokenSet.create(RobotTypes.IMPORT_ARGUMENT,
+            val tokenSet = TokenSet.create(
+                RobotTypes.IMPORT_ARGUMENT,
                 RobotTypes.KEYWORD_CALL,
                 RobotTypes.POSITIONAL_ARGUMENT,
                 RobotTypes.PARAMETER,
                 RobotTypes.LITERAL_CONSTANT,
                 RobotTypes.LITERAL_CONSTANT_VALUE,
-                RobotTypes.VARIABLE)
+                RobotTypes.VARIABLE
+            )
             if (!context.robotCodeStyleSettings.KEEP_SIMPLE_GLOBAL_SETTINGS_IN_ONE_LINE || myNode.getChildren(tokenSet).size > 1) {
                 val wrapType = context.robotCodeStyleSettings.GLOBAL_SETTINGS_WRAP
                 Wrap.createWrap(wrapType, context.robotCodeStyleSettings.GLOBAL_SETTINGS_FIRST_ARGUMENT_ON_NEW_LINE)
@@ -307,7 +324,8 @@ class RobotBlock(node: ASTNode, private val context: RobotBlockContext, wrap: Wr
 
             (myNode.elementType === RobotTypes.TEST_CASE_STATEMENT || myNode.elementType === RobotTypes.TASK_STATEMENT) && (myNode.psi as DataDrivenStatement).isDataDrivenStatement -> return ChildAttributes(
                 Indent.getNoneIndent(),
-                null)
+                null
+            )
         }
         return super.getChildAttributes(newChildIndex)
     }

@@ -6,9 +6,25 @@
 
 ### Added
 
+- Added new formatting options to increase the spaces after local settings, keyword calls and their arguments and after variable statements
+
 ### Changed
 
+- Removed requirement for `Test Setup` and `Test Teardown` as well as the tasks counterparts for an argument
+- Incorrectly parsed keywords doesn't lead to corrupt keywords after them if they are correctly identified
+- Evaluate the available Robot version based on the project's SDK and separately from any robot files to improve performance
+
 ### Fixed
+
+- Fixed Lexing issue with a single `=` used as a keyword argument
+- Don't complain about unknown parameter names when `Set To Dictionary` keyword call is detected. It's handled the same way as `Create Dictionary`
+- Fixed parsing issues when using line comments in the same line as multi-line IF/ELSE statements
+- Fixed formatting issue in data-driven test cases which are using variables within a column's value
+- Fixed lexing of empty Arguments settings in user keywords
+- Fixed parsing of template arguments based on local setting `[Template]`
+- Fixed parsing of positional arguments with more than one variable separated by only a single space leading to incorrect wrap format results
+- Fixed parsing issue of `Run Keyword If` statements with multiline ELSE
+- Fixed parsing of user keywords with a line comment in the same line as a user keyword's name
 
 ## 0.7.6 - 2026-08-08
 

@@ -14,11 +14,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 
+import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.TEMPLATE_ARGUMENT_VALUE;
+
 public class RobotParserUtil extends GeneratedParserUtilBase {
 
     private static final Key<Boolean> GLOBAL_TEMPLATE_SETTING_KEY = Key.create("GLOBAL_TEMPLATE_SETTING_KEY");
     private static final Key<Boolean> LOCAL_TEMPLATE_SETTING_KEY = Key.create("LOCAL_TEMPLATE_SETTING_KEY");
     private static final Key<Boolean> LOCAL_TEMPLATE_SETTING_RESET_OVERRIDE_KEY = Key.create("LOCAL_TEMPLATE_SETTING_RESET_OVERRIDE_KEY");
+    private static final Key<WhitespaceSkippedMemory> WHITESPACE_SKIPPED_MEMORY_KEY = Key.create("WHITESPACE_SKIPPED_MEMORY_KEY");
 
     // TODO: Need to be translatable, too
     private static final Pattern TEMPLATE_LOCAL_SETTING_NAME_PATTERN = Pattern.compile("\\[\\s*Template\\s*].*", Pattern.CASE_INSENSITIVE);
@@ -43,6 +46,17 @@ public class RobotParserUtil extends GeneratedParserUtilBase {
         }
         return marker;
     };
+    public static final Hook<Void> CLEAR_SKIPPED_WHITESPACE_MEMORY_HOOK = (builder, marker, param) -> {
+        WhitespaceSkippedMemory whitespaceSkippedMemory = builder.getUserData(WHITESPACE_SKIPPED_MEMORY_KEY);
+        // marker == null indicates that a section was processed without any result to produce (no PSI element constructed). In those cases we can still have whitespaces skipped as that specific part
+        // tried to parse something but failed partly (not the correct structure could be found).
+        // In special cases, we need to reset the skipped whitespace memory to avoid that the next parsing step thinks the argument ends as a super space, tab or EOL was detected. Incorrectly, as
+        // only one possible structure looked up too far and skipped some relevant whitespaces in the process.
+        if (whitespaceSkippedMemory != null && marker == null) {
+            whitespaceSkippedMemory.skippedWhitespaceRanges.clear();
+        }
+        return marker;
+    };
 
     /**
      * Custom parser to correctly detect and parse positional arguments in Robot Framework. In the space-based format of Robot files you need to separate arguments
@@ -55,7 +69,6 @@ public class RobotParserUtil extends GeneratedParserUtilBase {
      * @param builder                  current PsiBuilder
      * @param level                    current parser level
      * @param positionalArgumentParser parser for positional arguments, e.g. {@link RobotParser#positional_argument_content(PsiBuilder, int)}
-     *
      * @return true if a positional argument could be parsed (was detected), false otherwise
      */
     public static boolean parsePositionalArgument(PsiBuilder builder, int level, Parser positionalArgumentParser) {
@@ -65,6 +78,7 @@ public class RobotParserUtil extends GeneratedParserUtilBase {
 
         WhitespaceSkippedMemory whitespaceSkippedMemory = new WhitespaceSkippedMemory();
         builder.setWhitespaceSkippedCallback(whitespaceSkippedMemory);
+        builder.putUserData(WHITESPACE_SKIPPED_MEMORY_KEY, whitespaceSkippedMemory);
 
         Marker m = enter_section_(builder);
         boolean r = positionalArgumentParser.parse(builder, level + 1);
@@ -140,6 +154,30 @@ public class RobotParserUtil extends GeneratedParserUtilBase {
                 }
             }
         }
+    }
+
+    public static boolean parseTemplateArgument(PsiBuilder b, int l) {
+        if (!recursion_guard_(b, l, "template_argument")) return false;
+
+        WhitespaceSkippedMemory whitespaceSkippedMemory = new WhitespaceSkippedMemory();
+        b.setWhitespaceSkippedCallback(whitespaceSkippedMemory);
+
+        // Default parser logic to parse a template argument (either a TEMPLATE_ARGUMENT_VALUE or a variable)
+        boolean r = consumeToken(b, TEMPLATE_ARGUMENT_VALUE);
+        if (!r) r = RobotParser.variable(b, l + 1);
+
+        // Continue parsing template argument values or variables until we reach the end of the line or a whitespace (tab, super space) that indicates the end of the argument
+        // This is necessary to collect all parts, including variables, into a single template argument. Mostly required to keep the formatting working and not breaking anything.
+        while (r && !nextTokenIs(b, RobotTypes.EOL) && !whitespaceSkippedMemory.containsArgumentEndMarker(b)) {
+            if (nextTokenIs(b, TEMPLATE_ARGUMENT_VALUE)) {
+                r = consumeToken(b, TEMPLATE_ARGUMENT_VALUE);
+            } else {
+                r = RobotParser.variable(b, l + 1);
+            }
+        }
+
+        b.setWhitespaceSkippedCallback(null);
+        return r;
     }
 
     private static class WhitespaceSkippedMemory implements WhitespaceSkippedCallback {

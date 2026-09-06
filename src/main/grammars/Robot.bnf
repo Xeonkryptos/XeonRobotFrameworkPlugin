@@ -130,7 +130,7 @@ metadata_statement_global_setting ::= METADATA_KEYWORD positional_argument posit
     pin=1
     methods = [nameElement="METADATA_KEYWORD" metadataName="positional_argument[0]" metadataValue="positional_argument[1]"]
 }
-setup_teardown_statements_global_setting ::= SETUP_TEARDOWN_STATEMENT_KEYWORDS (eol_based_keyword_call | variable) {
+setup_teardown_statements_global_setting ::= SETUP_TEARDOWN_STATEMENT_KEYWORDS (eol_based_keyword_call | variable | eol_marker)? {
     pin=1
     methods = [nameElement="SETUP_TEARDOWN_STATEMENT_KEYWORDS"]
 }
@@ -210,7 +210,7 @@ template_parameter ::= template_parameter_id PARAMETER_ASSIGNMENT template_argum
     implements="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotArgument"
 }
 template_parameter_id ::= TEMPLATE_PARAMETER_NAME {methods=[getReference]}
-template_argument ::= TEMPLATE_ARGUMENT_VALUE | variable {implements="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotArgument"}
+template_argument ::= <<parseTemplateArgument>> {implements="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotArgument"}
 
 bdd_statement ::= (
         GIVEN eol_based_keyword_call WHEN eol_based_keyword_call
@@ -326,6 +326,7 @@ conditional_content ::= extended_variable* python_expression_body (python_expres
     implements="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotPythonInjectionExtension"
     methods=[getInjectionRelevantTextRange]
     pin=2
+    hooks=[clearSkippedWhitespaceMemoryHook]
 }
 conditional_content_only ::= (python_expression_body | extended_variable)+ {
     name="Condition"
@@ -355,7 +356,7 @@ except_structure ::= except_header eol_marker executable_statement* {
     mixin="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotExceptStructureExtension"
 }
 except_header ::= EXCEPT (positional_argument | parameter*)? {pin=1}
-meta else_structure ::= ELSE <<separator>> <<statement>> {
+meta else_structure ::= ELSE <<separator>>? <<statement>> {
     implements=[
         "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotBlockOpeningStructure"
         "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotFoldable"
@@ -397,7 +398,11 @@ fake keyword_call ::= base_keyword_call {
 }
 eol_based_keyword_call ::= base_keyword_call eol_marker? {elementType=keyword_call}
 eol_free_keyword_call ::= base_keyword_call {elementType=keyword_call}
-private base_keyword_call ::= keyword_call_name (parameter | extended_positional_argument)* {pin=1}
+private base_keyword_call ::= keyword_call_name (parameter | extended_positional_argument)* {
+    pin=1
+    recoverWhile=base_keyword_call_recover
+}
+private base_keyword_call_recover ::= !(EOL)
 sub_keyword_call ::= keyword_call_name (parameter | reduced_positional_argument)* {pin=1 elementType=keyword_call}
 keyword_call_name ::= keyword_call_library? KEYWORD_NAME { methods = [getReference keywordName="KEYWORD_NAME"] }
 keyword_call_library ::= keyword_call_library_name KEYWORD_LIBRARY_SEPARATOR
@@ -437,7 +442,13 @@ extended_positional_argument ::= <<parsePositionalArgument extended_positional_a
     methods = [getReference]
     elementType=positional_argument
 }
-private extended_positional_argument_content ::= literal_constant_value | conditional_content | variable | sub_keyword_call | <<else_if_structure EOS sub_keyword_call>> | <<else_structure EOS? sub_keyword_call>>
+private extended_positional_argument_content ::= literal_constant_value | conditional_content | variable | sub_keyword_call | else_if_sub_keyword_call | else_sub_keyword_call
+private else_if_sub_keyword_call ::= <<else_if_structure EOS sub_keyword_call>> {
+    hooks=[clearSkippedWhitespaceMemoryHook]
+}
+private else_sub_keyword_call ::= <<else_structure EOS sub_keyword_call>> {
+    hooks=[clearSkippedWhitespaceMemoryHook]
+}
 
 reduced_positional_argument ::= <<parsePositionalArgument reduced_positional_argument_content>> EOS? {
     implements="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotArgument"

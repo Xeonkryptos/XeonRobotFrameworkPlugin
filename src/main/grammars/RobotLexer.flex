@@ -353,6 +353,11 @@ LineComment = {LineCommentSign} {NON_EOL}*
     {ListVariableStart}         { yybegin(VARIABLE_DEFINITION); enterNewState(VARIABLE_OPENING_BRACE); yypushback(yylength() - 1); return LIST_VARIABLE_START; }
     {DictVariableStart}         { yybegin(VARIABLE_DEFINITION); enterNewState(VARIABLE_OPENING_BRACE); yypushback(yylength() - 1); return DICT_VARIABLE_START; }
     {EnvVariableStart}          { yybegin(VARIABLE_DEFINITION); enterNewState(VARIABLE_OPENING_BRACE); yypushback(yylength() - 1); return ENV_VARIABLE_START; }
+    {EOL} {NonNewlineWhitespace}* {Continuation} {SpaceBasedEndMarker}? {
+          yypushback(yylength() - 1);
+          return WHITE_SPACE;
+       }
+    {EOL}                       { leaveState(); return EOL; }
 }
 
 <VARIABLE_DEFINITION> {
@@ -430,6 +435,7 @@ LineComment = {LineCommentSign} {NON_EOL}*
 }
 <USER_KEYWORD_NAME_DEFINITION> {
     {EverythingButVariableValue}                             { pushBackTrailingWhitespace(); return USER_KEYWORD_NAME_PART; }
+    {NonNewlineWhitespace}* {LineCommentSign}                { yypushback(1); return WHITE_SPACE; }
     {SpaceBasedEndMarker} {NonNewlineWhitespace}*            { yybegin(USER_KEYWORD_DEFINITION); return EOS; }
     {EOL}                                                    { yybegin(USER_KEYWORD_DEFINITION); return EOL; }
 }
@@ -441,23 +447,21 @@ LineComment = {LineCommentSign} {NON_EOL}*
 <TASK_DEFINITION>              ^ [^\s#] {NON_EOL}+ {EOL}*    { resetTemplateState(); yypushback(yylength()); yybegin(TASK_NAME_DEFINITION); break; }
 <USER_KEYWORD_DEFINITION>      ^ [^\s#] {NON_EOL}+ {EOL}*    { yypushback(yylength()); yybegin(USER_KEYWORD_NAME_DEFINITION); break; }
 
-<KEYWORD_ARGUMENTS, SETTINGS_SECTION> {
-    <SETTING, FOR_STRUCTURE_LOOP, WHILE_CONFIGURATION> {
-        {EverythingButVariableValue} {EqualSign} {
-              yypushback(1);
-              enterNewState(NORMAL_PARAMETER_ASSIGNMENT);
-              return PARAMETER_NAME;
-        }
-        {EverythingButVariableValue} {EqualSign} {EverythingButVariableValue} {
-              int assignmentPos = indexOf('=');
-              yypushback(yylength() - assignmentPos);
-              enterNewState(NORMAL_PARAMETER_ASSIGNMENT);
-              return PARAMETER_NAME;
-        }
+<SETTINGS_SECTION, SETTING, FOR_STRUCTURE_LOOP, WHILE_CONFIGURATION, KEYWORD_ARGUMENTS> {
+    {EverythingButVariableValue} {EqualSign} {
+          yypushback(1);
+          enterNewState(NORMAL_PARAMETER_ASSIGNMENT);
+          return PARAMETER_NAME;
     }
-    <TESTCASE_DEFINITION, TASK_DEFINITION, USER_KEYWORD_DEFINITION> {
-        {EqualSign} {KeywordFinishedMarker}           { pushBackTrailingWhitespace(); return ASSIGNMENT; }
+    {EverythingButVariableValue} {EqualSign} {EverythingButVariableValue} {
+          int assignmentPos = indexOf('=');
+          yypushback(yylength() - assignmentPos);
+          enterNewState(NORMAL_PARAMETER_ASSIGNMENT);
+          return PARAMETER_NAME;
     }
+}
+<SETTINGS_SECTION, TESTCASE_DEFINITION, TASK_DEFINITION, USER_KEYWORD_DEFINITION> {
+    {EqualSign} {KeywordFinishedMarker}           { pushBackTrailingWhitespace(); return ASSIGNMENT; }
 }
 <INTERMEDIATE_TEMPLATE_CONFIGURATION> {
     {ExtendedSpaceBasedEndMarker} {None} {ExtendedKeywordFinishedMarker}  {
@@ -598,6 +602,7 @@ LineComment = {LineCommentSign} {NON_EOL}*
         break;
     }
     ^ {NonNewlineWhitespace} {NonNewlineWhitespace}+ [^\[#\s]{1}     { enterNewState(TEMPLATE_ARGUMENTS); yypushback(yylength()); break; }
+    [^]                                                              { leaveState(); yypushback(yylength()); break; }
 }
 
 <FOR_STRUCTURE>  {
@@ -631,6 +636,7 @@ LineComment = {LineCommentSign} {NON_EOL}*
     "$" [^{\s]                              { enterNewState(SPECIAL_VARIABLE_USAGE); yypushback(1); return SCALAR_VARIABLE_START; }
     {EverythingButSpecialVariableValue}     { return PYTHON_EXPRESSION_CONTENT; }
     {ExtendedSpaceBasedEndMarker}           { leaveState(); return EOS; }
+    {ExtendedSpaceBasedEndMarker} {LineCommentSign}     { yypushback(1); return WHITE_SPACE; }
     {EOL}                                   { leaveState(); yypushback(yylength()); break; }
     {MultiLine}                             {
       if (getPreviousStates()[getCurrentIndex()] == WHILE_CONFIGURATION) {
@@ -751,6 +757,7 @@ LineComment = {LineCommentSign} {NON_EOL}*
 
 <EOL_EXPECTED> {
     {NonNewlineWhitespace}+  { return WHITE_SPACE; }
+    {LineComment}            { return COMMENT; }
     {EOL}                    { leaveState(); return EOL; }
     [^]                      { yypushback(yylength()); leaveState(); break; }
 }

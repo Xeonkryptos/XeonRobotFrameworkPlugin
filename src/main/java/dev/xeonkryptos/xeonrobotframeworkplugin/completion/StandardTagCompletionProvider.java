@@ -26,7 +26,7 @@ class StandardTagCompletionProvider extends CompletionProvider<CompletionParamet
     protected void addCompletions(@NotNull CompletionParameters parameters, @NotNull ProcessingContext context, @NotNull CompletionResultSet result) {
         PsiFile originalFile = parameters.getOriginalFile();
         RobotVersionProvider robotVersionProvider = RobotVersionProvider.getInstance(originalFile.getProject());
-        RobotVersion robotVersion = robotVersionProvider.getRobotVersion(originalFile);
+        RobotVersion robotVersion = robotVersionProvider.getRobotVersion();
 
         RobotLocalSetting localSetting = PsiTreeUtil.getParentOfType(parameters.getPosition(), RobotLocalSetting.class);
         Set<String> definedTags = Set.of();

@@ -2,6 +2,7 @@ package dev.xeonkryptos.xeonrobotframeworkplugin.util
 
 import com.intellij.openapi.module.Module
 import com.intellij.openapi.module.ModuleUtilCore
+import com.intellij.openapi.project.Project
 import com.intellij.openapi.projectRoots.Sdk
 import com.intellij.openapi.roots.ModuleRootManager
 import com.intellij.openapi.roots.ProjectRootManager
@@ -15,6 +16,12 @@ import java.util.stream.Stream
 class RobotLocalProcessExecutor {
 
     companion object {
+
+        @JvmStatic
+        fun findPythonSdk(project: Project): Sdk? {
+            val sdk = ProjectRootManager.getInstance(project).projectSdk
+            return if (sdk != null && !PythonSdkUtil.isPythonSdk(sdk)) null else sdk
+        }
 
         @JvmStatic
         fun findPythonSdk(sourceElement: PsiElement): Sdk? {

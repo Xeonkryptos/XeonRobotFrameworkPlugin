@@ -62,13 +62,12 @@ public class RobotParser implements PsiParser, LightPsiParser {
   // keyword_call_name (parameter | extended_positional_argument)*
   static boolean base_keyword_call(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "base_keyword_call")) return false;
-    if (!nextTokenIs(b, "", KEYWORD_LIBRARY_NAME, KEYWORD_NAME)) return false;
     boolean r, p;
     Marker m = enter_section_(b, l, _NONE_);
     r = keyword_call_name(b, l + 1);
     p = r; // pin = 1
     r = r && base_keyword_call_1(b, l + 1);
-    exit_section_(b, l, m, r, p, null);
+    exit_section_(b, l, m, r, p, RobotParser::base_keyword_call_recover);
     return r || p;
   }
 
@@ -89,6 +88,17 @@ public class RobotParser implements PsiParser, LightPsiParser {
     boolean r;
     r = parameter(b, l + 1);
     if (!r) r = extended_positional_argument(b, l + 1);
+    return r;
+  }
+
+  /* ********************************************************** */
+  // !(EOL)
+  static boolean base_keyword_call_recover(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "base_keyword_call_recover")) return false;
+    boolean r;
+    Marker m = enter_section_(b, l, _NOT_);
+    r = !consumeToken(b, EOL);
+    exit_section_(b, l, m, r, false, null);
     return r;
   }
 
@@ -262,6 +272,7 @@ public class RobotParser implements PsiParser, LightPsiParser {
     r = r && python_expression_body(b, l + 1);
     p = r; // pin = 2
     r = r && conditional_content_2(b, l + 1);
+    register_hook_(b, CLEAR_SKIPPED_WHITESPACE_MEMORY_HOOK, null);
     exit_section_(b, l, m, r, p, null);
     return r || p;
   }
@@ -515,17 +526,36 @@ public class RobotParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // ELSE <<separator>> <<statement>>
+  // <<else_if_structure EOS sub_keyword_call>>
+  static boolean else_if_sub_keyword_call(PsiBuilder b, int l) {
+    return else_if_structure(b, l + 1, EOS_parser_, RobotParser::sub_keyword_call);
+  }
+
+  /* ********************************************************** */
+  // ELSE <<separator>>? <<statement>>
   public static boolean else_structure(PsiBuilder b, int l, Parser _separator, Parser _statement) {
     if (!recursion_guard_(b, l, "else_structure")) return false;
     if (!nextTokenIs(b, ELSE)) return false;
     boolean r;
     Marker m = enter_section_(b);
     r = consumeToken(b, ELSE);
-    r = r && _separator.parse(b, l);
+    r = r && else_structure_1(b, l + 1, _separator);
     r = r && _statement.parse(b, l);
     exit_section_(b, m, ELSE_STRUCTURE, r);
     return r;
+  }
+
+  // <<separator>>?
+  private static boolean else_structure_1(PsiBuilder b, int l, Parser _separator) {
+    if (!recursion_guard_(b, l, "else_structure_1")) return false;
+    _separator.parse(b, l);
+    return true;
+  }
+
+  /* ********************************************************** */
+  // <<else_structure EOS sub_keyword_call>>
+  static boolean else_sub_keyword_call(PsiBuilder b, int l) {
+    return else_structure(b, l + 1, EOS_parser_, RobotParser::sub_keyword_call);
   }
 
   /* ********************************************************** */
@@ -831,7 +861,7 @@ public class RobotParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // literal_constant_value | conditional_content | variable | sub_keyword_call | <<else_if_structure EOS sub_keyword_call>> | <<else_structure EOS? sub_keyword_call>>
+  // literal_constant_value | conditional_content | variable | sub_keyword_call | else_if_sub_keyword_call | else_sub_keyword_call
   static boolean extended_positional_argument_content(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "extended_positional_argument_content")) return false;
     boolean r;
@@ -840,17 +870,10 @@ public class RobotParser implements PsiParser, LightPsiParser {
     if (!r) r = conditional_content(b, l + 1);
     if (!r) r = variable(b, l + 1);
     if (!r) r = sub_keyword_call(b, l + 1);
-    if (!r) r = else_if_structure(b, l + 1, EOS_parser_, RobotParser::sub_keyword_call);
-    if (!r) r = else_structure(b, l + 1, RobotParser::extended_positional_argument_content_5_0, RobotParser::sub_keyword_call);
+    if (!r) r = else_if_sub_keyword_call(b, l + 1);
+    if (!r) r = else_sub_keyword_call(b, l + 1);
     exit_section_(b, m, null, r);
     return r;
-  }
-
-  // EOS?
-  private static boolean extended_positional_argument_content_5_0(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "extended_positional_argument_content_5_0")) return false;
-    consumeToken(b, EOS);
-    return true;
   }
 
   /* ********************************************************** */
@@ -2002,10 +2025,12 @@ public class RobotParser implements PsiParser, LightPsiParser {
   static boolean positional_argument_content(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "positional_argument_content")) return false;
     boolean r;
+    Marker m = enter_section_(b);
     r = literal_constant_value(b, l + 1);
     if (!r) r = conditional_content(b, l + 1);
     if (!r) r = variable(b, l + 1);
     if (!r) r = sub_keyword_call(b, l + 1);
+    exit_section_(b, m, null, r);
     return r;
   }
 
@@ -2080,9 +2105,11 @@ public class RobotParser implements PsiParser, LightPsiParser {
   static boolean reduced_positional_argument_content(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "reduced_positional_argument_content")) return false;
     boolean r;
+    Marker m = enter_section_(b);
     r = literal_constant_value(b, l + 1);
     if (!r) r = conditional_content(b, l + 1);
     if (!r) r = variable(b, l + 1);
+    exit_section_(b, m, null, r);
     return r;
   }
 
@@ -2339,7 +2366,7 @@ public class RobotParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // SETUP_TEARDOWN_STATEMENT_KEYWORDS (eol_based_keyword_call | variable)
+  // SETUP_TEARDOWN_STATEMENT_KEYWORDS (eol_based_keyword_call | variable | eol_marker)?
   public static boolean setup_teardown_statements_global_setting(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "setup_teardown_statements_global_setting")) return false;
     if (!nextTokenIs(b, SETUP_TEARDOWN_STATEMENT_KEYWORDS)) return false;
@@ -2352,12 +2379,20 @@ public class RobotParser implements PsiParser, LightPsiParser {
     return r || p;
   }
 
-  // eol_based_keyword_call | variable
+  // (eol_based_keyword_call | variable | eol_marker)?
   private static boolean setup_teardown_statements_global_setting_1(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "setup_teardown_statements_global_setting_1")) return false;
+    setup_teardown_statements_global_setting_1_0(b, l + 1);
+    return true;
+  }
+
+  // eol_based_keyword_call | variable | eol_marker
+  private static boolean setup_teardown_statements_global_setting_1_0(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "setup_teardown_statements_global_setting_1_0")) return false;
     boolean r;
     r = eol_based_keyword_call(b, l + 1);
     if (!r) r = variable(b, l + 1);
+    if (!r) r = eol_marker(b, l + 1);
     return r;
   }
 
@@ -2673,13 +2708,12 @@ public class RobotParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // TEMPLATE_ARGUMENT_VALUE | variable
+  // <<parseTemplateArgument>>
   public static boolean template_argument(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "template_argument")) return false;
     boolean r;
     Marker m = enter_section_(b, l, _NONE_, TEMPLATE_ARGUMENT, "<template argument>");
-    r = consumeToken(b, TEMPLATE_ARGUMENT_VALUE);
-    if (!r) r = variable(b, l + 1);
+    r = parseTemplateArgument(b, l + 1);
     exit_section_(b, l, m, r, false, null);
     return r;
   }
