@@ -244,6 +244,7 @@ object ParameterInfoHandlerUtil {
             .filter { param: PyCallableParameter? -> param!!.name != null }
             .collect(Collectors.toMap(Function { obj: PyCallableParameter? -> obj!!.name }, Function.identity<PyCallableParameter?>()))
 
+        val implicitOffset = callableType.implicitOffset
         val positionalContainerIndex = findPositionalContainerIndex(parameterList)
         var parameterFound = false
         val callable: PyCallable = checkNotNull(callableType.callable)
@@ -275,7 +276,7 @@ object ParameterInfoHandlerUtil {
                         }
                 }
             } else if (!parameterFound) {
-                val argIndex = Math.clamp(i.toLong(), 0, positionalContainerIndex)
+                val argIndex = Math.clamp((i + implicitOffset).toLong(), 0, positionalContainerIndex)
                 val pyCallableParameter = parameterList[argIndex]
                 highlightParameter(pyCallableParameter, parameterHintToIndex, hintFlags, mustHighlight)
             }
