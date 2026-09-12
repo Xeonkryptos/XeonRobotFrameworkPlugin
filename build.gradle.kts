@@ -18,8 +18,8 @@ plugins {
     // grammar-kit - only used to regenerate the JFlex lexer into src/main/gen (checked in)
     id("org.jetbrains.grammarkit") version "2022.3.2.2"
 
-    kotlin("jvm") version "2.1.10"
-    kotlin("plugin.lombok") version "2.1.10"
+    kotlin("jvm") version "2.2.20"
+    kotlin("plugin.lombok") version "2.2.20"
 }
 
 group = properties("pluginGroup")
@@ -73,6 +73,7 @@ dependencies {
 
         plugins(providers.gradleProperty("platformPlugins").map { it.split(',') })
         bundledPlugins(providers.gradleProperty("platformBundledPlugins").map { it.split(',') })
+        bundledModules(providers.gradleProperty("platformBundledModules").map { it.split(',') })
 
         pluginVerifier()
     }
