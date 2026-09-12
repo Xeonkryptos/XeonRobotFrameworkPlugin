@@ -1,7 +1,6 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.execution.ui.editor
 
 import com.intellij.diagnostic.logging.LogsGroupFragment
-import com.intellij.execution.ExecutionBundle
 import com.intellij.execution.ui.BeforeRunComponent
 import com.intellij.execution.ui.BeforeRunFragment
 import com.intellij.execution.ui.CommandLinePanel
@@ -101,13 +100,13 @@ class RobotConfigurationFragmentedEditor(private val runConfiguration: RobotRunC
                 FileChooserDescriptorFactory.singleFile(), runConfiguration.project
             )
         )
-        val labeledComponent = LabeledComponent.create<TextFieldWithBrowseButton>(inputFile, ExecutionBundle.message("redirect.input.from"))
+        val labeledComponent = LabeledComponent.create<TextFieldWithBrowseButton>(inputFile, RobotBundle.message("redirect.input.from"))
         labeledComponent.labelLocation = BorderLayout.WEST
         val redirectInputFrom: SettingsEditorFragment<RobotRunConfiguration, LabeledComponent<TextFieldWithBrowseButton>> =
             SettingsEditorFragment<RobotRunConfiguration, LabeledComponent<TextFieldWithBrowseButton>>(
                 "py.redirect.input",
-                ExecutionBundle.message("redirect.input.from.name"),
-                ExecutionBundle.message("group.operating.system"),
+                RobotBundle.message("redirect.input.from.name"),
+                RobotBundle.message("group.operating.system"),
                 labeledComponent,
                 SettingsEditorFragmentType.EDITOR,
                 { config, component ->
@@ -119,7 +118,7 @@ class RobotConfigurationFragmentedEditor(private val runConfiguration: RobotRunC
                     config.pythonRunConfiguration.inputFile = filePath
                 },
                 { config -> config.pythonRunConfiguration.isRedirectInput })
-        redirectInputFrom.actionHint = ExecutionBundle.message("read.input.from.the.specified.file")
+        redirectInputFrom.actionHint = RobotBundle.message("read.input.from.the.specified.file")
         addToFragmentsBeforeEditors(fragments, redirectInputFrom)
 
         val editors = mutableListOf<SettingsEditorFragment<RobotRunConfiguration, *>>()
