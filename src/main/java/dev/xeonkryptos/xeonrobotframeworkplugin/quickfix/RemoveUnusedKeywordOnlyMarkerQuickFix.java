@@ -1,4 +1,4 @@
-package dev.xeonkryptos.xeonrobotframeworkplugin.inspections.cleanup;
+package dev.xeonkryptos.xeonrobotframeworkplugin.quickfix;
 
 import com.intellij.codeInspection.LocalQuickFixOnPsiElement;
 import com.intellij.codeInspection.util.IntentionFamilyName;
@@ -9,7 +9,7 @@ import com.intellij.psi.PsiFile;
 import dev.xeonkryptos.xeonrobotframeworkplugin.RobotBundle;
 import org.jetbrains.annotations.NotNull;
 
-class RemoveUnusedKeywordOnlyMarkerQuickFix extends LocalQuickFixOnPsiElement {
+public class RemoveUnusedKeywordOnlyMarkerQuickFix extends LocalQuickFixOnPsiElement {
 
     public RemoveUnusedKeywordOnlyMarkerQuickFix(@NotNull PsiElement element) {
         super(element);

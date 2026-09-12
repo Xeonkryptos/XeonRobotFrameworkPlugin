@@ -170,9 +170,12 @@
         <localInspection language="Robot" shortName="DuplicatedParameterInKeywordCall" bundle="messages.RobotBundle" key="INSP.NAME.keyword.duplicated.parameters.defined"
                          groupKey="INSP.GROUP.robot" enabledByDefault="true" level="WEAK WARNING" dumbAware="true"
                          implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.inspections.maintainability.DuplicatedParameterInKeywordCallInspection"/>
-        <localInspection language="Robot" shortName="RobotEvaluateKeywordUnknownModules" bundle="messages.RobotBundle" key="INSP.NAME.keyword.evaluate.parameters.module.unknown"
-                         groupKey="INSP.GROUP.robot" enabledByDefault="true" level="ERROR"
-                         implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.inspections.RobotEvaluateKeywordUnknownModulesInspection"/>
+        <localInspection language="Robot" shortName="EmptyLocalArgumentsSetting" bundle="messages.RobotBundle" key="INSP.NAME.empty.local.arguments.setting"
+                         groupKey="INSP.GROUP.robot" enabledByDefault="true" level="WARNING" dumbAware="true"
+                         implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.inspections.maintainability.EmptyLocalArgumentsSettingInspection"/>
+        <localInspection language="Robot" shortName="EmptyGlobalSetupTeardownSetting" bundle="messages.RobotBundle" key="INSP.NAME.empty.global.setup.teardown.setting"
+                         groupKey="INSP.GROUP.robot" enabledByDefault="true" level="WARNING" dumbAware="true"
+                         implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.inspections.maintainability.EmptyGlobalSetupTeardownSettingInspection"/>
         <lang.inspectionSuppressor language="Robot" implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.inspections.RobotInspectionSuppressor"/>
 
         <runConfigurationProducer implementation="dev.xeonkryptos.xeonrobotframeworkplugin.execution.config.RobotRunConfigurationProducer"/>

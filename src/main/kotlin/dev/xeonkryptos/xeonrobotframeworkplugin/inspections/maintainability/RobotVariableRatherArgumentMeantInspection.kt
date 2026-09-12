@@ -13,6 +13,7 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLocalSetting
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotPositionalArgument
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVisitor
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.ReservedVariable
+import dev.xeonkryptos.xeonrobotframeworkplugin.quickfix.RobotVariableRatherArgumentQuickFix
 
 class RobotVariableRatherArgumentMeantInspection : LocalInspectionTool(), DumbAware {
 

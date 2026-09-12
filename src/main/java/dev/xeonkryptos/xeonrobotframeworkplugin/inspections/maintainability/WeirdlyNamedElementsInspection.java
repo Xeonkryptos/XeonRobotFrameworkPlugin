@@ -20,6 +20,8 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableContent
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableDefinition;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVisitor;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.RobotPyUtil;
+import dev.xeonkryptos.xeonrobotframeworkplugin.quickfix.WeirdlyNamedKeywordCallQuickFix;
+import dev.xeonkryptos.xeonrobotframeworkplugin.quickfix.WeirdlyNamedVariableElementQuickFix;
 import dev.xeonkryptos.xeonrobotframeworkplugin.util.KeywordUtil;
 import dev.xeonkryptos.xeonrobotframeworkplugin.util.VariableNameUtil;
 import org.jetbrains.annotations.NotNull;
