@@ -6,6 +6,14 @@
 
 ### Added
 
+### Changed
+
+### Fixed
+
+## 0.7.7 - 2026-09-12
+
+### Added
+
 - Added new formatting options to increase the spaces after local settings, keyword calls and their arguments and after variable statements
 - Added new inspections detecting and highlighting empty local setting `[Arguments]` and empty `Test Setup` and `Test Teardown` as well as the tasks counterparts
 
