@@ -1,4 +1,4 @@
-package dev.xeonkryptos.xeonrobotframeworkplugin.inspections.maintainability
+package dev.xeonkryptos.xeonrobotframeworkplugin.quickfix
 
 import com.intellij.codeInsight.intention.FileModifier
 import com.intellij.codeInspection.LocalQuickFixOnPsiElement
@@ -23,7 +23,7 @@ abstract class AbstractReplaceKeywordQuickFix(keywordCall: RobotKeywordCall, nor
     final override fun isAvailable(project: Project, file: PsiFile, startElement: PsiElement, endElement: PsiElement): Boolean = startElement.parentOfType<RobotKeywordCall>(withSelf = true)?.let {
         val normalizeKeywordName = KeywordUtil.normalizeKeywordName(it.name)
         // The quick fix is not available for keyword calls with parameters. A keyword call needs only positional arguments.
-        return@let if (replaceableKeywordNames.contains(normalizeKeywordName) && it.parameterList.isEmpty()) isAvailable(it) else false
+        return@let replaceableKeywordNames.contains(normalizeKeywordName) && it.parameterList.isEmpty() && isAvailable(it)
     } ?: false
 
     abstract fun isAvailable(keywordCall: RobotKeywordCall): Boolean

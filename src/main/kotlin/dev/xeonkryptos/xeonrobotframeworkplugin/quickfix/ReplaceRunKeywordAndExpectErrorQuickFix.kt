@@ -1,4 +1,4 @@
-package dev.xeonkryptos.xeonrobotframeworkplugin.inspections.maintainability
+package dev.xeonkryptos.xeonrobotframeworkplugin.quickfix
 
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Pair

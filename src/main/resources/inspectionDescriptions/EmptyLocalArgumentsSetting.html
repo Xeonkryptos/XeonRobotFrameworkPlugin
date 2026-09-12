@@ -1,0 +1,26 @@
+<html lang="en">
+    <body>
+        <p>Reports an <code>[Arguments]</code> setting inside a keyword that does not declare any argument.</p>
+
+        <p>
+            An <code>[Arguments]</code> setting without any argument does not change how the keyword can be called,
+            so it only adds noise without providing any value.
+        </p>
+
+        <p>Example:</p>
+        <pre><code>
+*** Keywords ***
+My Keyword
+    [Arguments]    # no argument declared -> will be marked as empty
+    Log    Hello World
+</code></pre>
+
+        <!-- tooltip end -->
+        <p>Text after this comment will only be shown in the settings of the inspection.</p>
+
+        <p>
+            Removing the empty setting keeps keyword definitions concise and makes it immediately clear which
+            keywords actually declare arguments.
+        </p>
+    </body>
+</html>

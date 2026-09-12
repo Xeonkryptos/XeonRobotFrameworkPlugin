@@ -1,4 +1,4 @@
-package dev.xeonkryptos.xeonrobotframeworkplugin.inspections.maintainability
+package dev.xeonkryptos.xeonrobotframeworkplugin.quickfix
 
 import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiFile
@@ -7,10 +7,9 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCall
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotPositionalArgument
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVisitor
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.RobotElementGenerator
-import dev.xeonkryptos.xeonrobotframeworkplugin.util.GlobalConstants
 import dev.xeonkryptos.xeonrobotframeworkplugin.util.RobotNames
 
-class ReplaceReturnFromKeywordIfQuickFix(keywordCall: RobotKeywordCall) : AbstractReplaceKeywordQuickFix(keywordCall, RobotNames.RETURN_FROM_KEYWORD_NORMALIZED_KEYWORD_NAME) {
+class ReplaceExitForLoopIfQuickFix(keywordCall: RobotKeywordCall) : AbstractReplaceKeywordQuickFix(keywordCall, RobotNames.EXIT_FOR_LOOP_IF_NORMALIZED_KEYWORD_NAME) {
 
     override fun isAvailable(keywordCall: RobotKeywordCall): Boolean {
         val argumentsCollector = QuickFixArgumentsCollector()
@@ -23,21 +22,18 @@ class ReplaceReturnFromKeywordIfQuickFix(keywordCall: RobotKeywordCall) : Abstra
         keywordCall.positionalArgumentList.forEach { it.accept(argumentsCollector) }
 
         val conditionalContent = argumentsCollector.conditionalContent?.text ?: return
-        val returnValues = argumentsCollector.returnableContents.joinToString(GlobalConstants.SUPER_SPACE) { it.text }
-        val returnStatement = "${RobotNames.RETURN_RESERVED_NAME}  $returnValues"
 
-        val newConditionalStructure = RobotElementGenerator.getInstance(project).createNewConditionalStructure(conditionalContent, returnStatement, emptyArray(), null)
-        keywordCall.replace(newConditionalStructure)
+        val loopControlStructure =
+            RobotElementGenerator.getInstance(project).createNewConditionalStructure(conditionalContent, RobotElementGenerator.LoopControlStructureType.BREAK.name, emptyArray(), null)
+        keywordCall.replace(loopControlStructure)
     }
 
     private class QuickFixArgumentsCollector : RobotVisitor() {
 
         var conditionalContent: RobotConditionalContent? = null
-        val returnableContents = mutableListOf<RobotPositionalArgument>()
 
         override fun visitPositionalArgument(o: RobotPositionalArgument) {
-            if (conditionalContent == null) o.acceptChildren(this)
-            else returnableContents.add(o)
+            o.acceptChildren(this)
         }
 
         override fun visitConditionalContent(o: RobotConditionalContent) {

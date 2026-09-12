@@ -1,0 +1,25 @@
+<html lang="en">
+    <body>
+        <p>Reports a <code>Suite Setup</code>, <code>Suite Teardown</code>, <code>Test Setup</code>, <code>Test Teardown</code>, <code>Task Setup</code> or <code>Task Teardown</code> setting in the <code>*** Settings ***</code> section that does not call a keyword.</p>
+
+        <p>
+            Such a setting has no effect because no keyword is executed for it, so it is effectively dead configuration.
+            It is usually left over after the referenced keyword call was removed or was never filled in.
+        </p>
+
+        <p>Example:</p>
+        <pre><code>
+*** Settings ***
+Suite Setup    # nothing follows -> will be marked as empty
+Test Teardown    Close All Browsers
+</code></pre>
+
+        <!-- tooltip end -->
+        <p>Text after this comment will only be shown in the settings of the inspection.</p>
+
+        <p>
+            Removing the empty setting keeps the Settings section concise and avoids confusion about whether a suite-
+            or test-level setup or teardown is actually configured.
+        </p>
+    </body>
+</html>
