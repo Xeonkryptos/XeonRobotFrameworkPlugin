@@ -84,7 +84,7 @@ object ParameterInfoHandlerUtil {
             val callableType = typeEvalContext.getType(callingFunction) as? PyCallableType? ?: return null
 
             hintsAndAnnotations = buildParameterListHint(parameters, indexToNamedParameter, parameterToHintIndex, hintFlags, typeEvalContext)
-            highlightParameters(mutableListOf(*arguments), callableType, parameters, parameterToHintIndex, hintFlags, currentParamIndex)
+            highlightParameters(mutableListOf(*arguments), callableType, parameters, indexToNamedParameter, parameterToHintIndex, hintFlags, currentParamIndex)
         } else {
             val parameterToHintIndex: MutableMap<DefinedParameter, Int> = mutableMapOf()
 
@@ -217,9 +217,17 @@ object ParameterInfoHandlerUtil {
     fun highlightParameters(arguments: MutableList<RobotArgument>,
                             callableType: PyCallableType,
                             parameters: MutableList<PyCallableParameter>,
+                            indexToNamedParameter: MutableMap<Int, PyCallableParameter>,
                             parameterToHintIndex: MutableMap<PyCallableParameter, Int>,
                             hintFlags: MutableMap<Int, EnumSet<ParameterInfoUIContextEx.Flag>>,
                             currentParamIndex: Int) { // gray out enough first parameters as implicit (self, cls, ...)
+        for (i in 0..<callableType.implicitOffset) {
+            if (indexToNamedParameter.containsKey(i)) {
+                val parameter = indexToNamedParameter[i]
+                hintFlags[parameterToHintIndex[parameter]]!!.add(ParameterInfoUIContextEx.Flag.DISABLE) // show but mark as absent
+            }
+        }
+
         collectHighlights(callableType, parameters, parameterToHintIndex, hintFlags, arguments, currentParamIndex)
     }
 
