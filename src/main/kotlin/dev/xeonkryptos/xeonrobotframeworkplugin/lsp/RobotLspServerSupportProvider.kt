@@ -9,15 +9,6 @@ import com.intellij.platform.lsp.api.LspCommunicationChannel
 import com.intellij.platform.lsp.api.LspServerListener
 import com.intellij.platform.lsp.api.LspServerSupportProvider
 import com.intellij.platform.lsp.api.ProjectWideLspServerDescriptor
-import com.intellij.platform.lsp.api.customization.LspCodeActionsSupport
-import com.intellij.platform.lsp.api.customization.LspCommandsSupport
-import com.intellij.platform.lsp.api.customization.LspCompletionSupport
-import com.intellij.platform.lsp.api.customization.LspDiagnosticsSupport
-import com.intellij.platform.lsp.api.customization.LspDocumentColorSupport
-import com.intellij.platform.lsp.api.customization.LspDocumentLinkSupport
-import com.intellij.platform.lsp.api.customization.LspFindReferencesSupport
-import com.intellij.platform.lsp.api.customization.LspFormattingSupport
-import com.intellij.platform.lsp.api.customization.LspSemanticTokensSupport
 import com.jetbrains.python.sdk.pythonSdk
 import dev.xeonkryptos.xeonrobotframeworkplugin.RobotBundle
 import dev.xeonkryptos.xeonrobotframeworkplugin.fileTypes.RobotFeatureFileType
@@ -37,20 +28,6 @@ class RobotLspServerSupportProvider : LspServerSupportProvider {
     class RobotLspServerDescriptor(project: Project) : ProjectWideLspServerDescriptor(project, RobotBundle.message("framework.name")) {
 
         override val lspCommunicationChannel: LspCommunicationChannel = LspCommunicationChannel.StdIO
-
-        override val lspCodeActionsSupport: LspCodeActionsSupport? = null
-        override val lspCommandsSupport: LspCommandsSupport? = null
-        override val lspCompletionSupport: LspCompletionSupport? = null
-        override val lspDiagnosticsSupport: LspDiagnosticsSupport? = null
-        override val lspDocumentColorSupport: LspDocumentColorSupport? = null
-        override val lspDocumentLinkSupport: LspDocumentLinkSupport? = null
-        override val lspFindReferencesSupport: LspFindReferencesSupport? = null
-        override val lspFormattingSupport: LspFormattingSupport? = null
-
-        override val lspGoToDefinitionSupport: Boolean = false
-        override val lspGoToTypeDefinitionSupport: Boolean = false
-        override val lspHoverSupport: Boolean = false
-        override val lspSemanticTokensSupport: LspSemanticTokensSupport? = null
 
         override val lspServerListener: LspServerListener? = null
 
