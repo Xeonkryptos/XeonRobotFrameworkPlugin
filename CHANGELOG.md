@@ -6,7 +6,11 @@
 
 ### Added
 
+- Support for localization in Robot Framework. Configure your preferred language in the plugin settings and the plugin will provide code completion, inspections and more in your preferred language.
+
 ### Changed
+
+- Updated the plugin's minimum required IDE version to 2025.3
 
 ### Fixed
 
