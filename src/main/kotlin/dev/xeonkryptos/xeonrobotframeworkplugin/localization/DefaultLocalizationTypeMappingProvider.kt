@@ -77,7 +77,8 @@ object DefaultLocalizationTypeMappingProvider : LocalizationTypeMappingProvider 
         "setup" to LocalSettingType.SETUP,
         "teardown" to LocalSettingType.TEARDOWN,
         "timeout" to LocalSettingType.TIMEOUT,
-        "arguments" to LocalSettingType.ARGUMENTS
+        "arguments" to LocalSettingType.ARGUMENTS,
+        "template" to LocalSettingType.TEMPLATE
     )
 
     private val localSettingTypeMappingsReversal: Map<LocalSettingType, CharSequence> = mapOf(

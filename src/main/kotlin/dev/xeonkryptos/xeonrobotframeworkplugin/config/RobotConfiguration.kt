@@ -1,6 +1,5 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.config
 
-import ai.grazie.utils.toLinkedSet
 import com.intellij.openapi.application.ModalityState
 import com.intellij.openapi.application.UI
 import com.intellij.openapi.application.asContextElement
@@ -62,7 +61,7 @@ class RobotConfiguration(project: Project, cs: CoroutineScope) : Configurable.No
         group(RobotBundle.message("options.languages.row.label")) {
             row {
                 cell(languageConfigurationsTableToolbar.createPanel()).resizableColumn().align(Align.FILL).onApply {
-                    val enabledLanguages = languageConfigurationsTableModel.languages.asSequence().filter { it.active }.map { it.languageClassReference }.toLinkedSet()
+                    val enabledLanguages = languageConfigurationsTableModel.languages.asSequence().filter { it.active }.map { it.languageClassReference }.toSet()
                     optionsProvider.enabledLanguages = enabledLanguages
                 }
             }.resizableRow()

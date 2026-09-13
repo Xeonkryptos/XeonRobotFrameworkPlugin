@@ -11,7 +11,4 @@ class RobotPrefixMatcher(prefix: String) : CamelHumpMatcher(prefix, true) {
     override fun prefixMatches(name: String): Boolean = super.prefixMatches(name) || name.startsWith(normalizedPrefix)
 
     override fun cloneWithPrefix(prefix: String): PrefixMatcher = if (prefix == myPrefix) this else RobotPrefixMatcher(prefix)
-
-    override fun matchingDegree(string: String?): Int = if (string == null) 0
-    else super.matchingDegree(string)
 }
