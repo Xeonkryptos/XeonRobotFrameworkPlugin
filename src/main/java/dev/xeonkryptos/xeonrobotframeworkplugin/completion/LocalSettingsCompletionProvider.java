@@ -11,6 +11,6 @@ class LocalSettingsCompletionProvider extends CompletionProvider<CompletionParam
 
     @Override
     protected void addCompletions(@NotNull CompletionParameters parameters, @NotNull ProcessingContext context, @NotNull CompletionResultSet result) {
-        CompletionProviderUtils.addSyntaxLookup(RobotTypes.LOCAL_SETTING, result);
+        CompletionProviderUtils.addSyntaxLookup(RobotTypes.LOCAL_SETTING, result, parameters.getPosition().getProject());
     }
 }

@@ -5,7 +5,7 @@ import com.intellij.codeInsight.completion.CompletionProvider;
 import com.intellij.codeInsight.completion.CompletionResultSet;
 import com.intellij.codeInsight.lookup.LookupElement;
 import com.intellij.util.ProcessingContext;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotResourceFileType;
+import dev.xeonkryptos.xeonrobotframeworkplugin.fileTypes.RobotResourceFileType;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotCommentsSection;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordsSection;
@@ -29,7 +29,7 @@ class SectionCompletionProvider extends CompletionProvider<CompletionParameters>
     protected void addCompletions(@NotNull CompletionParameters parameters, @NotNull ProcessingContext context, @NotNull CompletionResultSet result) {
         Collection<LookupElement> lookupElements = new LinkedList<>();
         boolean isResource = parameters.getOriginalFile().getFileType() == RobotResourceFileType.getInstance();
-        Set<String> definedSections = new HashSet<>(6);
+        Set<String> definedSections = HashSet.newHashSet(6);
         parameters.getOriginalFile().acceptChildren(new RecursiveRobotVisitor() {
 
             @Override
@@ -63,7 +63,7 @@ class SectionCompletionProvider extends CompletionProvider<CompletionParameters>
             }
 
         });
-        for (LookupElement element : CompletionProviderUtils.computeAdditionalSyntaxLookups(RobotTypes.SECTION)) {
+        for (LookupElement element : CompletionProviderUtils.computeAdditionalSyntaxLookups(RobotTypes.SECTION, parameters.getPosition().getProject())) {
             String lookupString = element.getLookupString();
             if (!definedSections.contains(lookupString) && (!isResource || !excludedSections.contains(lookupString))) {
                 lookupElements.add(element);

@@ -48,7 +48,7 @@ class RobotFormattingModelBuilder : CustomFormattingModelBuilder {
         val customSettings = context.codeStyleSettings.getCustomSettings(RobotCodeStyleSettings::class.java)
         val spaceBuilder = createSpaceBuilder(context.codeStyleSettings)
         val blockContext = RobotBlockContext(commonSettings, customSettings, spaceBuilder)
-        val robotBlock = RobotBlock(element.node, blockContext)
+        val robotBlock = RobotBlock(context.project, element.node, blockContext)
         return RobotFormattingModel(element.containingFile, robotBlock)
     }
 

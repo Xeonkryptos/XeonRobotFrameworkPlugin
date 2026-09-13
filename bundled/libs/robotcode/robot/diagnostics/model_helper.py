@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import ast
 import re
 import token as python_token
 from io import StringIO
@@ -25,7 +24,7 @@ from robot.utils.escaping import unescape
 from robot.variables.finders import NOT_FOUND, NumberFinder
 from robotcode.core.lsp.types import Position
 
-from ..utils import get_robot_version
+from ..utils import RF_VERSION
 from ..utils.ast import (
     iter_over_keyword_names_and_owners,
     range_from_token,
@@ -40,7 +39,7 @@ from .entities import (
     VariableDefinition,
     VariableNotFoundDefinition,
 )
-from .keyword_finder import DEFAULT_BDD_PREFIXES
+from .keyword_finder import DEFAULT_BDD_PREFIX_REGEXP, build_bdd_prefix_regexp
 from .library_doc import (
     ArgumentInfo,
     KeywordArgumentKind,
@@ -210,7 +209,7 @@ class ModelHelper:
         position: Position,
         analyse_run_keywords: bool = True,
     ) -> Optional[Tuple[Optional[KeywordDoc], Token]]:
-        finder = namespace.get_finder()
+        finder = namespace.finder
         keyword_doc = finder.find_keyword(keyword_name, raise_keyword_error=False)
         if keyword_doc is None:
             return None
@@ -240,7 +239,7 @@ class ModelHelper:
         for lib, keyword in iter_over_keyword_names_and_owners(keyword_token.value):
             if lib is not None:
                 lib_entries = next(
-                    (v for k, v in (namespace.get_namespaces()).items() if k == lib),
+                    (v for k, v in namespace.namespaces.items() if k == lib),
                     None,
                 )
                 if lib_entries is not None:
@@ -265,7 +264,6 @@ class ModelHelper:
     def iter_expression_variables_from_token(
         expression: Token,
         namespace: "Namespace",
-        nodes: Optional[List[ast.AST]],
         position: Optional[Position] = None,
         skip_commandline_variables: bool = False,
         skip_local_variables: bool = False,
@@ -278,11 +276,9 @@ class ModelHelper:
                     if toknum == python_token.NAME:
                         var = namespace.find_variable(
                             f"${{{tokval}}}",
-                            nodes,
                             position,
                             skip_commandline_variables=skip_commandline_variables,
                             skip_local_variables=skip_local_variables,
-                            ignore_error=True,
                         )
                         sub_token = Token(
                             expression.type,
@@ -394,7 +390,6 @@ class ModelHelper:
         cls,
         token: Token,
         namespace: "Namespace",
-        nodes: Optional[List[ast.AST]],
         position: Optional[Position] = None,
         skip_commandline_variables: bool = False,
         skip_local_variables: bool = False,
@@ -424,7 +419,6 @@ class ModelHelper:
                                 sub_token.error,
                             ),
                             namespace,
-                            nodes,
                             position,
                             skip_commandline_variables=skip_commandline_variables,
                             skip_local_variables=skip_local_variables,
@@ -481,11 +475,9 @@ class ModelHelper:
                 name = sub_token.value
                 var = namespace.find_variable(
                     name,
-                    nodes,
                     position,
                     skip_commandline_variables=skip_commandline_variables,
                     skip_local_variables=skip_local_variables,
-                    ignore_error=True,
                 )
                 if var is not None:
                     yield strip_variable_token(sub_token), var
@@ -506,11 +498,9 @@ class ModelHelper:
                         name = f"{name[0]}{{{base_name.strip()}}}"
                         var = namespace.find_variable(
                             name,
-                            nodes,
                             position,
                             skip_commandline_variables=skip_commandline_variables,
                             skip_local_variables=skip_local_variables,
-                            ignore_error=True,
                         )
                         sub_sub_token = Token(
                             sub_token.type,
@@ -555,20 +545,17 @@ class ModelHelper:
             else:
                 yield token_or_var
 
-    __expression_statement_types: Optional[Tuple[Type[Any]]] = None
+    __expression_statement_types: Optional[Tuple[Type[Any], ...]] = None
 
     @classmethod
-    def get_expression_statement_types(cls) -> Tuple[Type[Any]]:
+    def get_expression_statement_types(cls) -> Tuple[Type[Any], ...]:
         import robot.parsing.model.statements
 
         if cls.__expression_statement_types is None:
-            cls.__expression_statement_types = (robot.parsing.model.statements.IfHeader,)
-
-            if get_robot_version() >= (5, 0):
-                cls.__expression_statement_types = (  # type: ignore[assignment]
-                    robot.parsing.model.statements.IfElseHeader,
-                    robot.parsing.model.statements.WhileHeader,
-                )
+            cls.__expression_statement_types = (
+                robot.parsing.model.statements.IfElseHeader,
+                robot.parsing.model.statements.WhileHeader,
+            )
 
         return cls.__expression_statement_types
 
@@ -576,41 +563,38 @@ class ModelHelper:
     BDD_TOKEN = re.compile(r"^(Given|When|Then|And|But)$", flags=re.IGNORECASE)
 
     @classmethod
+    def _get_bdd_prefix_regexp(cls, namespace: "Namespace") -> "re.Pattern[str]":
+        if namespace.languages is not None:
+            return build_bdd_prefix_regexp(frozenset(namespace.languages.bdd_prefixes))
+        return DEFAULT_BDD_PREFIX_REGEXP
+
+    @classmethod
     def split_bdd_prefix(cls, namespace: "Namespace", token: Token) -> Tuple[Optional[Token], Optional[Token]]:
-        bdd_token = None
+        bdd_match = cls._get_bdd_prefix_regexp(namespace).match(token.value)
+        if bdd_match:
+            bdd_len = len(bdd_match.group(1))
+            bdd_token = Token(
+                token.type,
+                token.value[:bdd_len],
+                token.lineno,
+                token.col_offset,
+                token.error,
+            )
 
-        parts = token.value.split()
-        if len(parts) < 2:
-            return None, token
+            token = Token(
+                token.type,
+                token.value[bdd_len + 1 :],
+                token.lineno,
+                token.col_offset + bdd_len + 1,
+                token.error,
+            )
+            return bdd_token, token
 
-        for index in range(1, len(parts)):
-            prefix = " ".join(parts[:index]).title()
-            if prefix in (
-                namespace.languages.bdd_prefixes if namespace.languages is not None else DEFAULT_BDD_PREFIXES
-            ):
-                bdd_len = len(prefix)
-                bdd_token = Token(
-                    token.type,
-                    token.value[:bdd_len],
-                    token.lineno,
-                    token.col_offset,
-                    token.error,
-                )
-
-                token = Token(
-                    token.type,
-                    token.value[bdd_len + 1 :],
-                    token.lineno,
-                    token.col_offset + bdd_len + 1,
-                    token.error,
-                )
-                break
-
-        return bdd_token, token
+        return None, token
 
     @classmethod
     def strip_bdd_prefix(cls, namespace: "Namespace", token: Token) -> Token:
-        if get_robot_version() < (6, 0):
+        if RF_VERSION < (6, 0):
             bdd_match = cls.BDD_TOKEN_REGEX.match(token.value)
             if bdd_match:
                 bdd_len = len(bdd_match.group(1))
@@ -624,44 +608,27 @@ class ModelHelper:
                 )
             return token
 
-        parts = token.value.split()
-        if len(parts) < 2:
-            return token
-
-        for index in range(1, len(parts)):
-            prefix = " ".join(parts[:index]).title()
-            if prefix in (
-                namespace.languages.bdd_prefixes if namespace.languages is not None else DEFAULT_BDD_PREFIXES
-            ):
-                bdd_len = len(prefix)
-                token = Token(
-                    token.type,
-                    token.value[bdd_len + 1 :],
-                    token.lineno,
-                    token.col_offset + bdd_len + 1,
-                    token.error,
-                )
-                break
+        bdd_match = cls._get_bdd_prefix_regexp(namespace).match(token.value)
+        if bdd_match:
+            bdd_len = len(bdd_match.group(1))
+            token = Token(
+                token.type,
+                token.value[bdd_len + 1 :],
+                token.lineno,
+                token.col_offset + bdd_len + 1,
+                token.error,
+            )
 
         return token
 
     @classmethod
     def is_bdd_token(cls, namespace: "Namespace", token: Token) -> bool:
-        if get_robot_version() < (6, 0):
+        if RF_VERSION < (6, 0):
             bdd_match = cls.BDD_TOKEN.match(token.value)
             return bool(bdd_match)
 
-        parts = token.value.split()
-
-        for index in range(len(parts)):
-            prefix = " ".join(parts[: index + 1]).title()
-
-            if prefix.title() in (
-                namespace.languages.bdd_prefixes if namespace.languages is not None else DEFAULT_BDD_PREFIXES
-            ):
-                return True
-
-        return False
+        bdd_match = cls._get_bdd_prefix_regexp(namespace).match(token.value + " ")
+        return bdd_match is not None and len(bdd_match.group(1)) == len(token.value)
 
     @classmethod
     def get_keyword_definition_at_token(cls, library_doc: LibraryDoc, token: Token) -> Optional[KeywordDoc]:

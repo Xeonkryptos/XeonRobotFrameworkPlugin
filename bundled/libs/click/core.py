@@ -140,12 +140,25 @@ def iter_params_for_processing(
     return sorted(declaration_order, key=sort_key)
 
 
-class ParameterSource(enum.Enum):
-    """This is an :class:`~enum.Enum` that indicates the source of a
+class ParameterSource(enum.IntEnum):
+    """This is an :class:`~enum.IntEnum` that indicates the source of a
     parameter's value.
 
     Use :meth:`click.Context.get_parameter_source` to get the
     source for a parameter by name.
+
+    Members are ordered from most explicit to least explicit source.
+    This allows comparison to check if a value was explicitly provided:
+
+    .. code-block:: python
+
+        source = ctx.get_parameter_source("port")
+        if source < click.ParameterSource.DEFAULT_MAP:
+            ...  # value was explicitly set
+
+    .. versionchanged:: 8.3.3
+        Use :class:`~enum.IntEnum` and reorder members from most to
+        least explicit. Supports comparison operators.
 
     .. versionchanged:: 8.0
         Use :class:`~enum.Enum` and drop the ``validate`` method.
@@ -154,16 +167,16 @@ class ParameterSource(enum.Enum):
         Added the ``PROMPT`` value.
     """
 
+    PROMPT = enum.auto()
+    """Used a prompt to confirm a default or provide a value."""
     COMMANDLINE = enum.auto()
     """The value was provided by the command line args."""
     ENVIRONMENT = enum.auto()
     """The value was provided with an environment variable."""
-    DEFAULT = enum.auto()
-    """Used the default specified by the parameter."""
     DEFAULT_MAP = enum.auto()
     """Used a default provided by :attr:`Context.default_map`."""
-    PROMPT = enum.auto()
-    """Used a prompt to confirm a default or provide a value."""
+    DEFAULT = enum.auto()
+    """Used the default specified by the parameter."""
 
 
 class Context:
@@ -685,6 +698,20 @@ class Context:
             self.obj = rv = object_type()
         return rv
 
+    def _default_map_has(self, name: str | None) -> bool:
+        """Check if :attr:`default_map` contains a real value for ``name``.
+
+        Returns ``False`` when the key is absent, the map is ``None``,
+        ``name`` is ``None``, or the stored value is the internal
+        :data:`UNSET` sentinel.
+        """
+        return (
+            name is not None
+            and self.default_map is not None
+            and name in self.default_map
+            and self.default_map[name] is not UNSET
+        )
+
     @t.overload
     def lookup_default(
         self, name: str, call: t.Literal[True] = True
@@ -705,15 +732,17 @@ class Context:
         .. versionchanged:: 8.0
             Added the ``call`` parameter.
         """
-        if self.default_map is not None:
-            value = self.default_map.get(name, UNSET)
+        if not self._default_map_has(name):
+            return None
 
-            if call and callable(value):
-                return value()
+        # Assert to make the type checker happy.
+        assert self.default_map is not None
+        value = self.default_map[name]
 
-            return value
+        if call and callable(value):
+            return value()
 
-        return UNSET
+        return value
 
     def fail(self, message: str) -> t.NoReturn:
         """Aborts the execution of the program with a specific error
@@ -799,8 +828,18 @@ class Context:
 
             for param in other_cmd.params:
                 if param.name not in kwargs and param.expose_value:
+                    default_value = param.get_default(ctx)
+                    # We explicitly hide the :attr:`UNSET` value to the user, as we
+                    # choose to make it an implementation detail. And because ``invoke``
+                    # has been designed as part of Click public API, we return ``None``
+                    # instead. Refs:
+                    # https://github.com/pallets/click/issues/3066
+                    # https://github.com/pallets/click/issues/3065
+                    # https://github.com/pallets/click/pull/3068
+                    if default_value is UNSET:
+                        default_value = None
                     kwargs[param.name] = param.type_cast_value(  # type: ignore
-                        ctx, param.get_default(ctx)
+                        ctx, default_value
                     )
 
             # Track all kwargs as params, so that forward() will pass
@@ -1215,6 +1254,19 @@ class Command:
 
         for param in iter_params_for_processing(param_order, self.get_params(ctx)):
             _, args = param.handle_parse_result(ctx, opts, args)
+
+        # We now have all parameters' values into `ctx.params`, but the data may contain
+        # the `UNSET` sentinel.
+        # Convert `UNSET` to `None` to ensure that the user doesn't see `UNSET`.
+        #
+        # Waiting until after the initial parse to convert allows us to treat `UNSET`
+        # more like a missing value when multiple params use the same name.
+        # Refs:
+        # https://github.com/pallets/click/issues/3071
+        # https://github.com/pallets/click/pull/3079
+        for name, value in ctx.params.items():
+            if value is UNSET:
+                ctx.params[name] = None
 
         if args and not ctx.allow_extra_args and not ctx.resilient_parsing:
             ctx.fail(
@@ -2144,7 +2196,7 @@ class Parameter:
         self.nargs = nargs
         self.multiple = multiple
         self.expose_value = expose_value
-        self.default = default
+        self.default: t.Any | t.Callable[[], t.Any] | None = default
         self.is_eager = is_eager
         self.metavar = metavar
         self.envvar = envvar
@@ -2255,9 +2307,10 @@ class Parameter:
         .. versionchanged:: 8.0
             Added the ``call`` parameter.
         """
-        value = ctx.lookup_default(self.name, call=False)  # type: ignore
+        name = self.name
+        value = ctx.lookup_default(name, call=False) if name is not None else None
 
-        if value is UNSET:
+        if value is None and not ctx._default_map_has(name):
             value = self.default
 
         if call and callable(value):
@@ -2298,8 +2351,8 @@ class Parameter:
                 source = ParameterSource.ENVIRONMENT
 
         if value is UNSET:
-            default_map_value = ctx.lookup_default(self.name)  # type: ignore
-            if default_map_value is not UNSET:
+            default_map_value = ctx.lookup_default(self.name)  # type: ignore[arg-type]
+            if default_map_value is not None or ctx._default_map_has(self.name):
                 value = default_map_value
                 source = ParameterSource.DEFAULT_MAP
 
@@ -2315,7 +2368,7 @@ class Parameter:
         """Convert and validate a value against the parameter's
         :attr:`type`, :attr:`multiple`, and :attr:`nargs`.
         """
-        if value in (None, UNSET):
+        if value is None:
             if self.multiple or self.nargs == -1:
                 return ()
             else:
@@ -2398,7 +2451,16 @@ class Parameter:
 
         :meta private:
         """
-        value = self.type_cast_value(ctx, value)
+        # shelter `type_cast_value` from ever seeing an `UNSET` value by handling the
+        # cases in which `UNSET` gets special treatment explicitly at this layer
+        #
+        # Refs:
+        # https://github.com/pallets/click/issues/3069
+        if value is UNSET:
+            if self.multiple or self.nargs == -1:
+                value = ()
+        else:
+            value = self.type_cast_value(ctx, value)
 
         if self.required and self.value_is_missing(value):
             raise MissingParameter(ctx=ctx, param=self)
@@ -2408,7 +2470,37 @@ class Parameter:
             # to None.
             if value is UNSET:
                 value = None
-            value = self.callback(ctx, self, value)
+
+            # Search for parameters with UNSET values in the context.
+            unset_keys = {k: None for k, v in ctx.params.items() if v is UNSET}
+            # No UNSET values, call the callback as usual.
+            if not unset_keys:
+                value = self.callback(ctx, self, value)
+
+            # Legacy case: provide a temporarily manipulated context to the callback
+            # to hide UNSET values as None.
+            #
+            # Refs:
+            # https://github.com/pallets/click/issues/3136
+            # https://github.com/pallets/click/pull/3137
+            else:
+                # Add another layer to the context stack to clearly hint that the
+                # context is temporarily modified.
+                with ctx:
+                    # Update the context parameters to replace UNSET with None.
+                    ctx.params.update(unset_keys)
+                    # Feed these fake context parameters to the callback.
+                    value = self.callback(ctx, self, value)
+                    # Restore the UNSET values in the context parameters.
+                    ctx.params.update(
+                        {
+                            k: UNSET
+                            for k in unset_keys
+                            # Only restore keys that are present and still None, in case
+                            # the callback modified other parameters.
+                            if k in ctx.params and ctx.params[k] is None
+                        }
+                    )
 
         return value
 
@@ -2496,7 +2588,7 @@ class Parameter:
             if (
                 self.deprecated
                 and value is not UNSET
-                and source not in (ParameterSource.DEFAULT, ParameterSource.DEFAULT_MAP)
+                and source < ParameterSource.DEFAULT_MAP
             ):
                 extra_message = (
                     f" {self.deprecated}" if isinstance(self.deprecated, str) else ""
@@ -2528,17 +2620,14 @@ class Parameter:
             # We skip adding the value if it was previously set by another parameter
             # targeting the same variable name. This prevents parameters competing for
             # the same name to override each other.
-            and self.name not in ctx.params
+            and (self.name not in ctx.params or ctx.params[self.name] is UNSET)
         ):
             # Click is logically enforcing that the name is None if the parameter is
             # not to be exposed. We still assert it here to please the type checker.
             assert self.name is not None, (
                 f"{self!r} parameter's name should not be None when exposing value."
             )
-            # Normalize UNSET values to None, as we're about to pass them to the
-            # command function and move them to the pure-Python realm of user-written
-            # code.
-            ctx.params[self.name] = value if value is not UNSET else None
+            ctx.params[self.name] = value
 
         return value, args
 
@@ -2718,10 +2807,13 @@ class Option(Parameter):
             # Implicitly a flag because secondary options names were given.
             elif self.secondary_opts:
                 is_flag = True
-        # The option is explicitly not a flag. But we do not know yet if it needs a
-        # value or not. So we look at the default value to determine it.
+
+        # The option is explicitly not a flag, but to determine whether or not it needs
+        # value, we need to check if `flag_value` or `default` was set. Either one is
+        # sufficient.
+        # Ref: https://github.com/pallets/click/issues/3084
         elif is_flag is False and not self._flag_needs_value:
-            self._flag_needs_value = self.default is UNSET
+            self._flag_needs_value = flag_value is not UNSET or self.default is UNSET
 
         if is_flag:
             # Set missing default for flags if not explicitly required or prompted.
@@ -2733,7 +2825,7 @@ class Option(Parameter):
             if type is None:
                 # A flag without a flag_value is a boolean flag.
                 if flag_value is UNSET:
-                    self.type = types.BoolParamType()
+                    self.type: types.ParamType = types.BoolParamType()
                 # If the flag value is a boolean, use BoolParamType.
                 elif isinstance(flag_value, bool):
                     self.type = types.BoolParamType()
@@ -2752,14 +2844,12 @@ class Option(Parameter):
             if self.default is UNSET and not self.required:
                 self.default = False
 
-        # Support the special case of aligning the default value with the flag_value
-        # for flags whose default is explicitly set to True. Note that as long as we
-        # have this condition, there is no way a flag can have a default set to True,
-        # and a flag_value set to something else. Refs:
+        # The alignement of default to the flag_value is resolved lazily in
+        # get_default() to prevent callable flag_values (like classes) from
+        # being instantiated. Refs:
+        # https://github.com/pallets/click/issues/3121
         # https://github.com/pallets/click/issues/3024#issuecomment-3146199461
         # https://github.com/pallets/click/pull/3030/commits/06847da
-        if self.default is True and self.flag_value is not UNSET:
-            self.default = self.flag_value
 
         # Set the default flag_value if it is not set.
         if self.flag_value is UNSET:
@@ -2822,6 +2912,39 @@ class Option(Parameter):
             hidden=self.hidden,
         )
         return info_dict
+
+    def get_default(
+        self, ctx: Context, call: bool = True
+    ) -> t.Any | t.Callable[[], t.Any] | None:
+        """Return the default value for this option.
+
+        For non-boolean flag options, ``default=True`` is treated as a sentinel
+        meaning "activate this flag by default" and is resolved to
+        :attr:`flag_value`.  For example, with ``--upper/--lower`` feature
+        switches where ``flag_value="upper"`` and ``default=True``, the default
+        resolves to ``"upper"``.
+
+        .. caution::
+            This substitution only applies to non-boolean flags
+            (:attr:`is_bool_flag` is ``False``). For boolean flags, ``True`` is
+            a legitimate Python value and ``default=True`` is returned as-is.
+
+        .. versionchanged:: 8.3.3
+            ``default=True`` is no longer substituted with ``flag_value`` for
+            boolean flags, fixing negative boolean flags like
+            ``flag_value=False, default=True``.
+        """
+        value = super().get_default(ctx, call=False)
+
+        # Resolve default=True to flag_value lazily (here instead of
+        # __init__) to prevent callable flag_values (like classes) from
+        # being instantiated by the callable check below.
+        if value is True and self.is_flag and not self.is_bool_flag:
+            value = self.flag_value
+        elif call and callable(value):
+            value = value()
+
+        return value
 
     def get_error_hint(self, ctx: Context) -> str:
         result = super().get_error_hint(ctx)
@@ -3029,7 +3152,7 @@ class Option(Parameter):
                 )[1]
             elif self.is_bool_flag and not self.secondary_opts and not default_value:
                 default_string = ""
-            elif default_value == "":
+            elif isinstance(default_value, str) and default_value == "":
                 default_string = '""'
             else:
                 default_string = str(default_value)
@@ -3083,10 +3206,10 @@ class Option(Parameter):
                 default = bool(default)
             return confirm(self.prompt, default)
 
-        # If show_default is set to True/False, provide this to `prompt` as well. For
-        # non-bool values of `show_default`, we use `prompt`'s default behavior
+        # If show_default is given, provide this to `prompt` as well,
+        # otherwise we use `prompt`'s default behavior
         prompt_kwargs: t.Any = {}
-        if isinstance(self.show_default, bool):
+        if self.show_default is not None:
             prompt_kwargs["show_default"] = self.show_default
 
         return prompt(
@@ -3204,7 +3327,7 @@ class Option(Parameter):
             self.is_flag
             and value is True
             and not self.is_bool_flag
-            and source not in (ParameterSource.DEFAULT, ParameterSource.DEFAULT_MAP)
+            and source < ParameterSource.DEFAULT_MAP
         ):
             value = self.flag_value
 
@@ -3214,7 +3337,7 @@ class Option(Parameter):
         elif (
             self.multiple
             and value is not UNSET
-            and source not in (ParameterSource.DEFAULT, ParameterSource.DEFAULT_MAP)
+            and source < ParameterSource.DEFAULT_MAP
             and any(v is FLAG_NEEDS_VALUE for v in value)
         ):
             value = [self.flag_value if v is FLAG_NEEDS_VALUE else v for v in value]
@@ -3223,10 +3346,7 @@ class Option(Parameter):
         # The value wasn't set, or used the param's default, prompt for one to the user
         # if prompting is enabled.
         elif (
-            (
-                value is UNSET
-                or source in (ParameterSource.DEFAULT, ParameterSource.DEFAULT_MAP)
-            )
+            (value is UNSET or source >= ParameterSource.DEFAULT_MAP)
             and self.prompt is not None
             and (self.required or self.prompt_required)
             and not ctx.resilient_parsing
@@ -3236,13 +3356,22 @@ class Option(Parameter):
 
         return value, source
 
-    def type_cast_value(self, ctx: Context, value: t.Any) -> t.Any:
-        if self.is_flag and not self.required:
-            if value is UNSET:
-                if self.is_bool_flag:
-                    # If the flag is a boolean flag, we return False if it is not set.
-                    value = False
-        return super().type_cast_value(ctx, value)
+    def process_value(self, ctx: Context, value: t.Any) -> t.Any:
+        # process_value has to be overridden on Options in order to capture
+        # `value == UNSET` cases before `type_cast_value()` gets called.
+        #
+        # Refs:
+        # https://github.com/pallets/click/issues/3069
+        if self.is_flag and not self.required and self.is_bool_flag and value is UNSET:
+            value = False
+
+            if self.callback is not None:
+                value = self.callback(ctx, self, value)
+
+            return value
+
+        # in the normal case, rely on Parameter.process_value
+        return super().process_value(ctx, value)
 
 
 class Argument(Parameter):

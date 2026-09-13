@@ -12,14 +12,14 @@ plugins {
     // Java support
     id("java")
     // gradle-intellij-plugin - read more: https://github.com/JetBrains/gradle-intellij-plugin
-    id("org.jetbrains.intellij.platform") version "2.17.0"
+    id("org.jetbrains.intellij.platform") version "2.18.1"
     // gradle-changelog-plugin - read more: https://github.com/JetBrains/gradle-changelog-plugin
     id("org.jetbrains.changelog") version "2.5.0"
     // grammar-kit - only used to regenerate the JFlex lexer into src/main/gen (checked in)
     id("org.jetbrains.grammarkit") version "2022.3.2.2"
 
-    kotlin("jvm") version "2.0.21"
-    kotlin("plugin.lombok") version "2.0.21"
+    kotlin("jvm") version "2.2.20"
+    kotlin("plugin.lombok") version "2.2.20"
 }
 
 group = properties("pluginGroup")
@@ -50,7 +50,6 @@ dependencies {
     compileOnly("org.projectlombok:lombok:1.18.46")
     annotationProcessor("org.projectlombok:lombok:1.18.46")
 
-    implementation("org.eclipse.lsp4j:org.eclipse.lsp4j.debug:0.24.0")
     implementation("org.apache.commons:commons-text:1.15.0")
 
     testImplementation(platform("org.junit:junit-bom:5.14.1"))
@@ -69,11 +68,12 @@ dependencies {
         // BasePlatformTestCase (PSI/light-fixture tests) lives in the Platform test framework.
         testFramework(TestFrameworkType.Platform)
 
-        pycharmCommunity(platformVersion)
+        pycharm(platformVersion)
         jetbrainsRuntime()
 
         plugins(providers.gradleProperty("platformPlugins").map { it.split(',') })
         bundledPlugins(providers.gradleProperty("platformBundledPlugins").map { it.split(',') })
+        bundledModules(providers.gradleProperty("platformBundledModules").map { it.split(',') })
 
         pluginVerifier()
     }

@@ -8,7 +8,7 @@ import pathlib
 import site
 import sys
 
-import click
+from libs import click
 
 
 class ParameterData:

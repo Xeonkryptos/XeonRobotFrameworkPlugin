@@ -10,12 +10,13 @@ import com.intellij.openapi.util.NlsContexts
 import com.intellij.psi.codeStyle.CodeStyleSettings
 import com.intellij.ui.IdeBorderFactory
 import com.intellij.ui.components.fields.IntegerField
+import com.intellij.ui.dsl.builder.bindSelected
 import com.intellij.ui.dsl.builder.panel
 import com.intellij.ui.layout.ValidationInfoBuilder
 import com.intellij.util.ui.JBInsets
 import dev.xeonkryptos.xeonrobotframeworkplugin.RobotBundle
-import dev.xeonkryptos.xeonrobotframeworkplugin.config.RobotHighlighter
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotFeatureFileType
+import dev.xeonkryptos.xeonrobotframeworkplugin.fileTypes.RobotFeatureFileType
+import dev.xeonkryptos.xeonrobotframeworkplugin.fileTypes.RobotHighlighter
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotLanguage
 import org.jetbrains.annotations.NonNls
 import java.awt.BorderLayout
@@ -53,6 +54,14 @@ class RobotCustomFormattingPanel(settings: CodeStyleSettings) : CodeStyleAbstrac
                     .onReset { spacesBetweenKeywordCallAndArgumentsField.value = customSettings.SPACES_BETWEEN_KEYWORD_CALL_AND_ARGUMENTS }
                     .onIsModified { spacesBetweenKeywordCallAndArgumentsField.value != customSettings.SPACES_BETWEEN_KEYWORD_CALL_AND_ARGUMENTS }
                     .validationOnApply { validateIntegerFieldOnApply(it) }
+            }
+        }
+        group(RobotBundle.message("formatter.settings.custom.general")) {
+            row {
+                checkBox(RobotBundle.message("formatter.custom.multiline-indentation")).bindSelected(customSettings::MULTILINE_INDENTATION).onChanged { onSomethingChanged() }
+            }
+            row {
+                checkBox(RobotBundle.message("formatter.custom.capitalize-keywords")).bindSelected(customSettings::CAPITALIZE_KEYWORDS).onChanged { onSomethingChanged() }
             }
         }
     }

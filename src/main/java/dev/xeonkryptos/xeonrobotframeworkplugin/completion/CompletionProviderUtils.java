@@ -9,6 +9,7 @@ import com.intellij.codeInsight.lookup.LookupElementBuilder;
 import com.intellij.codeInsight.lookup.TailTypeDecorator;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.editor.Editor;
+import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Key;
 import com.intellij.psi.tree.IElementType;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RecommendationWord;
@@ -33,14 +34,14 @@ final class CompletionProviderUtils {
         throw new UnsupportedOperationException("Utility class");
     }
 
-    static void addSyntaxLookup(@NotNull IElementType elementType, @NotNull CompletionResultSet resultSet) {
-        List<LookupElement> lookupElements = computeAdditionalSyntaxLookups(elementType);
+    static void addSyntaxLookup(@NotNull IElementType elementType, @NotNull CompletionResultSet resultSet, @NotNull Project project) {
+        List<LookupElement> lookupElements = computeAdditionalSyntaxLookups(elementType, project);
         resultSet.addAllElements(lookupElements);
     }
 
-    static List<LookupElement> computeAdditionalSyntaxLookups(@NotNull IElementType type) {
+    static List<LookupElement> computeAdditionalSyntaxLookups(@NotNull IElementType type, @NotNull Project project) {
         List<LookupElement> results = new ArrayList<>();
-        Collection<RecommendationWord> words = RobotKeywordProvider.getRecommendationsForType(type);
+        Collection<RecommendationWord> words = RobotKeywordProvider.getInstance(project).getRecommendationsForType(type);
         for (RecommendationWord word : words) {
             String lookupString = word.presentation();
             LookupElement element = createLookupElementForSyntaxLookup(word, (context, item) -> {

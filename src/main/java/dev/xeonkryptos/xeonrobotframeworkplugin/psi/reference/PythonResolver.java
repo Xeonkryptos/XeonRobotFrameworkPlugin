@@ -1,7 +1,7 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.psi.reference;
 
 import com.intellij.openapi.module.Module;
-import com.intellij.openapi.module.ModuleUtil;
+import com.intellij.openapi.module.ModuleUtilCore;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.roots.ProjectRootModificationTracker;
 import com.intellij.openapi.util.Key;
@@ -35,7 +35,7 @@ public class PythonResolver {
     private static final Key<CachedValue<PyClass>> BUILT_IN_LIBRARY_CACHE_KEY = Key.create("BUILT_IN_LIBRARY_CACHE");
 
     public static PyClass getBuiltInClass(PsiFile psiFile) {
-        Module module = ModuleUtil.findModuleForPsiElement(psiFile);
+        Module module = ModuleUtilCore.findModuleForPsiElement(psiFile);
         if (module != null) {
             Project project = psiFile.getProject();
             return CachedValuesManager.getManager(project).getCachedValue(module, BUILT_IN_LIBRARY_CACHE_KEY, () -> {

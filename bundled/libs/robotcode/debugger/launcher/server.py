@@ -11,7 +11,7 @@ from robotcode.core.types import ServerMode, TcpParams
 from robotcode.core.utils.logging import LoggingDescriptor
 from robotcode.jsonrpc2.protocol import rpc_method
 from robotcode.jsonrpc2.server import JsonRPCServer
-from robotcode.robot.utils import get_robot_version
+from robotcode.robot.utils import RF_VERSION
 
 from ..cli import DEBUGGER_DEFAULT_PORT, DEBUGPY_DEFAULT_PORT
 from ..dap_types import (
@@ -84,6 +84,11 @@ class LauncherDebugAdapterProtocol(DebugAdapterProtocol):
     @property
     def connected(self) -> bool:
         return self._client is not None and self._client.connected
+
+    def close(self) -> None:
+        if self._client is not None:
+            self._client.close()
+            self._client = None
 
     @rpc_method(name="initialize", param_type=InitializeRequestArguments)
     async def _initialize(self, arguments: InitializeRequestArguments, *args: Any, **kwargs: Any) -> Capabilities:
@@ -189,7 +194,7 @@ class LauncherDebugAdapterProtocol(DebugAdapterProtocol):
 
         run_args = []
 
-        if get_robot_version() >= (6, 0) and languages:
+        if RF_VERSION >= (6, 0) and languages:
             for lang in languages:
                 run_args += ["--language", lang]
 
@@ -352,3 +357,9 @@ class LauncherServer(JsonRPCServer[LauncherDebugAdapterProtocol]):
         self.protocol = LauncherDebugAdapterProtocol(debugger_script=self.debugger_script)
 
         return self.protocol
+
+    def _close(self) -> None:
+        if self.protocol is not None:
+            self.protocol.close()
+
+        super()._close()

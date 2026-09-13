@@ -9,7 +9,9 @@ public class RobotTokenSets {
     public static final TokenSet COMMENTS_SET = TokenSet.create(RobotTypes.COMMENT);
     public static final TokenSet STRING_SET = TokenSet.create(RobotTypes.LITERAL_CONSTANT);
 
-    public static final TokenSet EXTENDED_WHITESPACE_SET = TokenSet.orSet(WHITESPACE_SET, TokenSet.create(RobotTypes.EOS, RobotTypes.EOL));
+    public static final TokenSet REAL_WHITESPACE_SET = TokenSet.create(TokenType.WHITE_SPACE, RobotTypes.EOL, RobotTypes.EOS);
+
+    public static final TokenSet EXTENDED_WHITESPACE_SET = TokenSet.orSet(WHITESPACE_SET, REAL_WHITESPACE_SET);
 
     public static final TokenSet GHERKIN_SET = TokenSet.create(RobotTypes.GIVEN, RobotTypes.WHEN, RobotTypes.THEN, RobotTypes.AND, RobotTypes.BUT);
     public static final TokenSet LOOP_KEYWORDS_SET = TokenSet.create(RobotTypes.FOR, RobotTypes.FOR_IN, RobotTypes.WHILE, RobotTypes.END);

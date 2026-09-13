@@ -37,21 +37,21 @@ class RobotLanguageCodeStyleSettingsProvider : LanguageCodeStyleSettingsProvider
                 consumer.renameStandardOption("FOR_STATEMENT_WRAP", RobotBundle.message("formatter.for.statement.wrapping.expression"))
 
                 consumer.showCustomOption(RobotCodeStyleSettings::class.java,
-                                          "KEEP_SIMPLE_KEYWORD_CALLS_IN_ONE_LINE",
-                                          RobotBundle.message("formatter.keep.simple.keyword.calls.in.one.line"),
-                                          customizableOptions.WRAPPING_KEEP)
+                    "KEEP_SIMPLE_KEYWORD_CALLS_IN_ONE_LINE",
+                    RobotBundle.message("formatter.keep.simple.keyword.calls.in.one.line"),
+                    customizableOptions.WRAPPING_KEEP)
                 consumer.showCustomOption(RobotCodeStyleSettings::class.java,
-                                          "KEEP_SIMPLE_GLOBAL_SETTINGS_IN_ONE_LINE",
-                                          RobotBundle.message("formatter.keep.simple.global.settings.in.one.line"),
-                                          customizableOptions.WRAPPING_KEEP)
+                    "KEEP_SIMPLE_GLOBAL_SETTINGS_IN_ONE_LINE",
+                    RobotBundle.message("formatter.keep.simple.global.settings.in.one.line"),
+                    customizableOptions.WRAPPING_KEEP)
                 consumer.showCustomOption(RobotCodeStyleSettings::class.java,
-                                          "KEEP_SIMPLE_LOCAL_SETTINGS_IN_ONE_LINE",
-                                          RobotBundle.message("formatter.keep.simple.local.settings.in.one.line"),
-                                          customizableOptions.WRAPPING_KEEP)
+                    "KEEP_SIMPLE_LOCAL_SETTINGS_IN_ONE_LINE",
+                    RobotBundle.message("formatter.keep.simple.local.settings.in.one.line"),
+                    customizableOptions.WRAPPING_KEEP)
                 consumer.showCustomOption(RobotCodeStyleSettings::class.java,
-                                          "KEEP_SIMPLE_VARIABLE_STATEMENT_IN_ONE_LINE",
-                                          RobotBundle.message("formatter.keep.simple.variable.statement.in.one.line"),
-                                          customizableOptions.WRAPPING_KEEP)
+                    "KEEP_SIMPLE_VARIABLE_STATEMENT_IN_ONE_LINE",
+                    RobotBundle.message("formatter.keep.simple.variable.statement.in.one.line"),
+                    customizableOptions.WRAPPING_KEEP)
                 consumer.showCustomOption(RobotCodeStyleSettings::class.java,
                     "CALL_PARAMETERS_FIRST_ARGUMENT_ON_NEW_LINE",
                     RobotBundle.message("formatter.place.call.arguments.first.parameter.on.newline"),
@@ -126,10 +126,7 @@ class RobotLanguageCodeStyleSettingsProvider : LanguageCodeStyleSettingsProvider
             }
 
             SettingsType.BLANK_LINES_SETTINGS -> {
-                consumer.showStandardOptions("KEEP_BLANK_LINES_IN_CODE",
-                    "BLANK_LINES_BEFORE_IMPORTS",
-                    "BLANK_LINES_AFTER_IMPORTS",
-                    "BLANK_LINES_AFTER_CLASS_HEADER")
+                consumer.showStandardOptions("KEEP_BLANK_LINES_IN_CODE", "BLANK_LINES_BEFORE_IMPORTS", "BLANK_LINES_AFTER_IMPORTS", "BLANK_LINES_AFTER_CLASS_HEADER")
 
                 consumer.renameStandardOption("BLANK_LINES_AFTER_CLASS_HEADER", RobotBundle.message("formatter.blank.lines.after.testcase.task.name"))
                 consumer.showCustomOption(RobotCodeStyleSettings::class.java,

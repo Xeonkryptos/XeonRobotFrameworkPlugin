@@ -1,6 +1,11 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.psi;
 
+import com.intellij.openapi.project.Project;
 import com.intellij.psi.tree.IElementType;
+import dev.xeonkryptos.xeonrobotframeworkplugin.lexer.*;
+import java.util.Map;
+import java.util.EnumMap;
+import org.jetbrains.annotations.NotNull;
 
 import static com.intellij.psi.TokenType.*;
 import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.*;
@@ -8,126 +13,119 @@ import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.ExtendedRobotTypes.*;
 %%
 
 %{
-  protected boolean globalTemplateEnabled = false;
-  protected boolean localTemplateEnabled = false;
-  protected boolean templateKeywordFound = false;
+  private final Map<RobotSectionType, Integer> sectionTypes = new EnumMap<>(RobotSectionType.class);
+  private final Map<RobotGlobalSettingType, Integer> globalSettingTypes = new EnumMap<>(RobotGlobalSettingType.class);
+  private final Map<RobotLocalSettingType, Integer> localSettingTypes = new EnumMap<>(RobotLocalSettingType.class);
 
-  protected int currentIndex = -1;
+  public RobotLexer(Project project) {
+    super(project);
 
-  protected final int[] previousStates = new int[20];
+    sectionTypes.put(RobotSectionType.SETTINGS, SETTINGS_SECTION);
+    sectionTypes.put(RobotSectionType.VARIABLES, VARIABLES_SECTION);
+    sectionTypes.put(RobotSectionType.TEST_CASES, TEST_CASES_SECTION_NAME_DEFINITION);
+    sectionTypes.put(RobotSectionType.TASKS, TASKS_SECTION_NAME_DEFINITION);
+    sectionTypes.put(RobotSectionType.KEYWORDS, USER_KEYWORD_NAME_DEFINITION);
+    sectionTypes.put(RobotSectionType.COMMENTS, COMMENTS_SECTION);
+    sectionTypes.put(RobotSectionType.INVALID, INVALID_SECTION);
 
-  public RobotLexer() {
-      this((java.io.Reader)null);
+    globalSettingTypes.put(RobotGlobalSettingType.SIMPLE_VALUE_SETTING, SETTING_VALUES);
+    globalSettingTypes.put(RobotGlobalSettingType.CONFIGURABLE_SETTING, SETTING);
+    globalSettingTypes.put(RobotGlobalSettingType.KEYWORD_CALL_SETTING, KEYWORD_CALL);
+
+    localSettingTypes.put(RobotLocalSettingType.SIMPLE_VALUE_SETTING, LITERAL_CONSTANT_ONLY);
+    localSettingTypes.put(RobotLocalSettingType.KEYWORD_CALL_SETTING, KEYWORD_CALL);
+    localSettingTypes.put(RobotLocalSettingType.PARAMETER_DEFINITION_SETTING, INLINE_VARIABLE_DEFINITION);
   }
 
-  protected void enterNewState(int newState) {
-      int previousState = yystate();
-      ++currentIndex;
-      previousStates[currentIndex] = previousState;
-      yybegin(newState);
+  @Override
+  protected int getSectionStateId(@NotNull RobotSectionType sectionType) {
+    return sectionTypes.getOrDefault(sectionType, INVALID_SECTION);
   }
 
-  protected void leaveState() {
-      if (currentIndex >= 0) {
-          int previousState = previousStates[currentIndex];
-          --currentIndex;
-          yybegin(previousState);
-      } else {
-          yybegin(YYINITIAL);
-      }
+  @Override
+  protected int getGlobalSettingStateId(@NotNull RobotGlobalSettingType settingType) {
+    return globalSettingTypes.getOrDefault(settingType, SETTING_VALUES);
   }
 
-  private void resetInternalState() {
-      currentIndex = -1;
-      localTemplateEnabled = globalTemplateEnabled;
+  @Override
+  protected int getLocalSettingDefinitionState() {
+    return LOCAL_SETTING_DEFINITION;
   }
 
-  /**
-   * Resests the complete lexer including the additional internal states besides the lexer states from JFlex. You need to call this method when you want to
-   * reset the lexer to the initial state completely, e.g. when starting to lex a new file.
-   */
-  protected void resetLexer() {
-      currentIndex = -1;
-      localTemplateEnabled = false;
-      templateKeywordFound = false;
-      globalTemplateEnabled = false;
+  @Override
+  protected int getLocalSettingStateId(@NotNull RobotLocalSettingType settingType) {
+    return localSettingTypes.getOrDefault(settingType, LITERAL_CONSTANT_ONLY);
+  }
+
+  @Override
+  protected boolean isTemplateSupportingState(int state) {
+      return state == TESTCASE_DEFINITION || state == TASK_DEFINITION || state == TEMPLATE_DEFINITION;
+  }
+
+  @Override
+  protected int @NotNull [] getNextTemplateStates(TemplateParseResult result) {
+      return switch (result) {
+          case TemplateParseResult.EMPTY_RESET -> new int[] {LITERAL_CONSTANT_ONLY, LOCAL_SETTING_DEFINITION};
+          case TemplateParseResult.NONE_RESET -> new int[] {INTERMEDIATE_TEMPLATE_CONFIGURATION, LOCAL_SETTING_DEFINITION};
+          case TemplateParseResult.KEYWORD -> new int[] {TEMPLATE_DEFINITION, TEMPLATE_ARGUMENTS, SETTING_TEMPLATE_START, LOCAL_SETTING_DEFINITION};
+      };
+  }
+
+  @Override
+  protected int getKeywordStateId(@NotNull RobotKeywordType keywordType) {
+      return KEYWORD_CALL;
   }
 
   protected void handleStateChangeOnMultiLineDetection() {
-      int currentState = yystate();
-      if (shouldLeaveStateOnMultilineDetection(currentState)) {
-          leaveState();
-      } else if (currentState == SINGLE_LITERAL_CONSTANT_START) {
-          yybegin(SINGLE_LITERAL_CONSTANT);
-      } else if (currentState == PYTHON_EVALUATED_CONTROL_STRUCTURE_START) {
-          yybegin(PYTHON_EXECUTED_CONDITION);
-      } else if (currentState == PYTHON_EVALUATED_EXPRESSION_START) {
-          yybegin(KEYWORD_PYTHON_EXPRESSION);
-      }
+    int currentState = yystate();
+    if (shouldLeaveStateOnMultilineDetection(currentState)) {
+        leaveState();
+    } else if (currentState == SINGLE_LITERAL_CONSTANT_START) {
+        yybegin(SINGLE_LITERAL_CONSTANT);
+    } else if (currentState == PYTHON_EVALUATED_CONTROL_STRUCTURE_START) {
+        yybegin(PYTHON_EXECUTED_CONDITION);
+    } else if (currentState == PYTHON_EVALUATED_EXPRESSION_START) {
+        yybegin(KEYWORD_PYTHON_EXPRESSION);
+    }
   }
 
   protected void handleStateChangeOnFakeMultilineDetection() {
-      leaveState();
-      int currentState = yystate();
-      switch (currentState) {
-          case SETTING,
-               SETTING_VALUES,
-               KEYWORD_CALL,
-               KEYWORD_ARGUMENTS,
-               VARIABLE_DEFINITION,
-               USER_KEYWORD_RETURN_STATEMENT,
-               FOR_STRUCTURE_LOOP_START,
-               FOR_STRUCTURE_LOOP,
-               WHILE_CONFIGURATION,
-               LITERAL_CONSTANT_ONLY,
-               VARIABLE_DEFINITION_ARGUMENTS,
-               SETTING_TEMPLATE_START,
-               FOR_STRUCTURE,
-               PARAMETER_VALUE,
-               TEMPLATE_PARAMETER_VALUE,
-               SINGLE_LITERAL_CONSTANT,
-               KEYWORD_PYTHON_EXPRESSION,
-               PYTHON_EXECUTED_CONDITION -> handleStateChangeOnFakeMultilineDetection();
-      }
+    leaveState();
+    int currentState = yystate();
+    switch (currentState) {
+        case SETTING,
+             SETTING_VALUES,
+             KEYWORD_CALL,
+             KEYWORD_ARGUMENTS,
+             VARIABLE_DEFINITION,
+             USER_KEYWORD_RETURN_STATEMENT,
+             FOR_STRUCTURE_LOOP_START,
+             FOR_STRUCTURE_LOOP,
+             WHILE_CONFIGURATION,
+             LITERAL_CONSTANT_ONLY,
+             VARIABLE_DEFINITION_ARGUMENTS,
+             SETTING_TEMPLATE_START,
+             FOR_STRUCTURE,
+             PARAMETER_VALUE,
+             TEMPLATE_PARAMETER_VALUE,
+             SINGLE_LITERAL_CONSTANT,
+             KEYWORD_PYTHON_EXPRESSION,
+             PYTHON_EXECUTED_CONDITION -> handleStateChangeOnFakeMultilineDetection();
+    }
   }
 
   protected boolean shouldLeaveStateOnMultilineDetection(int currentState) {
-      return currentState == SINGLE_LITERAL_CONSTANT
-            || currentState == PARAMETER_VALUE
-            || currentState == TEMPLATE_PARAMETER_VALUE
-            || currentState == KEYWORD_PYTHON_EXPRESSION
-            || currentState == PYTHON_EXECUTED_CONDITION;
-  }
-
-  protected void pushbackEverythingUpToKeywordFinishedMarker() {
-      int lengthToKeep = 0;
-      boolean firstPossibleSpaceExitMarkerFound = false;
-      int totalLength = yylength();
-      for (int i = 0; i < totalLength; i++) {
-          char currentChar = yycharat(i);
-          if (currentChar == '\n' || currentChar == '\r' || currentChar == '\t') {
-              break;
-          }
-          if (Character.isWhitespace(currentChar)) {
-              if (firstPossibleSpaceExitMarkerFound) {
-                  lengthToKeep--;
-                  break;
-              }
-              firstPossibleSpaceExitMarkerFound = true;
-          } else if (firstPossibleSpaceExitMarkerFound) {
-              firstPossibleSpaceExitMarkerFound = false;
-          }
-          lengthToKeep++;
-      }
-      int pushbackLength = Math.max(0, totalLength - lengthToKeep - 1);
-      yypushback(pushbackLength);
+    return currentState == SINGLE_LITERAL_CONSTANT
+          || currentState == PARAMETER_VALUE
+          || currentState == TEMPLATE_PARAMETER_VALUE
+          || currentState == KEYWORD_PYTHON_EXPRESSION
+          || currentState == PYTHON_EXECUTED_CONDITION;
   }
 %}
 
 %public
-%buffer 65536
 %class RobotLexer
-%extends AbstractRobotLexer
+%extends RobotMultiLingualFlexLexerBase
 %function advance
 %type IElementType
 %unicode
@@ -163,20 +161,10 @@ MultiLine = {MultiLineStart} ({MultiLineContinuation} {NonNewlineWhitespace}*)+
 
 WithNameKeyword = "WITH NAME" | "AS"
 
-SectionSettingsWords = [Ss][Ee][Tt]{2}[Ii][Nn][Gg][Ss]?
-SectionVariablesWords = [Vv][Aa][Rr][Ii][Aa][Bb][Ll][Ee][Ss]?
-SectionTestcasesWords = [Tt][Ee][Ss][Tt]{Space}[Cc][Aa][Ss][Ee][Ss]?
-SectionTasksWords = [Tt][Aa][Ss][Kk][Ss]?
-SectionKeywordsWords = [Kk][Ee][Yy][Ww][Oo][Rr][Dd][Ss]?
-SectionCommentsWords = [Cc][Oo][Mm]{2}[Ee][Nn][Tt][Ss]?
+LiteralValue = [^\s]+([ ][^\s]+)*[ ]?
 
 SectionIdentifierParts = ({Space}? {Star})* {Space}?
-CommentSectionIdentifier = {Star} {SectionIdentifierParts} {SectionCommentsWords} {SectionIdentifierParts} {SpaceBasedEndMarker}? {NON_EOL}*
-SettingsSectionIdentifier = {Star} {SectionIdentifierParts} {SectionSettingsWords} {SectionIdentifierParts} {SpaceBasedEndMarker}? {NON_EOL}*
-TestcaseSectionIdentifier = {Star} {SectionIdentifierParts} {SectionTestcasesWords} {SectionIdentifierParts} {SpaceBasedEndMarker}? {NON_EOL}*
-TasksSectionIdentifier = {Star} {SectionIdentifierParts} {SectionTasksWords} {SectionIdentifierParts} {SpaceBasedEndMarker}? {NON_EOL}*
-KeywordsSectionIdentifier = {Star} {SectionIdentifierParts} {SectionKeywordsWords} {SectionIdentifierParts} {SpaceBasedEndMarker}? {NON_EOL}*
-VariablesSectionIdentifier = {Star} {SectionIdentifierParts} {SectionVariablesWords} {SectionIdentifierParts} {SpaceBasedEndMarker}? {NON_EOL}*
+GenericSectionIdentifier = {Star} {SectionIdentifierParts} {LiteralValue} {SpaceBasedEndMarker}? {NON_EOL}*
 
 OpeningVariable = "{"
 ClosingVariable = "}"
@@ -186,19 +174,7 @@ ListVariableStart = "@" {OpeningVariable}
 DictVariableStart = "&" {OpeningVariable}
 EnvVariableStart = "%" {OpeningVariable}
 
-LibraryImportKeyword = [Ll][Ii][Bb][Rr][Aa][Rr][Yy]
-ResourceImportKeyword = [Rr][Ee][Ss][Oo][Uu][Rr][Cc][Ee]
-VariablesImportKeyword = [Vv][Aa][Rr][Ii][Aa][Bb][Ll][Ee][Ss]
-NameKeyword = [Nn][Aa][Mm][Ee]
-DocumentationKeyword = [Dd][Oo][Cc][Uu][Mm][Ee][Nn][Tt][Aa][Tt][Ii][Oo][Nn]
-MetadataKeyword = [Mm][Ee][Tt][Aa][Dd][Aa][Tt][Aa]
-Suite = [Ss][Uu][Ii][Tt][Ee]
 Test = [Tt][Ee][Ss][Tt]
-Task = [Tt][Aa][Ss][Kk]
-Setup = [Ss][Ee][Tt][Uu][Pp]
-Teardown = [Tt][Ee][Aa][Rr][Dd][Oo][Ww][Nn]
-Tags = [Tt][Aa][Gg][Ss]
-Template = [Tt][Ee][Mm][Pp][Ll][Aa][Tt][Ee]
 Continue = [Cc][Oo][Nn][Tt][Ii][Nn][Uu][Ee]
 On = [Oo][Nn]
 Failure = [Ff][Aa][Ii][Ll][Uu][Rr][Ee]
@@ -213,10 +189,6 @@ And = [Aa][Nn][Dd]
 Error = [Ee][Rr]{2}[Oo][Rr]
 Should = [Ss][Hh][Oo][Uu][Ll][Dd]
 None = [Nn][Oo][Nn][Ee]
-SetupTeardownKeywords = ({Suite} | {Test} | {Task}) {Space} ({Setup} | {Teardown})
-TagsKeywords = ({Test} | [Ff][Oo][Rr][Cc][Ee] | [Dd][Ee][Ff][Aa][Uu][Ll][Tt] | {Keyword}) {Space} {Tags}
-TemplateKeywords = ({Test} | {Task}) {Space} {Template}
-TimeoutKeywords = ({Test} | {Task}) {Space} {Timeout}
 GenericSettingsKeyword = [\w_-]+([ ][\w_-]+)*
 
 VariableCharNotAllowed = [^\s$@%&]
@@ -232,8 +204,6 @@ AllowedExtendedVariableAccessChar = [^\s\[\]$@%&] | {EscapeChar}{1} "[" | {Escap
 AllowedExtendedVariableAccessSeq = {AllowedExtendedVariableAccessChar}+
 
 VariableLiteralValue =   ([^}$@&%\r\n] | {ExceptionForAllowedVariableChar} | {OpeningVariable})+
-WhitespaceFreeVariableLiteralValue =   ([^}$@&%\s] | {ExceptionForAllowedVariableChar} | {OpeningVariable})+
-LiteralValue =           [^\s]+([ ][^\s]+)*[ ]?
 EverythingButVariableValue = {AllowedEverythingButVariableSeq} ({Space} {AllowedEverythingButVariableSeq})*
 EverythingButSpecialVariableValue = {AllowedEverythingButSpecialVariableSeq} ({Space} {AllowedEverythingButSpecialVariableSeq})*
 KeywordLibraryNameLiteralValue = {EverythingButVariableValue} "."
@@ -244,10 +214,6 @@ LocalSettingKeywordEndWhitespaceFree = "]"
 
 LocalSettingKeywordStart = {LocalSettingKeywordStartWhitespaceFree} {NonNewlineWhitespace}*
 LocalSettingKeywordEnd = {NonNewlineWhitespace}* {LocalSettingKeywordEndWhitespaceFree}
-LocalTemplateKeyword = {LocalSettingKeywordStart} {Template} {LocalSettingKeywordEnd}
-LocalSetupTeardownKeywords = {LocalSettingKeywordStart} ({Setup} | {Teardown}) {LocalSettingKeywordEnd}
-LocalArgumentsKeyword = {LocalSettingKeywordStart} [Aa][Rr][Gg][Uu][Mm][Ee][Nn][Tt][Ss] {LocalSettingKeywordEnd}
-LocalTagsKeyword = {LocalSettingKeywordStart} {Tags} {LocalSettingKeywordEnd}
 LocalSettingKeyword = {LocalSettingKeywordStart} {GenericSettingsKeyword} {LocalSettingKeywordEnd}
 
 BuiltInNamespace = [Bb][Uu][Ii][Ll][Tt][Ii][Nn]"."
@@ -303,7 +269,7 @@ LineComment = {LineCommentSign} {NON_EOL}*
 %state FOR_STRUCTURE, SIMPLE_CONTROL_STRUCTURE_START, FOR_STRUCTURE_LOOP_START, SIMPLE_CONTROL_STRUCTURE, FOR_STRUCTURE_LOOP, WHILE_CONFIGURATION
 %state PYTHON_EVALUATED_EXPRESSION_START, KEYWORD_PYTHON_EXPRESSION, PYTHON_EXPRESSION, PYTHON_EXECUTED_CONDITION, PYTHON_EVALUATED_CONTROL_STRUCTURE_START
 
-%xstate COMMENTS_SECTION, LITERAL_CONSTANT_ONLY, SETTING_VALUES, LOCAL_SETTING_DEFINITION
+%xstate COMMENTS_SECTION, INVALID_SECTION, LITERAL_CONSTANT_ONLY, SETTING_VALUES, LOCAL_SETTING_DEFINITION
 %xstate NORMAL_PARAMETER_ASSIGNMENT, TEMPLATE_PARAMETER_ASSIGNMENT
 %xstate KEYWORD_LIBRARY_NAME_SEPARATOR, KEYWORD_CALL_NAME, KEYWORD_LIBRARY_NAME_SEPARATOR_FOR_SPECIAL_KEYWORD
 %xstate IN_CONTINUATION, AFTER_CONTINUATION, FAKE_MULTILINE, SAME_LINE_FAKE_MULTILINE, AFTER_COMMENT
@@ -317,7 +283,7 @@ LineComment = {LineCommentSign} {NON_EOL}*
 
 <SETTING, SETTING_VALUES, VARIABLE_DEFINITION_ARGUMENTS, KEYWORD_ARGUMENTS, KEYWORD_CALL, USER_KEYWORD_RETURN_STATEMENT, FOR_STRUCTURE_LOOP_START, FOR_STRUCTURE_LOOP, WHILE_CONFIGURATION, SIMPLE_CONTROL_STRUCTURE, LITERAL_CONSTANT_ONLY, VARIABLE_DEFINITION, INLINE_VARIABLE_DEFINITION, SETTING_TEMPLATE_START> {
     {EOL} {NonNewlineWhitespace}* ({LineComment} ({EOL} {NonNewlineWhitespace}*)+)+ {MultiLineContinuation}                 { enterNewState(IN_CONTINUATION); pushBackEverythingExceptLeadingWhitespace(); return WHITE_SPACE; }
-    {EOL} {NonNewlineWhitespace}* {LineComment} ({EOL} {NonNewlineWhitespace}*)+ .?                                         { enterNewState(FAKE_MULTILINE); yypushback(yylength()); break; }
+    {EOL} {NonNewlineWhitespace}* {LineComment} ({EOL} {NonNewlineWhitespace}*)+ .?                                         { enterNewState(FAKE_MULTILINE); pushBackEverythingExceptLeadingWhitespace(); return WHITE_SPACE; }
 
     {SpaceBasedEndMarker} {NonNewlineWhitespace}* ({LineComment} ({EOL} {NonNewlineWhitespace}*)+)+ {MultiLineContinuation} { enterNewState(IN_CONTINUATION); pushBackEverythingExceptLeadingWhitespace(); return WHITE_SPACE; }
     {SpaceBasedEndMarker} {NonNewlineWhitespace}* {LineComment} ({EOL} {NonNewlineWhitespace}*)+ .?                         { pushBackEverythingExceptLeadingWhitespace(); enterNewState(SAME_LINE_FAKE_MULTILINE); return WHITE_SPACE; }
@@ -326,8 +292,9 @@ LineComment = {LineCommentSign} {NON_EOL}*
 }
 
 <FAKE_MULTILINE, SAME_LINE_FAKE_MULTILINE>  {
-    {EOL}                { handleStateChangeOnFakeMultilineDetection(); return EOL; }
-    {LineComment}        { return COMMENT; }
+    {EOL}                                                   { handleStateChangeOnFakeMultilineDetection(); return EOL; }
+    {EOL} {NonNewlineWhitespace}* {LineComment}             { pushBackEverythingExceptLeadingWhitespace(); return WHITE_SPACE; }
+    {LineComment}                                           { return COMMENT; }
 }
 <AFTER_COMMENT>   {
     {WhitespaceIncludingNewline}+                           { leaveState(); return WHITE_SPACE; }
@@ -336,19 +303,8 @@ LineComment = {LineCommentSign} {NON_EOL}*
     [^]                                                     { yypushback(yylength()); leaveState(); break; }
 }
 
-^ {SettingsSectionIdentifier} {EOL}   { resetInternalState(); yybegin(SETTINGS_SECTION); yypushback(1); return SETTINGS_HEADER; }
-^ {VariablesSectionIdentifier} {EOL}  { resetInternalState(); yybegin(VARIABLES_SECTION); yypushback(1); return VARIABLES_HEADER; }
-^ {KeywordsSectionIdentifier} {EOL}   { resetInternalState(); yybegin(USER_KEYWORD_NAME_DEFINITION); yypushback(1); return USER_KEYWORDS_HEADER; }
-^ {TestcaseSectionIdentifier} {EOL}   { resetInternalState(); yybegin(TEST_CASES_SECTION_NAME_DEFINITION); pushbackEverythingUpToKeywordFinishedMarker(); yypushback(1); return TEST_CASES_HEADER_NAME; }
-^ {TasksSectionIdentifier} {EOL}      { resetInternalState(); yybegin(TASKS_SECTION_NAME_DEFINITION); pushbackEverythingUpToKeywordFinishedMarker(); yypushback(1); return TASKS_HEADER_NAME; }
-^ {CommentSectionIdentifier} {EOL}    { resetInternalState(); yybegin(COMMENTS_SECTION); yypushback(1); return COMMENTS_HEADER; }
-
-^ {SettingsSectionIdentifier}   { resetInternalState(); yybegin(SETTINGS_SECTION); return SETTINGS_HEADER; }
-^ {VariablesSectionIdentifier}  { resetInternalState(); yybegin(VARIABLES_SECTION); return VARIABLES_HEADER; }
-^ {KeywordsSectionIdentifier}   { resetInternalState(); yybegin(USER_KEYWORD_NAME_DEFINITION); return USER_KEYWORDS_HEADER; }
-^ {TestcaseSectionIdentifier}   { resetInternalState(); yybegin(TEST_CASES_SECTION_NAME_DEFINITION); pushbackEverythingUpToKeywordFinishedMarker(); return TEST_CASES_HEADER_NAME; }
-^ {TasksSectionIdentifier}      { resetInternalState(); yybegin(TASKS_SECTION_NAME_DEFINITION); pushbackEverythingUpToKeywordFinishedMarker(); return TASKS_HEADER_NAME; }
-^ {CommentSectionIdentifier}    { resetInternalState(); yybegin(COMMENTS_SECTION); return COMMENTS_HEADER; }
+^ {GenericSectionIdentifier} {EOL}    { resetInternalState(); yypushback(1); return switchSection(); }
+^ {GenericSectionIdentifier}          { resetInternalState(); return switchSection(); }
 
 <TEST_CASES_SECTION_NAME_DEFINITION>  {
     {EOL}                             { yybegin(TESTCASE_NAME_DEFINITION); return EOL; }
@@ -415,7 +371,7 @@ LineComment = {LineCommentSign} {NON_EOL}*
 
 <VARIABLE_DEFINITION_ARGUMENTS> {
     {EqualSign} {NonNewlineWhitespace}* {EverythingButVariableValue}?       { yypushback(yylength() - 1); return ASSIGNMENT; }
-    [Ss][Cc][Oo][Pp][Ee] {EqualSign} !{KeywordFinishedMarker}                            { yypushback(yylength() - "scope".length()); enterNewState(NORMAL_PARAMETER_ASSIGNMENT); return PARAMETER_NAME; }
+    [Ss][Cc][Oo][Pp][Ee] {EqualSign} !{KeywordFinishedMarker}               { yypushback(yylength() - "scope".length()); enterNewState(NORMAL_PARAMETER_ASSIGNMENT); return PARAMETER_NAME; }
     {EverythingButVariableValue}                                            { return LITERAL_CONSTANT; }
     {EOL}                                                                   { leaveState(); return EOL; }
 }
@@ -459,24 +415,7 @@ LineComment = {LineCommentSign} {NON_EOL}*
 }
 
 <SETTINGS_SECTION> {
-    ^ {LibraryImportKeyword} {ExtendedKeywordFinishedMarker}             { enterNewState(SETTING); pushBackTrailingWhitespace(); return LIBRARY_IMPORT_KEYWORD; }
-    ^ {ResourceImportKeyword} {ExtendedKeywordFinishedMarker}            { enterNewState(SETTING_VALUES); pushBackTrailingWhitespace(); return RESOURCE_IMPORT_KEYWORD; }
-    ^ {VariablesImportKeyword} {ExtendedKeywordFinishedMarker}           { enterNewState(SETTING); pushBackTrailingWhitespace(); return VARIABLES_IMPORT_KEYWORD; }
-    ^ {NameKeyword} {ExtendedKeywordFinishedMarker}                      { enterNewState(SETTING_VALUES); pushBackTrailingWhitespace(); return SUITE_NAME_KEYWORD; }
-    ^ {DocumentationKeyword} {ExtendedKeywordFinishedMarker}             { enterNewState(SETTING_VALUES); pushBackTrailingWhitespace(); return DOCUMENTATION_KEYWORD; }
-    ^ {MetadataKeyword} {ExtendedKeywordFinishedMarker}                  { enterNewState(SETTING); pushBackTrailingWhitespace(); return METADATA_KEYWORD; }
-    ^ {SetupTeardownKeywords} {ExtendedKeywordFinishedMarker}            { enterNewState(KEYWORD_CALL); pushBackTrailingWhitespace(); return SETUP_TEARDOWN_STATEMENT_KEYWORDS; }
-    ^ {TagsKeywords} {ExtendedKeywordFinishedMarker}                     { enterNewState(SETTING_VALUES); pushBackTrailingWhitespace(); return TAGS_KEYWORDS; }
-    ^ {TemplateKeywords} {ExtendedKeywordFinishedMarker}                 {
-          enterNewState(KEYWORD_CALL);
-          pushBackTrailingWhitespace();
-          globalTemplateEnabled = true;
-          localTemplateEnabled = true;
-          templateKeywordFound = true;
-          return TEMPLATE_KEYWORDS;
-      }
-    ^ {TimeoutKeywords} {ExtendedKeywordFinishedMarker}                  { enterNewState(SETTING_VALUES); pushBackTrailingWhitespace(); return TIMEOUT_KEYWORDS; }
-    ^ {GenericSettingsKeyword} {ExtendedKeywordFinishedMarker}           { enterNewState(SETTING_VALUES); pushBackTrailingWhitespace(); return UNKNOWN_SETTING_KEYWORD; }
+    ^ {GenericSettingsKeyword} {ExtendedKeywordFinishedMarker}         { return switchGlobalSetting(); }
 }
 
 <SETTING> {
@@ -504,8 +443,8 @@ LineComment = {LineCommentSign} {NON_EOL}*
     {SpaceBasedEndMarker} {NonNewlineWhitespace}* {EOL}      { yypushback(1); return WHITE_SPACE; }
 }
 
-<TESTCASE_DEFINITION>          ^ [^\s#] {NON_EOL}+ {EOL}*    { localTemplateEnabled = globalTemplateEnabled; yypushback(yylength()); yybegin(TESTCASE_NAME_DEFINITION); break; }
-<TASK_DEFINITION>              ^ [^\s#] {NON_EOL}+ {EOL}*    { localTemplateEnabled = globalTemplateEnabled; yypushback(yylength()); yybegin(TASK_NAME_DEFINITION); break; }
+<TESTCASE_DEFINITION>          ^ [^\s#] {NON_EOL}+ {EOL}*    { resetTemplateState(); yypushback(yylength()); yybegin(TESTCASE_NAME_DEFINITION); break; }
+<TASK_DEFINITION>              ^ [^\s#] {NON_EOL}+ {EOL}*    { resetTemplateState(); yypushback(yylength()); yybegin(TASK_NAME_DEFINITION); break; }
 <USER_KEYWORD_DEFINITION>      ^ [^\s#] {NON_EOL}+ {EOL}*    { yypushback(yylength()); yybegin(USER_KEYWORD_NAME_DEFINITION); break; }
 
 <SETTINGS_SECTION, SETTING, FOR_STRUCTURE_LOOP, WHILE_CONFIGURATION, KEYWORD_ARGUMENTS> {
@@ -560,61 +499,9 @@ LineComment = {LineCommentSign} {NON_EOL}*
     {NonNewlineWhitespace}+                                         { return WHITE_SPACE; }
     {LocalSettingKeywordEndWhitespaceFree}                          { leaveState(); return LOCAL_SETTING_END; }
 }
-<USER_KEYWORD_DEFINITION> {
-    {LocalArgumentsKeyword} {ExtendedKeywordFinishedMarker}         {
-        yypushback(yylength() - 1);
-        enterNewState(INLINE_VARIABLE_DEFINITION);
-        enterNewState(LOCAL_SETTING_DEFINITION);
-        return LOCAL_SETTING_START;
-    }
-}
-
-<TESTCASE_DEFINITION, TASK_DEFINITION, TEMPLATE_DEFINITION> {
-    // Disables the template for the current test case / task due to the NONE "keyword"
-    {LocalTemplateKeyword} ({ExtendedSpaceBasedEndMarker} | {MultiLine}) {None} {ExtendedKeywordFinishedMarker}   {
-          yypushback(yylength() - 1);
-          enterNewState(INTERMEDIATE_TEMPLATE_CONFIGURATION);
-          enterNewState(LOCAL_SETTING_DEFINITION);
-          localTemplateEnabled = false;
-          return LOCAL_SETTING_START;
-    }
-    // Expects a template name (keyword) following the [Template] setting. Can be on the same line or on a new line after the continuation marker
-    {LocalTemplateKeyword} ({ExtendedSpaceBasedEndMarker} | {MultiLine})   {
-          yypushback(yylength() - 1);
-          enterNewState(TEMPLATE_DEFINITION);
-          enterNewState(TEMPLATE_ARGUMENTS);
-          enterNewState(SETTING_TEMPLATE_START);
-          enterNewState(LOCAL_SETTING_DEFINITION);
-          localTemplateEnabled = true;
-          return LOCAL_SETTING_START;
-    }
-    // Represents the [Template] configuration WITHOUT any template name to "deactivate" the template for the current test case / task.
-    {LocalTemplateKeyword} {NonNewlineWhitespace}* {EOL} {
-          yypushback(yylength() - 1);
-          enterNewState(LITERAL_CONSTANT_ONLY);
-          enterNewState(LOCAL_SETTING_DEFINITION);
-          localTemplateEnabled = false;
-          return LOCAL_SETTING_START;
-    }
-}
 <TESTCASE_DEFINITION, TASK_DEFINITION, USER_KEYWORD_DEFINITION, TEMPLATE_DEFINITION> {
-    {LocalSetupTeardownKeywords} {ExtendedKeywordFinishedMarker}  {
-        yypushback(yylength() - 1);
-        enterNewState(KEYWORD_CALL);
-        enterNewState(LOCAL_SETTING_DEFINITION);
-        return LOCAL_SETTING_START;
-    }
-    {LocalTagsKeyword} {ExtendedKeywordFinishedMarker}            {
-        yypushback(yylength() - 1);
-        enterNewState(LITERAL_CONSTANT_ONLY);
-        enterNewState(LOCAL_SETTING_DEFINITION);
-        return LOCAL_SETTING_START;
-    }
-    {LocalSettingKeyword} {ExtendedKeywordFinishedMarker}          {
-        yypushback(yylength() - 1);
-        enterNewState(LITERAL_CONSTANT_ONLY);
-        enterNewState(LOCAL_SETTING_DEFINITION);
-        return LOCAL_SETTING_START;
+    <USER_KEYWORD_DEFINITION> {
+        {LocalSettingKeyword} {ExtendedKeywordFinishedMarker}   { return switchLocalSetting(); }
     }
 
     <TEMPLATE_ARGUMENTS> {
@@ -643,32 +530,6 @@ LineComment = {LineCommentSign} {NON_EOL}*
     }
 }
 <TESTCASE_DEFINITION, TASK_DEFINITION> {
-    "GIVEN" {ExtendedSpaceBasedEndMarker}   {
-          yypushback(yylength() - "GIVEN".length());
-          enterNewState(KEYWORD_CALL);
-          return GIVEN;
-    }
-    "WHEN" {ExtendedSpaceBasedEndMarker}    {
-         yypushback(yylength() - "WHEN".length());
-         enterNewState(KEYWORD_CALL);
-         return WHEN;
-    }
-    "THEN" {ExtendedSpaceBasedEndMarker}    {
-         yypushback(yylength() - "THEN".length());
-         enterNewState(KEYWORD_CALL);
-         return THEN;
-    }
-    "AND" {ExtendedSpaceBasedEndMarker}     {
-         yypushback(yylength() - "AND".length());
-         enterNewState(KEYWORD_CALL);
-         return AND;
-    }
-    "BUT" {ExtendedSpaceBasedEndMarker}     {
-         yypushback(yylength() - "BUT".length());
-         enterNewState(KEYWORD_CALL);
-         return BUT;
-    }
-
     "VAR" {ExtendedSpaceBasedEndMarker}     {
           yypushback(yylength() - "VAR".length());
           enterNewState(INLINE_VARIABLE_DEFINITION);
@@ -676,18 +537,21 @@ LineComment = {LineCommentSign} {NON_EOL}*
     }
 
     {EverythingButVariableValue} {
-          if (localTemplateEnabled && templateKeywordFound) {
+          if (getLocalTemplateEnabled() && getTemplateKeywordFound()) {
               enterNewState(TEMPLATE_DEFINITION);
               enterNewState(TEMPLATE_ARGUMENTS);
-          } else {
-              enterNewState(KEYWORD_CALL);
+              yypushback(yylength());
+              break;
           }
-          yypushback(yylength());
+          IElementType elementType = switchPotentialKeyword();
+          if (elementType != null) {
+              return elementType;
+          }
           break;
    }
 
    {ScalarVariableStart} | {ListVariableStart} | {DictVariableStart} | {EnvVariableStart}  {
-         if (localTemplateEnabled && templateKeywordFound) {
+         if (getLocalTemplateEnabled() && getTemplateKeywordFound()) {
              enterNewState(TEMPLATE_DEFINITION);
              enterNewState(TEMPLATE_ARGUMENTS);
          } else {
@@ -727,7 +591,7 @@ LineComment = {LineCommentSign} {NON_EOL}*
 
 <TEMPLATE_DEFINITION> {
     ^ [^\s#] {NON_EOL}+ {EOL}*    {
-        localTemplateEnabled = globalTemplateEnabled;
+        resetTemplateState();
         leaveState();
         yypushback(yylength());
         if (yystate() == TESTCASE_DEFINITION) {
@@ -737,7 +601,8 @@ LineComment = {LineCommentSign} {NON_EOL}*
         }
         break;
     }
-    [^]                           { leaveState(); yypushback(yylength()); break; }
+    ^ {NonNewlineWhitespace} {NonNewlineWhitespace}+ [^\[#\s]{1}     { enterNewState(TEMPLATE_ARGUMENTS); yypushback(yylength()); break; }
+    [^]                                                              { leaveState(); yypushback(yylength()); break; }
 }
 
 <FOR_STRUCTURE>  {
@@ -774,7 +639,7 @@ LineComment = {LineCommentSign} {NON_EOL}*
     {ExtendedSpaceBasedEndMarker} {LineCommentSign}     { yypushback(1); return WHITE_SPACE; }
     {EOL}                                   { leaveState(); yypushback(yylength()); break; }
     {MultiLine}                             {
-      if (previousStates[currentIndex] == WHILE_CONFIGURATION) {
+      if (getPreviousStates()[getCurrentIndex()] == WHILE_CONFIGURATION) {
           pushBackTrailingWhitespace();
           yypushback(3);
           leaveState();
@@ -811,13 +676,13 @@ LineComment = {LineCommentSign} {NON_EOL}*
 
 <SETTING_TEMPLATE_START>  {
     {KeywordLibraryNameLiteralValue} {EverythingButVariableValue}        {
-          templateKeywordFound = true;
+          markTemplateKeywordFound();
           int libraryNameSeparatorStart = indexOf('.');
           yypushback(yylength() - libraryNameSeparatorStart);
           yybegin(KEYWORD_LIBRARY_NAME_SEPARATOR);
           return KEYWORD_LIBRARY_NAME;
     }
-    {EverythingButVariableValue}                                         { templateKeywordFound = true; return KEYWORD_NAME; }
+    {EverythingButVariableValue}                                         { markTemplateKeywordFound(); return KEYWORD_NAME; }
     {EOL}                                                                { leaveState(); return EOL; }
 }
 
@@ -898,30 +763,33 @@ LineComment = {LineCommentSign} {NON_EOL}*
 }
 
 <COMMENTS_SECTION> {
-    ^ {SettingsSectionIdentifier} {EOL}         { resetInternalState(); yybegin(SETTINGS_SECTION); yypushback(1); return SETTINGS_HEADER; }
-    ^ {VariablesSectionIdentifier} {EOL}        { resetInternalState(); yybegin(VARIABLES_SECTION); yypushback(1); return VARIABLES_HEADER; }
-    ^ {KeywordsSectionIdentifier} {EOL}         { resetInternalState(); yybegin(USER_KEYWORD_NAME_DEFINITION); yypushback(1); return USER_KEYWORDS_HEADER; }
-    ^ {TestcaseSectionIdentifier} {EOL}         { resetInternalState(); yybegin(TEST_CASES_SECTION_NAME_DEFINITION); pushbackEverythingUpToKeywordFinishedMarker(); yypushback(1); return TEST_CASES_HEADER_NAME; }
-    ^ {TasksSectionIdentifier} {EOL}            { resetInternalState(); yybegin(TASKS_SECTION_NAME_DEFINITION); pushbackEverythingUpToKeywordFinishedMarker(); yypushback(1); return TASKS_HEADER_NAME; }
-    ^ {CommentSectionIdentifier} {EOL}          { resetInternalState(); yybegin(COMMENTS_SECTION); yypushback(1); return COMMENTS_HEADER; }
-
-    ^ {SettingsSectionIdentifier}               { resetInternalState(); yybegin(SETTINGS_SECTION); return SETTINGS_HEADER; }
-    ^ {VariablesSectionIdentifier}              { resetInternalState(); yybegin(VARIABLES_SECTION); return VARIABLES_HEADER; }
-    ^ {KeywordsSectionIdentifier}               { resetInternalState(); yybegin(USER_KEYWORD_NAME_DEFINITION); return USER_KEYWORDS_HEADER; }
-    ^ {TestcaseSectionIdentifier}               { resetInternalState(); yybegin(TEST_CASES_SECTION_NAME_DEFINITION); pushbackEverythingUpToKeywordFinishedMarker(); return TEST_CASES_HEADER_NAME; }
-    ^ {TasksSectionIdentifier}                  { resetInternalState(); yybegin(TASKS_SECTION_NAME_DEFINITION); pushbackEverythingUpToKeywordFinishedMarker(); return TASKS_HEADER_NAME; }
-    ^ {CommentSectionIdentifier}                { resetInternalState(); yybegin(COMMENTS_SECTION); return COMMENTS_HEADER; }
-
+    <INVALID_SECTION> {
+        ^ {GenericSectionIdentifier} {EOL}    { resetInternalState(); yypushback(1); return switchSection(); }
+        ^ {GenericSectionIdentifier}          { resetInternalState(); return switchSection(); }
+    }
     <YYINITIAL> {
-        {WhitespaceIncludingNewline}+           { return WHITE_SPACE; }
-        {NON_EOL}+                              { return COMMENT; }
+        <INVALID_SECTION> {
+            {WhitespaceIncludingNewline}+     { return WHITE_SPACE; }
+        }
+        {NON_EOL}+                            { return COMMENT; }
     }
 }
+<INVALID_SECTION> {
+    [^]   { return BAD_CHARACTER; }
+}
 
-{ScalarVariableStart}                           { enterNewState(VARIABLE_USAGE); enterNewState(VARIABLE_OPENING_BRACE); yypushback(1); return SCALAR_VARIABLE_START; }
-{ListVariableStart}                             { enterNewState(VARIABLE_USAGE); enterNewState(VARIABLE_OPENING_BRACE); yypushback(1); return LIST_VARIABLE_START; }
-{DictVariableStart}                             { enterNewState(VARIABLE_USAGE); enterNewState(VARIABLE_OPENING_BRACE); yypushback(1); return DICT_VARIABLE_START; }
-{EnvVariableStart}                              { enterNewState(VARIABLE_USAGE); enterNewState(VARIABLE_OPENING_BRACE); yypushback(1); return ENV_VARIABLE_START; }
+{ScalarVariableStart} | {ListVariableStart} | {DictVariableStart} | {EnvVariableStart}  {
+      enterNewState(VARIABLE_USAGE);
+      enterNewState(VARIABLE_OPENING_BRACE);
+      yypushback(1);
+      return switch(yycharat(0)) {
+          case '$' -> SCALAR_VARIABLE_START;
+          case '@' -> LIST_VARIABLE_START;
+          case '&' -> DICT_VARIABLE_START;
+          case '%' -> ENV_VARIABLE_START;
+          default -> null;
+      };
+}
 
 {EmptyValue} {WhitespaceIncludingNewline}*      { yypushback(yylength() - 2); return LITERAL_CONSTANT; }
 

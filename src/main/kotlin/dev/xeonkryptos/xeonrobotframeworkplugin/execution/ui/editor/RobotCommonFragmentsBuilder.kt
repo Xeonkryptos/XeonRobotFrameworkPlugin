@@ -1,8 +1,6 @@
 // Copyright 2000-2024 JetBrains s.r.o. and contributors. Use of this source code is governed by the Apache 2.0 license.
 package dev.xeonkryptos.xeonrobotframeworkplugin.execution.ui.editor
 
-import dev.xeonkryptos.xeonrobotframeworkplugin.execution.config.RobotRunConfiguration
-import com.intellij.execution.ExecutionBundle
 import com.intellij.execution.configuration.EnvironmentVariablesComponent
 import com.intellij.execution.ui.CommonParameterFragments
 import com.intellij.execution.ui.SettingsEditorFragment
@@ -14,6 +12,8 @@ import com.intellij.openapi.ui.TextComponentAccessor
 import com.intellij.openapi.ui.TextFieldWithBrowseButton
 import com.intellij.openapi.util.Predicates
 import com.intellij.ui.components.fields.ExtendableTextField
+import dev.xeonkryptos.xeonrobotframeworkplugin.RobotBundle
+import dev.xeonkryptos.xeonrobotframeworkplugin.execution.config.RobotRunConfiguration
 import java.awt.BorderLayout
 import javax.swing.JComponent
 
@@ -27,14 +27,14 @@ abstract class RobotCommonFragmentsBuilder {
     ): SettingsEditorFragment<RobotRunConfiguration, LabeledComponent<TextFieldWithBrowseButton>> {
         val textField = ExtendableTextField(10)
         val workingDirectoryField = TextFieldWithBrowseButton(textField)
-        val descriptor = FileChooserDescriptorFactory.createSingleFolderDescriptor().withTitle(ExecutionBundle.message("select.working.directory.message"))
+        val descriptor = FileChooserDescriptorFactory.createSingleFolderDescriptor().withTitle(RobotBundle.message("select.working.directory.message"))
         workingDirectoryField.addBrowseFolderListener(project, descriptor, TextComponentAccessor.TEXT_FIELD_WHOLE_TEXT)
         val field = LabeledComponent.create(
-            workingDirectoryField, ExecutionBundle.message("run.configuration.working.directory.label"), BorderLayout.WEST
+            workingDirectoryField, RobotBundle.message("run.configuration.working.directory.label"), BorderLayout.WEST
         )
         val workingDirectorySettings = SettingsEditorFragment(
             "workingDirectory",
-            ExecutionBundle.message("run.configuration.working.directory.name"),
+            RobotBundle.message("run.configuration.working.directory.name"),
             null,
             field,
             { config: RobotRunConfiguration, component: LabeledComponent<TextFieldWithBrowseButton> ->
@@ -56,8 +56,8 @@ abstract class RobotCommonFragmentsBuilder {
         CommonParameterFragments.setMonospaced(env.component.textField)
         val fragment = SettingsEditorFragment<RobotRunConfiguration, JComponent>(
             "environmentVariables",
-            ExecutionBundle.message("environment.variables.fragment.name"),
-            ExecutionBundle.message("group.operating.system"),
+            RobotBundle.message("environment.variables.fragment.name"),
+            RobotBundle.message("group.operating.system"),
             env,
             { config: RobotRunConfiguration, _: JComponent? ->
                 env.envs = config.pythonRunConfiguration.envs
@@ -82,8 +82,8 @@ abstract class RobotCommonFragmentsBuilder {
         env.myEnvVars.textField.emptyText.text = ""
 
         fragment.isCanBeHidden = true
-        fragment.setHint(ExecutionBundle.message("environment.variables.fragment.hint"))
-        fragment.actionHint = ExecutionBundle.message("set.custom.environment.variables.for.the.process")
+        fragment.setHint(RobotBundle.message("environment.variables.fragment.hint"))
+        fragment.actionHint = RobotBundle.message("set.custom.environment.variables.for.the.process")
         return fragment
     }
 }

@@ -25,7 +25,7 @@ class ForLoopControlStructureCompletionProvider extends CompletionProvider<Compl
         if (forLoopStructure != null) {
             RobotForLoopHeader forLoopHeader = forLoopStructure.getForLoopHeader();
             if (forLoopHeader.getForInElement() == null) {
-                List<LookupElement> lookupElements = CompletionProviderUtils.computeAdditionalSyntaxLookups(RobotTypes.FOR_IN);
+                List<LookupElement> lookupElements = CompletionProviderUtils.computeAdditionalSyntaxLookups(RobotTypes.FOR_IN, parameters.getPosition().getProject());
                 result.addAllElements(lookupElements);
             }
         }

@@ -2,7 +2,7 @@ package dev.xeonkryptos.xeonrobotframeworkplugin.execution.debugger.breakpoint;
 
 import com.intellij.xdebugger.breakpoints.XBreakpoint;
 import com.intellij.xdebugger.breakpoints.XBreakpointHandler;
-import dev.xeonkryptos.xeonrobotframeworkplugin.debugger.RobotDebugProcess;
+import dev.xeonkryptos.xeonrobotframeworkplugin.execution.debugger.RobotDebugProcess;
 import org.jetbrains.annotations.NotNull;
 
 public class RobotExceptionBreakpointHandler extends XBreakpointHandler<XBreakpoint<RobotExceptionBreakpointProperties>> {
