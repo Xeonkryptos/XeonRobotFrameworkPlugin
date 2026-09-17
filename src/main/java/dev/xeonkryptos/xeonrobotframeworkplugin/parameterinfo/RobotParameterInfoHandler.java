@@ -129,6 +129,7 @@ public class RobotParameterInfoHandler implements ParameterInfoHandler<RobotKeyw
         // formatting of hints: hint index -> flags. this includes flags for parens.
         final Map<Integer, EnumSet<ParameterInfoUIContextEx.Flag>> hintFlags = new HashMap<>();
 
+
         final Pair<List<String>, List<String>> hintsAndAnnotations = ParameterInfoHandlerUtil.buildHintsAndAnnotationsWithHighlights(callingFunction,
                                                                                                                                      context,
                                                                                                                                      currentParamIndex,

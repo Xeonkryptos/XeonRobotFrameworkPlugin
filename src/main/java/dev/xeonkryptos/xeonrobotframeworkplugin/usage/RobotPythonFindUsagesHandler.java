@@ -1,8 +1,8 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.usage;
 
 import com.intellij.find.findUsages.FindUsagesHandler;
-import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiFile;
 import com.jetbrains.python.psi.PyExpression;
 import com.jetbrains.python.psi.PyFunction;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.util.RobotPyUtil;
@@ -30,19 +30,18 @@ public class RobotPythonFindUsagesHandler extends FindUsagesHandler {
             if (stringsToSearch != null) {
                 keywordNames.addAll(stringsToSearch);
             }
-            addStringsToSearch(pyFunction, keywordNames);
+            addStringsToSearch(pyFunction, keywordNames, element.getContainingFile());
             return keywordNames;
         }
         return super.getStringsToSearch(element);
     }
 
     @SuppressWarnings("UnstableApiUsage")
-    private static void addStringsToSearch(@NotNull PyFunction pyFunction, @NotNull Set<String> keywordNames) {
+    private static void addStringsToSearch(@NotNull PyFunction pyFunction, @NotNull Set<String> keywordNames, PsiFile file) {
         getDecoratorKeywordName(pyFunction).ifPresent(keywordNames::add);
         String pyFunctionName = pyFunction.getName();
         if (pyFunctionName != null) {
-            Project project = pyFunction.getProject();
-            String convertedKeywordName = KeywordUtil.getInstance(project).functionToKeyword(pyFunctionName);
+            String convertedKeywordName = KeywordUtil.getInstance().functionToKeyword(pyFunctionName, file);
             keywordNames.add(convertedKeywordName);
         }
     }

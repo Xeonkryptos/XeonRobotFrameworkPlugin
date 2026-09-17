@@ -5,7 +5,7 @@ import com.intellij.lang.annotation.HighlightSeverity;
 import com.intellij.psi.PsiReference;
 import dev.xeonkryptos.xeonrobotframeworkplugin.RobotBundle;
 import dev.xeonkryptos.xeonrobotframeworkplugin.annotator.RobotAnnotator;
-import dev.xeonkryptos.xeonrobotframeworkplugin.config.RobotHighlighter;
+import dev.xeonkryptos.xeonrobotframeworkplugin.fileTypes.RobotHighlighter;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotImportArgument;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLibraryImportGlobalSetting;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotResourceImportGlobalSetting;

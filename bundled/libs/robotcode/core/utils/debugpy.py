@@ -20,7 +20,6 @@ def is_debugpy_installed() -> bool:
 
 def wait_for_debugpy_connected(timeout: float = 30) -> bool:
     if is_debugpy_installed():
-        import debugpy  # noqa: T100
 
         connected = threading.Event()
         _logger.info("wait for debugpy client")
@@ -42,7 +41,6 @@ def wait_for_debugpy_connected(timeout: float = 30) -> bool:
 
 def enable_debugpy(port: int, addresses: Union[Sequence[str], str, None] = None) -> bool:
     if is_debugpy_installed():
-        import debugpy  # noqa: T100
 
         if addresses is None:
             addresses = ["127.0.0.1"]
@@ -59,7 +57,6 @@ def enable_debugpy(port: int, addresses: Union[Sequence[str], str, None] = None)
 
 def start_debugpy(end_point: Union[Tuple[str, int], int], wait_for_client: bool) -> Optional[int]:
     if is_debugpy_installed():
-        import debugpy  # noqa: T100
 
         if isinstance(end_point, int):
             end_point = ("127.0.0.1", end_point)

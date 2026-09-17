@@ -30,14 +30,28 @@ public class RobotMetadataStatementGlobalSettingImpl extends RobotGlobalSettingS
 
   @Override
   @NotNull
+  public List<RobotPositionalArgument> getPositionalArgumentList() {
+    return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotPositionalArgument.class);
+  }
+
+  @Override
+  @NotNull
   public PsiElement getNameElement() {
     return notNullChild(findChildByType(METADATA_KEYWORD));
   }
 
   @Override
-  @NotNull
-  public List<RobotPositionalArgument> getMetadataValue() {
-    return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotPositionalArgument.class);
+  @Nullable
+  public RobotPositionalArgument getMetadataName() {
+    List<RobotPositionalArgument> p1 = getPositionalArgumentList();
+    return p1.size() < 1 ? null : p1.get(0);
+  }
+
+  @Override
+  @Nullable
+  public RobotPositionalArgument getMetadataValue() {
+    List<RobotPositionalArgument> p1 = getPositionalArgumentList();
+    return p1.size() < 2 ? null : p1.get(1);
   }
 
 }

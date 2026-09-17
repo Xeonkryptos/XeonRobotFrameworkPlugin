@@ -32,6 +32,7 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotDictVariable;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotForLoopHeader;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotImportArgument;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotInlineVariableStatement;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotInvalidSection;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCall;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCallLibraryName;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCallName;
@@ -361,6 +362,11 @@ public class RobotPsiUtil {
 
     @NotNull
     public static String getSectionName(@NotNull RobotKeywordsSection section) {
+        return section.getNameIdentifier().getText();
+    }
+
+    @NotNull
+    public static String getSectionName(@NotNull RobotInvalidSection section) {
         return section.getNameIdentifier().getText();
     }
 

@@ -1,11 +1,13 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.util
 
+import com.intellij.application.options.CodeStyle
+import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.components.Service
 import com.intellij.openapi.components.service
-import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiElement
+import com.intellij.psi.PsiFile
 import com.intellij.psi.util.PsiTreeUtil
-import dev.xeonkryptos.xeonrobotframeworkplugin.config.RobotOptionsProvider
+import dev.xeonkryptos.xeonrobotframeworkplugin.formatter.RobotCodeStyleSettings
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotFile
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCall
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLocalSetting
@@ -19,8 +21,8 @@ import org.apache.commons.text.WordUtils
 
 fun RobotKeywordCall.matchesNormalizedName(normalizedName: String): Boolean = KeywordUtil.normalizeKeywordName(this.keywordCallName.keywordName.text) == normalizedName
 
-@Service(Service.Level.PROJECT)
-class KeywordUtil(private val project: Project) {
+@Service(Service.Level.APP)
+class KeywordUtil {
 
     companion object {
 
@@ -28,7 +30,7 @@ class KeywordUtil(private val project: Project) {
         const val UNDERSCORE = "_"
 
         @JvmStatic
-        fun getInstance(project: Project): KeywordUtil = project.service<KeywordUtil>()
+        fun getInstance(): KeywordUtil = ApplicationManager.getApplication().service<KeywordUtil>()
 
         @JvmStatic
         fun normalizeKeywordName(name: String): String = RobotUtil.normalizeRobotIdentifier(name) ?: ""
@@ -58,11 +60,10 @@ class KeywordUtil(private val project: Project) {
         }
     }
 
-    fun functionToKeyword(function: String): String {
-        var keyword =
-            function.replace(UNDERSCORE.toRegex(), SPACE).trim { it <= ' ' }
+    fun functionToKeyword(function: String, file: PsiFile): String {
+        var keyword = function.replace(UNDERSCORE.toRegex(), SPACE).trim { it <= ' ' }
 
-        val capitalizeKeywords = RobotOptionsProvider.getInstance(project).capitalizeKeywords()
+        val capitalizeKeywords = CodeStyle.getCustomSettings(file, RobotCodeStyleSettings::class.java).CAPITALIZE_KEYWORDS
         if (capitalizeKeywords && keyword != function) {
             keyword = WordUtils.capitalize(keyword)
         }

@@ -3,6 +3,7 @@
     <!--suppress PluginXmlValidity -->
     <name>Xeon RobotFramework Support</name>
     <vendor email="info@xeonkryptos.dev" url="https://github.com/Xeonkryptos/XeonRobotFrameworkPlugin">Xeonkryptos</vendor>
+    <resource-bundle>messages.RobotBundle</resource-bundle>
 
     <depends>com.intellij.modules.platform</depends>
     <depends>com.intellij.modules.xdebugger</depends>
@@ -15,20 +16,25 @@
     <!--suppress PluginXmlValidity -->
     <depends optional="true" config-file="dev.xeonkryptos.xeonrobotframeworkplugin-withIntelliLangModule.xml">intellij.platform.langInjection</depends>
 
-    <resource-bundle>messages.RobotBundle</resource-bundle>
+    <incompatible-with>robocorp.lsp.intellij</incompatible-with>
+    <incompatible-with>com.github.jnhyperion.hyperrobotframeworkplugin</incompatible-with>
+    <incompatible-with>com.millennialmedia.intellibot</incompatible-with>
+    <incompatible-with>com.github.nghiatm.robotframeworkplugin</incompatible-with>
+    <incompatible-with>net.modulo3.robot</incompatible-with>
+    <incompatible-with>dev.robotcode.robotcode4ij</incompatible-with>
 
     <extensions defaultExtensionNs="com.intellij">
         <projectConfigurable groupId="language" instance="dev.xeonkryptos.xeonrobotframeworkplugin.config.RobotConfiguration" key="options.entrypoint"
                              bundle="messages.RobotBundle"/>
 
-        <fileType name="Robot Feature" implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotFeatureFileType" fieldName="INSTANCE"
+        <fileType name="Robot Feature" implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.fileTypes.RobotFeatureFileType" fieldName="INSTANCE"
                   language="Robot" extensions="robot"/>
-        <fileType name="Robot Resource" implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotResourceFileType" fieldName="INSTANCE"
+        <fileType name="Robot Resource" implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.fileTypes.RobotResourceFileType" fieldName="INSTANCE"
                   language="Robot" extensions="resource"/>
 
-        <colorSettingsPage implementation="dev.xeonkryptos.xeonrobotframeworkplugin.config.RobotColorsPage"/>
+        <colorSettingsPage implementation="dev.xeonkryptos.xeonrobotframeworkplugin.options.RobotColorsPage"/>
         <lang.syntaxHighlighterFactory language="Robot"
-                                       implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.config.RobotSyntaxHighlightingFactory"/>
+                                       implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.fileTypes.RobotSyntaxHighlightingFactory"/>
 
         <!--suppress PluginXmlValidity -->
         <additionalTextAttributes scheme="Default" file="colorSchemes/RobotColorScheme.xml"/>
@@ -63,7 +69,9 @@
         <langCodeStyleSettingsProvider implementation="dev.xeonkryptos.xeonrobotframeworkplugin.formatter.RobotLanguageCodeStyleSettingsProvider"/>
         <lang.whiteSpaceFormattingStrategy language="Robot" implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.formatter.RobotWhitespaceFormattingStrategy"/>
 
-        <lang.parserDefinition language="Robot" implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotParserDefinition"/>
+        <!--<platform.lsp.serverSupportProvider implementation="dev.xeonkryptos.xeonrobotframeworkplugin.lsp.RobotLspServerSupportProvider"/>-->
+
+        <lang.parserDefinition language="Robot" implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.lang.RobotParserDefinition"/>
         <lang.braceMatcher language="Robot" implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.misc.RobotPairedBraceMatcher"/>
 
         <stubElementTypeHolder class="dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes" externalIdPrefix="robot."/>
@@ -231,6 +239,8 @@
         <renameHandler implementation="dev.xeonkryptos.xeonrobotframeworkplugin.rename.RobotMemberInplaceRenameHandler"/>
 
         <codeFoldingOptionsProvider instance="dev.xeonkryptos.xeonrobotframeworkplugin.config.RobotCodeFoldingOptionsProvider"/>
+
+        <notificationGroup id="Robot" displayType="BALLOON" bundle="messages.RobotBundle" key="notification.group.robot"/>
 
         <intentionAction>
             <language>Robot</language>

@@ -31,7 +31,7 @@ public final class RobotPyUtil {
     private static final Key<CachedValue<Boolean>> SYSTEM_PSI_FILE_KEY = new Key<>("ROBOT_PYTHON_SYSTEM_FILE_CACHE");
 
     @SuppressWarnings("UnstableApiUsage")
-    public static Optional<String> getPythonKeywordName(@NotNull PyFunction pyFunction) {
+    public static Optional<String> getPythonKeywordName(@NotNull PyFunction pyFunction, @NotNull PsiFile file) {
         return findCustomKeywordNameDecoratorExpression(pyFunction).map(PyStringLiteralExpression::getStringValue)
                                                                    .or(() -> pyFunction.findAttributes()
                                                                                        .stream()
@@ -41,8 +41,7 @@ public final class RobotPyUtil {
                                                                                        .map(value -> ((PyStringLiteralExpression) value).getStringValue())
                                                                                        .findAny())
                                                                    .or(() -> Optional.ofNullable(pyFunction.getName())
-                                                                                     .map(functionName -> KeywordUtil.getInstance(pyFunction.getProject())
-                                                                                                                     .functionToKeyword(functionName)));
+                                                                                     .map(functionName -> KeywordUtil.getInstance().functionToKeyword(functionName, file)));
     }
 
     @SuppressWarnings("UnstableApiUsage")

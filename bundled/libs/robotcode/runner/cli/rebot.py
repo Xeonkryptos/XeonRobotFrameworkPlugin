@@ -10,7 +10,7 @@ from robotcode.plugin import Application, pass_application
 from robotcode.robot.config.loader import load_robot_config_from_path
 from robotcode.robot.config.model import RebotProfile
 from robotcode.robot.config.utils import get_config_files
-from robotcode.robot.utils import get_robot_version
+from robotcode.robot.utils import RF_VERSION
 
 from ..__version__ import __version__
 
@@ -94,12 +94,14 @@ def rebot(app: Application, robot_options_and_args: Tuple[str, ...]) -> None:
             raise click.ClickException(str(e)) from e
 
         app.verbose(
-            lambda: "Executing rebot with the following options:\n    "
-            + " ".join(f'"{o}"' for o in (options + list(robot_options_and_args)))
+            lambda: (
+                "Executing rebot with the following options:\n    "
+                + " ".join(f'"{o}"' for o in (options + list(robot_options_and_args)))
+            )
         )
 
         console_links_args = []
-        if get_robot_version() >= (7, 1) and os.getenv("ROBOTCODE_DISABLE_ANSI_LINKS", "").lower() in [
+        if RF_VERSION >= (7, 1) and os.getenv("ROBOTCODE_DISABLE_ANSI_LINKS", "").lower() in [
             "on",
             "1",
             "yes",

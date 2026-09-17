@@ -8,8 +8,8 @@ import com.intellij.openapi.fileTypes.FileType;
 import com.intellij.openapi.project.DumbAware;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiFile;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotFeatureFileType;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotResourceFileType;
+import dev.xeonkryptos.xeonrobotframeworkplugin.fileTypes.RobotFeatureFileType;
+import dev.xeonkryptos.xeonrobotframeworkplugin.fileTypes.RobotResourceFileType;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
