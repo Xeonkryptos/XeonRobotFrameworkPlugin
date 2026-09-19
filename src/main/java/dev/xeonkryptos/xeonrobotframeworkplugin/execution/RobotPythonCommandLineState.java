@@ -154,12 +154,14 @@ public class RobotPythonCommandLineState extends PythonScriptCommandLineState {
         parametersList.addAt(2, String.valueOf(robotDebugPort));
         parametersList.addAt(2, "--tcp");
         parametersList.addAt(2, "debug");
+        String rootDirectory = null;
         if (workingDirectory != null) {
-            parametersList.addAt(2, workingDirectory.normalize().toAbsolutePath().toString());
+            rootDirectory = workingDirectory.normalize().toAbsolutePath().toString();
+            parametersList.addAt(2, rootDirectory);
             parametersList.addAt(2, "--root");
         }
 
-        enrichWithTestArguments(runConfiguration, parametersList::add);
+        enrichWithTestArguments(runConfiguration, parametersList::add, rootDirectory);
     }
 
     @NotNull
@@ -255,7 +257,7 @@ public class RobotPythonCommandLineState extends PythonScriptCommandLineState {
             parameters.addAll(0, additionalParameters);
             additionalParameters.clear();
 
-            enrichWithTestArguments(configuration, argument -> additionalParameters.add(TargetEnvironmentFunctions.constant(argument)));
+            enrichWithTestArguments(configuration, argument -> additionalParameters.add(TargetEnvironmentFunctions.constant(argument)), null);
             parameters.addAll(additionalParameters);
 
             return parentBuilder.build(helpersAwareTargetEnvironmentRequest, delegateExecution);
@@ -280,18 +282,27 @@ public class RobotPythonCommandLineState extends PythonScriptCommandLineState {
         }
     }
 
-    private static void enrichWithTestArguments(RobotRunConfiguration configuration, Consumer<String> argumentConsumer) {
+    private static void enrichWithTestArguments(RobotRunConfiguration configuration, Consumer<String> argumentConsumer, @Nullable String rootDirectory) {
         List<RobotRunnableUnitExecutionInfo> testCases = configuration.getTestCases();
         List<RobotRunnableUnitExecutionInfo> tasks = configuration.getTasks();
         Set<String> directories = new LinkedHashSet<>(configuration.getDirectories());
         PythonRunConfiguration pythonRunConfiguration = configuration.getPythonRunConfiguration();
-        String expandedWorkingDir = PythonScriptCommandLineState.getExpandedWorkingDir(pythonRunConfiguration);
-        VirtualFile expandedWorkingDirVFile = VfsUtil.findFile(Path.of(expandedWorkingDir), true);
-        assert expandedWorkingDirVFile != null;
-
         Project project = pythonRunConfiguration.getProject();
         Sdk sdk = pythonRunConfiguration.getSdk();
         Module module = pythonRunConfiguration.getModule();
+
+        // Prefer the directory that was actually used for the "--root" argument. PythonScriptCommandLineState.getExpandedWorkingDir(...)
+        // does NOT fall back to the project base path when the run configuration has no explicit working directory set, unlike the
+        // resolution used to build the "--root" value, which would otherwise cause the two to disagree and produce bogus file paths.
+        String expandedWorkingDir = rootDirectory;
+        if (expandedWorkingDir == null || expandedWorkingDir.isBlank()) {
+            expandedWorkingDir = PythonScriptCommandLineState.getExpandedWorkingDir(pythonRunConfiguration);
+        }
+        if (expandedWorkingDir.isBlank()) {
+            expandedWorkingDir = project.getBasePath();
+        }
+        VirtualFile expandedWorkingDirVFile = VfsUtil.findFile(Path.of(expandedWorkingDir), true);
+        assert expandedWorkingDirVFile != null;
         ContextAnchor contextAnchor = module == null ? new ProjectSdkContextAnchor(project, sdk) : new ModuleBasedContextAnchor(module);
 
         if (!testCases.isEmpty()) {
