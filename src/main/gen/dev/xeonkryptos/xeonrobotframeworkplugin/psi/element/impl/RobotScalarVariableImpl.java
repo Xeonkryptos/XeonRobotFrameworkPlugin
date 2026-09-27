@@ -48,6 +48,12 @@ public class RobotScalarVariableImpl extends RobotScalarVariableExtension implem
   }
 
   @Override
+  @Nullable
+  public RobotVariableExpressionDefinition getVariableExpressionDefinition() {
+    return PsiTreeUtil.getChildOfType(this, RobotVariableExpressionDefinition.class);
+  }
+
+  @Override
   @NotNull
   public List<RobotVariableIndexAccessContent> getVariableIndexAccessContentList() {
     return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotVariableIndexAccessContent.class);

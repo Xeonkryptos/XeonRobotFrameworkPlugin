@@ -17,6 +17,9 @@ public interface RobotListVariable extends RobotVariable, StubBasedPsiElement<Ro
   @Nullable
   RobotVariableContent getVariableContent();
 
+  @Nullable
+  RobotVariableExpressionDefinition getVariableExpressionDefinition();
+
   @NotNull
   List<RobotVariableIndexAccessContent> getVariableIndexAccessContentList();
 

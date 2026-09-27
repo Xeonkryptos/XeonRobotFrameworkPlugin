@@ -48,6 +48,12 @@ public class RobotDictVariableImpl extends RobotDictVariableExtension implements
   }
 
   @Override
+  @Nullable
+  public RobotVariableExpressionDefinition getVariableExpressionDefinition() {
+    return PsiTreeUtil.getChildOfType(this, RobotVariableExpressionDefinition.class);
+  }
+
+  @Override
   @NotNull
   public List<RobotVariableNestedAccessContent> getVariableNestedAccessContentList() {
     return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotVariableNestedAccessContent.class);

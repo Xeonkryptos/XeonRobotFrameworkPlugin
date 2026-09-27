@@ -104,7 +104,16 @@ public interface RobotTypes {
   IElementType VARIABLES_IMPORT_GLOBAL_SETTING = new RobotElementType("VARIABLES_IMPORT_GLOBAL_SETTING");
   IElementType VARIABLES_SECTION = new RobotElementType("VARIABLES_SECTION");
   IElementType VARIABLE_CONTENT = new RobotElementType("VARIABLE_CONTENT");
+  IElementType VARIABLE_DATATYPE = new RobotElementType("VARIABLE_DATATYPE");
+  IElementType VARIABLE_DATATYPE_DEFINITION = new RobotElementType("VARIABLE_DATATYPE_DEFINITION");
+  IElementType VARIABLE_DATATYPE_PARAMETERIZED = new RobotElementType("VARIABLE_DATATYPE_PARAMETERIZED");
+  IElementType VARIABLE_DATATYPE_UNION = new RobotElementType("VARIABLE_DATATYPE_UNION");
   IElementType VARIABLE_DEFINITION = RobotVariableDefinitionStubElement.create("VARIABLE_DEFINITION");
+  IElementType VARIABLE_EXPRESSION_DEFINITION = new RobotElementType("VARIABLE_EXPRESSION_DEFINITION");
+  IElementType VARIABLE_EXPRESSION_ID = new RobotElementType("VARIABLE_EXPRESSION_ID");
+  IElementType VARIABLE_EXPRESSION_METHOD_CALL = new RobotElementType("VARIABLE_EXPRESSION_METHOD_CALL");
+  IElementType VARIABLE_EXPRESSION_METHOD_CALL_ARGUMENT = new RobotElementType("VARIABLE_EXPRESSION_METHOD_CALL_ARGUMENT");
+  IElementType VARIABLE_EXPRESSION_METHOD_CALL_ID = new RobotElementType("VARIABLE_EXPRESSION_METHOD_CALL_ID");
   IElementType VARIABLE_INDEX_ACCESS_CONTENT = new RobotElementType("VARIABLE_INDEX_ACCESS_CONTENT");
   IElementType VARIABLE_NESTED_ACCESS_CONTENT = new RobotElementType("VARIABLE_NESTED_ACCESS_CONTENT");
   IElementType VARIABLE_SLICE_ACCESS_CONTENT = new RobotElementType("VARIABLE_SLICE_ACCESS_CONTENT");
@@ -121,9 +130,11 @@ public interface RobotTypes {
   IElementType COMMENTS_HEADER = new RobotTokenType("COMMENTS_HEADER");
   IElementType CONTINUATION = new RobotTokenType("CONTINUATION");
   IElementType CONTINUE = new RobotTokenType("CONTINUE");
+  IElementType DATATYPE_CONVERSION_COLON = new RobotTokenType("DATATYPE_CONVERSION_COLON");
   IElementType DATA_DRIVEN_COLUMN_NAME = new RobotTokenType("DATA_DRIVEN_COLUMN_NAME");
   IElementType DICT_VARIABLE_START = new RobotTokenType("DICT_VARIABLE_START");
   IElementType DOCUMENTATION_KEYWORD = new RobotTokenType("DOCUMENTATION_KEYWORD");
+  IElementType DOT_OPERATOR = new RobotTokenType("DOT_OPERATOR");
   IElementType ELSE = new RobotTokenType("ELSE");
   IElementType ELSE_IF = new RobotTokenType("ELSE_IF");
   IElementType END = new RobotTokenType("END");
@@ -152,6 +163,9 @@ public interface RobotTypes {
   IElementType LOCAL_SETTING_NAME = new RobotTokenType("LOCAL_SETTING_NAME");
   IElementType LOCAL_SETTING_START = new RobotTokenType("LOCAL_SETTING_START");
   IElementType METADATA_KEYWORD = new RobotTokenType("METADATA_KEYWORD");
+  IElementType METHOD_CALL_ARGUMENT = new RobotTokenType("METHOD_CALL_ARGUMENT");
+  IElementType METHOD_CALL_LBRACE = new RobotTokenType("METHOD_CALL_LBRACE");
+  IElementType METHOD_CALL_RBRACE = new RobotTokenType("METHOD_CALL_RBRACE");
   IElementType PARAMETER_ASSIGNMENT = new RobotTokenType("PARAMETER_ASSIGNMENT");
   IElementType PARAMETER_NAME = new RobotTokenType("PARAMETER_NAME");
   IElementType PYTHON_EXPRESSION_CONTENT = new RobotTokenType("PYTHON_EXPRESSION_CONTENT");
@@ -183,6 +197,11 @@ public interface RobotTypes {
   IElementType VARIABLE_ACCESS_END = new RobotTokenType("VARIABLE_ACCESS_END");
   IElementType VARIABLE_ACCESS_START = new RobotTokenType("VARIABLE_ACCESS_START");
   IElementType VARIABLE_BODY = new RobotTokenType("VARIABLE_BODY");
+  IElementType VARIABLE_BODY_METHOD_CALL_NAME = new RobotTokenType("VARIABLE_BODY_METHOD_CALL_NAME");
+  IElementType VARIABLE_DATA_TYPE = new RobotTokenType("VARIABLE_DATA_TYPE");
+  IElementType VARIABLE_DATA_TYPE_PARAM_LBRACE = new RobotTokenType("VARIABLE_DATA_TYPE_PARAM_LBRACE");
+  IElementType VARIABLE_DATA_TYPE_PARAM_RBRACE = new RobotTokenType("VARIABLE_DATA_TYPE_PARAM_RBRACE");
+  IElementType VARIABLE_DATA_TYPE_UNION_MARKER = new RobotTokenType("VARIABLE_DATA_TYPE_UNION_MARKER");
   IElementType VARIABLE_INDEX_ACCESS = new RobotTokenType("VARIABLE_INDEX_ACCESS");
   IElementType VARIABLE_LBRACE = new RobotTokenType("VARIABLE_LBRACE");
   IElementType VARIABLE_RBRACE = new RobotTokenType("VARIABLE_RBRACE");
@@ -449,8 +468,35 @@ public interface RobotTypes {
       else if (type == VARIABLE_CONTENT) {
         return new RobotVariableContentImpl(node);
       }
+      else if (type == VARIABLE_DATATYPE) {
+        return new RobotVariableDatatypeImpl(node);
+      }
+      else if (type == VARIABLE_DATATYPE_DEFINITION) {
+        return new RobotVariableDatatypeDefinitionImpl(node);
+      }
+      else if (type == VARIABLE_DATATYPE_PARAMETERIZED) {
+        return new RobotVariableDatatypeParameterizedImpl(node);
+      }
+      else if (type == VARIABLE_DATATYPE_UNION) {
+        return new RobotVariableDatatypeUnionImpl(node);
+      }
       else if (type == VARIABLE_DEFINITION) {
         return new RobotVariableDefinitionImpl(node);
+      }
+      else if (type == VARIABLE_EXPRESSION_DEFINITION) {
+        return new RobotVariableExpressionDefinitionImpl(node);
+      }
+      else if (type == VARIABLE_EXPRESSION_ID) {
+        return new RobotVariableExpressionIdImpl(node);
+      }
+      else if (type == VARIABLE_EXPRESSION_METHOD_CALL) {
+        return new RobotVariableExpressionMethodCallImpl(node);
+      }
+      else if (type == VARIABLE_EXPRESSION_METHOD_CALL_ARGUMENT) {
+        return new RobotVariableExpressionMethodCallArgumentImpl(node);
+      }
+      else if (type == VARIABLE_EXPRESSION_METHOD_CALL_ID) {
+        return new RobotVariableExpressionMethodCallIdImpl(node);
       }
       else if (type == VARIABLE_INDEX_ACCESS_CONTENT) {
         return new RobotVariableIndexAccessContentImpl(node);

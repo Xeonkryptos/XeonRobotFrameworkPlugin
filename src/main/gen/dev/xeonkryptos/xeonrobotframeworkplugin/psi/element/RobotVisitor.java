@@ -437,6 +437,22 @@ public class RobotVisitor extends PsiElementVisitor {
     visitElement(o);
   }
 
+  public void visitVariableDatatype(@NotNull RobotVariableDatatype o) {
+    visitElement(o);
+  }
+
+  public void visitVariableDatatypeDefinition(@NotNull RobotVariableDatatypeDefinition o) {
+    visitElement(o);
+  }
+
+  public void visitVariableDatatypeParameterized(@NotNull RobotVariableDatatypeParameterized o) {
+    visitElement(o);
+  }
+
+  public void visitVariableDatatypeUnion(@NotNull RobotVariableDatatypeUnion o) {
+    visitElement(o);
+  }
+
   public void visitVariableDefinition(@NotNull RobotVariableDefinition o) {
     visitPsiNamedElement(o);
     // visitNavigationItem(o);
@@ -444,6 +460,26 @@ public class RobotVisitor extends PsiElementVisitor {
     // visitQualifiedNameOwner(o);
     // visitAssignedVariable(o);
     // visitElement(o);
+  }
+
+  public void visitVariableExpressionDefinition(@NotNull RobotVariableExpressionDefinition o) {
+    visitElement(o);
+  }
+
+  public void visitVariableExpressionId(@NotNull RobotVariableExpressionId o) {
+    visitElement(o);
+  }
+
+  public void visitVariableExpressionMethodCall(@NotNull RobotVariableExpressionMethodCall o) {
+    visitElement(o);
+  }
+
+  public void visitVariableExpressionMethodCallArgument(@NotNull RobotVariableExpressionMethodCallArgument o) {
+    visitElement(o);
+  }
+
+  public void visitVariableExpressionMethodCallId(@NotNull RobotVariableExpressionMethodCallId o) {
+    visitElement(o);
   }
 
   public void visitVariableIndexAccessContent(@NotNull RobotVariableIndexAccessContent o) {

@@ -457,7 +457,7 @@ reduced_positional_argument ::= <<parsePositionalArgument reduced_positional_arg
 }
 private reduced_positional_argument_content ::= literal_constant_value | conditional_content | variable
 
-variable_definition ::= scalar_variable_definition | list_variable_definition | dict_variable_definition {
+variable_definition ::= <<scalar_variable_definition variable_definition_body>> | <<list_variable_definition variable_definition_body>> | <<dict_variable_definition variable_definition_body>> {
     implements = [
         "com.intellij.psi.PsiNamedElement"
         "com.intellij.navigation.NavigationItem"
@@ -470,28 +470,22 @@ variable_definition ::= scalar_variable_definition | list_variable_definition | 
     elementTypeFactory = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotVariableDefinitionStubElement.create"
     methods = [getName getIcon getQualifiedName]
 }
+private variable_definition_body ::= variable_datatype_definition | variable_content
 
-variable ::= scalar_variable | list_variable | dict_variable | environment_variable {
-    implements = [
-        "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotFoldable"
-        "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotAssignedVariable"
-    ]
-    methods = [getVariableName fold getAssignedValues]
-}
 private extended_variable ::= variable | special_scalar_variable
-scalar_variable ::= scalar_variable_definition {
+scalar_variable ::= <<scalar_variable_definition (python_expression | variable_expression_definition | variable_content)?>> {
     mixin = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotScalarVariableExtension"
     stubClass = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotScalarVariableStub"
     elementTypeFactory = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotScalarVariableStubElement.create"
     methods = [getVariableName fold getAssignedValues]
 }
-list_variable ::= list_variable_definition {
+list_variable ::= <<list_variable_definition (python_expression | variable_expression_definition | variable_content)>> {
     mixin = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotListVariableExtension"
     stubClass = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotListVariableStub"
     elementTypeFactory = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotListVariableStubElement.create"
     methods = [getVariableName fold getAssignedValues]
 }
-dict_variable ::= dict_variable_definition {
+dict_variable ::= <<dict_variable_definition (python_expression | variable_expression_definition | variable_content)>> {
     mixin = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotDictVariableExtension"
     stubClass = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotDictVariableStub"
     elementTypeFactory = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotDictVariableStubElement.create"
@@ -503,16 +497,37 @@ special_scalar_variable ::= special_scalar_variable_definition {
     elementType = scalar_variable
 }
 
-private scalar_variable_definition ::= SCALAR_VARIABLE_START VARIABLE_LBRACE (python_expression | variable_content)? VARIABLE_RBRACE (extended_variable_slice_access | extended_variable_index_access | extended_variable_nested_access)* {pin=2}
-private list_variable_definition ::= LIST_VARIABLE_START VARIABLE_LBRACE (python_expression | variable_content) VARIABLE_RBRACE (extended_variable_slice_access | extended_variable_index_access | extended_variable_nested_access)* {pin=1}
-private dict_variable_definition ::= DICT_VARIABLE_START VARIABLE_LBRACE (python_expression | variable_content) VARIABLE_RBRACE extended_variable_nested_access* {pin=1}
+private meta scalar_variable_definition ::= SCALAR_VARIABLE_START VARIABLE_LBRACE <<body>> VARIABLE_RBRACE (extended_variable_slice_access | extended_variable_index_access | extended_variable_nested_access)* {pin=2}
+private meta list_variable_definition ::= LIST_VARIABLE_START VARIABLE_LBRACE <<body>> VARIABLE_RBRACE (extended_variable_slice_access | extended_variable_index_access | extended_variable_nested_access)* {pin=2}
+private meta dict_variable_definition ::= DICT_VARIABLE_START VARIABLE_LBRACE <<body>> VARIABLE_RBRACE extended_variable_nested_access* {pin=2}
 
 private special_scalar_variable_definition ::= SCALAR_VARIABLE_START variable_content {pin=2}
+
+variable_datatype_definition ::= variable_content DATATYPE_CONVERSION_COLON (variable_datatype_parameterized | variable_datatype_union | variable_datatype) {pin=2}
+variable_datatype_parameterized ::= variable_datatype VARIABLE_DATA_TYPE_PARAM_LBRACE variable_datatype VARIABLE_DATA_TYPE_PARAM_RBRACE {pin=2}
+variable_datatype_union ::= variable_datatype VARIABLE_DATA_TYPE_UNION_MARKER variable_datatype {pin=2}
+variable_datatype ::= VARIABLE_DATA_TYPE
+
+variable_expression_definition ::= variable_expression_id (DOT_OPERATOR (variable_expression | variable))+ {pin=2}
+private variable_expression ::= variable_expression_id | variable_expression_method_call
+variable_expression_id ::= VARIABLE_BODY {methods=[getReference]}
+
+variable_expression_method_call ::= variable_expression_method_call_id METHOD_CALL_LBRACE variable_expression_method_call_argument* METHOD_CALL_RBRACE {pin=1}
+variable_expression_method_call_argument ::= METHOD_CALL_ARGUMENT
+variable_expression_method_call_id ::= VARIABLE_BODY_METHOD_CALL_NAME {methods=[getReference]}
 
 variable_content ::= (variable | VARIABLE_BODY)+ {
     methods = [getReference]
     recoverWhile=variable_content_recover
 }
+variable ::= scalar_variable | list_variable | dict_variable | environment_variable {
+    implements = [
+        "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotFoldable"
+        "dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotAssignedVariable"
+    ]
+    methods = [getVariableName fold getAssignedValues]
+}
+
 private variable_content_recover ::= !(VARIABLE_RBRACE | eol_marker)
 python_expression ::= PYTHON_EXPRESSION_START (python_expression_body | variable | special_scalar_variable)* PYTHON_EXPRESSION_END {
     implements="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotPythonInjectionExtension"
