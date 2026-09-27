@@ -109,6 +109,7 @@ public interface RobotTypes {
   IElementType VARIABLE_DATATYPE_PARAMETERIZED = new RobotElementType("VARIABLE_DATATYPE_PARAMETERIZED");
   IElementType VARIABLE_DATATYPE_UNION = new RobotElementType("VARIABLE_DATATYPE_UNION");
   IElementType VARIABLE_DEFINITION = RobotVariableDefinitionStubElement.create("VARIABLE_DEFINITION");
+  IElementType VARIABLE_DEFINITION_BODY = new RobotElementType("VARIABLE_DEFINITION_BODY");
   IElementType VARIABLE_EXPRESSION_DEFINITION = new RobotElementType("VARIABLE_EXPRESSION_DEFINITION");
   IElementType VARIABLE_EXPRESSION_ID = new RobotElementType("VARIABLE_EXPRESSION_ID");
   IElementType VARIABLE_EXPRESSION_METHOD_CALL = new RobotElementType("VARIABLE_EXPRESSION_METHOD_CALL");
@@ -482,6 +483,9 @@ public interface RobotTypes {
       }
       else if (type == VARIABLE_DEFINITION) {
         return new RobotVariableDefinitionImpl(node);
+      }
+      else if (type == VARIABLE_DEFINITION_BODY) {
+        return new RobotVariableDefinitionBodyImpl(node);
       }
       else if (type == VARIABLE_EXPRESSION_DEFINITION) {
         return new RobotVariableExpressionDefinitionImpl(node);

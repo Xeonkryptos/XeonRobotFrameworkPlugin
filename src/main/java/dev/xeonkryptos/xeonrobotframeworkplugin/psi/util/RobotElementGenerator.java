@@ -30,6 +30,8 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTestCaseId;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotUserKeywordStatementId;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariable;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableContent;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableDefinitionBody;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVisitor;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.visitor.RecursiveRobotVisitor;
 import dev.xeonkryptos.xeonrobotframeworkplugin.util.GlobalConstants;
 import org.jetbrains.annotations.NotNull;
@@ -219,6 +221,21 @@ public record RobotElementGenerator(Project project) {
         RobotVariableFinder variableFinder = new RobotVariableFinder();
         psiFile.acceptChildren(variableFinder);
         return variableFinder.variable;
+    }
+
+    public RobotVariableDefinitionBody createNewVariableDefinitionBody(String variableContent) {
+        String fileContent = """
+                             *** Variables ***
+                             ${%s}=  dummy
+                             """.formatted(variableContent);
+
+        PsiFile psiFile = createDummyPsiFile(fileContent);
+        if (psiFile == null) {
+            return null;
+        }
+        RobotVariableDefinitionBodyFinder variableDefinitionBodyFinder = new RobotVariableDefinitionBodyFinder();
+        psiFile.acceptChildren(variableDefinitionBodyFinder);
+        return variableDefinitionBodyFinder.definitionBody;
     }
 
     public RobotVariableContent createNewVariableContent(String variableContent) {
@@ -516,6 +533,16 @@ public record RobotElementGenerator(Project project) {
         @Override
         public void visitImportArgument(@NotNull RobotImportArgument o) {
             importArgument = o;
+        }
+    }
+
+    private static final class RobotVariableDefinitionBodyFinder extends RecursiveRobotVisitor {
+
+        private RobotVariableDefinitionBody definitionBody;
+
+        @Override
+        public void visitVariableDefinitionBody(@NotNull RobotVariableDefinitionBody o) {
+            definitionBody = o;
         }
     }
 

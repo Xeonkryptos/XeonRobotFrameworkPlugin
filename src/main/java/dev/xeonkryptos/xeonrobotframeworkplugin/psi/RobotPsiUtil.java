@@ -63,6 +63,7 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotUserKeywordStat
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariable;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableContent;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableDefinition;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableDefinitionBody;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableStatement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariablesSection;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotTestCaseExtension;
@@ -87,13 +88,15 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.util.GlobalConstants;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import javax.swing.Icon;
+import javax.swing.*;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
 @SuppressWarnings("UnstableApiUsage")
 public class RobotPsiUtil {
+
+    private RobotPsiUtil() {}
 
     @NotNull
     public static String getName(@NotNull RobotKeywordCall robotKeywordCall) {
@@ -121,8 +124,8 @@ public class RobotPsiUtil {
         if (stub != null) {
             return stub.getName();
         }
-        RobotVariableContent variableContent = variableDefinition.getVariableContent();
-        return variableContent != null ? variableContent.getText() : null;
+        RobotVariableDefinitionBody variableDefinitionBody = variableDefinition.getVariableDefinitionBody();
+        return variableDefinitionBody != null ? variableDefinitionBody.getText() : null;
     }
 
     @NotNull

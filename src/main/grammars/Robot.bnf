@@ -470,7 +470,7 @@ variable_definition ::= <<scalar_variable_definition variable_definition_body>> 
     elementTypeFactory = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotVariableDefinitionStubElement.create"
     methods = [getName getIcon getQualifiedName]
 }
-private variable_definition_body ::= variable_datatype_definition | variable_content
+variable_definition_body ::= variable_datatype_definition | variable_content
 
 private extended_variable ::= variable | special_scalar_variable
 scalar_variable ::= <<scalar_variable_definition (python_expression | variable_expression_definition | variable_content)?>> {
@@ -518,7 +518,6 @@ variable_expression_method_call_id ::= VARIABLE_BODY_METHOD_CALL_NAME {methods=[
 
 variable_content ::= (variable | VARIABLE_BODY)+ {
     methods = [getReference]
-    recoverWhile=variable_content_recover
 }
 variable ::= scalar_variable | list_variable | dict_variable | environment_variable {
     implements = [
@@ -528,7 +527,6 @@ variable ::= scalar_variable | list_variable | dict_variable | environment_varia
     methods = [getVariableName fold getAssignedValues]
 }
 
-private variable_content_recover ::= !(VARIABLE_RBRACE | eol_marker)
 python_expression ::= PYTHON_EXPRESSION_START (python_expression_body | variable | special_scalar_variable)* PYTHON_EXPRESSION_END {
     implements="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotPythonInjectionExtension"
     methods=[getInjectionRelevantTextRange]

@@ -64,6 +64,13 @@ class RobotHighlighter @JvmOverloads constructor(private val project: Project? =
         @JvmField
         val REASSIGNED_VARIABLE: TextAttributesKey = TextAttributesKey.createTextAttributesKey("ROBOT_REASSIGNED_VARIABLE", VARIABLE)
 
+        @JvmField
+        val VARIABLE_DATA_TYPE: TextAttributesKey = TextAttributesKey.createTextAttributesKey("ROBOT_VARIABLE_DATA_TYPE", DefaultLanguageHighlighterColors.CLASS_REFERENCE)
+
+        @JvmField
+        val VARIABLE_DATA_TYPE_MARKER: TextAttributesKey =
+            TextAttributesKey.createTextAttributesKey("ROBOT_VARIABLE_DATA_TYPE_MARKER", DefaultLanguageHighlighterColors.OPERATION_SIGN)
+
         private val keys: MutableMap<IElementType?, TextAttributesKey?> = mutableMapOf()
 
         init {
@@ -127,6 +134,12 @@ class RobotHighlighter @JvmOverloads constructor(private val project: Project? =
             keys[ExtendedRobotTypes.EXTENDED_VARIABLE_ACCESS_BODY] = VARIABLE
             keys[RobotTypes.VARIABLE_ACCESS_START] = EXTENDED_VARIABLE_ACCESS_BRACKETS
             keys[RobotTypes.VARIABLE_ACCESS_END] = EXTENDED_VARIABLE_ACCESS_BRACKETS
+
+            keys[RobotTypes.DATATYPE_CONVERSION_COLON] = VARIABLE_DATA_TYPE_MARKER
+            keys[RobotTypes.VARIABLE_DATA_TYPE] = VARIABLE_DATA_TYPE
+            keys[RobotTypes.VARIABLE_DATA_TYPE_PARAM_LBRACE] = VARIABLE_DATA_TYPE_MARKER
+            keys[RobotTypes.VARIABLE_DATA_TYPE_PARAM_RBRACE] = VARIABLE_DATA_TYPE_MARKER
+            keys[RobotTypes.VARIABLE_DATA_TYPE_UNION_MARKER] = VARIABLE_DATA_TYPE_MARKER
             keys[RobotTypes.USER_KEYWORD_STATEMENT] = USER_KEYWORD_NAME
             keys[RobotTypes.KEYWORD_LIBRARY_NAME] = KEYWORD
             keys[RobotTypes.KEYWORD_LIBRARY_SEPARATOR] = KEYWORD

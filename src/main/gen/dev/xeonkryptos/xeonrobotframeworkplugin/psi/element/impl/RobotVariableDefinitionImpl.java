@@ -36,14 +36,8 @@ public class RobotVariableDefinitionImpl extends RobotVariableDefinitionExtensio
 
   @Override
   @Nullable
-  public RobotVariableContent getVariableContent() {
-    return PsiTreeUtil.getChildOfType(this, RobotVariableContent.class);
-  }
-
-  @Override
-  @Nullable
-  public RobotVariableDatatypeDefinition getVariableDatatypeDefinition() {
-    return PsiTreeUtil.getChildOfType(this, RobotVariableDatatypeDefinition.class);
+  public RobotVariableDefinitionBody getVariableDefinitionBody() {
+    return PsiTreeUtil.getChildOfType(this, RobotVariableDefinitionBody.class);
   }
 
   @Override

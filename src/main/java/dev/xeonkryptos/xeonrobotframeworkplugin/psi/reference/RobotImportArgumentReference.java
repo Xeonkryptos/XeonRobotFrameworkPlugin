@@ -9,7 +9,7 @@ import com.intellij.openapi.module.ModuleUtilCore;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.roots.ProjectRootModificationTracker;
 import com.intellij.openapi.util.Key;
-import com.intellij.openapi.vfs.VfsUtil;
+import com.intellij.openapi.vfs.VfsUtilCore;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiElementResolveResult;
@@ -32,8 +32,8 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.completion.CompletionKeys;
 import dev.xeonkryptos.xeonrobotframeworkplugin.completion.RobotLookupContext;
 import dev.xeonkryptos.xeonrobotframeworkplugin.completion.RobotLookupScope;
 import dev.xeonkryptos.xeonrobotframeworkplugin.completion.service.BuiltInImportCompletionService;
-import dev.xeonkryptos.xeonrobotframeworkplugin.icons.RobotIcons;
 import dev.xeonkryptos.xeonrobotframeworkplugin.fileTypes.RobotResourceFileType;
+import dev.xeonkryptos.xeonrobotframeworkplugin.icons.RobotIcons;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotImportArgument;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotImportGlobalSettingExpression;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLibraryImportGlobalSetting;
@@ -187,11 +187,11 @@ public class RobotImportArgumentReference extends PsiPolyVariantReferenceBase<Ro
                                                                                                                                                             fileExtension,
                                                                                                                                                             moduleForFile.getModuleContentScope()))
                                                                                                    .stream())
-                                                               .filter(resourceFile -> VfsUtil.isAncestor(contentRoot, resourceFile, true))
-                                                               .map(virtualFile -> VfsUtil.getRelativePath(virtualFile, contentRoot))
+                                                               .filter(resourceFile -> VfsUtilCore.isAncestor(contentRoot, resourceFile, true))
+                                                               .map(virtualFile -> VfsUtilCore.getRelativePath(virtualFile, contentRoot))
                                                                .filter(Objects::nonNull)
                                                                .map(relativePath -> {
-                                                                   String[] lookupStrings = { relativePath, WordUtils.capitalize(relativePath), relativePath.toLowerCase() };
+                                                                   String[] lookupStrings = {relativePath, WordUtils.capitalize(relativePath), relativePath.toLowerCase()};
                                                                    return LookupElementBuilder.create(relativePath)
                                                                                               .withIcon(RobotIcons.RESOURCE)
                                                                                               .withLookupStrings(Arrays.asList(lookupStrings))

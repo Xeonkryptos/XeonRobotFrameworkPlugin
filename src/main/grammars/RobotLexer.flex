@@ -203,6 +203,7 @@ AllowedEverythingButSpecialVariableSeq = {AllowedEverythingButSpecialVariableCha
 AllowedExtendedVariableAccessChar = [^\s\[\]$@%&] | {EscapeChar}{1} "[" | {EscapeChar}{1} "]" | {ExceptionForAllowedVariableChar}
 AllowedExtendedVariableAccessSeq = {AllowedExtendedVariableAccessChar}+
 
+VariableLiteralValueDataTypeConversion =   ([^}$@&%:\r\n] | {ExceptionForAllowedVariableChar} | {OpeningVariable})+
 VariableLiteralValue =   ([^}$@&%\r\n] | {ExceptionForAllowedVariableChar} | {OpeningVariable})+
 EverythingButVariableValue = {AllowedEverythingButVariableSeq} ({Space} {AllowedEverythingButVariableSeq})*
 EverythingButSpecialVariableValue = {AllowedEverythingButSpecialVariableSeq} ({Space} {AllowedEverythingButSpecialVariableSeq})*
@@ -264,11 +265,12 @@ LineComment = {LineCommentSign} {NON_EOL}*
 %state USER_KEYWORD_NAME_DEFINITION, USER_KEYWORD_DEFINITION, USER_KEYWORD_RETURN_STATEMENT
 %state SETTING, SETTING_TEMPLATE_START, LOCAL_TEMPLATE_DEFINITION_START, INTERMEDIATE_TEMPLATE_CONFIGURATION, TEMPLATE_DEFINITION, TEMPLATE_ARGUMENTS
 %state KEYWORD_CALL, KEYWORD_ARGUMENTS, SINGLE_LITERAL_CONSTANT_START, SINGLE_LITERAL_CONSTANT
-%state INLINE_VARIABLE_DEFINITION, VARIABLE_DEFINITION, VARIABLE_DEFINITION_ARGUMENTS, VARIABLE_USAGE, EXTENDED_VARIABLE_ACCESS
+%state INLINE_VARIABLE_DEFINITION, VARIABLE_DEFINITION, TEST_TASK_CASE_VARIABLE_DEFINITION, VARIABLE_DEFINITION_ARGUMENTS, VARIABLE_USAGE, EXTENDED_VARIABLE_ACCESS
 %state PARAMETER_VALUE, TEMPLATE_PARAMETER_VALUE
 %state FOR_STRUCTURE, SIMPLE_CONTROL_STRUCTURE_START, FOR_STRUCTURE_LOOP_START, SIMPLE_CONTROL_STRUCTURE, FOR_STRUCTURE_LOOP, WHILE_CONFIGURATION
 %state PYTHON_EVALUATED_EXPRESSION_START, KEYWORD_PYTHON_EXPRESSION, PYTHON_EXPRESSION, PYTHON_EXECUTED_CONDITION, PYTHON_EVALUATED_CONTROL_STRUCTURE_START
 
+%xstate VARIABLE_DATATYPE_CONVERSION
 %xstate COMMENTS_SECTION, INVALID_SECTION, LITERAL_CONSTANT_ONLY, SETTING_VALUES, LOCAL_SETTING_DEFINITION
 %xstate NORMAL_PARAMETER_ASSIGNMENT, TEMPLATE_PARAMETER_ASSIGNMENT
 %xstate KEYWORD_LIBRARY_NAME_SEPARATOR, KEYWORD_CALL_NAME, KEYWORD_LIBRARY_NAME_SEPARATOR_FOR_SPECIAL_KEYWORD
@@ -360,6 +362,16 @@ LineComment = {LineCommentSign} {NON_EOL}*
     {EOL}                       { leaveState(); return EOL; }
 }
 
+
+<VARIABLE_DEFINITION, TEST_TASK_CASE_VARIABLE_DEFINITION> {
+    {VariableLiteralValueDataTypeConversion} ":" {NonNewlineWhitespace}+ [\w\|\[\]]+   {
+          int indexOfDataTypeConversionColon = indexOf(':');
+          yypushback(yylength() - indexOfDataTypeConversionColon);
+          enterNewState(VARIABLE_DATATYPE_CONVERSION);
+          return VARIABLE_BODY;
+    }
+}
+
 <VARIABLE_DEFINITION> {
     {ClosingVariable}                                        { yybegin(VARIABLE_DEFINITION_ARGUMENTS); return VARIABLE_RBRACE; }
     {ClosingVariable} {NonNewlineWhitespace}? {EqualSign}    { yybegin(VARIABLE_DEFINITION_ARGUMENTS); yypushback(yylength() - 1); return VARIABLE_RBRACE; }
@@ -369,6 +381,16 @@ LineComment = {LineCommentSign} {NON_EOL}*
     {EOL}                                                    { leaveState(); return EOL; }
 }
 
+<VARIABLE_DATATYPE_CONVERSION> {
+    ":"                            { return DATATYPE_CONVERSION_COLON; }
+    "|"                            { return VARIABLE_DATA_TYPE_UNION_MARKER; }
+    "["                            { return VARIABLE_DATA_TYPE_PARAM_LBRACE; }
+    "]"                            { return VARIABLE_DATA_TYPE_PARAM_RBRACE; }
+    \w+                            { return VARIABLE_DATA_TYPE; }
+    {NonNewlineWhitespace}+        { return WHITE_SPACE; }
+    [^]                            { yypushback(yylength()); leaveState(); break; }
+}
+
 <VARIABLE_DEFINITION_ARGUMENTS> {
     {EqualSign} {NonNewlineWhitespace}* {EverythingButVariableValue}?       { yypushback(yylength() - 1); return ASSIGNMENT; }
     [Ss][Cc][Oo][Pp][Ee] {EqualSign} !{KeywordFinishedMarker}               { yypushback(yylength() - "scope".length()); enterNewState(NORMAL_PARAMETER_ASSIGNMENT); return PARAMETER_NAME; }
@@ -376,14 +398,14 @@ LineComment = {LineCommentSign} {NON_EOL}*
     {EOL}                                                                   { leaveState(); return EOL; }
 }
 
-<VARIABLE_USAGE> {
+<VARIABLE_USAGE, TEST_TASK_CASE_VARIABLE_DEFINITION> {
     {ClosingVariable} "["                           { leaveState(); enterNewState(EXTENDED_VARIABLE_ACCESS); yypushback(1); return VARIABLE_RBRACE; }
     {ClosingVariable} "]"                           { leaveState(); yypushback(1); return VARIABLE_RBRACE; }
     {ClosingVariable}                               { leaveState(); return VARIABLE_RBRACE; }
     {OpeningVariable} (!{ClosingVariable}{2})+      { enterNewState(PYTHON_EXPRESSION); yypushback(yylength() - 1); return PYTHON_EXPRESSION_START; }
 }
 
-<VARIABLE_DEFINITION, VARIABLE_USAGE> {
+<VARIABLE_DEFINITION, VARIABLE_USAGE, TEST_TASK_CASE_VARIABLE_DEFINITION> {
     {VariableLiteralValue}                          { return VARIABLE_BODY; }
     {EOL}                                           { leaveState(); return EOL; }
 }
@@ -555,7 +577,7 @@ LineComment = {LineCommentSign} {NON_EOL}*
              enterNewState(TEMPLATE_DEFINITION);
              enterNewState(TEMPLATE_ARGUMENTS);
          } else {
-             enterNewState(VARIABLE_USAGE);
+             enterNewState(TEST_TASK_CASE_VARIABLE_DEFINITION);
              enterNewState(VARIABLE_OPENING_BRACE);
              yypushback(1);
              return switch(yycharat(0)) {

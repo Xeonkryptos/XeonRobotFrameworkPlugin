@@ -26,7 +26,10 @@ class RobotColorsPage : ColorSettingsPage {
                *** Variables ***
                ${'$'}{var1}  12345
                ${'$'}{var2}  another variable
-               
+               ${'$'}{var3: int}  12345
+               ${'$'}{var4: list[int]}  1  2  3
+               ${'$'}{var5: int | str}  12345
+
                *** Test Cases ***
                Addition
                  [Tags]  Calculator
@@ -74,6 +77,8 @@ private val ATTRIBUTES = arrayOf(AttributesDescriptor(RobotBundle.message("color
     AttributesDescriptor(RobotBundle.message("color.settings.gherkin"), RobotHighlighter.GHERKIN),
     AttributesDescriptor(RobotBundle.message("color.settings.syntaxMarker"), RobotHighlighter.STRUCTURAL_KEYWORDS),
     AttributesDescriptor(RobotBundle.message("color.settings.variable"), RobotHighlighter.VARIABLE),
+    AttributesDescriptor(RobotBundle.message("color.settings.variableDataType"), RobotHighlighter.VARIABLE_DATA_TYPE),
+    AttributesDescriptor(RobotBundle.message("color.settings.variableDataTypeMarker"), RobotHighlighter.VARIABLE_DATA_TYPE_MARKER),
     AttributesDescriptor(RobotBundle.message("color.settings.keyword"), RobotHighlighter.KEYWORD),
     AttributesDescriptor(RobotBundle.message("color.settings.userKeywordName"), RobotHighlighter.USER_KEYWORD_NAME),
     AttributesDescriptor(RobotBundle.message("color.settings.testCaseName"), RobotHighlighter.TEST_CASE_NAME),

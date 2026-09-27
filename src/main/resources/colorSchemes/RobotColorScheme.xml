@@ -11,4 +11,14 @@
             <option name="FOREGROUND" value="89ddff"/>
         </value>
     </option>
+    <option name="ROBOT_VARIABLE_DATA_TYPE">
+        <value>
+            <option name="FOREGROUND" value="56B6C2"/>
+        </value>
+    </option>
+    <option name="ROBOT_VARIABLE_DATA_TYPE_MARKER">
+        <value>
+            <option name="FOREGROUND" value="7C8B9A"/>
+        </value>
+    </option>
 </list>

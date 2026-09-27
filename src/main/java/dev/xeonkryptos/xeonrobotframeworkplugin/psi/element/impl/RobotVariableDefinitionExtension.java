@@ -19,8 +19,8 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotElement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotIfVariableStatement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordCall;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLocalArgumentsSettingParameterOptional;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableContent;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableDefinition;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableDefinitionBody;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableStatement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableValue;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVisitor;
@@ -35,7 +35,7 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.util.VariableNameUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import javax.swing.Icon;
+import javax.swing.*;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -90,10 +90,10 @@ public abstract class RobotVariableDefinitionExtension extends RobotStubPsiEleme
 
     @Override
     public PsiElement setName(@NotNull String newName) throws IncorrectOperationException {
-        RobotVariableContent newVariableContent = RobotElementGenerator.getInstance(getProject()).createNewVariableContent(newName);
-        RobotVariableContent variableContent = getVariableContent();
-        if (variableContent != null && newVariableContent != null) {
-            variableContent.replace(newVariableContent);
+        RobotVariableDefinitionBody newVariableDefinitionBody = RobotElementGenerator.getInstance(getProject()).createNewVariableDefinitionBody(newName);
+        RobotVariableDefinitionBody variableDefinitionBody = getVariableDefinitionBody();
+        if (variableDefinitionBody != null && newVariableDefinitionBody != null) {
+            variableDefinitionBody.replace(newVariableDefinitionBody);
         }
         return this;
     }

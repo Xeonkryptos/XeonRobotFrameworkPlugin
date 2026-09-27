@@ -13,10 +13,7 @@ import javax.swing.Icon;
 public interface RobotVariableDefinition extends PsiNamedElement, NavigationItem, DefinedVariable, RobotQualifiedNameOwner, RobotAssignedVariable, RobotElement, StubBasedPsiElement<RobotVariableDefinitionStub> {
 
   @Nullable
-  RobotVariableContent getVariableContent();
-
-  @Nullable
-  RobotVariableDatatypeDefinition getVariableDatatypeDefinition();
+  RobotVariableDefinitionBody getVariableDefinitionBody();
 
   @NotNull
   List<RobotVariableIndexAccessContent> getVariableIndexAccessContentList();
