@@ -62,6 +62,7 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotUserKeywordStat
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotUserKeywordStatementId;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariable;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableContent;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableDatatypeContainer;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableDefinition;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableDefinitionBody;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableStatement;
@@ -386,6 +387,14 @@ public class RobotPsiUtil {
         String text = expression.getText();
         int offset = text.length() - text.stripLeading().length() + 1;
         int length = text.trim().length() - 1 - offset;
+        return TextRange.from(offset, length);
+    }
+
+    @NotNull
+    public static TextRange getInjectionRelevantTextRange(@NotNull RobotVariableDatatypeContainer variableDatatypeContainer) {
+        String text = variableDatatypeContainer.getText();
+        int offset = text.length() - text.stripLeading().length();
+        int length = text.trim().length();
         return TextRange.from(offset, length);
     }
 

@@ -105,6 +105,7 @@ public interface RobotTypes {
   IElementType VARIABLES_SECTION = new RobotElementType("VARIABLES_SECTION");
   IElementType VARIABLE_CONTENT = new RobotElementType("VARIABLE_CONTENT");
   IElementType VARIABLE_DATATYPE = new RobotElementType("VARIABLE_DATATYPE");
+  IElementType VARIABLE_DATATYPE_CONTAINER = new RobotElementType("VARIABLE_DATATYPE_CONTAINER");
   IElementType VARIABLE_DATATYPE_DEFINITION = new RobotElementType("VARIABLE_DATATYPE_DEFINITION");
   IElementType VARIABLE_DATATYPE_PARAMETERIZED = new RobotElementType("VARIABLE_DATATYPE_PARAMETERIZED");
   IElementType VARIABLE_DATATYPE_UNION = new RobotElementType("VARIABLE_DATATYPE_UNION");
@@ -471,6 +472,9 @@ public interface RobotTypes {
       }
       else if (type == VARIABLE_DATATYPE) {
         return new RobotVariableDatatypeImpl(node);
+      }
+      else if (type == VARIABLE_DATATYPE_CONTAINER) {
+        return new RobotVariableDatatypeContainerImpl(node);
       }
       else if (type == VARIABLE_DATATYPE_DEFINITION) {
         return new RobotVariableDatatypeDefinitionImpl(node);

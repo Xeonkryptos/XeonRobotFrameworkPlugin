@@ -35,20 +35,8 @@ public class RobotVariableDatatypeDefinitionImpl extends RobotPsiElementBase imp
 
   @Override
   @Nullable
-  public RobotVariableDatatype getVariableDatatype() {
-    return PsiTreeUtil.getChildOfType(this, RobotVariableDatatype.class);
-  }
-
-  @Override
-  @Nullable
-  public RobotVariableDatatypeParameterized getVariableDatatypeParameterized() {
-    return PsiTreeUtil.getChildOfType(this, RobotVariableDatatypeParameterized.class);
-  }
-
-  @Override
-  @Nullable
-  public RobotVariableDatatypeUnion getVariableDatatypeUnion() {
-    return PsiTreeUtil.getChildOfType(this, RobotVariableDatatypeUnion.class);
+  public RobotVariableDatatypeContainer getVariableDatatypeContainer() {
+    return PsiTreeUtil.getChildOfType(this, RobotVariableDatatypeContainer.class);
   }
 
 }

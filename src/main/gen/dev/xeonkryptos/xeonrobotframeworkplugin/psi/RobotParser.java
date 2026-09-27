@@ -3304,7 +3304,21 @@ public class RobotParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // variable_content DATATYPE_CONVERSION_COLON (variable_datatype_parameterized | variable_datatype_union | variable_datatype)
+  // variable_datatype_parameterized | variable_datatype_union | variable_datatype
+  public static boolean variable_datatype_container(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "variable_datatype_container")) return false;
+    if (!nextTokenIs(b, VARIABLE_DATA_TYPE)) return false;
+    boolean r;
+    Marker m = enter_section_(b);
+    r = variable_datatype_parameterized(b, l + 1);
+    if (!r) r = variable_datatype_union(b, l + 1);
+    if (!r) r = variable_datatype(b, l + 1);
+    exit_section_(b, m, VARIABLE_DATATYPE_CONTAINER, r);
+    return r;
+  }
+
+  /* ********************************************************** */
+  // variable_content DATATYPE_CONVERSION_COLON variable_datatype_container
   public static boolean variable_datatype_definition(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "variable_datatype_definition")) return false;
     boolean r, p;
@@ -3312,23 +3326,13 @@ public class RobotParser implements PsiParser, LightPsiParser {
     r = variable_content(b, l + 1);
     r = r && consumeToken(b, DATATYPE_CONVERSION_COLON);
     p = r; // pin = 2
-    r = r && variable_datatype_definition_2(b, l + 1);
+    r = r && variable_datatype_container(b, l + 1);
     exit_section_(b, l, m, r, p, null);
     return r || p;
   }
 
-  // variable_datatype_parameterized | variable_datatype_union | variable_datatype
-  private static boolean variable_datatype_definition_2(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "variable_datatype_definition_2")) return false;
-    boolean r;
-    r = variable_datatype_parameterized(b, l + 1);
-    if (!r) r = variable_datatype_union(b, l + 1);
-    if (!r) r = variable_datatype(b, l + 1);
-    return r;
-  }
-
   /* ********************************************************** */
-  // variable_datatype VARIABLE_DATA_TYPE_PARAM_LBRACE variable_datatype VARIABLE_DATA_TYPE_PARAM_RBRACE
+  // variable_datatype VARIABLE_DATA_TYPE_PARAM_LBRACE variable_datatype_container VARIABLE_DATA_TYPE_PARAM_RBRACE
   public static boolean variable_datatype_parameterized(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "variable_datatype_parameterized")) return false;
     if (!nextTokenIs(b, VARIABLE_DATA_TYPE)) return false;
@@ -3337,25 +3341,43 @@ public class RobotParser implements PsiParser, LightPsiParser {
     r = variable_datatype(b, l + 1);
     r = r && consumeToken(b, VARIABLE_DATA_TYPE_PARAM_LBRACE);
     p = r; // pin = 2
-    r = r && report_error_(b, variable_datatype(b, l + 1));
+    r = r && report_error_(b, variable_datatype_container(b, l + 1));
     r = p && consumeToken(b, VARIABLE_DATA_TYPE_PARAM_RBRACE) && r;
     exit_section_(b, l, m, r, p, null);
     return r || p;
   }
 
   /* ********************************************************** */
-  // variable_datatype VARIABLE_DATA_TYPE_UNION_MARKER variable_datatype
+  // (variable_datatype_parameterized | variable_datatype) VARIABLE_DATA_TYPE_UNION_MARKER (variable_datatype_parameterized | variable_datatype)
   public static boolean variable_datatype_union(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "variable_datatype_union")) return false;
     if (!nextTokenIs(b, VARIABLE_DATA_TYPE)) return false;
     boolean r, p;
     Marker m = enter_section_(b, l, _NONE_, VARIABLE_DATATYPE_UNION, null);
-    r = variable_datatype(b, l + 1);
+    r = variable_datatype_union_0(b, l + 1);
     r = r && consumeToken(b, VARIABLE_DATA_TYPE_UNION_MARKER);
     p = r; // pin = 2
-    r = r && variable_datatype(b, l + 1);
+    r = r && variable_datatype_union_2(b, l + 1);
     exit_section_(b, l, m, r, p, null);
     return r || p;
+  }
+
+  // variable_datatype_parameterized | variable_datatype
+  private static boolean variable_datatype_union_0(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "variable_datatype_union_0")) return false;
+    boolean r;
+    r = variable_datatype_parameterized(b, l + 1);
+    if (!r) r = variable_datatype(b, l + 1);
+    return r;
+  }
+
+  // variable_datatype_parameterized | variable_datatype
+  private static boolean variable_datatype_union_2(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "variable_datatype_union_2")) return false;
+    boolean r;
+    r = variable_datatype_parameterized(b, l + 1);
+    if (!r) r = variable_datatype(b, l + 1);
+    return r;
   }
 
   /* ********************************************************** */

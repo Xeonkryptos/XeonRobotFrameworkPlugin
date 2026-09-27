@@ -33,4 +33,10 @@ public class RobotVariableDatatypeUnionImpl extends RobotPsiElementBase implemen
     return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotVariableDatatype.class);
   }
 
+  @Override
+  @NotNull
+  public List<RobotVariableDatatypeParameterized> getVariableDatatypeParameterizedList() {
+    return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotVariableDatatypeParameterized.class);
+  }
+
 }

@@ -11,12 +11,6 @@ public interface RobotVariableDatatypeDefinition extends RobotElement {
   RobotVariableContent getVariableContent();
 
   @Nullable
-  RobotVariableDatatype getVariableDatatype();
-
-  @Nullable
-  RobotVariableDatatypeParameterized getVariableDatatypeParameterized();
-
-  @Nullable
-  RobotVariableDatatypeUnion getVariableDatatypeUnion();
+  RobotVariableDatatypeContainer getVariableDatatypeContainer();
 
 }

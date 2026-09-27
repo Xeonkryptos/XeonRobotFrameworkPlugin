@@ -8,6 +8,9 @@ import com.intellij.psi.PsiElement;
 public interface RobotVariableDatatypeParameterized extends RobotElement {
 
   @NotNull
-  List<RobotVariableDatatype> getVariableDatatypeList();
+  RobotVariableDatatype getVariableDatatype();
+
+  @Nullable
+  RobotVariableDatatypeContainer getVariableDatatypeContainer();
 
 }

@@ -7,9 +7,9 @@ import com.intellij.openapi.util.TextRange
 import com.intellij.psi.ElementManipulators
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiLanguageInjectionHost
-import com.intellij.psi.util.endOffset
 import com.jetbrains.python.ast.findChildrenByClass
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariable
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableDatatypeContainer
 
 class RobotLanguageInjectionPerformer : LanguageInjectionPerformer {
 
@@ -27,7 +27,7 @@ class RobotLanguageInjectionPerformer : LanguageInjectionPerformer {
         val rangeInElement = manipulator.getRangeInElement(context)
 
         registrar.startInjecting(language)
-        if (context.children.size > 1) {
+        if (context !is RobotVariableDatatypeContainer && context.children.size > 1) {
             @Suppress("UnstableApiUsage")
             val variables = context.findChildrenByClass(RobotVariable::class.java)
 

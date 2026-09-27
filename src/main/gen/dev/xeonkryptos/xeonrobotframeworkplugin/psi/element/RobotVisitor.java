@@ -441,6 +441,11 @@ public class RobotVisitor extends PsiElementVisitor {
     visitElement(o);
   }
 
+  public void visitVariableDatatypeContainer(@NotNull RobotVariableDatatypeContainer o) {
+    visitPythonInjectionExtension(o);
+    // visitElement(o);
+  }
+
   public void visitVariableDatatypeDefinition(@NotNull RobotVariableDatatypeDefinition o) {
     visitElement(o);
   }

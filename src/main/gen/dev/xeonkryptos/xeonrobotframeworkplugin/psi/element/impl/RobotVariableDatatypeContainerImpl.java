@@ -10,15 +10,16 @@ import com.intellij.psi.util.PsiTreeUtil;
 import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.*;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.*;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotPsiUtil;
+import com.intellij.openapi.util.TextRange;
 
-public class RobotVariableDatatypeParameterizedImpl extends RobotPsiElementBase implements RobotVariableDatatypeParameterized {
+public class RobotVariableDatatypeContainerImpl extends RobotPsiElementBase implements RobotVariableDatatypeContainer {
 
-  public RobotVariableDatatypeParameterizedImpl(@NotNull ASTNode node) {
+  public RobotVariableDatatypeContainerImpl(@NotNull ASTNode node) {
     super(node);
   }
 
   public void accept(@NotNull RobotVisitor visitor) {
-    visitor.visitVariableDatatypeParameterized(this);
+    visitor.visitVariableDatatypeContainer(this);
   }
 
   @Override
@@ -28,15 +29,26 @@ public class RobotVariableDatatypeParameterizedImpl extends RobotPsiElementBase 
   }
 
   @Override
-  @NotNull
+  @Nullable
   public RobotVariableDatatype getVariableDatatype() {
-    return notNullChild(PsiTreeUtil.getChildOfType(this, RobotVariableDatatype.class));
+    return PsiTreeUtil.getChildOfType(this, RobotVariableDatatype.class);
   }
 
   @Override
   @Nullable
-  public RobotVariableDatatypeContainer getVariableDatatypeContainer() {
-    return PsiTreeUtil.getChildOfType(this, RobotVariableDatatypeContainer.class);
+  public RobotVariableDatatypeParameterized getVariableDatatypeParameterized() {
+    return PsiTreeUtil.getChildOfType(this, RobotVariableDatatypeParameterized.class);
+  }
+
+  @Override
+  @Nullable
+  public RobotVariableDatatypeUnion getVariableDatatypeUnion() {
+    return PsiTreeUtil.getChildOfType(this, RobotVariableDatatypeUnion.class);
+  }
+
+  @Override
+  public @NotNull TextRange getInjectionRelevantTextRange() {
+    return RobotPsiUtil.getInjectionRelevantTextRange(this);
   }
 
 }

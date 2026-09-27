@@ -10,4 +10,7 @@ public interface RobotVariableDatatypeUnion extends RobotElement {
   @NotNull
   List<RobotVariableDatatype> getVariableDatatypeList();
 
+  @NotNull
+  List<RobotVariableDatatypeParameterized> getVariableDatatypeParameterizedList();
+
 }

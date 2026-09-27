@@ -30,8 +30,8 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTestCaseId;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotUserKeywordStatementId;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariable;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableContent;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableDatatypeContainer;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableDefinitionBody;
-import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVisitor;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.visitor.RecursiveRobotVisitor;
 import dev.xeonkryptos.xeonrobotframeworkplugin.util.GlobalConstants;
 import org.jetbrains.annotations.NotNull;
@@ -425,6 +425,22 @@ public record RobotElementGenerator(Project project) {
         return conditionalContentFinder.conditionalContent;
     }
 
+    public RobotVariableDatatypeContainer createNewVariableDatatypeContainer(String parameter) {
+        String fileContent = """
+                             *** Keywords ***
+                             Dummy
+                                 ${Variable: %s}=  Set Variable  ABC
+                             """.formatted(parameter);
+        PsiFile psiFile = createDummyPsiFile(fileContent);
+        if (psiFile == null) {
+            return null;
+        }
+
+        RobotVariableDatatypeContainerFinder finder = new RobotVariableDatatypeContainerFinder();
+        psiFile.acceptChildren(finder);
+        return finder.variableDatatypeContainer;
+    }
+
     public PsiFile createDummyPsiFile(String text) {
         PsiFileFactory factory = PsiFileFactory.getInstance(project);
 
@@ -583,6 +599,16 @@ public record RobotElementGenerator(Project project) {
         @Override
         public void visitConditionalContent(@NotNull RobotConditionalContent o) {
             conditionalContent = o;
+        }
+    }
+
+    private static final class RobotVariableDatatypeContainerFinder extends RecursiveRobotVisitor {
+
+        private RobotVariableDatatypeContainer variableDatatypeContainer;
+
+        @Override
+        public void visitVariableDatatypeContainer(@NotNull RobotVariableDatatypeContainer o) {
+            variableDatatypeContainer = o;
         }
     }
 
