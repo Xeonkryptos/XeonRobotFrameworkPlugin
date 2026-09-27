@@ -165,6 +165,9 @@
         <localInspection language="Robot" shortName="RobotCombinedEmbeddedWithConcreteArguments" bundle="messages.RobotBundle" key="INSP.NAME.feature.combined.embedded.with.concrete.arguments"
                          groupKey="INSP.GROUP.robot" enabledByDefault="true" level="ERROR" dumbAware="true"
                          implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.inspections.versioned.RobotCombinedEmbeddedWithConcreteArgumentsInspection"/>
+        <localInspection language="Robot" shortName="RobotVariableDataTypeConversionSupportInspection" bundle="messages.RobotBundle" key="INSP.NAME.inspections.variable.data.type.conversion.not.supported"
+                         groupKey="INSP.GROUP.robot" enabledByDefault="true" level="WARNING" dumbAware="true"
+                         implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.inspections.versioned.RobotVariableDataTypeConversionSupportInspection"/>
         <!-- Maintainability -->
         <localInspection language="Robot" shortName="RobotVariableRatherArgumentMeant" bundle="messages.RobotBundle"
                          key="INSP.NAME.variable.rather.argument.meant" groupKey="INSP.GROUP.robot" enabledByDefault="true" level="WARNING" dumbAware="true"
@@ -178,6 +181,9 @@
         <localInspection language="Robot" shortName="DuplicatedParameterInKeywordCall" bundle="messages.RobotBundle" key="INSP.NAME.keyword.duplicated.parameters.defined"
                          groupKey="INSP.GROUP.robot" enabledByDefault="true" level="WEAK WARNING" dumbAware="true"
                          implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.inspections.maintainability.DuplicatedParameterInKeywordCallInspection"/>
+        <localInspection language="Robot" shortName="RobotEvaluateKeywordUnknownModules" bundle="messages.RobotBundle" key="INSP.NAME.keyword.evaluate.parameters.module.unknown"
+                         groupKey="INSP.GROUP.robot" enabledByDefault="true" level="ERROR"
+                         implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.inspections.RobotEvaluateKeywordUnknownModulesInspection"/>
         <localInspection language="Robot" shortName="EmptyLocalArgumentsSetting" bundle="messages.RobotBundle" key="INSP.NAME.empty.local.arguments.setting"
                          groupKey="INSP.GROUP.robot" enabledByDefault="true" level="WARNING" dumbAware="true"
                          implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.inspections.maintainability.EmptyLocalArgumentsSettingInspection"/>

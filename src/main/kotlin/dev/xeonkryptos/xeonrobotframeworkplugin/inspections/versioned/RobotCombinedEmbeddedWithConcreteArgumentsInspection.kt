@@ -20,6 +20,10 @@ class RobotCombinedEmbeddedWithConcreteArgumentsInspection : RobotVersionBasedIn
 
     private val userKeywordResultsHolderKey = Key.create<Map<RobotUserKeywordStatement, Boolean>>("USER_KEYWORD_RESULT_HOLDER")
 
+    override val minimumRobotVersion: RobotVersionProvider.RobotVersion = RobotVersionProvider.RobotVersion(6, 1, 0)
+
+    override val negativeRobotVersionCheck: Boolean = true
+
     override fun buildVisitor(holder: ProblemsHolder, isOnTheFly: Boolean, session: LocalInspectionToolSession): PsiElementVisitor {
         val userKeywordResultHolder = mutableMapOf<RobotUserKeywordStatement, Boolean>()
         session.putUserData(userKeywordResultsHolderKey, userKeywordResultHolder)
@@ -44,6 +48,4 @@ class RobotCombinedEmbeddedWithConcreteArgumentsInspection : RobotVersionBasedIn
             }
         }
     }
-
-    override fun getMinimumRobotVersion(): RobotVersionProvider.RobotVersion = RobotVersionProvider.RobotVersion(6, 1, 0)
 }

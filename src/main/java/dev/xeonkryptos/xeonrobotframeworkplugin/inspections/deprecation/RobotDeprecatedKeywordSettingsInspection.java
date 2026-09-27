@@ -35,6 +35,12 @@ public class RobotDeprecatedKeywordSettingsInspection extends RobotVersionBasedI
     }
 
     @Override
+    protected boolean getNegativeRobotVersionCheck() {
+        return false;
+    }
+
+    @NotNull
+    @Override
     protected RobotVersion getMinimumRobotVersion() {
         return new RobotVersion(7, 0, 0);
     }

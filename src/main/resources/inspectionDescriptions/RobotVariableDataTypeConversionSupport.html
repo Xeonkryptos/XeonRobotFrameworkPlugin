@@ -1,0 +1,25 @@
+<html lang="en">
+    <body>
+        <p>
+            Reports variable type conversion definitions when the configured Robot Framework version does not support this syntax.
+        </p>
+        <p>
+            Declaring an expected data type directly on a variable, such as <code>${name: int}</code>, was introduced in Robot Framework 7.3.
+            This inspection flags such declarations when the project's Robot Framework version is set to an earlier version, helping you avoid parsing errors at runtime.
+        </p>
+        <p><b>Example:</b></p>
+        <pre><code>*** Keywords ***
+Example Keyword
+    [Arguments]    ${count: int}
+    ${values: list[int]} =    Create List    1    2    3
+</code></pre>
+        <p>
+            This is only reported when the project's Robot Framework version is below 7.3; on 7.3 and later, the same declarations are valid.
+        </p>
+        <!-- tooltip end -->
+        <p>
+            The problem is highlighted on the affected variable declaration so you can either remove the type conversion
+            definition or update the Robot Framework version used by the project.
+        </p>
+    </body>
+</html>
