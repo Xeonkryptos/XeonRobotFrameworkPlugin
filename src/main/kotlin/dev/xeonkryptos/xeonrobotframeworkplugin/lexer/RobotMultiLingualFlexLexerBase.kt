@@ -117,10 +117,6 @@ abstract class RobotMultiLingualFlexLexerBase @JvmOverloads constructor(protecte
     protected var localTemplateEnabled: Boolean = false
     protected var templateKeywordFound: Boolean = false
 
-    protected var currentIndex: Int = -1
-
-    protected val previousStates: IntArray = IntArray(20)
-
     protected var buffer: CharSequence = ""
     protected var endPosition: Int = 0
 
@@ -216,16 +212,6 @@ abstract class RobotMultiLingualFlexLexerBase @JvmOverloads constructor(protecte
         ++currentIndex
         previousStates[currentIndex] = previousState
         yybegin(newState)
-    }
-
-    protected fun leaveState() {
-        if (currentIndex >= 0) {
-            val previousState = previousStates[currentIndex]
-            --currentIndex
-            yybegin(previousState)
-        } else {
-            yybegin(0) // 0 => YYINITIAL
-        }
     }
 
     protected fun resetTemplateState() {

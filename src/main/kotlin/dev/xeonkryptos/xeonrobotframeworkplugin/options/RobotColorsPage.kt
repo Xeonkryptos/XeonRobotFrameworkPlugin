@@ -58,6 +58,7 @@ class RobotColorsPage : ColorSettingsPage {
                
                Result is "${'$'}{result}"
                    Result should be    ${'$'}{result}
+                   Log    ${'$'}{calculator.history(1, 'last', prefix${'$'}{suffix})}
                    """.trimIndent()
     }
 
@@ -79,6 +80,10 @@ private val ATTRIBUTES = arrayOf(AttributesDescriptor(RobotBundle.message("color
     AttributesDescriptor(RobotBundle.message("color.settings.variable"), RobotHighlighter.VARIABLE),
     AttributesDescriptor(RobotBundle.message("color.settings.variableDataType"), RobotHighlighter.VARIABLE_DATA_TYPE),
     AttributesDescriptor(RobotBundle.message("color.settings.variableDataTypeMarker"), RobotHighlighter.VARIABLE_DATA_TYPE_MARKER),
+    AttributesDescriptor(RobotBundle.message("color.settings.variableExtendedAccessOperator"), RobotHighlighter.VARIABLE_EXTENDED_ACCESS_OPERATOR),
+    AttributesDescriptor(RobotBundle.message("color.settings.variableMethodCall"), RobotHighlighter.VARIABLE_METHOD_CALL),
+    AttributesDescriptor(RobotBundle.message("color.settings.variableMethodCallParentheses"), RobotHighlighter.VARIABLE_METHOD_CALL_PARENTHESES),
+    AttributesDescriptor(RobotBundle.message("color.settings.variableMethodCallComma"), RobotHighlighter.VARIABLE_METHOD_CALL_COMMA),
     AttributesDescriptor(RobotBundle.message("color.settings.keyword"), RobotHighlighter.KEYWORD),
     AttributesDescriptor(RobotBundle.message("color.settings.userKeywordName"), RobotHighlighter.USER_KEYWORD_NAME),
     AttributesDescriptor(RobotBundle.message("color.settings.testCaseName"), RobotHighlighter.TEST_CASE_NAME),

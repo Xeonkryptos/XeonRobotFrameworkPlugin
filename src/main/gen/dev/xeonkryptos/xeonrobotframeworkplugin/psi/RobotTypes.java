@@ -166,6 +166,8 @@ public interface RobotTypes {
   IElementType LOCAL_SETTING_START = new RobotTokenType("LOCAL_SETTING_START");
   IElementType METADATA_KEYWORD = new RobotTokenType("METADATA_KEYWORD");
   IElementType METHOD_CALL_ARGUMENT = new RobotTokenType("METHOD_CALL_ARGUMENT");
+  IElementType METHOD_CALL_ARGUMENT_COMMA = new RobotTokenType("METHOD_CALL_ARGUMENT_COMMA");
+  IElementType METHOD_CALL_ARGUMENT_PART = new RobotTokenType("METHOD_CALL_ARGUMENT_PART");
   IElementType METHOD_CALL_LBRACE = new RobotTokenType("METHOD_CALL_LBRACE");
   IElementType METHOD_CALL_RBRACE = new RobotTokenType("METHOD_CALL_RBRACE");
   IElementType PARAMETER_ASSIGNMENT = new RobotTokenType("PARAMETER_ASSIGNMENT");

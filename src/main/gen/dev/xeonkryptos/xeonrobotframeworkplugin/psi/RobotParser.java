@@ -3477,7 +3477,7 @@ public class RobotParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // variable_expression_method_call_id METHOD_CALL_LBRACE variable_expression_method_call_argument* METHOD_CALL_RBRACE
+  // variable_expression_method_call_id METHOD_CALL_LBRACE (variable_expression_method_call_argument METHOD_CALL_ARGUMENT_COMMA?)* METHOD_CALL_RBRACE
   public static boolean variable_expression_method_call(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "variable_expression_method_call")) return false;
     if (!nextTokenIs(b, VARIABLE_BODY_METHOD_CALL_NAME)) return false;
@@ -3492,27 +3492,86 @@ public class RobotParser implements PsiParser, LightPsiParser {
     return r || p;
   }
 
-  // variable_expression_method_call_argument*
+  // (variable_expression_method_call_argument METHOD_CALL_ARGUMENT_COMMA?)*
   private static boolean variable_expression_method_call_2(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "variable_expression_method_call_2")) return false;
     while (true) {
       int c = current_position_(b);
-      if (!variable_expression_method_call_argument(b, l + 1)) break;
+      if (!variable_expression_method_call_2_0(b, l + 1)) break;
       if (!empty_element_parsed_guard_(b, "variable_expression_method_call_2", c)) break;
     }
     return true;
   }
 
-  /* ********************************************************** */
-  // METHOD_CALL_ARGUMENT
-  public static boolean variable_expression_method_call_argument(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "variable_expression_method_call_argument")) return false;
-    if (!nextTokenIs(b, METHOD_CALL_ARGUMENT)) return false;
+  // variable_expression_method_call_argument METHOD_CALL_ARGUMENT_COMMA?
+  private static boolean variable_expression_method_call_2_0(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "variable_expression_method_call_2_0")) return false;
     boolean r;
     Marker m = enter_section_(b);
-    r = consumeToken(b, METHOD_CALL_ARGUMENT);
-    exit_section_(b, m, VARIABLE_EXPRESSION_METHOD_CALL_ARGUMENT, r);
+    r = variable_expression_method_call_argument(b, l + 1);
+    r = r && variable_expression_method_call_2_0_1(b, l + 1);
+    exit_section_(b, m, null, r);
     return r;
+  }
+
+  // METHOD_CALL_ARGUMENT_COMMA?
+  private static boolean variable_expression_method_call_2_0_1(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "variable_expression_method_call_2_0_1")) return false;
+    consumeToken(b, METHOD_CALL_ARGUMENT_COMMA);
+    return true;
+  }
+
+  /* ********************************************************** */
+  // METHOD_CALL_ARGUMENT | (METHOD_CALL_ARGUMENT_PART? variable METHOD_CALL_ARGUMENT_PART?)+
+  public static boolean variable_expression_method_call_argument(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "variable_expression_method_call_argument")) return false;
+    boolean r;
+    Marker m = enter_section_(b, l, _NONE_, VARIABLE_EXPRESSION_METHOD_CALL_ARGUMENT, "<variable expression method call argument>");
+    r = consumeToken(b, METHOD_CALL_ARGUMENT);
+    if (!r) r = variable_expression_method_call_argument_1(b, l + 1);
+    exit_section_(b, l, m, r, false, null);
+    return r;
+  }
+
+  // (METHOD_CALL_ARGUMENT_PART? variable METHOD_CALL_ARGUMENT_PART?)+
+  private static boolean variable_expression_method_call_argument_1(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "variable_expression_method_call_argument_1")) return false;
+    boolean r;
+    Marker m = enter_section_(b);
+    r = variable_expression_method_call_argument_1_0(b, l + 1);
+    while (r) {
+      int c = current_position_(b);
+      if (!variable_expression_method_call_argument_1_0(b, l + 1)) break;
+      if (!empty_element_parsed_guard_(b, "variable_expression_method_call_argument_1", c)) break;
+    }
+    exit_section_(b, m, null, r);
+    return r;
+  }
+
+  // METHOD_CALL_ARGUMENT_PART? variable METHOD_CALL_ARGUMENT_PART?
+  private static boolean variable_expression_method_call_argument_1_0(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "variable_expression_method_call_argument_1_0")) return false;
+    boolean r;
+    Marker m = enter_section_(b);
+    r = variable_expression_method_call_argument_1_0_0(b, l + 1);
+    r = r && variable(b, l + 1);
+    r = r && variable_expression_method_call_argument_1_0_2(b, l + 1);
+    exit_section_(b, m, null, r);
+    return r;
+  }
+
+  // METHOD_CALL_ARGUMENT_PART?
+  private static boolean variable_expression_method_call_argument_1_0_0(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "variable_expression_method_call_argument_1_0_0")) return false;
+    consumeToken(b, METHOD_CALL_ARGUMENT_PART);
+    return true;
+  }
+
+  // METHOD_CALL_ARGUMENT_PART?
+  private static boolean variable_expression_method_call_argument_1_0_2(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "variable_expression_method_call_argument_1_0_2")) return false;
+    consumeToken(b, METHOD_CALL_ARGUMENT_PART);
+    return true;
   }
 
   /* ********************************************************** */

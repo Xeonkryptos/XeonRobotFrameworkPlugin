@@ -71,6 +71,22 @@ class RobotHighlighter @JvmOverloads constructor(private val project: Project? =
         val VARIABLE_DATA_TYPE_MARKER: TextAttributesKey =
             TextAttributesKey.createTextAttributesKey("ROBOT_VARIABLE_DATA_TYPE_MARKER", DefaultLanguageHighlighterColors.OPERATION_SIGN)
 
+        @JvmField
+        val VARIABLE_EXTENDED_ACCESS_OPERATOR: TextAttributesKey =
+            TextAttributesKey.createTextAttributesKey("ROBOT_VARIABLE_EXTENDED_ACCESS_OPERATOR", DefaultLanguageHighlighterColors.DOT)
+
+        @JvmField
+        val VARIABLE_METHOD_CALL: TextAttributesKey =
+            TextAttributesKey.createTextAttributesKey("ROBOT_VARIABLE_METHOD_CALL", DefaultLanguageHighlighterColors.INSTANCE_METHOD)
+
+        @JvmField
+        val VARIABLE_METHOD_CALL_PARENTHESES: TextAttributesKey =
+            TextAttributesKey.createTextAttributesKey("ROBOT_VARIABLE_METHOD_CALL_PARENTHESES", DefaultLanguageHighlighterColors.PARENTHESES)
+
+        @JvmField
+        val VARIABLE_METHOD_CALL_COMMA: TextAttributesKey =
+            TextAttributesKey.createTextAttributesKey("ROBOT_VARIABLE_METHOD_CALL_COMMA", DefaultLanguageHighlighterColors.COMMA)
+
         private val keys: MutableMap<IElementType?, TextAttributesKey?> = mutableMapOf()
 
         init {
@@ -134,6 +150,14 @@ class RobotHighlighter @JvmOverloads constructor(private val project: Project? =
             keys[ExtendedRobotTypes.EXTENDED_VARIABLE_ACCESS_BODY] = VARIABLE
             keys[RobotTypes.VARIABLE_ACCESS_START] = EXTENDED_VARIABLE_ACCESS_BRACKETS
             keys[RobotTypes.VARIABLE_ACCESS_END] = EXTENDED_VARIABLE_ACCESS_BRACKETS
+
+            keys[RobotTypes.DOT_OPERATOR] = VARIABLE_EXTENDED_ACCESS_OPERATOR
+            keys[RobotTypes.VARIABLE_BODY_METHOD_CALL_NAME] = VARIABLE_METHOD_CALL
+            keys[RobotTypes.METHOD_CALL_LBRACE] = VARIABLE_METHOD_CALL_PARENTHESES
+            keys[RobotTypes.METHOD_CALL_RBRACE] = VARIABLE_METHOD_CALL_PARENTHESES
+            keys[RobotTypes.METHOD_CALL_ARGUMENT_COMMA] = VARIABLE_METHOD_CALL_COMMA
+            keys[RobotTypes.METHOD_CALL_ARGUMENT] = PYTHON_EXPRESSION_CONTENT
+            keys[RobotTypes.METHOD_CALL_ARGUMENT_PART] = PYTHON_EXPRESSION_CONTENT
 
             keys[RobotTypes.DATATYPE_CONVERSION_COLON] = VARIABLE_DATA_TYPE_MARKER
             keys[RobotTypes.VARIABLE_DATA_TYPE] = VARIABLE_DATA_TYPE

@@ -21,4 +21,24 @@
             <option name="FOREGROUND" value="5B6B7A"/>
         </value>
     </option>
+    <option name="ROBOT_VARIABLE_EXTENDED_ACCESS_OPERATOR">
+        <value>
+            <option name="FOREGROUND" value="5B6B7A"/>
+        </value>
+    </option>
+    <option name="ROBOT_VARIABLE_METHOD_CALL">
+        <value>
+            <option name="FOREGROUND" value="3A6FD8"/>
+        </value>
+    </option>
+    <option name="ROBOT_VARIABLE_METHOD_CALL_PARENTHESES">
+        <value>
+            <option name="FOREGROUND" value="0F7B86"/>
+        </value>
+    </option>
+    <option name="ROBOT_VARIABLE_METHOD_CALL_COMMA">
+        <value>
+            <option name="FOREGROUND" value="5B6B7A"/>
+        </value>
+    </option>
 </list>

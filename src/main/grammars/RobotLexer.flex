@@ -203,8 +203,9 @@ AllowedEverythingButSpecialVariableSeq = {AllowedEverythingButSpecialVariableCha
 AllowedExtendedVariableAccessChar = [^\s\[\]$@%&] | {EscapeChar}{1} "[" | {EscapeChar}{1} "]" | {ExceptionForAllowedVariableChar}
 AllowedExtendedVariableAccessSeq = {AllowedExtendedVariableAccessChar}+
 
-VariableLiteralValueDataTypeConversion =   ([^}$@&%:\r\n] | {ExceptionForAllowedVariableChar} | {OpeningVariable})+
-VariableLiteralValue =   ([^}$@&%\r\n] | {ExceptionForAllowedVariableChar} | {OpeningVariable})+
+VariableLiteralValueDataTypeConversion = ([^}$@&%:\r\n] | {ExceptionForAllowedVariableChar} | {OpeningVariable})+
+VariableLiteralValueExtendedSyntax = ([^}$@&%.\r\n] | {ExceptionForAllowedVariableChar} | {OpeningVariable})+
+VariableLiteralValue = ([^}$@&%\r\n] | {ExceptionForAllowedVariableChar} | {OpeningVariable})+
 EverythingButVariableValue = {AllowedEverythingButVariableSeq} ({Space} {AllowedEverythingButVariableSeq})*
 EverythingButSpecialVariableValue = {AllowedEverythingButSpecialVariableSeq} ({Space} {AllowedEverythingButSpecialVariableSeq})*
 KeywordLibraryNameLiteralValue = {EverythingButVariableValue} "."
@@ -265,12 +266,13 @@ LineComment = {LineCommentSign} {NON_EOL}*
 %state USER_KEYWORD_NAME_DEFINITION, USER_KEYWORD_DEFINITION, USER_KEYWORD_RETURN_STATEMENT
 %state SETTING, SETTING_TEMPLATE_START, LOCAL_TEMPLATE_DEFINITION_START, INTERMEDIATE_TEMPLATE_CONFIGURATION, TEMPLATE_DEFINITION, TEMPLATE_ARGUMENTS
 %state KEYWORD_CALL, KEYWORD_ARGUMENTS, SINGLE_LITERAL_CONSTANT_START, SINGLE_LITERAL_CONSTANT
-%state INLINE_VARIABLE_DEFINITION, VARIABLE_DEFINITION, TEST_TASK_CASE_VARIABLE_DEFINITION, VARIABLE_DEFINITION_ARGUMENTS, VARIABLE_USAGE, EXTENDED_VARIABLE_ACCESS
+%state INLINE_VARIABLE_DEFINITION, VARIABLE_DEFINITION, TEST_TASK_CASE_VARIABLE_DEFINITION, VARIABLE_DEFINITION_ARGUMENTS, VARIABLE_USAGE, EXTENDED_VARIABLE_ACCESS, EXTENDED_VARIABLE_SYNTAX_METHOD_ARGUMENTS
 %state PARAMETER_VALUE, TEMPLATE_PARAMETER_VALUE
 %state FOR_STRUCTURE, SIMPLE_CONTROL_STRUCTURE_START, FOR_STRUCTURE_LOOP_START, SIMPLE_CONTROL_STRUCTURE, FOR_STRUCTURE_LOOP, WHILE_CONFIGURATION
 %state PYTHON_EVALUATED_EXPRESSION_START, KEYWORD_PYTHON_EXPRESSION, PYTHON_EXPRESSION, PYTHON_EXECUTED_CONDITION, PYTHON_EVALUATED_CONTROL_STRUCTURE_START
 
-%xstate VARIABLE_DATATYPE_CONVERSION
+%xstate VARIABLE_DATATYPE_CONVERSION, EXTENDED_VARIABLE_SYNTAX
+%xstate EXTENDED_VARIABLE_SYNTAX_METHOD_ARGUMENT_VALUES
 %xstate COMMENTS_SECTION, INVALID_SECTION, LITERAL_CONSTANT_ONLY, SETTING_VALUES, LOCAL_SETTING_DEFINITION
 %xstate NORMAL_PARAMETER_ASSIGNMENT, TEMPLATE_PARAMETER_ASSIGNMENT
 %xstate KEYWORD_LIBRARY_NAME_SEPARATOR, KEYWORD_CALL_NAME, KEYWORD_LIBRARY_NAME_SEPARATOR_FOR_SPECIAL_KEYWORD
@@ -391,6 +393,29 @@ LineComment = {LineCommentSign} {NON_EOL}*
     [^]                            { yypushback(yylength()); leaveState(); break; }
 }
 
+<EXTENDED_VARIABLE_SYNTAX> {
+    "."                                        { return DOT_OPERATOR; }
+    [\w_]+                                     { return VARIABLE_BODY; }
+    [\w_]+ {NonNewlineWhitespace}* "("         { yypushback(1); pushBackTrailingWhitespace(); enterNewState(EXTENDED_VARIABLE_SYNTAX_METHOD_ARGUMENTS); return VARIABLE_BODY_METHOD_CALL_NAME; }
+    {NonNewlineWhitespace}+                    { return WHITE_SPACE; }
+    [^]                                        { yypushback(yylength()); leaveState(); break; }
+}
+
+<EXTENDED_VARIABLE_SYNTAX_METHOD_ARGUMENTS> {
+    "(" { yybegin(EXTENDED_VARIABLE_SYNTAX_METHOD_ARGUMENT_VALUES); enterMethodArguments(); return METHOD_CALL_LBRACE; }
+    [^] { yypushback(yylength()); leaveState(); break; }
+}
+
+<EXTENDED_VARIABLE_SYNTAX_METHOD_ARGUMENT_VALUES> {
+    {ScalarVariableStart} { markVariableInMethodArgument(); yypushback(yylength() - 1); enterNewState(VARIABLE_USAGE); enterNewState(VARIABLE_OPENING_BRACE); return SCALAR_VARIABLE_START; }
+    {ListVariableStart} { markVariableInMethodArgument(); yypushback(yylength() - 1); enterNewState(VARIABLE_USAGE); enterNewState(VARIABLE_OPENING_BRACE); return LIST_VARIABLE_START; }
+    {DictVariableStart} { markVariableInMethodArgument(); yypushback(yylength() - 1); enterNewState(VARIABLE_USAGE); enterNewState(VARIABLE_OPENING_BRACE); return DICT_VARIABLE_START; }
+    {EnvVariableStart} { markVariableInMethodArgument(); yypushback(yylength() - 1); enterNewState(VARIABLE_USAGE); enterNewState(VARIABLE_OPENING_BRACE); return ENV_VARIABLE_START; }
+    // Everything else is handled by scanMethodArgument which tracks quotes and brackets (not expressible as a regular expression)
+    [^\r\n$@&%] [^\r\n]* | [$@&%] [^{\r\n] [^\r\n]* | [$@&%]   { return scanMethodArgument(); }
+    [^]                                                       { yypushback(yylength()); leaveMethodArguments(); leaveState(); break; }
+}
+
 <VARIABLE_DEFINITION_ARGUMENTS> {
     {EqualSign} {NonNewlineWhitespace}* {EverythingButVariableValue}?       { yypushback(yylength() - 1); return ASSIGNMENT; }
     [Ss][Cc][Oo][Pp][Ee] {EqualSign} !{KeywordFinishedMarker}               { yypushback(yylength() - "scope".length()); enterNewState(NORMAL_PARAMETER_ASSIGNMENT); return PARAMETER_NAME; }
@@ -399,31 +424,33 @@ LineComment = {LineCommentSign} {NON_EOL}*
 }
 
 <VARIABLE_USAGE, TEST_TASK_CASE_VARIABLE_DEFINITION> {
-    {ClosingVariable} "["                           { leaveState(); enterNewState(EXTENDED_VARIABLE_ACCESS); yypushback(1); return VARIABLE_RBRACE; }
-    {ClosingVariable} "]"                           { leaveState(); yypushback(1); return VARIABLE_RBRACE; }
-    {ClosingVariable}                               { leaveState(); return VARIABLE_RBRACE; }
-    {OpeningVariable} (!{ClosingVariable}{2})+      { enterNewState(PYTHON_EXPRESSION); yypushback(yylength() - 1); return PYTHON_EXPRESSION_START; }
+    {ClosingVariable} "["                            { leaveState(); enterNewState(EXTENDED_VARIABLE_ACCESS); yypushback(1); return VARIABLE_RBRACE; }
+    {ClosingVariable} "]"                            { leaveState(); yypushback(1); return VARIABLE_RBRACE; }
+    {ClosingVariable}                                { leaveState(); return VARIABLE_RBRACE; }
+    {OpeningVariable} (!{ClosingVariable}{2})+       { enterNewState(PYTHON_EXPRESSION); yypushback(yylength() - 1); return PYTHON_EXPRESSION_START; }
 }
 
 <VARIABLE_DEFINITION, VARIABLE_USAGE, TEST_TASK_CASE_VARIABLE_DEFINITION> {
-    {VariableLiteralValue}                          { return VARIABLE_BODY; }
-    {EOL}                                           { leaveState(); return EOL; }
+    // Has to be at least as long as VariableLiteralValue (listed afterwards) to win the longest match and so reaches the whole variable body
+    {VariableLiteralValueExtendedSyntax} "." {VariableLiteralValue}?  { yypushback(yylength() - indexOf('.')); enterNewState(EXTENDED_VARIABLE_SYNTAX); return VARIABLE_BODY; }
+    {VariableLiteralValue}                           { return VARIABLE_BODY; }
+    {EOL}                                            { leaveState(); return EOL; }
 }
 <SPECIAL_VARIABLE_USAGE> {
-    \w+                                             { return VARIABLE_BODY; }
-    [^]                                             { leaveState(); yypushback(yylength()); break; }
+    \w+                                              { return VARIABLE_BODY; }
+    [^]                                              { leaveState(); yypushback(yylength()); break; }
 }
 
 <EXTENDED_VARIABLE_ACCESS> {
-    "["                                             { return VARIABLE_ACCESS_START; }
-    "]"                                             { return VARIABLE_ACCESS_END; }
-    "]" ({WhitespaceIncludingNewline}+ | [^\[]{1})  {
+    "["                                              { return VARIABLE_ACCESS_START; }
+    "]"                                              { return VARIABLE_ACCESS_END; }
+    "]" ({WhitespaceIncludingNewline}+ | [^\[]{1})   {
           leaveState();
           yypushback(yylength() - 1);
           return VARIABLE_ACCESS_END;
       }
-    {ExtendedVariableAccessValue}                   { return EXTENDED_VARIABLE_ACCESS_BODY; }
-    {EOL}                                           { leaveState(); return EOL; }
+    {ExtendedVariableAccessValue}                    { return EXTENDED_VARIABLE_ACCESS_BODY; }
+    {EOL}                                            { leaveState(); return EOL; }
 }
 
 <PYTHON_EXPRESSION> {

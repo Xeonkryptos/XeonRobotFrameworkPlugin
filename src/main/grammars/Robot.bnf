@@ -516,8 +516,8 @@ variable_expression_definition ::= variable_expression_id (DOT_OPERATOR (variabl
 private variable_expression ::= variable_expression_id | variable_expression_method_call
 variable_expression_id ::= VARIABLE_BODY {methods=[getReference]}
 
-variable_expression_method_call ::= variable_expression_method_call_id METHOD_CALL_LBRACE variable_expression_method_call_argument* METHOD_CALL_RBRACE {pin=1}
-variable_expression_method_call_argument ::= METHOD_CALL_ARGUMENT
+variable_expression_method_call ::= variable_expression_method_call_id METHOD_CALL_LBRACE (variable_expression_method_call_argument METHOD_CALL_ARGUMENT_COMMA?)* METHOD_CALL_RBRACE {pin=1}
+variable_expression_method_call_argument ::= METHOD_CALL_ARGUMENT | (METHOD_CALL_ARGUMENT_PART? variable METHOD_CALL_ARGUMENT_PART?)+
 variable_expression_method_call_id ::= VARIABLE_BODY_METHOD_CALL_NAME {methods=[getReference]}
 
 variable_content ::= (variable | VARIABLE_BODY)+ {
