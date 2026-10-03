@@ -17,8 +17,8 @@ public class RobotPositionalArgumentReference extends PsiReferenceBase<RobotPosi
     @Nullable
     @Override
     public PsiElement resolve() {
-        RobotPositionalArgument positionalArgument = getElement();
-        return ResolveCache.getInstance(positionalArgument.getProject()).resolveWithCaching(this, (reference, incompleteCode) -> {
+        return ResolveCache.getInstance(getElement().getProject()).resolveWithCaching(this, (reference, incompleteCode) -> {
+            RobotPositionalArgument positionalArgument = reference.getElement();
             Object[] variants = RobotEnumValuesResolver.findPossibleEnumValuesFor(positionalArgument);
             if (variants.length > 0) {
                 String enumValue = positionalArgument.getText();

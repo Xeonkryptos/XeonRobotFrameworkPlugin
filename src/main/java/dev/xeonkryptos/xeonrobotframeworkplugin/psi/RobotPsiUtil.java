@@ -62,6 +62,7 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotUserKeywordStat
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotUserKeywordStatementId;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariable;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableContent;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableDatatype;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableDatatypeContainer;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableDefinition;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableDefinitionBody;
@@ -75,6 +76,7 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.reference.RobotParameterRefe
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.reference.RobotPositionalArgumentReference;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.reference.RobotTemplateParameterReference;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.reference.RobotVariableContentReference;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.reference.RobotVariableDatatypeReference;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotDictVariableStub;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotKeywordCallStub;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotListVariableStub;
@@ -272,6 +274,11 @@ public class RobotPsiUtil {
     @NotNull
     public static PsiReference getReference(RobotTemplateParameterId templateParameterId) {
         return new RobotTemplateParameterReference(templateParameterId);
+    }
+
+    @NotNull
+    public static PsiReference getReference(RobotVariableDatatype variableDatatype) {
+        return new RobotVariableDatatypeReference(variableDatatype);
     }
 
     @NotNull

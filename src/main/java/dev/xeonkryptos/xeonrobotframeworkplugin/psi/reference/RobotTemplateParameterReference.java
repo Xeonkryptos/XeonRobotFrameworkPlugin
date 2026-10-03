@@ -1,6 +1,5 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.psi.reference;
 
-import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiReference;
 import com.intellij.psi.PsiReferenceBase;
@@ -20,10 +19,9 @@ public class RobotTemplateParameterReference extends PsiReferenceBase<RobotTempl
     @Nullable
     @Override
     public PsiElement resolve() {
-        RobotTemplateParameterId parameterId = getElement();
-        Project project = parameterId.getProject();
-        ResolveCache resolveCache = ResolveCache.getInstance(project);
+        ResolveCache resolveCache = ResolveCache.getInstance(getElement().getProject());
         return resolveCache.resolveWithCaching(this, (robotParameterReference, incompleteCode) -> {
+            RobotTemplateParameterId parameterId = robotParameterReference.getElement();
             String parameterName = parameterId.getText();
             RobotKeywordCall keywordCall = KeywordUtil.findTemplateKeywordCall(parameterId);
             return keywordCall != null ? keywordCall.findParameterReference(parameterName) : null;

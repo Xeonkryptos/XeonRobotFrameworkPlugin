@@ -510,7 +510,7 @@ variable_datatype_container ::= variable_datatype_parameterized | variable_datat
 }
 variable_datatype_parameterized ::= variable_datatype VARIABLE_DATA_TYPE_PARAM_LBRACE variable_datatype_container VARIABLE_DATA_TYPE_PARAM_RBRACE {pin=2}
 variable_datatype_union ::= (variable_datatype_parameterized | variable_datatype) VARIABLE_DATA_TYPE_UNION_MARKER (variable_datatype_parameterized | variable_datatype) {pin=2}
-variable_datatype ::= VARIABLE_DATA_TYPE
+variable_datatype ::= VARIABLE_DATA_TYPE {methods=[getReference]}
 
 variable_expression_definition ::= variable_expression_id (DOT_OPERATOR (variable_expression | variable))+ {pin=2}
 private variable_expression ::= variable_expression_id | variable_expression_method_call

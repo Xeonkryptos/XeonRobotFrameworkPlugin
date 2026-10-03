@@ -32,15 +32,15 @@ public class RobotVariableContentReference extends PsiPolyVariantReferenceBase<R
 
     @Override
     public ResolveResult @NotNull [] multiResolve(boolean incompleteCode) {
-        RobotVariableContent variableContent = getElement();
-        RobotVariable variable = PsiTreeUtil.getParentOfType(variableContent, RobotVariable.class);
+        RobotVariable variable = PsiTreeUtil.getParentOfType(getElement(), RobotVariable.class);
         if (variable == null) {
             return ResolveResult.EMPTY_ARRAY;
         }
 
-        Project project = variableContent.getProject();
+        Project project = getElement().getProject();
         ResolveCache resolveCache = ResolveCache.getInstance(project);
         return resolveCache.resolveWithCaching(this, (robotVariableReference, incompCode) -> {
+            RobotVariableContent variableContent = robotVariableReference.getElement();
             String variableName = variable.getVariableName();
             if (variableName == null) {
                 return ResolveResult.EMPTY_ARRAY;

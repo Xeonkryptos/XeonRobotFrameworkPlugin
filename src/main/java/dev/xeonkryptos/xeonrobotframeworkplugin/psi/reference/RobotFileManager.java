@@ -6,7 +6,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.roots.ModuleRootManager;
 import com.intellij.openapi.util.Key;
 import com.intellij.openapi.util.UserDataHolder;
-import com.intellij.openapi.vfs.VfsUtil;
+import com.intellij.openapi.vfs.VfsUtilCore;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
@@ -46,7 +46,7 @@ public class RobotFileManager {
         if (moduleForFile != null) {
             VirtualFile[] contentRoots = ModuleRootManager.getInstance(moduleForFile).getContentRoots();
             for (VirtualFile contentRoot : contentRoots) {
-                if (VfsUtil.isAncestor(contentRoot, sourceFile, true)) {
+                if (VfsUtilCore.isAncestor(contentRoot, sourceFile, true)) {
                     return contentRoot;
                 }
             }

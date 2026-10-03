@@ -23,6 +23,7 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.util.RobotNames;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedHashSet;
@@ -36,9 +37,9 @@ public class RobotKeywordCallNameReference extends PsiPolyVariantReferenceBase<R
 
     @Override
     public ResolveResult @NotNull [] multiResolve(boolean incompleteCode) {
-        RobotKeywordCallName keywordCallName = getElement();
-        ResolveCache resolveCache = ResolveCache.getInstance(keywordCallName.getProject());
+        ResolveCache resolveCache = ResolveCache.getInstance(getElement().getProject());
         return resolveCache.resolveWithCaching(this, (robotKeywordReference, incompCode) -> {
+            RobotKeywordCallName keywordCallName = robotKeywordReference.getElement();
             PsiFile containingFile = keywordCallName.getContainingFile();
             PsiElement[] keywordReferences = findKeywordReferences(keywordCallName, containingFile);
             return Arrays.stream(keywordReferences).map(PsiElementResolveResult::new).toArray(ResolveResult[]::new);
@@ -77,7 +78,7 @@ public class RobotKeywordCallNameReference extends PsiPolyVariantReferenceBase<R
         Project project = myElement.getProject();
         GlobalSearchScope searchScope = GlobalSearchScope.filesWithLibrariesScope(project, importedFiles);
 
-        Collection<RobotUserKeywordStatement> userKeywordStatements = KeywordDefinitionNameIndex.getUserKeywordStatements(keyword, project, searchScope);
+        Collection<RobotUserKeywordStatement> userKeywordStatements = new ArrayList<>(KeywordDefinitionNameIndex.getUserKeywordStatements(keyword, project, searchScope));
         Collection<RobotUserKeywordStatement> embeddedUserKeywordStatements = EmbeddedKeywordDefinitionNameIndex.getEmbeddedUserKeywordStatements(keyword, project, searchScope);
         userKeywordStatements.addAll(embeddedUserKeywordStatements);
         Collection<PyFunction> pythonKeywordFunctions = PyRobotKeywordDefinitionIndexUtil.findKeywordFunctions(keyword, psiFile.getProject(), searchScope);
@@ -89,7 +90,7 @@ public class RobotKeywordCallNameReference extends PsiPolyVariantReferenceBase<R
             userKeywordStatements.addAll(embeddedUserKeywordStatementsWithFullReference);
             pythonKeywordFunctions = PyRobotKeywordDefinitionIndexUtil.findKeywordFunctions(fullKeywordName, psiFile.getProject(), searchScope);
         }
-        Collection<PsiElement> keywordElements = new LinkedHashSet<>(userKeywordStatements.size() + pythonKeywordFunctions.size());
+        Collection<PsiElement> keywordElements = LinkedHashSet.newLinkedHashSet(userKeywordStatements.size() + pythonKeywordFunctions.size());
         keywordElements.addAll(userKeywordStatements);
         keywordElements.addAll(pythonKeywordFunctions);
 

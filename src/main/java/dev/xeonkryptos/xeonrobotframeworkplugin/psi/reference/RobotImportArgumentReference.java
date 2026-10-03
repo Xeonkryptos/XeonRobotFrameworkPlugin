@@ -64,7 +64,7 @@ public class RobotImportArgumentReference extends PsiPolyVariantReferenceBase<Ro
 
     @Override
     public ResolveResult @NotNull [] multiResolve(boolean incompleteCode) {
-        return ResolveCache.getInstance(getElement().getProject()).resolveWithCaching(this, (resolver, incompCode) -> multiResolve(getElement()), false, incompleteCode);
+        return ResolveCache.getInstance(getElement().getProject()).resolveWithCaching(this, (resolver, incompCode) -> multiResolve(resolver.getElement()), false, incompleteCode);
     }
 
     private static ResolveResult @NotNull [] multiResolve(RobotImportArgument importArgument) {

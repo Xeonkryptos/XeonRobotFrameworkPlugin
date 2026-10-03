@@ -13,8 +13,6 @@
     <depends>PythonCore</depends>
 
     <depends optional="true" config-file="dev.xeonkryptos.xeonrobotframeworkplugin-withIntelliLangBundled.xml">org.intellij.intelliLang</depends>
-    <!--suppress PluginXmlValidity -->
-    <depends optional="true" config-file="dev.xeonkryptos.xeonrobotframeworkplugin-withIntelliLangModule.xml">intellij.platform.langInjection</depends>
 
     <incompatible-with>robocorp.lsp.intellij</incompatible-with>
     <incompatible-with>com.github.jnhyperion.hyperrobotframeworkplugin</incompatible-with>
@@ -105,6 +103,8 @@
                                  implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.manipulator.RobotParameterIdManipulator"/>
         <lang.elementManipulator forClass="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTemplateParameterId"
                                  implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.manipulator.RobotTemplateParameterIdManipulator"/>
+        <lang.elementManipulator forClass="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableDatatype"
+                                 implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.manipulator.RobotVariableDatatypeManipulator"/>
 
         <!-- Manipulators required for language injection -->
         <lang.elementManipulator forClass="dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotConditionalContent"

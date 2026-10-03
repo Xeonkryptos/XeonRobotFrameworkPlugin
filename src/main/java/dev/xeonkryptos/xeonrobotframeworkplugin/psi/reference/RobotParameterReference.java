@@ -26,10 +26,10 @@ public class RobotParameterReference extends PsiReferenceBase<RobotParameterId> 
     @Nullable
     @Override
     public PsiElement resolve() {
-        RobotParameterId parameterId = getElement();
-        ResolveCache resolveCache = ResolveCache.getInstance(parameterId.getProject());
+        ResolveCache resolveCache = ResolveCache.getInstance(getElement().getProject());
         return resolveCache.resolveWithCaching(this, (robotParameterReference, incompleteCode) -> {
-            String parameterName = parameterId.getText();
+            RobotParameterId parameterId = robotParameterReference.getElement();
+            String parameterName = robotParameterReference.getElement().getText();
             RobotKeywordCall keywordCall = PsiTreeUtil.getParentOfType(parameterId, RobotKeywordCall.class);
             PsiElement reference = null;
             if (keywordCall != null) {

@@ -30,6 +30,7 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTestCaseId;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotUserKeywordStatementId;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariable;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableContent;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableDatatype;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableDatatypeContainer;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableDefinitionBody;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.visitor.RecursiveRobotVisitor;
@@ -441,6 +442,22 @@ public record RobotElementGenerator(Project project) {
         return finder.variableDatatypeContainer;
     }
 
+    public RobotVariableDatatype createNewVariableDatatype(String parameter) {
+        String fileContent = """
+                             *** Keywords ***
+                             Dummy
+                                 ${Variable: %s}=  Set Variable  ABC
+                             """.formatted(parameter);
+        PsiFile psiFile = createDummyPsiFile(fileContent);
+        if (psiFile == null) {
+            return null;
+        }
+
+        RobotVariableDatatypeFinder finder = new RobotVariableDatatypeFinder();
+        psiFile.acceptChildren(finder);
+        return finder.variableDatatype;
+    }
+
     public PsiFile createDummyPsiFile(String text) {
         PsiFileFactory factory = PsiFileFactory.getInstance(project);
 
@@ -609,6 +626,16 @@ public record RobotElementGenerator(Project project) {
         @Override
         public void visitVariableDatatypeContainer(@NotNull RobotVariableDatatypeContainer o) {
             variableDatatypeContainer = o;
+        }
+    }
+
+    private static final class RobotVariableDatatypeFinder extends RecursiveRobotVisitor {
+
+        private RobotVariableDatatype variableDatatype;
+
+        @Override
+        public void visitVariableDatatype(@NotNull RobotVariableDatatype o) {
+            variableDatatype = o;
         }
     }
 
