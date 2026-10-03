@@ -10,6 +10,7 @@ import com.intellij.psi.util.PsiTreeUtil;
 import static dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes.*;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.*;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotPsiUtil;
+import com.intellij.psi.PsiReference;
 
 public class RobotVariableExpressionMethodCallIdImpl extends RobotPsiElementBase implements RobotVariableExpressionMethodCallId {
 
@@ -25,6 +26,11 @@ public class RobotVariableExpressionMethodCallIdImpl extends RobotPsiElementBase
   public void accept(@NotNull PsiElementVisitor visitor) {
     if (visitor instanceof RobotVisitor) accept((RobotVisitor)visitor);
     else super.accept(visitor);
+  }
+
+  @Override
+  public @NotNull PsiReference getReference() {
+    return RobotPsiUtil.getReference(this);
   }
 
 }

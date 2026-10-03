@@ -56,6 +56,10 @@ class VariableCompletionProvider extends CompletionProvider<CompletionParameters
     @Override
     protected void addCompletions(@NotNull CompletionParameters parameters, @NotNull ProcessingContext context, @NotNull CompletionResultSet result) {
         PsiElement psiElement = parameters.getPosition();
+        if (ExtendedVariableCompletionProviderKt.extendedVariableSegmentAt(psiElement) != null) {
+            // Members of an accessed object are provided by the ExtendedVariableCompletionProvider
+            return;
+        }
         PsiElement localSettingElement = PsiTreeUtil.getParentOfType(psiElement, RobotLocalSetting.class, RobotLocalArgumentsSetting.class);
         if (localSettingElement instanceof RobotLocalArgumentsSetting) {
             return;

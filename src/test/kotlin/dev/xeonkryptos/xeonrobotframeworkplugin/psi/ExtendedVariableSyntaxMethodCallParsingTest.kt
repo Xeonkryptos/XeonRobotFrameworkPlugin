@@ -99,6 +99,8 @@ class ExtendedVariableSyntaxMethodCallParsingTest : BasePlatformTestCase() {
         assertEquals(3, calls.size)
     }
 
+    fun `test variables as part of the access chain`() = assertNoErrors(keywordCall("\${OBJECT.\${attr}.name} \${OBJECT.attr.\${other}} \${OBJECT.first(1).\${attr}.run(2)}"))
+
     fun `test multiple expressions in one line`() {
         val calls = methodCalls(keywordCall("\${A.run('(', 1)}    \${B.run(2)}"))
         assertEquals(listOf(listOf("'('", "1"), listOf("2")), calls.map { argumentTexts(it) })

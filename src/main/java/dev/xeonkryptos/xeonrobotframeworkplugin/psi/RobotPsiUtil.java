@@ -66,6 +66,8 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableDatatyp
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableDatatypeContainer;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableDefinition;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableDefinitionBody;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableExpressionId;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableExpressionMethodCallId;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableStatement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariablesSection;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotTestCaseExtension;
@@ -77,6 +79,8 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.reference.RobotPositionalArg
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.reference.RobotTemplateParameterReference;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.reference.RobotVariableContentReference;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.reference.RobotVariableDatatypeReference;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.reference.RobotVariableExpressionIdReference;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.reference.RobotVariableExpressionMethodCallIdReference;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotDictVariableStub;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotKeywordCallStub;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotListVariableStub;
@@ -279,6 +283,16 @@ public class RobotPsiUtil {
     @NotNull
     public static PsiReference getReference(RobotVariableDatatype variableDatatype) {
         return new RobotVariableDatatypeReference(variableDatatype);
+    }
+
+    @NotNull
+    public static PsiReference getReference(RobotVariableExpressionId variableExpressionId) {
+        return new RobotVariableExpressionIdReference(variableExpressionId);
+    }
+
+    @NotNull
+    public static PsiReference getReference(RobotVariableExpressionMethodCallId variableExpressionMethodCallId) {
+        return new RobotVariableExpressionMethodCallIdReference(variableExpressionMethodCallId);
     }
 
     @NotNull

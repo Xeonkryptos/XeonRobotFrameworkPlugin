@@ -7,6 +7,7 @@ import org.jetbrains.annotations.NotNull;
 
 public class RobotContextLevelWeigher extends CompletionWeigher {
 
+    private static final int EXTENDED_VARIABLE_SYNTAX_WEIGHT = 2_000;
     private static final int PROJECT_SCOPE_WEIGHT = 1_050;
     private static final int LIBRARY_SCOPE_WEIGHT = 1_025;
     private static final int PARAMETER_WEIGHT = 1_000;
@@ -18,6 +19,9 @@ public class RobotContextLevelWeigher extends CompletionWeigher {
     @SuppressWarnings("rawtypes")
     public Comparable weigh(@NotNull LookupElement element, @NotNull CompletionLocation location) {
         RobotLookupContext lookupContext = element.getUserData(CompletionKeys.ROBOT_LOOKUP_CONTEXT);
+        if (lookupContext == RobotLookupContext.EXTENDED_VARIABLE_SYNTAX) {
+            return EXTENDED_VARIABLE_SYNTAX_WEIGHT;
+        }
         if (lookupContext == RobotLookupContext.WITHIN_KEYWORD_STATEMENT) {
             RobotLookupElementType lookupElementType = element.getUserData(CompletionKeys.ROBOT_LOOKUP_ELEMENT_TYPE);
             if (lookupElementType == RobotLookupElementType.PARAMETER || lookupElementType == RobotLookupElementType.ARGUMENT) {

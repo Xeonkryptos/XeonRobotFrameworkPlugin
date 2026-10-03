@@ -395,6 +395,10 @@ LineComment = {LineCommentSign} {NON_EOL}*
 
 <EXTENDED_VARIABLE_SYNTAX> {
     "."                                        { return DOT_OPERATOR; }
+    {ScalarVariableStart}                      { yypushback(yylength() - 1); enterNewState(VARIABLE_USAGE); enterNewState(VARIABLE_OPENING_BRACE); return SCALAR_VARIABLE_START; }
+    {ListVariableStart}                        { yypushback(yylength() - 1); enterNewState(VARIABLE_USAGE); enterNewState(VARIABLE_OPENING_BRACE); return LIST_VARIABLE_START; }
+    {DictVariableStart}                        { yypushback(yylength() - 1); enterNewState(VARIABLE_USAGE); enterNewState(VARIABLE_OPENING_BRACE); return DICT_VARIABLE_START; }
+    {EnvVariableStart}                         { yypushback(yylength() - 1); enterNewState(VARIABLE_USAGE); enterNewState(VARIABLE_OPENING_BRACE); return ENV_VARIABLE_START; }
     [\w_]+                                     { return VARIABLE_BODY; }
     [\w_]+ {NonNewlineWhitespace}* "("         { yypushback(1); pushBackTrailingWhitespace(); enterNewState(EXTENDED_VARIABLE_SYNTAX_METHOD_ARGUMENTS); return VARIABLE_BODY_METHOD_CALL_NAME; }
     {NonNewlineWhitespace}+                    { return WHITE_SPACE; }
