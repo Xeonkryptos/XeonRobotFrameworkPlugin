@@ -26,66 +26,76 @@ class RobotLanguageInjectionPerformer : LanguageInjectionPerformer {
         val manipulator = ElementManipulators.getManipulator<PsiLanguageInjectionHost>(context)
         val rangeInElement = manipulator.getRangeInElement(context)
 
+        @Suppress("UnstableApiUsage")
+        val variables = if (context !is RobotVariableDatatypeContainer && context.children.size > 1) context.findChildrenByClass(RobotVariable::class.java) else emptyArray<RobotVariable>()
+
         registrar.startInjecting(language)
-        if (context !is RobotVariableDatatypeContainer && context.children.size > 1) {
-            @Suppress("UnstableApiUsage")
-            val variables = context.findChildrenByClass(RobotVariable::class.java)
-
-            val firstVariableAtStartOfConditionRange = variables.first().textRangeInParent
-            var startOffset = if (firstVariableAtStartOfConditionRange.startOffset != rangeInElement.startOffset) {
-                registrar.addPlace(injection.prefix, null, context, TextRange(rangeInElement.startOffset, firstVariableAtStartOfConditionRange.startOffset))
-                firstVariableAtStartOfConditionRange.endOffset
-            } else {
-                val nextVariable = variables.elementAtOrNull(1)
-                val suffix: String?
-                val endOffset: Int
-                if (nextVariable != null) {
-                    suffix = null
-                    endOffset = nextVariable.textRangeInParent.startOffset
-                } else {
-                    suffix = injection.suffix
-                    endOffset = rangeInElement.endOffset
-                }
-                registrar.addPlace(
-                    "${injection.prefix}${ROBOT_VARIABLE_PLACEHOLDER}",
-                    suffix,
-                    context,
-                    TextRange(firstVariableAtStartOfConditionRange.endOffset, endOffset)
-                )
-                endOffset
-            }
-
-            for (variable in variables.drop(1)) {
-                val variableTextRange = variable.textRangeInParent
-                val suffix = if (variableTextRange.endOffset == rangeInElement.endOffset) injection.suffix else null
-                registrar.addPlace(
-                    ROBOT_VARIABLE_PLACEHOLDER,
-                    suffix,
-                    context,
-                    TextRange(startOffset, variableTextRange.startOffset)
-                )
-                startOffset = variableTextRange.endOffset
-            }
-
-            if (startOffset < rangeInElement.endOffset) {
-                registrar.addPlace(
-                    ROBOT_VARIABLE_PLACEHOLDER,
-                    injection.suffix,
-                    context,
-                    TextRange(startOffset, rangeInElement.endOffset)
-                )
-            } else if (variables.lastOrNull()?.textRangeInParent?.endOffset == rangeInElement.endOffset) {
-                registrar.addPlace(
-                    ROBOT_VARIABLE_PLACEHOLDER,
-                    injection.suffix,
-                    context,
-                    TextRange(rangeInElement.endOffset, rangeInElement.endOffset)
-                )
-            }
+        if (variables.isNotEmpty()) {
+            performInjectionForVariables(variables, rangeInElement, registrar, injection, context)
         } else {
             registrar.addPlace(injection.prefix, injection.suffix, context, rangeInElement)
         }
         registrar.doneInjecting()
         return true
+    }
+
+    private fun performInjectionForVariables(
+        variables: Array<RobotVariable>,
+        rangeInElement: TextRange,
+        registrar: MultiHostRegistrar,
+        injection: Injection,
+        context: PsiLanguageInjectionHost
+    ) {
+        val firstVariableAtStartOfConditionRange = variables.first().textRangeInParent
+        var startOffset = if (firstVariableAtStartOfConditionRange.startOffset != rangeInElement.startOffset) {
+            registrar.addPlace(injection.prefix, null, context, TextRange(rangeInElement.startOffset, firstVariableAtStartOfConditionRange.startOffset))
+            firstVariableAtStartOfConditionRange.endOffset
+        } else {
+            val nextVariable = variables.elementAtOrNull(1)
+            val suffix: String?
+            val endOffset: Int
+            if (nextVariable != null) {
+                suffix = null
+                endOffset = nextVariable.textRangeInParent.startOffset
+            } else {
+                suffix = injection.suffix
+                endOffset = rangeInElement.endOffset
+            }
+            registrar.addPlace(
+                "${injection.prefix}${ROBOT_VARIABLE_PLACEHOLDER}",
+                suffix,
+                context,
+                TextRange(firstVariableAtStartOfConditionRange.endOffset, endOffset)
+            )
+            endOffset
+        }
+
+        for (variable in variables.drop(1)) {
+            val variableTextRange = variable.textRangeInParent
+            val suffix = if (variableTextRange.endOffset == rangeInElement.endOffset) injection.suffix else null
+            registrar.addPlace(
+                ROBOT_VARIABLE_PLACEHOLDER,
+                suffix,
+                context,
+                TextRange(startOffset, variableTextRange.startOffset)
+            )
+            startOffset = variableTextRange.endOffset
+        }
+
+        if (startOffset < rangeInElement.endOffset) {
+            registrar.addPlace(
+                ROBOT_VARIABLE_PLACEHOLDER,
+                injection.suffix,
+                context,
+                TextRange(startOffset, rangeInElement.endOffset)
+            )
+        } else if (variables.lastOrNull()?.textRangeInParent?.endOffset == rangeInElement.endOffset) {
+            registrar.addPlace(
+                ROBOT_VARIABLE_PLACEHOLDER,
+                injection.suffix,
+                context,
+                TextRange(rangeInElement.endOffset, rangeInElement.endOffset)
+            )
+        }
     }
 }
