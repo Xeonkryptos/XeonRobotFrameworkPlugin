@@ -192,7 +192,7 @@
                          groupKey="INSP.GROUP.robot" enabledByDefault="true" level="ERROR"
                          implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.inspections.RobotEvaluateKeywordUnknownModulesInspection"/>
         <localInspection language="Robot" shortName="UnresolvedExtendedVariablePart" bundle="messages.RobotBundle" key="INSP.NAME.unresolved.extended.variable.part"
-                         groupKey="INSP.GROUP.robot" enabledByDefault="true" level="WARNING" dumbAware="false"
+                         groupKey="INSP.GROUP.robot" enabledByDefault="false" level="WARNING" dumbAware="false"
                          implementationClass="dev.xeonkryptos.xeonrobotframeworkplugin.inspections.maintainability.UnresolvedExtendedVariablePartInspection"/>
         <localInspection language="Robot" shortName="EmptyLocalArgumentsSetting" bundle="messages.RobotBundle" key="INSP.NAME.empty.local.arguments.setting"
                          groupKey="INSP.GROUP.robot" enabledByDefault="true" level="WARNING" dumbAware="true"
