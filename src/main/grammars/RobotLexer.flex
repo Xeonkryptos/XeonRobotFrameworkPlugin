@@ -436,7 +436,7 @@ LineComment = {LineCommentSign} {NON_EOL}*
 
 <VARIABLE_DEFINITION, VARIABLE_USAGE, TEST_TASK_CASE_VARIABLE_DEFINITION> {
     // Has to be at least as long as VariableLiteralValue (listed afterwards) to win the longest match and so reaches the whole variable body
-    {VariableLiteralValueExtendedSyntax} "." {VariableLiteralValue}?  { yypushback(yylength() - indexOf('.')); enterNewState(EXTENDED_VARIABLE_SYNTAX); return VARIABLE_BODY; }
+    {VariableLiteralValueExtendedSyntax} "." {VariableLiteralValue}  { yypushback(yylength() - indexOf('.')); enterNewState(EXTENDED_VARIABLE_SYNTAX); return VARIABLE_BODY; }
     {VariableLiteralValue}                           { return VARIABLE_BODY; }
     {EOL}                                            { leaveState(); return EOL; }
 }

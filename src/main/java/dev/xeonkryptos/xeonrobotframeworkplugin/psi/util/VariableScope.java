@@ -60,13 +60,15 @@ public enum VariableScope {
         @Override
         public boolean isInScope(@NotNull PsiElement sourceElement, @NotNull PsiElement element) {
             RobotScopeOwner scopeOwner = PsiTreeUtil.getParentOfType(sourceElement, RobotScopeOwner.class);
+            if (scopeOwner == null) {
+                return false;
+            }
             if (PsiTreeUtil.isAncestor(scopeOwner, element, false)) {
                 return true;
             }
-            PsiManager psiManager = sourceElement.getManager();
             RobotScopeOwner elementScopeOwner = PsiTreeUtil.getParentOfType(element, RobotScopeOwner.class);
             while (elementScopeOwner != null) {
-                if (psiManager.areElementsEquivalent(scopeOwner, elementScopeOwner)) {
+                if (isSameScopeOwner(scopeOwner, elementScopeOwner)) {
                     return true;
                 }
                 elementScopeOwner = PsiTreeUtil.getParentOfType(elementScopeOwner, RobotScopeOwner.class);
@@ -91,6 +93,26 @@ public enum VariableScope {
     };
 
     /**
+     * Checks whether both scope owners represent the same construct. During code completion IntelliJ works on a copy of the file, so the same construct exists as two
+     * different PSI instances which are never equivalent per {@link PsiManager#areElementsEquivalent}. In that case the owners are compared by their position in the
+     * original file. The start offset is stable as the dummy identifier is inserted at the caret, which is always inside the owner.
+     */
+    private static boolean isSameScopeOwner(@NotNull PsiElement first, @NotNull PsiElement second) {
+        if (first.getManager().areElementsEquivalent(first, second)) {
+            return true;
+        }
+        if (first.getClass() != second.getClass()) {
+            return false;
+        }
+        PsiFile firstFile = first.getContainingFile();
+        PsiFile secondFile = second.getContainingFile();
+        if (firstFile == null || secondFile == null || firstFile.getOriginalFile() != secondFile.getOriginalFile()) {
+            return false;
+        }
+        return first.getTextRange().getStartOffset() == second.getTextRange().getStartOffset();
+    }
+
+    /**
      * Determines if the given element is a part of the Test Cases header.
      *
      * @param position the element in question.
@@ -100,8 +122,10 @@ public enum VariableScope {
     private static boolean isInSameTestCase(@NotNull PsiElement sourceElement, @NotNull PsiElement position) {
         RobotTestCaseStatement sourceTestCaseStatement = PsiTreeUtil.getParentOfType(sourceElement, RobotTestCaseStatement.class, false);
         RobotTestCaseStatement targetTestCaseStatement = PsiTreeUtil.getParentOfType(position, RobotTestCaseStatement.class, false);
-        PsiManager psiManager = sourceElement.getManager();
-        return psiManager.areElementsEquivalent(sourceTestCaseStatement, targetTestCaseStatement);
+        if (sourceTestCaseStatement == null || targetTestCaseStatement == null) {
+            return sourceTestCaseStatement == targetTestCaseStatement;
+        }
+        return isSameScopeOwner(sourceTestCaseStatement, targetTestCaseStatement);
     }
 
     /**
