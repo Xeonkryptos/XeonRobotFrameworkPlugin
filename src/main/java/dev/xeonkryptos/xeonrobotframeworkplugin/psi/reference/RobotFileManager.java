@@ -26,6 +26,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 public class RobotFileManager {
@@ -81,7 +82,7 @@ public class RobotFileManager {
         Module module = ModuleUtilCore.findModuleForPsiElement(anchor);
         CachedValuesManager manager = CachedValuesManager.getManager(project);
         UserDataHolder usableUserDataHolder = module != null ? module : project;
-        return manager.getParameterizedCachedValue(usableUserDataHolder, GLOBAL_ROBOT_VARIABLES_CACHE_KEY, pModule -> {
+        Collection<DefinedVariable> cachedGlobalVariables = manager.getParameterizedCachedValue(usableUserDataHolder, GLOBAL_ROBOT_VARIABLES_CACHE_KEY, pModule -> {
             Collection<DefinedVariable> globalVariables = new ArrayList<>();
             ReservedVariable[] reservedVariables = ReservedVariable.values();
             PsiElement element = VariableScope.getReferencedPsiElement(project, module);
@@ -92,5 +93,6 @@ public class RobotFileManager {
             }
             return element != null ? Result.createSingleDependency(globalVariables, element) : null;
         }, false, module);
+        return cachedGlobalVariables != null ? cachedGlobalVariables : List.of();
     }
 }
