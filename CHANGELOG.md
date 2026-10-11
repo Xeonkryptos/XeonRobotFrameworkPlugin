@@ -7,12 +7,18 @@
 ### Added
 
 - Support for localization in Robot Framework. Configure your preferred language in the plugin settings and the plugin will provide code completion, inspections and more in your preferred language.
+- Added code completions for variables referencing a python object
+- Added resolving of methods and attributes of a python object referenced by a variable
+- Added inspection (disabled by default) to warn about unresolved variables referencing a python object
 
 ### Changed
 
 - Updated the plugin's minimum required IDE version to 2025.3
+- Updated parsing logic of variables to identify method calls, attributes and properties of a python object referenced by a variable
 
 ### Fixed
+
+- NoSuchElementExceptions occurring when injecting Python language into Robot files
 
 ## 0.7.7 - 2026-09-12
 
