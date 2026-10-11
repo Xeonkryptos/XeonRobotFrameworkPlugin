@@ -6,6 +6,14 @@
 
 ### Added
 
+### Changed
+
+### Fixed
+
+## 0.8.0 - 2026-10-11
+
+### Added
+
 - Support for localization in Robot Framework. Configure your preferred language in the plugin settings and the plugin will provide code completion, inspections and more in your preferred language.
 - Added code completions for variables referencing a python object
 - Added resolving of methods and attributes of a python object referenced by a variable
