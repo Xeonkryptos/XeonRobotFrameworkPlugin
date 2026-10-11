@@ -1,16 +1,22 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.completion;
 
 import com.intellij.codeInsight.completion.CompletionContributor;
+import com.intellij.codeInsight.completion.CompletionInitializationContext;
+import com.intellij.codeInsight.completion.CompletionUtil;
 import com.intellij.codeInsight.completion.CompletionParameters;
 import com.intellij.codeInsight.completion.CompletionResultSet;
 import com.intellij.codeInsight.completion.CompletionType;
 import com.intellij.patterns.ElementPattern;
 import com.intellij.psi.PsiElement;
+import com.intellij.psi.util.PsiTreeUtil;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotKeywordProvider;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotConditionalStructure;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotExceptionHandlingStructure;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotFile;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableExpressionDefinition;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableExpressionId;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableExpressionMethodCallId;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotForLoopStructure;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotKeywordsSection;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotLocalSetting;
@@ -102,6 +108,10 @@ public class RobotCompletionContributor extends CompletionContributor {
                            .inside(true, instanceOf(RobotPositionalArgument.class))
                            .inside(true, instanceOf(RobotParameter.class)),
                new PositionalArgumentProvider());
+        // Provide members of objects accessed with the extended variable syntax, e.g. ${OBJECT.<caret>}
+        extend(CompletionType.BASIC,
+               psiElement().withParent(or(psiElement(RobotVariableExpressionId.class), psiElement(RobotVariableExpressionMethodCallId.class))).inFile(psiElement(RobotFile.class)),
+               new ExtendedVariableCompletionProvider());
         // Provide completions in context of variables or arguments
         extend(CompletionType.BASIC,
                psiElement().with(indented())
@@ -109,6 +119,15 @@ public class RobotCompletionContributor extends CompletionContributor {
                            .inFile(psiElement(RobotFile.class)),
                new VariableCompletionProvider());
         extend(CompletionType.BASIC, psiElement(RobotTypes.LITERAL_CONSTANT).inside(true, withElementInLocalSetting("Tags")).inFile(psiElement(RobotFile.class)), new StandardTagCompletionProvider());
+    }
+
+    @Override
+    public void beforeCompletion(@NotNull CompletionInitializationContext context) {
+        // The default dummy identifier ends with a space which would split an already existing method call name like in ${OBJECT.<caret>method()} into two parts
+        PsiElement elementBeforeCaret = context.getFile().findElementAt(Math.max(0, context.getStartOffset() - 1));
+        if (PsiTreeUtil.getParentOfType(elementBeforeCaret, RobotVariableExpressionDefinition.class) != null) {
+            context.setDummyIdentifier(CompletionUtil.DUMMY_IDENTIFIER_TRIMMED);
+        }
     }
 
     @Override

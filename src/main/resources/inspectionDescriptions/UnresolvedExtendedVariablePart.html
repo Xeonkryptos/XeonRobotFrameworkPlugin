@@ -1,0 +1,27 @@
+<html lang="en">
+    <body>
+        <p>
+            Reports parts of the extended variable syntax, e.g. <code>${OBJECT.attribute.method()}</code>, which cannot be resolved: the variable
+            itself or an attribute, property or method of the object it is accessed on.
+        </p>
+
+        <p>Example:</p>
+        <pre><code>
+*** Test Cases ***
+My Test
+    ${person} =    Create Person
+    Log    ${person.name}       # resolved
+    Log    ${person.unknown}    # will be marked as unresolved
+</code></pre>
+
+        <!-- tooltip end -->
+        <p>Text after this comment will only be shown in the settings of the inspection.</p>
+
+        <p>
+            The type of the object is inferred from the Python type of the variable: the return type of the keyword it is assigned from, the value
+            of a user keyword returned with <code>[Return]</code> or <code>RETURN</code>, a data type conversion or a variable of a Python variable file.
+            When the type can not be inferred, every part accessed on the object is reported. Only the first unresolved part of an expression is
+            reported, because all following parts depend on it. Parts behind a nested variable are not checked.
+        </p>
+    </body>
+</html>

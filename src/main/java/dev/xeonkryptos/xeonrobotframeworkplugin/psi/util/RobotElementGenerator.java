@@ -30,6 +30,11 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotTestCaseId;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotUserKeywordStatementId;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariable;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableContent;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableDatatype;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableDatatypeContainer;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableExpressionId;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableExpressionMethodCallId;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableDefinitionBody;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.visitor.RecursiveRobotVisitor;
 import dev.xeonkryptos.xeonrobotframeworkplugin.util.GlobalConstants;
 import org.jetbrains.annotations.NotNull;
@@ -221,6 +226,21 @@ public record RobotElementGenerator(Project project) {
         return variableFinder.variable;
     }
 
+    public RobotVariableDefinitionBody createNewVariableDefinitionBody(String variableContent) {
+        String fileContent = """
+                             *** Variables ***
+                             ${%s}=  dummy
+                             """.formatted(variableContent);
+
+        PsiFile psiFile = createDummyPsiFile(fileContent);
+        if (psiFile == null) {
+            return null;
+        }
+        RobotVariableDefinitionBodyFinder variableDefinitionBodyFinder = new RobotVariableDefinitionBodyFinder();
+        psiFile.acceptChildren(variableDefinitionBodyFinder);
+        return variableDefinitionBodyFinder.definitionBody;
+    }
+
     public RobotVariableContent createNewVariableContent(String variableContent) {
         String fileContent = """
                              *** Variables ***
@@ -408,6 +428,70 @@ public record RobotElementGenerator(Project project) {
         return conditionalContentFinder.conditionalContent;
     }
 
+    public RobotVariableDatatypeContainer createNewVariableDatatypeContainer(String parameter) {
+        String fileContent = """
+                             *** Keywords ***
+                             Dummy
+                                 ${Variable: %s}=  Set Variable  ABC
+                             """.formatted(parameter);
+        PsiFile psiFile = createDummyPsiFile(fileContent);
+        if (psiFile == null) {
+            return null;
+        }
+
+        RobotVariableDatatypeContainerFinder finder = new RobotVariableDatatypeContainerFinder();
+        psiFile.acceptChildren(finder);
+        return finder.variableDatatypeContainer;
+    }
+
+    public RobotVariableDatatype createNewVariableDatatype(String parameter) {
+        String fileContent = """
+                             *** Keywords ***
+                             Dummy
+                                 ${Variable: %s}=  Set Variable  ABC
+                             """.formatted(parameter);
+        PsiFile psiFile = createDummyPsiFile(fileContent);
+        if (psiFile == null) {
+            return null;
+        }
+
+        RobotVariableDatatypeFinder finder = new RobotVariableDatatypeFinder();
+        psiFile.acceptChildren(finder);
+        return finder.variableDatatype;
+    }
+
+    public RobotVariableExpressionId createNewVariableExpressionId(String name) {
+        String fileContent = """
+                             *** Keywords ***
+                             Dummy
+                                 Log    ${%s.attribute}
+                             """.formatted(name);
+        PsiFile psiFile = createDummyPsiFile(fileContent);
+        if (psiFile == null) {
+            return null;
+        }
+
+        RobotVariableExpressionIdFinder finder = new RobotVariableExpressionIdFinder();
+        psiFile.acceptChildren(finder);
+        return finder.variableExpressionId;
+    }
+
+    public RobotVariableExpressionMethodCallId createNewVariableExpressionMethodCallId(String name) {
+        String fileContent = """
+                             *** Keywords ***
+                             Dummy
+                                 Log    ${object.%s()}
+                             """.formatted(name);
+        PsiFile psiFile = createDummyPsiFile(fileContent);
+        if (psiFile == null) {
+            return null;
+        }
+
+        RobotVariableExpressionMethodCallIdFinder finder = new RobotVariableExpressionMethodCallIdFinder();
+        psiFile.acceptChildren(finder);
+        return finder.variableExpressionMethodCallId;
+    }
+
     public PsiFile createDummyPsiFile(String text) {
         PsiFileFactory factory = PsiFileFactory.getInstance(project);
 
@@ -519,6 +603,16 @@ public record RobotElementGenerator(Project project) {
         }
     }
 
+    private static final class RobotVariableDefinitionBodyFinder extends RecursiveRobotVisitor {
+
+        private RobotVariableDefinitionBody definitionBody;
+
+        @Override
+        public void visitVariableDefinitionBody(@NotNull RobotVariableDefinitionBody o) {
+            definitionBody = o;
+        }
+    }
+
     private static final class RobotVariableContentFinder extends RecursiveRobotVisitor {
 
         private RobotVariableContent variableContent;
@@ -556,6 +650,48 @@ public record RobotElementGenerator(Project project) {
         @Override
         public void visitConditionalContent(@NotNull RobotConditionalContent o) {
             conditionalContent = o;
+        }
+    }
+
+    private static final class RobotVariableDatatypeContainerFinder extends RecursiveRobotVisitor {
+
+        private RobotVariableDatatypeContainer variableDatatypeContainer;
+
+        @Override
+        public void visitVariableDatatypeContainer(@NotNull RobotVariableDatatypeContainer o) {
+            variableDatatypeContainer = o;
+        }
+    }
+
+    private static final class RobotVariableExpressionIdFinder extends RecursiveRobotVisitor {
+
+        private RobotVariableExpressionId variableExpressionId;
+
+        @Override
+        public void visitVariableExpressionId(@NotNull RobotVariableExpressionId o) {
+            if (variableExpressionId == null) {
+                variableExpressionId = o;
+            }
+        }
+    }
+
+    private static final class RobotVariableExpressionMethodCallIdFinder extends RecursiveRobotVisitor {
+
+        private RobotVariableExpressionMethodCallId variableExpressionMethodCallId;
+
+        @Override
+        public void visitVariableExpressionMethodCallId(@NotNull RobotVariableExpressionMethodCallId o) {
+            variableExpressionMethodCallId = o;
+        }
+    }
+
+    private static final class RobotVariableDatatypeFinder extends RecursiveRobotVisitor {
+
+        private RobotVariableDatatype variableDatatype;
+
+        @Override
+        public void visitVariableDatatype(@NotNull RobotVariableDatatype o) {
+            variableDatatype = o;
         }
     }
 

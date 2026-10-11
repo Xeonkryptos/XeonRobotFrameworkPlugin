@@ -26,6 +26,10 @@ class ReplaceBuiltInKeywordsWithNativeExpressionsInspection : RobotVersionBasedI
 
     private val replaceableKeywordInfos = mapOf(*createReplaceableKeywordInfosForRobot4(), *createReplaceableKeywordInfosForRobot5())
 
+    override val minimumRobotVersion: RobotVersionProvider.RobotVersion = RobotVersionProvider.RobotVersion(4, 0, 0)
+
+    override val negativeRobotVersionCheck: Boolean = false
+
     private fun createReplaceableKeywordInfosForRobot4(): Array<Pair<String, ReplaceableBuiltInKeywordsInfo>> {
         val replaceableKeywordInfo = ::ReplaceRunKeywordIfQuickFix
         val minimalRobotVersion = RobotVersionProvider.RobotVersion(4, 0, 0)
@@ -95,16 +99,15 @@ class ReplaceBuiltInKeywordsWithNativeExpressionsInspection : RobotVersionBasedI
 
     override fun buildVisitor(holder: ProblemsHolder, isOnTheFly: Boolean, session: LocalInspectionToolSession): PsiElementVisitor = ReplaceableKeywordsVisitor(holder, session)
 
-    override fun getMinimumRobotVersion(): RobotVersionProvider.RobotVersion = RobotVersionProvider.RobotVersion(4, 0, 0)
-
     private inner class ReplaceableKeywordsVisitor(private val holder: ProblemsHolder, private val session: LocalInspectionToolSession) : RobotVisitor() {
 
         override fun visitKeywordCall(keywordCall: RobotKeywordCall) {
             val normalizedKeywordCallName = KeywordUtil.normalizeKeywordName(keywordCall.name)
             replaceableKeywordInfos[normalizedKeywordCallName]?.let { info ->
-                val currentRobotVersion = getRobotVersion(session)
-                if (currentRobotVersion.supports(info.minimalRobotVersion)) {
-                    holder.registerProblem(keywordCall.keywordCallName, RobotBundle.message("INSP.keyword.replace.with.native.expressions.description"), info.quickFixCreator(keywordCall))
+                getRobotVersion(session)?.let { currentRobotVersion ->
+                    if (currentRobotVersion.supports(info.minimalRobotVersion)) {
+                        holder.registerProblem(keywordCall.keywordCallName, RobotBundle.message("INSP.keyword.replace.with.native.expressions.description"), info.quickFixCreator(keywordCall))
+                    }
                 }
             }
         }

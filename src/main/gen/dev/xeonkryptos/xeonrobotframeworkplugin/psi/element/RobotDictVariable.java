@@ -17,6 +17,9 @@ public interface RobotDictVariable extends RobotVariable, StubBasedPsiElement<Ro
   @Nullable
   RobotVariableContent getVariableContent();
 
+  @Nullable
+  RobotVariableExpressionDefinition getVariableExpressionDefinition();
+
   @NotNull
   List<RobotVariableNestedAccessContent> getVariableNestedAccessContentList();
 

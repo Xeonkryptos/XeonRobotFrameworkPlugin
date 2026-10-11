@@ -60,6 +60,9 @@ class RobotConfiguration(project: Project, cs: CoroutineScope) : Configurable.No
     private val panel = panel {
         group(RobotBundle.message("options.languages.row.label")) {
             row {
+                comment(RobotBundle.message("options.languages.description"))
+            }
+            row {
                 cell(languageConfigurationsTableToolbar.createPanel()).resizableColumn().align(Align.FILL).onApply {
                     val enabledLanguages = languageConfigurationsTableModel.languages.asSequence().filter { it.active }.map { it.languageClassReference }.toSet()
                     optionsProvider.enabledLanguages = enabledLanguages

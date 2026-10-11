@@ -18,7 +18,8 @@ public class RobotPairedBraceMatcher implements PairedBraceMatcher {
                                                                      new BracePair(RobotTypes.WHILE, RobotTypes.END, true),
                                                                      new BracePair(RobotTypes.GROUP, RobotTypes.END, true),
                                                                      new BracePair(RobotTypes.IF, RobotTypes.END, true),
-                                                                     new BracePair(RobotTypes.TRY, RobotTypes.END, true) };
+                                                                     new BracePair(RobotTypes.TRY, RobotTypes.END, true),
+                                                                     new BracePair(RobotTypes.METHOD_CALL_LBRACE, RobotTypes.METHOD_CALL_RBRACE, true) };
 
     @Override
     public BracePair @NotNull [] getPairs() {

@@ -62,7 +62,12 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotUserKeywordStat
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotUserKeywordStatementId;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariable;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableContent;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableDatatype;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableDatatypeContainer;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableDefinition;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableDefinitionBody;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableExpressionId;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableExpressionMethodCallId;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableStatement;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariablesSection;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.impl.RobotTestCaseExtension;
@@ -73,6 +78,9 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.reference.RobotParameterRefe
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.reference.RobotPositionalArgumentReference;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.reference.RobotTemplateParameterReference;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.reference.RobotVariableContentReference;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.reference.RobotVariableDatatypeReference;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.reference.RobotVariableExpressionIdReference;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.reference.RobotVariableExpressionMethodCallIdReference;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotDictVariableStub;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotKeywordCallStub;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotListVariableStub;
@@ -87,13 +95,15 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.util.GlobalConstants;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import javax.swing.Icon;
+import javax.swing.*;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
 @SuppressWarnings("UnstableApiUsage")
 public class RobotPsiUtil {
+
+    private RobotPsiUtil() {}
 
     @NotNull
     public static String getName(@NotNull RobotKeywordCall robotKeywordCall) {
@@ -121,8 +131,8 @@ public class RobotPsiUtil {
         if (stub != null) {
             return stub.getName();
         }
-        RobotVariableContent variableContent = variableDefinition.getVariableContent();
-        return variableContent != null ? variableContent.getText() : null;
+        RobotVariableDefinitionBody variableDefinitionBody = variableDefinition.getVariableDefinitionBody();
+        return variableDefinitionBody != null ? variableDefinitionBody.getText() : null;
     }
 
     @NotNull
@@ -271,6 +281,21 @@ public class RobotPsiUtil {
     }
 
     @NotNull
+    public static PsiReference getReference(RobotVariableDatatype variableDatatype) {
+        return new RobotVariableDatatypeReference(variableDatatype);
+    }
+
+    @NotNull
+    public static PsiReference getReference(RobotVariableExpressionId variableExpressionId) {
+        return new RobotVariableExpressionIdReference(variableExpressionId);
+    }
+
+    @NotNull
+    public static PsiReference getReference(RobotVariableExpressionMethodCallId variableExpressionMethodCallId) {
+        return new RobotVariableExpressionMethodCallIdReference(variableExpressionMethodCallId);
+    }
+
+    @NotNull
     @SuppressWarnings("unused")
     public static Icon getIcon(RobotTaskStatement taskStatement, int flags) {
         return RobotIcons.JUNIT;
@@ -383,6 +408,14 @@ public class RobotPsiUtil {
         String text = expression.getText();
         int offset = text.length() - text.stripLeading().length() + 1;
         int length = text.trim().length() - 1 - offset;
+        return TextRange.from(offset, length);
+    }
+
+    @NotNull
+    public static TextRange getInjectionRelevantTextRange(@NotNull RobotVariableDatatypeContainer variableDatatypeContainer) {
+        String text = variableDatatypeContainer.getText();
+        int offset = text.length() - text.stripLeading().length();
+        int length = text.trim().length();
         return TextRange.from(offset, length);
     }
 

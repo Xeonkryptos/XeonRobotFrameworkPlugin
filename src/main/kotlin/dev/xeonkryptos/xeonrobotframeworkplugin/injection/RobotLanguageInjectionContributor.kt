@@ -17,6 +17,7 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotPositionalArgum
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotPythonExpression
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotPythonExpressionBody
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotScalarVariable
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableDatatypeContainer
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVisitor
 import dev.xeonkryptos.xeonrobotframeworkplugin.util.RobotNames
 import org.intellij.plugins.intelliLang.inject.config.BaseInjection
@@ -92,6 +93,26 @@ class RobotLanguageInjectionContributor : LanguageInjectionContributor {
         override fun visitPythonExpression(o: RobotPythonExpression) {
             pythonExpression = true
             prefix = "${computeImportsForPythonExpressionBodies(o.pythonExpressionBodyList).joinToString(separator = "\n", postfix = "\n") { module -> "import $module" }}\nresult = "
+        }
+
+        override fun visitVariableDatatypeContainer(o: RobotVariableDatatypeContainer) {
+            pythonExpression = true
+            prefix = """
+                from collections.abc import *
+                from numbers import Integral, Real
+                from os import PathLike
+                
+                boolean = bool
+                integer = int
+                long = int
+                double = float
+                string = str
+                unicode = str
+                dictionary = dict
+                map = Mapping
+                
+                var: 
+            """.trimIndent()
         }
 
         private fun computeImportsForPythonExpressionBodies(pythonExpressionBodies: Collection<RobotPythonExpressionBody>): Collection<String> {

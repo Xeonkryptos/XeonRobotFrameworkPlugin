@@ -13,6 +13,10 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.util.RobotVersionProvider
 
 class RobotJsonVariableFileSupportInspection : RobotVersionBasedInspection(), DumbAware {
 
+    override val minimumRobotVersion: RobotVersionProvider.RobotVersion = RobotVersionProvider.RobotVersion(6, 1, 0)
+
+    override val negativeRobotVersionCheck: Boolean = true
+
     override fun buildVisitor(holder: ProblemsHolder, isOnTheFly: Boolean, session: LocalInspectionToolSession): PsiElementVisitor {
         return object : RobotVisitor() {
             override fun visitImportArgument(o: RobotImportArgument) {
@@ -22,6 +26,4 @@ class RobotJsonVariableFileSupportInspection : RobotVersionBasedInspection(), Du
             }
         }
     }
-
-    override fun getMinimumRobotVersion(): RobotVersionProvider.RobotVersion = RobotVersionProvider.RobotVersion(6, 1, 0)
 }

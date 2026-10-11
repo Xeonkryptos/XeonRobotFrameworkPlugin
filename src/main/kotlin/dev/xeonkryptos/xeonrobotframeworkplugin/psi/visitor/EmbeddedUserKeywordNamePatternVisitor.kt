@@ -49,7 +49,7 @@ class EmbeddedUserKeywordNamePatternVisitor @JvmOverloads constructor(private va
             //  A better approach is to take it from the variable itself. For that, the parsing logic needs to be extended as it is needed to support type checks and all the other features of the
             //  latest Robot Framework versions which added additional metadata after the ':' in variable names
             var regexp = ".*?"
-            val variableContent = if (o.getVariableContent() != null) o.getVariableContent()!!.text else null
+            val variableContent = o.variableDefinitionBody?.text
             if (variableContent != null && variableContent.contains(":")) {
                 val startOfRegExp = variableContent.indexOf(":")
                 regexp = variableContent.substring(startOfRegExp + 1)

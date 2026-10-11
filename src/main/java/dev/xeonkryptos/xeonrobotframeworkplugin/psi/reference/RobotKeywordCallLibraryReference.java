@@ -26,9 +26,9 @@ public class RobotKeywordCallLibraryReference extends PsiPolyVariantReferenceBas
 
     @Override
     public ResolveResult @NotNull [] multiResolve(boolean incompleteCode) {
-        RobotKeywordCallLibraryName keywordCallLibraryId = getElement();
-        ResolveCache resolveCache = ResolveCache.getInstance(keywordCallLibraryId.getProject());
+        ResolveCache resolveCache = ResolveCache.getInstance(getElement().getProject());
         return resolveCache.resolveWithCaching(this, (robotKeywordReference, incompCode) -> {
+            RobotKeywordCallLibraryName keywordCallLibraryId = robotKeywordReference.getElement();
             String libraryName = keywordCallLibraryId.getText();
             PsiFile containingFile = keywordCallLibraryId.getContainingFile();
             PsiElement[] keywordLibraryReference = findKeywordLibraryReference(libraryName, containingFile);

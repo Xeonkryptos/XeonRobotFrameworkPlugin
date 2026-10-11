@@ -31,6 +31,12 @@ public class RobotDeprecatedWithNameInspection extends RobotVersionBasedInspecti
     }
 
     @Override
+    protected boolean getNegativeRobotVersionCheck() {
+        return false;
+    }
+
+    @NotNull
+    @Override
     protected RobotVersion getMinimumRobotVersion() {
         return new RobotVersion(6, 0, 0);
     }

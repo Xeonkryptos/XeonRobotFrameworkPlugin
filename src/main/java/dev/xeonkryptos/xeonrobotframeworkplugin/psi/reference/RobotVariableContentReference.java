@@ -32,13 +32,12 @@ public class RobotVariableContentReference extends PsiPolyVariantReferenceBase<R
 
     @Override
     public ResolveResult @NotNull [] multiResolve(boolean incompleteCode) {
-        RobotVariableContent variableContent = getElement();
-        RobotVariable variable = PsiTreeUtil.getParentOfType(variableContent, RobotVariable.class);
+        RobotVariable variable = PsiTreeUtil.getParentOfType(getElement(), RobotVariable.class);
         if (variable == null) {
             return ResolveResult.EMPTY_ARRAY;
         }
 
-        Project project = variableContent.getProject();
+        Project project = getElement().getProject();
         ResolveCache resolveCache = ResolveCache.getInstance(project);
         return resolveCache.resolveWithCaching(this, (robotVariableReference, incompCode) -> {
             String variableName = variable.getVariableName();
@@ -46,14 +45,7 @@ public class RobotVariableContentReference extends PsiPolyVariantReferenceBase<R
                 return ResolveResult.EMPTY_ARRAY;
             }
 
-            Collection<PsiElement> foundElements = new LinkedHashSet<>();
-            VariableDefinitionNameIndex.getInstance()
-                                       .getVariableDefinitions(variableName, project, GlobalSearchScope.fileScope(variableContent.getContainingFile().getOriginalFile()))
-                                       .stream()
-                                       .filter(variableDefinition -> variableDefinition.isInScope(variable))
-                                       .forEach(foundElements::add);
-            Collection<PsiElement> otherElements = findVariableElementsOutsideOfCurrentFile(variable, variableName);
-            foundElements.addAll(otherElements);
+            Collection<PsiElement> foundElements = findVariableDefinitions(variable, variableName);
             if (foundElements.isEmpty()) {
                 return ResolveResult.EMPTY_ARRAY;
             }
@@ -61,8 +53,24 @@ public class RobotVariableContentReference extends PsiPolyVariantReferenceBase<R
         }, true, false);
     }
 
+    /**
+     * Finds all definitions of the given variable name visible from the given variable usage. Used for plain variables and for the base variable of an extended variable access.
+     */
     @NotNull
-    private Collection<PsiElement> findVariableElementsOutsideOfCurrentFile(RobotVariable variable, String variableName) {
+    public static Collection<PsiElement> findVariableDefinitions(@NotNull RobotVariable variable, @NotNull String variableName) {
+        Project project = variable.getProject();
+        Collection<PsiElement> foundElements = new LinkedHashSet<>();
+        VariableDefinitionNameIndex.getInstance()
+                                   .getVariableDefinitions(variableName, project, GlobalSearchScope.fileScope(variable.getContainingFile().getOriginalFile()))
+                                   .stream()
+                                   .filter(variableDefinition -> variableDefinition.isInScope(variable))
+                                   .forEach(foundElements::add);
+        foundElements.addAll(findVariableElementsOutsideOfCurrentFile(variable, variableName));
+        return foundElements;
+    }
+
+    @NotNull
+    private static Collection<PsiElement> findVariableElementsOutsideOfCurrentFile(RobotVariable variable, String variableName) {
         RobotFile robotFile = (RobotFile) variable.getContainingFile();
         return robotFile.collectImportedFiles(true, ImportType.VARIABLES, ImportType.RESOURCE)
                         .stream()
