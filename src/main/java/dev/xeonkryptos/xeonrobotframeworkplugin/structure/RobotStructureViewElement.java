@@ -1,5 +1,6 @@
 package dev.xeonkryptos.xeonrobotframeworkplugin.structure;
 
+import com.intellij.codeInsight.navigation.NavigationUtil;
 import com.intellij.ide.structureView.StructureViewTreeElement;
 import com.intellij.ide.util.treeView.smartTree.TreeElement;
 import com.intellij.navigation.ColoredItemPresentation;
@@ -50,8 +51,8 @@ public class RobotStructureViewElement implements StructureViewTreeElement {
 
     @Override
     public void navigate(boolean requestFocus) {
-        if (element instanceof Navigatable navigatable) {
-            navigatable.navigate(requestFocus);
+        if (canNavigate()) {
+            NavigationUtil.activateFileWithPsiElement(element, requestFocus);
         }
     }
 
