@@ -13,4 +13,7 @@ public interface RobotVariableDefinitionBody extends RobotElement {
   @Nullable
   RobotVariableDatatypeDefinition getVariableDatatypeDefinition();
 
+  @Nullable
+  RobotVariableExpressionDefinition getVariableExpressionDefinition();
+
 }

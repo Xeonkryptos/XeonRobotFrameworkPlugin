@@ -53,6 +53,10 @@ and keywords.
 
 ![](https://raw.githubusercontent.com/xeonkryptos/XeonRobotFrameworkPlugin/main/docs/imgs/language-injection.jpg)
 
+### Multi-Language Support of Robot Framework
+
+### Code completion for object access in Robot's variables
+
 ## Prerequisites
 
 * Python 3.10 or newer
@@ -62,14 +66,12 @@ and keywords.
 
 * Only static code analysis is available for now. Dynamic features like described [here](https://robotframework.org/robotframework/latest/RobotFrameworkUserGuide.html#dynamic-library-api) aren't
   supported yet. It is planned as an upcoming feature, though. Same applies to Python's decorators which modify the function signature.
-* Code completion for object access in Robot's variables isn't possible yet.
 
 ## Upcoming Features
 
 For the upcoming releases, the following features are planned to get implemented:
 
 * Support dynamic libraries. Load provided variables, keywords, everything of relevance from them and provide them in code navigation, code completion, inspections, etc.
-* Extended code completion in variables, especially for object access.
 * Support to load documentation provided in user keywords when hovering a used user keyword or when looking for it in code completion.
 
 Keep in mind that this is not a complete list of planned features. More features will be added in the future. Also, the order of implementation isn't described by this list.

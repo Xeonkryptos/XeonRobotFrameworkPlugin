@@ -39,4 +39,10 @@ public class RobotVariableDefinitionBodyImpl extends RobotPsiElementBase impleme
     return PsiTreeUtil.getChildOfType(this, RobotVariableDatatypeDefinition.class);
   }
 
+  @Override
+  @Nullable
+  public RobotVariableExpressionDefinition getVariableExpressionDefinition() {
+    return PsiTreeUtil.getChildOfType(this, RobotVariableExpressionDefinition.class);
+  }
+
 }

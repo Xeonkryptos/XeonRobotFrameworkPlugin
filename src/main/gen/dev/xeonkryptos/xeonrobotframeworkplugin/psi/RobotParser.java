@@ -3394,12 +3394,13 @@ public class RobotParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // variable_datatype_definition | variable_content
+  // variable_datatype_definition | variable_expression_definition | variable_content
   public static boolean variable_definition_body(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "variable_definition_body")) return false;
     boolean r;
     Marker m = enter_section_(b, l, _NONE_, VARIABLE_DEFINITION_BODY, "<variable definition body>");
     r = variable_datatype_definition(b, l + 1);
+    if (!r) r = variable_expression_definition(b, l + 1);
     if (!r) r = variable_content(b, l + 1);
     exit_section_(b, l, m, r, false, null);
     return r;

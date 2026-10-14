@@ -470,7 +470,7 @@ variable_definition ::= <<scalar_variable_definition variable_definition_body>> 
     elementTypeFactory = "dev.xeonkryptos.xeonrobotframeworkplugin.psi.stub.RobotVariableDefinitionStubElement.create"
     methods = [getName getIcon getQualifiedName]
 }
-variable_definition_body ::= variable_datatype_definition | variable_content
+variable_definition_body ::= variable_datatype_definition | variable_expression_definition | variable_content
 
 private extended_variable ::= variable | special_scalar_variable
 scalar_variable ::= <<scalar_variable_definition (python_expression | variable_expression_definition | variable_content)?>> {

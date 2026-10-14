@@ -10,6 +10,8 @@
 
 ### Fixed
 
+- Fixed parsing issue for Variable Extended Syntax in variable definitions
+
 ## 0.8.0 - 2026-10-11
 
 ### Added
