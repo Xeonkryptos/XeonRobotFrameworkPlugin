@@ -5,6 +5,7 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.projectRoots.Sdk
 import com.intellij.openapi.roots.OrderRootType
 import com.intellij.openapi.roots.ProjectRootManager
+import com.intellij.openapi.vfs.VfsUtilCore
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.psi.PsiElementResolveResult
 import com.intellij.psi.PsiPolyVariantReferenceBase
@@ -30,7 +31,7 @@ class RobotVariableDatatypeReference(element: RobotVariableDatatype) : PsiPolyVa
                 ?: ProjectRootManager.getInstance(project).projectSdk?.takeIf { PythonSdkUtil.isPythonSdk(it) } ?: return@resolveWithCaching emptyArray<ResolveResult>()
 
             val stdlibScope = object : DelegatingGlobalSearchScope(getPythonSdkScope(project, sdk)) {
-                override fun contains(file: VirtualFile) = super.contains(file) && PythonSdkUtil.isStdLib(file, sdk)
+                override fun contains(file: VirtualFile) = super.contains(file) && isStdLib(file, sdk)
             }
 
             PyClassNameIndex.find(datatype, element.project, stdlibScope).map { PsiElementResolveResult(it) }.toTypedArray()
@@ -41,6 +42,13 @@ class RobotVariableDatatypeReference(element: RobotVariableDatatype) : PsiPolyVa
         val roots = sdk.rootProvider.getFiles(OrderRootType.CLASSES)
         if (roots.isEmpty()) return GlobalSearchScope.EMPTY_SCOPE
         return GlobalSearchScopesCore.directoriesScope(project, true, *roots)
+    }
+
+    private fun isStdLib(file: VirtualFile, sdk: Sdk): Boolean {
+        val roots = sdk.rootProvider.getFiles(OrderRootType.CLASSES)
+        val root = roots.firstOrNull { VfsUtilCore.isAncestor(it, file, false) } ?: return false
+        val relativePath = VfsUtilCore.getRelativePath(file, root) ?: return false
+        return relativePath.split('/').none { it == "site-packages" || it == "dist-packages" }
     }
 
     private fun mapToSupportedType(datatype: String): String {
