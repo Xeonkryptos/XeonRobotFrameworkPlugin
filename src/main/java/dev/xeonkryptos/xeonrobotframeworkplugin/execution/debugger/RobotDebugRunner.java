@@ -42,7 +42,14 @@ public class RobotDebugRunner implements ProgramRunner<RunnerSettings> {
 
     @Override
     public void execute(@NotNull ExecutionEnvironment environment) throws ExecutionException {
-        RobotRunConfiguration robotRunConfiguration = (RobotRunConfiguration) environment.getRunProfile();
+        RunProfile currentProfile = environment.getRunProfile();
+        if (currentProfile instanceof CustomPythonRunProfile) {
+            // The environment was already converted and got re-dispatched to this runner (the builder keeps the runner), so just continue with the debug runner
+            new CustomPyDebugRunner().execute(environment);
+            return;
+        }
+
+        RobotRunConfiguration robotRunConfiguration = (RobotRunConfiguration) currentProfile;
         RunProfile pythonRunProfile = new CustomPythonRunProfile(robotRunConfiguration);
         ExecutionEnvironment pythonEnvironment = new ExecutionEnvironmentBuilder(environment).runProfile(pythonRunProfile).build();
         new CustomPyDebugRunner().execute(pythonEnvironment);
