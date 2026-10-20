@@ -18,6 +18,7 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.dto.ImportType;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotFile;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariable;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableDefinition;
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableExpressionDefinition;
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVisitor;
 import dev.xeonkryptos.xeonrobotframeworkplugin.quickfix.RemoveUnusedVariableDefinitionQuickFix;
 import org.jetbrains.annotations.NotNull;
@@ -86,7 +87,7 @@ public class RobotUnusedVariableDefinitionInspection extends LocalInspectionTool
             Iterator<RobotVariable> variableIterator = variableUsageVisitor.foundVariableUsages.iterator();
             while (variableIterator.hasNext()) {
                 RobotVariable variable = variableIterator.next();
-                String variableName = variable.getVariableName();
+                String variableName = getUsedVariableName(variable);
                 if (variableName != null && variableDefinition.isInScope(variable) && variableDefinition.matches(variableName)) {
                     variableIterator.remove();
                     definitionsIterator.remove();
@@ -94,6 +95,18 @@ public class RobotUnusedVariableDefinitionInspection extends LocalInspectionTool
                 }
             }
         }
+    }
+
+    private static String getUsedVariableName(RobotVariable variable) {
+        String variableName = variable.getVariableName();
+        if (variableName == null) {
+            // Variables using the extended syntax (e.g. ${Partner.bpid}) have no plain variable content
+            RobotVariableExpressionDefinition expressionDefinition = PsiTreeUtil.getChildOfType(variable, RobotVariableExpressionDefinition.class);
+            if (expressionDefinition != null) {
+                variableName = expressionDefinition.getText();
+            }
+        }
+        return variableName;
     }
 
     @Override
@@ -116,7 +129,7 @@ public class RobotUnusedVariableDefinitionInspection extends LocalInspectionTool
 
         @Override
         public void visitVariable(@NotNull RobotVariable o) {
-            String variableName = o.getVariableName();
+            String variableName = getUsedVariableName(o);
             if (variableName != null) {
                 ReadWriteAccessDetector detector = ReadWriteAccessDetector.findDetector(o);
                 if (detector != null && detector.getExpressionAccess(o) == Access.Read) {
