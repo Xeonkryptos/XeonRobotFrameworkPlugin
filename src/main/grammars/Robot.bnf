@@ -512,7 +512,8 @@ variable_datatype_parameterized ::= variable_datatype VARIABLE_DATA_TYPE_PARAM_L
 variable_datatype_union ::= (variable_datatype_parameterized | variable_datatype) VARIABLE_DATA_TYPE_UNION_MARKER (variable_datatype_parameterized | variable_datatype) {pin=2}
 variable_datatype ::= VARIABLE_DATA_TYPE {methods=[getReference]}
 
-variable_expression_definition ::= variable_expression_id (DOT_OPERATOR (variable_expression | variable))+ {pin=2}
+variable_expression_definition ::= variable_expression_id (DOT_OPERATOR (variable_expression | variable)? variable_expression_array_access*)+ {pin=2}
+variable_expression_array_access ::= VARIABLE_ACCESS_START (variable_slice_access_content | variable_index_access_content | variable_nested_access_content) VARIABLE_ACCESS_END {pin=1}
 private variable_expression ::= variable_expression_id | variable_expression_method_call
 variable_expression_id ::= VARIABLE_BODY {methods=[getReference]}
 

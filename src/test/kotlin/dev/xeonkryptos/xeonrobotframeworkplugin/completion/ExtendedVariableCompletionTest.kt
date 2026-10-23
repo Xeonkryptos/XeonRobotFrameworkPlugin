@@ -14,9 +14,15 @@ class ExtendedVariableCompletionTest : BasePlatformTestCase() {
 
                 def full(self, number: int) -> str: ...
 
+            class AddressList:
+                def __getitem__(self, index: int) -> Address: ...
+
+                def append(self, address: Address) -> None: ...
+
             class Person:
                 name: str = ""
                 address: Address
+                addresses: AddressList
 
                 def __init__(self) -> None:
                     self.nickname = ""
@@ -26,6 +32,8 @@ class ExtendedVariableCompletionTest : BasePlatformTestCase() {
                 def get_address(self) -> Address: ...
 
                 def reset(self) -> None: ...
+
+                def get_addresses(self) -> AddressList: ...
 
                 @property
                 def home(self) -> Address: ...
@@ -61,6 +69,18 @@ class ExtendedVariableCompletionTest : BasePlatformTestCase() {
         val proposals = complete("Log    \${p.g<caret>}")
         assertContainsElements(proposals, "greet", "get_address")
         assertDoesntContain(proposals, "name", "reset")
+    }
+
+    fun `test members of item of attribute collection`() {
+        val proposals = complete("Log    \${p.addresses[0].<caret>}")
+        assertContainsElements(proposals, "city", "full")
+        assertDoesntContain(proposals, "greet", "append")
+    }
+
+    fun `test members of item of method call collection`() {
+        val proposals = complete("Log    \${p.get_addresses()[0].<caret>}")
+        assertContainsElements(proposals, "city", "full")
+        assertDoesntContain(proposals, "append")
     }
 
     fun `test members of attribute type`() {

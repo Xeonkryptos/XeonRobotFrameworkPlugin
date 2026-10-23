@@ -9,6 +9,8 @@ import com.jetbrains.python.psi.PyFunction
 import com.jetbrains.python.psi.PyTypedElement
 import com.jetbrains.python.psi.resolve.PyResolveContext
 import com.jetbrains.python.psi.types.PyClassTypeImpl
+import com.jetbrains.python.psi.types.PyCollectionType
+import com.jetbrains.python.psi.types.PyTupleType
 import com.jetbrains.python.psi.types.PyType
 import com.jetbrains.python.psi.types.PyUnionType
 import com.jetbrains.python.psi.types.TypeEvalContext
@@ -19,6 +21,7 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotUserKeywordStat
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariable
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableDatatype
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableDefinition
+import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableExpressionArrayAccess
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableExpressionDefinition
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableExpressionId
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.element.RobotVariableExpressionMethodCall
@@ -79,7 +82,7 @@ object RobotExtendedVariableResolver {
         var types = baseTypes(segments.first() as? RobotVariableExpressionId ?: return emptyList(), context)
         for (i in 1..<index) {
             val previousSegment = segments[i] ?: return emptyList()
-            types = types.flatMap { typeOfMember(it, previousSegment, context) }
+            types = types.flatMap { typeOfMember(it, previousSegment, context) }.flatMap { applyArrayAccesses(it, previousSegment, context) }
             if (types.isEmpty()) return emptyList()
         }
         return types
@@ -150,6 +153,44 @@ object RobotExtendedVariableResolver {
             }
         }.flatMap(::flatten)
     }
+
+    /** The array accesses (`[0]`, `[1:2]`, `['key']`) directly behind a part, e.g. `[0]` in `${OBJECT.items[0].name}`. */
+    fun arrayAccessesOf(segment: PsiElement): List<RobotVariableExpressionArrayAccess> {
+        // The id of a method call is wrapped into the method call itself, the array access follows the method call
+        val anchor = if (segment is RobotVariableExpressionMethodCallId) segment.parent else segment
+        val accesses = mutableListOf<RobotVariableExpressionArrayAccess>()
+        var sibling = PsiTreeUtil.skipWhitespacesForward(anchor)
+        while (sibling is RobotVariableExpressionArrayAccess) {
+            accesses += sibling
+            sibling = PsiTreeUtil.skipWhitespacesForward(sibling)
+        }
+        return accesses
+    }
+
+    /** The type of the value the array accesses behind a part access in the given type of the part. A slice keeps the type, any other access selects one item. */
+    private fun applyArrayAccesses(type: PyType, segment: PsiElement, context: TypeEvalContext): List<PyType> =
+        arrayAccessesOf(segment).fold(listOf(type)) { types, access ->
+            if (access.variableSliceAccessContent != null) types else types.flatMap { itemTypesOf(it, access, context) }
+        }
+
+    private fun itemTypesOf(type: PyType, access: RobotVariableExpressionArrayAccess, context: TypeEvalContext): List<PyType> {
+        val itemType: PyType? = when {
+            type is PyTupleType -> {
+                val index = access.variableIndexAccessContent?.text?.trim()?.toIntOrNull()
+                if (index != null && !type.isHomogeneous) type.getElementType(index) else type.iteratedItemType
+            }
+            type is PyCollectionType && isMapping(type, context) -> type.elementTypes.getOrNull(1)
+            type is PyCollectionType -> type.iteratedItemType
+            else -> membersOf(type, GET_ITEM_METHOD_NAME, context).filterIsInstance<PyFunction>().firstNotNullOfOrNull { context.getReturnType(it) }
+        }
+        return itemType?.let(::flatten).orEmpty()
+    }
+
+    private fun isMapping(type: PyCollectionType, context: TypeEvalContext): Boolean =
+        MAPPING_CLASS_NAMES.any { type.pyClass.isSubclass(it, context) }
+
+    private const val GET_ITEM_METHOD_NAME = "__getitem__"
+    private val MAPPING_CLASS_NAMES = listOf("dict", "typing.Mapping", "collections.abc.Mapping")
 
     private fun membersOf(type: PyType, name: String, context: TypeEvalContext): List<PsiElement> =
         type.resolveMember(name, null, AccessDirection.READ, PyResolveContext.defaultContext(context))?.mapNotNull { it.element } ?: emptyList()

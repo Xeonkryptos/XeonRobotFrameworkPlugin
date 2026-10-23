@@ -210,6 +210,7 @@ EverythingButVariableValue = {AllowedEverythingButVariableSeq} ({Space} {Allowed
 EverythingButSpecialVariableValue = {AllowedEverythingButSpecialVariableSeq} ({Space} {AllowedEverythingButSpecialVariableSeq})*
 KeywordLibraryNameLiteralValue = {EverythingButVariableValue} "."
 ExtendedVariableAccessValue = {AllowedExtendedVariableAccessSeq}
+ArrayAccessValue = ([^\]$@%&\r\n] | {EscapeChar}{1} "]" | {ExceptionForAllowedVariableChar})+
 
 LocalSettingKeywordStartWhitespaceFree = "["
 LocalSettingKeywordEndWhitespaceFree = "]"
@@ -271,7 +272,7 @@ LineComment = {LineCommentSign} {NON_EOL}*
 %state FOR_STRUCTURE, SIMPLE_CONTROL_STRUCTURE_START, FOR_STRUCTURE_LOOP_START, SIMPLE_CONTROL_STRUCTURE, FOR_STRUCTURE_LOOP, WHILE_CONFIGURATION
 %state PYTHON_EVALUATED_EXPRESSION_START, KEYWORD_PYTHON_EXPRESSION, PYTHON_EXPRESSION, PYTHON_EXECUTED_CONDITION, PYTHON_EVALUATED_CONTROL_STRUCTURE_START
 
-%xstate VARIABLE_DATATYPE_CONVERSION, EXTENDED_VARIABLE_SYNTAX
+%xstate VARIABLE_DATATYPE_CONVERSION, EXTENDED_VARIABLE_SYNTAX, EXTENDED_VARIABLE_SYNTAX_ARRAY_ACCESS
 %xstate EXTENDED_VARIABLE_SYNTAX_METHOD_ARGUMENT_VALUES
 %xstate COMMENTS_SECTION, INVALID_SECTION, LITERAL_CONSTANT_ONLY, SETTING_VALUES, LOCAL_SETTING_DEFINITION
 %xstate NORMAL_PARAMETER_ASSIGNMENT, TEMPLATE_PARAMETER_ASSIGNMENT
@@ -399,9 +400,20 @@ LineComment = {LineCommentSign} {NON_EOL}*
     {ListVariableStart}                        { yypushback(yylength() - 1); enterNewState(VARIABLE_USAGE); enterNewState(VARIABLE_OPENING_BRACE); return LIST_VARIABLE_START; }
     {DictVariableStart}                        { yypushback(yylength() - 1); enterNewState(VARIABLE_USAGE); enterNewState(VARIABLE_OPENING_BRACE); return DICT_VARIABLE_START; }
     {EnvVariableStart}                         { yypushback(yylength() - 1); enterNewState(VARIABLE_USAGE); enterNewState(VARIABLE_OPENING_BRACE); return ENV_VARIABLE_START; }
+    "["                                        { enterNewState(EXTENDED_VARIABLE_SYNTAX_ARRAY_ACCESS); return VARIABLE_ACCESS_START; }
     [\w_]+                                     { return VARIABLE_BODY; }
     [\w_]+ {NonNewlineWhitespace}* "("         { yypushback(1); pushBackTrailingWhitespace(); enterNewState(EXTENDED_VARIABLE_SYNTAX_METHOD_ARGUMENTS); return VARIABLE_BODY_METHOD_CALL_NAME; }
     {NonNewlineWhitespace}+                    { return WHITE_SPACE; }
+    [^]                                        { yypushback(yylength()); leaveState(); break; }
+}
+
+<EXTENDED_VARIABLE_SYNTAX_ARRAY_ACCESS> {
+    "]"                                        { leaveState(); return VARIABLE_ACCESS_END; }
+    {ScalarVariableStart}                      { yypushback(yylength() - 1); enterNewState(VARIABLE_USAGE); enterNewState(VARIABLE_OPENING_BRACE); return SCALAR_VARIABLE_START; }
+    {ListVariableStart}                        { yypushback(yylength() - 1); enterNewState(VARIABLE_USAGE); enterNewState(VARIABLE_OPENING_BRACE); return LIST_VARIABLE_START; }
+    {DictVariableStart}                        { yypushback(yylength() - 1); enterNewState(VARIABLE_USAGE); enterNewState(VARIABLE_OPENING_BRACE); return DICT_VARIABLE_START; }
+    {EnvVariableStart}                         { yypushback(yylength() - 1); enterNewState(VARIABLE_USAGE); enterNewState(VARIABLE_OPENING_BRACE); return ENV_VARIABLE_START; }
+    {ArrayAccessValue}                         { return EXTENDED_VARIABLE_ACCESS_BODY; }
     [^]                                        { yypushback(yylength()); leaveState(); break; }
 }
 
@@ -436,7 +448,7 @@ LineComment = {LineCommentSign} {NON_EOL}*
 
 <VARIABLE_DEFINITION, VARIABLE_USAGE, TEST_TASK_CASE_VARIABLE_DEFINITION> {
     // Has to be at least as long as VariableLiteralValue (listed afterwards) to win the longest match and so reaches the whole variable body
-    {VariableLiteralValueExtendedSyntax} "." {VariableLiteralValue}  { yypushback(yylength() - indexOf('.')); enterNewState(EXTENDED_VARIABLE_SYNTAX); return VARIABLE_BODY; }
+    {VariableLiteralValueExtendedSyntax} "." {VariableLiteralValue}?  { yypushback(yylength() - indexOf('.')); enterNewState(EXTENDED_VARIABLE_SYNTAX); return VARIABLE_BODY; }
     {VariableLiteralValue}                           { return VARIABLE_BODY; }
     {EOL}                                            { leaveState(); return EOL; }
 }

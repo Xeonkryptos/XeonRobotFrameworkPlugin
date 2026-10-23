@@ -7,7 +7,7 @@ import com.intellij.openapi.fileTypes.SyntaxHighlighterBase
 import com.intellij.openapi.project.Project
 import com.intellij.psi.TokenType
 import com.intellij.psi.tree.IElementType
-import dev.xeonkryptos.xeonrobotframeworkplugin.lexer.RobotLexerAdapter
+import dev.xeonkryptos.xeonrobotframeworkplugin.lexer.createLayeredRobotLexer
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.ExtendedRobotTypes
 import dev.xeonkryptos.xeonrobotframeworkplugin.psi.RobotTypes
 
@@ -46,6 +46,7 @@ class RobotHighlighter @JvmOverloads constructor(private val project: Project? =
 
         @JvmField
         val VARIABLE: TextAttributesKey = TextAttributesKey.createTextAttributesKey("ROBOT_VARIABLE", DefaultLanguageHighlighterColors.DOC_COMMENT_MARKUP)
+        @JvmField
         val EXTENDED_VARIABLE_ACCESS_BRACKETS: TextAttributesKey = TextAttributesKey.createTextAttributesKey("ROBOT_EXTENDED_VARIABLE_ACCESS_BRACKETS", DefaultLanguageHighlighterColors.BRACKETS)
 
         @JvmField
@@ -74,6 +75,10 @@ class RobotHighlighter @JvmOverloads constructor(private val project: Project? =
         @JvmField
         val VARIABLE_EXTENDED_ACCESS_OPERATOR: TextAttributesKey =
             TextAttributesKey.createTextAttributesKey("ROBOT_VARIABLE_EXTENDED_ACCESS_OPERATOR", DefaultLanguageHighlighterColors.DOT)
+
+        @JvmField
+        val VARIABLE_ARRAY_ACCESS_INDEX: TextAttributesKey =
+            TextAttributesKey.createTextAttributesKey("ROBOT_VARIABLE_ARRAY_ACCESS_INDEX", DefaultLanguageHighlighterColors.NUMBER)
 
         @JvmField
         val VARIABLE_METHOD_CALL: TextAttributesKey =
@@ -150,6 +155,8 @@ class RobotHighlighter @JvmOverloads constructor(private val project: Project? =
             keys[ExtendedRobotTypes.EXTENDED_VARIABLE_ACCESS_BODY] = VARIABLE
             keys[RobotTypes.VARIABLE_ACCESS_START] = EXTENDED_VARIABLE_ACCESS_BRACKETS
             keys[RobotTypes.VARIABLE_ACCESS_END] = EXTENDED_VARIABLE_ACCESS_BRACKETS
+            keys[RobotTypes.VARIABLE_INDEX_ACCESS] = VARIABLE_ARRAY_ACCESS_INDEX
+            keys[RobotTypes.VARIABLE_SLICE_ACCESS] = VARIABLE_ARRAY_ACCESS_INDEX
 
             keys[RobotTypes.DOT_OPERATOR] = VARIABLE_EXTENDED_ACCESS_OPERATOR
             keys[RobotTypes.VARIABLE_BODY_METHOD_CALL_NAME] = VARIABLE_METHOD_CALL
@@ -189,7 +196,7 @@ class RobotHighlighter @JvmOverloads constructor(private val project: Project? =
         }
     }
 
-    override fun getHighlightingLexer(): Lexer = RobotLexerAdapter(project)
+    override fun getHighlightingLexer(): Lexer = createLayeredRobotLexer(project)
 
     override fun getTokenHighlights(tokenType: IElementType?): Array<TextAttributesKey> = pack(keys[tokenType])
 }

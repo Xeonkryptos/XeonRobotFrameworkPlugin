@@ -59,6 +59,7 @@ class RobotColorsPage : ColorSettingsPage {
                Result is "${'$'}{result}"
                    Result should be    ${'$'}{result}
                    Log    ${'$'}{calculator.history(1, 'last', prefix${'$'}{suffix})}
+                   Log    ${'$'}{calculator.entries[0].name}
                    """.trimIndent()
     }
 
@@ -81,6 +82,8 @@ private val ATTRIBUTES = arrayOf(AttributesDescriptor(RobotBundle.message("color
     AttributesDescriptor(RobotBundle.message("color.settings.variableDataType"), RobotHighlighter.VARIABLE_DATA_TYPE),
     AttributesDescriptor(RobotBundle.message("color.settings.variableDataTypeMarker"), RobotHighlighter.VARIABLE_DATA_TYPE_MARKER),
     AttributesDescriptor(RobotBundle.message("color.settings.variableExtendedAccessOperator"), RobotHighlighter.VARIABLE_EXTENDED_ACCESS_OPERATOR),
+    AttributesDescriptor(RobotBundle.message("color.settings.variableArrayAccessBrackets"), RobotHighlighter.EXTENDED_VARIABLE_ACCESS_BRACKETS),
+    AttributesDescriptor(RobotBundle.message("color.settings.variableArrayAccessIndex"), RobotHighlighter.VARIABLE_ARRAY_ACCESS_INDEX),
     AttributesDescriptor(RobotBundle.message("color.settings.variableMethodCall"), RobotHighlighter.VARIABLE_METHOD_CALL),
     AttributesDescriptor(RobotBundle.message("color.settings.variableMethodCallParentheses"), RobotHighlighter.VARIABLE_METHOD_CALL_PARENTHESES),
     AttributesDescriptor(RobotBundle.message("color.settings.variableMethodCallComma"), RobotHighlighter.VARIABLE_METHOD_CALL_COMMA),

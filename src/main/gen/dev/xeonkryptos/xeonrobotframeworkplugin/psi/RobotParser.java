@@ -3418,7 +3418,32 @@ public class RobotParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // variable_expression_id (DOT_OPERATOR (variable_expression | variable))+
+  // VARIABLE_ACCESS_START (variable_slice_access_content | variable_index_access_content | variable_nested_access_content) VARIABLE_ACCESS_END
+  public static boolean variable_expression_array_access(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "variable_expression_array_access")) return false;
+    if (!nextTokenIs(b, VARIABLE_ACCESS_START)) return false;
+    boolean r, p;
+    Marker m = enter_section_(b, l, _NONE_, VARIABLE_EXPRESSION_ARRAY_ACCESS, null);
+    r = consumeToken(b, VARIABLE_ACCESS_START);
+    p = r; // pin = 1
+    r = r && report_error_(b, variable_expression_array_access_1(b, l + 1));
+    r = p && consumeToken(b, VARIABLE_ACCESS_END) && r;
+    exit_section_(b, l, m, r, p, null);
+    return r || p;
+  }
+
+  // variable_slice_access_content | variable_index_access_content | variable_nested_access_content
+  private static boolean variable_expression_array_access_1(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "variable_expression_array_access_1")) return false;
+    boolean r;
+    r = variable_slice_access_content(b, l + 1);
+    if (!r) r = variable_index_access_content(b, l + 1);
+    if (!r) r = variable_nested_access_content(b, l + 1);
+    return r;
+  }
+
+  /* ********************************************************** */
+  // variable_expression_id (DOT_OPERATOR (variable_expression | variable)? variable_expression_array_access*)+
   public static boolean variable_expression_definition(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "variable_expression_definition")) return false;
     if (!nextTokenIs(b, VARIABLE_BODY)) return false;
@@ -3430,7 +3455,7 @@ public class RobotParser implements PsiParser, LightPsiParser {
     return r;
   }
 
-  // (DOT_OPERATOR (variable_expression | variable))+
+  // (DOT_OPERATOR (variable_expression | variable)? variable_expression_array_access*)+
   private static boolean variable_expression_definition_1(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "variable_expression_definition_1")) return false;
     boolean r;
@@ -3445,24 +3470,43 @@ public class RobotParser implements PsiParser, LightPsiParser {
     return r;
   }
 
-  // DOT_OPERATOR (variable_expression | variable)
+  // DOT_OPERATOR (variable_expression | variable)? variable_expression_array_access*
   private static boolean variable_expression_definition_1_0(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "variable_expression_definition_1_0")) return false;
     boolean r;
     Marker m = enter_section_(b);
     r = consumeToken(b, DOT_OPERATOR);
     r = r && variable_expression_definition_1_0_1(b, l + 1);
+    r = r && variable_expression_definition_1_0_2(b, l + 1);
     exit_section_(b, m, null, r);
     return r;
   }
 
-  // variable_expression | variable
+  // (variable_expression | variable)?
   private static boolean variable_expression_definition_1_0_1(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "variable_expression_definition_1_0_1")) return false;
+    variable_expression_definition_1_0_1_0(b, l + 1);
+    return true;
+  }
+
+  // variable_expression | variable
+  private static boolean variable_expression_definition_1_0_1_0(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "variable_expression_definition_1_0_1_0")) return false;
     boolean r;
     r = variable_expression(b, l + 1);
     if (!r) r = variable(b, l + 1);
     return r;
+  }
+
+  // variable_expression_array_access*
+  private static boolean variable_expression_definition_1_0_2(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "variable_expression_definition_1_0_2")) return false;
+    while (true) {
+      int c = current_position_(b);
+      if (!variable_expression_array_access(b, l + 1)) break;
+      if (!empty_element_parsed_guard_(b, "variable_expression_definition_1_0_2", c)) break;
+    }
+    return true;
   }
 
   /* ********************************************************** */

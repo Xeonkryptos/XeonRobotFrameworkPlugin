@@ -23,11 +23,21 @@ class ExtendedVariableSyntaxReferenceTest : BasePlatformTestCase() {
 
                 def full(self, number: int) -> str: ...
 
+            class AddressList:
+                def __getitem__(self, index: int) -> Address: ...
+
+            class AddressMap:
+                def __getitem__(self, key: str) -> Address: ...
+
             class Person:
                 name: str = ""
                 address: Address
+                addresses: AddressList
+                by_key: AddressMap
 
                 def greet(self, other: str) -> str: ...
+
+                def get_addresses(self) -> AddressList: ...
 
                 def get_address(self) -> Address: ...
 
@@ -118,6 +128,42 @@ class ExtendedVariableSyntaxReferenceTest : BasePlatformTestCase() {
 
     fun `test nested variable in chain stops resolving`() {
         configure("Log    \${p.address.\${attr}.city}")
+        assertNull(idNamed("city").reference.resolve())
+    }
+
+    fun `test attribute behind index access of attribute`() {
+        configure("Log    \${p.addresses[0].city}")
+        val resolved = idNamed("city").reference.resolve()
+        assertInstanceOf(resolved, PyTargetExpression::class.java)
+        assertEquals("Address", (resolved as PyTargetExpression).containingClass?.name)
+    }
+
+    fun `test attribute behind index access of method call`() {
+        configure("Log    \${p.get_addresses()[0].city}")
+        assertInstanceOf(idNamed("city").reference.resolve(), PyTargetExpression::class.java)
+    }
+
+    fun `test method call behind index access`() {
+        configure("Log    \${p.addresses[-1].full(1)}")
+        assertInstanceOf(methodCallIdNamed("full").reference.resolve(), PyFunction::class.java)
+    }
+
+    fun `test dict access resolves to value type`() {
+        configure("Log    \${p.by_key['home'].city}", "Log    \${p.by_key[\${key}].city}")
+        val cities = elements<RobotVariableExpressionId>().filter { it.text == "city" }
+        assertEquals(2, cities.size)
+        cities.forEach { assertInstanceOf(it.reference.resolve(), PyTargetExpression::class.java) }
+    }
+
+    fun `test slice keeps the collection type`() {
+        configure("Log    \${p.addresses[1:2].city}", "Log    \${p.addresses[1:2][0].city}")
+        val cities = elements<RobotVariableExpressionId>().filter { it.text == "city" }
+        assertNull(cities[0].reference.resolve())
+        assertInstanceOf(cities[1].reference.resolve(), PyTargetExpression::class.java)
+    }
+
+    fun `test collection itself is not the receiver of an attribute`() {
+        configure("Log    \${p.addresses.city}")
         assertNull(idNamed("city").reference.resolve())
     }
 

@@ -11,6 +11,9 @@ public interface RobotVariableExpressionDefinition extends RobotElement {
   List<RobotVariable> getVariableList();
 
   @NotNull
+  List<RobotVariableExpressionArrayAccess> getVariableExpressionArrayAccessList();
+
+  @NotNull
   List<RobotVariableExpressionId> getVariableExpressionIdList();
 
   @NotNull

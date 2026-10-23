@@ -35,6 +35,12 @@ public class RobotVariableExpressionDefinitionImpl extends RobotPsiElementBase i
 
   @Override
   @NotNull
+  public List<RobotVariableExpressionArrayAccess> getVariableExpressionArrayAccessList() {
+    return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotVariableExpressionArrayAccess.class);
+  }
+
+  @Override
+  @NotNull
   public List<RobotVariableExpressionId> getVariableExpressionIdList() {
     return PsiTreeUtil.getChildrenOfTypeAsList(this, RobotVariableExpressionId.class);
   }
