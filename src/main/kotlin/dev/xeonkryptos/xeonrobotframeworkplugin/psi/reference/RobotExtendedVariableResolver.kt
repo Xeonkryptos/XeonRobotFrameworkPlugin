@@ -179,7 +179,7 @@ object RobotExtendedVariableResolver {
                 val index = access.variableIndexAccessContent?.text?.trim()?.toIntOrNull()
                 if (index != null && !type.isHomogeneous) type.getElementType(index) else iteratedItemTypeOf(type)
             }
-            type is PyCollectionType && isMapping(type, context) -> type.elementTypes.getOrNull(1)
+            type is PyCollectionType && isMapping(type, context) -> elementTypesOf(type).getOrNull(1)
             type is PyCollectionType -> iteratedItemTypeOf(type)
             else -> membersOf(type, GET_ITEM_METHOD_NAME, context).filterIsInstance<PyFunction>().firstNotNullOfOrNull { context.getReturnType(it) }
         }
@@ -188,11 +188,25 @@ object RobotExtendedVariableResolver {
 
     /** Replacement for the internal `PyClassType.getIteratedItemType()`: a tuple iterates over the union of its elements, other collections over their first type argument. */
     private fun iteratedItemTypeOf(type: PyCollectionType): PyType? =
-        if (type is PyTupleType) PyUnionType.union(type.elementTypes) else type.elementTypes.firstOrNull()
+        if (type is PyTupleType) PyUnionType.union(elementTypesOf(type)) else elementTypesOf(type).firstOrNull()
+
+    /**
+     * `PyCollectionType.getElementTypes()` doesn't exist anymore in newer platform versions. Resolved reflectively to stay binary compatible with both
+     * old and new versions.
+     */
+    private fun elementTypesOf(type: PyCollectionType): List<PyType?> {
+        for (methodName in ELEMENT_TYPES_METHOD_NAMES) {
+            val method = runCatching { type.javaClass.getMethod(methodName) }.getOrNull() ?: continue
+            val result = runCatching { method.invoke(type) }.getOrNull()
+            if (result is List<*>) return result.filterIsInstance<PyType?>()
+        }
+        return emptyList()
+    }
 
     private fun isMapping(type: PyCollectionType, context: TypeEvalContext): Boolean =
         MAPPING_CLASS_NAMES.any { type.pyClass.isSubclass(it, context) }
 
+    private val ELEMENT_TYPES_METHOD_NAMES = listOf("getElementTypes", "getTypeArguments")
     private const val GET_ITEM_METHOD_NAME = "__getitem__"
     private val MAPPING_CLASS_NAMES = listOf("dict", "typing.Mapping", "collections.abc.Mapping")
 

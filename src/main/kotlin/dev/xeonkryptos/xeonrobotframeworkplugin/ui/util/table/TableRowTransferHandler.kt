@@ -3,8 +3,8 @@ package dev.xeonkryptos.xeonrobotframeworkplugin.ui.util.table
 import java.awt.Cursor
 import java.awt.datatransfer.DataFlavor
 import java.awt.datatransfer.Transferable
+import java.awt.datatransfer.UnsupportedFlavorException
 import java.awt.dnd.DragSource
-import javax.activation.DataHandler
 import javax.swing.JComponent
 import javax.swing.JTable
 import javax.swing.TransferHandler
@@ -15,7 +15,7 @@ class TableRowTransferHandler(private val table: JTable) : TransferHandler() {
 
     override fun createTransferable(c: JComponent): Transferable {
         assert(c === table)
-        return DataHandler(table.selectedRow, localObjectFlavor.getMimeType())
+        return RowIndexTransferable(table.selectedRow, localObjectFlavor)
     }
 
     override fun canImport(info: TransferSupport): Boolean {
@@ -56,5 +56,16 @@ class TableRowTransferHandler(private val table: JTable) : TransferHandler() {
         if (act == MOVE) {
             table.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR))
         }
+    }
+}
+
+private class RowIndexTransferable(private val row: Int, private val flavor: DataFlavor) : Transferable {
+    override fun getTransferDataFlavors(): Array<DataFlavor> = arrayOf(flavor)
+
+    override fun isDataFlavorSupported(flavor: DataFlavor): Boolean = this.flavor.equals(flavor)
+
+    override fun getTransferData(flavor: DataFlavor): Any {
+        if (!isDataFlavorSupported(flavor)) throw UnsupportedFlavorException(flavor)
+        return row
     }
 }

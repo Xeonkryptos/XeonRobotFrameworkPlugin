@@ -180,10 +180,9 @@ public class RobotImportArgumentReference extends PsiPolyVariantReferenceBase<Ro
         Module moduleForFile = ModuleUtilCore.findModuleForPsiElement(file);
         VirtualFile contentRoot = RobotFileManager.findContentRootForFile(file);
         if (moduleForFile != null && contentRoot != null) {
-            @SuppressWarnings("UnstableApiUsage")
             Set<LookupElementBuilder> elements = fileExtensions.stream()
                                                                .parallel()
-                                                               .flatMap(fileExtension -> ReadAction.computeCancellable(() -> FilenameIndex.getAllFilesByExt(project,
+                                                               .flatMap(fileExtension -> ReadAction.compute(() -> FilenameIndex.getAllFilesByExt(project,
                                                                                                                                                             fileExtension,
                                                                                                                                                             moduleForFile.getModuleContentScope()))
                                                                                                    .stream())
