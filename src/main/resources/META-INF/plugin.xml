@@ -257,6 +257,8 @@
 
         <codeFoldingOptionsProvider instance="dev.xeonkryptos.xeonrobotframeworkplugin.config.RobotCodeFoldingOptionsProvider"/>
 
+        <errorHandler implementation="com.intellij.diagnostic.JetBrainsMarketplaceErrorReportSubmitter"/>
+
         <notificationGroup id="Robot" displayType="BALLOON" bundle="messages.RobotBundle" key="notification.group.robot"/>
 
         <intentionAction>
