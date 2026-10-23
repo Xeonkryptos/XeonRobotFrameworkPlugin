@@ -177,14 +177,18 @@ object RobotExtendedVariableResolver {
         val itemType: PyType? = when {
             type is PyTupleType -> {
                 val index = access.variableIndexAccessContent?.text?.trim()?.toIntOrNull()
-                if (index != null && !type.isHomogeneous) type.getElementType(index) else type.iteratedItemType
+                if (index != null && !type.isHomogeneous) type.getElementType(index) else iteratedItemTypeOf(type)
             }
             type is PyCollectionType && isMapping(type, context) -> type.elementTypes.getOrNull(1)
-            type is PyCollectionType -> type.iteratedItemType
+            type is PyCollectionType -> iteratedItemTypeOf(type)
             else -> membersOf(type, GET_ITEM_METHOD_NAME, context).filterIsInstance<PyFunction>().firstNotNullOfOrNull { context.getReturnType(it) }
         }
         return itemType?.let(::flatten).orEmpty()
     }
+
+    /** Replacement for the internal `PyClassType.getIteratedItemType()`: a tuple iterates over the union of its elements, other collections over their first type argument. */
+    private fun iteratedItemTypeOf(type: PyCollectionType): PyType? =
+        if (type is PyTupleType) PyUnionType.union(type.elementTypes) else type.elementTypes.firstOrNull()
 
     private fun isMapping(type: PyCollectionType, context: TypeEvalContext): Boolean =
         MAPPING_CLASS_NAMES.any { type.pyClass.isSubclass(it, context) }
