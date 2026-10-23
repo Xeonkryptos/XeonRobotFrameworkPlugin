@@ -21,11 +21,15 @@ jobs:
 
       # Setup Java 21 environment for the next steps
       - name: Setup Java
-        uses: actions/setup-java@v5.2.0
+        uses: Wandalen/wretry.action@v3.8.0
         with:
-          distribution: jetbrains
-          java-version: 21
-          token: ${{ secrets.GITHUB_TOKEN }}
+          action: actions/setup-java@v5.2.0
+          attempt_limit: 5
+          attempt_delay: 60000
+          with: |
+            distribution: jetbrains
+            java-version: 21
+            token: ${{ secrets.GITHUB_TOKEN }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -87,11 +91,15 @@ jobs:
           fetch-depth: 0
 
       - name: Setup Java
-        uses: actions/setup-java@v5.2.0
+        uses: Wandalen/wretry.action@v3.8.0
         with:
-          distribution: jetbrains
-          java-version: 21
-          token: ${{ secrets.GITHUB_TOKEN }}
+          action: actions/setup-java@v5.2.0
+          attempt_limit: 5
+          attempt_delay: 60000
+          with: |
+            distribution: jetbrains
+            java-version: 21
+            token: ${{ secrets.GITHUB_TOKEN }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
