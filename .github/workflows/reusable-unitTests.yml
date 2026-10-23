@@ -13,23 +13,23 @@ jobs:
       gradleVersion: "9.8.0"
       os: ubuntu-latest
 
-#  unitTests:
-#    name: Gradle ${{ matrix.gradleVersion }} @ ${{ matrix.os }}
-#    needs: baseUnitTest
-#    uses: ./.github/workflows/reusable-single-unitTest.yml
-#    secrets: inherit
-#    permissions:
-#      checks: write
-#    with:
-#      gradleVersion: ${{ matrix.gradleVersion }}
-#      os: ${{ matrix.os }}
-#      cacheReadOnly: true
-#
-#    strategy:
-#      fail-fast: false
-#      matrix:
-#        gradleVersion:
-#          - "9.8.0"
-#        os:
-#          - windows-latest
-#          - macos-latest
+  unitTests:
+    name: Gradle ${{ matrix.gradleVersion }} @ ${{ matrix.os }}
+    needs: baseUnitTest
+    uses: ./.github/workflows/reusable-single-unitTest.yml
+    secrets: inherit
+    permissions:
+      checks: write
+    with:
+      gradleVersion: ${{ matrix.gradleVersion }}
+      os: ${{ matrix.os }}
+      cacheReadOnly: true
+
+    strategy:
+      fail-fast: false
+      matrix:
+        gradleVersion:
+          - "9.8.0"
+        os:
+          - windows-latest
+          - macos-latest
