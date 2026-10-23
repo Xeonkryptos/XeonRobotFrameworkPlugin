@@ -1,0 +1,103 @@
+name: Setup Java with retry
+description: Runs actions/setup-java and retries on failure (e.g. flaky JDK download)
+
+inputs:
+  java-version:
+    description: Java version to install
+    default: '21'
+  distribution:
+    description: Java distribution
+    default: jetbrains
+  cache:
+    description: Build tool to cache dependencies for (e.g. gradle)
+    default: ''
+  token:
+    description: Token used to fetch the JDK metadata
+    default: ${{ github.token }}
+  attempt-delay:
+    description: Seconds to wait between attempts
+    default: '60'
+
+runs:
+  using: composite
+  steps:
+    - name: Setup Java (attempt 1/5)
+      id: attempt1
+      continue-on-error: true
+      uses: actions/setup-java@v5.2.0
+      with:
+        distribution: ${{ inputs.distribution }}
+        java-version: ${{ inputs.java-version }}
+        cache: ${{ inputs.cache }}
+        token: ${{ inputs.token }}
+
+    - name: Wait before attempt 2
+      if: steps.attempt1.outcome == 'failure'
+      shell: bash
+      run: sleep "${{ inputs.attempt-delay }}"
+
+    - name: Setup Java (attempt 2/5)
+      id: attempt2
+      if: steps.attempt1.outcome == 'failure'
+      continue-on-error: true
+      uses: actions/setup-java@v5.2.0
+      with:
+        distribution: ${{ inputs.distribution }}
+        java-version: ${{ inputs.java-version }}
+        cache: ${{ inputs.cache }}
+        token: ${{ inputs.token }}
+
+    - name: Wait before attempt 3
+      if: steps.attempt2.outcome == 'failure'
+      shell: bash
+      run: sleep "${{ inputs.attempt-delay }}"
+
+    - name: Setup Java (attempt 3/5)
+      id: attempt3
+      if: steps.attempt2.outcome == 'failure'
+      continue-on-error: true
+      uses: actions/setup-java@v5.2.0
+      with:
+        distribution: ${{ inputs.distribution }}
+        java-version: ${{ inputs.java-version }}
+        cache: ${{ inputs.cache }}
+        token: ${{ inputs.token }}
+
+    - name: Wait before attempt 4
+      if: steps.attempt3.outcome == 'failure'
+      shell: bash
+      run: sleep "${{ inputs.attempt-delay }}"
+
+    - name: Setup Java (attempt 4/5)
+      id: attempt4
+      if: steps.attempt3.outcome == 'failure'
+      continue-on-error: true
+      uses: actions/setup-java@v5.2.0
+      with:
+        distribution: ${{ inputs.distribution }}
+        java-version: ${{ inputs.java-version }}
+        cache: ${{ inputs.cache }}
+        token: ${{ inputs.token }}
+
+    - name: Wait before attempt 5
+      if: steps.attempt4.outcome == 'failure'
+      shell: bash
+      run: sleep "${{ inputs.attempt-delay }}"
+
+    - name: Setup Java (attempt 5/5)
+      id: attempt5
+      if: steps.attempt4.outcome == 'failure'
+      continue-on-error: true
+      uses: actions/setup-java@v5.2.0
+      with:
+        distribution: ${{ inputs.distribution }}
+        java-version: ${{ inputs.java-version }}
+        cache: ${{ inputs.cache }}
+        token: ${{ inputs.token }}
+
+    - name: Fail if all attempts failed
+      if: steps.attempt5.outcome == 'failure'
+      shell: bash
+      run: |
+        echo "::error::Setting up Java failed after 5 attempts"
+        exit 1
