@@ -38,7 +38,7 @@ jobs:
       - name: Setup Java
         uses: actions/setup-java@v5.2.0
         with:
-          distribution: temurin
+          distribution: jetbrains
           java-version: 21
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
