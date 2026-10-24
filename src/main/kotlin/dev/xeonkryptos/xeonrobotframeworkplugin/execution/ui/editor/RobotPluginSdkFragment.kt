@@ -9,6 +9,7 @@ import com.intellij.openapi.module.Module
 import com.intellij.openapi.projectRoots.Sdk
 import com.intellij.openapi.roots.ModuleRootManager
 import com.intellij.openapi.ui.ComboBox
+import com.intellij.openapi.util.Computable
 import com.jetbrains.python.run.PythonRunConfiguration
 import com.jetbrains.python.run.configuration.PyInterpreterModeNotifier
 import com.jetbrains.python.run.configuration.PySdkComboBox
@@ -96,7 +97,7 @@ class RobotPluginSdkFragment : SettingsEditorFragment<RobotRunConfiguration, JPa
     hints[modulesComponent] = RobotBundle.message("python.run.configuration.fragments.plugin.sdk.of.module.hint")
     modulesCombo?.addActionListener { updateRemoteInterpreterMode() }
 
-    val interpreterComponent = PySdkComboBox(false) { modulesComponent.selectedModule }
+    val interpreterComponent = createSdkComboBox(config) { modulesComponent.selectedModule }
     initComponent(interpreterComponent, SDK_FROM_LIST)
     interpreterComponent.reset(config)
     fields[SDK_FROM_LIST] = interpreterComponent
@@ -104,6 +105,16 @@ class RobotPluginSdkFragment : SettingsEditorFragment<RobotRunConfiguration, JPa
     CommandLinePanel.setMinimumWidth(interpreterCombo, 400)
     hints[interpreterComponent] = RobotBundle.message("python.run.configuration.fragments.plugin.specified.interpreter.hint")
     interpreterCombo?.addActionListener { updateRemoteInterpreterMode() }
+  }
+
+  // The PySdkComboBox constructor signature differs between platform builds (newer ones additionally take a Project)
+  private fun createSdkComboBox(config: PythonRunConfiguration, moduleProvider: Computable<Module?>): PySdkComboBox {
+    val constructors = PySdkComboBox::class.java.constructors
+    constructors.firstOrNull { it.parameterCount == 3 }?.let {
+      return it.newInstance(config.project, false, moduleProvider) as PySdkComboBox
+    }
+    val legacy = constructors.first { it.parameterCount == 2 }
+    return legacy.newInstance(false, moduleProvider) as PySdkComboBox
   }
 
   private fun initComponent(field: JComponent, index: Int) {
