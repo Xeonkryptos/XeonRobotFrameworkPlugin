@@ -14,6 +14,7 @@
 - Fixed ClassCastException when starting a robot debug process after a cancellation
 - Fixed incorrectly marked variables with extended variable syntax as unused even though they are used
 - Fixed handling of array access in variable extended syntax
+- Fixed missing code completions for entries in `Settings` section
 
 ## 0.8.0 - 2026-10-11
 

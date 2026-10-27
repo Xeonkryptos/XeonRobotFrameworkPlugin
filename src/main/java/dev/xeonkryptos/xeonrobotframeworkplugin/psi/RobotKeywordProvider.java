@@ -9,6 +9,7 @@ import dev.xeonkryptos.xeonrobotframeworkplugin.localization.BehaviourDrivenType
 import dev.xeonkryptos.xeonrobotframeworkplugin.localization.GlobalSettingType;
 import dev.xeonkryptos.xeonrobotframeworkplugin.localization.LocalSettingType;
 import dev.xeonkryptos.xeonrobotframeworkplugin.localization.LocalizationLoadedListener;
+import dev.xeonkryptos.xeonrobotframeworkplugin.localization.LocalizationLoadingMechanism;
 import dev.xeonkryptos.xeonrobotframeworkplugin.localization.LocalizationTopics;
 import dev.xeonkryptos.xeonrobotframeworkplugin.localization.LocalizationTypeMappingProvider;
 import dev.xeonkryptos.xeonrobotframeworkplugin.localization.SectionType;
@@ -32,6 +33,9 @@ public final class RobotKeywordProvider implements Disposable {
 
     public RobotKeywordProvider(Project project) {
         project.getMessageBus().connect(this).subscribe(LocalizationTopics.LOCALIZATION_LOADED_TOPIC, (LocalizationLoadedListener) this::fillRecommendations);
+        // No localization event is published without a persisted configuration or when it was published before this service got created.
+        // Without an initial fill, there would be no recommendations at all.
+        fillRecommendations(LocalizationLoadingMechanism.getInstance(project).getLocalizationTypeMappingProvider());
     }
 
     public static RobotKeywordProvider getInstance(Project project) {

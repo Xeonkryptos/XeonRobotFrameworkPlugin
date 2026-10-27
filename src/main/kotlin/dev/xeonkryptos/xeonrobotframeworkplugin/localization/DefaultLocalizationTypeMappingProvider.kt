@@ -18,12 +18,12 @@ object DefaultLocalizationTypeMappingProvider : LocalizationTypeMappingProvider 
     )
 
     private val sectionTypeMappingsReversal: Map<SectionType, CharSequence> = mapOf(
-        SectionType.SETTINGS to "settings",
-        SectionType.VARIABLES to "variables",
-        SectionType.TEST_CASES to "test cases",
-        SectionType.TASKS to "tasks",
-        SectionType.KEYWORDS to "keywords",
-        SectionType.COMMENTS to "comments"
+        SectionType.SETTINGS to "Settings",
+        SectionType.VARIABLES to "Variables",
+        SectionType.TEST_CASES to "Test Cases",
+        SectionType.TASKS to "Tasks",
+        SectionType.KEYWORDS to "Keywords",
+        SectionType.COMMENTS to "Comments"
     )
 
     private val globalSettingTypeMappings = mapOf(
@@ -50,26 +50,26 @@ object DefaultLocalizationTypeMappingProvider : LocalizationTypeMappingProvider 
     )
 
     private val globalSettingTypeMappingsReversal: Map<GlobalSettingType, CharSequence> = mapOf(
-        GlobalSettingType.LIBRARY to "library",
-        GlobalSettingType.RESOURCE to "resource",
-        GlobalSettingType.VARIABLES to "variables",
-        GlobalSettingType.DOCUMENTATION to "documentation",
-        GlobalSettingType.SUITE_SETUP to "suite setup",
-        GlobalSettingType.SUITE_TEARDOWN to "suite teardown",
-        GlobalSettingType.NAME to "name",
-        GlobalSettingType.METADATA to "metadata",
-        GlobalSettingType.TEST_TAGS to "test tags",
-        GlobalSettingType.TEST_SETUP to "test setup",
-        GlobalSettingType.TEST_TEARDOWN to "test teardown",
-        GlobalSettingType.TEST_TIMEOUT to "test timeout",
-        GlobalSettingType.TEST_TEMPLATE to "test template",
-        GlobalSettingType.TASK_TAGS to "task tags",
-        GlobalSettingType.TASK_SETUP to "task setup",
-        GlobalSettingType.TASK_TEARDOWN to "task teardown",
-        GlobalSettingType.TASK_TIMEOUT to "task timeout",
-        GlobalSettingType.TASK_TEMPLATE to "task template",
-        GlobalSettingType.KEYWORD_TAGS to "keyword tags",
-        GlobalSettingType.DEFAULT_TAGS to "default tags"
+        GlobalSettingType.LIBRARY to "Library",
+        GlobalSettingType.RESOURCE to "Resource",
+        GlobalSettingType.VARIABLES to "Variables",
+        GlobalSettingType.DOCUMENTATION to "Documentation",
+        GlobalSettingType.SUITE_SETUP to "Suite Setup",
+        GlobalSettingType.SUITE_TEARDOWN to "Suite Teardown",
+        GlobalSettingType.NAME to "Name",
+        GlobalSettingType.METADATA to "Metadata",
+        GlobalSettingType.TEST_TAGS to "Test Tags",
+        GlobalSettingType.TEST_SETUP to "Test Setup",
+        GlobalSettingType.TEST_TEARDOWN to "Test Teardown",
+        GlobalSettingType.TEST_TIMEOUT to "Test Timeout",
+        GlobalSettingType.TEST_TEMPLATE to "Test Template",
+        GlobalSettingType.TASK_TAGS to "Task Tags",
+        GlobalSettingType.TASK_SETUP to "Task Setup",
+        GlobalSettingType.TASK_TEARDOWN to "Task Teardown",
+        GlobalSettingType.TASK_TIMEOUT to "Task Timeout",
+        GlobalSettingType.TASK_TEMPLATE to "Task Template",
+        GlobalSettingType.KEYWORD_TAGS to "Keyword Tags",
+        GlobalSettingType.DEFAULT_TAGS to "Default Tags"
     )
 
     private val localSettingTypeMappings = mapOf(
@@ -82,11 +82,12 @@ object DefaultLocalizationTypeMappingProvider : LocalizationTypeMappingProvider 
     )
 
     private val localSettingTypeMappingsReversal: Map<LocalSettingType, CharSequence> = mapOf(
-        LocalSettingType.TAGS to "tags",
-        LocalSettingType.SETUP to "setup",
-        LocalSettingType.TEARDOWN to "teardown",
-        LocalSettingType.TIMEOUT to "timeout",
-        LocalSettingType.ARGUMENTS to "arguments"
+        LocalSettingType.TAGS to "Tags",
+        LocalSettingType.SETUP to "Setup",
+        LocalSettingType.TEARDOWN to "Teardown",
+        LocalSettingType.TIMEOUT to "Timeout",
+        LocalSettingType.ARGUMENTS to "Arguments",
+        LocalSettingType.TEMPLATE to "Template"
     )
 
     private val behaviourDrivenIdentifierTypeMappings = mapOf(
@@ -98,11 +99,11 @@ object DefaultLocalizationTypeMappingProvider : LocalizationTypeMappingProvider 
     )
 
     private val behaviourDrivenIdentifierTypeMappingsReversal: Map<BehaviourDrivenType, CharSequence> = mapOf(
-        BehaviourDrivenType.GIVEN to "given",
-        BehaviourDrivenType.WHEN to "when",
-        BehaviourDrivenType.THEN to "then",
-        BehaviourDrivenType.AND to "and",
-        BehaviourDrivenType.BUT to "but"
+        BehaviourDrivenType.GIVEN to "Given",
+        BehaviourDrivenType.WHEN to "When",
+        BehaviourDrivenType.THEN to "Then",
+        BehaviourDrivenType.AND to "And",
+        BehaviourDrivenType.BUT to "But"
     )
 
     override fun getSectionType(sectionName: CharSequence): SectionType? = sectionTypeMappings[sectionName]
