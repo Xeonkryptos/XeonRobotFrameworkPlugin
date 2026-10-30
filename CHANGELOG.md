@@ -8,6 +8,9 @@
 
 ### Changed
 
+- Don't normalize keyword name changes on refactor besides the capitalization
+- Do capitalization in renaming only when configured
+
 ### Fixed
 
 - Fixed parsing issue for Variable Extended Syntax in variable definitions
