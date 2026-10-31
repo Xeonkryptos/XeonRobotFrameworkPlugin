@@ -8,6 +8,12 @@
 
 ### Changed
 
+### Fixed
+
+## 0.8.1 - 2026-10-31
+
+### Changed
+
 - Don't normalize keyword name changes on refactor besides the capitalization
 - Do capitalization in renaming only when configured
 
