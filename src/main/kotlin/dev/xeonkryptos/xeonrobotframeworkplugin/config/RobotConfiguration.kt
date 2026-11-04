@@ -3,7 +3,7 @@ package dev.xeonkryptos.xeonrobotframeworkplugin.config
 import com.intellij.openapi.application.ModalityState
 import com.intellij.openapi.application.UI
 import com.intellij.openapi.application.asContextElement
-import com.intellij.openapi.application.readAction
+import com.intellij.openapi.application.smartReadAction
 import com.intellij.openapi.options.Configurable
 import com.intellij.openapi.options.SearchableConfigurable
 import com.intellij.openapi.project.Project
@@ -73,7 +73,7 @@ class RobotConfiguration(project: Project, cs: CoroutineScope) : Configurable.No
 
     init {
         cs.launch {
-            val languageConfigurations = readAction {
+            val languageConfigurations = smartReadAction(project) {
                 PythonResolver.findClass(RobotNames.LANGUAGE_BASE_CLASS_REFERENCE, project, null)?.let { languageBaseClass ->
                     val inheritors = PyClassInheritorsSearch.search(languageBaseClass, false).findAll()
                     inheritors.map { inheritor ->
