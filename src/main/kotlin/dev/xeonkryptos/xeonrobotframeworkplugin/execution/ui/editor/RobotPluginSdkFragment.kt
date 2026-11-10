@@ -9,10 +9,8 @@ import com.intellij.openapi.module.Module
 import com.intellij.openapi.projectRoots.Sdk
 import com.intellij.openapi.roots.ModuleRootManager
 import com.intellij.openapi.ui.ComboBox
-import com.intellij.openapi.util.Computable
 import com.jetbrains.python.run.PythonRunConfiguration
 import com.jetbrains.python.run.configuration.PyInterpreterModeNotifier
-import com.jetbrains.python.run.configuration.PySdkComboBox
 import com.jetbrains.python.sdk.PythonSdkUtil
 import dev.xeonkryptos.xeonrobotframeworkplugin.RobotBundle
 import dev.xeonkryptos.xeonrobotframeworkplugin.execution.config.RobotRunConfiguration
@@ -35,7 +33,7 @@ class RobotPluginSdkFragment : SettingsEditorFragment<RobotRunConfiguration, JPa
   private var currentMode: Int? = null
 
   private var modulesCombo: ModulesComboBox? = null
-  private var interpreterCombo: PySdkComboBox? = null
+  private var interpreterCombo: RobotSdkComboBox? = null
 
   val fields: MutableList<JComponent?> = MutableList(SDK_FROM_LIST + 1) { null }
   private val hints: MutableMap<JComponent, String> = mutableMapOf()
@@ -97,7 +95,7 @@ class RobotPluginSdkFragment : SettingsEditorFragment<RobotRunConfiguration, JPa
     hints[modulesComponent] = RobotBundle.message("python.run.configuration.fragments.plugin.sdk.of.module.hint")
     modulesCombo?.addActionListener { updateRemoteInterpreterMode() }
 
-    val interpreterComponent = createSdkComboBox(config) { modulesComponent.selectedModule }
+    val interpreterComponent = RobotSdkComboBox()
     initComponent(interpreterComponent, SDK_FROM_LIST)
     interpreterComponent.reset(config)
     fields[SDK_FROM_LIST] = interpreterComponent
@@ -105,19 +103,6 @@ class RobotPluginSdkFragment : SettingsEditorFragment<RobotRunConfiguration, JPa
     CommandLinePanel.setMinimumWidth(interpreterCombo, 400)
     hints[interpreterComponent] = RobotBundle.message("python.run.configuration.fragments.plugin.specified.interpreter.hint")
     interpreterCombo?.addActionListener { updateRemoteInterpreterMode() }
-  }
-
-  // The PySdkComboBox constructor signature differs between platform builds (newer ones additionally take a Project).
-  // Parameter order of the newer variants changed as well: (Project, Boolean, Computable) in 2025.x, (Boolean, Project, Computable) in 2026.3+
-  private fun createSdkComboBox(config: PythonRunConfiguration, moduleProvider: Computable<Module?>): PySdkComboBox {
-    val constructors = PySdkComboBox::class.java.constructors
-    constructors.firstOrNull { it.parameterCount == 3 }?.let {
-      val args = if (it.parameterTypes[0] == java.lang.Boolean.TYPE) arrayOf(false, config.project, moduleProvider)
-      else arrayOf(config.project, false, moduleProvider)
-      return it.newInstance(*args) as PySdkComboBox
-    }
-    val legacy = constructors.first { it.parameterCount == 2 }
-    return legacy.newInstance(false, moduleProvider) as PySdkComboBox
   }
 
   private fun initComponent(field: JComponent, index: Int) {

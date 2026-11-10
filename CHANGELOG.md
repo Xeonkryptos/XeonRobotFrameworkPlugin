@@ -8,6 +8,8 @@
 
 ### Changed
 
+- Use custom ComboBox implementation to avoid issues with newer IDE versions
+
 ### Fixed
 
 - Fixed compatibility issues with 2026.3 IDE version
