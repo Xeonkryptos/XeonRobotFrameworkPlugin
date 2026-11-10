@@ -52,6 +52,10 @@ dependencies {
 
     implementation("org.apache.commons:commons-text:1.15.0")
 
+    // lsp4j is no longer exposed by the platform to plugins since 2026.x, so ship it with the plugin
+    implementation("org.eclipse.lsp4j:org.eclipse.lsp4j.debug:0.24.0")
+    implementation("org.eclipse.lsp4j:org.eclipse.lsp4j.jsonrpc.debug:0.24.0")
+
     testImplementation(platform("org.junit:junit-bom:5.14.1"))
     testImplementation("org.junit.jupiter:junit-jupiter")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")

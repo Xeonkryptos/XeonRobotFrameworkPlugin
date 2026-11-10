@@ -11,6 +11,7 @@
 ### Fixed
 
 - Fixed compatibility issues with 2026.3 IDE version
+- Added missing dependencies to lsp4j and lsp4j-jsonrpc to be compatible with 2026.3 IDE versions
 
 ## 0.8.2 - 2026-11-10
 
