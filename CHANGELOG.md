@@ -10,6 +10,10 @@
 
 ### Fixed
 
+## 0.8.2 - 2026-11-10
+
+### Fixed
+
 - Fixed reason for IndexNotReadyException when opening settings while indexing is still running
 
 ## 0.8.1 - 2026-10-31
