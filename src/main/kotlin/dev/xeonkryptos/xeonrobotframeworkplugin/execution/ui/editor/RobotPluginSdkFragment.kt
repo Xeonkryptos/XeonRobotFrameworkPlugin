@@ -107,11 +107,14 @@ class RobotPluginSdkFragment : SettingsEditorFragment<RobotRunConfiguration, JPa
     interpreterCombo?.addActionListener { updateRemoteInterpreterMode() }
   }
 
-  // The PySdkComboBox constructor signature differs between platform builds (newer ones additionally take a Project)
+  // The PySdkComboBox constructor signature differs between platform builds (newer ones additionally take a Project).
+  // Parameter order of the newer variants changed as well: (Project, Boolean, Computable) in 2025.x, (Boolean, Project, Computable) in 2026.3+
   private fun createSdkComboBox(config: PythonRunConfiguration, moduleProvider: Computable<Module?>): PySdkComboBox {
     val constructors = PySdkComboBox::class.java.constructors
     constructors.firstOrNull { it.parameterCount == 3 }?.let {
-      return it.newInstance(config.project, false, moduleProvider) as PySdkComboBox
+      val args = if (it.parameterTypes[0] == java.lang.Boolean.TYPE) arrayOf(false, config.project, moduleProvider)
+      else arrayOf(config.project, false, moduleProvider)
+      return it.newInstance(*args) as PySdkComboBox
     }
     val legacy = constructors.first { it.parameterCount == 2 }
     return legacy.newInstance(false, moduleProvider) as PySdkComboBox

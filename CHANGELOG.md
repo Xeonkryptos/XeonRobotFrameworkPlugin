@@ -10,6 +10,8 @@
 
 ### Fixed
 
+- Fixed compatibility issues with 2026.3 IDE version
+
 ## 0.8.2 - 2026-11-10
 
 ### Fixed
