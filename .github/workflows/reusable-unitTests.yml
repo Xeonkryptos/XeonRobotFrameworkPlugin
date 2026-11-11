@@ -3,19 +3,8 @@ name: Reusable Unit Tests
 on: [ workflow_call ]
 
 jobs:
-  baseUnitTest:
-    name: Gradle 9.8.0 @ ubuntu-latest
-    uses: ./.github/workflows/reusable-single-unitTest.yml
-    secrets: inherit
-    permissions:
-      checks: write
-    with:
-      gradleVersion: "9.8.0"
-      os: ubuntu-latest
-
   unitTests:
     name: Gradle ${{ matrix.gradleVersion }} @ ${{ matrix.os }}
-    needs: baseUnitTest
     uses: ./.github/workflows/reusable-single-unitTest.yml
     secrets: inherit
     permissions:
@@ -29,7 +18,8 @@ jobs:
       fail-fast: false
       matrix:
         gradleVersion:
-          - "9.8.0"
+          - "9.8.2"
         os:
+          - ubuntu-latest
           - windows-latest
           - macos-latest
